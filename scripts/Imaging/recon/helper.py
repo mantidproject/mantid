@@ -72,7 +72,8 @@ class Helper(object):
                 "Save preproc images was specified with -s/--save-preproc, but no output directory was given!")
 
         if not config.func.output_path:
-            self.tomo_print_warning("No output path specified, no output will be produced!")
+            self.tomo_print_warning(
+                "No output path specified, no output will be produced!")
 
     @staticmethod
     def empty_init():
@@ -85,12 +86,12 @@ class Helper(object):
         if not isinstance(data, numpy.ndarray):
             raise ValueError(
                 "Invalid stack of images data. It is not a numpy array: {0}".
-                    format(data))
+                format(data))
 
         if 3 != len(data.shape):
             raise ValueError(
                 "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
-                    format(data.shape))
+                format(data.shape))
 
     @staticmethod
     def debug_print_memory_usage_linux(message=""):
@@ -313,3 +314,25 @@ class Helper(object):
 
     def set_readme(self, readme):
         self._readme = readme
+
+    def save_debug(self, sample, config, flat, dark, path_append, *args):
+        return
+        # if any of the arguments are none
+        for a in args:
+            if a is None or a is False:
+                return
+
+        from recon.data.saver import Saver
+
+        saver = Saver(config)
+        saver._img_format = 'fits'  # force fits files
+        saver.save_single_image(sample, subdir=path_append, image_name='sample')
+
+        saver._data_as_stack = True  # force data as stack to save out single images
+        if flat is not None:
+            saver.save_single_image(
+                flat, subdir=path_append, image_name='flat')
+
+        if dark is not None:
+            saver.save_single_image(
+                dark, subdir=path_append, image_name='dark')

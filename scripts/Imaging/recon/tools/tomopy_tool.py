@@ -41,19 +41,18 @@ class TomoPyTool(AbstractTool):
 
         return tomopy
 
-    def run_reconstruct(self, data, config, h):
+    def run_reconstruct(self, data, config, h, proj_angles=None, **kwargs):
         import numpy as np
         from recon.helper import Helper
         h = Helper.empty_init() if h is None else h
 
         h.check_data_stack(data)
 
-        num_proj = data.shape[0]
-        inc = float(config.func.max_angle) / num_proj
-
-        proj_angles = np.arange(0, num_proj * inc, inc)
-
-        proj_angles = np.radians(proj_angles)
+        if proj_angles is None:
+            num_proj = data.shape[0]
+            inc = float(config.func.max_angle) / num_proj
+            proj_angles = np.arange(0, num_proj * inc, inc)
+            proj_angles = np.radians(proj_angles)
 
         alg = config.func.algorithm
         cor = config.func.cor
@@ -62,21 +61,20 @@ class TomoPyTool(AbstractTool):
 
         iterative_algorithm = False if alg in ['gridrec', 'fbp'] else True
 
-        # run the iterative algorithms
-        if iterative_algorithm:
+        if iterative_algorithm:  # run the iterative algorithms
             h.pstart(
                 "Starting iterative method with TomoPy. Center of Rotation: {0}, Algorithm: {1}, "
                 "number of iterations: {2}...".format(cor, alg, num_iter))
 
             recon = self._tomopy.recon(tomo=data, theta=proj_angles, center=cor,
-                                       algorithm=alg, num_iter=num_iter, ncore=cores)
+                                       algorithm=alg, num_iter=num_iter, ncore=cores, **kwargs)
 
         else:  # run the non-iterative algorithms
             h.pstart(
                 "Starting non-iterative reconstruction algorithm with TomoPy. "
                 "Center of Rotation: {0}, Algorithm: {1}...".format(cor, alg))
             recon = self._tomopy.recon(
-                tomo=data, theta=proj_angles, center=cor, ncore=cores, algorithm=alg)
+                tomo=data[:], theta=proj_angles, center=cor, ncore=cores, algorithm=alg, **kwargs)
 
         h.pstop(
             "Reconstructed 3D volume. Shape: {0}, and pixel data type: {1}.".

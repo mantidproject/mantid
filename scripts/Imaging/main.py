@@ -65,9 +65,9 @@ def main():
         # run find_center stuff
         import recon.find_cor
         res = recon.find_cor.execute(config)
-    elif config.func.sinogram:
-        from imopr import show_sinogram
-        res = show_sinogram.execute(config)
+    elif config.func.imopr:
+        import imopr.runner
+        res = imopr.runner.execute(config)
     else:
         # run recon stuff
         import recon.runner

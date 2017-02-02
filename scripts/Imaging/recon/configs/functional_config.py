@@ -69,6 +69,9 @@ class FunctionalConfig(object):
         # how to spread the image load per worker
         self.chunksize = None
         self.parallel_load = False
+        self.sinogram = None
+        self.indices=None
+        self.imopr=None
 
     def __str__(self):
         return "Input dir: {0}\n".format(str(self.input_path)) \
@@ -269,6 +272,29 @@ class FunctionalConfig(object):
             default=self.convert,
             help='Shortcut to activate --reuse-preproc and --only-preproc.')
 
+        grp_func.add_argument(
+            "--sinogram",
+            required=False,
+            action='store_true',
+            default=self.sinogram,
+            help='Shortcut to activate --reuse-preproc and --only-preproc.')
+
+        grp_func.add_argument(
+            "--indices",
+            nargs='*',
+            required=False,
+            type=str,
+            default=self.indices,
+            help='Select specific image indices.')
+
+        grp_func.add_argument(
+            "--imopr",
+            nargs='*',
+            required=False,
+            type=str,
+            default=self.imopr,
+            help='Image operator TODO docs.')
+
         grp_recon = parser.add_argument_group('Reconstruction options')
 
         supported_tools = ['tomopy', 'astra']
@@ -391,7 +417,11 @@ class FunctionalConfig(object):
         self.chunksize = args.chunksize
         self.parallel_load = args.parallel_load
         self.convert = args.convert
+        self.sinogram = args.sinogram
+        self.indices = args.indices
+        self.imopr = args.imopr
 
+        # THIS MUST BE THE LAST THING THIS FUNCTION DOES
         self.handle_special_arguments()
 
     def handle_special_arguments(self):
@@ -399,3 +429,14 @@ class FunctionalConfig(object):
         if self.convert is True:
             self.reuse_preproc = True
             self.only_preproc = True
+
+        if self.indices is not None:
+            try:
+                self.indices[0] = int(self.indices[0])
+                try:
+                    self.indices[1] = int(self.indices[1])
+                except IndexError:
+                    self.indices.append(self.indices[0] + 1)
+            except IndexError:
+                raise ValueError("If passing --indices you must specify indices!")
+

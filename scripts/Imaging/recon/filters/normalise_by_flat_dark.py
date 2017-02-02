@@ -13,7 +13,7 @@ def _apply_normalise(data, dark=None, norm_divide=None, clip_min=None, clip_max=
         data - dark, norm_divide), clip_min, clip_max)
 
 
-def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
+def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=8, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -41,7 +41,7 @@ def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1
     return data
 
 
-def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=1, chunksize=None, h=None):
+def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=8, chunksize=None, h=None):
     """
     Normalise by flat and dark images
 
@@ -75,10 +75,9 @@ def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_
     f = ptsm.create_partial(_apply_normalise_inplace, fwd_function=ptsm.inplace_fwd_func_second_2d,
                             clip_min=clip_min, clip_max=clip_max)
 
-    Helper.debug_print_memory_usage_linux("Before execution")
+    data, norm_divide = ptsm.execute(
+        data, norm_divide, f, cores, chunksize, "Norm by Flat/Dark", h=h)
 
-    data, norm_divide = ptsm.execute(data, norm_divide, f, cores, chunksize, "Norm by Flat/Dark", h=h)
-    Helper.debug_print_memory_usage_linux("after execution")
     h.pstop(
         "Finished PARALLEL normalization by flat/dark images, pixel data type: {0}.".format(data.dtype))
 

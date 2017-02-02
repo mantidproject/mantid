@@ -3,6 +3,15 @@ import numpy as np
 from recon.helper import Helper
 
 
+def execute(sample, region_of_interest, flat, dark, h=None):
+    if sample is not None and flat is None:
+        return execute_volume(sample, region_of_interest, h), None, None
+    else:
+        return execute_volume(sample, region_of_interest, h), \
+               execute_image(flat, region_of_interest, h), \
+               execute_image(dark, region_of_interest, h)
+
+
 def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):
     # if nothing is provided make the user aware
     if not isinstance(coords, list) or 4 != len(coords):

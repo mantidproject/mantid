@@ -13,8 +13,8 @@ def execute(config):
     from recon.runner import load_tool
     tool = load_tool(config, h)
 
-    from recon.runner import load_data
-    sample, flat, dark = load_data(config, h)  # and onwards we go!
+    from recon.data import loader
+    sample, flat, dark = loader.load_data(config, h)  # and onwards we go!
 
     # -----------------------------------------------------------------------------
 

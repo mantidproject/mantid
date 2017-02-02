@@ -4,7 +4,7 @@ from recon.helper import Helper
 __module__ = 'gaussian_p'
 
 
-def execute(data, size, mode, order, cores=1, chunksize=None, h=None):
+def execute(data, size, mode, order, cores=8, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -57,7 +57,7 @@ def _execute_seq(data, size, mode, order, h=None):
     return data
 
 
-def _execute_par(data, size, mode, order, cores=1, chunksize=None, h=None):
+def _execute_par(data, size, mode, order, cores=8, chunksize=None, h=None):
     """
     Parallel version of the gaussian filter.
 

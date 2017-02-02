@@ -32,9 +32,10 @@ def execute(config, cmd_line):
     # import early to check if tool is available
     tool = load_tool(config, h)
 
-    sample, flat, dark = load_data(config, h)
+    from recon.data import loader
+    sample, flat, dark = loader.load_data(config, h)
 
-    sample = pre_processing(config, sample, flat, dark)
+    sample, flat, dark = pre_processing(config, sample, flat, dark)
 
     # Save pre-proc images, print inside
     saver.save_preproc_images(sample, flat, dark)
@@ -73,9 +74,8 @@ def pre_processing(config, sample, flat, dark):
 
     sample, flat, dark = rotate_stack.execute(
         sample, config.pre.rotation, flat, dark, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and config.pre.rotation is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "1rotated", "_rotated")
+    h.save_debug(sample, config, flat, dark, "1rotated",
+                 debug, save_preproc, config.pre.rotation)
 
     # the air region coordinates must be within the ROI if this is selected
     if config.pre.crop_before_normalise:
@@ -87,61 +87,63 @@ def pre_processing(config, sample, flat, dark):
         dark = crop_coords.execute_image(
             dark, config.pre.region_of_interest, h)
 
-        if debug and save_preproc:
-            _debug_save_out_data(sample, config, flat, dark,
-                                 "2cropped", "_cropped")
+        h.save_debug(sample, config, flat, dark, "2cropped",
+                     config.pre.crop_before_normalise)
 
     # removes background using images taken when exposed to fully open beam
     # and no beam
     sample = normalise_by_flat_dark.execute(
         sample, flat, dark, config.pre.clip_min, config.pre.clip_max, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and flat is not None and dark is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "3norm_by_flat_dark", "_normalised_by_flat_dark")
+    h.save_debug(sample, config, flat, dark,
+                 "3norm_by_flat_dark", debug, save_preproc, flat, dark)
 
     # removes the contrast difference between the stack of images
-    sample = normalise_by_air_region.execute(sample, config.pre.normalise_air_region, config.pre.region_of_interest,
-                                             config.pre.crop_before_normalise, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and config.pre.normalise_air_region is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "4norm_by_air", "_normalised_by_air")
+    air = config.pre.normalise_air_region
+    roi = config.pre.region_of_interest
+    crop = config.pre.crop_before_normalise
+
+    sample = normalise_by_air_region.execute(
+        sample, air, roi, crop, cores=cores, chunksize=chunksize, h=h)
+    h.save_debug(sample, config, flat, dark, "4norm_by_air",
+                 debug, save_preproc, air, roi, crop)
 
     if not config.pre.crop_before_normalise:
         # in this case we don't care about cropping the flat and dark
         sample = crop_coords.execute_volume(
             sample, config.pre.region_of_interest, h)
 
-        if debug and save_preproc:
-            _debug_save_out_data(sample, config, flat, dark,
-                                 "5cropped", "_cropped")
+        flat = crop_coords.execute_image(
+            flat, config.pre.region_of_interest, h)
+        dark = crop_coords.execute_image(
+            dark, config.pre.region_of_interest, h)
+
+        h.save_debug(sample, config, flat, dark, "5cropped",
+                     debug, save_preproc, crop)
 
     sample = outliers.execute(
         sample, config.pre.outliers_threshold, config.pre.outliers_mode, h)
-    if debug and save_preproc and config.pre.outliers_threshold:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "6outliers", "_outliers")
+    h.save_debug(sample, config, flat, dark, "6outliers",
+                 debug, save_preproc, config.pre.outliers_threshold)
+
     # mcp_corrections
     # data = mcp_corrections.execute(data, config)
 
     sample = rebin.execute(sample, config.pre.rebin,
                            config.pre.rebin_mode, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and config.pre.rebin is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "7scaled", "_scaled")
+    h.save_debug(sample, config, flat, dark, "7scaled",
+                 debug, save_preproc, config.pre.rebin)
 
     sample = median_filter.execute(
         sample, config.pre.median_size, config.pre.median_mode, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and config.pre.median_size is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "8median_filtered", "_median_filtered")
+    h.save_debug(sample, config, flat, dark, "8median_filtered",
+                 debug, save_preproc, config.pre.median_size)
 
     sample = gaussian.execute(sample, config.pre.gaussian_size, config.pre.gaussian_mode,
                               config.pre.gaussian_order, cores=cores, chunksize=chunksize, h=h)
-    if debug and save_preproc and config.pre.gaussian_size is not None:
-        _debug_save_out_data(sample, config, flat, dark,
-                             "9gaussian", "_gaussian")
+    h.save_debug(sample, config, flat, dark, "9gaussian",
+                 debug, save_preproc, config.pre.gaussian_size)
 
-    return sample
+    return sample, flat, dark
 
 
 def _debug_save_out_data(data, config, flat=None, dark=None, out_path_append='', image_append=''):
@@ -219,27 +221,3 @@ def load_tool(config, h):
 
     h.pstop("Tool loaded.")
     return tool
-
-
-def load_data(config, h):
-    from recon.data import loader
-
-    h.pstart("Loading data...")
-    input_path = config.func.input_path
-    input_path_flat = config.func.input_path_flat
-    input_path_dark = config.func.input_path_dark
-    img_format = config.func.in_format
-    data_dtype = config.func.data_dtype
-    cores = config.func.cores
-    chunksize = config.func.chunksize
-    parallel_load = config.func.parallel_load
-
-    sample, flat, dark = loader.load(input_path, input_path_flat, input_path_dark,
-                                     img_format, data_dtype, cores, chunksize, parallel_load, h)
-
-    h.pstop("Data loaded. Shape of raw data: {0}, dtype: {1}.".format(
-        sample.shape, sample.dtype))
-
-    h.check_data_stack(sample)
-
-    return sample, flat, dark

@@ -27,7 +27,7 @@ def create_partial(func, **kwargs):
     return partial(func, **kwargs)
 
 
-def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, output_data=None,
+def execute(data=None, partial_func=None, cores=8, chunksize=None, name="Progress", h=None, output_data=None,
             show_timer=True):
     """
     Executes a function in parallel, but does not share the memory between processes.
@@ -56,7 +56,8 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
     if chunksize is None:
         chunksize = pu.calculate_chunksize(cores)
 
-    # handle the edge case of having a different output that input i.e. rebin, crop, etc
+    # handle the edge case of having a different output that input i.e. rebin,
+    # crop, etc
     if output_data is None:
         # get data reference to original with [:]
         output_data = data[:]
@@ -69,7 +70,8 @@ def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progres
         h.prog_init(img_num, name + " " + str(cores) +
                     "c " + str(chunksize) + "chs")
 
-    # passing the data triggers a copy-on-write in the child process, even if it only reads the data
+    # passing the data triggers a copy-on-write in the child process, even if
+    # it only reads the data
     for i, res_data in enumerate(pool.imap(partial_func, data, chunksize=chunksize)):
         output_data[i] = res_data[:]
         h.prog_update()

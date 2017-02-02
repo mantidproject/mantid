@@ -116,7 +116,8 @@ def fwd_func_return_to_second(func, i, **kwargs):
     :param kwargs: kwargs to forward to the function func that will be executed
     :return: nothing is returned, as the data is replaced in place
     """
-    second_shared_data[i] = func(shared_data[i], second_shared_data[i], **kwargs)
+    second_shared_data[i] = func(
+        shared_data[i], second_shared_data[i], **kwargs)
 
 
 def create_partial(func, fwd_function=inplace_fwd_func, **kwargs):
@@ -134,7 +135,7 @@ def create_partial(func, fwd_function=inplace_fwd_func, **kwargs):
     return partial(fwd_function, func, **kwargs)
 
 
-def execute(data=None, second_data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, show_timer=True):
+def execute(data=None, second_data=None, partial_func=None, cores=8, chunksize=None, name="Progress", h=None, show_timer=True):
     """
     Executes a function in parallel with shared memory between the processes.
     The array must have been created using parallel.create_shared_array(shape, dtype).
@@ -201,5 +202,3 @@ def execute(data=None, second_data=None, partial_func=None, cores=1, chunksize=N
     h.prog_close()
 
     return shared_data, second_shared_data
-
-

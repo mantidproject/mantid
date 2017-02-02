@@ -191,15 +191,6 @@ class Saver(object):
 
         """
 
-        # save out as stack in fits
-        # DONE - save out as stack in nxs
-        # save out as stack in xxx
-        # ^ branch 1
-
-        # save out individual images in fits
-        # save out individual images in xxx
-        # ^ branch 2
-
         self.make_dirs_if_needed(output_dir)
         if not self._data_as_stack:
             self._save_out_individual_files(data, output_dir, name_prefix)
@@ -219,10 +210,10 @@ class Saver(object):
             for idx in range(0, data.shape[0]):
                 write_fits(data[idx, :, :], os.path.join(
                     output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
-        # elif self._img_format in ['tif', 'tiff']:
-        #     for idx in range(0, data.shape[0]):
-        #         write_img(data[idx, :, :], os.path.join(
-        #             output_dir, name_prefix + str(idx).zfill(6) + '.fits'), self._overwrite_all)
+        elif self._img_format in ['tif', 'tiff']:
+            for idx in range(0, data.shape[0]):
+                write_img(data[idx, :, :], os.path.join(
+                    output_dir, name_prefix + str(idx).zfill(6) + '.tiff'), self._overwrite_all)
 
     def _save_out_stack(self, data, output_dir, name_prefix, flat=None, dark=None, projection_angles=None):
         """
@@ -244,6 +235,8 @@ class Saver(object):
         elif self._img_format in ['nxs']:
             write_nxs(data, filename + '.nxs',
                       flat, dark, projection_angles, self._overwrite_all)
+        else:
+            write_img(data, filename+'.tiff', self._overwrite_all)
 
     def make_dirs_if_needed(self, dirname=None):
         """

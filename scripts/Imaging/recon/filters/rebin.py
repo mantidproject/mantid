@@ -8,7 +8,7 @@ However the information that needs to be copied is 0s, so it should not be expen
 """
 
 
-def execute(data, rebin_param, mode, cores=1, chunksize=None, h=None):
+def execute(data, rebin_param, mode, cores=8, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -25,7 +25,7 @@ def execute(data, rebin_param, mode, cores=1, chunksize=None, h=None):
     return data
 
 
-def _execute_par(data, rebin_param, mode, cores=1, chunksize=None, h=None):
+def _execute_par(data, rebin_param, mode, cores=8, chunksize=None, h=None):
     import scipy.misc
 
     resized_data = _create_reshaped_array(data.shape, rebin_param)

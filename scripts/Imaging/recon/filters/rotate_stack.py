@@ -13,7 +13,7 @@ def _rotate_image(data, rotation=None):
     return np.rot90(data[:, :], rotation)
 
 
-def execute(data, rotation, flat=None, dark=None, cores=1, chunksize=None, h=None):
+def execute(data, rotation, flat=None, dark=None, cores=8, chunksize=None, h=None):
     """
     Rotates a stack (sample, flat and dark images).
 
@@ -88,7 +88,7 @@ def _execute_seq(data, rotation, h=None):
     return data
 
 
-def _execute_par(data, rotation, cores=1, chunksize=None, h=None):
+def _execute_par(data, rotation, cores=8, chunksize=None, h=None):
 
     h.pstart(
         "Starting PARALLEL rotation step ({0} degrees clockwise), with pixel data type: {1}...".

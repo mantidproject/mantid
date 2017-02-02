@@ -70,7 +70,7 @@ def create_partial(func, fwd_function=fwd_func, **kwargs):
     return partial(fwd_function, func, **kwargs)
 
 
-def execute(data=None, partial_func=None, cores=1, chunksize=None, name="Progress", h=None, show_timer=True):
+def execute(data=None, partial_func=None, cores=8, chunksize=None, name="Progress", h=None, show_timer=True):
     """
     Executes a function in parallel with shared memory between the processes.
     The array must have been created using parallel.create_shared_array(shape, dtype).

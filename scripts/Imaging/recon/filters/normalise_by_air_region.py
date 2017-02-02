@@ -4,16 +4,18 @@ from recon.filters.crop_coords import _crop_coords_sanity_checks
 import numpy as np
 
 
-def execute(data, air_region, region_of_interest, crop_before_normalise, cores=1, chunksize=None, h=None):
+def execute(data, air_region, region_of_interest, crop_before_normalise, cores=8, chunksize=None, h=None):
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
     if air_region is not None and region_of_interest is not None:
         from parallel import utility as pu
         if pu.multiprocessing_available():
-            data = _execute_par(data, air_region, region_of_interest, crop_before_normalise, cores, chunksize, h)
+            data = _execute_par(data, air_region, region_of_interest,
+                                crop_before_normalise, cores, chunksize, h)
         else:
-            data = _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h)
+            data = _execute_seq(
+                data, air_region, region_of_interest, crop_before_normalise, h)
 
     else:
         h.tomo_print_note("NOT applying normalisation by Air Region.")
@@ -30,7 +32,7 @@ def _divide_by_air_sum(data=None, air_sums=None):
     data[:] = np.true_divide(data, air_sums)
 
 
-def _execute_par(data, air_region, region_of_interest, crop_before_normalise, cores=1, chunksize=None, h=None):
+def _execute_par(data, air_region, region_of_interest, crop_before_normalise, cores=8, chunksize=None, h=None):
     """
     normalise by beam intensity. This is not directly about proton
     charg - not using the proton charge field as usually found in
@@ -77,10 +79,13 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, co
                                       "Calculating air sums", h)
 
         # we can use shared for this because the output == input arrays
-        # WARNING this copied the whole data for every index, 100 indices = 100*data
-        f2 = ptsm.create_partial(_divide_by_air_sum, fwd_function=ptsm.inplace_fwd_func)
+        # WARNING this copied the whole data for every index, 100 indices =
+        # 100*data
+        f2 = ptsm.create_partial(
+            _divide_by_air_sum, fwd_function=ptsm.inplace_fwd_func)
 
-        data, air_sums = ptsm.execute(data, air_sums, f2, cores, chunksize, "Norm by Air Sums", h)
+        data, air_sums = ptsm.execute(
+            data, air_sums, f2, cores, chunksize, "Norm by Air Sums", h)
 
         avg = np.average(air_sums)
         max_avg = np.max(air_sums) / avg
@@ -88,7 +93,7 @@ def _execute_par(data, air_region, region_of_interest, crop_before_normalise, co
 
         h.pstop(
             "Finished normalization by air region. Average: {0}, max ratio: {1}, min ratio: {2}.".
-                format(avg, max_avg, min_avg))
+            format(avg, max_avg, min_avg))
 
     else:
         h.tomo_print_note(
@@ -133,7 +138,7 @@ def _execute_seq(data, air_region, region_of_interest, crop_before_normalise, h=
         air_sums = []
         for idx in range(0, data.shape[0]):
             air_data_sum = data[
-                           idx, air_top:air_bottom, air_left:air_right].sum()
+                idx, air_top:air_bottom, air_left:air_right].sum()
             air_sums.append(air_data_sum)
             h.prog_update(1)
 
@@ -196,8 +201,8 @@ def _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,
                                 crop_bottom, crop_left, crop_right, crop_top):
     # sanity check just in case
     if air_top < crop_top or \
-                    air_bottom > crop_bottom or \
-                    air_left < crop_left or \
-                    air_right > crop_right:
+            air_bottom > crop_bottom or \
+            air_left < crop_left or \
+            air_right > crop_right:
         raise ValueError(
             "Selected air region is outside of the cropped data range.")
