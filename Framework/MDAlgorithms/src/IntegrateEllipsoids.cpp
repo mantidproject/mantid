@@ -577,14 +577,9 @@ void IntegrateEllipsoids::setOutputWorkspaceData(
   size_t index = 0;
   for (auto &axis : axes) {
     auto &x = ws->mutableX(index);
-    auto &y = ws->mutableY(index);
-    auto &e = ws->mutableE(index);
-
-    std::iota(x.begin(), x.end(), axis.size());
-    y = axis;
-    std::transform(y.begin(), y.end(), e.begin(),
-                   [](double value) { return std::sqrt(value); });
-
+    std::iota(x.begin(), x.end(), static_cast<int>(axis.size()));
+    ws->setCounts(index, axis);
+    ws->setCountVariances(index, axis);
     ++index;
   }
 }

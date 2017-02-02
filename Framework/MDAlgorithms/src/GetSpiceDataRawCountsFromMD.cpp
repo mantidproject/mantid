@@ -501,13 +501,10 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  auto &dataX = outws->mutableX(0);
-  auto &dataY = outws->mutableY(0);
+  outws->setPoints(0, vecX);
+  outws->setCounts(0, vecY);
+
   auto &dataE = outws->mutableE(0);
-
-  dataX = vecX;
-  dataY = vecY;
-
   std::transform(vecY.begin(), vecY.end(), dataE.begin(),
                  [](double value) { return (value > 1.) ? sqrt(value) : 1.; });
 

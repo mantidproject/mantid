@@ -640,13 +640,9 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 void IntegratePeaksMD::setSpectrum(Workspace2D_sptr ws, size_t index,
                                    const std::vector<double> &signal) const {
   auto &x = ws->mutableX(index);
-  auto &y = ws->mutableY(index);
-  auto &e = ws->mutableE(index);
-
   std::iota(x.begin(), x.end(), 0);
-  y = signal;
-  std::transform(y.begin(), y.end(), e.begin(),
-                 [](double value) { return std::sqrt(value); });
+  ws->setCounts(index, signal);
+  ws->setCountVariances(index, signal);
 }
 
 /** Calculate if this Q is on a detector

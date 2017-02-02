@@ -115,6 +115,8 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
   double dx = (xMax - xMin) / static_cast<double>(nX - 1);
   auto &X = ws->mutableX(0);
 
+  // x-values are equally spaced between the min and max tof in the first flux
+  // spectrum
   std::vector<double> xValues(X.size(), xMin);
   std::partial_sum(xValues.begin(), xValues.end(), X.begin(),
                    [dx](double sum, double value) {
