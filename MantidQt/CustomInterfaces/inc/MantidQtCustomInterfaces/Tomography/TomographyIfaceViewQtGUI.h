@@ -19,7 +19,6 @@
 #include "ui_TomographyIfaceQtTabEnergy.h"
 #include "ui_TomographyIfaceQtTabFiltersSettings.h"
 #include "ui_TomographyIfaceQtTabRun.h"
-#include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabSystemSettings.h"
 #include "ui_TomographyIfaceQtTabVisualize.h"
 #include <boost/scoped_ptr.hpp>
@@ -135,13 +134,6 @@ public:
   }
   std::string currentReconTool() const override { return m_currentReconTool; }
 
-  /// get the path to the image that the user has requested to visualize
-  std::string visImagePath() const;
-
-  std::string showImagePath() const override { return m_imgPath; }
-  void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) override;
-  void showImage(const std::string &path) override;
-
   int keepAlivePeriod() override { return m_settings.useKeepAlive; }
 
   TomoPathsConfig currentPathsConfig() const override { return m_pathsConfig; }
@@ -183,8 +175,6 @@ private slots:
   void runToolIndexChanged(int);
   void SCARFLoginClicked();
   void SCARFLogoutClicked();
-
-  void browseImageClicked();
 
   void browseLocalInOutDirClicked();
   void browseLocalRemoteDriveOrPath();
@@ -241,11 +231,12 @@ private slots:
   void runExternalProcess(const std::string &exec,
                           const std::vector<std::string> &args);
 
+  void imageOrStackLoadedInRoi(const std::string &path);
+
 private:
   /// Setup the interface (tab UI)
   void initLayout() override;
 
-  void doSetupSectionSetup();
   void doSetupSectionRun();
   void doSetupSectionFilters();
   void doSetupSectionVisualize();
@@ -310,7 +301,6 @@ private:
   // 'tabs' but they could be separate dialogs, widgets, etc. combined in
   // different ways.
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
-  Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabFiltersSettings m_uiTabFilters;
   Ui::ImageSelectCoRAndRegions m_uiTabCoR;
   Ui::TomographyIfaceQtTabVisualize m_uiTabVisualize;

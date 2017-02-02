@@ -163,21 +163,6 @@ public:
         testing::Mock::VerifyAndClearExpectations(&mockView))
   }
 
-  void test_showImg_fails() {
-    testing::NiceMock<MockTomographyIfaceView> mockView;
-    MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
-
-    // No errors, but one warning
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
-
-    pres.notify(ITomographyIfacePresenter::ViewImg);
-    TSM_ASSERT(
-        "Mock not used as expected. Some EXPECT_CALL conditions were not "
-        "satisfied.",
-        testing::Mock::VerifyAndClearExpectations(&mockView))
-  }
-
   void test_valuesAtInit() {
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
@@ -303,13 +288,6 @@ public:
 
       EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(0);
       EXPECT_CALL(mockView, experimentReference()).Times(0);
-      EXPECT_CALL(
-          mockView,
-          showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-              testing::_))).Times(0);
-      EXPECT_CALL(mockView,
-                  showImage(testing::Matcher<const std::string &>(testing::_)))
-          .Times(0);
 
       // needs some basic paths config - using test / inexistent paths
       EXPECT_CALL(mockView, currentPathsConfig())
@@ -363,13 +341,6 @@ public:
     mockView.updatePathsConfig(cfg);
 
     EXPECT_CALL(mockView, updatePathsConfig(testing::_)).Times(1);
-    EXPECT_CALL(
-        mockView,
-        showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
-            testing::_))).Times(0);
-    EXPECT_CALL(mockView,
-                showImage(testing::Matcher<const std::string &>(testing::_)))
-        .Times(0);
 
     // needs some basic paths config - using defaults from constructor
     EXPECT_CALL(mockView, currentPathsConfig())

@@ -21,6 +21,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
+#include <boost/optional/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -200,7 +201,8 @@ private slots:
   bool plotExists(const QString &wsName);
 
   /// Enable PP tool for the plot of the given WS
-  void selectMultiPeak(const QString &wsName);
+  void selectMultiPeak(const QString &wsName,
+                       const boost::optional<QString> &filePath);
 
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();

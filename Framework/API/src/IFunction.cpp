@@ -1,6 +1,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -593,7 +594,7 @@ protected:
   }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
-    if (m_value.empty()) {
+    if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
@@ -747,25 +748,31 @@ void IFunction::setMatrixWorkspace(
 
     const auto &paramMap = workspace->constInstrumentParameters();
 
-    Geometry::IDetector_const_sptr det;
+    Geometry::IDetector const *detectorPtr = nullptr;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      Instrument_const_sptr inst = workspace->getInstrument();
-      det = inst->getDetector(
-          *workspace->getSpectrum(wi).getDetectorIDs().begin());
-    } else
+      auto firstDetectorId =
+          *workspace->getSpectrum(wi).getDetectorIDs().begin();
+
+      const auto &detectorInfo = workspace->detectorInfo();
+      const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
+      const auto &detector = detectorInfo.detector(detectorIndex);
+      detectorPtr = &detector;
+    } else {
       // Get the detector (single) at this workspace index
-      det = workspace->getDetector(wi);
-    ;
+      const auto &spectrumInfo = workspace->spectrumInfo();
+      const auto &detector = spectrumInfo.detector(wi);
+      detectorPtr = &detector;
+    }
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
         Geometry::Parameter_sptr param =
-            paramMap.getRecursive(&(*det), parameterName(i), "fitting");
+            paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const Geometry::FitParameter &fitParam =

@@ -52,7 +52,6 @@ public:
     RefreshJobs,        ///< get updated jobs info in the table/tree
     CancelJobFromTable, ///< cancel one job from the list
     VisualizeJobFromTable, ///< open visualization window for one job
-    ViewImg,               ///< user wants to view an image (2D)
     AggregateEnergyBands,  ///< run aggregate bands (in the background)
     LogMsg,                ///< need to send a message to the Mantid log system
     ShutDown               ///< closing the interface

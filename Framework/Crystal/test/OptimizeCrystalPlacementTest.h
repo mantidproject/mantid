@@ -174,8 +174,8 @@ public:
         Goniometer(tiltChange * origGon5638Mat).getEulerAngles("YZY");
 
     for (int i = 0; i < 3; i++) {
-      TS_ASSERT_DELTA(angles5637[i], angles5637a[i], .2);
-      TS_ASSERT_DELTA(angles5638[i], angles5638a[i], .15);
+      TS_ASSERT_DELTA(angles5637[i], angles5637a[i], .3);
+      TS_ASSERT_DELTA(angles5638[i], angles5638a[i], .3);
     }
   }
 
