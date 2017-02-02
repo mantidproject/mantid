@@ -164,6 +164,22 @@ std::string QtReflSettingsView::getTransmissionRuns() const {
   return m_ui.transmissionRunsEdit->text().toStdString();
 }
 
+/** Return start overlap
+* @return :: start overlap
+*/
+std::string QtReflSettingsView::getStartOverlap() const {
+
+  return m_ui.startOverlapEdit->text().toStdString();
+}
+
+/** Return end overlap
+* @return :: end overlap
+*/
+std::string QtReflSettingsView::getEndOverlap() const {
+
+  return m_ui.endOverlapEdit->text().toStdString();
+}
+
 /** Return selected polarisation corrections
 * @return :: selected polarisation corrections
 */
