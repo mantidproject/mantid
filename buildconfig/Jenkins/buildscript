@@ -282,7 +282,7 @@ fi
 if [[ ${BUILDPKG} == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
-  if [[ ${ON_MACOS} == 'Darwin' ]]; then
+  if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"
