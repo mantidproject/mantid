@@ -139,17 +139,17 @@ bool SCDCalibratePanels::edgePixel(const PeaksWorkspace &ws,
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
   // We must sort the peaks
-  std::vector<std::pair<std::string, bool> > criteria{ { "BankName", true } };
+  std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
-    auto it = std::remove_if(peaks.begin(), peaks.end(),
-                             [&peaksWs, edge, this](const Peak &pk) {
-      return this->edgePixel(*peaksWs, pk.getBankName(), pk.getCol(),
-                             pk.getRow(), edge);
-    });
+    auto it = std::remove_if(
+        peaks.begin(), peaks.end(), [&peaksWs, edge, this](const Peak &pk) {
+          return this->edgePixel(*peaksWs, pk.getBankName(), pk.getCol(),
+                                 pk.getRow(), edge);
+        });
     peaks.erase(it, peaks.end());
   }
   findU(peaksWs);
@@ -223,8 +223,7 @@ void SCDCalibratePanels::exec() {
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       g_log.error("Can't locate Fit algorithm");
       throw;
     }
@@ -263,8 +262,7 @@ void SCDCalibratePanels::exec() {
       IAlgorithm_sptr fit2_alg;
       try {
         fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
-      }
-      catch (Exception::NotFoundError &) {
+      } catch (Exception::NotFoundError &) {
         g_log.error("Can't locate Fit algorithm");
         throw;
       }
@@ -406,8 +404,7 @@ void SCDCalibratePanels::exec() {
           RowY[icount] = theoretical.getRow();
           TofX[icount] = peak.getTOF();
           TofY[icount] = theoretical.getTOF();
-        }
-        catch (...) {
+        } catch (...) {
           // g_log.debug() << "Problem only in printing peaks\n";
         }
         icount++;
@@ -465,8 +462,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
   IAlgorithm_sptr fitL1_alg;
   try {
     fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
     g_log.error("Can't locate Fit algorithm");
     throw;
   }
@@ -501,8 +497,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   IAlgorithm_sptr ub_alg;
   try {
     ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
-  }
-  catch (Exception::NotFoundError &) {
+  } catch (Exception::NotFoundError &) {
     g_log.error("Can't locate CalculateUMatrix algorithm");
     throw;
   }
@@ -796,11 +791,11 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 void SCDCalibratePanels::init() {
-  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(Kernel::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeakWorkspace", "", Kernel::Direction::InOut),
                   "Workspace of Indexed Peaks");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   declareProperty("a", EMPTY_DBL(), mustBePositive,
@@ -830,7 +825,7 @@ void SCDCalibratePanels::init() {
                   "Remove peaks that are at pixels this close to edge. ");
 
   // ---------- outputs
-  const std::vector<std::string> detcalExts{ ".DetCal", ".Det_Cal" };
+  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
   declareProperty(
       Kernel::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
                                         FileProperty::Save, detcalExts),
