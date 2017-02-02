@@ -158,7 +158,7 @@ if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests
   add_custom_target ( GUITests )
   add_dependencies ( GUITests MantidWidgetsTest)
-  add_dependencies ( mantid-check GUITests )
+  add_dependencies ( check GUITests )
   # Collect all tests together
   add_custom_target ( AllTests )
   add_dependencies ( AllTests FrameworkTests GUITests )
