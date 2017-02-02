@@ -486,9 +486,6 @@ void ConvertToDiffractionMDWorkspace::exec() {
   beamline_norm = beamline.norm();
   beamDir = beamline / beamline.norm();
 
-  // To get all the detector ID's
-  m_inWS->getInstrument()->getDetectors(allDetectors);
-
   // Estimate the number of events in the final workspace
   size_t totalEvents = m_inWS->size();
   if (m_inEventWS && !OneEventPerBin)

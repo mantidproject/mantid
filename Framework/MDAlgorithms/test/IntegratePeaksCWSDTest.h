@@ -460,7 +460,7 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     createMDEvents2Run(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
 
     inputws =
@@ -496,7 +496,7 @@ public:
     alg.setProperty("NormalizeByTime", false);
   }
 
-  void tearDown() { AnalysisDataService::Instance().clear(); }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testIntegratePeaksCWSDPerformance() {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
