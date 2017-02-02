@@ -255,12 +255,12 @@ double ConvertSpectrumAxis2::getEfixed(
       }
     } else if (emode == 2) {
 
-        const auto& detectorSingle =
-            detectorInfo.detector(detectorIndex);
- 
-      std::vector<double> efixedVec = detectorSingle.getNumberParameter("Efixed");
+      const auto &detectorSingle = detectorInfo.detector(detectorIndex);
+
+      std::vector<double> efixedVec =
+          detectorSingle.getNumberParameter("Efixed");
       if (efixedVec.empty()) {
-       efixedVec = detectorSingle.getNumberParameter("Efixed");
+        efixedVec = detectorSingle.getNumberParameter("Efixed");
       }
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);

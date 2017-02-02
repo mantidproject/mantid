@@ -87,8 +87,9 @@ private:
   std::multimap<double, size_t> m_indexMap;
 
   /// Getting Efixed
-  double getEfixed(const size_t detectorIndex, const Mantid::API::DetectorInfo& detectorInfo,
-                   const API::MatrixWorkspace& inputWS, const int emode) const;
+  double getEfixed(const size_t detectorIndex,
+                   const Mantid::API::DetectorInfo &detectorInfo,
+                   const API::MatrixWorkspace &inputWS, const int emode) const;
 };
 
 } // namespace Algorithms
