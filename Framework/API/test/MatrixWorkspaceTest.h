@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -1581,13 +1582,12 @@ public:
     using namespace Mantid::Kernel;
 
     int count = 0;
+    auto &detInfo = m_workspaceSans.mutableDetectorInfo();
     // Repeated execution to improve statistics and for comparison purposes with
     // future updates
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      detInfo.setRotation(*m_sansBank, m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1607,13 +1607,12 @@ public:
     using namespace Mantid::Kernel;
 
     int count = 0;
+    auto &detInfo = m_workspaceSans.mutableDetectorInfo();
     // Repeated execution to improve statistics and for comparison purposes with
     // future updates
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      detInfo.setPosition(*m_sansBank, m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1626,11 +1625,10 @@ public:
   // As test_rotate_bank_and_read_positions_x10 but based on SpectrumInfo.
   void test_rotate_bank_and_read_positions_SpectrumInfo_x10() {
     int count = 0;
+    auto &detInfo = m_workspaceSans.mutableDetectorInfo();
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      detInfo.setRotation(*m_sansBank, m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -1644,11 +1642,10 @@ public:
   // As test_move_bank_and_read_positions_x10 but based on SpectrumInfo.
   void test_move_bank_and_read_positions_SpectrumInfo_x10() {
     int count = 0;
+    auto &detInfo = m_workspaceSans.mutableDetectorInfo();
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      detInfo.setPosition(*m_sansBank, m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
