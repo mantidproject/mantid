@@ -80,7 +80,11 @@ createTestWorkspace(const bool detShape = true,
       auto shape = ShapeFactory().createShape(shapeXML);
       Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
       // Setting detectors should normally go via DetectorInfo, but here we need
-      // to set a position as we are adding a new detector.
+      // to set a position as we are adding a new detector. In general getPos
+      // should not be called as this tries to set the position of the base
+      // component. If the component is parameterized then this method would
+      // throw. getPos is required here, otherwise the new detector may not have
+      // a base position set.
       det2->setPos(pos);
       instrument->add(det2);
       instrument->markAsDetector(det2);
