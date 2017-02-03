@@ -22,7 +22,7 @@
    <value val="LET_one2one_153.map"/>
 </parameter>
 
-<!-- Prefered extension of the data files obtained from DAE, e.g. what to prefer if two 
+<!-- Preferred extension of the data files obtained from DAE, e.g. what to prefer if two 
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
@@ -356,7 +356,7 @@
   <value val="False"/>
 </parameter>
 
-<!-- if this value is provided (not None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
+<!-- if this value is provided (not None) it is string representation of the number used instead of calculating mono-vanadium based normalization factor 
    one does not need to provide mono-vanadium run if this value is provided as it will be used instead
   -->
 <parameter name="mono_correction_factor" type="string">
@@ -369,12 +369,20 @@
 <parameter name="fixei"  type="bool">
     <value val="False"/>
 </parameter>
+<!-- if defined to true, fix incident energy to this value and do not calculate the energy from the run -->
+<parameter name="DAE_time_shift" >
+    <value val="None"/>
+	<description is="if defined, (not None), specifies the time shift (in mksec) to 
+	 set the time at monitor-1, when instrument moved into monitor-1 position. Used to compensate 
+	 initial time DAE starts counting from, if DAE time shift has been specified and fix_ei mode is used."/>	
+</parameter>
+
 
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
-    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
-     Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
+    Three values are currently supported, namely .spe, .nxspe, and nexus (Mantid workspace) (.nxs)
+     Three possible values for this are defined in DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
    <value val="None"/>
