@@ -188,7 +188,7 @@ class DirectEnergyConversion(object):
         variation  - The number of medians the ratio of the first/second white beam can deviate from
                      the average by (default=1.1)
         bleed_test - If true then the CreatePSDBleedMask algorithm is run
-        bleed_maxrate - If the bleed test is on then this is the maximum framerate allowed in a tube
+        bleed_maxrate - If the bleed test is on then this is the maximum frame rate allowed in a tube
         bleed_pixels - If the bleed test is on then this is the number of pixels ignored within the
                      bleed test diagnostic
         """
@@ -849,6 +849,8 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
+		if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
+			mon1_peak = mon1_peak+self.DAE_time_shift;
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
