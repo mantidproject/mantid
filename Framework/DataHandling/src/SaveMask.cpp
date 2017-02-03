@@ -65,7 +65,7 @@ void SaveMask::exec() {
   // 2. Convert Workspace to ...
   std::vector<detid_t> detid0s;
   for (size_t i = 0; i < inpWS->getNumberHistograms(); i++) {
-    if (inpWS->dataY(i)[0] > 0.1) {
+    if (inpWS->y(i)[0] > 0.1) {
       // It is way from 0 but smaller than 1
       for (const auto &det_id : inpWS->getSpectrum(i).getDetectorIDs()) {
         detid0s.push_back(det_id);

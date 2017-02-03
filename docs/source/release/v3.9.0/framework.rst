@@ -11,6 +11,7 @@ Changes
 - Mantid now supports automatic updates to the facilities.xml file in the same way that it does the instrument definitions.  This allows extensions and changes to the list of supported instruments without needing to install a new release of Mantid.
 - This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
 - Mantid is aware of the change to file naming for Vesuvio, you can continue to use EVS or VESUVIO as a prefix when trying to load files from this instrument, and Mantid will map that to the correct filenames.
+- Mantid will correctly handle the naming format changes to Polaris, it will automatically select between the old and new filename format whilst loading files correctly.
 
 Algorithms
 ----------
@@ -60,6 +61,7 @@ Bug Fixes
 - If a run is aborted and restarted, the ``running`` log in the workspace will correctly reflect this. (``running`` will be false at all times before the abort.)
 - Fixed several issues with masked detectors and neighbour counts in the nearest-neighbour code used by a few algorithms.
 - Issues with :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` with  **Return Background** option returning fake values has been fixed.
+- :ref:`ShiftLogTime <algm-ShiftLogTime>` now correctly handles shift in the negative direction
 
 Deprecated
 ##########
