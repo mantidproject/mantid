@@ -340,7 +340,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
     }
   }
   if (mode == "diffspec") {
-    const auto vanFile = m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+    const auto vanFile =
+        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
     msgDiffReduction->setProperty("VanadiumFiles", vanFile);
   }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
@@ -549,11 +550,10 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.swVanadium->setCurrentIndex(0);
   else if (calibNeeded)
     m_uiForm.swVanadium->setCurrentIndex(1);
-  else if (reflectionName!="diffspec")
+  else if (reflectionName != "diffspec")
     m_uiForm.swVanadium->setCurrentIndex(2);
   else
     m_uiForm.swVanadium->setCurrentIndex(1);
-
 
   // Hide options that the current instrument config cannot process
 
@@ -562,8 +562,7 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.ckUseCalib->setEnabled(false);
     m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
     m_uiForm.ckUseCalib->setChecked(false);
-  }
-  else {
+  } else {
     m_uiForm.ckUseCalib->setEnabled(true);
     m_uiForm.ckUseCalib->setToolTip("");
     m_uiForm.ckUseCalib->setChecked(true);
