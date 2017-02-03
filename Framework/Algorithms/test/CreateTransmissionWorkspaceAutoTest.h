@@ -75,8 +75,8 @@ public:
   }
 
   void test_exec() {
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("CreateTransmissionWorkspaceAuto");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
+        "CreateTransmissionWorkspaceAuto", 1);
     alg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(

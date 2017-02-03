@@ -72,9 +72,9 @@ void MantidGroupPlotGenerator::plot(
         m_mantidUI->importMatrixWorkspace(matrixWS, -1, -1, false);
 
     // Change the default plot title
-    QString title =
-        QString("plot for %1, spectrum %2")
-            .arg(wsGroup->name().c_str(), QString::number(options.plotIndex));
+    QString title = QString("plot for %1, spectrum %2")
+                        .arg(wsGroup->getName().c_str(),
+                             QString::number(options.plotIndex));
 
     // Plot the correct type of graph
     if (graphType == Type::Surface) {

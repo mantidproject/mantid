@@ -40,8 +40,7 @@ vtkPeaksSource::~vtkPeaksSource()
   Setter for the workspace name.
   @param name : workspace name to extract from ADS.
 */
-void vtkPeaksSource::SetWsName(std::string name)
-{
+void vtkPeaksSource::SetWsName(const std::string &name) {
   if (!name.empty())
   {
     m_wsName = name;

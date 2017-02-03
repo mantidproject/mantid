@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid import logger
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import (SimulatedDensityOfStates, CheckWorkspacesMatch,
+from mantid.simpleapi import (SimulatedDensityOfStates, CompareWorkspaces,
                               Scale, CreateEmptyTableWorkspace)
 
 
@@ -109,7 +109,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         ref = SimulatedDensityOfStates(PHONONFile=self._phonon_file)
         ref = Scale(ref, Factor=10)
 
-        self.assertEqual(CheckWorkspacesMatch(wks, ref), 'Success!')
+        self.assertTrue(CompareWorkspaces(wks, ref)[0])
 
     def test_bin_width(self):
         import math
@@ -156,8 +156,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         total = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                          SpectrumType=spec_type)
 
-        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance),
-                          'Success!')
+        self.assertTrue(CompareWorkspaces(summed, total, tolerance)[0])
 
     def test_partial_cross_section_scale(self):
         spec_type = 'DOS'
@@ -183,8 +182,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                          SpectrumType=spec_type,
                                          ScaleByCrossSection='Incoherent')
 
-        self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance),
-                          'Success!')
+        self.assertTrue(CompareWorkspaces(summed, total, tolerance)[0])
 
     def test_ion_table(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
@@ -326,7 +324,7 @@ def _perform_group_name_search(wks_group, name_to_find):
     """
 
     for workspace in wks_group:
-        if workspace.getName() == name_to_find:
+        if workspace.name() == name_to_find:
             return workspace
 
 if __name__=="__main__":

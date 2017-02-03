@@ -108,6 +108,9 @@ public:
     return m_table_viewE->selectionModel();
   }
 
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Workspace"; }
+
   int numRows() const { return m_rows; }
   int numCols() const { return m_cols; }
   double dataX(int row, int col) const;
@@ -157,6 +160,8 @@ public:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
 
   /// returns the workspace name
   const std::string &getWorkspaceName();

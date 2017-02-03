@@ -53,9 +53,9 @@ Usage
        sp.setDetectorID(i+1);
    in_ws = LoadNXSPE(file_path)
    
-   ws_comparison_rez = CheckWorkspacesMatch(out_ws,in_ws,1.e-9,CheckInstrument=False)
+   ws_comparison_rez = CompareWorkspaces(out_ws,in_ws,1.e-9,CheckInstrument=False)
    print "Contents of the first spectrum = " + str(in_ws.readY(0)) + "."
-   print "Initial and loaded workspaces comparison is: ",ws_comparison_rez
+   print "Initial and loaded workspaces comparison is:",str(ws_comparison_rez[0])
    run = in_ws.getRun();
    print "Loaded workspace has attached incident energy Ei={0:5} and rotation angle Psi={1:5}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value)
    
@@ -69,7 +69,7 @@ Output:
 .. testoutput:: ExSimpleSavingRoundtrip
 
    Contents of the first spectrum = [ 10.  50.  30.  60.].
-   Initial and loaded workspaces comparison is:  Success!
+   Initial and loaded workspaces comparison is: True
    Loaded workspace has attached incident energy Ei=321.0 and rotation angle Psi= 32.0deg
    
 

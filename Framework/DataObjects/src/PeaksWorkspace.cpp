@@ -47,6 +47,8 @@ PeaksWorkspace::PeaksWorkspace()
     : IPeaksWorkspace(), peaks(), columns(), columnNames(),
       m_coordSystem(None) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -59,6 +61,8 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
   initColumns();
+  // PeaksWorkspace does not use the grouping mechanism of ExperimentInfo.
+  setNumberOfDetectorGroups(0);
 }
 
 //=====================================================================================

@@ -875,7 +875,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -903,12 +903,12 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
       Mantid::API::IAlgorithm_sptr alg =
           Mantid::API::AlgorithmManager::Instance().create(
               "MaskWorkspaceToCalFile", -1);
-      alg->setPropertyValue("InputWorkspace", outputWS->name());
+      alg->setPropertyValue("InputWorkspace", outputWS->getName());
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->setProperty("Invert", false);
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -932,22 +932,6 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   // Apply the view (no workspace) to a buffered mask workspace
   Mantid::API::MatrixWorkspace_sptr inputWS =
       m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
-
-  /*
-  Mantid::Geometry::Instrument_const_sptr instrument =
-  outputMaskWS->getInstrument();
-  std::vector<int> detids = instrument->getDetectorIDs();
-  size_t maskedcount = 0;
-  for (size_t i = 0; i < detids.size(); ++i)
-  {
-  int detid = detids[i];
-  Mantid::Geometry::IDetector_const_sptr det = instrument->getDetector(detid);
-  if (det->isMasked())
-  ++ maskedcount;
-  }
-  std::cout << "There are " << maskedcount << " detectors out of total " <<
-  detids.size() << " detectors.\n";
-  */
 
   // Extract from MaskWorkspace to a TableWorkspace
   double xmin = m_instrWidget->getInstrumentActor()->minBinValue();
@@ -1286,7 +1270,7 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   auto workspace = actor->getWorkspace();
   auto instrument = workspace->getInstrument();
   auto instrumentName = instrument->getName();
-  auto tempName = "__" + workspace->name() + "MaskView";
+  auto tempName = "__" + workspace->getName() + "MaskView";
 
   // load the mask from the project folder
   try {

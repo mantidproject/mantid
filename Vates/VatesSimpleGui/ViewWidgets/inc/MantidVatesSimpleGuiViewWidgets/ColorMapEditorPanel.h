@@ -41,7 +41,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ColorMapEditorPanel
   Q_OBJECT
 public:
   /// Default constructor.
-  ColorMapEditorPanel(QWidget *parent = 0);
+  ColorMapEditorPanel(QWidget *parent = nullptr);
   /// Default destructor.
   ~ColorMapEditorPanel() override;
   /// Connect the panel to ParaView

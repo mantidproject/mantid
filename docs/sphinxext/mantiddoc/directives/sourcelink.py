@@ -1,6 +1,8 @@
-from base import AlgorithmBaseDirective #pylint: disable=unused-import
+from __future__ import (absolute_import, division, print_function)
+from .base import AlgorithmBaseDirective #pylint: disable=unused-import
 import mantid
 import os
+from six import iteritems
 
 class SourceLinkError(Exception):
     def __init__(self, value):
@@ -175,7 +177,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         valid_ext_list = []
 
         self.add_rst(self.make_header("Source"))
-        for extension, filepath in file_paths.iteritems():
+        for extension, filepath in iteritems(file_paths):
             if filepath is not None:
                 self.output_path_to_page(filepath,extension)
                 valid_ext_list.append(extension)
@@ -187,10 +189,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             if len(valid_ext_list) == 0:
                 raise SourceLinkError("No file possibilities for " + file_name + " have been found\n" +
                                       "Please specify a better one using the :filename: opiton or use the " +
-                                      str(self.file_types.keys()) + " options\n" +
+                                      str(list(self.file_types.keys())) + " options\n" +
                                       "e.g. \n" +
                                       ".. sourcelink:\n" +
-                                      "      :" + self.file_types.keys()[0] + ": " + suggested_path + "\n "+
+                                      "      :" + list(self.file_types.keys())[0] + ": " + suggested_path + "\n "+
                                       "or \n" +
                                       ".. sourcelink:\n" +
                                       "      :filename: " + file_name)
@@ -200,10 +202,10 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                     raise SourceLinkError("Only one of .h and .cpp found for " + file_name + "\n" +
                                           "valid files found for " + str(valid_ext_list) + "\n" +
                                           "Please specify the missing one using an " +
-                                          str(self.file_types.keys()) + " option\n" +
+                                          str(list(self.file_types.keys())) + " option\n" +
                                           "e.g. \n" +
                                           ".. sourcelink:\n" +
-                                          "      :" + self.file_types.keys()[0] + ": " + suggested_path)
+                                          "      :" + list(self.file_types.keys())[0] + ": " + suggested_path)
         return
 
     def output_path_to_page(self, filepath, extension):

@@ -8,8 +8,18 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 :ref:`algm-FindUBUsingLatticeParameters` will now return an oriented lattice even when the number of peaks used is very low.
+
 :ref:`algm-FindUBUsingLatticeParameters` has a new option to fix lattice parameters. This will find an orientation, but without optimisation between indexed HKLs and q vectors.
 
+:ref:`algm-CreateGroupingWorkspace` has a new option to create one group of 4 columns of SNAP detectors and another with the remaining 2 columns. This grouping is used frequently in their reduction.
+
+:ref:`algm-IntegratePeaksMD` now removes the top 1% of the background events so that intensity spikes near the edges are removed.
+
+:ref:`algm-IntegrateEllipsoids` has a new option, AdaptiveQMultiplier, for the radius to vary as a function of the modulus of Q. If the AdaptiveQBackground option is set to True, the background radius also changes.  These are the same as the adaptive options in :ref:`algm-IntegratePeaksMD`.
+
+General Diffraction
+-------------------
+A new version of :ref:`algm-ConvertToDiffractionMDWorkspace-v3` has been created that now automatically calculates extents using :ref:`algm-ConvertToMDMinMaxLocal` if none are provided.
 
 Single Crystal Diffraction
 --------------------------
@@ -20,6 +30,7 @@ User interface *HFIR 4Circle Reduction* has been modified to allow user to speci
 
 Engineering Diffraction
 -----------------------
+:ref:`algm-SaveOpenGenieAscii` has been rewritten and works with the analyze_scan procedure in OpenGenie. It should also work with other procedures that use a standard set of parameters.
 
 Powder Diffraction
 ------------------

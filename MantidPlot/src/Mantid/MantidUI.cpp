@@ -55,6 +55,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <QListWidget>
@@ -580,7 +581,7 @@ MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
                                 int upper, bool showDlg) {
   MantidMatrix *matrix = 0;
   if (workspace) {
-    const QString wsName(workspace->name().c_str());
+    const QString wsName(workspace->getName().c_str());
     if (showDlg) {
       ImportWorkspaceDlg dlg(appWindow(), workspace->getNumberHistograms());
       if (dlg.exec() == QDialog::Accepted) {
@@ -1224,10 +1225,18 @@ Table *MantidUI::createDetectorTable(
 
   // check if efixed value is available
   bool calcQ(true);
-  try {
-    auto detector = ws->getDetector(0);
-    ws->getEFixed(detector);
-  } catch (std::runtime_error &) {
+
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (spectrumInfo.hasDetectors(0)) {
+    try {
+      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
+                                                  Mantid::NoDeleting());
+      ws->getEFixed(detector);
+    } catch (std::runtime_error &) {
+      calcQ = false;
+    }
+  } else {
+    // No detectors available
     calcQ = false;
   }
 
@@ -1317,32 +1326,39 @@ Table *MantidUI::createDetectorTable(
       }
 
       // Geometry
-      IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if (!spectrumInfo.hasDetectors(wsIndex))
+        throw std::runtime_error("No detectors found.");
       if (!signedThetaParamRetrieved) {
         const std::vector<std::string> &parameters =
-            det->getStringParameter("show-signed-theta", true); // recursive
+            spectrumInfo.detector(wsIndex)
+                .getStringParameter("show-signed-theta", true); // recursive
         showSignedTwoTheta = (!parameters.empty() &&
                               find(parameters.begin(), parameters.end(),
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
-      // We want the position of the detector relative to the sample
-      Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
       double R(0.0), theta(0.0), phi(0.0);
-      pos.getSpherical(R, theta, phi);
-      // Need to get R, theta through these methods to be correct for grouped
-      // detectors
-      R = det->getDistance(*sample);
-      try {
-        theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(*det)
-                                   : ws->detectorTwoTheta(*det);
-        theta *= 180.0 / M_PI; // To degrees
-      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
-        // Log the error and leave theta as it is
-        g_log.error(ex.what());
+      // R and theta used as dummy variables
+      // Note: phi is the angle around Z, not necessarily the beam direction.
+      spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
+      // R is actually L2 (same as R if sample is at (0,0,0))
+      R = spectrumInfo.l2(wsIndex);
+      // Theta is actually 'twoTheta' for detectors (twice the scattering
+      // angle), if Z is the beam direction this corresponds to theta in
+      // spherical coordinates.
+      // For monitors we follow historic behaviour and display theta
+      const bool isMonitor = spectrumInfo.isMonitor(wsIndex);
+      if (!isMonitor) {
+        try {
+          theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
+                                     : spectrumInfo.twoTheta(wsIndex);
+          theta *= 180.0 / M_PI; // To degrees
+        } catch (const std::exception &ex) {
+          // Log the error and leave theta as it is
+          g_log.error(ex.what());
+        }
       }
-      QString isMonitor = det->isMonitor() ? "yes" : "no";
-
+      const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
       // Y/E
       if (include_data) {
@@ -1354,8 +1370,10 @@ Table *MantidUI::createDetectorTable(
 
         try {
           // Get unsigned theta and efixed value
+          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                   Mantid::NoDeleting());
           double efixed = ws->getEFixed(det);
-          double usignTheta = ws->detectorTwoTheta(*det) * 0.5;
+          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
@@ -1364,8 +1382,8 @@ Table *MantidUI::createDetectorTable(
         }
       }
 
-      colValues << QVariant(phi)        // rtp
-                << QVariant(isMonitor); // monitor
+      colValues << QVariant(phi)               // rtp
+                << QVariant(isMonitorDisplay); // monitor
     } catch (...) {
       // spectrumNo=-1, detID=0
       colValues << QVariant(-1) << QVariant("0");
@@ -2325,6 +2343,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
 
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
   t->setColName(0, "Log entry");
+  t->setColumnType(0, Table::Text);
   t->setReadOnlyColumn(0, true); // Read-only
 
   for (int i = 0; i < loglines.size(); ++i) {
@@ -2336,11 +2355,12 @@ void MantidUI::importString(const QString &logName, const QString &data,
             (qMin(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
 *  @param logName :: the title of the table is based on this
-*  @param data :: a formated string with the time series data to display
+*  @param data :: a formatted string with the time series data to display
 *  @param wsName :: add workspace name to the table window title bar, defaults
 * to logname if left blank
 */
@@ -2362,6 +2382,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   t->setColumnType(0, Table::Time);
   t->setTimeFormat("HH:mm:ss", 0, false);
   t->setColName(1, label.section("-", 1));
+  t->setColumnType(1, Table::Text);
 
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
@@ -2377,6 +2398,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
     ds.removeFirst(); // remove date
     ds.removeFirst(); // and time
     t->setText(row, 1, ds.join(" "));
+    t->setTextAlignment(row, 1, Qt::AlignLeft | Qt::AlignVCenter);
   }
 
   // Show table
@@ -2385,6 +2407,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 
@@ -2824,7 +2847,7 @@ Table *MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs,
     return NULL;
 
   return createTableFromSpectraList(
-      m->name(), QString::fromStdString(m->workspace()->name()), indexList,
+      m->name(), QString::fromStdString(m->workspace()->getName()), indexList,
       errs, binCentres);
 }
 

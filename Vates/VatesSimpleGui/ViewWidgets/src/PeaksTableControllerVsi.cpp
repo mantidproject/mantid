@@ -49,12 +49,13 @@
 #include <QLayoutItem>
 #include <QColor>
 
+#include <algorithm>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <stdexcept>
-#include <algorithm>
 #include <map>
 #include <sstream>
+#include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace Vates {
@@ -113,8 +114,8 @@ std::vector<bool> PeaksTableControllerVsi::getViewablePeaks() {
  * @param source A new peaks source
  * @param splatSource A pointer to the splatter source
  */
-void PeaksTableControllerVsi::addWorkspace(
-    pqPipelineSource *source, QPointer<pqPipelineSource> splatSource) {
+void PeaksTableControllerVsi::addWorkspace(pqPipelineSource *source,
+                                           pqPipelineSource *splatSource) {
   try {
     if (!source || !splatSource) {
       throw std::invalid_argument(
@@ -165,7 +166,8 @@ void PeaksTableControllerVsi::addWorkspace(
           m_presenter->getInitializedViewablePeaks();
       m_peaksTabWidget->addNewPeaksWorkspace(
           peaksWorkspace, viewablePeaks[peaksWorkspace->getName()]);
-      m_peaksTabWidget->updateTabs(viewablePeaks, getColors());
+      auto colors = this->getColors();
+      m_peaksTabWidget->updateTabs(viewablePeaks, colors);
       updatePeakWorkspaceColor();
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
@@ -268,8 +270,8 @@ void PeaksTableControllerVsi::updateViewableArea() {
  * Extract the frame from the source
  * @param splatSource A pointer to a splatter plot source.
  */
-std::vector<std::string> PeaksTableControllerVsi::extractFrameFromSource(
-    QPointer<pqPipelineSource> splatSource) {
+std::vector<std::string>
+PeaksTableControllerVsi::extractFrameFromSource(pqPipelineSource *splatSource) {
   pqPipelineFilter *filter = qobject_cast<pqPipelineFilter *>(splatSource);
 
   if (!filter) {
@@ -357,7 +359,8 @@ void PeaksTableControllerVsi::createTable() {
       layout()->addWidget(widget);
       m_peaksTabWidget = widget;
       // Set the color
-      m_peaksTabWidget->updateTabs(viewablePeaks, getColors());
+      auto colors = this->getColors();
+      m_peaksTabWidget->updateTabs(viewablePeaks, colors);
       updatePeakWorkspaceColor();
     } catch (std::runtime_error &ex) {
       g_log.warning()
@@ -411,7 +414,7 @@ void PeaksTableControllerVsi::onZoomToPeak(
     double radius;
     Mantid::Kernel::V3D position;
 
-    m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius,
+    m_presenter->getPeaksInfo(std::move(peaksWorkspace), row, position, radius,
                               m_coordinateSystem);
 
     // Reset camera
@@ -528,8 +531,8 @@ void PeaksTableControllerVsi::resetSinglePeaksSource(double position1,
  * @param delimiter The delimiter to concatenate workspace names.
  * @returns The concatenated workspace names.
  */
-std::string
-PeaksTableControllerVsi::getConcatenatedWorkspaceNames(std::string delimiter) {
+std::string PeaksTableControllerVsi::getConcatenatedWorkspaceNames(
+    const std::string &delimiter) {
   std::vector<std::string> peaksWorkspaceNames =
       m_presenter->getPeaksWorkspaceNames();
   std::stringstream stream;
@@ -581,8 +584,9 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
   // Now update all the presenter
   m_presenter->updateWorkspaces(peaksWorkspaceNames);
   if (!peakSources.empty() && m_peaksTabWidget) {
-    m_peaksTabWidget->updateTabs(m_presenter->getInitializedViewablePeaks(),
-                                 getColors());
+    auto colors = this->getColors();
+    auto peaks = m_presenter->getInitializedViewablePeaks();
+    m_peaksTabWidget->updateTabs(peaks, colors);
     updatePeakWorkspaceColor();
   }
 
@@ -600,7 +604,7 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
  */
 void PeaksTableControllerVsi::onPeaksSorted(
     const std::string &columnToSortBy, const bool sortAscending,
-    Mantid::API::IPeaksWorkspace_sptr ws) {
+    const Mantid::API::IPeaksWorkspace *ws) {
   // Invoke the ording command on the presenters
   m_presenter->sortPeaksWorkspace(columnToSortBy, sortAscending, ws);
   // Update the tabs

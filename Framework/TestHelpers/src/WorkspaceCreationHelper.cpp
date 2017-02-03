@@ -16,6 +16,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -494,6 +495,71 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   return workspace;
 }
 
+/**
+* Create a very small 2D workspace for a virtual reflectometry instrument with
+* multiple detectors
+* @return workspace with instrument attached.
+* @param startX : X Tof start value for the workspace.
+*/
+MatrixWorkspace_sptr
+create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX) {
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(
+      boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
+
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(V3D(0, 0, 0));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(V3D(15, 0, 0));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  Detector *monitor = new Detector("Monitor", 1, nullptr);
+  monitor->setPos(14, 0, 0);
+  instrument->add(monitor);
+  instrument->markAsMonitor(monitor);
+
+  Detector *det1 = new Detector(
+      "point-detector", 2,
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
+  det1->setPos(20, (20 - sample->getPos().X()), 0);
+  instrument->add(det1);
+  instrument->markAsDetector(det1);
+
+  Detector *det2 = new Detector(
+      "point-detector", 3,
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
+  det2->setPos(20, (20 - sample->getPos().X()), 0);
+  instrument->add(det2);
+  instrument->markAsDetector(det2);
+
+  Detector *det3 = new Detector(
+      "point-detector", 4,
+      ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
+  det3->setPos(20, (20 - sample->getPos().X()), 0);
+  instrument->add(det3);
+  instrument->markAsDetector(det3);
+
+  const int nSpectra = 4;
+  const int nBins = 20;
+  const double deltaX = 5000; // TOF
+  auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
+
+  workspace->setTitle("Test histogram");
+  workspace->getAxis(0)->setUnit("TOF");
+  workspace->setYUnit("Counts");
+
+  workspace->setInstrument(instrument);
+  workspace->getSpectrum(0).setDetectorID(monitor->getID());
+  workspace->getSpectrum(1).setDetectorID(det1->getID());
+  workspace->getSpectrum(2).setDetectorID(det2->getID());
+  workspace->getSpectrum(3).setDetectorID(det3->getID());
+  return workspace;
+}
+
 void createInstrumentForWorkspaceWithDistances(
     MatrixWorkspace_sptr workspace, const V3D &samplePosition,
     const V3D &sourcePosition, const std::vector<V3D> &detectorPositions) {
@@ -507,7 +573,7 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->markAsSource(source);
 
   ObjComponent *sample = new ObjComponent("sample");
-  source->setPos(samplePosition);
+  sample->setPos(samplePosition);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -998,8 +1064,9 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
 
   // c) Pad all the pixels and Set to zero
   size_t workspaceIndex = 0;
+  const auto &detectorInfo = outputWS->detectorInfo();
   for (it = detector_map.begin(); it != detector_map.end(); ++it) {
-    if (!it->second->isMonitor()) {
+    if (!detectorInfo.isMonitor(detectorInfo.indexOf(it->first))) {
       auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);
       // Start the spectrum number at 1
@@ -1237,6 +1304,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   size_t nHist = targWS->rowCount();
   //// Loop over the spectra
   uint32_t liveDetectorsCount(0);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
     sp2detMap[i] = std::numeric_limits<size_t>::quiet_NaN();
     detId[i] = std::numeric_limits<int32_t>::quiet_NaN();
@@ -1245,26 +1313,17 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
     TwoTheta[i] = std::numeric_limits<double>::quiet_NaN();
     Azimuthal[i] = std::numeric_limits<double>::quiet_NaN();
 
-    // get detector or detector group which corresponds to the spectra i
-    Geometry::IDetector_const_sptr spDet;
-    try {
-      spDet = inputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
-      continue;
-    }
-
-    // Check that we aren't dealing with monitor...
-    if (spDet->isMonitor())
+    if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i))
       continue;
 
     // calculate the requested values;
     sp2detMap[i] = liveDetectorsCount;
-    detId[liveDetectorsCount] = int32_t(spDet->getID());
+    detId[liveDetectorsCount] = int32_t(spectrumInfo.detector(i).getID());
     detIDMap[liveDetectorsCount] = i;
-    L2[liveDetectorsCount] = spDet->getDistance(*sample);
+    L2[liveDetectorsCount] = spectrumInfo.l2(i);
 
-    double polar = inputWS->detectorTwoTheta(*spDet);
-    double azim = spDet->getPhi();
+    double polar = spectrumInfo.twoTheta(i);
+    double azim = spectrumInfo.detector(i).getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
 

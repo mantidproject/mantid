@@ -24,7 +24,7 @@ public:
   DetectorInfoTest() {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -32,16 +32,15 @@ public:
         m_workspace, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = m_workspace.instrumentParameters();
+    auto &detInfo = m_workspace.mutableDetectorInfo();
     for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
       if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = m_workspace.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detInfo.setMasked(i, true);
       }
     }
 
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
-                                 numberOfBins - 1);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
+                                       numberOfBins);
   }
 
   void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
@@ -287,7 +286,7 @@ public:
     WorkspaceTester workspace;
     int32_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     for (int32_t i = 0; i < numberOfHistograms; ++i)
       workspace.getSpectrum(i)
           .setSpectrumNo(static_cast<int32_t>(numberOfHistograms) - i);
@@ -340,12 +339,11 @@ private:
       inst->markAsDetector(det);
     }
     ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
+    auto &detInfo = ws->mutableDetectorInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
-      const auto &det = ws->getDetector(i);
       if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
+        detInfo.setMasked(i, true);
     }
     return std::move(ws);
   }
@@ -361,7 +359,7 @@ public:
   DetectorInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

@@ -93,16 +93,16 @@ public:
 
   /// Invokes the ADS to sort group members by orkspace name
   void sortByName() {
-    AnalysisDataService::Instance().sortGroupByName(this->name());
+    AnalysisDataService::Instance().sortGroupByName(this->getName());
   }
 
   /// Adds a workspace to the group.
   void add(const std::string &wsName) {
-    AnalysisDataService::Instance().addToGroup(this->name(), wsName);
+    AnalysisDataService::Instance().addToGroup(this->getName(), wsName);
   }
   /// Remove a name from the group
   void remove(const std::string &wsName) {
-    AnalysisDataService::Instance().removeFromGroup(this->name(), wsName);
+    AnalysisDataService::Instance().removeFromGroup(this->getName(), wsName);
   }
   /// Does a workspace exist within the group
   bool contains(const std::string &wsName) const;

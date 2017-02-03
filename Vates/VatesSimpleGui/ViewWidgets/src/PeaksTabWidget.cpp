@@ -4,12 +4,13 @@
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksWidget.h"
 
-#include <QWidget>
 #include <QItemSelectionModel>
 #include <QModelIndex>
-#include <vector>
-#include <string>
+#include <QWidget>
 #include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace Mantid {
 namespace Vates {
@@ -53,11 +54,11 @@ void PeaksTabWidget::setupMvc(
 }
 
 void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-                               std::string tabName,
+                               const std::string &tabName,
                                std::vector<bool> visiblePeaks) {
   PeaksWidget *widget =
-      new PeaksWidget(peaksWorkspace, m_coordinateSystem, this);
-  widget->setupMvc(visiblePeaks);
+      new PeaksWidget(std::move(peaksWorkspace), m_coordinateSystem, this);
+  widget->setupMvc(std::move(visiblePeaks));
 
   // Connect to the output of the widget
   QObject::connect(
@@ -81,7 +82,7 @@ void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
  */
 void PeaksTabWidget::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws,
                                   int row) {
-  emit zoomToPeak(ws, row);
+  emit zoomToPeak(std::move(ws), row);
 }
 
 /**
@@ -90,8 +91,8 @@ void PeaksTabWidget::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws,
  * @param colors The color of the tabs
  */
 void PeaksTabWidget::updateTabs(
-    std::map<std::string, std::vector<bool>> visiblePeaks,
-    std::map<std::string, QColor> colors) {
+    std::map<std::string, std::vector<bool>> &visiblePeaks,
+    std::map<std::string, QColor> &colors) {
   // Iterate over all tabs
   for (int i = 0; i < m_tabWidget->count(); i++) {
     QString label = m_tabWidget->tabText(i);
@@ -114,10 +115,10 @@ void PeaksTabWidget::updateTabs(
  * @param color
  * @param index The tab index.
  */
-void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color,
-                               int index) {
+void PeaksTabWidget::updateTab(const std::vector<bool> &visiblePeaks,
+                               const QColor &color, int index) {
   PeaksWidget *widget = qobject_cast<PeaksWidget *>(m_tabWidget->widget(index));
-  widget->updateModel(visiblePeaks);
+  widget->updateModel(std::move(visiblePeaks));
   m_tabWidget->tabBar()->setTabTextColor(index, color);
 }
 
@@ -129,8 +130,8 @@ void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color,
 void PeaksTabWidget::addNewPeaksWorkspace(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
     std::vector<bool> visiblePeaks) {
-  m_ws.push_back(peaksWorkspace);
-  addNewTab(peaksWorkspace, peaksWorkspace->getName(), visiblePeaks);
+  m_ws.push_back(std::move(peaksWorkspace));
+  addNewTab(peaksWorkspace, peaksWorkspace->getName(), std::move(visiblePeaks));
 }
 }
 } // namespace
