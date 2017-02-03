@@ -2277,7 +2277,7 @@ class TransmissionCalc(ReductionStep):
         """
         return reducer.get_transmissions()
 
-    def calculate(self, reducer):
+    def calculate(self, reducer):  # noqa
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
         FITMETHOD = 'fit_method'
