@@ -3,13 +3,11 @@
     Magnetism reflectometry reduction
 """
 from __future__ import (absolute_import, division, print_function)
-import time
 import math
-import os
+import functools
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-import functools
 
 INSTRUMENT_NAME = "REF_M"
 
@@ -113,7 +111,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                 data_file = FileFinder.findRuns(item)[0]
             file_list.append(data_file)
         runs = functools.reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-        
+
         entry_name = self.getProperty("EntryName").value
         ws_event_data = LoadEventNexus(Filename=runs, NXentryName=entry_name,
                                        OutputWorkspace="%s_%s" % (INSTRUMENT_NAME, dataRunNumbers[0]))
@@ -200,7 +198,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Get the distance fromthe moderator to the detector
         run_object = ws_event_data.getRun()
         sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
-        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0        
+        source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Convert to Q
@@ -300,7 +298,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             @param ws_event_data: data workspace
         """
         run_object = ws_event_data.getRun()
-        
+
         dangle = run_object['DANGLE'].getStatistics().mean
         dangle0 = run_object['DANGLE0'].getStatistics().mean
         det_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
@@ -313,12 +311,11 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         else:
             pixel_width = 0.0007
 
-        #theta = (dangle - dangle0) * math.pi / 360.0      
+        #theta = (dangle - dangle0) * math.pi / 360.0
         theta = (dangle - dangle0) * math.pi / 180.0 / 2.0 + ((direct_beam_pix - ref_pix) * pixel_width) / (2.0 * det_distance)
 
         angle_offset = self.getProperty("AngleOffset").value
         return theta + angle_offset
-  
 
     #pylint: disable=too-many-arguments
     def process_data(self, workspace, tof_range, crop_low_res, low_res_range,
@@ -365,36 +362,39 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                              SumPixels=True, NormalizeSum=True)
 
             signal = RefRoi(InputWorkspace=workspace, IntegrateY=True,
-                               NXPixel=self.number_of_pixels_x,
-                               NYPixel=self.number_of_pixels_y,
-                               ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
-                               OutputWorkspace="signal_%s" % str(workspace))                                     
-            workspace = Minus(LHSWorkspace=signal, RHSWorkspace=average,
-                              OutputWorkspace="subtracted_%s" % str(workspace))   
+                            NXPixel=self.number_of_pixels_x,
+                            NYPixel=self.number_of_pixels_y,
+                            ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
+                            OutputWorkspace="signal_%s" % str(workspace))
+            subtracted = Minus(LHSWorkspace=signal, RHSWorkspace=average,
+                               OutputWorkspace="subtracted_%s" % str(workspace))
+            AnalysisDataService.remove(str(average))
+            AnalysisDataService.remove(str(signal))
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis
-            workspace = RefRoi(InputWorkspace=workspace, IntegrateY=True,
-                               NXPixel=self.number_of_pixels_x,
-                               NYPixel=self.number_of_pixels_y,
-                               ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
-                               OutputWorkspace=str(workspace))
+            subtracted = RefRoi(InputWorkspace=workspace, IntegrateY=True,
+                                NXPixel=self.number_of_pixels_x,
+                                NYPixel=self.number_of_pixels_y,
+                                ConvertToQ=False, YPixelMin=low_res_min, YPixelMax=low_res_max,
+                                OutputWorkspace="subtracted_%s" % str(workspace))
 
         # Normalize by current proton charge
         # Note that the background subtraction will use an error weighted mean
         # and use 1 as the error on counts of zero. We normalize by the integrated
         # current _after_ the background subtraction so that the 1 doesn't have
         # to be changed to a 1/Charge.
-        workspace = NormaliseByCurrent(InputWorkspace=workspace, OutputWorkspace=str(workspace))
+        subtracted = NormaliseByCurrent(InputWorkspace=subtracted, OutputWorkspace=str(subtracted))
 
         # Crop to only the selected peak region
-        cropped = CropWorkspace(InputWorkspace = workspace,
+        cropped = CropWorkspace(InputWorkspace=subtracted,
                                 StartWorkspaceIndex=int(peak_range[0]),
                                 EndWorkspaceIndex=int(peak_range[1]),
-                                OutputWorkspace="%s_cropped" % str(workspace))
+                                OutputWorkspace="%s_cropped" % str(subtracted))
 
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(workspace))
+        AnalysisDataService.remove(str(subtracted))
 
         return cropped
 
