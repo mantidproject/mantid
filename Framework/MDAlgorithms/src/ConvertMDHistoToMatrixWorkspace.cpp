@@ -291,7 +291,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
-      outputWorkspace->setSharedX(i, outputWorkspace->refX(0));
+      outputWorkspace->setSharedX(i, outputWorkspace->sharedX(0));
     auto &Y = outputWorkspace->mutableY(i);
     auto &E = outputWorkspace->mutableE(i);
 
