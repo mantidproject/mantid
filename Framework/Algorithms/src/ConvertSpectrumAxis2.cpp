@@ -1,11 +1,11 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -159,10 +159,16 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
     double theta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {
       theta = 0.5 * spectrumInfo.twoTheta(i);
-      const auto &detector =
-          spectrumInfo.detector(i); // A better way to get the detector index
-                                    // relies on SpectrumDefinition. TODO.
-      efixed = getEfixed(detector.index(), detectorInfo, *inputWS,
+      /*
+       * Two assumptions made in the following code.
+       * 1. Getting the detector index of the first detector in the spectrum
+       * defnition is enough (this should be completely safe).
+       * 2. That the time index is not important (first element of pair only
+       * accessed). i.e we are not performing scanning. Step scanning is not
+       * supported at the time of writing.
+       */
+      const auto detectorIndex = spectrumInfo.spectrumDefinition(i)[0].first;
+      efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
                          emode); // get efixed
     } else {
       theta = 0.0;
