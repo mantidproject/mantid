@@ -2388,8 +2388,14 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.execute()
 
         # Set the y axis label correctly for the transmission ratio data
-        fitted_trans_ws = mtd[fittedtransws]
-        unfitted_trans_ws = mtd[unfittedtransws]
+        try:
+            fitted_trans_ws = mtd[fittedtransws]
+            unfitted_trans_ws = mtd[unfittedtransws]
+        except KeyError as err:
+            message = "Something went wrong during the transmission calculation. The error message is " \
+                      "{0}. Check if you have any signal in the monitors which are used to record the " \
+                      "transmission and normalisation signal.".format(str(err))
+            raise RuntimeError(message)
         if fitted_trans_ws:
             fitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
         if unfitted_trans_ws:
