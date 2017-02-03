@@ -626,6 +626,10 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
+  <instrument name="D1B">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
   <instrument name="D4">
     <technique>Liquid diffraction</technique>
   </instrument>
