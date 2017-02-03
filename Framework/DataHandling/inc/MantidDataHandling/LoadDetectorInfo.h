@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -78,7 +79,8 @@ private:
   void readNXSDotDat(::NeXus::File &nxsFile, DetectorInfo &detInfo) const;
 
   /// Update the parameter map with the new values for the given detector
-  void updateParameterMap(Geometry::ParameterMap &pmap,
+  void updateParameterMap(API::DetectorInfo &detectorInfo,
+                          Geometry::ParameterMap &pmap,
                           const Geometry::IDetector &det, const double l2,
                           const double theta, const double phi,
                           const double delay, const double pressure,

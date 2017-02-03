@@ -1,15 +1,15 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
+#include "LoadRaw/isisraw2.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "LoadRaw/isisraw2.h"
+#include "MantidKernel/Exception.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string/compare.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <nexus/NeXusFile.hpp>
-#include <Poco/Path.h>
 
 #include <fstream>
 
@@ -124,7 +124,7 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
 
   // start loop over file
   auto &pmap = m_workspace->instrumentParameters();
-  const auto &detectorInfo = m_workspace->detectorInfo();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   while (getline(datFile, line)) {
     if (line.empty() || line[0] == '#')
       continue;
@@ -138,8 +138,8 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
     delta *= -1.0f;
 
     try {
-      size_t index = detectorInfo.indexOf(detID);
-      if (detectorInfo.isMonitor(index) || code == 1)
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
         continue;
 
       // drop 10 float columns
@@ -152,8 +152,8 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
       float pressure(0.0), thickness(0.0);
       is >> pressure >> thickness;
 
-      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                         delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
+                         phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -190,13 +190,13 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
-  const auto &detectorInfo = m_workspace->detectorInfo();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = static_cast<detid_t>(iraw.udet[i]);
     int code = iraw.code[i];
     try {
-      size_t index = detectorInfo.indexOf(detID);
-      if (detectorInfo.isMonitor(index) || code == 1)
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
         continue;
 
       // Positions
@@ -212,8 +212,8 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
       float pressure = iraw.ut[i + pressureTabNum * numDets];
       float thickness = iraw.ut[i + thicknessTabNum * numDets];
 
-      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                         delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
+                         phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -252,14 +252,14 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
 
   // Start loop over detectors
   auto &pmap = m_workspace->instrumentParameters();
-  const auto &detectorInfo = m_workspace->detectorInfo();
+  auto &wsDetInfo = m_workspace->mutableDetectorInfo();
   int numDets = static_cast<int>(detInfo.ids.size());
   for (int i = 0; i < numDets; ++i) {
     detid_t detID = detInfo.ids[i];
     int code = detInfo.codes[i];
     try {
-      size_t index = detectorInfo.indexOf(detID);
-      if (detectorInfo.isMonitor(index) || code == 1)
+      size_t index = wsDetInfo.indexOf(detID);
+      if (wsDetInfo.isMonitor(index) || code == 1)
         continue;
 
       // Positions
@@ -275,8 +275,8 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
       double pressure = detInfo.pressures[i];
       double thickness = detInfo.thicknesses[i];
 
-      updateParameterMap(pmap, detectorInfo.detector(index), l2, theta, phi,
-                         delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
+                         phi, delta, pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -401,7 +401,8 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param pressure The new pressure value
  * @param thickness The new thickness value
  */
-void LoadDetectorInfo::updateParameterMap(Geometry::ParameterMap &pmap,
+void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
+                                          Geometry::ParameterMap &pmap,
                                           const Geometry::IDetector &det,
                                           const double l2, const double theta,
                                           const double phi, const double delay,
@@ -421,8 +422,7 @@ void LoadDetectorInfo::updateParameterMap(Geometry::ParameterMap &pmap,
     newPos.spherical(l2, theta, phi);
     // The sample position may not be at 0,0,0
     newPos += m_samplePos;
-    ComponentHelper::moveComponent(det, pmap, newPos,
-                                   ComponentHelper::Absolute);
+    detectorInfo.setPosition(det, newPos);
   }
 }
 }
