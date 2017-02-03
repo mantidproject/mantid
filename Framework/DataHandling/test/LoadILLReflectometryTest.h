@@ -76,7 +76,31 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
+  }
 
+  void test2Theta() {
+    // Name of the output workspace.
+    std::string outWSName("LoadILLReflectometryTest_OutputWS");
+
+    LoadILLReflectometry loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_dataFile));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+
+    MatrixWorkspace_sptr output =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+
+    TS_ASSERT(output);
+
+    // Compare angles in degree
+    //twoTheta = outWSName->getSampleLogs("");
+    //TS_ASSERT_EQUALS(twoTheta, 0.799460);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().clear();
   }
 
 private:
@@ -89,9 +113,8 @@ private:
       Mantid::Kernel::Property *prop = inputWS->run().getProperty(propertyName);
       return boost::lexical_cast<T>(prop->value());
     } else {
-      std::string mesg =
-          "No '" + propertyName + "' property found in the input workspace....";
-      throw std::runtime_error(mesg);
+      std::string msg = "No '" + propertyName + "' property found";
+      throw std::runtime_error(msg);
     }
   }
 };
