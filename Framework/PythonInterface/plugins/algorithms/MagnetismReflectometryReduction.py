@@ -248,7 +248,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(q_workspace))
 
         return q_rebin
-        
+
     def cleanup_reflectivity(self, q_rebin):
         """
             Clean up the reflectivity workspace, removing zeros and cropping.
