@@ -11,6 +11,7 @@ from mantid.kernel import *
 
 INSTRUMENT_NAME = "REF_M"
 
+
 class MagnetismReflectometryReduction(PythonAlgorithm):
     """
         Workflow algorithm to reduce REF_M data
@@ -94,12 +95,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
 
-        # Get Q range
-        qMin = self.getProperty("QMin").value
-        qStep = self.getProperty("QStep").value
-        if qStep > 0:  #force logarithmic binning
-            qStep = -qStep
-
         # If we have multiple files, add them
         file_list = []
         for item in dataRunNumbers:
@@ -138,12 +133,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         self.number_of_pixels_y = int(ws_event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
 
-        # Get scattering angle theta
-        theta = self.calculate_scattering_angle(ws_event_data)
-        two_theta_degrees = 2.0*theta*180.0/math.pi
-        AddSampleLog(Workspace=ws_event_data, LogName='two_theta', LogText=str(two_theta_degrees),
-                     LogType='Number', LogUnit='degree')
-
         # ----- Process Sample Data -------------------------------------------
         crop_request = self.getProperty("CutLowResDataAxis").value
         low_res_range = self.getProperty("LowResDataAxisPixelRange").value
@@ -173,9 +162,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                            WorkspaceToMatch=data_cropped,
                                            OutputWorkspace=str(norm_summed))
 
-            # Sum up the normalization peak
-            #norm_summed = SumSpectra(InputWorkspace = norm_cropped)
-
             # Normalize the data
             normalized_data = data_cropped / norm_summed
             # Avoid leaving trash behind
@@ -192,11 +178,38 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                              OutputWorkspace=str(normalized_data))
         normalized_data.setDistribution(True)
 
-        q_workspace = SumSpectra(InputWorkspace = normalized_data)
+        # Convert to Q and clean up the distribution
+        q_rebin = self.convert_to_q(normalized_data, TOFrange)
+        q_rebin = self.cleanup_reflectivity(q_rebin)
+
+        # Avoid leaving trash behind
+        AnalysisDataService.remove(str(normalized_data))
+
+        self.setProperty('OutputWorkspace', q_rebin)
+
+    def convert_to_q(self, workspace, TOFrange):
+        """
+            Convert a reflectivity workspace to Q space
+            @param workspace: workspace to convert
+            @param TOFrange: time of flight range
+        """
+        # Get Q range
+        qMin = self.getProperty("QMin").value
+        qStep = self.getProperty("QStep").value
+        if qStep > 0:  #force logarithmic binning
+            qStep = -qStep
+
+        # Get scattering angle theta
+        theta = self.calculate_scattering_angle(workspace)
+        two_theta_degrees = 2.0*theta*180.0/math.pi
+        AddSampleLog(Workspace=workspace, LogName='two_theta', LogText=str(two_theta_degrees),
+                     LogType='Number', LogUnit='degree')
+
+        q_workspace = SumSpectra(InputWorkspace = workspace)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
         # Get the distance fromthe moderator to the detector
-        run_object = ws_event_data.getRun()
+        run_object = workspace.getRun()
         sample_detector_distance = run_object['SampleDetDis'].getStatistics().mean / 1000.0
         source_sample_distance = run_object['ModeratorSamDis'].getStatistics().mean / 1000.0
         source_detector_distance = source_sample_distance + sample_detector_distance
@@ -229,16 +242,21 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
 
         name_output_ws = self.getPropertyValue("OutputWorkspace")
-
-        if q_range[2] < q_range[0]:
-            logger.error("Bad Q range: %s ; determining range from data" % str(q_range))
-            q_range = [q_min_from_data, qStep, q_max_from_data]
         q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                         OutputWorkspace=name_output_ws)
 
+        AnalysisDataService.remove(str(q_workspace))
+
+        return q_rebin
+        
+    def cleanup_reflectivity(self, q_rebin):
+        """
+            Clean up the reflectivity workspace, removing zeros and cropping.
+            @param q_rebin: reflectivity workspace
+        """
         # Replace NaNs by zeros
         q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin,
-                                       OutputWorkspace=name_output_ws,
+                                       OutputWorkspace=str(q_rebin),
                                        NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
@@ -268,13 +286,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
         data_e = q_rebin.dataE(0)
-        # Again for backward compatibility, the first and last points of the
-        # raw output when not cropping was simply set to 0 += 1.
-        if crop is False:
-            data_y[0] = 0
-            data_e[0] = 1
-            data_y[len(data_y)-1] = 0
-            data_e[len(data_y)-1] = 1
+
         # Values < 1e-12 and values where the error is greater than the value are replaced by 0+-1
         for i in range(len(data_y)):
             if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
@@ -284,13 +296,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Sanity check
         if sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
-
-        # Avoid leaving trash behind
-        for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
-            if AnalysisDataService.doesExist(ws):
-                AnalysisDataService.remove(ws)
-
-        self.setProperty('OutputWorkspace', mtd[name_output_ws])
+        return q_rebin
 
     def calculate_scattering_angle(self, ws_event_data):
         """
