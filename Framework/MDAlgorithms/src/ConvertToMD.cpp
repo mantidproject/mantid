@@ -325,7 +325,9 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
                        "boundaries \n";
 
   // retrieve representative bin boundaries
-  MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
+  auto binBoundaries = m_InWS2D->x(spectra_index).rawData();
+
+
   // check if the boundaries transformation is necessary
   if (m_Convertor->getUnitConversionHelper().isUnitConverted()) {
 
