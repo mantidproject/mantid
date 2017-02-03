@@ -604,7 +604,8 @@ void GroupDetectors2::processGroupingWorkspace(
       for (const auto &spectrumDefinition :
            spectrumInfo.spectrumDefinition(i)) {
         // translate detectors to target det ws indexes
-        size_t targetWSIndex = detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
         if (unUsedSpec[targetWSIndex] != (USED)) {
@@ -656,9 +657,11 @@ void GroupDetectors2::processMatrixWorkspace(
 
     // If the detector was not found or was not in a group, then ignore it.
     if (spectrumInfo.spectrumDefinition(i).size() > 1) {
-      for (const auto &spectrumDefinition : spectrumInfo.spectrumDefinition(i)) {
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
         // translate detectors to target det ws indexes
-        size_t targetWSIndex = detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
         if (unUsedSpec[targetWSIndex] != (USED)) {
