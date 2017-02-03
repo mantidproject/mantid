@@ -850,7 +850,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Do align and focus
             num_out_wksp = len(output_ws_name_list)
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 # Get workspace name
                 out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
