@@ -237,7 +237,7 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   if (!spectrumInfo.hasDetectors(index)) {
     return 0.0;
   }
-  
+
   const auto &detectorInfo = inputWS->detectorInfo();
   const auto detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
   const auto &det = detectorInfo.detector(detIndex);
