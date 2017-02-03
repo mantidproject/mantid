@@ -72,6 +72,8 @@ class MockSettingsView : public IReflSettingsView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getStartOverlap, std::string());
+  MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
