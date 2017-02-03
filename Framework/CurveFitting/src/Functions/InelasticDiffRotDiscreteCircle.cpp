@@ -143,17 +143,16 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
   if (!workspace)
     return;
 
-  size_t numHist = workspace->getNumberHistograms();
   const auto &spectrumInfo = workspace->spectrumInfo();
   const auto &detectorIDs = workspace->detectorInfo().detectorIDs();
   for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
     if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information("Cannot populate Q values from workspace - no detectors set.");
       break;
     }
 
-    const auto &detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
+    const auto detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
 
     try {
       double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
@@ -164,7 +163,7 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace");
+      g_log.information("Cannot populate Q values from workspace - could not find EFixed value.");
       return;
     }
   }
