@@ -169,15 +169,15 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
     auto beg = data.begin() + spectraLength * wsIndex;
     auto end = beg + spectraLength;
-    if (spectraLength == xData.size())
+    if (static_cast<size_t>(spectraLength) == xData.size())
       ws->setHistogram(wsIndex, Points(x), Counts(beg, end));
     else
       ws->setHistogram(wsIndex, BinEdges(x), Counts(beg, end));
 
-    ws->getSpectrum(wsIndex)
-        .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
-    ws->getSpectrum(wsIndex)
-        .setDetectorID(static_cast<detid_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setSpectrumNo(
+        static_cast<specnum_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex).setDetectorID(
+        static_cast<detid_t>(yData[wsIndex]));
   }
 
   ws->setYUnit("Counts");
