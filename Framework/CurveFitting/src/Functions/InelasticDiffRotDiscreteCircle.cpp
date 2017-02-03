@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -9,6 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <limits>
@@ -143,17 +145,18 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
 
   size_t numHist = workspace->getNumberHistograms();
   const auto &spectrumInfo = workspace->spectrumInfo();
-  for (size_t idx = 0; idx < numHist; idx++) {
+  const auto &detectorIDs = workspace->detectorInfo().detectorIDs();
+  for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
     if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
     }
 
-    const auto detID = spectrumInfo.detector(idx).getID();
+    const auto &detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
 
     try {
-      double efixed = workspace->getEFixed(detID);
+      double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
       double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
 
       double q = Mantid::Kernel::UnitConversion::run(usingTheta, efixed);
