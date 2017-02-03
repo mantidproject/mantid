@@ -8,8 +8,6 @@
 
 namespace Mantid {
 
-class API::SpectrumInfo;
-
 namespace Algorithms {
 class DLLExport RemoveLowResTOF : public API::Algorithm {
 public:

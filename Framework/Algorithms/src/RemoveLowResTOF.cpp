@@ -248,8 +248,8 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
   const Kernel::V3D &sourcePos = spectrumInfo.sourcePosition();
   const Kernel::V3D &samplePos = spectrumInfo.samplePosition();
   const Kernel::V3D &beamline = samplePos - sourcePos;
-  double beamline_norm = 2. * beamline.norm();
   const double l1 = spectrumInfo.l1();
+  double beamline_norm = 2. * l1;
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
