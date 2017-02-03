@@ -8,6 +8,7 @@ class EigenTest {
 
   virtual Eigen::Vector3d getPos() const = 0;
   virtual Eigen::Quaterniond getRotation() const = 0;
+
 };
 
-#endif // MANTID_EIGENTEST_H
+#endif //MANTID_EIGENTEST_H
