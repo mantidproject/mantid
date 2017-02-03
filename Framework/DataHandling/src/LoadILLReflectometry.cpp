@@ -518,25 +518,32 @@ void LoadILLReflectometry::placeDetector() {
 
   parref: parameters from reflected beam
 
-  bragg angle (rad):
+  bragg angle (rad)
 
-  parref.san in rad
+  ============================================================================================
+
+  parref.san in grad
 
   san coherent
+  --------------------------------------------------------------------------------------------
 
   angle_bragg = (parref.san * !pi / 180.) -
                 0.5*atan((float(peakref)-c_params.pcen)*c_params.pixelwidth/parref.sdetd) +
                 0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
 
   san incoherent
+  --------------------------------------------------------------------------------------------
 
   angle_bragg = parref.san * !pi / 180.
+
+  ============================================================================================
 
   dan     Direct peak position (new from gaussian fit) = newpeakdir
   dan     Reflect peak position (new from gaussian fit) = newpeakref
   angle_centre = ((parref.dan - pardir.dan) / 2.) * !pi / 180.
 
   dan coherent
+  --------------------------------------------------------------------------------------------
 
   detector pixels projected onto a given pixel, so we need
   to select middle of specular pixel (peakref) instead of value from fit
@@ -547,21 +554,25 @@ void LoadILLReflectometry::placeDetector() {
                 we have to use the middle of the coherent center pixel
 
   dan incoherent
+  --------------------------------------------------------------------------------------------
 
   angle_bragg = angle_centre +
                 0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd) -
                 0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
 
-  Using DAN to calculate theta = (angle_bragg * 180. / pi) [deg].
-  angle to centre of detector =  (angle_centre * 180. / pi)
+  ============================================================================================
 
-  twotheta = 2.0 * angle_bragg
+    - user defined using theta value from table
 
-  - user defined using theta value from table
+  ============================================================================================
+
+  twotheta = 2.0 * angle_bragg (rad)
 
   */
 
   double angle_rad = 2. * *sample_angle * M_PI / 180.0;
+  g_log.debug() << "2Theta " << 2. * *sample_angle << "\n";
+
   // add theta to sample logs
   // m_localWorkspace->run().addLogData("Theta");
   //add somewhere  m_localWorkspace->setTitle();
@@ -574,7 +585,7 @@ void LoadILLReflectometry::placeDetector() {
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 
   const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
-  double twoTheta = spectrumInfo.twoTheta(0);
+  double twoTheta = spectrumInfo.twoTheta(2);
   g_log.debug() << "2Theta " << twoTheta << "\n";
 
   g_log.debug() << "End moving.\n";

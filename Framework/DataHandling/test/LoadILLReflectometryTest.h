@@ -14,6 +14,8 @@ using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
+private:
+  std::string m_dataFile;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -69,9 +71,9 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
 
     // Test x values, minimum and maximum
-    double minimum_wavelength = output->dataX(2)[0];
+    double minimum_wavelength = output->x(2)[0];
     TS_ASSERT_DELTA(minimum_wavelength, -0.23369886776335402, 1e-6);
-    double maximum_wavelength = output->dataX(2)[1000];
+    double maximum_wavelength = output->x(2)[1000];
     TS_ASSERT_DELTA(maximum_wavelength, 30.784049961143634, 1e-6);
 
     // Remove workspace from the data service.
@@ -101,21 +103,6 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
-  }
-
-private:
-  std::string m_dataFile;
-
-  template <typename T>
-  T getPropertyFromRun(MatrixWorkspace_const_sptr inputWS,
-                       const std::string &propertyName) {
-    if (inputWS->run().hasProperty(propertyName)) {
-      Mantid::Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-      return boost::lexical_cast<T>(prop->value());
-    } else {
-      std::string msg = "No '" + propertyName + "' property found";
-      throw std::runtime_error(msg);
-    }
   }
 };
 
