@@ -15,6 +15,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <cmath>
@@ -211,27 +212,14 @@ void DetectorEfficiencyCor::correctForEfficiency(
   auto yValues = m_inputWS->y(spectraIn);
   auto eValues = m_inputWS->e(spectraIn);
 
-  // get a pointer to the detectors that created the spectrum
-  const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
-  const double ndets(static_cast<double>(dets.size())); // We correct each pixel
-                                                        // so make sure we
-                                                        // average the
-                                                        // correction computing
-                                                        // it for the spectrum
-
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
-  const auto &detectorInfo = m_inputWS->detectorInfo();
   std::vector<double> oneOverWaveVectors(yValues.size());
-  for (auto it = dets.cbegin(); it != dets.cend(); ++it) {
-    size_t detIndex;
-    try {
-      detIndex = detectorInfo.indexOf(*it);
-    } catch (std::out_of_range &) {
-      throw Exception::NotFoundError("Detector ID", *it);
-    }
+  const auto &detectorInfo = m_inputWS->detectorInfo();
+  const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(spectraIn);
 
+  for (const auto index : spectrumDefinition) {
+    const auto detIndex = index.first;
     const auto &det_member = detectorInfo.detector(detIndex);
     Parameter_sptr par =
         m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
@@ -273,14 +261,14 @@ void DetectorEfficiencyCor::correctForEfficiency(
     auto wavItr = oneOverWaveVectors.begin();
 
     for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
-      if (it == dets.begin()) {
+      if (index == spectrumDefinition[0]) {
         *youtItr = 0.0;
         *eoutItr = 0.0;
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1));
       }
       const double oneOverWave = *wavItr;
       const double factor =
-          1.0 / ndets / detectorEfficiency(det_const * oneOverWave);
+          1.0 / spectrumDefinition.size() / detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;
       *eoutItr += (*einItr) * factor;
       ++yinItr;
