@@ -29,6 +29,8 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
  */
 SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
                                        const bool includeMonitors) {
+  setNumberOfDetectorGroups(inst->getNumberDetectors(!includeMonitors));
+
   // Init the Workspace2D with one spectrum per detector, in the same order.
   this->init(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
@@ -55,6 +57,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
  * @return created SpecialWorkspace2D
  */
 SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
+  setNumberOfDetectorGroups(parent->getNumberHistograms());
   this->init(parent->getNumberHistograms(), 1, 1);
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.

@@ -7,7 +7,7 @@ $global_style
 subgraph params {
  $param_style
   inputWS             [label="TransmissionRun"]
-  procCommands        [label="ProcessingCommands"]
+  procCommands        [label="ProcessingInstructions"]
   wavMin              [label="WavelengthMin", group=gwav]
   wavMax              [label="WavelengthMax", group=gwav]
   monitorIndex        [label="I0MonitorIndex"]
@@ -23,8 +23,9 @@ subgraph decisions {
 
 subgraph algorithms {
  $algorithm_style
-  convertWav    [label="ConvertUnits\n(AlignBins = True)", group=g1]
-  groupDet      [label="GroupDetectors"]
+  convertDet    [label="ConvertUnits\n(AlignBins = True)", group=g1]
+  convertMon    [label="ConvertUnits\n(AlignBins = True)", group=g11]
+  groupDet      [label="GroupDetectors", group=g1]
   cropMonWS     [label="CropWorkspace", group=g11]
   calcFlatBg    [label="CalculateFlatBackground", group=g11]
   intMon        [label="Integration", group=g11]
@@ -38,25 +39,26 @@ subgraph processes {
 
 subgraph values {
  $value_style
-  valWav        [label="I(&lambda;)", group=g1]
   valWavOut     [label="I(&lambda;)", group=g1]
 }
 
-inputWS             -> convertWav
-convertWav          -> valWav
-valWav              -> groupDet       [label="Detectors"]
-procCommands        -> groupDet
+inputWS             -> groupDet			[label="Detectors"]
+procCommands		-> groupDet
 
-valWav              -> cropMonWS      [label="Monitors"]
-monitorIndex        -> cropMonWS
-cropMonWS           -> calcFlatBg
+inputWS				-> cropMonWS		[label="Montitors"]
+monitorIndex		-> cropMonWS
+
+groupDet			-> convertDet
+cropMonWS			-> convertMon
+
+convertMon          -> calcFlatBg
 monBackWavMin       -> calcFlatBg
 monBackWavMax       -> calcFlatBg
 calcFlatBg          -> intMon
 monIntWavMin        -> intMon
 monIntWavMax        -> intMon
 
-groupDet            -> divideDetMon
+convertDet          -> divideDetMon
 intMon              -> divideDetMon
 wavMin              -> cropWav
 divideDetMon        -> cropWav
@@ -71,4 +73,5 @@ monBackWavMax -> monIntWavMax [style=invis]
 {rank=same; monIntWavMin; monIntWavMax}
 {rank=same; monBackWavMin; monBackWavMax}
 {rank=same; groupDet; cropMonWS}
+{rank=same; convertDet; convertMon}
 }

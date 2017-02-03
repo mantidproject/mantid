@@ -38,20 +38,23 @@ Conversion to Wavelength
 First, the algorithm checks the X units of
 the input workspace. If the input workspace is already in wavelength, normalization by
 monitors and direct beam are not performed, as it is considered that the input run was
-already reduced using this algorithm. If the input workspace is in TOF, it will be
-converted to wavelength (note that :literal:`AlignBins` will be set to :literal:`True` for this in 
-:ref:`algm-ConvertUnits`) and the detectors
-of interest, specified via :literal:`ProcessingInstructions`, will be grouped together using
-:ref:`algm-GroupDetectors`. **Optionally**, the algorithm will perform direct beam
-normalization (if :literal:`RegionOfDirectBeam` is specified) dividing the detectors of
-interest by the direct beam, and monitor normalization (if :literal:`I0MonitorIndex` and
-:literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax` are all specified),
-in which case the detectors of interest will be divided by monitors. Detectors can be normalized
-by integrated monitors by setting :literal:`NormalizeByIntegratedMonitors` to true, in which case
-:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax` will
-be used as the integration range. Finally, the resulting workspace will be cropped according to
-:literal:`WavelengthMin` and :literal:`WavelengthMax`, which are both mandatory properties.
-A summary of the steps is shown in the workflow diagram below.
+already reduced using this algorithm. If the input workspace is in TOF, monitors, detectors of
+interest and region of direct beam are extracted by running :ref:`algm-GroupDetectors` with
+``ProcessingInstructions`` as input, :ref:`algm-GroupDetectors` with ``RegionOfDirectBeam`` as input,
+and :ref:`algm-CropWorkspace` with ``I0MonitorIndex`` as input respectively, and each of
+the resulting workspaces is converted to wavelength (note that :literal:`AlignBins` is set
+to :literal:`True` in all the three cases). Note that the normalization by a direct beam
+is optional, and only happens if ``RegionOfDirectBeam`` is provided. In the same way,
+monitor normalization is also optional, and only takes place if ``I0MonitorIndex``,
+``MonitorBackgroundWavelengthMin`` and ``MonitorBackgroundWavelengthMax`` are all
+specified. Detectors can be normalized by integrated monitors by setting
+:literal:`NormalizeByIntegratedMonitors` to true, in which case
+:literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax` are
+used as the integration range. If monitors are not integrated, detectors are rebinned to
+monitors using :ref:`algm-RebinToWorkspace` so that the normalization by monitors can take place.
+Finally, the resulting workspace is cropped in wavelength according to :literal:`WavelengthMin`
+and :literal:`WavelengthMax`, which are both mandatory properties. A summary of the steps
+is shown in the workflow diagram below. For the sake of clarity, all possible steps are illustrated, even if some of them are optional.
 
 .. diagram:: ReflectometryReductionOne_ConvertToWavelength-v2_wkflw.dot
 
@@ -134,20 +137,20 @@ Usage
                                             MonitorIntegrationWavelengthMin=4.0,
                                             MonitorIntegrationWavelengthMax=10.0)
 
-   print "%.4f" % (IvsLam.readY(0)[173])
-   print "%.4f" % (IvsLam.readY(0)[174])
-   print "%.4f" % (IvsQ.readY(0)[2])
-   print "%.4f" % (IvsQ.readY(0)[3])
+   print "%.4f" % (IvsLam.readY(0)[533])
+   print "%.4f" % (IvsLam.readY(0)[534])
+   print "%.4f" % (IvsQ.readY(0)[327])
+   print "%.4f" % (IvsQ.readY(0)[328])
 
 
 Output:
 
 .. testoutput:: ExReflRedOneSimple
 
-   0.0014
-   0.0014
-   0.0001
-   0.0001
+   0.0003
+   0.0003
+   0.0003
+   0.0003
 
 
 **Example - Reduce a run and normalize by transmission workspace**
@@ -170,8 +173,8 @@ Output:
 					    FirstTransmissionRun=trans1,
 					    SecondTransmissionRun=trans2)
 
-   print "%.4f" % (IvsLam.readY(0)[170])
-   print "%.4f" % (IvsLam.readY(0)[171])
+   print "%.4f" % (IvsLam.readY(0)[480])
+   print "%.4f" % (IvsLam.readY(0)[481])
    print "%.4f" % (IvsQ.readY(0)[107])
    print "%.4f" % (IvsQ.readY(0)[108])
 
@@ -180,10 +183,10 @@ Output:
 
 .. testoutput:: ExReflRedOneTrans
 
-   0.4897
-   0.5468
-   0.6144
-   0.5943
+   0.4588
+   0.4655
+   0.7336
+   1.0156
 
 .. categories::
 
