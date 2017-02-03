@@ -82,7 +82,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty("EntryName", "entry-Off_Off", doc="Name of the entry to load")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
 
-    #pylint: disable=too-many-locals,too-many-branches
+    #pylint: disable=too-many-locals
     def PyExec(self):
         """ Main execution """
         # DATA
