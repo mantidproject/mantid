@@ -3,6 +3,7 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include <boost/regex.hpp>
+#include <sstream>
 
 namespace { // anonymous namespace
 const boost::regex FILE_EXT_REG_EXP{"^.+\\s+\\((\\S+)\\)$"};

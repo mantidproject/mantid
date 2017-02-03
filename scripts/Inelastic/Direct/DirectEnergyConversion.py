@@ -849,8 +849,8 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
-		if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
-			mon1_peak = mon1_peak+self.DAE_time_shift;
+        if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
+            mon1_peak = mon1_peak+self.DAE_time_shift;
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
@@ -1131,6 +1131,10 @@ class DirectEnergyConversion(object):
            Returns:
            list of TOF corresponding to input energies list.
         """
+        tof_shift = 0
+        if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
+            tof_shift = self.DAE_time_shift;
+        
         if ei:
             ei_guess = PropertyManager.incident_energy.get_current()
             fix_ei = self.fix_ei
@@ -1151,6 +1155,7 @@ class DirectEnergyConversion(object):
                     mon_2_spec_ID = mon_2_spec_ID[1]
                 #-----------
 
+
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
@@ -1160,18 +1165,19 @@ class DirectEnergyConversion(object):
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
                     src_name = monitor_ws.getInstrument().getSource().name()
+                    mon1_peak = mon1_peak+tof_shift
                 #pylint: disable=bare-except
                 except:
                     src_name = None
-                    mon1_peak = 0
+                    mon1_peak = tof_shift
                     en_bin  = [energy_list[0],energy_list[1]-energy_list[0],energy_list[3]]
                     self.prop_man.log("*** WARNING: message from multirep chunking procedure: get_TOF_for_energies:\n"
                                       "    not able to identify energy peak looking for TOF range for incident energy:"
                                       " {0}meV, binning: {1}\n"
-                                      "    Continuing under assumption that incident neutrons arrive at source at time=0".
-                                      format(ei_guess,en_bin),'warning')
+                                      "    Continuing under assumption that incident neutrons arrive at source at time={2}".
+                                      format(ei_guess,en_bin,tof_shift),'warning')
         else:
-            mon1_peak = 0
+            mon1_peak = tof_shift
         #end if
 
         template_ws_name = '_energy_range_ws'
