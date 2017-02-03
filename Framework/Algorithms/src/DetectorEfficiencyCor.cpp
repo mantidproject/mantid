@@ -267,7 +267,8 @@ void DetectorEfficiencyCor::correctForEfficiency(
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1));
       }
       const double oneOverWave = *wavItr;
-      const double factor = 1.0 / spectrumDefinition.size() /
+      const double nDets(static_cast<double>(spectrumDefinition.size()));
+      const double factor = 1.0 / nDets /
                             detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;
       *eoutItr += (*einItr) * factor;
