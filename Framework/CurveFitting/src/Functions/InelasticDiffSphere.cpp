@@ -264,7 +264,8 @@ void InelasticDiffSphere::setWorkspace(
   for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
     if (!spectrumInfo.hasDetectors(idx)) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace - no detectors set.");
+      g_log.information(
+          "Cannot populate Q values from workspace - no detectors set.");
       break;
     }
 
@@ -279,7 +280,8 @@ void InelasticDiffSphere::setWorkspace(
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace - could not find EFixed value.");
+      g_log.information("Cannot populate Q values from workspace - could not "
+                        "find EFixed value.");
       return;
     }
   }
