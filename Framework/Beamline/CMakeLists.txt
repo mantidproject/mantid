@@ -1,11 +1,9 @@
 set ( SRC_FILES
 	src/DetectorInfo.cpp
-    src/EigenTest.cpp
 )
 
 set ( INC_FILES
 	inc/MantidBeamline/DetectorInfo.h
-    inc/MantidBeamline/EigenTest.h
 )
 
 set ( TEST_FILES
