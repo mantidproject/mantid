@@ -825,7 +825,7 @@ public:
 
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
-    data->init(1, 100, 100);
+    data->initialize(1, 100, 100);
 
     auto &x = data->dataX(0);
     auto &y = data->dataY(0);
