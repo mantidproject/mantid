@@ -1154,7 +1154,7 @@ class DirectEnergyConversion(object):
                     fix_ei = True # This could be a HACK
                     mon_2_spec_ID = mon_2_spec_ID[1]
                 #-----------
-				
+
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
