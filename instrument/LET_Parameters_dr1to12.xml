@@ -372,9 +372,9 @@
 <!--  -->
 <parameter name="DAE_time_shift" >
     <value val="0"/>
-    <description is="if defined, (not None), specifies the time shift (in mksec) to 
-    set the time at monitor-1, when instrument moved into monitor-1 position. Used to compensate 
-   initial time DAE starts counting from, if DAE time shift has been specified and fix_ei mode is used."/>
+    <description is="Contains the time shift (in mksec) to set the time at monitor-1,
+    when instrument moved into monitor-1 position. Used  in fix_ei mode to compensate 
+    initial DAE time shift (if any was specified)"/>
 </parameter>
 
 
