@@ -849,8 +849,8 @@ class DirectEnergyConversion(object):
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
                   Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
-        if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
-            mon1_peak = mon1_peak+self.DAE_time_shift;
+        if hasattr(self,'DAE_time_shift'):
+            mon1_peak = mon1_peak+self.DAE_time_shift
 
         # Store found incident energy in the class itself
         if self.prop_man.normalise_method == 'monitor-2' and not separate_monitors:
@@ -1132,8 +1132,8 @@ class DirectEnergyConversion(object):
            list of TOF corresponding to input energies list.
         """
         tof_shift = 0
-        if hasattr(self,'DAE_time_shift') and not self.DAE_time_shift is None:
-            tof_shift = self.DAE_time_shift;
+        if hasattr(self,'DAE_time_shift') :
+            tof_shift = self.DAE_time_shift
         
         if ei:
             ei_guess = PropertyManager.incident_energy.get_current()
@@ -1154,8 +1154,7 @@ class DirectEnergyConversion(object):
                     fix_ei = True # This could be a HACK
                     mon_2_spec_ID = mon_2_spec_ID[1]
                 #-----------
-
-
+				
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,_ = \
