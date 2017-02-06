@@ -51,7 +51,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     @param simple_text :: whether to print the tables in a simple text format
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
-    @param html :: If rst=True, whether to save the file to in html format
+    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
     @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
                           must be consistent with the style sheet used in the documentation pages (5
                           at the moment).
