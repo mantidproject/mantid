@@ -260,7 +260,8 @@ private:
 
   void updateExperimentInfo() const;
   ExperimentInfo *m_experimentInfo{nullptr};
-  size_t m_index;
+  // The default value is meaningless. This will always be set before use.
+  size_t m_index{0};
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};
