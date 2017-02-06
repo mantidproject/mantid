@@ -216,7 +216,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         progress.report('Creating ELF workspaces')
         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-        transpose_alg.setAlwaysStoreInADS(True)
         sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
         # Process the ELF workspace
         if self._elf_workspace != '':
@@ -225,7 +224,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace", self._elf_workspace)
+            sort_alg.setProperty("InputWorkspace", transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
