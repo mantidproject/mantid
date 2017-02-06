@@ -1068,7 +1068,7 @@ class Mask_ISIS(ReductionStep):
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML=
-                                     self._mask_line(start_point, 10.0, self.arm_width, self.arm_angle))
+                                     self._mask_line(start_point, 100.0, self.arm_width, self.arm_angle))
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
