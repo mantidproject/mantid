@@ -1,18 +1,17 @@
 #ifndef MANTID_DATAHANDLING_SAVEFITSTEST_H_
 #define MANTID_DATAHANDLING_SAVEFITSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/SaveFITS.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
 using Mantid::DataHandling::SaveFITS;

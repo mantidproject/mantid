@@ -24,19 +24,25 @@ output workspace is generated with X-units of wavelength in angstroms.
 
 The diagram above illustrates the main steps in the algorithm. Below is a more
 detailed diagram describing how transmission workspaces are converted to units
-of wavelength and normalized by monitors. First, the input workspace is converted
-to wavelength and :literal:`ProcessingInstructions` are used to extract
-the detectors of interest. If :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelengthMin`
-and :literal:`MonitorBackgroundWavelengthMax` are provided, the monitor will be
-extracted from the input workspace and its background will be subtracted according
-to :literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax`.
-If :literal:`MonitorIntegrationWavelengthMin` and :literal:`MonitorIntegrationWavelengthMax`
-are provided, monitors will be integrated according to that range. Finally, the
-detector workspace will be normalized by the monitor workspace, and the resulting workspace
-will be cropped according to :literal:`WavelengthMin` and :literal:`WavelengthMax`.
-Note that monitor normalization is optional and only happens when all :literal:`I0MonitorIndex`,
-:literal:`MonitorBackgroundWavelengthMin` and :literal:`MonitorBackgroundWavelengthMax` are
-provided.
+of wavelength and normalized by monitors. First, detectors and monitors are
+extracted from the input workspace using :ref:`algm-GroupDetectors` and
+:ref:`algm-CropWorkspace` respectively, using ``ProcessingInstructions`` in the
+first case and ``I0MonitorIndex`` in the second case. Then, each of the resulting
+workspaces is converted to wavelength (note that ``AlignBins`` is set to ``True``
+for this), detectors are normalized by monitors, and the resulting workspace is
+cropped in wavelength according to ``WavelengthMin`` and ``WavelengthMax``, which
+are both mandatory parameters. Note that the normalization by monitors is optional,
+and only takes place if :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundWavelengthMin`
+and :literal:`MonitorBackgroundWavelengthMax` are provided. In this case, the monitor
+of interest will be extracted from the input workspace, converted to wavelength, and its
+background will be subtracted according to :literal:`MonitorBackgroundWavelengthMin`
+and :literal:`MonitorBackgroundWavelengthMax`. If :literal:`MonitorIntegrationWavelengthMin`
+and :literal:`MonitorIntegrationWavelengthMax` are provided, monitors will be integrated
+according to that range. If monitors are not integrated, there is an addition step in which
+detectors will be rebinned to monitors using :ref:`algm-RebinToWorkspace`, to ensure that
+the normalization can be performed. Below is a summary of the main steps in the algorithm.
+For the sake of clarity, all possible steps are illustrated, even if some of them are
+optional.
 
 .. diagram:: CreateTransmissionWorkspace_ConvertToWavelength-v2_wkflw.dot
 
@@ -74,10 +80,10 @@ Output:
 .. testoutput:: ExCreateTransWSSimple
 
     The first four transWS Y values are:
-    0.0255
-    0.0759
-    0.1324
-    0.1424
+    0.0052
+    0.0065
+    0.0088
+    0.0123
 
 **Example - Create a transmission run from two runs**
 
@@ -108,10 +114,10 @@ Output:
 .. testoutput:: ExCreateTransWSTwo
 
     The first four transWS Y values are:
-    0.0572
-    0.0575
-    0.0585
-    0.0585
+    0.0563
+    0.0561
+    0.0570
+    0.0578
 
 .. categories::
 

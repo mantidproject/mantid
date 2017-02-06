@@ -393,11 +393,10 @@ void MDNormSCD::calculateNormalization(
   }
   const double protonCharge = exptInfoZero.run().getProtonCharge();
 
-  const SpectrumInfo spectrumInfo(exptInfoZero);
+  const auto &spectrumInfo = exptInfoZero.spectrumInfo();
 
   // Mappings
-  const int64_t ndets =
-      static_cast<int64_t>(exptInfoZero.numberOfDetectorGroups());
+  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
   const detid2index_map fluxDetToIdx =
       integrFlux->getDetectorIDToWorkspaceIndexMap();
   const detid2index_map solidAngDetToIdx =

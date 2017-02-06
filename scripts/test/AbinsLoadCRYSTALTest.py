@@ -48,11 +48,12 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
     # ===================================================================================
     # | Use case: Gamma point calculation for CRYSTAL                                    |
     # ===================================================================================
-
     _gamma_crystal = "crystalB3LYP_LoadCRYSTAL"
+    _set_crystal = "crystal_set_key_LoadCRYSTAL"
 
     def test_gamma_crystal(self):
         self._check(name=self._gamma_crystal)
+        self._check(name=self._set_crystal)
 
     # TODO: prepare test for molecule
 
@@ -93,7 +94,7 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
         with open(AbinsTestHelpers.find_file(filename + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
-        array = np.loadtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt"), dtype=complex)
+        array = np.genfromtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt"), dtype=complex)
         array.reshape(shape)
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])

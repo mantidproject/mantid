@@ -443,11 +443,10 @@ void MDNormDirectSC::calculateNormalization(
   }
   const double protonCharge = exptInfoZero.run().getProtonCharge();
 
-  const SpectrumInfo spectrumInfo(exptInfoZero);
+  const auto &spectrumInfo = exptInfoZero.spectrumInfo();
 
   // Mapping
-  const int64_t ndets =
-      static_cast<int64_t>(exptInfoZero.numberOfDetectorGroups());
+  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
