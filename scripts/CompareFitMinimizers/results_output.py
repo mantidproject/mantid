@@ -26,7 +26,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 from scipy import stats  # older version of numpy does not support nanmean and nanmedian
+from docutils.core import publish_string
 import post_processing as postproc
+import os
 
 # Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
@@ -49,7 +51,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
     @param simple_text :: whether to print the tables in a simple text format
     @param rst :: whether to print the tables in rst format. They are printed to the standard outputs
                   and to files following specific naming conventions
-    @param save_to_file :: If rst=True, whether to save the tables to files following specific naming conventions
+    @param html :: If rst=True, whether to save the file to in html format
     @param color_scale :: threshold-color pairs. This is used for RST tables. The number of levels
                           must be consistent with the style sheet used in the documentation pages (5
                           at the moment).
@@ -77,11 +79,18 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # optionally save the above table to file
         if save_to_file:
-            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+            color_definitions = 'color_definitions.txt'
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
                      format(weighted=weighted_suffix_string(use_errors),
                             version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
-            with open(fname, 'w') as tbl_file:
+            with open(fname + '.txt', 'w') as tbl_file:
                 print(tbl_acc_indiv, file=tbl_file)
+            with open(color_definitions) as cd:
+                content = cd.read() + "\n"
+                content += tbl_acc_indiv
+            html = publish_string(content, writer_name='html')
+            with open(fname + '.html', 'w') as tbl_file:
+                print(html, file=tbl_file)
 
         # print out accuracy summary table for this group of fit problems
         ext_summary_cols = minimizers
@@ -105,11 +114,18 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # optionally save the above table to file
         if save_to_file:
-            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
+            color_definitions = 'color_definitions.txt'
+            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
                      format(weighted=weighted_suffix_string(use_errors),
                             version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
-            with open(fname, 'w') as tbl_file:
+            with open(fname + '.txt', 'w') as tbl_file:
                 print(tbl_runtime_indiv, file=tbl_file)
+            with open(color_definitions) as cd:
+                content = cd.read() + "\n"
+                content += tbl_runtime_indiv
+            html = publish_string(content, writer_name='html')
+            with open(fname + '.html', 'w') as tbl_file:
+                print(html, file=tbl_file)
 
         # print out runtime summary table for this group of fit problems
         tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
