@@ -1134,7 +1134,7 @@ class DirectEnergyConversion(object):
         tof_shift = 0
         if hasattr(self,'DAE_time_shift') :
             tof_shift = self.DAE_time_shift
-        
+
         if ei:
             ei_guess = PropertyManager.incident_energy.get_current()
             fix_ei = self.fix_ei
