@@ -713,17 +713,11 @@ void SaveNXcanSAS::init() {
                       "Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{"Spallation Neutron Source",
-                                            "Pulsed Reactor Neutron Source",
-                                            "Reactor Neutron Source",
-                                            "Synchrotron X-ray Source",
-                                            "Pulsed Muon Source",
-                                            "Rotating Anode X-ray",
-                                            "Fixed Tube X-ray",
-                                            "neutron",
-                                            "x-ray",
-                                            "muon",
-                                            "electron"};
+  std::vector<std::string> radiation_source{
+      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
+      "Reactor Neutron Source", "Synchrotron X-ray Source",
+      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
+      "neutron", "x-ray", "muon", "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
