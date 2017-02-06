@@ -2,7 +2,7 @@
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
- 
+
 
 class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
     def runTest(self):
@@ -27,7 +27,7 @@ class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
                                         SpecularPixel=126.9,
                                         EntryName='entry-Off_Off',
                                         OutputWorkspace="r_24949")
-        
+
     def validate(self):
         # Be more tolerant with the output, mainly because of the errors.
         # The following tolerance check the errors up to the third digit.
