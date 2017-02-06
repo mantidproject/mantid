@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/mpi.hpp>
 
@@ -91,25 +92,17 @@ void BroadcastWorkspace::exec() {
   for (std::size_t i = 0; i < numSpec; ++i) {
     if (world.rank() == root) {
       // For local output, just copy over
-      outputWorkspace->mutableX(i) = inputWorkspace->x(i);
-      outputWorkspace->mutableY(i) = inputWorkspace->y(i);
-      outputWorkspace->mutableE(i) = inputWorkspace->e(i);
+      outputWorkspace->setHistogram(i, inputWorkspace->histogram(i));
 
       // Send out the current spectrum
-      broadcast(world, const_cast<std::vector<double> &>(
-                           inputWorkspace->x(i).rawData()),
-                root);
-      broadcast(world, const_cast<std::vector<double> &>(
-                           inputWorkspace->y(i).rawData()),
-                root);
-      broadcast(world, const_cast<std::vector<double> &>(
-                           inputWorkspace->e(i).rawData()),
-                root);
+      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readX(i)), root);
+      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readY(i)), root);
+      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readE(i)), root);
     } else {
       // Receive the broadcast spectrum from the broadcasting process
-      broadcast(world, outputWorkspace->mutableX(i), root);
-      broadcast(world, outputWorkspace->mutableY(i), root);
-      broadcast(world, outputWorkspace->mutableE(i), root);
+      broadcast(world, outputWorkspace->dataX(i), root);
+      broadcast(world, outputWorkspace->dataY(i), root);
+      broadcast(world, outputWorkspace->dataE(i), root);
     }
   }
 }
