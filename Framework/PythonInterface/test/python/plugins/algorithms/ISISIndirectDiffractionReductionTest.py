@@ -193,6 +193,8 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
+        self.assertEquals(round(red_ws.readY(0)[1], 7), 0.0215684)
+        self.assertEquals(round(red_ws.readY(0)[-1], 7), 0.0022809)
 
     # ------------------------------------------Failure cases------------------------------------------
     def test_reduction_with_cal_file_osiris_diffonly_fails(self):

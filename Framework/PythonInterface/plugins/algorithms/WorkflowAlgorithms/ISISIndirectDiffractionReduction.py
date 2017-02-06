@@ -194,7 +194,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           RHSWorkspace=self._container_workspace,
                           OutputWorkspace=ws_name)
 
-                if self._vanadium_ws is not None:
+                if self._vanadium_ws:
                     Divide(LHSWorkspace=ws_name,
                            RHSWorkspace=self._vanadium_ws[index],
                            OutputWorkspace=ws_name,
