@@ -18,12 +18,3 @@ endif()
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
   set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers" )
 endif()
-
-add_subdirectory( gmock-${GMOCK_VERSION} )
-
-# Put the targets in the UnitTests folder
-foreach( target_var
-         gmock gtest )
-  set_target_properties( ${target_var} PROPERTIES EXCLUDE_FROM_ALL TRUE
-                                                  FOLDER "UnitTests/gmock" )
-endforeach()

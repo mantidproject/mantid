@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
 
   include_directories ( ../../TestHelpers/inc ../../Nexus/inc ${HDF5_INCLUDE_DIRS})
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/FakeObjects.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
             Geometry
             HistogramData
@@ -25,8 +25,8 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
-            ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES}  )
+            gmock
+            gtest )
 
   add_dependencies ( FrameworkTests APITest )
   # Test data

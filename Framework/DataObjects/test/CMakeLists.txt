@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
 
   include_directories ( ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
@@ -9,14 +9,14 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
-                        ../../TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../TestHelpers/src/MDEventsTestHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/FakeObjects.cpp
   )
 
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
-  target_link_libraries( DataObjectsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries( DataObjectsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
             DataObjects
             Geometry
@@ -27,11 +27,9 @@ if ( CXXTEST_FOUND )
             ${JSONCPP_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES})
+            gmock )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( FrameworkTests DataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataObjectsTest PROPERTY FOLDER "UnitTests" )
 endif ()
-
