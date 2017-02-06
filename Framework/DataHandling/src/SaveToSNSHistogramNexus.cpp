@@ -579,7 +579,9 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             std::vector<float> tof_data(dataDimensions[0]);
 
             // And fill it with the X data
-            std::copy(X.cbegin(), X.cend(), tof_data.begin());
+            // Use a for loop to avoid double to float warning
+            for (size_t i = 0; i < X.size(); i++)
+              tof_data[i] = static_cast<float>(X[i]);
 
             if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
                                NX_COMP_LZW, dataDimensions) != NX_OK)
