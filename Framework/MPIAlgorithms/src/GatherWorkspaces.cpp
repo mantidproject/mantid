@@ -2,14 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
 #include <boost/version.hpp>
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 namespace mpi = boost::mpi;
 
@@ -48,29 +48,31 @@ struct vplus : public std::plus<double> {};
 
 struct eplus : public SumGaussError<double> {};
 
-#else // older version of Boost that passes the entire MantidVec
+#else // older version of Boost that passes the entire std::vector<double>
 // the operator
 
-/// Sum for boostmpi MantidVec
-struct vplus : public std::binary_function<MantidVec, MantidVec,
-                                           MantidVec> { // functor for operator+
-  MantidVec
-  operator()(const MantidVec &_Left,
-             const MantidVec &_Right) const { // apply operator+ to operands
-    MantidVec v(_Left.size());
+/// Sum for boostmpi std::vector<double>
+struct vplus : public std::binary_function<
+                   std::vector<double>, std::vector<double>,
+                   std::vector<double>> { // functor for operator+
+  std::vector<double> operator()(
+      const std::vector<double> &_Left,
+      const std::vector<double> &_Right) const { // apply operator+ to operands
+    std::vector<double> v(_Left.size());
     std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
                    std::plus<double>());
     return (v);
   }
 };
 
-/// Sum for error for boostmpi MantidVec
-struct eplus : public std::binary_function<MantidVec, MantidVec,
-                                           MantidVec> { // functor for operator+
-  MantidVec
-  operator()(const MantidVec &_Left,
-             const MantidVec &_Right) const { // apply operator+ to operands
-    MantidVec v(_Left.size());
+/// Sum for error for boostmpi std::vector<double>
+struct eplus : public std::binary_function<
+                   std::vector<double>, std::vector<double>,
+                   std::vector<double>> { // functor for operator+
+  std::vector<double> operator()(
+      const std::vector<double> &_Left,
+      const std::vector<double> &_Right) const { // apply operator+ to operands
+    std::vector<double> v(_Left.size());
     std::transform(_Left.begin(), _Left.end(), _Right.begin(), v.begin(),
                    SumGaussError<double>());
     return (v);
@@ -195,16 +197,14 @@ void GatherWorkspaces::exec() {
     if (included.rank() == 0) {
       const auto &inSpec = inputWorkspace->getSpectrum(wi);
       if (accum == "Add") {
-        outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
-        reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi),
+        outputWorkspace->setSharedX(wi, inputWorkspace->sharedX(wi));
+        reduce(included, inputWorkspace->y(wi), outputWorkspace->mutableY(wi),
                vplus(), 0);
-        reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi),
+        reduce(included, inputWorkspace->e(wi), outputWorkspace->mutableE(wi),
                eplus(), 0);
       } else if (accum == "Append") {
-        // Copy over data from own input workspace
-        outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
-        outputWorkspace->dataY(wi) = inputWorkspace->readY(wi);
-        outputWorkspace->dataE(wi) = inputWorkspace->readE(wi);
+        // Share data from own input workspace
+        outputWorkspace->setHistogram(wi, inputWorkspace->histogram(wi));
 
         const int numReqs(3 * (included.size() - 1));
         std::vector<boost::mpi::request> reqs(numReqs);
@@ -217,9 +217,9 @@ void GatherWorkspaces::exec() {
         // robustify
         for (int i = 1; i < included.size(); ++i) {
           size_t index = wi + i * totalSpec;
-          reqs[j++] = included.irecv(i, 0, outputWorkspace->dataX(index));
-          reqs[j++] = included.irecv(i, 1, outputWorkspace->dataY(index));
-          reqs[j++] = included.irecv(i, 2, outputWorkspace->dataE(index));
+          reqs[j++] = included.irecv(i, 0, outputWorkspace->x(index));
+          reqs[j++] = included.irecv(i, 1, outputWorkspace->y(index));
+          reqs[j++] = included.irecv(i, 2, outputWorkspace->e(index));
           auto &outSpec = outputWorkspace->getSpectrum(index);
           outSpec.clearDetectorIDs();
           outSpec.addDetectorIDs(inSpec.getDetectorIDs());
@@ -233,15 +233,15 @@ void GatherWorkspaces::exec() {
       outSpec.addDetectorIDs(inSpec.getDetectorIDs());
     } else {
       if (accum == "Add") {
-        reduce(included, inputWorkspace->readY(wi), vplus(), 0);
-        reduce(included, inputWorkspace->readE(wi), eplus(), 0);
+        reduce(included, inputWorkspace->y(wi), vplus(), 0);
+        reduce(included, inputWorkspace->e(wi), eplus(), 0);
       } else if (accum == "Append") {
         std::vector<boost::mpi::request> reqs(3);
 
         // Send the spectrum to the root process
-        reqs[0] = included.isend(0, 0, inputWorkspace->readX(0));
-        reqs[1] = included.isend(0, 1, inputWorkspace->readY(0));
-        reqs[2] = included.isend(0, 2, inputWorkspace->readE(0));
+        reqs[0] = included.isend(0, 0, inputWorkspace->x(0));
+        reqs[1] = included.isend(0, 1, inputWorkspace->y(0));
+        reqs[2] = included.isend(0, 2, inputWorkspace->e(0));
 
         // Make sure the sends have completed before exiting the algorithm
         mpi::wait_all(reqs.begin(), reqs.end());
@@ -279,7 +279,7 @@ void GatherWorkspaces::execEvent() {
         size_t index = wi; // accum == "Add"
         if (accum == "Append")
           index = wi + i * totalSpec;
-        outputWorkspace->dataX(index) = eventW->readX(wi);
+        outputWorkspace->setSharedX(index, eventW->sharedX(wi));
         outputWorkspace->getSpectrum(index) += out_values[i];
         const auto &inSpec = eventW->getSpectrum(wi);
         auto &outSpec = outputWorkspace->getSpectrum(index);

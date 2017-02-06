@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 
@@ -57,10 +57,18 @@ public:
     API::MatrixWorkspace_const_sptr outWS =
         broadcaster.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
+
+    const auto &inX = inWS->x(0);
+    const auto &inY = inWS->y(0);
+    const auto &inE = inWS->e(0);
+    const auto &outX = outWS->x(0);
+    const auto &outY = outWS->y(0);
+    const auto &outE = outWS->e(0);
+
     for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readY(0)[i], outWS->readY(0)[i]);
-      TS_ASSERT_EQUALS(inWS->readE(0)[i], outWS->readE(0)[i]);
+      TS_ASSERT_EQUALS(inX[i], outX[i]);
+      TS_ASSERT_EQUALS(inY[i], outY[i]);
+      TS_ASSERT_EQUALS(inE[i], outE[i]);
     }
 
     // TS_ASSERT_EQUALS( inWS->getAxis(0)->unit()->unitID(),

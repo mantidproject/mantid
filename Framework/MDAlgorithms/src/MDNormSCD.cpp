@@ -427,8 +427,7 @@ void MDNormSCD::calculateNormalization(
     size_t wsIdx = fluxDetToIdx.find(detID)->second;
     // Get solid angle for this contribution
     double solid =
-        solidAngleWS->readY(solidAngDetToIdx.find(detID)->second)[0] *
-        protonCharge;
+        solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] * protonCharge;
 
     // -- calculate integrals for the intersection --
     // momentum values at intersections
@@ -504,14 +503,14 @@ void MDNormSCD::calcIntegralsForIntersections(
   assert(xValues.size() == yValues.size());
 
   // the x-data from the workspace
-  const auto &xData = integrFlux.readX(sp);
+  const auto &xData = integrFlux.x(sp);
   const double xStart = xData.front();
   const double xEnd = xData.back();
 
   // the values in integrFlux are expected to be integrals of a non-negative
   // function
   // ie they must make a non-decreasing function
-  const auto &yData = integrFlux.readY(sp);
+  const auto &yData = integrFlux.y(sp);
   size_t spSize = yData.size();
 
   const double yMin = 0.0;

@@ -23,8 +23,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 
-#include <boost/shared_ptr.hpp>
 #include <Poco/TemporaryFile.h>
+#include <boost/shared_ptr.hpp>
 
 #include <algorithm>
 #include <cstdio>
@@ -234,20 +234,20 @@ void LoadILLAscii::loadIDF(API::MatrixWorkspace_sptr &workspace) {
 void LoadILLAscii::loadsDataIntoTheWS(API::MatrixWorkspace_sptr &thisWorkspace,
                                       const std::vector<int> &thisSpectrum) {
 
-  thisWorkspace->dataX(0)[0] = m_wavelength - 0.001;
-  thisWorkspace->dataX(0)[1] = m_wavelength + 0.001;
+  thisWorkspace->mutableX(0)[0] = m_wavelength - 0.001;
+  thisWorkspace->mutableX(0)[1] = m_wavelength + 0.001;
 
   size_t spec = 0;
   for (auto value : thisSpectrum) {
 
     if (spec > 0) {
       // just copy the time binning axis to every spectra
-      thisWorkspace->dataX(spec) = thisWorkspace->readX(0);
+      thisWorkspace->mutableX(spec) = thisWorkspace->x(0);
     }
     // Assign Y
-    thisWorkspace->dataY(spec)[0] = value;
+    thisWorkspace->mutableY(spec)[0] = value;
     // Assign Error
-    thisWorkspace->dataE(spec)[0] = value * value;
+    thisWorkspace->mutableE(spec)[0] = value * value;
 
     ++spec;
   }
@@ -285,15 +285,15 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
   if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
-    for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
-      std::size_t pos = std::distance(workspaceList.begin(), it);
-      API::MatrixWorkspace_sptr thisWorkspace = *it;
 
-      std::size_t nHist = thisWorkspace->getNumberHistograms();
+    for (size_t pos = 0; pos < workspaceList.size(); ++pos) {
+      const auto workspace = workspaceList[pos];
+
+      std::size_t nHist = workspace->getNumberHistograms();
       for (std::size_t i = 0; i < nHist; ++i) {
-        Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-        const MantidVec &signal = thisWorkspace->readY(i);
-        const MantidVec &error = thisWorkspace->readE(i);
+        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
+        const auto &signal = workspace->y(i);
+        const auto &error = workspace->e(i);
         myfile << signal[0] << " ";
         myfile << error[0] << " ";
         myfile << det->getID() << " ";
@@ -326,7 +326,6 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
                                "ImportMDEventWorkspace"));
 
     return workspace;
-
   } else {
     throw std::runtime_error("Error: No workspaces were found to be merged!");
   }

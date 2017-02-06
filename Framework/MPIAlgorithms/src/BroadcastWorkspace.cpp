@@ -2,12 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
-#include <boost/mpi.hpp>
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include <boost/mpi.hpp>
 
 namespace mpi = boost::mpi;
 
@@ -91,19 +91,25 @@ void BroadcastWorkspace::exec() {
   for (std::size_t i = 0; i < numSpec; ++i) {
     if (world.rank() == root) {
       // For local output, just copy over
-      outputWorkspace->dataX(i) = inputWorkspace->readX(i);
-      outputWorkspace->dataY(i) = inputWorkspace->readY(i);
-      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
+      outputWorkspace->mutableX(i) = inputWorkspace->x(i);
+      outputWorkspace->mutableY(i) = inputWorkspace->y(i);
+      outputWorkspace->mutableE(i) = inputWorkspace->e(i);
 
       // Send out the current spectrum
-      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readX(i)), root);
-      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readY(i)), root);
-      broadcast(world, const_cast<MantidVec &>(inputWorkspace->readE(i)), root);
+      broadcast(world, const_cast<std::vector<double> &>(
+                           inputWorkspace->x(i).rawData()),
+                root);
+      broadcast(world, const_cast<std::vector<double> &>(
+                           inputWorkspace->y(i).rawData()),
+                root);
+      broadcast(world, const_cast<std::vector<double> &>(
+                           inputWorkspace->e(i).rawData()),
+                root);
     } else {
       // Receive the broadcast spectrum from the broadcasting process
-      broadcast(world, outputWorkspace->dataX(i), root);
-      broadcast(world, outputWorkspace->dataY(i), root);
-      broadcast(world, outputWorkspace->dataE(i), root);
+      broadcast(world, outputWorkspace->mutableX(i), root);
+      broadcast(world, outputWorkspace->mutableY(i), root);
+      broadcast(world, outputWorkspace->mutableE(i), root);
     }
   }
 }
