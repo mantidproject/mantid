@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "POLREF" valid-from = "2017-01-31T00:00:00">
+<parameter-file instrument = "POLREF" valid-from = "2012-01-31T00:00:00">
 <component-link name = "POLREF">
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
   </parameter>
 
   <parameter name="MonitorBackgroundMin">
-    <value val="15.0"/>
+    <value val="14.0"/>
   </parameter>
 
   <parameter name="MonitorBackgroundMax">
-    <value val="16.0"/>
+    <value val="15.0"/>
   </parameter>
 
   <parameter name="MonitorIntegralMin">
@@ -20,20 +20,19 @@
   <parameter name="MonitorIntegralMax">
    <value val="10.0"/>
   </parameter>
-  
+
+<!-- here we need to add the other monitors -->
+
   <parameter name="PointDetectorStart">
     <value val="3"/>
   </parameter>
 
   <parameter name="PointDetectorStop">
-    <value val="3"/>
+    <value val="4"/>
   </parameter>
 
   <parameter name="MultiDetectorStart">
-    <!--
-  This channel number is marks the start of all other linear and/or area detectors.
-   -->
-    <value val="5"/>
+    <value val="6"/>
   </parameter>
 
   <parameter name="I0MonitorIndex">
@@ -48,14 +47,6 @@
     <value val="15.0"/>
   </parameter>
 
-  <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
-    <value val="10"/>
-  </parameter>
-
-  <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
-    <value val="12"/>
-  </parameter>
-  
    <!-- parameters for efficiency correction -->
    <parameter name="correction" type="string">
     <value val="polynomial"/>
