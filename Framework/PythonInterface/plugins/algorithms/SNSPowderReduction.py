@@ -481,7 +481,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return
 
     def _getLinearizedFilenames(self, propertyName):
-        runnumbers = self.getProperty("Filename").value
+        runnumbers = self.getProperty(propertyName).value
         linearizedRuns = []
         for item in runnumbers:
             if type(item) == list:
