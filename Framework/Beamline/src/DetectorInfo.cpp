@@ -4,13 +4,23 @@
 namespace Mantid {
 namespace Beamline {
 
-DetectorInfo::DetectorInfo(const size_t numberOfDetectors)
-    : m_isMonitor(Kernel::make_cow<std::vector<bool>>(numberOfDetectors)),
-      m_isMasked(Kernel::make_cow<std::vector<bool>>(numberOfDetectors)) {}
+DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
+                           std::vector<Eigen::Quaterniond> rotations)
+    : m_isMonitor(Kernel::make_cow<std::vector<bool>>(positions.size())),
+      m_isMasked(Kernel::make_cow<std::vector<bool>>(positions.size())),
+      m_positions(
+          Kernel::make_cow<std::vector<Eigen::Vector3d>>(std::move(positions))),
+      m_rotations(Kernel::make_cow<std::vector<Eigen::Quaterniond>>(
+          std::move(rotations))) {
+  if (m_positions->size() != m_rotations->size())
+    throw std::runtime_error("DetectorInfo: Position and rotations vectors "
+                             "must have identical size");
+}
 
-DetectorInfo::DetectorInfo(const size_t numberOfDetectors,
+DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
+                           std::vector<Eigen::Quaterniond> rotations,
                            const std::vector<size_t> &monitorIndices)
-    : DetectorInfo(numberOfDetectors) {
+    : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;
 }
@@ -36,6 +46,24 @@ bool DetectorInfo::isMasked(const size_t index) const {
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
   m_isMasked.access()[index] = masked;
+}
+
+Eigen::Vector3d DetectorInfo::position(const size_t index) const {
+  return (*m_positions)[index];
+}
+
+Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
+  return (*m_rotations)[index];
+}
+
+void DetectorInfo::setPosition(const size_t index,
+                               const Eigen::Vector3d &position) {
+  m_positions.access()[index] = position;
+}
+
+void DetectorInfo::setRotation(const size_t index,
+                               const Eigen::Quaterniond &rotation) {
+  m_rotations.access()[index] = rotation;
 }
 
 } // namespace Beamline

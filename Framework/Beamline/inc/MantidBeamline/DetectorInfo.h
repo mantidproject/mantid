@@ -4,6 +4,8 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include "Eigen/Geometry"
+
 namespace Mantid {
 namespace Beamline {
 
@@ -56,8 +58,11 @@ namespace Beamline {
 */
 class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
-  DetectorInfo(const size_t numberOfDetectors);
-  DetectorInfo(const size_t numberOfDetectors,
+  DetectorInfo() = default;
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond> rotations);
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond> rotations,
                const std::vector<size_t> &monitorIndices);
 
   size_t size() const;
@@ -65,10 +70,16 @@ public:
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   void setMasked(const size_t index, bool masked);
+  Eigen::Vector3d position(const size_t index) const;
+  Eigen::Quaterniond rotation(const size_t index) const;
+  void setPosition(const size_t index, const Eigen::Vector3d &position);
+  void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
 
 private:
-  Kernel::cow_ptr<std::vector<bool>> m_isMonitor;
-  Kernel::cow_ptr<std::vector<bool>> m_isMasked;
+  Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
+  Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
 };
 
 } // namespace Beamline
