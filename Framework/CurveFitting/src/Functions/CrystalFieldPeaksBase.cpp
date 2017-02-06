@@ -336,10 +336,29 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   auto ionIter = ION_2_NRE.find(ion);
   if (ionIter == ION_2_NRE.end()) {
-    throw std::runtime_error("Unknown ion name passed to CrystalFieldPeaks.");
+    // If 'Ion=S2', or 'Ion=J2.5' etc, interpret as arbitrary J values with gJ=2
+    // Allow lower cases, but values must be half-integral. E.g. 'Ion=S2.4' fails
+    switch(ion[0]) {
+      case 'S':
+      case 's':
+      case 'J':
+      case 'j':
+        {
+          // Need to store as 2J to allow half-integer values
+          auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (fabs(J2 - (int)J2) < 0.001) {
+            nre = -(int)J2;
+            break;
+          } 
+          // fall through
+        }
+      default:
+        throw std::runtime_error("Unknown ion name '"+ion+"' passed to CrystalFieldPeaks.");
+    }
   }
-
-  nre = ionIter->second;
+  else {
+    nre = ionIter->second;
+  }
 
   DoubleFortranVector bmol(1, 3);
   bmol(1) = getParameter("BmolX");
