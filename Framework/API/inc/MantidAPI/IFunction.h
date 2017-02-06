@@ -256,6 +256,8 @@ public:
     /// Create vector attribute
     explicit Attribute(const std::vector<double> &v)
         : m_data(v), m_quoteValue(false) {}
+    /// Copy assignment
+    Attribute& operator=(const Attribute &attr);
 
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
