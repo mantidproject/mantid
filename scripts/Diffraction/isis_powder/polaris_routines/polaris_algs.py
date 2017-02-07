@@ -42,7 +42,8 @@ def get_run_details(run_number, inst_settings):
     splined_vanadium_name = _generate_splined_van_name(chopper_on=inst_settings.chopper_on,
                                                        vanadium_run_string=vanadium_runs)
 
-    grouping_full_path = os.path.join(inst_settings.calibration_dir, inst_settings.grouping_file_name)
+    grouping_full_path = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
+    grouping_full_path = os.path.join(grouping_full_path, inst_settings.grouping_file_name)
 
     in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
     calibration_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])

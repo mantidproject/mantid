@@ -72,7 +72,7 @@ class AbstractInst(object):
         :param run_number_string: The run number to look up the properties of
         :return: A RunDetails object containing attributes relevant to that run_number_string
         """
-        pass
+        raise NotImplementedError("get_run_details")
 
     @staticmethod
     @abstractmethod
@@ -82,7 +82,7 @@ class AbstractInst(object):
         :param run_number: The run number to convert into a valid format for Mantid
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        pass
+        raise NotImplementedError("generate_input_file_name")
 
     @abstractmethod
     def generate_output_file_name(self, run_number_string):
@@ -101,7 +101,7 @@ class AbstractInst(object):
         :param focused_vanadium_banks: The list processed (and cropped) vanadium banks to take a spline of
         :return: The splined vanadium workspaces as a list
         """
-        return None
+        return None  # This can probably be ported to common and instruments can override for specific steps
 
     # Optional overrides
     @abstractmethod
@@ -206,6 +206,7 @@ class AbstractInst(object):
         """
         if not output_directory:
             output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
+        output_directory.path.abspath(os.path.expanduser(output_directory))
         file_name = str(self.generate_output_file_name(run_number_string=run_details.run_number))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
