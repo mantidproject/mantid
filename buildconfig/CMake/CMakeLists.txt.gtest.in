@@ -5,6 +5,7 @@ ExternalProject_Add(googletest
   GIT_TAG           "release-${gtest_version}"
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+  #PATCH_COMMAND     git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/googletest_supress_warnings.patch
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
