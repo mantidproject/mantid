@@ -47,8 +47,8 @@ void MultiplyMD::checkInputs() {
 template <typename MDE, size_t nd>
 void MultiplyMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
-  float scalar = float(m_rhs_scalar->mutableY(0)[0]);
-  float scalarError = float(m_rhs_scalar->mutableE(0)[0]);
+  float scalar = static_cast<float>(m_rhs_scalar->y(0)[0]);
+  float scalarError = static_cast<float>(m_rhs_scalar->e(0)[0]);
   float scalarErrorSquared = scalarError * scalarError;
   float scalarSquared = scalar * scalar;
 
