@@ -97,6 +97,125 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="gbMonteCarloDetails">
+     <property name="title">
+      <string>Monte Carlo</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbNumberEvents">
+        <property name="text">
+         <string>Events:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="spNumberWavelengths">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbNumberWavelengths">
+        <property name="text">
+         <string>Number Wavelengths:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QSpinBox" name="spNumberEvents">
+        <property name="maximum">
+         <number>1000000</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>5000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbBeamDetails">
+     <property name="title">
+      <string>Beam Details</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbBeamWidth">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Beam Width:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="spBeamWidth">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="suffix">
+         <string> cm</string>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbBeamHeight">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Beam Height:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QDoubleSpinBox" name="spBeamHeight">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="suffix">
+         <string> cm</string>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="gbShapeDetails">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -476,116 +595,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbGeneralDetails">
-     <property name="title">
-      <string>General Details</string>
-     </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="1" column="2">
-       <widget class="QLabel" name="lbNumberEvents">
-        <property name="text">
-         <string>Events:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbBeamHeight">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Beam Height:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QDoubleSpinBox" name="spBeamHeight">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="suffix">
-         <string> cm</string>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QSpinBox" name="spNumberWavelengths">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbBeamWidth">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="text">
-         <string>Beam Width:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spBeamWidth">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="suffix">
-         <string> cm</string>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lbNumberWavelengths">
-        <property name="text">
-         <string>Number Wavelengths:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
-       <widget class="QSpinBox" name="spNumberEvents">
-        <property name="maximum">
-         <number>1000000</number>
-        </property>
-        <property name="singleStep">
-         <number>10</number>
-        </property>
-        <property name="value">
-         <number>5000</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QGroupBox" name="gbSampleDetails">
      <property name="title">
       <string>Sample Details</string>
@@ -876,11 +885,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>782</x>
-     <y>158</y>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>296</x>
-     <y>185</y>
+     <x>315</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -923,12 +932,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
-     <y>87</y>
+     <x>194</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>783</x>
-     <y>78</y>
+     <y>60</y>
     </hint>
    </hints>
   </connection>
@@ -939,8 +948,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
-     <y>87</y>
+     <x>194</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>305</x>
@@ -988,11 +997,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>398</x>
-     <y>237</y>
+     <y>370</y>
     </hint>
     <hint type="destinationlabel">
      <x>783</x>
-     <y>237</y>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -1003,12 +1012,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>121</x>
-     <y>81</y>
+     <x>140</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>130</x>
-     <y>224</y>
+     <x>149</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -1019,12 +1028,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>222</x>
-     <y>82</y>
+     <x>241</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>265</x>
-     <y>231</y>
+     <x>398</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -1035,12 +1044,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>236</x>
-     <y>82</y>
+     <x>255</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>484</x>
-     <y>228</y>
+     <x>590</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -1051,12 +1060,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>210</x>
-     <y>81</y>
+     <x>229</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>666</x>
-     <y>230</y>
+     <x>783</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>
@@ -1067,12 +1076,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>150</x>
-     <y>82</y>
+     <x>169</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>195</y>
+     <x>39</x>
+     <y>328</y>
     </hint>
    </hints>
   </connection>
@@ -1083,12 +1092,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>87</y>
+     <x>246</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>195</y>
+     <x>65</x>
+     <y>328</y>
     </hint>
    </hints>
   </connection>
@@ -1099,12 +1108,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>82</y>
+     <x>308</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>195</y>
+     <x>92</x>
+     <y>328</y>
     </hint>
    </hints>
   </connection>
@@ -1115,12 +1124,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>77</y>
+     <x>334</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>118</x>
-     <y>195</y>
+     <y>328</y>
     </hint>
    </hints>
   </connection>
@@ -1131,12 +1140,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>113</x>
-     <y>81</y>
+     <x>132</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>195</y>
+     <x>92</x>
+     <y>310</y>
     </hint>
    </hints>
   </connection>
@@ -1147,12 +1156,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>224</x>
-     <y>74</y>
+     <x>243</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>118</x>
-     <y>195</y>
+     <y>310</y>
     </hint>
    </hints>
   </connection>
