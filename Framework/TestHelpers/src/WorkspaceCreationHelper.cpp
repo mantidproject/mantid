@@ -85,7 +85,7 @@ Workspace2D_sptr create1DWorkspaceRand(int size) {
   CountStandardDeviations errorVals(size, randFunc);
 
   Histogram generatedHisto(std::move(xVals), std::move(counts),
-                                          std::move(errorVals));
+                           std::move(errorVals));
 
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, std::move(generatedHisto));
@@ -99,7 +99,7 @@ Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
   CountStandardDeviations errVals(size, error);
 
   Histogram generatedHisto(std::move(xVals), std::move(yVals),
-                                          std::move(errVals));
+                           std::move(errVals));
 
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, std::move(generatedHisto));
@@ -142,8 +142,9 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
                                                          int numBoundaries) {
   Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
   for (int workspaceIndex = 0; workspaceIndex < nhist; workspaceIndex++) {
-	  std::vector<double> yValues(numBoundaries, static_cast<double>(workspaceIndex));
-	  out->mutableY(workspaceIndex) = std::move(yValues);
+    std::vector<double> yValues(numBoundaries,
+                                static_cast<double>(workspaceIndex));
+    out->mutableY(workspaceIndex) = std::move(yValues);
   }
 
   return out;
@@ -982,7 +983,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.push_back(Emin + static_cast<double>(i) * dE);
     }
-	ws->mutableX(j) = E_transfer;
+    ws->mutableX(j) = E_transfer;
   }
 
   // set axis, correspondent to the X-values

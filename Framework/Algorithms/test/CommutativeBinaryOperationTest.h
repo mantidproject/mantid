@@ -93,7 +93,7 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
-	  const bool isHistogram(true);
+    const bool isHistogram(true);
     MatrixWorkspace_sptr work_in1 =
         WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     MatrixWorkspace_sptr work_in2 =

@@ -191,8 +191,8 @@ void PoldiSpectrumDomainFunction::init() {}
  */
 void PoldiSpectrumDomainFunction::initializeParametersFromWorkspace(
     const Workspace2D_const_sptr &workspace2D) {
-	const auto &xVals = workspace2D->x(0);
-	m_deltaT = xVals[1] - xVals[0];
+  const auto &xVals = workspace2D->x(0);
+  m_deltaT = xVals[1] - xVals[0];
 
   PoldiInstrumentAdapter_sptr adapter =
       boost::make_shared<PoldiInstrumentAdapter>(workspace2D->getInstrument(),
