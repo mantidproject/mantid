@@ -34,7 +34,7 @@ Algorithms
     range is outside of these limits ([4, 10]). This was causing the algorithm to integrate over [0.6, 4].
   * :ref:`algm-ReflectometryReductionOneAuto` now outputs three workspaces: a workspace in wavelength, a workspace in Q with native binning,
     and a rebinned and scaled workspace in Q. The latter is rebinned according to ``MomentumTransferMin``, ``MomentumTransferMax``
-    and ``MomentumTransferStep``. If these are not provided, the algorithm will attempt to determin the bin width
+    and ``MomentumTransferStep``. If these are not provided, the algorithm will attempt to determine the bin width
     running :ref:`algm-CalculateResolution`. When this is not possible, the rebinning will not take place.
 
 * :ref:`algm-Stitch1D` documentation has been improved, it now includes a workflow diagram illustrating
