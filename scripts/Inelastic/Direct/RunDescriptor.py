@@ -459,8 +459,6 @@ class RunDescriptor(PropDescriptor):
         elif isinstance(value, collections.Iterable): # xrange provided
             value = list(value)
             self._set_run_list(instance,value,"",None)
-        elif isinstance(value,list):
-            self._set_run_list(instance,value,"",None)
         else:
             self._set_single_run(instance,value,"",None)
 
