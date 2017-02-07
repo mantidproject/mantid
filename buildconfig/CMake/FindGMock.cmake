@@ -14,30 +14,28 @@ if(USE_SYSTEM_GTEST)
 else()
   message(STATUS "Using gtest in ExternalProject")
 
-  # Prevent GoogleTest from overriding our compiler/linker options
-  # when building with Visual Studio
+  # Prevent overriding the parent project's compiler/linker
+  # settings on Windows
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-#  set(gmock_force_shared_crt ON CACHE BOOL "" FORCE)
 
   # Download and unpack googletest at configure time
   configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CMakeLists.txt.gtest.in
                  ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+                  RESULT_VARIABLE result
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  endif()
   execute_process(COMMAND ${CMAKE_COMMAND} --build .
+                  RESULT_VARIABLE result
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+  if(result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+  endif()
 
-  # Download and unpack googletest at configure time
-#  configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CMakeLists.txt.gmock.in
-#    ${CMAKE_BINARY_DIR}/googlemock-download/CMakeLists.txt)
-#  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-#    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlemock-download )
-#  execute_process(COMMAND ${CMAKE_COMMAND} --build .
-#    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlemock-download )
-
-
-  # Add googletest directly to our build. This adds the following
-  # targets: gtest, gtest_main, gmock and gmock_main
+  # Add googletest directly to our build. This defines
+  # the gtest and gtest_main targets.
   add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                    ${CMAKE_BINARY_DIR}/googletest-build)
 
@@ -47,5 +45,3 @@ else()
   include_directories("${gtest_SOURCE_DIR}/include"
                       "${gmock_SOURCE_DIR}/include")
 endif()
-
-mark_as_advanced ( GMOCK_INCLUDE_DIR GMOCK_LIB GMOCK_LIB_DEBUG )
