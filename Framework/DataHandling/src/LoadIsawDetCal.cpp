@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include "MantidKernel/Strings.h"
@@ -443,14 +444,23 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
   const V3D position(x, y, z);
 
   // Do the move
+  using namespace Geometry::ComponentHelper;
+  const TransformType positionType = Absolute;
+
   MatrixWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
-  if (inputW)
-    inputW->mutableDetectorInfo().setPosition(*comp, position);
-  else if (inputP)
-    inputW->mutableDetectorInfo().setPosition(*comp, position);
+  if (inputW) {
+    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position, positionType);
+    //inputW->mutableDetectorInfo().setPosition(*comp, position);
+  }
+  else if (inputP) {
+    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position, positionType);
+    //inputP->mutableDetectorInfo().setPosition(*comp, position);
+  }
 }
 
 /**
