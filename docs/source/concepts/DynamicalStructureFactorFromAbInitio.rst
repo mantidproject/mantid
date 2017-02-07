@@ -41,7 +41,7 @@ From DFT calculations one usually obtains phonon data for infinite single crysta
 calculations for molecule, e.g, gas phase). In order to compare it with experiment in which sample is in the form of
 powder one has to perform powder averaging. Usually semi-empirical formula is used [2], [3]:
 
-:math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2(\omega_i) TrB_{\omega_i}}{3} exp\left(-Q^2(\omega_i) \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
+:math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2 TrB_{\omega_i}}{3} exp\left(-Q^2 \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
 
 where :math:`B` and :math:`A` are tensors created from atomic displacements in the following way:
 
@@ -65,7 +65,7 @@ with
 
 :math:`\omega_i` -- frequency for :math:`i`-th transition in :math:`cm^{-1}` (called also mode or fundamental)
 
-:math:`c^j_{\omega_i}`  -- atomic displacement for :math:`j`-th atom and i-th frequency in atomic units
+:math:`c^j_{\omega_i}`  -- atomic displacement for :math:`j`-th atom and :math:`i`-th frequency in atomic units
 
 :math:`M_j` -- mass of :math:`j`-th atom in atomic units
 
@@ -86,7 +86,7 @@ Cardinality of this set is :math:`p^2`, where :math:`p` is a number of fundament
 and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` is negligible.
 Within harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [4]:
 
-:math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( TrB^j_{\omega_i}TrB^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2(\omega_{ik}) \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
+:math:`S^j(Q, \omega_{ik}) = \frac{Q^4}{15  C}\left( TrB^j_{\omega_i}TrB^j_{\omega_k} + B^j_{\omega_i}:B^j_{\omega_k} + B^j_{\omega_k}:B^j_{\omega_i} \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ik}}{2 k_B T} \right) \right)\sigma^j`
 
 where:
 
@@ -96,7 +96,7 @@ where:
 
 Similarly one can define contribution for the third quantum order event (:math:`0 \rightarrow 3`, simultaneous  :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''` for different oscillators ,etc.. ) [4]:
 
-:math:`S^j(Q, \omega_{ikl}) = \frac{9Q^6}{543}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}  \right)  exp\left(-Q^2) \beta^j coth^2\left(\frac{\hbar \omega_{ikl}}{2 k_B T}\right) \right)\sigma^j`
+:math:`S^j(Q, \omega_{ikl}) = \frac{9Q^6}{543}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}  \right)  exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{ikl}}{2 k_B T}\right) \right)\sigma^j`
 
 Usually in order to reconstruct experimental spectrum it is enough to give contribution up to fourth order (:math:`0 \rightarrow 4` , simultaneous :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''`, :math:`0 \rightarrow 1'''` for different oscillators, etc.)  [4]:
 
