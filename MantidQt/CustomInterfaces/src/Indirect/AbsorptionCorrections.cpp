@@ -24,6 +24,11 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 
+
+  // Change of input
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+    SLOT(newSample(const QString &)));
+
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
@@ -290,6 +295,29 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
+
+void AbsorptionCorrections::newSample(const QString &dataName) {
+  const MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
+  if (!sampleWs) {
+    g_warning() << "Failed to find workspace " << dataName.toStdString() << "\n"
+  }
+
+  const auto inst = sampleWs.getInstrument();
+  const std::string beamWidthParamName = "Worksflow.beam-width";
+  if (inst->hasParameter(beamWidthParamName)) {
+    const auto beamWidth= QString::fromStdString(
+      instrument->getStringParameter(beamWidthParamName)[0]);
+    const auto beamWidthValue = beamWidth.toDouble();
+  }
+  const std::string beamHeightParamName = "Workflow.beam-height";
+  if (instrument->hasParameter(beamHeightParamName)) {
+    const auto beamHeight = QString::fromStdString(
+      instrument->getStringParameter(beamHeightParamName)[0]);
+    const auto beamHeightValue = beamHeight.toDouble();
+  }
+
+}
+
 /**
  * Handle saving of workspace
  */
