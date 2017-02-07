@@ -3,10 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
 
@@ -46,7 +45,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(broadcaster.initialize());
     // Create a small workspace
     API::MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::create2DWorkspace154(1, 5);
+        WorkspaceCreationHelper::Create2DWorkspace154(1, 5);
 
     TS_ASSERT_THROWS_NOTHING(broadcaster.setProperty("InputWorkspace", inWS));
     TS_ASSERT_THROWS_NOTHING(
@@ -58,9 +57,11 @@ public:
     API::MatrixWorkspace_const_sptr outWS =
         broadcaster.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
-    TS_ASSERT_EQUALS(inWS->x(0), outWS->x(0));
-    TS_ASSERT_EQUALS(inWS->y(0), outWS->y(0));
-    TS_ASSERT_EQUALS(inWS->e(0), outWS->e(0));
+    for (int i = 0; i < 5; ++i) {
+      TS_ASSERT_EQUALS(inWS->readX(0)[i], outWS->readX(0)[i]);
+      TS_ASSERT_EQUALS(inWS->readY(0)[i], outWS->readY(0)[i]);
+      TS_ASSERT_EQUALS(inWS->readE(0)[i], outWS->readE(0)[i]);
+    }
 
     // TS_ASSERT_EQUALS( inWS->getAxis(0)->unit()->unitID(),
     // outWS->getAxis(0)->unit()->unitID() );

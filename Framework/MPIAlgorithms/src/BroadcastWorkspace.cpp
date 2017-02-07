@@ -2,13 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
 #include <boost/mpi.hpp>
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Axis.h"
 
 namespace mpi = boost::mpi;
 
@@ -92,7 +91,9 @@ void BroadcastWorkspace::exec() {
   for (std::size_t i = 0; i < numSpec; ++i) {
     if (world.rank() == root) {
       // For local output, just copy over
-      outputWorkspace->setHistogram(i, inputWorkspace->histogram(i));
+      outputWorkspace->dataX(i) = inputWorkspace->readX(i);
+      outputWorkspace->dataY(i) = inputWorkspace->readY(i);
+      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
 
       // Send out the current spectrum
       broadcast(world, const_cast<MantidVec &>(inputWorkspace->readX(i)), root);

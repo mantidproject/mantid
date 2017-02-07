@@ -2,14 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidMPIAlgorithms/MPISerialization.h"
 #include <boost/mpi.hpp>
 #include <boost/version.hpp>
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace mpi = boost::mpi;
 
@@ -202,7 +202,9 @@ void GatherWorkspaces::exec() {
                eplus(), 0);
       } else if (accum == "Append") {
         // Copy over data from own input workspace
-        outputWorkspace->setHistogram(wi, inputWorkspace->histogram(wi));
+        outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
+        outputWorkspace->dataY(wi) = inputWorkspace->readY(wi);
+        outputWorkspace->dataE(wi) = inputWorkspace->readE(wi);
 
         const int numReqs(3 * (included.size() - 1));
         std::vector<boost::mpi::request> reqs(numReqs);
