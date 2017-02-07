@@ -2384,20 +2384,20 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
- 
-if (xmin == 0.0 && xmax == 0.0) {
+
+    if (xmin == 0.0 && xmax == 0.0) {
       // A previous fitting range of [0,0] means this is the first time the
       // user goes to "Data Analysis" tab
       // We have to initialise the fitting range
       m_dataSelector->setStartTime(
-        m_uiForm.timeAxisStartAtInput->text().toDouble());
+          m_uiForm.timeAxisStartAtInput->text().toDouble());
       m_dataSelector->setEndTime(
-        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+          m_uiForm.timeAxisFinishAtInput->text().toDouble());
       m_uiForm.fitBrowser->setStartX(
-        m_uiForm.timeAxisStartAtInput->text().toDouble());
+          m_uiForm.timeAxisStartAtInput->text().toDouble());
       m_uiForm.fitBrowser->setEndX(
-        m_uiForm.timeAxisFinishAtInput->text().toDouble());
-      
+          m_uiForm.timeAxisFinishAtInput->text().toDouble());
+
     }
     // or set it to the previous values provided by the user:
     else {
@@ -2406,10 +2406,9 @@ if (xmin == 0.0 && xmax == 0.0) {
       m_dataSelector->setEndTime(xmax);
       m_uiForm.fitBrowser->setStartX(xmin);
       m_uiForm.fitBrowser->setEndX(xmax);
-}
+    }
 
-
-} else if (newTab == m_uiForm.ResultsTable) {
+  } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
 
