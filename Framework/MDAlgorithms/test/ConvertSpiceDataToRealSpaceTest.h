@@ -444,17 +444,17 @@ public:
 
 class ConvertSpiceDataToRealSpaceTestPerformance : public CxxTest::TestSuite {
 public:
-	static ConvertSpiceDataToRealSpaceTestPerformance *createSuite(){
-	return new ConvertSpiceDataToRealSpaceTestPerformance;
-}
-	static void destroySuite(ConvertSpiceDataToRealSpaceTestPerformance *suite){delete suite;}
-	  
-	ConvertSpiceDataToRealSpaceTestPerformance(){
+  static ConvertSpiceDataToRealSpaceTestPerformance *createSuite() {
+    return new ConvertSpiceDataToRealSpaceTestPerformance;
+  }
+  static void destroySuite(ConvertSpiceDataToRealSpaceTestPerformance *suite) {
+    delete suite;
+  }
 
-	}
+  ConvertSpiceDataToRealSpaceTestPerformance() {}
 
-	void test_ConvertMDhistoToMatrixWorkspace(){
-	  MatrixWorkspace_sptr dataws =
+  void test_ConvertMDhistoToMatrixWorkspace() {
+    MatrixWorkspace_sptr dataws =
         WorkspaceFactory::Instance().create("Workspace2D", 44, 2, 1);
     AnalysisDataService::Instance().addOrReplace("EmptyWS", dataws);
 
@@ -467,9 +467,8 @@ public:
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
+  }
 
-
-}
 private:
 };
 #endif /* MANTID_MDALGORITHMS_CONVERTSPICEDATATOREALSPACETEST_H_ */
