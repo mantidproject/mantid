@@ -72,7 +72,7 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_boundingBoxMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
               *other.m_boundingBoxMap)),
-      m_detectorInfo(other.m_detectorInfo) {}
+      m_detectorInfo(other.m_detectorInfo), m_instrument(other.m_instrument) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 ParameterMap::~ParameterMap() = default;
@@ -1162,10 +1162,20 @@ const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
   return *m_detectorInfo;
 }
 
+/// Only for use by Detector. Returns a detector index for a detector ID.
+size_t ParameterMap::detectorIndex(const detid_t detID) const {
+  return m_instrument->detectorIndex(detID);
+}
+
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
+}
+
+/// Only for use by Instrument. Sets the pointer to the owning instrument.
+void ParameterMap::setInstrument(const Instrument *instrument) {
+  m_instrument = instrument;
 }
 
 } // Namespace Geometry

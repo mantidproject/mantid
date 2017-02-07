@@ -48,7 +48,9 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {}
+      m_detectorInfo(instr->m_detectorInfo) {
+  m_map_nonconst->setInstrument(m_instr.get());
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -497,9 +499,6 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     return baseDet;
 
   auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
-  // Set the linear detector index, used for legacy accessors to obtain data
-  // from Beamline::DetectorInfo, which is stored in the ParameterMap.
-  det->setIndex(std::distance(baseInstr.m_detectorCache.cbegin(), it));
   return det;
 }
 
@@ -1237,6 +1236,14 @@ void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
 }
+
+/// Returns the index for a detector ID. Used for accessing DetectorInfo.
+size_t Instrument::detectorIndex(const detid_t detID) const {
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detID);
+  return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
 namespace Conversion {
 
 /**

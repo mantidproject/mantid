@@ -181,7 +181,6 @@ public:
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
-  void setIndex(const size_t index) override;
 
 protected:
   /// The ID of this effective detector

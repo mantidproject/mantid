@@ -125,10 +125,7 @@ det_topology Detector::getTopology(V3D &center) const {
 const ParameterMap &Detector::parameterMap() const { return *m_map; }
 
 /// Helper for legacy access mode. Returns the index of the detector.
-size_t Detector::index() const { return m_index; }
-
-/// Helper for legacy access mode. Sets the index of the detector.
-void Detector::setIndex(const size_t index) { m_index = index; }
+size_t Detector::index() const { return m_map->detectorIndex(m_id); }
 
 } // Namespace Geometry
 } // Namespace Mantid
