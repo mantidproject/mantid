@@ -160,28 +160,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       "StdoutChannel",
       new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
-  // Define the directory to search for the Mantid.properties file.
-  Poco::File f;
-
-  // First directory: the current working
-  m_strBaseDir = Poco::Path::current();
-  f = Poco::File(m_strBaseDir + m_properties_file_name);
-  if (!f.exists()) {
-    // Check the executable directory to see if it includes a mantid.properties
-    // file
-    m_strBaseDir = getDirectoryOfExecutable();
-    f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists()) {
-      // Last, use the MANTIDPATH environment var
-      if (Poco::Environment::has("MANTIDPATH")) {
-        // Here we have to follow the convention of the rest of this code and
-        // add a trailing slash.
-        // Note: adding it to the MANTIDPATH itself will make other parts of the
-        // code crash.
-        m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
-      }
-    }
-  }
+  setBaseDirectory();
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
@@ -283,6 +262,55 @@ ConfigServiceImpl::~ConfigServiceImpl() {
   delete m_pSysConfig;
   delete m_pConf; // potential double delete???
   clearFacilities();
+}
+
+/**
+ * Set the base directory path so we can file the Mantid.properties file.
+ *
+ * This will search for the base directory that contains the .properties file
+ * by checking the following places:
+ *  - The current working directory
+ *  - The executable directory
+ *  - The directory defined by the MANTIDPATH enviroment var
+ *  - OSX only: the directory two directories up from the executable (which
+ *    is the base on the OSX package.
+ *
+ */
+void ConfigServiceImpl::setBaseDirectory() {
+  // Define the directory to search for the Mantid.properties file.
+  Poco::File f;
+
+  // First directory: the current working
+  m_strBaseDir = Poco::Path::current();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the executable directory to see if it includes a mantid.properties
+  // file
+  m_strBaseDir = getDirectoryOfExecutable();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the MANTIDPATH environment var
+  if (Poco::Environment::has("MANTIDPATH")) {
+    // Here we have to follow the convention of the rest of this code and
+    // add a trailing slash.
+    // Note: adding it to the MANTIDPATH itself will make other parts of the
+    // code crash.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+    f = Poco::File(m_strBaseDir + m_properties_file_name);
+    if (!f.exists())
+      return;
+  }
+
+#ifdef __APPLE__
+  // Finally, on OSX check if we're in the package directory and the .properties
+  // file just happens to be two directories up
+  auto path = Poco::Path(getDirectoryOfExecutable());
+  m_strBaseDir = path.parent().parent().parent().toString();
+#endif
 }
 
 /** Loads the config file provided.
