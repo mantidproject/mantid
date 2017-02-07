@@ -391,7 +391,7 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
 }
 
 /**
- * 
+ *
  * @param detectorInfo A reference to the workspace's detector info
  * @param detIndex The index of the detector whose parameters should be updated
  * @param pmap A reference to the ParameterMap instance to update

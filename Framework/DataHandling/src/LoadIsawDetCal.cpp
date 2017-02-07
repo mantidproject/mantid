@@ -453,13 +453,14 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
 
   if (inputW) {
     Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position, positionType);
-    //inputW->mutableDetectorInfo().setPosition(*comp, position);
-  }
-  else if (inputP) {
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
+                                             positionType);
+    // inputW->mutableDetectorInfo().setPosition(*comp, position);
+  } else if (inputP) {
     Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position, positionType);
-    //inputP->mutableDetectorInfo().setPosition(*comp, position);
+    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
+                                             positionType);
+    // inputP->mutableDetectorInfo().setPosition(*comp, position);
   }
 }
 

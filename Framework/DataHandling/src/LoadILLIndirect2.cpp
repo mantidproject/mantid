@@ -405,7 +405,7 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
 
     g_log.debug() << componentName << " : t = " << theta
                   << " ==> t = " << twoTheta << "\n";
-    
+
     m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {

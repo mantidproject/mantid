@@ -70,8 +70,8 @@ public:
     std::string inputFile = "test.DetCal";
     std::ofstream out(inputFile.c_str());
     out << "5      1    256    256 50.1000 49.9000  0.2000  55.33   50.0000   "
-      "16.7548  -16.7548  0.00011 -0.00002  1.00000  0.00000  1.00000  "
-      "0.00000\n";
+           "16.7548  -16.7548  0.00011 -0.00002  1.00000  0.00000  1.00000  "
+           "0.00000\n";
     out.close();
 
     LoadIsawDetCal testerCAL;
@@ -174,9 +174,7 @@ public:
     testerCAL.setPropertyValue("Filename", inputFile);
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().remove(wsName);
-  }
+  void tearDown() override { AnalysisDataService::Instance().remove(wsName); }
 
   void testLoadIsawDetCalTestPerformance() { testerCAL.execute(); }
 
