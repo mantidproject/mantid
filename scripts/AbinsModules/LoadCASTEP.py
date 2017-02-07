@@ -157,7 +157,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
                          r"(%(s)s) + (%(s)s) + (%(s)s)" % {'s': self._float_regex}
         header_sum = re.compile(header_str_sum)
 
-        with open(self._clerk.get_input_filename(), "rU") as f:
+        with open(self._clerk.get_input_filename(), "r") as f:
             found = False
             for line in f:  # iterate over the file one line at a time(memory efficient)
                 if header_sum.match(line):
@@ -196,7 +196,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         block_count = 0
 
         frequencies, weights, k_vectors, eigenvectors = [], [], [], []
-        with open(self._clerk.get_input_filename(), "rU") as f_handle:
+        with open(self._clerk.get_input_filename(), "r") as f_handle:
             file_data.update(self._parse_phonon_file_header(f_handle))
             header_found = False
             while True:

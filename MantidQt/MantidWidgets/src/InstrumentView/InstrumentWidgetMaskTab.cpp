@@ -933,22 +933,6 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   Mantid::API::MatrixWorkspace_sptr inputWS =
       m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
 
-  /*
-  Mantid::Geometry::Instrument_const_sptr instrument =
-  outputMaskWS->getInstrument();
-  std::vector<int> detids = instrument->getDetectorIDs();
-  size_t maskedcount = 0;
-  for (size_t i = 0; i < detids.size(); ++i)
-  {
-  int detid = detids[i];
-  Mantid::Geometry::IDetector_const_sptr det = instrument->getDetector(detid);
-  if (det->isMasked())
-  ++ maskedcount;
-  }
-  std::cout << "There are " << maskedcount << " detectors out of total " <<
-  detids.size() << " detectors.\n";
-  */
-
   // Extract from MaskWorkspace to a TableWorkspace
   double xmin = m_instrWidget->getInstrumentActor()->minBinValue();
   double xmax = m_instrWidget->getInstrumentActor()->maxBinValue();
