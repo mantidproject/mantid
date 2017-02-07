@@ -6,6 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -58,13 +59,9 @@ public:
     API::MatrixWorkspace_const_sptr outWS =
         gatherer.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
-    for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_EQUALS(inWS->x(0)[i], outWS->x(0)[i]);
-      TS_ASSERT_EQUALS(inWS->y(0)[i], outWS->y(0)[i]);
-      TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
-      // TODO: Check spectrum numbers and detector IDs are copied correctly
-      // (perhaps?)
-    }
+    TS_ASSERT_EQUALS(inWS->x(0), outWS->x(0));
+    TS_ASSERT_EQUALS(inWS->y(0), outWS->y(0));
+    TS_ASSERT_EQUALS(inWS->e(0), outWS->e(0));
 
     TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(),
                      outWS->getInstrument()->baseInstrument());
@@ -87,13 +84,9 @@ public:
     API::MatrixWorkspace_const_sptr outWS =
         gatherer.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
-    for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_EQUALS(inWS->x(0)[i], outWS->x(0)[i]);
-      TS_ASSERT_EQUALS(inWS->y(0)[i], outWS->y(0)[i]);
-      TS_ASSERT_EQUALS(inWS->e(0)[i], outWS->e(0)[i]);
-      // TODO: Check spectrum numbers and detector IDs are copied correctly
-      // (perhaps?)
-    }
+    TS_ASSERT_EQUALS(inWS->x(0), outWS->x(0));
+    TS_ASSERT_EQUALS(inWS->y(0), outWS->y(0));
+    TS_ASSERT_EQUALS(inWS->e(0), outWS->e(0));
 
     TS_ASSERT_EQUALS(inWS->getInstrument()->baseInstrument(),
                      outWS->getInstrument()->baseInstrument());

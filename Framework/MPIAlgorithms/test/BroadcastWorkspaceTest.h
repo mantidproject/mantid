@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMPIAlgorithms/BroadcastWorkspace.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
@@ -57,19 +58,9 @@ public:
     API::MatrixWorkspace_const_sptr outWS =
         broadcaster.getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(inWS->size(), outWS->size());
-
-    const auto &inX = inWS->x(0);
-    const auto &inY = inWS->y(0);
-    const auto &inE = inWS->e(0);
-    const auto &outX = outWS->x(0);
-    const auto &outY = outWS->y(0);
-    const auto &outE = outWS->e(0);
-
-    for (int i = 0; i < 5; ++i) {
-      TS_ASSERT_EQUALS(inX[i], outX[i]);
-      TS_ASSERT_EQUALS(inY[i], outY[i]);
-      TS_ASSERT_EQUALS(inE[i], outE[i]);
-    }
+    TS_ASSERT_EQUALS(inWS->x(0), outWS->x(0));
+    TS_ASSERT_EQUALS(inWS->y(0), outWS->y(0));
+    TS_ASSERT_EQUALS(inWS->e(0), outWS->e(0));
 
     // TS_ASSERT_EQUALS( inWS->getAxis(0)->unit()->unitID(),
     // outWS->getAxis(0)->unit()->unitID() );
