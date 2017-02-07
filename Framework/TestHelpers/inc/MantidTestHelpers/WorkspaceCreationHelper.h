@@ -38,7 +38,7 @@ class PeaksWorkspace;
 }
 
 namespace WorkspaceCreationHelper {
-/// Create a fibonacci series
+/// Create a Fibonacci series
 template <typename T> struct FibSeries {
 private:
   T x1; /// Initial value 1;
@@ -182,9 +182,9 @@ create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
                                                        nY));
 
   for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-    Mantid::MantidVec &X = ws->dataX(iSpec);
-    Mantid::MantidVec &Y = ws->dataY(iSpec);
-    Mantid::MantidVec &E = ws->dataE(iSpec);
+    auto &X = ws->mutableX(iSpec);
+    auto &Y = ws->mutableY(iSpec);
+    auto &E = ws->mutableE(iSpec);
     for (int i = 0; i < nY; i++) {
       double x = x0 + dx * i;
       X[i] = x;
