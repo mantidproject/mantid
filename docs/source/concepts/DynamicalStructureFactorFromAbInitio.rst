@@ -43,7 +43,7 @@ powder one has to perform powder averaging. Usually semi-empirical formula is us
 
 :math:`S^j (\mathbf{Q},\omega_i) = S^j (Q,\omega_i) = \frac{Q^2(\omega_i) TrB_{\omega_i}}{3} exp\left(-Q^2(\omega_i) \alpha^j_{\omega_i} coth^2\left(\frac{\hbar \omega_i}{2 k_B T}\right)  \right)\sigma^j`
 
-where B and A are tensors created from atomic displacements in the following way:
+where :math:`B` and :math:`A` are tensors created from atomic displacements in the following way:
 
 :math:`B^j_{\omega_i} = c^j_{\omega_i}(c^{j}_{\omega_i})^T M^j  \frac{C_1}{\omega_i}`
 
@@ -59,15 +59,15 @@ with
 
 :math:`:` --  tensor contraction operation
 
-:math:`j` -- indicates j-th atoms
+:math:`j` -- indicates :math:`j`-th atoms
 
-:math:`i` -- indicates i-th energy transition
+:math:`i` -- indicates :math:`i`-th energy transition
 
-:math:`\omega_i` -- frequency for i-th transition in :math:`cm^{-1}` (called also mode or fundamental)
+:math:`\omega_i` -- frequency for :math:`i`-th transition in :math:`cm^{-1}` (called also mode or fundamental)
 
-:math:`c^j_{\omega_i}`  -- atomic displacement for j-th atom and i-th frequency in atomic units
+:math:`c^j_{\omega_i}`  -- atomic displacement for :math:`j`-th atom and i-th frequency in atomic units
 
-:math:`M_j` -- mass of j-th atom in atomic units
+:math:`M_j` -- mass of :math:`j`-th atom in atomic units
 
 :math:`C_1` --  :math:`\hbar / (4 / \pi)` expressed in spectroscopic units
 
@@ -75,14 +75,14 @@ with
 
 :math:`T` -- temperature in K
 
-:math:`\sigma_j` -- cross-section for j-th atom
+:math:`\sigma_j` -- cross-section for :math:`j`-th atom
 
 
-The formula above is valid for *first order quantum events*, e. g., transitions 0 -> 1 for each phonon. In order to
+The formula above is valid for *first order quantum events*, e. g., transitions :math:`0 \rightarrow 1` for each phonon. In order to
 reconstruct spectrum one has to also consider higher order quantum events. For second order quantum event one should
-consider transitions 0 -> 2, but also simultaneous transitions 0 -> 1, 0 -> 1' for different phonons. Within harmonic approximation all second
-order transitions form the following  set: :math:`\lbrace \omega_1 + \omega_1, \omega_1 + \omega_2, \omega_1 + \omega_3, \ldots,  \omega_n + \omega_n \rbrace`.
-Cardinality of this set is :math:`n^2`. In practice one can reduce this number by taking into consideration realistic energy  window
+consider transitions :math:`0 \rightarrow 2`, but also simultaneous transitions :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'` for different phonons. Within harmonic approximation all second
+order transitions form the following  set: :math:`\lbrace \omega_1 + \omega_1, \omega_1 + \omega_2, \omega_1 + \omega_3, \ldots,  \omega_p + \omega_p \rbrace`.
+Cardinality of this set is :math:`p^2`, where :math:`p` is a number of fundamentals. In practice one can reduce this number by taking into consideration realistic energy  window
 and neglecting those :math:`\omega_{ij}=\omega_i + \omega_j` for which :math:`S(Q, \omega_i)` is negligible.
 Within harmonic approximation each phonon is treated as independent harmonic quantum oscillator.  The formula for :math:`S(Q, \omega_{ik})` is as follows [4]:
 
@@ -92,29 +92,31 @@ where:
 
 :math:`\beta^j = A^j / 3`
 
-C -- is a constant,  C=2 if i=j and C=1 otherwise
+:math:`C` -- is a constant,  :math:`C=2` if :math:`i=j` and :math:`C=1` otherwise
 
-Similarly one can define contribution for the third quantum order event (0 -> 3, simultaneous  0 -> 1, 0 -> 1', 0 -> 1'' for different oscilators ,etc.. ) [4]:
+Similarly one can define contribution for the third quantum order event (:math:`0 \rightarrow 3`, simultaneous  :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''` for different oscillators ,etc.. ) [4]:
 
 :math:`S^j(Q, \omega_{ikl}) = \frac{9Q^6}{543}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}  \right)  exp\left(-Q^2) \beta^j coth^2\left(\frac{\hbar \omega_{ikl}}{2 k_B T}\right) \right)\sigma^j`
 
-Usually in order to reconstruct experimental spectrum it is enough to give contribution up to fourth order (0 -> 4 , simultaneous 0 -> 1, 0 -> 1', 0 -> 1'', 0- > 1''' for different oscilators, etc.)  [4]:
+Usually in order to reconstruct experimental spectrum it is enough to give contribution up to fourth order (:math:`0 \rightarrow 4` , simultaneous :math:`0 \rightarrow 1`, :math:`0 \rightarrow 1'`, :math:`0 \rightarrow 1''`, :math:`0 \rightarrow 1'''` for different oscillators, etc.)  [4]:
 
 :math:`S^j(Q, \omega_{iklm}) = \frac{27Q^8}{9850}\left( TrB^j_{\omega_i} TrB^j_{\omega_k} TrB^j_{\omega_l}TrB^j_{\omega_m}  \right) exp\left(-Q^2 \beta^j coth^2\left(\frac{\hbar \omega_{iklm}}{2 k_B T}\right) \right)\sigma^j`
 
 In the similar way as for the second quantum order event one can reduce number of energy transitions by taking into account considered energy window and neglecting small S.
 
-After evaluating equations above one obtains discrete S for each quantum order and for each atom. In order to compare such a spectrum (:math:`S_{theory}`) one has to convolve it with experimental resolution:
+After evaluating equations above one obtains discrete S for each quantum order and for each atom: :math:`S_{discrete}`. In order to compare such a spectrum with an experimental spectrum one has to convolve it with experimental resolution:
 
 :math:`S_{theory}^{nj}(Q, \omega) = S_{discrete}^{nj}(Q, \omega) * f(\omega)`
 
 where:
 
-:math:`j` -- indicates j-th atoms
+:math:`j` -- indicates :math:`j`-th atoms
 
-:math:`n` -- indicates n-order event
+:math:`n` -- indicates :math:`n`-order event
 
 :math:`f(\omega)` -- resolution function
+
+:math:`S_{theory}` -- it is *theoretical S* which can be compared with experimental results
 
 For `Tosca <http://www.isis.stfc.ac.uk/instruments/tosca/tosca4715.html>`_  and Tosca-like instruments :math:`f(\omega)` has the following form:
 
@@ -124,24 +126,24 @@ where:
 
 :math:`\sigma(\omega) = A  \omega^2  + B  \omega + C`
 
-with A, B, C as constants.
+with :math:`A`, :math:`B`, :math:`C` as constants.
 
 Moreover, in case of Tosca and Tosca-like instruments length of momentum transfer depends on frequency (*indirect geometry spectrometer*).
-The formula for Q is as follows:
+The formula for :math:`Q^2` is as follows:
 
-:math:`Q(\omega)=k2_i(\omega) + k2_f - 2  \sqrt{k2_i(\omega)  k2_f} angle`
+:math:`Q^2(\omega)=k^2_i(\omega) + k^2_f - 2  \sqrt{k^2_i(\omega)  k^2_f} cos(\theta)`
 
 where:
 
-:math:`k2_i(\omega)=(\omega + E_{final})  \hbar/ (4  \pi)` expressed in the spectroscopic units
+:math:`k^2_i(\omega)=(\omega + E_{final})  \hbar/ (4  \pi)` expressed in the spectroscopic units
 
-:math:`k2_f=E_{final}  \hbar/(4 \pi)`
+:math:`k^2_f=E_{final}  \hbar/(4 \pi)`
 
 with
 
 :math:`E_{final}` -- final energy on the crystal analyser in :math:`cm^{-1}`
 
-:math:`angle` -- cosines of crystal analyser angle in radians
+:math:`cos(\theta)` -- cosines of crystal analyser angle in radians
 
 Current implementation
 ++++++++++++++++++++++
