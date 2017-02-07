@@ -386,7 +386,11 @@
            </widget>
           </item>
           <item row="2" column="3">
-           <widget class="QDoubleSpinBox" name="spFlatSampleAngle"/>
+           <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
+            <property name="suffix">
+             <string>°</string>
+            </property>
+           </widget>
           </item>
           <item row="2" column="2">
            <widget class="QLabel" name="lbFlatSampleAngle">
@@ -624,12 +628,12 @@
        <widget class="QComboBox" name="cbSampleDensity">
         <item>
          <property name="text">
-          <string>Mass Density</string>
+          <string>Mass Density (g/cm^3)</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Number Density</string>
+          <string>Number Density (atoms/Å^3)</string>
          </property>
         </item>
        </widget>
@@ -758,12 +762,12 @@
        <widget class="QComboBox" name="cbCanDensity">
         <item>
          <property name="text">
-          <string>Mass Density</string>
+          <string>Mass Density (g/cm^3)</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Number Density</string>
+          <string>Number Density (atoms/Å^3)</string>
          </property>
         </item>
        </widget>
