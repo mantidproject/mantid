@@ -383,8 +383,8 @@ class RunDescriptorTest(unittest.TestCase):
         # check if run list can be set up using range
         propman.sample_run = range(1,4)
         run_list = PropertyManager.sample_run.get_run_list()
-        self.assertEqual(len(run_list),3)        
-        
+        self.assertEqual(len(run_list),3)
+        self.assertTrue(isinstance(run_list,list))
 
     def test_sum_runs(self):
         propman  = self.prop_man
