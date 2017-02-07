@@ -34,7 +34,7 @@ also produce a total spectrum for the whole considered system. Dynamical structu
 all atoms in the system. If needed  a user can also include in a simulation elevated temperature.
 
 A description about the implemented working equations can be found :ref:`here <concepts contents>`
-(under TheoreticalS).
+(under DynamicalStructureFactorFromAbInitio).
 
 Abins is in constant development and suggestions
 how to make it better are very welcome. For any suggestions of enhancements please contact

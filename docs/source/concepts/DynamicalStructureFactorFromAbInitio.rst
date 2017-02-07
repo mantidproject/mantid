@@ -1,4 +1,4 @@
-.. _TheoreticalS:
+.. _DynamicalStructureFactorFromAbInitio:
 
 Ab-initio calculation of dynamical structure factor (S)
 =======================================================
@@ -158,5 +158,6 @@ References
 
 [3] J. Howard and J. Tomkinson, *An analytical method for the calculation of the relative intensities of bending and stretching modes in inelastic neutron scattering spectra*, Chem. Phys. Letters 98 (1983).
 
-[4] P. C H Mitchell, S. F. Parker, A. J. Ramirez-Cuesta, J. Tomkinson, * Vibrational Spectroscopy with Neutrons With Applications in Chemistry, Biology, Materials Science and Catalysis *, ISBN: 978-981-256-013-1
+[4] P. C H Mitchell, S. F. Parker, A. J. Ramirez-Cuesta, J. Tomkinson, *Vibrational Spectroscopy with Neutrons With Applications in Chemistry, Biology, Materials Science and Catalysis*, ISBN: 978-981-256-013-1
+
 .. categories:: Concepts
