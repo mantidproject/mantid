@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflRunsTabPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/ProgressableViewMockObject.h"
@@ -286,6 +287,33 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_0));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_1));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockTablePresenter_2));
+  }
+
+  void test_instrumentChanged() {
+    NiceMock<MockRunsTabView> mockRunsTabView;
+    MockProgressableView mockProgress;
+    MockMainWindowPresenter mockMainPresenter;
+    NiceMock<MockDataProcessorPresenter> mockTablePresenter;
+    std::vector<DataProcessorPresenter *> tablePresenterVec;
+    tablePresenterVec.push_back(&mockTablePresenter);
+
+    ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
+                                   tablePresenterVec);
+    presenter.acceptMainPresenter(&mockMainPresenter);
+
+    std::vector<std::string> instruments = {"INTER", "POLREF", "OFFSPEC",
+                                            "SURF", "CRISP"};
+    for (const auto &instrument : instruments) {
+      EXPECT_CALL(mockRunsTabView, getSearchInstrument())
+          .Times(Exactly(1))
+          .WillOnce(Return(instrument));
+      EXPECT_CALL(mockMainPresenter, setInstrumentName(instrument))
+          .Times(Exactly(1));
+      presenter.notify(IReflRunsTabPresenter::InstrumentChangedFlag);
+      TS_ASSERT_EQUALS(Mantid::Kernel::ConfigService::Instance().getString(
+                           "default.instrument"),
+                       instrument);
+    }
   }
 };
 

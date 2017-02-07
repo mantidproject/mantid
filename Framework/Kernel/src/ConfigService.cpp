@@ -1627,7 +1627,8 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
   return directoryName;
 }
 /**
- * Fills the internal cache of instrument definition directories
+ * Fills the internal cache of instrument definition directories and creates
+ * The %appdata%/mantidproject/mantid or $home/.mantid directory.
  *
  * This will normally contain from Index 0
  * - The download directory (win %appdata%/mantidproject/mantid/instrument)
@@ -1637,15 +1638,15 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
+
   Poco::Path path(getAppDataDir());
   path.makeDirectory();
   path.pushDirectory("instrument");
-  std::string appdatadir = path.toString();
+  const std::string appdatadir = path.toString();
   addDirectoryifExists(appdatadir, m_InstrumentDirs);
 
 #ifndef _WIN32
-  std::string etcdatadir = "/etc/mantid/instrument";
-  addDirectoryifExists(etcdatadir, m_InstrumentDirs);
+  addDirectoryifExists("/etc/mantid/instrument", m_InstrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
@@ -1686,6 +1687,45 @@ bool ConfigServiceImpl::addDirectoryifExists(
   }
 }
 
+std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
+  // first try the supplied file
+  if (!fName.empty()) {
+    const Poco::File fileObj(fName);
+    if (fileObj.exists()) {
+      return fName;
+    }
+  }
+
+  // search all of the instrument directories
+  const std::vector<std::string> directoryNames = getInstrumentDirectories();
+
+  // only use downloaded instruments if configured to download
+  const std::string updateInstrStr =
+      this->getString("UpdateInstrumentDefinitions.OnStartup");
+
+  auto instrDir = directoryNames.begin();
+  if (updateInstrStr.compare("1") == 0 || updateInstrStr.compare("on") == 0 ||
+      updateInstrStr.compare("On") == 0) {
+    // do nothing
+  } else {
+    instrDir++; // advance to after the first value
+  }
+
+  for (; instrDir != directoryNames.end(); ++instrDir) {
+    std::string filename = (*instrDir) + "Facilities.xml";
+
+    Poco::File fileObj(filename);
+    // stop when you find the first one
+    if (fileObj.exists())
+      return filename;
+  }
+
+  // getting this far means the file was not found
+  std::string directoryNamesList = boost::algorithm::join(directoryNames, ", ");
+  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " +
+                           directoryNamesList);
+}
+
 /**
  * Load facility information from instrumentDir/Facilities.xml file if fName
  * parameter
@@ -1695,36 +1735,18 @@ bool ConfigServiceImpl::addDirectoryifExists(
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   clearFacilities();
 
-  // search all of the instrument directories
-  std::vector<std::string> directoryNames = getInstrumentDirectories();
-  std::string fileName = "";
-  for (const auto &instrDir : directoryNames) {
-    fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
-
-    Poco::File facilitiesFile(fileName);
-    // stop when you find the first one
-    if (facilitiesFile.exists())
-      break;
-  }
-
-  // Set up the DOM parser and parse xml file
-  Poco::XML::DOMParser pParser;
-  Poco::AutoPtr<Poco::XML::Document> pDoc;
-
   try {
-    if (fileName.empty()) {
-      std::string directoryNamesList =
-          boost::algorithm::join(directoryNames, ", ");
-      throw std::runtime_error(
-          "Could not find a facilities info file! Searched for " +
-          directoryNamesList);
-    }
+    std::string fileName = getFacilityFilename(fName);
 
+    // Set up the DOM parser and parse xml file
+    Poco::AutoPtr<Poco::XML::Document> pDoc;
     try {
+      Poco::XML::DOMParser pParser;
       pDoc = pParser.parse(fileName);
     } catch (...) {
       throw Kernel::Exception::FileError("Unable to parse file:", fileName);
     }
+
     // Get pointer to root element
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     if (!pRootElem->hasChildNodes()) {

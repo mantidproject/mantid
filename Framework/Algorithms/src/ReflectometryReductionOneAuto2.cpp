@@ -691,6 +691,16 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
   groupAlg->execute();
 
+  // Set other properties so they can be updated in the Reflectometry interface
+  setPropertyValue("ThetaIn", alg->getPropertyValue("ThetaIn"));
+  setPropertyValue("MomentumTransferMin",
+                   alg->getPropertyValue("MomentumTransferMin"));
+  setPropertyValue("MomentumTransferMax",
+                   alg->getPropertyValue("MomentumTransferMax"));
+  setPropertyValue("MomentumTransferStep",
+                   alg->getPropertyValue("MomentumTransferStep"));
+  setPropertyValue("ScaleFactor", alg->getPropertyValue("ScaleFactor"));
+
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
     setPropertyValue("OutputWorkspace", outputIvsQ);
@@ -743,6 +753,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   setPropertyValue("OutputWorkspace", outputIvsQ);
   setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
   setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+
   return true;
 }
 

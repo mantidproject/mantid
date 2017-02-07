@@ -297,6 +297,8 @@ private:
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
+  /// Determine the name of the facilities file to use
+  std::string getFacilityFilename(const std::string &fName);
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
   bool addDirectoryifExists(const std::string &directoryName,
