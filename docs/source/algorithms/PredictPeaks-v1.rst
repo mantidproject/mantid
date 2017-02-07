@@ -26,6 +26,11 @@ HKL's to try.
 The parameters of WavelengthMin/WavelengthMax also limit the peaks
 attempted to those that can be detected/produced by your instrument.
 
+The Reflection Condition and Point Group can be input to also limit the peaks
+attempted to those possible.  
+By checking UseSymmetry, you will take the crystal symmetry into account so
+HKL peaks that are equivalent, due to symmetry, are considered to be the same.
+
 Furthermore it's possible to calculate structure factors for the
 predicted peaks by activating the CalculateStructureFactors-option.
 For this to work the sample needs to have a crystal structure stored,

@@ -26,7 +26,9 @@ public:
   PredictPeaks();
 
   /// Algorithm's name for identification
-  const std::string name() const override { return "PredictPeaks"; };
+  const std::string name() const override {
+    return "PredictPeaks";
+  };
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Using a known crystal lattice and UB matrix, predict where single "
@@ -35,7 +37,9 @@ public:
   }
 
   /// Algorithm's version for identification
-  int version() const override { return 1; };
+  int version() const override {
+    return 1;
+  };
   /// Algorithm's category for identification
   const std::string category() const override { return "Crystal\\Peaks"; }
 
@@ -76,6 +80,7 @@ private:
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_pws;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
 
   double m_qConventionFactor;
