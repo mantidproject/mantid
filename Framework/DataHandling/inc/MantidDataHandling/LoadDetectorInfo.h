@@ -80,9 +80,8 @@ private:
 
   /// Update the parameter map with the new values for the given detector
   void updateParameterMap(API::DetectorInfo &detectorInfo,
-                          Geometry::ParameterMap &pmap,
-                          const Geometry::IDetector &det, const double l2,
-                          const double theta, const double phi,
+                          const size_t detIndex, Geometry::ParameterMap &pmap,
+                          const double l2, const double theta, const double phi,
                           const double delay, const double pressure,
                           const double thickness) const;
 

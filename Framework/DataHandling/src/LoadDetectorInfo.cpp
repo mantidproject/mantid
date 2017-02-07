@@ -152,8 +152,8 @@ void LoadDetectorInfo::loadFromDAT(const std::string &filename) {
       float pressure(0.0), thickness(0.0);
       is >> pressure >> thickness;
 
-      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
-                         phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -212,8 +212,8 @@ void LoadDetectorInfo::loadFromRAW(const std::string &filename) {
       float pressure = iraw.ut[i + pressureTabNum * numDets];
       float thickness = iraw.ut[i + thicknessTabNum * numDets];
 
-      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
-                         phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -275,8 +275,8 @@ void LoadDetectorInfo::loadFromIsisNXS(const std::string &filename) {
       double pressure = detInfo.pressures[i];
       double thickness = detInfo.thicknesses[i];
 
-      updateParameterMap(wsDetInfo, pmap, wsDetInfo.detector(index), l2, theta,
-                         phi, delta, pressure, thickness);
+      updateParameterMap(wsDetInfo, index, pmap, l2, theta, phi, delta,
+                         pressure, thickness);
     } catch (std::out_of_range &) {
       continue;
     }
@@ -391,9 +391,10 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
 }
 
 /**
- *
+ * 
+ * @param detectorInfo A reference to the workspace's detector info
+ * @param detIndex The index of the detector whose parameters should be updated
  * @param pmap A reference to the ParameterMap instance to update
- * @param det A reference to the detector whose parameters should be updated
  * @param l2 The new l2 value
  * @param theta The new theta value
  * @param phi The new phi value
@@ -402,13 +403,15 @@ void LoadDetectorInfo::readNXSDotDat(::NeXus::File &nxsFile,
  * @param thickness The new thickness value
  */
 void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
+                                          const size_t detIndex,
                                           Geometry::ParameterMap &pmap,
-                                          const Geometry::IDetector &det,
                                           const double l2, const double theta,
                                           const double phi, const double delay,
                                           const double pressure,
                                           const double thickness) const {
+
   // store detector params that are different to instrument level
+  const auto &det = detectorInfo.detector(detIndex);
   if (fabs(delay - m_instDelta) > 1e-06)
     pmap.addDouble(det.getComponentID(), DELAY_PARAM, delay);
   if (fabs(pressure - m_instPressure) > 1e-06)

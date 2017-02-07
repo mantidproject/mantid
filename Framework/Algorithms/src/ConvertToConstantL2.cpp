@@ -91,9 +91,8 @@ void ConvertToConstantL2::exec() {
     m_outputWS->setHistogram(i, m_inputWS->histogram(i));
 
     // Should not move the monitors
-    if (inputSpecInfo.isMonitor(i)) {
+    if (inputSpecInfo.isMonitor(i))
       continue;
-    }
 
     // subract the diference in l2
     double thisDetL2 = inputSpecInfo.l2(i);
