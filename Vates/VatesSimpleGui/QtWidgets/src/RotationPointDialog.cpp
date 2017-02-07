@@ -19,6 +19,8 @@ RotationPointDialog::RotationPointDialog(QWidget *parent) : QDialog(parent) {
   // Gather the coordinates
   QObject::connect(this->ui.buttonBox, SIGNAL(accepted()), this,
                    SLOT(getCoordinates()));
+
+  setModal(true);
 }
 
 RotationPointDialog::~RotationPointDialog() {}

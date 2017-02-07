@@ -26,6 +26,8 @@ void ColorMapEditorPanel::setUpPanel() {
 
   QObject::connect(this, SIGNAL(hidePopUpWindow()), this,
                    SLOT(onHidePopUpWindow()), Qt::QueuedConnection);
+
+  setModal(true);
 }
 
 /**
