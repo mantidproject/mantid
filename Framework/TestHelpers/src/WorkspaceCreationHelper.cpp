@@ -80,29 +80,29 @@ Workspace2D_sptr create1DWorkspaceRand(int size) {
                             std::numeric_limits<int>::max());
 
   auto randFunc = [&randomGen] { return randomGen.nextValue(); };
-  HistogramData::BinEdges xVals(size);
-  HistogramData::Counts counts(size, randFunc);
-  HistogramData::CountStandardDeviations errorVals(size, randFunc);
+  BinEdges xVals(size + 1, LinearGenerator(1, 1));
+  Counts counts(size, randFunc);
+  CountStandardDeviations errorVals(size, randFunc);
 
-  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(counts),
+  Histogram generatedHisto(std::move(xVals), std::move(counts),
                                           std::move(errorVals));
 
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->setHistogram(0, std::move(generatedHisto));
+  retVal->initialize(1, std::move(generatedHisto));
   return retVal;
 }
 
 Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
                                            double error) {
-  HistogramData::BinEdges xVals(size);
-  HistogramData::Counts yVals(size, value);
-  HistogramData::CountStandardDeviations errVals(size, error);
+  BinEdges xVals(size + 1, LinearGenerator(1, 1));
+  Counts yVals(size, value);
+  CountStandardDeviations errVals(size, error);
 
-  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(yVals),
+  Histogram generatedHisto(std::move(xVals), std::move(yVals),
                                           std::move(errVals));
 
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->setHistogram(0, std::move(generatedHisto));
+  retVal->initialize(1, std::move(generatedHisto));
   return retVal;
 }
 
@@ -116,15 +116,15 @@ Workspace2D_sptr create1DWorkspaceConstantWithXerror(int size, double value,
 }
 
 Workspace2D_sptr create1DWorkspaceFib(int size) {
-  HistogramData::BinEdges xVals(size);
-  HistogramData::Counts yVals(size, FibSeries<double>());
-  HistogramData::CountStandardDeviations errVals(size);
+  BinEdges xVals(size + 1, LinearGenerator(1, 1));
+  Counts yVals(size, FibSeries<double>());
+  CountStandardDeviations errVals(size);
 
-  HistogramData::Histogram generatedHisto(std::move(xVals), std::move(yVals),
-                                          std::move(errVals));
+  Histogram generatedHisto(std::move(xVals), std::move(yVals),
+                           std::move(errVals));
 
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->setHistogram(0, std::move(generatedHisto));
+  retVal->initialize(1, std::move(generatedHisto));
   return retVal;
 }
 
@@ -142,10 +142,8 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist,
                                                          int numBoundaries) {
   Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
   for (int workspaceIndex = 0; workspaceIndex < nhist; workspaceIndex++) {
-    auto &yVals = out->mutableY(workspaceIndex);
-    for (int i = 0; i < numBoundaries; i++) {
-      yVals[i] = workspaceIndex * 1.0;
-    }
+	  std::vector<double> yValues(numBoundaries, static_cast<double>(workspaceIndex));
+	  out->mutableY(workspaceIndex) = std::move(yValues);
   }
 
   return out;
@@ -977,16 +975,14 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO
   }
 
-  const double dE = (Emax - Emin) / double(numBins);
+  const double dE = (Emax - Emin) / static_cast<double>(numBins);
   for (size_t j = 0; j < numPixels; j++) {
-
     std::vector<double> E_transfer;
     E_transfer.reserve(numBins);
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.push_back(Emin + static_cast<double>(i) * dE);
     }
-    BinEdges xVals(E_transfer);
-    ws->setHistogram(j, std::move(xVals));
+	ws->mutableX(j) = E_transfer;
   }
 
   // set axis, correspondent to the X-values

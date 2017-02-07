@@ -167,7 +167,8 @@ public:
   void test_1D_Rand2D()
   {
     int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins);
+    const bool isHistogram(true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, isHistogram);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins);
     performTest(work_in1,work_in2);
   }

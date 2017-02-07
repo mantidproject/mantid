@@ -206,7 +206,8 @@ public:
   void test_1D_Rand2D()
   {
     int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins);
+    const bool isHistogram(true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, isHistogram);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins);
     performTest(work_in1,work_in2);
   }
@@ -703,6 +704,7 @@ public:
     alg->setPropertyValue("RHSWorkspace",wsName2);
     alg->setPropertyValue("OutputWorkspace",wsNameOut);
     alg->setProperty("AllowDifferentNumberSpectra", allowMismatchedSpectra);
+    alg->setRethrows(true);
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;

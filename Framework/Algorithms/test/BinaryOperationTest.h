@@ -90,8 +90,9 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
+	  const bool isHistogram(true);
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     Workspace2D_sptr work_in2 =
         WorkspaceCreationHelper::create1DWorkspaceFib(20);
     Workspace2D_sptr work_in3 =
