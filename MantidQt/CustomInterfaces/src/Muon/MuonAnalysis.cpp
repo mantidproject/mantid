@@ -2370,24 +2370,6 @@ void MuonAnalysis::changeTab(int newTabIndex) {
         ConfigService::Instance().getString(PEAK_RADIUS_CONFIG);
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, "99");
 
-    // setFitPropertyBrowser() above changes the fitting range, so we have to
-    // either initialise it to the correct values:
-    if (xmin == 0.0 && xmax == 0.0) {
-      // A previous fitting range of [0,0] means this is the first time the
-      // user goes to "Data Analysis" tab
-      // We have to initialise the fitting range
-      m_dataSelector->setStartTime(
-          m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_dataSelector->setEndTime(
-          m_uiForm.timeAxisFinishAtInput->text().toDouble());
-    }
-    // or set it to the previous values provided by the user:
-    else {
-      // A previous fitting range already exists, so we use it
-      m_dataSelector->setStartTime(xmin);
-      m_dataSelector->setEndTime(xmax);
-    }
-
     // If a workspace is selected:
     // - Show connected plot and attach PP tool to it (if has been assigned)
     // - Set input of data selector to selected workspace
@@ -2402,7 +2384,32 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
-  } else if (newTab == m_uiForm.ResultsTable) {
+ 
+if (xmin == 0.0 && xmax == 0.0) {
+      // A previous fitting range of [0,0] means this is the first time the
+      // user goes to "Data Analysis" tab
+      // We have to initialise the fitting range
+      m_dataSelector->setStartTime(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+      m_dataSelector->setEndTime(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+      m_uiForm.fitBrowser->setStartX(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+      m_uiForm.fitBrowser->setEndX(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+      
+    }
+    // or set it to the previous values provided by the user:
+    else {
+      // A previous fitting range already exists, so we use it
+      m_dataSelector->setStartTime(xmin);
+      m_dataSelector->setEndTime(xmax);
+      m_uiForm.fitBrowser->setStartX(xmin);
+      m_uiForm.fitBrowser->setEndX(xmax);
+}
+
+
+} else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
 
