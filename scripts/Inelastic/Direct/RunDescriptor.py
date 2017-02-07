@@ -425,7 +425,6 @@ class RunDescriptor(PropDescriptor):
             return self._run_number
 #--------------------------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-branches
-
     def __set__(self,instance,value):
         """Set up Run number and define workspace name from any source """
         #
@@ -456,6 +455,9 @@ class RunDescriptor(PropDescriptor):
                     self._set_run_list(instance,run_num,file_path,fext)
                 else:
                     self._set_single_run(instance,run_num,file_path,fext)
+        elif isinstance(value, collections.Iterable): # xrange provided
+            value = list(value)
+            self._set_run_list(instance,value,"",None)
         elif isinstance(value,list):
             self._set_run_list(instance,value,"",None)
         else:
