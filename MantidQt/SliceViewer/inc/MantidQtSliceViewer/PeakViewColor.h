@@ -30,7 +30,9 @@ struct PeakViewColor {
     return sameColorCross && sameColorSphere && sameColorEllipsoid;
   }
 
-  bool operator!=(const PeakViewColor &other) const { return !(*this == other); }
+  bool operator!=(const PeakViewColor &other) const {
+    return !(*this == other);
+  }
 
   QColor colorCross;
   QColor colorSphere;
