@@ -22,7 +22,7 @@ private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
   void plotClicked();
-  void newSample(const QString &dataName);
+  void getBeamDefaults(const QString &dataName);
 
 private:
   void addSaveWorkspace(QString wsName);

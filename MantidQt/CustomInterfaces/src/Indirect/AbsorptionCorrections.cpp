@@ -27,7 +27,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
 
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-    SLOT(newSample(const QString &)));
+    SLOT(getBeamDefaults(const QString &)));
 
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -64,8 +64,6 @@ void AbsorptionCorrections::run() {
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
 
   // General details
-
-  absCorAlgo->setProperty("DefaultBeamSize", m_uiForm.ckBeamSize->isChecked());
   absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
   long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
@@ -296,7 +294,7 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void AbsorptionCorrections::newSample(const QString &dataName) {
+void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
   const MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
   if (!sampleWs) {
     g_warning() << "Failed to find workspace " << dataName.toStdString() << "\n"
@@ -308,12 +306,16 @@ void AbsorptionCorrections::newSample(const QString &dataName) {
     const auto beamWidth= QString::fromStdString(
       instrument->getStringParameter(beamWidthParamName)[0]);
     const auto beamWidthValue = beamWidth.toDouble();
+
+    m_uiForm.spBeamWidth->setValue(beamWidthValue);
   }
   const std::string beamHeightParamName = "Workflow.beam-height";
   if (instrument->hasParameter(beamHeightParamName)) {
     const auto beamHeight = QString::fromStdString(
       instrument->getStringParameter(beamHeightParamName)[0]);
     const auto beamHeightValue = beamHeight.toDouble();
+
+    m_uiForm.spBeamHeight->setValue(beamHeightValue);
   }
 
 }
