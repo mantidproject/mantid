@@ -72,8 +72,6 @@ void ConvertToConstantL2::exec() {
 
   initWorkspaces();
 
-  Geometry::ParameterMap &pmap = m_outputWS->instrumentParameters();
-
   // Calculate the number of spectra in this workspace
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
