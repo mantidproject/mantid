@@ -27,10 +27,10 @@ ComplexType conjg(const ComplexMatrixValueConverter &conv) {
   return std::conj(static_cast<ComplexType>(conv));
 }
 
-// number of rare earth ions (?)
+// number of rare earth ions (trivalent rare earths with unfilled f-shell)
 const int maxNre = 13;
 
-// define some rare earth constants (?)
+// define some rare earth constants (ggj is the Lande g-factor, ddimj=2J+1)
 const std::array<double, maxNre> ggj = {
     6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0,     2.0,
     3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.};

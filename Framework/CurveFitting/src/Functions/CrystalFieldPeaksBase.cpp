@@ -344,12 +344,15 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
       case 'J':
       case 'j':
         {
-          // Need to store as 2J to allow half-integer values
-          auto J2 = std::stof(ion.substr(1)) * 2.;
-          if (fabs(J2 - (int)J2) < 0.001) {
-            nre = -(int)J2;
-            break;
-          } 
+          std::string numbers ("0123456789");
+          if (numbers.find(ion[1]) != std::string::npos) {
+            // Need to store as 2J to allow half-integer values
+            auto J2 = std::stof(ion.substr(1)) * 2.;
+            if (fabs(J2 - (int)J2) < 0.001) {
+              nre = -(int)J2;
+              break;
+            } 
+          }
           // fall through
         }
       default:
