@@ -487,27 +487,27 @@
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="2" column="2">
+      <item row="1" column="2">
        <widget class="QLabel" name="lbNumberEvents">
         <property name="text">
          <string>Events:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="0" column="2">
        <widget class="QLabel" name="lbBeamHeight">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>Beam Height:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
+      <item row="0" column="4">
        <widget class="QDoubleSpinBox" name="spBeamHeight">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="suffix">
          <string> cm</string>
@@ -520,7 +520,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="1" column="1">
        <widget class="QSpinBox" name="spNumberWavelengths">
         <property name="minimum">
          <number>1</number>
@@ -536,20 +536,20 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0">
        <widget class="QLabel" name="lbBeamWidth">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text">
          <string>Beam Width:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spBeamWidth">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="suffix">
          <string> cm</string>
@@ -562,14 +562,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="lbNumberWavelengths">
         <property name="text">
          <string>Number Wavelengths:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="1" column="4">
        <widget class="QSpinBox" name="spNumberEvents">
         <property name="maximum">
          <number>1000000</number>
@@ -579,16 +579,6 @@
         </property>
         <property name="value">
          <number>5000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="ckBeamSize">
-        <property name="text">
-         <string>Use Instrument Default Beam Size</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -1003,70 +993,6 @@
     <hint type="destinationlabel">
      <x>783</x>
      <y>237</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbBeamWidth</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>46</x>
-     <y>281</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>47</x>
-     <y>314</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spBeamWidth</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>176</x>
-     <y>283</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>458</x>
-     <y>319</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>lbBeamHeight</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>110</x>
-     <y>283</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>482</x>
-     <y>313</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckBeamSize</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spBeamHeight</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>149</x>
-     <y>284</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>672</x>
-     <y>301</y>
     </hint>
    </hints>
   </connection>
