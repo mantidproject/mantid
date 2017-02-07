@@ -9,13 +9,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidKernel/Unit.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/LoadHelper.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
 
 class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
-  std::string m_dataFile;
+  std::string m_dataFile{"ILLD17-161876-Ni.nxs"};
+  Mantid::DataHandling::LoadHelper loadHelper;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -23,8 +26,6 @@ public:
     return new LoadILLReflectometryTest();
   }
   static void destroySuite(LoadILLReflectometryTest *suite) { delete suite; }
-
-  LoadILLReflectometryTest() : m_dataFile("ILLD17-161876-Ni.nxs") {}
 
   void testInit() {
     LoadILLReflectometry loader;
@@ -61,10 +62,10 @@ public:
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2);
 
-    double channelWidth = getPropertyFromRun<double>(output, "channel_width");
+    double channelWidth = loadHelper.getPropertyFromRun<double>(output, "channel_width");
     TS_ASSERT_EQUALS(channelWidth, 57.0);
 
-    double analyserAngle = getPropertyFromRun<double>(output, "dan.value");
+    double analyserAngle = loadHelper.getPropertyFromRun<double>(output, "dan.value");
     TS_ASSERT_EQUALS(analyserAngle, 3.1909999847412109);
 
     // Test x unit
@@ -97,9 +98,11 @@ public:
 
     TS_ASSERT(output);
 
-    // Compare angles in degree
-    //twoTheta = outWSName->getSampleLogs("");
-    //TS_ASSERT_EQUALS(twoTheta, 0.799460);
+    // Compare angles in rad
+    double sampleAngle = loadHelper.getPropertyFromRun<double>(output, "san.value");
+    const auto &spectrumInfo = output->spectrumInfo();
+    // Check twoTheta at mid detector
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(129), 2. * sampleAngle * M_PI / 180.0, 1.e-4);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();

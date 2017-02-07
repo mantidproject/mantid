@@ -5,7 +5,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 
 //#include <boost/algorithm/string.hpp>
@@ -22,16 +21,6 @@ using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-LoadILLReflectometry::LoadILLReflectometry()
-    : m_numberOfTubes{0},         // number of tubes - X
-      m_numberOfPixelsPerTube{0}, // number of pixels per tube - Y
-      m_numberOfChannels{0},      // time channels - Z
-      m_numberOfHistograms{0}, m_wavelength{0}, m_channelWidth{0},
-      m_supportedInstruments{"D17", "d17"} {}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -183,7 +172,7 @@ void LoadILLReflectometry::exec() {
                                                            m_localWorkspace);
     convertToWavelength->setPropertyValue("Target", "Wavelength");
     convertToWavelength->setPropertyValue("EMode", "Elastic");
-    convertToWavelength->execute();
+    // convertToWavelength->execute();
   }
 
   // eventually transpose workspace (histogram)
@@ -474,7 +463,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
 
-  // Add also "Facility", as asked
+  // Add also "Facility"
   runDetails.addProperty("Facility", std::string("ILL"));
 
   stat = NXclose(&nxfileID);
@@ -486,29 +475,20 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
  * @param entry :: The first entry of the Nexus file
  */
 void LoadILLReflectometry::placeDetector() {
+  g_log.debug() << "Move detector \n";
 
-  auto angle = dynamic_cast<PropertyWithValue<double> *>(
-      m_localWorkspace->run().getProperty("dan.value"));
-  g_log.debug() << "Detector angle in degree " << angle->value() << '\n';
+  double angle =
+      loadHelper.getPropertyFromRun<double>(m_localWorkspace, "dan.value");
+  g_log.debug() << "Detector angle in degree " << angle << '\n';
 
-  auto sample_angle = dynamic_cast<PropertyWithValue<double> *>(
-      m_localWorkspace->run().getProperty("san.value"));
-  g_log.debug() << "Sample angle in degree " << sample_angle->value() << '\n';
-
-  g_log.debug() << "Moving \n";
+  double sample_angle =
+      loadHelper.getPropertyFromRun<double>(m_localWorkspace, "san.value");
+  g_log.debug() << "Sample angle in degree " << sample_angle << '\n';
 
   auto dist = dynamic_cast<PropertyWithValue<double> *>(
       m_localWorkspace->run().getProperty("det.value"));
   double distance = *dist / 1000.0; // convert to meter
   g_log.debug() << "Sample - detector distance in millimeter " << *dist << '\n';
-
-  std::string componentName("uniq_detector");
-  V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  //      double r, theta, phi;
-  //      pos.getSpherical(r, theta, phi);
-
-  // center detector?
-  // pos.setX(pos.X() - xCenter);
 
   /*
   Lamp
@@ -528,7 +508,8 @@ void LoadILLReflectometry::placeDetector() {
   --------------------------------------------------------------------------------------------
 
   angle_bragg = (parref.san * !pi / 180.) -
-                0.5*atan((float(peakref)-c_params.pcen)*c_params.pixelwidth/parref.sdetd) +
+                0.5*atan((float(peakref)-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
+  +
                 0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
 
   san incoherent
@@ -549,7 +530,8 @@ void LoadILLReflectometry::placeDetector() {
   to select middle of specular pixel (peakref) instead of value from fit
 
   angle_bragg = angle_centre +
-                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd) -
+                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd)
+  -
                 0.5*atan(((float(peakref)+0.5)-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
                 we have to use the middle of the coherent center pixel
 
@@ -557,7 +539,8 @@ void LoadILLReflectometry::placeDetector() {
   --------------------------------------------------------------------------------------------
 
   angle_bragg = angle_centre +
-                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd) -
+                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd)
+  -
                 0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
 
   ============================================================================================
@@ -570,25 +553,22 @@ void LoadILLReflectometry::placeDetector() {
 
   */
 
-  double angle_rad = 2. * *sample_angle * M_PI / 180.0;
-  g_log.debug() << "2Theta " << 2. * *sample_angle << "\n";
+  std::string componentName("uniq_detector");
+  V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
 
-  // add theta to sample logs
-  // m_localWorkspace->run().addLogData("Theta");
-  //add somewhere  m_localWorkspace->setTitle();
+  double angle_rad = 2. * sample_angle * M_PI / 180.0;
+  // incident theta angle for being able to call the algorithm
+  // ConvertToReflectometryQ
+  m_localWorkspace->mutableRun().addProperty("stheta", double(angle_rad));
+  g_log.debug() << "2Theta " << 2. * sample_angle << " degrees\n";
+
+  // move to new position
   V3D newpos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
-
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
-  Quat rotation(*sample_angle, axis);
+  Quat rotation(sample_angle, axis);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
-
-  const auto &spectrumInfo = m_localWorkspace->spectrumInfo();
-  double twoTheta = spectrumInfo.twoTheta(2);
-  g_log.debug() << "2Theta " << twoTheta << "\n";
-
-  g_log.debug() << "End moving.\n";
 }
 } // namespace DataHandling
 } // namespace Mantid

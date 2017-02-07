@@ -8,6 +8,8 @@
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
+Mantid::DataHandling::LoadHelper loadHelper;
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -37,7 +39,7 @@ namespace DataHandling {
 class DLLExport LoadILLReflectometry
     : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
-  LoadILLReflectometry();
+  LoadILLReflectometry() = default;
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
   /// Algorithm's name for identification. @see Algorithm::name
@@ -77,14 +79,13 @@ private:
 
   /* Values parsed from the nexus file */
   std::string m_instrumentName; ///< Name of the instrument
-  size_t m_numberOfTubes;         // number of tubes - X
-  size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
-  size_t m_numberOfChannels;      // time channels - Z
-  size_t m_numberOfHistograms;
-  double m_wavelength;
-  double m_channelWidth;
-
-  std::unordered_set<std::string> m_supportedInstruments;
+  size_t m_numberOfTubes{0};         // number of tubes - X
+  size_t m_numberOfPixelsPerTube{0}; // number of pixels per tube - Y
+  size_t m_numberOfChannels{0};      // time channels - Z
+  size_t m_numberOfHistograms{0};
+  double m_wavelength{0};
+  double m_channelWidth{0};
+  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17"};
   LoadHelper m_loader;
 };
 
