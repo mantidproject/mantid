@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
 
 Deprecated
 ##########
