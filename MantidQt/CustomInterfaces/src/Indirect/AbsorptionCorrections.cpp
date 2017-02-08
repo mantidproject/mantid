@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 
@@ -24,10 +25,9 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 
-
   // Change of input
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-    SLOT(getBeamDefaults(const QString &)));
+          SLOT(getBeamDefaults(const QString &)));
 
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -295,16 +295,19 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
 }
 
 void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
-  const MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(dataName.toStdString());
+  auto sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
+
   if (!sampleWs) {
-    g_warning() << "Failed to find workspace " << dataName.toStdString() << "\n"
+    g_log.warning() << "Failed to find workspace " << dataName.toStdString()
+                    << "\n";
   }
 
-  const auto inst = sampleWs.getInstrument();
-  const std::string beamWidthParamName = "Worksflow.beam-width";
-  if (inst->hasParameter(beamWidthParamName)) {
-    const auto beamWidth= QString::fromStdString(
-      instrument->getStringParameter(beamWidthParamName)[0]);
+  auto instrument = sampleWs->getInstrument();
+  const std::string beamWidthParamName = "Workflow.beam-width";
+  if (instrument->hasParameter(beamWidthParamName)) {
+    const auto beamWidth = QString::fromStdString(
+        instrument->getStringParameter(beamWidthParamName)[0]);
     const auto beamWidthValue = beamWidth.toDouble();
 
     m_uiForm.spBeamWidth->setValue(beamWidthValue);
@@ -312,12 +315,11 @@ void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
   const std::string beamHeightParamName = "Workflow.beam-height";
   if (instrument->hasParameter(beamHeightParamName)) {
     const auto beamHeight = QString::fromStdString(
-      instrument->getStringParameter(beamHeightParamName)[0]);
+        instrument->getStringParameter(beamHeightParamName)[0]);
     const auto beamHeightValue = beamHeight.toDouble();
 
     m_uiForm.spBeamHeight->setValue(beamHeightValue);
   }
-
 }
 
 /**
