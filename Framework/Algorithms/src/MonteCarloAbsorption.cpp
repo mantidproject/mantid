@@ -120,8 +120,8 @@ void MonteCarloAbsorption::exec() {
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
 
-  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
-                               seed, interpolateOpt);
+  MatrixWorkspace_sptr outputWS = doSimulation(
+      *inputWS, static_cast<size_t>(nevents), nlambda, seed, interpolateOpt);
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -136,7 +136,7 @@ void MonteCarloAbsorption::exec() {
  * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_sptr
+MatrixWorkspace_uptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
                                    size_t nevents, int nlambda, int seed,
                                    const InterpolationOption &interpolateOpt) {
@@ -222,7 +222,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   return outputWS;
 }
 
-MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
+MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
   auto outputWS = DataObjects::create<HistoWorkspace>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
