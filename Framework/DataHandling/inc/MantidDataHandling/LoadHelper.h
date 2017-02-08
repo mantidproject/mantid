@@ -69,7 +69,7 @@ public:
                                    const std::string &componentName);
   template <typename T>
   T getPropertyFromRun(API::MatrixWorkspace_sptr inputWS,
-                                   const std::string &propertyName) {
+                       const std::string &propertyName) {
     if (inputWS->run().hasProperty(propertyName)) {
       Kernel::Property *prop = inputWS->run().getProperty(propertyName);
       return boost::lexical_cast<T>(prop->value());
