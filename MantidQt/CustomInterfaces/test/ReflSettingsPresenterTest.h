@@ -258,7 +258,7 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
 
-    std::vector<double> defaults = {1., 4.0, 10., 15., 17., 1.0, 17., 2.0};
+    std::vector<double> defaults = {1., 4.0, 10., 17., 18., 1.5, 17., 2.0};
 
     EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
