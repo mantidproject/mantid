@@ -206,7 +206,7 @@ class AbstractInst(object):
         """
         if not output_directory:
             output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        output_directory.path.abspath(os.path.expanduser(output_directory))
+        output_directory = os.path.abspath(os.path.expanduser(output_directory))
         file_name = str(self.generate_output_file_name(run_number_string=run_details.run_number))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
