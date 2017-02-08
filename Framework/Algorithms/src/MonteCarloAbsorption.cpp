@@ -120,10 +120,10 @@ void MonteCarloAbsorption::exec() {
   InterpolationOption interpolateOpt;
   interpolateOpt.set(getPropertyValue("Interpolation"));
 
-  MatrixWorkspace_sptr outputWS = doSimulation(
-      *inputWS, static_cast<size_t>(nevents), nlambda, seed, interpolateOpt);
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
+                               seed, interpolateOpt);
 
-  setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", outputWS.get());
 }
 
 /**
