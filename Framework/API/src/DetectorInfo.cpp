@@ -67,38 +67,47 @@ bool DetectorInfo::isMasked(const size_t index) const {
  */
 double DetectorInfo::l2(const size_t index) const {
   if (!isMonitor(index))
-    return getDetector(index).getDistance(getSample());
+    return position(index).distance(samplePosition());
   else
-    return getDetector(index).getDistance(getSource()) - l1();
+    return position(index).distance(sourcePosition()) - l1();
 }
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const size_t index) const {
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
 
-  return getDetector(index).getTwoTheta(samplePos, beamLine);
+  const auto sampleDetVec = position(index) - samplePos;
+  return sampleDetVec.angle(beamLine);
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
 double DetectorInfo::signedTwoTheta(const size_t index) const {
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  const Kernel::V3D &instrumentUpAxis =
+  const auto &instrumentUpAxis =
       m_instrument->getReferenceFrame()->vecPointingUp();
-  return getDetector(index)
-      .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+
+  const auto sampleDetVec = position(index) - samplePos;
+  double angle = sampleDetVec.angle(beamLine);
+
+  const auto cross = beamLine.cross_prod(sampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
 }
 
 /// Returns the position of the detector with given index.
