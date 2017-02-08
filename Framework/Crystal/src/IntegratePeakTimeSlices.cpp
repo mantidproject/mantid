@@ -1116,10 +1116,9 @@ bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
   double Rx = lastRCRadius / CellWidth - EdgeX;
   double Ry = lastRCRadius / CellHeight - EdgeY;
   if (CellWidth > 0 && currentRadius > 0 && lastCol > 0 && lastRow > 0)
-    if (Rx * Rx < 4 * std::max<double>(Varx, VarxHW) ||
+    if (Rx * Rx < 4 * std::max(Varx, VarxHW) ||
         HalfWidthAtHalfHeightRadius < 0 ||
-        Ry * Ry < 4 * std::max<double>(
-                          Vary, VaryHW)) // Edge peak so cannot use samples
+        Ry * Ry < 4 * std::max(Vary, VaryHW)) // Edge peak so cannot use samples
     {
       Vx_calc = VarxHW;
       Vy_calc = VaryHW;
@@ -1200,12 +1199,12 @@ double DataModeHandler::getNewRCRadius() {
   double Ry = lastRCRadius / CellHeight - EdgeY;
   double mult = 1;
   if (Rx * Rx > 4 * Vx)
-    Vx = std::max<double>(VarxHW, Vx_calc);
+    Vx = std::max(VarxHW, Vx_calc);
   else
     mult = 1.35;
 
   if (Ry * Ry > 4 * Vy)
-    Vy = std::max<double>(VaryHW, Vy_calc);
+    Vy = std::max(VaryHW, Vy_calc);
   else
     mult *= 1.35;
 
@@ -1288,62 +1287,23 @@ void DataModeHandler::setHeightHalfWidthInfo(
   MaxX /= nmax;
   MaxY /= nmax;
 
-  double dCount = std::max<double>(.51, (maxCount - minCount) / 6.2);
+  double dCount = std::max(.51, (maxCount - minCount) / 6.2);
   double CountUp = (maxCount + minCount) / 2 + dCount;
   double CountLow = (maxCount + minCount) / 2 - dCount;
-
-  // Checking for weak peak not really reaching edge, so could use full peak
-  // work
-  double d2Edge = min<double>(min<double>(MaxX - lowX, highX - MaxX),
-                              min<double>(MaxY - lowY, highY - MaxY));
   double dSpanx = (highX - lowX) / 6.;
   double dSpany = (highY - lowY) / 6.0;
-  if (MaxX + d2Edge >= highX - .000001) {
-    lowX = highX - (highX - MaxX) / 4;
-    if (static_cast<int>(lowX) == static_cast<int>(highX))
-      lowX -= 1;
-    highY = highY - (highX - MaxX) / 4;
-    lowY = lowY + (highX - MaxX) / 4;
-
-  } else if (MaxX - d2Edge <= lowX + .000001) {
-    highX = lowX + (MaxX - lowX) / 4;
-    if (static_cast<int>(highX) == static_cast<int>(lowX))
-      highX += 1.0;
-
-    highY -= (MaxX - lowX) / 4;
-    lowY += (MaxX - lowX) / 4;
-
-  } else if (MaxY + d2Edge >= highY - .000001) {
-    lowY = highY - (highY - MaxY) / 4;
-    if (static_cast<int>(lowY) == static_cast<int>(highY))
-      lowY -= 1;
-    highX -= (highY - MaxY) / 4;
-    lowX += (highY - MaxY) / 4;
-
-  } else {
-    highY = lowY + (MaxY - lowY) / 4;
-    if (static_cast<int>(lowY) == static_cast<int>(highY))
-      highY -= 1;
-    highX -= (MaxY - lowY) / 4;
-    lowX += (MaxY - lowY) / 4;
-  }
 
   int nMax = 0;
   int nMin = 0;
   double TotMax = 0;
   double TotMin = 0;
-  double offset = std::max<double>(.2, (maxCount - minCount) / 20);
+  double offset = std::max(.2, (maxCount - minCount) / 20);
   double TotR_max = 0;
   double TotR_min = 0;
-  int nedge1Cells = 0;
-  int nintCells = 0;
-  int nBoundEdge1Cells = 0;
-  int nBoundIntCells = 0;
   double TotRx0 = 0;
   double TotRy0 = 0;
   double TotCx = 0;
   double TotCy = 0;
-  double IntOffset = std::min<double>(highX - lowX, highY - lowY);
   for (int i = 0; i < N; i++) {
     if (C[i] > maxCount - offset) {
       TotMax += C[i];
@@ -1361,16 +1321,6 @@ void DataModeHandler::setHeightHalfWidthInfo(
                               (Y[i] - MaxY) * (Y[i] - MaxY));
     }
 
-    if (X[i] >= lowX && X[i] <= highX && Y[i] >= lowY && Y[i] <= highY) {
-      nedge1Cells++;
-      if (C[i] < minCount + offset)
-        nBoundEdge1Cells++;
-    }
-    if (fabs(MaxX - X[i]) < IntOffset && fabs(MaxY - Y[i]) < IntOffset) {
-      nintCells++;
-      if (C[i] < minCount + offset)
-        nBoundIntCells++;
-    }
     if (fabs(MaxY - Y[i]) < 1.2 && fabs(MaxX - X[i]) > 1.2 &&
         C[i] >= CountLow && C[i] <= CountUp && fabs(MaxX - X[i]) < dSpanx) {
       TotRx0 += (C[i] - minCount) * (X[i] - MaxX) * (X[i] - MaxX);
@@ -1578,7 +1528,6 @@ void IntegratePeakTimeSlices::SetUpData1(
   int nBoundaryCells = 0;
   double TotBoundaryVariances = 0;
 
-  int N = 0;
   double BoundaryRadius = min<double>(
       .90 * Radius, Radius - 1.5 * max<double>(m_cellWidth, m_cellHeight));
   double minRow = 20000, maxRow = -1, minCol = 20000, maxCol = -1;
@@ -1633,7 +1582,6 @@ void IntegratePeakTimeSlices::SetUpData1(
           variance += histoerrs[chan] * histoerrs[chan];
         }
 
-        N++;
         yvalB.push_back(intensity);
         double sigma = 1;
 
@@ -1759,10 +1707,8 @@ bool DataModeHandler::isEdgePeak(const double *params, int nparams) {
   double Ry =
       lastRCRadius / CellHeight - EdgeY; // span from center  in y direction
 
-  return Rx * Rx < NStdDevPeakSpan * NStdDevPeakSpan *
-                       std::max<double>(Varx, VarxHW) ||
-         Ry * Ry <
-             NStdDevPeakSpan * NStdDevPeakSpan * std::max<double>(Vary, VaryHW);
+  return Rx * Rx < NStdDevPeakSpan * NStdDevPeakSpan * std::max(Varx, VarxHW) ||
+         Ry * Ry < NStdDevPeakSpan * NStdDevPeakSpan * std::max(Vary, VaryHW);
 }
 
 /**
@@ -1891,11 +1837,11 @@ void DataModeHandler::CalcVariancesFromData(double background, double meanx,
 
   if (CalcVariances()) {
 
-    Varxx = std::min<double>(
-        Varxx, 1.21 * getInitVarx()); // copied from BiVariateNormal
-    Varxx = std::max<double>(Varxx, .79 * getInitVarx());
-    Varyy = std::min<double>(Varyy, 1.21 * getInitVary());
-    Varyy = std::max<double>(Varyy, .79 * getInitVary());
+    Varxx =
+        std::min(Varxx, 1.21 * getInitVarx()); // copied from BiVariateNormal
+    Varxx = std::max(Varxx, .79 * getInitVarx());
+    Varyy = std::min(Varyy, 1.21 * getInitVary());
+    Varyy = std::max(Varyy, .79 * getInitVary());
   }
 }
 /**
@@ -1915,9 +1861,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
 
   double nBoundaryCells = StatBase[INBoundary];
   double back = TotBoundaryIntensities / nBoundaryCells;
-  double backVar =
-      std::max<double>(nBoundaryCells / 50.0, TotBoundaryVariances) /
-      nBoundaryCells / nBoundaryCells;
+  double backVar = std::max(nBoundaryCells / 50.0, TotBoundaryVariances) /
+                   nBoundaryCells / nBoundaryCells;
   double IntensVar = Variance + ncells * ncells * backVar;
 
   double relError = .25;
@@ -1931,8 +1876,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
 
   double NSigs = NStdDevPeakSpan;
   if (back_calc > 0)
-    NSigs = std::max<double>(NStdDevPeakSpan,
-                             7 - 5 * back_calc / back); // background too high
+    NSigs = std::max(NStdDevPeakSpan,
+                     7 - 5 * back_calc / back); // background too high
   ostringstream str;
 
   NSigs *=
@@ -1954,8 +1899,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
       Intensity_calc + NSigs * (1 + relError) * sqrt(IntensVar));
   double relErr1 = relError * .75;
   double val = col_calc;
-  double minn = std::max<double>(MinCol - .5, (1 - relErr1) * val);
-  maxx = std::min<double>((1 + relErr1) * val, MaxCol + .5);
+  double minn = std::max(MinCol - .5, (1 - relErr1) * val);
+  maxx = std::min((1 + relErr1) * val, MaxCol + .5);
 
   str << "," << minn << "<"
       << "Mcol"
@@ -1964,8 +1909,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
 
   val = row_calc;
 
-  minn = std::max<double>(MinRow - .5, (1 - relErr1) * val);
-  maxx = std::min<double>((1 + relErr1) * val, MaxRow + .5);
+  minn = std::max(MinRow - .5, (1 - relErr1) * val);
+  maxx = std::min((1 + relErr1) * val, MaxRow + .5);
   str << "," << minn << "<"
       << "Mrow"
       << "<" << maxx;
@@ -1976,8 +1921,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
     double valmin = val;
     double valmax = val;
     if (VarxHW > 0) {
-      valmin = std::min<double>(val, VarxHW);
-      valmax = std::max<double>(val, VarxHW);
+      valmin = std::min(val, VarxHW);
+      valmax = std::max(val, VarxHW);
     }
 
     relErr1 *= .6; // Edge peaks: need to restrict sigmas.
@@ -1990,8 +1935,8 @@ DataModeHandler::CalcConstraints(std::vector<std::pair<double, double>> &Bounds,
     valmin = val;
     valmax = val;
     if (VaryHW > 0) {
-      valmin = std::min<double>(val, VaryHW);
-      valmax = std::max<double>(val, VaryHW);
+      valmin = std::min(val, VaryHW);
+      valmax = std::max(val, VaryHW);
     }
     str << "," << (1 - relErr1) * valmin << "<"
         << "SSrow"
@@ -2356,8 +2301,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
     return false;
   }
 
-  double Nrows = std::max<double>(m_AttributeValues->StatBase[INRows],
-                                  m_AttributeValues->StatBase[INCol]);
+  double Nrows = std::max(m_AttributeValues->StatBase[INRows],
+                          m_AttributeValues->StatBase[INCol]);
   if (maxPeakHeightTheoretical < 1 &&
       (params[IVXX] > Nrows * Nrows / 4 || params[IVYY] > Nrows * Nrows / 4)) {
     g_log.debug() << "Peak is too flat \n";
@@ -2661,8 +2606,8 @@ double DataModeHandler::CalcISAWIntensity(const double *params) {
 
   double r = CalcSampleIntensityMultiplier(params);
 
-  double alpha = static_cast<float>(0 + .5 * (r - 1));
-  alpha = std::min<double>(1.0f, alpha);
+  double alpha = .5 * (r - 1.0);
+  alpha = std::min(1.0, alpha);
 
   lastISAWIntensity =
       ExperimentalIntensity * r; //*( 1-alpha )+ alpha * FitIntensity;
@@ -2694,8 +2639,8 @@ double DataModeHandler::CalcISAWIntensityVariance(const double *params,
                 params[IBACK] * ncells;
 
   double r = CalcSampleIntensityMultiplier(params);
-  double alpha = static_cast<float>(0 + .5 * (r - 1));
-  alpha = std::min<double>(1.0f, alpha);
+  double alpha = .5 * (r - 1.0);
+  alpha = std::min(1.0, alpha);
 
   lastISAWVariance = ExperimVar * r * r; //*( 1 - alpha ) + alpha * FitVar;
   return lastISAWVariance;
@@ -2770,7 +2715,7 @@ DataModeHandler::CalcSampleIntensityMultiplier(const double *params) const {
   else
     r *= 1 / (1 - P);
 
-  r = std::max<double>(r, 1.0);
+  r = std::max(r, 1.0);
   return r;
 }
 

@@ -9,13 +9,13 @@ namespace VATES {
 
 boost::optional<int> findRecursionDepthForTopLevelSplitting(
     const std::string &workspaceName,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider) {
+    const WorkspaceProvider &workspaceProvider) {
   const int topLevelRecursionDepth = 1;
   boost::optional<int> recursionDepth;
-  if (workspaceProvider->canProvideWorkspace(workspaceName)) {
+  if (workspaceProvider.canProvideWorkspace(workspaceName)) {
     auto workspace =
         boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
-            workspaceProvider->fetchWorkspace(workspaceName));
+            workspaceProvider.fetchWorkspace(workspaceName));
     auto boxController = workspace->getBoxController();
     boost::optional<std::vector<size_t>> topLevelSplits =
         boxController->getSplitTopInto();

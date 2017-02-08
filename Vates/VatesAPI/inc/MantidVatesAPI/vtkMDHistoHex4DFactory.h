@@ -60,7 +60,7 @@ public:
   ~vtkMDHistoHex4DFactory() override;
 
   /// Initialize the object with a workspace.
-  void initialize(Mantid::API::Workspace_sptr workspace) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Factory method
   vtkSmartPointer<vtkDataSet>

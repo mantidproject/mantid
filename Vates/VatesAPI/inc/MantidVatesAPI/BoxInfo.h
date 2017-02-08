@@ -42,7 +42,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(
     const std::string &workspaceName,
-    std::unique_ptr<WorkspaceProvider> workspaceProvider);
+    const WorkspaceProvider &workspaceProvider);
 }
 }
 

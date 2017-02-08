@@ -11,9 +11,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -474,11 +476,9 @@ void SANSRunWindow::setupSaveBox() {
           SLOT(setUserFname()));
 
   // link the save option tick boxes to their save algorithm
-  m_savFormats.insert(m_uiForm.saveNex_check, "SaveNexus");
   m_savFormats.insert(m_uiForm.saveNIST_Qxy_check, "SaveNISTDAT");
   m_savFormats.insert(m_uiForm.saveCan_check, "SaveCanSAS1D");
   m_savFormats.insert(m_uiForm.saveRKH_check, "SaveRKH");
-  m_savFormats.insert(m_uiForm.saveCSV_check, "SaveCSV");
   m_savFormats.insert(m_uiForm.saveNXcanSAS_check, "SaveNXcanSAS");
 
   for (SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end();
@@ -733,13 +733,11 @@ void SANSRunWindow::readSettings() {
 */
 void SANSRunWindow::readSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  m_uiForm.saveNex_check->setChecked(valueStore.value("nexus", false).toBool());
   m_uiForm.saveCan_check->setChecked(
       valueStore.value("canSAS", false).toBool());
   m_uiForm.saveNIST_Qxy_check->setChecked(
       valueStore.value("NIST_Qxy", false).toBool());
   m_uiForm.saveRKH_check->setChecked(valueStore.value("RKH", false).toBool());
-  m_uiForm.saveCSV_check->setChecked(valueStore.value("CSV", false).toBool());
   m_uiForm.saveNXcanSAS_check->setChecked(
       valueStore.value("NXcanSAS", false).toBool());
 }
@@ -779,11 +777,9 @@ void SANSRunWindow::saveSettings() {
 */
 void SANSRunWindow::saveSaveSettings(QSettings &valueStore) {
   valueStore.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
-  valueStore.setValue("nexus", m_uiForm.saveNex_check->isChecked());
   valueStore.setValue("canSAS", m_uiForm.saveCan_check->isChecked());
   valueStore.setValue("NIST_Qxy", m_uiForm.saveNIST_Qxy_check->isChecked());
   valueStore.setValue("RKH", m_uiForm.saveRKH_check->isChecked());
-  valueStore.setValue("CSV", m_uiForm.saveCSV_check->isChecked());
   valueStore.setValue("NXcanSAS", m_uiForm.saveNXcanSAS_check->isChecked());
 }
 /**
@@ -1671,12 +1667,12 @@ void SANSRunWindow::setGeometryDetails() {
 
   if (boost::dynamic_pointer_cast<const IEventWorkspace>(ws)) {
     // EventWorkspaces have their monitors loaded into a separate workspace.
-    const std::string monitorWsName = ws->name() + "_monitors";
+    const std::string monitorWsName = ws->getName() + "_monitors";
 
     if (!ADS.doesExist(monitorWsName)) {
       g_log.error() << "Expected a sister monitor workspace called \""
                     << monitorWsName << "\" "
-                    << "for the EventWorkspace \"" << ws->name()
+                    << "for the EventWorkspace \"" << ws->getName()
                     << "\", but could not find one "
                     << "so unable to set geometry details.\n";
       return;
@@ -1691,9 +1687,6 @@ void SANSRunWindow::setGeometryDetails() {
 
   const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sampleWs->getInstrument();
-  const auto source = instr->getSource();
-
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
   const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
@@ -1703,23 +1696,27 @@ void SANSRunWindow::setGeometryDetails() {
     g_log.error() << "The reported incident monitor spectrum number \""
                   << monitorSpectrum
                   << "\" does not have a corresponding workspace index in \""
-                  << monitorWs->name()
+                  << monitorWs->getName()
                   << "\", so unable to set geometry details.\n";
     return;
   }
 
-  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
-  if (dets.empty())
+  const auto &monitorDetectorIDs =
+      monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
+  if (monitorDetectorIDs.empty())
     return;
 
   double dist_mm(0.0);
   QString colour("black");
-  try {
-    Mantid::Geometry::IDetector_const_sptr detector =
-        instr->getDetector(*dets.begin());
 
-    double unit_conv(1000.);
-    dist_mm = detector->getDistance(*source) * unit_conv;
+  const auto &detectorInfo = sampleWs->detectorInfo();
+
+  try {
+    const auto &detector = detectorInfo.detector(
+        detectorInfo.indexOf(*monitorDetectorIDs.begin()));
+    const double unit_conv(1000.);
+    const auto &source = sampleWs->getInstrument()->getSource();
+    dist_mm = detector.getDistance(*source) * unit_conv;
   } catch (std::runtime_error &) {
     colour = "red";
   }
@@ -1823,14 +1820,8 @@ void SANSRunWindow::setGeometryDetails() {
 void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
-  double unitconv = 1000.;
-
-  Instrument_const_sptr instr = workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> sample =
-      instr->getSample();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-      instr->getSource();
-  double distance = source->getDistance(*sample) * unitconv;
+  const double unitconv = 1000.;
+  const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
   QLabel *dist_label(NULL);
@@ -1847,7 +1838,7 @@ void SANSRunWindow::setSANS2DGeometry(
   QString code_to_run =
       QString("print ','.join([str(a) for a in "
               "i.ReductionSingleton().instrument.getDetValues('%1')])")
-          .arg(QString::fromStdString(workspace->name()));
+          .arg(QString::fromStdString(workspace->getName()));
 
   QStringList logvalues = runReduceScriptFunction(code_to_run).split(",");
 
@@ -2473,8 +2464,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   // that is about to start
   py_code += "\n_user_settings_copy = "
              "copy.deepcopy(i.ReductionSingleton().user_settings)";
-  const QString verb = m_uiForm.verbose_check ? "True" : "False";
-  py_code += "\ni.SetVerboseMode(" + verb + ")";
+  py_code += "\ni.SetVerboseMode(False)";
   // Need to check which mode we're in
   if (runMode == SingleMode) {
     py_code += readSampleObjectGUIChanges();
@@ -2543,9 +2533,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
     }
     py_code += "}";
 
-    if (m_uiForm.log_colette->isChecked()) {
-      py_code += ", verbose=True";
-    }
     py_code += ", reducer=i.ReductionSingleton().reference(),";
 
     py_code += "combineDet=";

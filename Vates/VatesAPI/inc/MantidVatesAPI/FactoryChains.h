@@ -34,7 +34,7 @@ void DLLExport applyCOBMatrixSettingsToVtkDataSet(
 
 /// Function to get clipped data sets.
 vtkSmartPointer<vtkPVClipDataSet> DLLExport
-getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet);
+getClippedDataSet(const vtkSmartPointer<vtkDataSet> &dataSet);
 
 /// Create name with timestamp attached.
 std::string DLLExport createTimeStampedName(const std::string &name);

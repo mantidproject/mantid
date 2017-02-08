@@ -384,6 +384,9 @@ class ISISReducer(Reducer):
         # which gets used during cropping and Tranmission calculation
         self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
 
+        # Unwrap monitors
+        self._unwrap_monitors = False
+
     def set_instrument(self, configuration):
         """
             Sets the instrument and put in the default beam center (usually the
@@ -462,8 +465,7 @@ class ISISReducer(Reducer):
         name += self.instrument.cur_detector().name('short')
         name += '_' + self.to_Q.output_type
         name += '_' + self.to_wavelen.get_range()
-        if self.to_Q.get_output_type() == "1D":
-            name += self.mask.get_phi_limits_tag()
+        name += self.mask.get_phi_limits_tag()
 
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
@@ -979,3 +981,11 @@ class ISISReducer(Reducer):
             if sample.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
         return was_event
+
+    def get_unwrap_monitors(self):
+        return self._unwrap_monitors
+
+    def set_unwrap_monitors(self, value):
+        self._unwrap_monitors = value
+
+    unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)

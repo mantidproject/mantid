@@ -207,9 +207,11 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-  for (miter = m_outputWorkspacesMap.begin();
-       miter != m_outputWorkspacesMap.end(); ++miter) {
-    outputwsnames.push_back(miter->second->name());
+  //for (miter = m_outputWorkspacesMap.begin();
+  //     miter != m_outputWorkspacesMap.end(); ++miter) {
+  //  outputwsnames.push_back(miter->second->name());
+  for (miter = m_outputWS.begin(); miter != m_outputWS.end(); ++miter) {
+    outputwsnames.push_back(miter->second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
 
@@ -712,13 +714,13 @@ void FilterEvents::setupCustomizedTOFCorrection() {
   if (toffactormap.size() > numhist) {
     g_log.warning() << "Input correction table workspace has more detectors ("
                     << toffactormap.size() << ") than input workspace "
-                    << m_eventWS->name() << "'s spectra number (" << numhist
+                    << m_eventWS->getName() << "'s spectra number (" << numhist
                     << ".\n";
   } else if (toffactormap.size() < numhist) {
     stringstream errss;
     errss << "Input correction table workspace has more detectors ("
           << toffactormap.size() << ") than input workspace "
-          << m_eventWS->name() << "'s spectra number (" << numhist << ".\n";
+          << m_eventWS->getName() << "'s spectra number (" << numhist << ".\n";
     throw runtime_error(errss.str());
   }
 
@@ -757,7 +759,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
         stringstream errss;
         errss << "Detector "
               << "w/ ID << " << detid << " of spectrum " << i
-              << " in Eventworkspace " << m_eventWS->name()
+              << " in Eventworkspace " << m_eventWS->getName()
               << " cannot be found in input TOF calibration workspace. ";
         throw runtime_error(errss.str());
       }
@@ -865,12 +867,12 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     Kernel::TimeSplitterType splitters = generateSplitters(wsindex);
 
     g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
-                  << ": Name = " << opws->name()
+                  << ": Name = " << opws->getName()
                   << "; Number of splitters = " << splitters.size() << ".\n";
 
     // Skip output workspace has ZERO splitters
     if (splitters.empty()) {
-      g_log.warning() << "[FilterEvents] Workspace " << opws->name()
+      g_log.warning() << "[FilterEvents] Workspace " << opws->getName()
                       << " Indexed @ " << wsindex
                       << " won't have logs splitted due to zero splitter size. "
                       << ".\n";
@@ -989,7 +991,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
     throw std::runtime_error(errmsg.str());
   } else {
     for (const auto &split : splitters) {
-      g_log.debug() << "Workspace " << eventws->name() << ": "
+      g_log.debug() << "Workspace " << eventws->getName() << ": "
                     << "log name = " << logname
                     << ", duration = " << split.duration() << " from "
                     << split.start() << " to " << split.stop() << ".\n";

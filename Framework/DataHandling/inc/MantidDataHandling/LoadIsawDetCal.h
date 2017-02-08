@@ -5,12 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument.h"
-
-#include <gsl/gsl_statistics.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
+#include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -41,7 +36,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadIsawDetCal : public API::Algorithm, public Kernel::Quat {
+class DLLExport LoadIsawDetCal : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadIsawDetCal"; }
@@ -60,16 +55,21 @@ public:
   const std::string category() const override {
     return "Diffraction\\DataHandling;DataHandling\\Isaw";
   }
-  /// Function to optimize
-  void center(double x, double y, double z, const std::string &detname,
-              API::Workspace_sptr ws);
+
+  /// @copydoc Algorithm::validateInputs()
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
+  /// Set the center of the supplied detector name
+  void center(const double x, const double y, const double z,
+              const std::string &detname, API::Workspace_sptr ws);
+
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
+  std::vector<std::string> getFilenames();
 };
 
 } // namespace DataHandling

@@ -256,7 +256,7 @@ public:
     f.setParameter("c3", 1.3);
 
     f.tie("c1", "0");
-    f.tie("c3", "0");
+    f.tie("c3", "c2");
 
     TS_ASSERT_EQUALS(f.nParams(), 4);
 
@@ -277,7 +277,7 @@ public:
     TS_ASSERT(!f.isActive(3));
 
     TS_ASSERT(!f.getTie(0));
-    TS_ASSERT(f.getTie(1) && !f.getTie(1)->isDefault());
+    TS_ASSERT(!f.getTie(1));
     TS_ASSERT(!f.getTie(2));
     TS_ASSERT(f.getTie(3) && !f.getTie(3)->isDefault());
   }

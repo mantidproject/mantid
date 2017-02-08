@@ -55,10 +55,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<std::string, std::string> &postprocessMap,
     const std::string &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_mainPresenter(), m_whitelist(whitelist), m_preprocessMap(preprocessMap),
       m_processor(processor), m_postprocessor(postprocessor),
       m_postprocessMap(postprocessMap), m_loader(loader), m_postprocess(true),
-      m_mainPresenter(), m_tableDirty(false) {
+      m_tableDirty(false) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -209,14 +209,20 @@ void GenericDataProcessorPresenter::process() {
 
   for (const auto &item : items) {
 
+    // Group with updated columns
+    GroupData newGroup;
+
     // Reduce rows sequentially
 
+    // Loop over rows within this group
     for (const auto &data : item.second) {
-      // item.second -> set of vectors containing data
+      // data.first -> index of this row within the group
+      // data.second -> vector containing data
 
       try {
         auto newData = reduceRow(data.second);
         m_manager->update(item.first, data.first, newData);
+        newGroup[data.first] = newData;
         progressReporter.report();
 
       } catch (std::exception &ex) {
@@ -231,7 +237,7 @@ void GenericDataProcessorPresenter::process() {
     // Post-process (if needed)
     if (item.second.size() > 1) {
       try {
-        postProcessGroup(item.second);
+        postProcessGroup(newGroup);
         progressReporter.report();
       } catch (std::exception &ex) {
         m_mainPresenter->giveUserCritical(ex.what(), "Error");
@@ -347,8 +353,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
       // Reflectometry this property refers to the rebin step, and they want a
       // logarithmic binning. If other technique areas need to use a
       // post-process map we'll need to re-think how to do this.
-      double propValue = boost::lexical_cast<double>(propValueStr);
-      alg->setPropertyValue(propName, std::to_string(-propValue));
+      alg->setPropertyValue(propName, "-" + propValueStr);
     }
   }
 
@@ -397,8 +402,9 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().create(preprocessor.name());
   alg->initialize();
-  alg->setProperty(preprocessor.lhsProperty(),
-                   loadRun(runs[0], instrument, preprocessor.prefix())->name());
+  alg->setProperty(
+      preprocessor.lhsProperty(),
+      loadRun(runs[0], instrument, preprocessor.prefix())->getName());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -419,7 +425,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       alg->setProperty(
           preprocessor.rhsProperty(),
-          loadRun(*runIt, instrument, preprocessor.prefix())->name());
+          loadRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -492,7 +498,7 @@ std::string GenericDataProcessorPresenter::getReducedWorkspaceName(
 }
 
 /**
-Returns the name of the reduced workspace for a given row
+Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
 @param prefix : A prefix to be appended to the generated ws name
 @returns : The name of the workspace
@@ -608,7 +614,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->name());
+        alg->setProperty(propertyName, runWS->getName());
       }
     } else {
       // No pre-processing needed
@@ -1120,7 +1126,7 @@ void GenericDataProcessorPresenter::plotGroup() {
             boost::algorithm::join(notFound, "\n") +
             "\n\nPlease check that the groups you are trying to plot have been "
             "fully processed.",
-        "Error plotting rows.");
+        "Error plotting groups.");
 
   plotWorkspaces(workspaces);
 }

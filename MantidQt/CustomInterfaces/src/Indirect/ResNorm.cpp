@@ -283,7 +283,7 @@ void ResNorm::previewSpecChanged(int value) {
             fitParamsName);
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
-      std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->name());
+      std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
       MatrixWorkspace_const_sptr fitWs =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               fitWsName);
@@ -331,8 +331,8 @@ void ResNorm::plotClicked() {
   QString fitWsName("");
 
   if (fitWorkspaces)
-    fitWsName =
-        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+    fitWsName = QString::fromStdString(
+        fitWorkspaces->getItem(m_previewSpec)->getName());
 
   QString plotOptions(m_uiForm.cbPlot->currentText());
   if (plotOptions == "Intensity" || plotOptions == "All")

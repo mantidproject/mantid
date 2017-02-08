@@ -184,39 +184,79 @@ ILL Energy Transfer
 
 This tab handles the reduction of data from the IN16B instrument at the ILL.
 
-This will output the raw (*_raw*) data read from the file and reduced (*_red*)
-workspace by default, with mirror mode enabled you will also get the left
-(*_left*) and right (*_right*) hand components of the data as separate
-workspaces.
+Reduction Type
+~~~~~~~~~~~~~~
 
-Note that when using a calibration workspace the grouping of the calibration
-workspace must match that being used in the energy transfer reduction, i.e. both
-processes use the same grouping file (or both use the default grouping).
+There are two reduction types of IN16B data: Quasi-Elastic Neutron Scattering (QENS) or Fixed Window Scans (FWS),
+and the latter can be either Elastic (EFWS) or Inelastic (IFWS).
+If one or another reduction type is checked, the corresponding algorithm will be invoked
+(see :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` and :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>`).
+There are several properties in common between the two, and several others that are specific to one or the other.
+The specific ones will show up or disappear corresponding to the choice of the reduction type.
 
-Options
-~~~~~~~
+Common Options
+~~~~~~~~~~~~~~
 
-Input
-  Used to select the raw data in *.nxs* format
+Input File
+  Used to select the raw data in ``.nxs`` format. Note that multiple files can be specified following
+  `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_ instructions.
 
-Calibration
-  Gives the option of applying a calibration workspace or NeXus file created
-  with the ILL Calibration tab or :ref:`ILLIN16BCalibration
-  <algm-ILLIN16BCalibration>` algorithm.
-
-Grouping
+Detector Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map File*).
+  mapping file (*Map File*). This defines e.g. the summing of the vertical pixels per PSDs.
 
-Use Mirror Mode
-  Enable to reduce data that has been captured with mirror mode enabled.
+Background Subtraction
+  Used to specify the background (i.e. empty can) runs to subtract. A scale factor can be applied to background subtraction.
+
+Detector Calibration
+  Used to specify the calibration (i.e. vanadium) runs to divide by.
+
+Output Name
+  This will be the name of the resulting reduced workspace group.
 
 Plot
-  If enabled will plot the result as a spectra plot.
+  If enabled, will plot the result (of the first run) as a contour plot.
 
 Save
-  If enabled the result will be saved as a NeXus file in the default save
+  If enabled the reduced workspace group will be saved as a ``.nxs`` file in the default save
   directory.
+
+QENS-only Options
+~~~~~~~~~~~~~~~~~
+
+Sum All Runs
+  If checked, all the input runs will be summed while loading.
+
+Crop Dead Monitor Channels
+  If checked, the few channels in the beginning and at the end of the spectra, that contain zero monitor counts will be cropped out.
+  As a result, the doppler maximum energy will be mapped to the first and last non-zero monitor channels, resulting in narrower peaks.
+  Care must be taken with this option; since this alters the total number of bins,
+  problems might occur while subtracting the background or performing unmirroring, if the number of dead monitor channels are different.
+
+Calibration Peak Range
+  This defines the integration range over the peak in calibration run in ``mev``.
+
+Unmirror Options
+  This is used to choose the option of summing of the left and right wings of the data, when recorded in mirror sense.
+  See :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` for full details.
+  Unmirror option 5 and 7 require vanadium alignment run.
+
+
+FWS-only Options
+~~~~~~~~~~~~~~~~
+
+Observable
+  This is the scanning ovservable, that will become the x-axis of the final result.
+  It can be any numeric sample parameter defined in Sample Logs (e.g. sample.*) or a time-stamp string (e.g. start_time).
+  It can also be the run number. It can not be an instrument parameter.
+
+Sort X Axis
+  If checked, the x-axis of the final results will be sorted.
+
+Sum/Interpolate
+  Both background and calibration have options to use the summed (averaged) or interpolated values over different observable points.
+  Default behaviour is Sum. Interpolation is done using cubic (or linear for 2 measured values only) splines.
+  If interpolation is requested, x-axis will be sorted automatically.
 
 ISIS Calibration & Resolution
 -----------------------------
@@ -291,25 +331,23 @@ ILL Calibration
 .. interface:: Data Reduction
   :widget: tabILLCalibration
 
-This tab is used to create calibration workspaces for the IN16B spectrometer at
-the ILL using the :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`
-algorithm.
+**This tab is deprecated.** Use CalibrationRun in EnergyTransfer tab.
 
 Options
 ~~~~~~~
+
+Input Files
+  File for the calibration (e.g. vanadium) run. If multiple specified, they will be automatically summed.
 
 Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
   mapping file (*Map File*).
 
 Peak Range
-  Sets the integreation range over the peak in :math:`meV`
+  Sets the integration range over the peak in :math:`meV`
 
 Scale Factor
-  Override the calculated scale factor
-
-Mirror Mode
-  Enable of the data uses mirror mode
+  Factor to scale the intensities with
 
 ISIS Diagnostics
 ----------------

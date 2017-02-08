@@ -456,7 +456,8 @@ class RunDescriptor(PropDescriptor):
                     self._set_run_list(instance,run_num,file_path,fext)
                 else:
                     self._set_single_run(instance,run_num,file_path,fext)
-        elif isinstance(value,list):
+        elif isinstance(value, collections.Iterable): # xrange provided
+            value = list(value)
             self._set_run_list(instance,value,"",None)
         else:
             self._set_single_run(instance,value,"",None)
@@ -1228,7 +1229,7 @@ class RunDescriptor(PropDescriptor):
         bins = [x_param[0],dx_min,x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
         Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-        mon_ws_name = mon_ws.getName()
+        mon_ws_name = mon_ws.name()
         if not homo_binning:
             Rebin(InputWorkspace=mon_ws_name,OutputWorkspace=mon_ws_name,Params=bins,PreserveEvents='0')
         ConjoinWorkspaces(InputWorkspace1=mon_ws_name,InputWorkspace2='tmp_mon')
