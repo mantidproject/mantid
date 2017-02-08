@@ -262,4 +262,3 @@ Limitation
 
 - HFIR single crystal reduction GUI supports for instrument HB3A only from release 3.5.0 and nightly.
 
-.. categories:: Interfaces
