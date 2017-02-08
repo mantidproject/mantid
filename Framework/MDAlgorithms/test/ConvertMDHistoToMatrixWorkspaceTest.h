@@ -494,9 +494,11 @@ public:
   }
 };
 
-/* Disabling clang format because the CXX parsser cannot read across multiple lines. 
- Clang formatting has therefore been disabled to prevent compiler errors. 
- When the parsser has been fixed (can read across multiple lines) the clang formatting 
+/* Disabling clang format because the CXX parsser cannot read across multiple
+lines.
+ Clang formatting has therefore been disabled to prevent compiler errors.
+ When the parsser has been fixed (can read across multiple lines) the clang
+formatting
 can be enabled */
 
 // clang-format off
