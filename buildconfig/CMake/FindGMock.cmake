@@ -3,7 +3,7 @@
 # GMOCK_FOUND If false, do not try to use Google Mock
 
 # Make gtest_version available everywhere
-set (gtest_version "1.8.0" CACHE INTERNAL "")
+set (gtest_version "1.7.0" CACHE INTERNAL "")
 
 option(USE_SYSTEM_GTEST "Use the system installed GTest - v${gtest_version}?" OFF)
 
@@ -36,7 +36,7 @@ else()
 
   # Add googletest directly to our build. This defines
   # the gtest and gtest_main targets.
-  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
+  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src/gmock
                    ${CMAKE_BINARY_DIR}/googletest-build)
 
   # The gtest/gmock targets carry header search path dependencies
