@@ -1295,7 +1295,7 @@ double tofToDSpacingFactor(const double l1, const Kernel::V3D &beamline,
 }
 
 //-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing)
+/** Calculate the conversion factor from tof -> d-spacing
  * for a LIST of detectors assigned to a single spectrum.
  */
 double
