@@ -34,6 +34,11 @@ else()
     message(FATAL_ERROR "Build step for googletest failed: ${result}")
   endif()
 
+  # Use static libraries as the dynamic ones are built with different
+  # flags and don't load correctly for us. This does not affect
+  # the global scope
+  set ( BUILD_SHARED_LIBS OFF )
+
   # Add googletest directly to our build. This defines
   # the gtest and gtest_main targets.
   add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src/gmock
