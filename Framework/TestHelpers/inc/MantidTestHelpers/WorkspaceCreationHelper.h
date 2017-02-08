@@ -111,13 +111,17 @@ template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
 }
 
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size);
+template <typename YType, typename EType>
+Mantid::HistogramData::Histogram createHisto(bool isHistogram, YType &&yAxis,
+                                             EType &&eAxis);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size, bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
-create1DWorkspaceConstant(int size, double value, double error);
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size);
+create1DWorkspaceConstant(int size, double value, double error,
+                          bool isHisto);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
 create1DWorkspaceConstantWithXerror(int size, double value, double error,
-                                    double xError);
+                                    double xError, bool isHisto = true);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(int nhist,
                                                         int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr
@@ -145,7 +149,7 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
+create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are

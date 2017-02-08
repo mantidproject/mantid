@@ -23,6 +23,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -74,55 +75,63 @@ void removeWS(const std::string &name) {
   Mantid::API::AnalysisDataService::Instance().remove(name);
 }
 
-Workspace2D_sptr create1DWorkspaceRand(int size) {
+template <typename YType, typename EType>
+Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
+  const size_t yValsSize = yAxis.size();
+  if (isHistogram) {
+    BinEdges xAxis(yValsSize + 1, LinearGenerator(1, 1));
+    Histogram histo{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    return histo;
+  } else {
+    Points xAxis(yValsSize, LinearGenerator(1, 1));
+    Histogram pointsHisto{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    return pointsHisto;
+  }
+}
+
+Workspace2D_sptr create1DWorkspaceRand(int size, bool isHisto) {
 
   MersenneTwister randomGen(DateAndTime::getCurrentTime().nanoseconds(), 0,
                             std::numeric_limits<int>::max());
 
   auto randFunc = [&randomGen] { return randomGen.nextValue(); };
-  BinEdges xVals(size + 1, LinearGenerator(1, 1));
   Counts counts(size, randFunc);
   CountStandardDeviations errorVals(size, randFunc);
 
-  Histogram generatedHisto(std::move(xVals), std::move(counts),
-                           std::move(errorVals));
-
+  auto generatedHisto = createHisto(isHisto, counts, errorVals);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, std::move(generatedHisto));
   return retVal;
 }
 
 Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
-                                           double error) {
-  BinEdges xVals(size + 1, LinearGenerator(1, 1));
-  Counts yVals(size, value);
-  CountStandardDeviations errVals(size, error);
+                                           double error, bool isHisto) {
+    Counts yVals(size, value);
+    CountStandardDeviations errVals(size, error);
+	auto generatedHisto = createHisto(isHisto, yVals, errVals);
 
-  Histogram generatedHisto(std::move(xVals), std::move(yVals),
-                           std::move(errVals));
+	auto retVal = boost::make_shared<Workspace2D>();
+	retVal->initialize(1, std::move(generatedHisto));
+	return retVal;
 
-  auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, std::move(generatedHisto));
-  return retVal;
+
 }
 
 Workspace2D_sptr create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double error,
-                                                     double xError) {
-  auto ws = create1DWorkspaceConstant(size, value, error);
+                                                     double xError, bool isHisto) {
+  auto ws = create1DWorkspaceConstant(size, value, error, isHisto);
   auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
   ws->setSharedDx(0, dx1);
   return ws;
 }
 
-Workspace2D_sptr create1DWorkspaceFib(int size) {
+Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto) {
   BinEdges xVals(size + 1, LinearGenerator(1, 1));
   Counts yVals(size, FibSeries<double>());
   CountStandardDeviations errVals(size);
 
-  Histogram generatedHisto(std::move(xVals), std::move(yVals),
-                           std::move(errVals));
-
+  auto generatedHisto = createHisto(isHisto, yVals, errVals);
   auto retVal = boost::make_shared<Workspace2D>();
   retVal->initialize(1, std::move(generatedHisto));
   return retVal;
@@ -262,13 +271,13 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins,
 /** Create a 2D workspace with this many histograms and bins.
  * Filled with Y = 2.0 and E = M_SQRT2w
  */
-Workspace2D_sptr create2DWorkspaceBinned(int nhist, int nbins, double x0,
+Workspace2D_sptr create2DWorkspaceBinned(int nhist, int numVals, double x0,
                                          double deltax) {
-  BinEdges x(nbins + 1, LinearGenerator(x0, deltax));
-  Counts y(nbins, 2);
-  CountStandardDeviations e(nbins, M_SQRT2);
+  BinEdges x(numVals + 1, LinearGenerator(x0, deltax));
+  Counts y(numVals, 2);
+  CountStandardDeviations e(numVals, M_SQRT2);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(nhist, nbins + 1, nbins);
+  retVal->initialize(nhist, numVals + 1, numVals);
   for (int i = 0; i < nhist; i++) {
     retVal->setBinEdges(i, x);
     retVal->setCounts(i, y);
