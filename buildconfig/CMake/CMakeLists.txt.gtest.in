@@ -8,7 +8,7 @@ ExternalProject_Add(googlemock
   GIT_TAG           "release-${gtest_version}"
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src/gmock"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
-  PATCH_COMMAND     git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/gmock-spec-builders.patch
+  PATCH_COMMAND     git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/gmock_spec_builders.patch
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
