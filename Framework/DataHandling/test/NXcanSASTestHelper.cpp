@@ -83,7 +83,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
         parameters.size, parameters.value, parameters.error, parameters.xerror);
   } else {
     ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
-        parameters.size, parameters.value, parameters.error);
+        parameters.size, parameters.value, parameters.error, true);
   }
 
   ws->setTitle(parameters.workspaceTitle);
@@ -115,7 +115,7 @@ provide1DWorkspace(NXcanSASTestParameters &parameters) {
 Mantid::API::MatrixWorkspace_sptr
 getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters) {
   auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
-      parameters.size, parameters.value, parameters.error);
+      parameters.size, parameters.value, parameters.error, true);
   ws->setTitle(parameters.name);
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
