@@ -1,35 +1,32 @@
-#ifndef SAVEFOCUSSEDXYETEST_H_
-#define SAVEFOCUSSEDXYETEST_H_
+#ifndef SAVEFOCUSEDXYETEST_H_
+#define SAVEFOCUSEDXYETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/SaveFocusedXYE.h"
+
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/SaveGSS.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/Axis.h"
-#include "MantidDataHandling/SaveGSS.h"
-
+#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
-#include <string>
-#include <fstream>
-#include <sstream>
 
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-class SaveFocussedXYETest : public CxxTest::TestSuite {
+class SaveFocusedXYETest : public CxxTest::TestSuite {
 public:
-  static SaveFocussedXYETest *createSuite() {
-    return new SaveFocussedXYETest();
-  }
-  static void destroySuite(SaveFocussedXYETest *suite) { delete suite; }
+  static SaveFocusedXYETest *createSuite() { return new SaveFocusedXYETest(); }
+  static void destroySuite(SaveFocusedXYETest *suite) { delete suite; }
 
-  SaveFocussedXYETest() : m_tol(1e-08) {}
+  SaveFocusedXYETest() : m_tol(1e-08) {}
 
-  //
   void testHistogram() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
@@ -456,4 +453,4 @@ private:
   const double m_tol;
 };
 
-#endif // SAVEFOCUSSEDXYETEST_H_
+#endif // SAVEFOCUSEDXYETEST_H_

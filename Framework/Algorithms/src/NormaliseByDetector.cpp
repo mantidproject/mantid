@@ -5,6 +5,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -66,13 +67,13 @@ void NormaliseByDetector::init() {
 }
 
 const Geometry::FitParameter NormaliseByDetector::tryParseFunctionParameter(
-    Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det) {
+    Geometry::Parameter_sptr parameter, const Geometry::IDetector &det) {
   if (parameter == nullptr) {
     std::stringstream stream;
-    stream << det->getName() << " and all of it's parent components, have no "
-                                "fitting type parameters. This algorithm "
-                                "cannot be run without fitting parameters. See "
-                                "wiki help for details on setup.";
+    stream << det.getName() << " and all of it's parent components, have no "
+                               "fitting type parameters. This algorithm "
+                               "cannot be run without fitting parameters. See "
+                               "wiki help for details on setup.";
     this->g_log.warning(stream.str());
     throw std::runtime_error(stream.str());
   }
@@ -96,10 +97,10 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
                                            MatrixWorkspace_sptr denominatorWS,
                                            Progress &prog) {
   const auto &paramMap = inWS->constInstrumentParameters();
-  Geometry::IDetector_const_sptr det = inWS->getDetector(wsIndex);
+  const auto &spectrumInfo = inWS->spectrumInfo();
+  const auto &det = spectrumInfo.detector(wsIndex);
   const std::string type = "fitting";
-  Geometry::Parameter_sptr foundParam =
-      paramMap.getRecursiveByType(&(*det), type);
+  Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&det, type);
 
   const Geometry::FitParameter &foundFittingParam =
       tryParseFunctionParameter(foundParam, det);
@@ -112,7 +113,7 @@ void NormaliseByDetector::processHistogram(size_t wsIndex,
 
   // Lookup each parameter name.
   for (auto &name : allParamNames) {
-    Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), name, type);
+    Geometry::Parameter_sptr param = paramMap.getRecursive(&det, name, type);
 
     const Geometry::FitParameter &fitParam =
         tryParseFunctionParameter(param, det);

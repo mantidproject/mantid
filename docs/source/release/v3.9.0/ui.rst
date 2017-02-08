@@ -9,6 +9,19 @@ UI & Usability Changes
 User Interface
 --------------
 
+Windows
+#######
+
+.. figure:: ../../images/close_all_windows.png
+   :class: screenshot
+   :width: 209px
+   :align: right
+
+   Close All Graph Windows
+
+- If you have lots of windows that you want to close, there is now an option to close all of the windows of a certain type in one go in the window menu.
+  The type of window is based on the selected window, so to close all graph windows, just click on a graph window and go to ``Windows->Close All Graph Windows``. The option will only appear if you have more than one of that type of window.
+
 Instrument View
 ###############
 
@@ -28,7 +41,7 @@ Plotting Improvements
    :width: 550px
    :align: right
 
-   plotSubplots image
+   plotSubplots 
 
 Algorithm Toolbox
 #################
@@ -50,6 +63,7 @@ SliceViewer Improvements
 ------------------------
 
 - Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
+- Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructoir is fixed.
 
 .. figure:: ../../images/SliceViewerNonOrthogonal.png
    :class: screenshot
