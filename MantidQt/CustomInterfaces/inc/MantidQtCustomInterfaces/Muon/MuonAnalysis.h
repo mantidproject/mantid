@@ -460,6 +460,9 @@ private:
   /// conversion from QString to int
   void getFullCode(int originalSize, QString &run);
 
+  /// Sets the fitting ranges
+  void setFittingRanges(double xmin, double xmax);
+
   /// Setup the signals for updating
   void connectAutoUpdate();
 

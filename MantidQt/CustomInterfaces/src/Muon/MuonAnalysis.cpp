@@ -14,7 +14,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -2335,6 +2334,37 @@ void MuonAnalysis::getFullCode(int originalSize, QString &run) {
 }
 
 /**
+* Sets the fitting ranges on the dataselectot and fitbrowser
+*
+* @param xmin :: The minimum x value
+* @param xmax :: The maximum x value
+*/
+void MuonAnalysis::setFittingRanges(double xmin, double xmax) {
+  if (xmin == 0.0 && xmax == 0.0) {
+    // A previous fitting range of [0,0] means this is the first time the
+    // user goes to "Data Analysis" tab
+    // We have to initialise the fitting range
+    m_dataSelector->setStartTime(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+    m_dataSelector->setEndTime(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+    m_uiForm.fitBrowser->setStartX(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+    m_uiForm.fitBrowser->setEndX(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+
+  }
+  // or set it to the previous values provided by the user:
+  else {
+    // A previous fitting range already exists, so we use it
+    m_dataSelector->setStartTime(xmin);
+    m_dataSelector->setEndTime(xmax);
+    m_uiForm.fitBrowser->setStartX(xmin);
+    m_uiForm.fitBrowser->setEndX(xmax);
+  }
+}
+
+/**
  * Is called every time when tab gets changed
  *
  * @param newTabIndex :: The index of the tab we switch to
@@ -2380,23 +2410,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
         ConfigService::Instance().getString(PEAK_RADIUS_CONFIG);
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, "99");
 
-    // setFitPropertyBrowser() above changes the fitting range, so we have to
-    // either initialise it to the correct values:
-    if (xmin == 0.0 && xmax == 0.0) {
-      // A previous fitting range of [0,0] means this is the first time the
-      // user goes to "Data Analysis" tab
-      // We have to initialise the fitting range
-      m_dataSelector->setStartTime(
-          m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_dataSelector->setEndTime(
-          m_uiForm.timeAxisFinishAtInput->text().toDouble());
-    }
-    // or set it to the previous values provided by the user:
-    else {
-      // A previous fitting range already exists, so we use it
-      m_dataSelector->setStartTime(xmin);
-      m_dataSelector->setEndTime(xmax);
-    }
+    setFittingRanges(xmin, xmax);
 
     // If a workspace is selected:
     // - Show connected plot and attach PP tool to it (if has been assigned)
@@ -2412,6 +2426,10 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     // to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
+
+    // repeat setting the fitting ranges as the above code can set them to an
+    // unwanted default value
+    setFittingRanges(xmin, xmax);
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
