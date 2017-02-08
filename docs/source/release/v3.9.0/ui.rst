@@ -63,7 +63,7 @@ SliceViewer Improvements
 ------------------------
 
 - Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
-- Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructoir is fixed.
+- Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructor is fixed.
 
 .. figure:: ../../images/SliceViewerNonOrthogonal.png
    :class: screenshot
