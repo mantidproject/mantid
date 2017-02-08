@@ -105,28 +105,6 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
   return distance / velocity;
 }
 
-/**
- * Obtains L1 (distance from source to sample)
- *  @param workspace :: input workspace
- *  @return L1
- */
-double LoadHelper::getL1(const API::MatrixWorkspace_sptr &workspace) {
-  return workspace->detectorInfo().l1();
-}
-
-/**
- * Obtains L2 (distance from sample to spectrum)
- *  @param workspace :: input workspace
- *  @param detId :: id to obtain detector index from
- *  @return L2
- */
-double LoadHelper::getL2(const API::MatrixWorkspace_sptr &workspace,
-                         int detId) {
-  const auto &detInfo = workspace->detectorInfo();
-  const size_t detIndex = detInfo.indexOf(detId);
-  return detInfo.l2(detIndex);
-}
-
 /*
  * Get instrument property as double
  * @s - input property name

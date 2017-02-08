@@ -12,6 +12,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <cmath>
+#include <boost/format.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -92,6 +93,15 @@ void ConvertToConstantL2::exec() {
     if (inputSpecInfo.isMonitor(i))
       continue;
 
+    // Throw if detector doesn't exist or is a group
+    if (!inputSpecInfo.hasUniqueDetector(i)) {
+      const auto errorMsg =
+          boost::format("The detector for spectrum number %d was either not "
+                        "found, or is a group.") %
+          i;
+      throw std::runtime_error(errorMsg.str());
+    }
+
     // subract the diference in l2
     double thisDetL2 = inputSpecInfo.l2(i);
     double deltaL2 = std::abs(thisDetL2 - m_l2);
@@ -104,7 +114,9 @@ void ConvertToConstantL2::exec() {
     oldPos.getSpherical(r, theta, phi);
     V3D newPos;
     newPos.spherical(m_l2, theta, phi);
-    outputDetInfo.setPosition(i, newPos);
+
+    const size_t detIndex = inputSpecInfo.detector(i).index();
+    outputDetInfo.setPosition(detIndex, newPos);
 
     m_outputWS->mutableX(i) -= deltaTOF;
 

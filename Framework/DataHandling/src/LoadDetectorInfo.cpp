@@ -410,14 +410,15 @@ void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
                                           const double pressure,
                                           const double thickness) const {
 
+  const auto detCompID = detectorInfo.detector(detIndex).getComponentID();
+
   // store detector params that are different to instrument level
-  const auto &det = detectorInfo.detector(detIndex);
   if (fabs(delay - m_instDelta) > 1e-06)
-    pmap.addDouble(det.getComponentID(), DELAY_PARAM, delay);
+    pmap.addDouble(detCompID, DELAY_PARAM, delay);
   if (fabs(pressure - m_instPressure) > 1e-06)
-    pmap.addDouble(det.getComponentID(), PRESSURE_PARAM, pressure);
+    pmap.addDouble(detCompID, PRESSURE_PARAM, pressure);
   if (fabs(thickness - m_instThickness) > 1e-06)
-    pmap.addDouble(det.getComponentID(), THICKNESS_PARAM, thickness);
+    pmap.addDouble(detCompID, THICKNESS_PARAM, thickness);
 
   // move
   if (m_moveDets) {
@@ -425,7 +426,7 @@ void LoadDetectorInfo::updateParameterMap(API::DetectorInfo &detectorInfo,
     newPos.spherical(l2, theta, phi);
     // The sample position may not be at 0,0,0
     newPos += m_samplePos;
-    detectorInfo.setPosition(det, newPos);
+    detectorInfo.setPosition(detIndex, newPos);
   }
 }
 }
