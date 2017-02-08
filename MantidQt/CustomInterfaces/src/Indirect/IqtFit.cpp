@@ -943,14 +943,14 @@ void IqtFit::plotGuess(QtProperty *) {
   const size_t nData = binIndxHigh - binIndxLow;
 
   const auto &xPoints = m_iqtFInputWS->points(0);
-  
+
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
 
   FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
-  
+
   std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
     dataY[i] = outputData.getCalculated(i);

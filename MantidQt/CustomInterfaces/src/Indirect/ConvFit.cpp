@@ -1107,7 +1107,7 @@ void ConvFit::plotGuess() {
   const size_t nData = binIndexHigh - binIndexLow;
 
   const auto &xPoints = m_cfInputWS->points(0);
-  
+
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
             dataX.begin());
@@ -1115,7 +1115,7 @@ void ConvFit::plotGuess() {
   FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
-  
+
   std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
     dataY[i] = outputData.getCalculated(i);
