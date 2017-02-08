@@ -182,3 +182,4 @@ Limitation
 
 - HFIR powder reduction GUI supports for instrument HB2A only in release 3.4.0;
 
+.. categories:: Interfaces
