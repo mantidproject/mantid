@@ -1,0 +1,376 @@
+:100644 100644 f63fa9a... 0000000... M	include/gtest/gtest-spi.h
+:100644 100644 77eb844... 0000000... M	include/gtest/gtest-test-part.h
+:100644 100644 6fa0a39... 0000000... M	include/gtest/gtest.h
+:100644 100644 2b3a78f... 0000000... M	include/gtest/internal/gtest-death-test-internal.h
+:100644 100644 d5e1028... 0000000... M	include/gtest/internal/gtest-param-util.h
+:100644 100644 a6023fc... 0000000... M	src/gtest-death-test.cc
+:100644 100644 35df303... 0000000... M	src/gtest-internal-inl.h
+:100644 100644 6de53dd... 0000000... M	src/gtest.cc
+
+diff --git a/include/gtest/gtest-spi.h b/include/gtest/gtest-spi.h
+index f63fa9a..f59ec6d 100644
+--- a/include/gtest/gtest-spi.h
++++ b/include/gtest/gtest-spi.h
+@@ -75,7 +75,7 @@ class GTEST_API_ ScopedFakeTestPartResultReporter
+   //
+   // This method is from the TestPartResultReporterInterface
+   // interface.
+-  virtual void ReportTestPartResult(const TestPartResult& result);
++  virtual void ReportTestPartResult(const TestPartResult& result) override;
+  private:
+   void Init();
+ 
+diff --git a/include/gtest/gtest-test-part.h b/include/gtest/gtest-test-part.h
+index 77eb844..b93b114 100644
+--- a/include/gtest/gtest-test-part.h
++++ b/include/gtest/gtest-test-part.h
+@@ -162,8 +162,8 @@ class GTEST_API_ HasNewFatalFailureHelper
+     : public TestPartResultReporterInterface {
+  public:
+   HasNewFatalFailureHelper();
+-  virtual ~HasNewFatalFailureHelper();
+-  virtual void ReportTestPartResult(const TestPartResult& result);
++  virtual ~HasNewFatalFailureHelper() override;
++  virtual void ReportTestPartResult(const TestPartResult& result) override;
+   bool has_new_fatal_failure() const { return has_new_fatal_failure_; }
+  private:
+   bool has_new_fatal_failure_;
+diff --git a/include/gtest/gtest.h b/include/gtest/gtest.h
+index 6fa0a39..82b58dc 100644
+--- a/include/gtest/gtest.h
++++ b/include/gtest/gtest.h
+@@ -1011,21 +1011,21 @@ class TestEventListener {
+ // above.
+ class EmptyTestEventListener : public TestEventListener {
+  public:
+-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
++  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) override {}
+   virtual void OnTestIterationStart(const UnitTest& /*unit_test*/,
+-                                    int /*iteration*/) {}
+-  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) {}
+-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
+-  virtual void OnTestCaseStart(const TestCase& /*test_case*/) {}
+-  virtual void OnTestStart(const TestInfo& /*test_info*/) {}
+-  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) {}
+-  virtual void OnTestEnd(const TestInfo& /*test_info*/) {}
+-  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) {}
+-  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) {}
+-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
++                                    int /*iteration*/) override {}
++  virtual void OnEnvironmentsSetUpStart(const UnitTest& /*unit_test*/) override {}
++  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
++  virtual void OnTestCaseStart(const TestCase& /*test_case*/) override {}
++  virtual void OnTestStart(const TestInfo& /*test_info*/) override {}
++  virtual void OnTestPartResult(const TestPartResult& /*test_part_result*/) override {}
++  virtual void OnTestEnd(const TestInfo& /*test_info*/) override {}
++  virtual void OnTestCaseEnd(const TestCase& /*test_case*/) override {}
++  virtual void OnEnvironmentsTearDownStart(const UnitTest& /*unit_test*/) override {}
++  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
+   virtual void OnTestIterationEnd(const UnitTest& /*unit_test*/,
+-                                  int /*iteration*/) {}
+-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
++                                  int /*iteration*/) override {}
++  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
+ };
+ 
+ // TestEventListeners lets users add listeners to track events in Google Test.
+diff --git a/include/gtest/internal/gtest-death-test-internal.h b/include/gtest/internal/gtest-death-test-internal.h
+index 2b3a78f..a82aec1 100644
+--- a/include/gtest/internal/gtest-death-test-internal.h
++++ b/include/gtest/internal/gtest-death-test-internal.h
+@@ -148,7 +148,7 @@ class DeathTestFactory {
+ class DefaultDeathTestFactory : public DeathTestFactory {
+  public:
+   virtual bool Create(const char* statement, const RE* regex,
+-                      const char* file, int line, DeathTest** test);
++                      const char* file, int line, DeathTest** test) override;
+ };
+ 
+ // Returns true if exit_status describes a process that was terminated
+diff --git a/include/gtest/internal/gtest-param-util.h b/include/gtest/internal/gtest-param-util.h
+index d5e1028..5a7954f 100644
+--- a/include/gtest/internal/gtest-param-util.h
++++ b/include/gtest/internal/gtest-param-util.h
+@@ -270,12 +270,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
+   template <typename ForwardIterator>
+   ValuesInIteratorRangeGenerator(ForwardIterator begin, ForwardIterator end)
+       : container_(begin, end) {}
+-  virtual ~ValuesInIteratorRangeGenerator() {}
++  virtual ~ValuesInIteratorRangeGenerator() override {}
+ 
+-  virtual ParamIteratorInterface<T>* Begin() const {
++  virtual ParamIteratorInterface<T>* Begin() const override {
+     return new Iterator(this, container_.begin());
+   }
+-  virtual ParamIteratorInterface<T>* End() const {
++  virtual ParamIteratorInterface<T>* End() const override {
+     return new Iterator(this, container_.end());
+   }
+ 
+@@ -289,14 +289,14 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
+         : base_(base), iterator_(iterator) {}
+     virtual ~Iterator() {}
+ 
+-    virtual const ParamGeneratorInterface<T>* BaseGenerator() const {
++    virtual const ParamGeneratorInterface<T>* BaseGenerator() const override {
+       return base_;
+     }
+-    virtual void Advance() {
++    virtual void Advance() override {
+       ++iterator_;
+       value_.reset();
+     }
+-    virtual ParamIteratorInterface<T>* Clone() const {
++    virtual ParamIteratorInterface<T>* Clone() const override {
+       return new Iterator(*this);
+     }
+     // We need to use cached value referenced by iterator_ because *iterator_
+@@ -306,12 +306,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
+     // can advance iterator_ beyond the end of the range, and we cannot
+     // detect that fact. The client code, on the other hand, is
+     // responsible for not calling Current() on an out-of-range iterator.
+-    virtual const T* Current() const {
++    virtual const T* Current() const override {
+       if (value_.get() == NULL)
+         value_.reset(new T(*iterator_));
+       return value_.get();
+     }
+-    virtual bool Equals(const ParamIteratorInterface<T>& other) const {
++    virtual bool Equals(const ParamIteratorInterface<T>& other) const override {
+       // Having the same base generator guarantees that the other
+       // iterator is of the same type and we can downcast.
+       GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
+diff --git a/src/gtest-death-test.cc b/src/gtest-death-test.cc
+index a6023fc..c158d0b 100644
+--- a/src/gtest-death-test.cc
++++ b/src/gtest-death-test.cc
+@@ -373,8 +373,8 @@ class DeathTestImpl : public DeathTest {
+   // read_fd_ is expected to be closed and cleared by a derived class.
+   ~DeathTestImpl() { GTEST_DEATH_TEST_CHECK_(read_fd_ == -1); }
+ 
+-  void Abort(AbortReason reason);
+-  virtual bool Passed(bool status_ok);
++  void Abort(AbortReason reason) override;
++  virtual bool Passed(bool status_ok) override;
+ 
+   const char* statement() const { return statement_; }
+   const RE* regex() const { return regex_; }
+@@ -778,7 +778,7 @@ class ForkingDeathTest : public DeathTestImpl {
+   ForkingDeathTest(const char* statement, const RE* regex);
+ 
+   // All of these virtual functions are inherited from DeathTest.
+-  virtual int Wait();
++  virtual int Wait() override;
+ 
+  protected:
+   void set_child_pid(pid_t child_pid) { child_pid_ = child_pid; }
+@@ -814,7 +814,7 @@ class NoExecDeathTest : public ForkingDeathTest {
+  public:
+   NoExecDeathTest(const char* a_statement, const RE* a_regex) :
+       ForkingDeathTest(a_statement, a_regex) { }
+-  virtual TestRole AssumeRole();
++  virtual TestRole AssumeRole() override;
+ };
+ 
+ // The AssumeRole process for a fork-and-run death test.  It implements a
+@@ -870,7 +870,7 @@ class ExecDeathTest : public ForkingDeathTest {
+   ExecDeathTest(const char* a_statement, const RE* a_regex,
+                 const char* file, int line) :
+       ForkingDeathTest(a_statement, a_regex), file_(file), line_(line) { }
+-  virtual TestRole AssumeRole();
++  virtual TestRole AssumeRole() override;
+  private:
+   static ::std::vector<testing::internal::string>
+   GetArgvsForDeathTestChildProcess() {
+diff --git a/src/gtest-internal-inl.h b/src/gtest-internal-inl.h
+index 35df303..2553eb4 100644
+--- a/src/gtest-internal-inl.h
++++ b/src/gtest-internal-inl.h
+@@ -442,9 +442,9 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
+   OsStackTraceGetter() : caller_frame_(NULL) {}
+ 
+   virtual string CurrentStackTrace(int max_depth, int skip_count)
+-      GTEST_LOCK_EXCLUDED_(mutex_);
++      GTEST_LOCK_EXCLUDED_(mutex_) override;
+ 
+-  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_);
++  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) override;
+ 
+   // This string is inserted in place of stack frames that are part of
+   // Google Test's implementation.
+@@ -477,7 +477,7 @@ class DefaultGlobalTestPartResultReporter
+   explicit DefaultGlobalTestPartResultReporter(UnitTestImpl* unit_test);
+   // Implements the TestPartResultReporterInterface. Reports the test part
+   // result in the current test.
+-  virtual void ReportTestPartResult(const TestPartResult& result);
++  virtual void ReportTestPartResult(const TestPartResult& result) override;
+ 
+  private:
+   UnitTestImpl* const unit_test_;
+@@ -493,7 +493,7 @@ class DefaultPerThreadTestPartResultReporter
+   explicit DefaultPerThreadTestPartResultReporter(UnitTestImpl* unit_test);
+   // Implements the TestPartResultReporterInterface. The implementation just
+   // delegates to the current global test part result reporter of *unit_test_.
+-  virtual void ReportTestPartResult(const TestPartResult& result);
++  virtual void ReportTestPartResult(const TestPartResult& result) override;
+ 
+  private:
+   UnitTestImpl* const unit_test_;
+@@ -1100,7 +1100,7 @@ class StreamingListener : public EmptyTestEventListener {
+     }
+ 
+     // Sends a string to the socket.
+-    virtual void Send(const string& message) {
++    virtual void Send(const string& message) override {
+       GTEST_CHECK_(sockfd_ != -1)
+           << "Send() can be called only when there is a connection.";
+ 
+@@ -1117,7 +1117,7 @@ class StreamingListener : public EmptyTestEventListener {
+     void MakeConnection();
+ 
+     // Closes the socket.
+-    void CloseConnection() {
++    void CloseConnection() override {
+       GTEST_CHECK_(sockfd_ != -1)
+           << "CloseConnection() can be called only when there is a connection.";
+ 
+@@ -1141,11 +1141,11 @@ class StreamingListener : public EmptyTestEventListener {
+   explicit StreamingListener(AbstractSocketWriter* socket_writer)
+       : socket_writer_(socket_writer) { Start(); }
+ 
+-  void OnTestProgramStart(const UnitTest& /* unit_test */) {
++  void OnTestProgramStart(const UnitTest& /* unit_test */) override {
+     SendLn("event=TestProgramStart");
+   }
+ 
+-  void OnTestProgramEnd(const UnitTest& unit_test) {
++  void OnTestProgramEnd(const UnitTest& unit_test) override {
+     // Note that Google Test current only report elapsed time for each
+     // test iteration, not for the entire test program.
+     SendLn("event=TestProgramEnd&passed=" + FormatBool(unit_test.Passed()));
+@@ -1154,39 +1154,39 @@ class StreamingListener : public EmptyTestEventListener {
+     socket_writer_->CloseConnection();
+   }
+ 
+-  void OnTestIterationStart(const UnitTest& /* unit_test */, int iteration) {
++  void OnTestIterationStart(const UnitTest& /* unit_test */, int iteration) override {
+     SendLn("event=TestIterationStart&iteration=" +
+            StreamableToString(iteration));
+   }
+ 
+-  void OnTestIterationEnd(const UnitTest& unit_test, int /* iteration */) {
++  void OnTestIterationEnd(const UnitTest& unit_test, int /* iteration */) override {
+     SendLn("event=TestIterationEnd&passed=" +
+            FormatBool(unit_test.Passed()) + "&elapsed_time=" +
+            StreamableToString(unit_test.elapsed_time()) + "ms");
+   }
+ 
+-  void OnTestCaseStart(const TestCase& test_case) {
++  void OnTestCaseStart(const TestCase& test_case) override {
+     SendLn(std::string("event=TestCaseStart&name=") + test_case.name());
+   }
+ 
+-  void OnTestCaseEnd(const TestCase& test_case) {
++  void OnTestCaseEnd(const TestCase& test_case) override {
+     SendLn("event=TestCaseEnd&passed=" + FormatBool(test_case.Passed())
+            + "&elapsed_time=" + StreamableToString(test_case.elapsed_time())
+            + "ms");
+   }
+ 
+-  void OnTestStart(const TestInfo& test_info) {
++  void OnTestStart(const TestInfo& test_info) override {
+     SendLn(std::string("event=TestStart&name=") + test_info.name());
+   }
+ 
+-  void OnTestEnd(const TestInfo& test_info) {
++  void OnTestEnd(const TestInfo& test_info) override {
+     SendLn("event=TestEnd&passed=" +
+            FormatBool((test_info.result())->Passed()) +
+            "&elapsed_time=" +
+            StreamableToString((test_info.result())->elapsed_time()) + "ms");
+   }
+ 
+-  void OnTestPartResult(const TestPartResult& test_part_result) {
++  void OnTestPartResult(const TestPartResult& test_part_result) override {
+     const char* file_name = test_part_result.file_name();
+     if (file_name == NULL)
+       file_name = "";
+diff --git a/src/gtest.cc b/src/gtest.cc
+index 6de53dd..e3ad4f3 100644
+--- a/src/gtest.cc
++++ b/src/gtest.cc
+@@ -2697,19 +2697,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
+   }
+ 
+   // The following methods override what's in the TestEventListener class.
+-  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) {}
+-  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
+-  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
+-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) {}
+-  virtual void OnTestCaseStart(const TestCase& test_case);
+-  virtual void OnTestStart(const TestInfo& test_info);
+-  virtual void OnTestPartResult(const TestPartResult& result);
+-  virtual void OnTestEnd(const TestInfo& test_info);
+-  virtual void OnTestCaseEnd(const TestCase& test_case);
+-  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
+-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) {}
+-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+-  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) {}
++  virtual void OnTestProgramStart(const UnitTest& /*unit_test*/) override {}
++  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
++  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
++  virtual void OnEnvironmentsSetUpEnd(const UnitTest& /*unit_test*/) override {}
++  virtual void OnTestCaseStart(const TestCase& test_case) override;
++  virtual void OnTestStart(const TestInfo& test_info) override;
++  virtual void OnTestPartResult(const TestPartResult& result) override;
++  virtual void OnTestEnd(const TestInfo& test_info) override;
++  virtual void OnTestCaseEnd(const TestCase& test_case) override;
++  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
++  virtual void OnEnvironmentsTearDownEnd(const UnitTest& /*unit_test*/) override {}
++  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
++  virtual void OnTestProgramEnd(const UnitTest& /*unit_test*/) override {}
+ 
+  private:
+   static void PrintFailedTests(const UnitTest& unit_test);
+@@ -2908,19 +2908,19 @@ class TestEventRepeater : public TestEventListener {
+   bool forwarding_enabled() const { return forwarding_enabled_; }
+   void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
+ 
+-  virtual void OnTestProgramStart(const UnitTest& unit_test);
+-  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration);
+-  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test);
+-  virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test);
+-  virtual void OnTestCaseStart(const TestCase& test_case);
+-  virtual void OnTestStart(const TestInfo& test_info);
+-  virtual void OnTestPartResult(const TestPartResult& result);
+-  virtual void OnTestEnd(const TestInfo& test_info);
+-  virtual void OnTestCaseEnd(const TestCase& test_case);
+-  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test);
+-  virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test);
+-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
+-  virtual void OnTestProgramEnd(const UnitTest& unit_test);
++  virtual void OnTestProgramStart(const UnitTest& unit_test) override;
++  virtual void OnTestIterationStart(const UnitTest& unit_test, int iteration) override;
++  virtual void OnEnvironmentsSetUpStart(const UnitTest& unit_test) override;
++  virtual void OnEnvironmentsSetUpEnd(const UnitTest& unit_test) override;
++  virtual void OnTestCaseStart(const TestCase& test_case) override;
++  virtual void OnTestStart(const TestInfo& test_info) override;
++  virtual void OnTestPartResult(const TestPartResult& result) override;
++  virtual void OnTestEnd(const TestInfo& test_info) override;
++  virtual void OnTestCaseEnd(const TestCase& test_case) override;
++  virtual void OnEnvironmentsTearDownStart(const UnitTest& unit_test) override;
++  virtual void OnEnvironmentsTearDownEnd(const UnitTest& unit_test) override;
++  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
++  virtual void OnTestProgramEnd(const UnitTest& unit_test) override;
+ 
+  private:
+   // Controls whether events will be forwarded to listeners_. Set to false
+@@ -3013,7 +3013,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
+  public:
+   explicit XmlUnitTestResultPrinter(const char* output_file);
+ 
+-  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration);
++  virtual void OnTestIterationEnd(const UnitTest& unit_test, int iteration) override;
+ 
+  private:
+   // Is c a whitespace character that is normalized to a space character

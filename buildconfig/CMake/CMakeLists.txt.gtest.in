@@ -9,6 +9,7 @@ ExternalProject_Add(googlemock
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src/gmock"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
   PATCH_COMMAND     git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/gmock_spec_builders.patch
+            COMMAND git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/gmock_override.patch
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
@@ -19,6 +20,7 @@ ExternalProject_Add(googletest
   GIT_TAG           "release-${gtest_version}"
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src/gtest"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+  PATCH_COMMAND     git apply ${CMAKE_SOURCE_DIR}/buildconfig/CMake/gtest_override.patch
   CONFIGURE_COMMAND ""
   BUILD_COMMAND     ""
   INSTALL_COMMAND   ""
