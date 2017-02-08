@@ -26,6 +26,8 @@ set ( TEST_PY_FILES
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DirectILLDetectorDiagnosticsTest.py
+  DirectILLPrepareDataTest.py
   DirectILLReductionTest.py
   DNSComputeDetEffCorrCoefsTest.py
   DNSMergeRunsTest.py

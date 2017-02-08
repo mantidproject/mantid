@@ -417,6 +417,8 @@ class DirectILLPrepareData(DataProcessorAlgorithm):
         if fileGiven == wsGiven:
             issues[common.PROP_INPUT_FILE] = \
                 'Must give either an input file or an input workspace.'
+        if not wsGiven and self.getProperty(common.PROP_INPUT_WS).value:
+            issues[common.PROP_INPUT_WS] = 'Input workspace has to be in the ADS.'
         return issues
 
     def _calibrateEi(self, mainWS, detEPPWS, monWS, monEPPWS, wsNames, wsCleanup, report, subalgLogging):
