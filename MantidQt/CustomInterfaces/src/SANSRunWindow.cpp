@@ -2467,8 +2467,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   // that is about to start
   py_code += "\n_user_settings_copy = "
              "copy.deepcopy(i.ReductionSingleton().user_settings)";
-  const QString verb = m_uiForm.verbose_check ? "True" : "False";
-  py_code += "\ni.SetVerboseMode(" + verb + ")";
+  py_code += "\ni.SetVerboseMode(False)";
   // Need to check which mode we're in
   if (runMode == SingleMode) {
     py_code += readSampleObjectGUIChanges();
@@ -2537,9 +2536,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
     }
     py_code += "}";
 
-    if (m_uiForm.log_colette->isChecked()) {
-      py_code += ", verbose=True";
-    }
     py_code += ", reducer=i.ReductionSingleton().reference(),";
 
     py_code += "combineDet=";

@@ -91,6 +91,7 @@ Bugs Resolved
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
+- Fixed a bug where closing a second plot window would cause a newly activated window to be resized.
 - Fixed a bug where pressing the pick mode button in the SplatterPlotView of the VSI caused Mantid to crash.
 
 
