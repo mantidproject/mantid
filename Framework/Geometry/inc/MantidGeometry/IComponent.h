@@ -126,7 +126,7 @@ public:
   // parent chain
   virtual Kernel::V3D getPos() const = 0;
   //! Get the relative Orientation
-  virtual const Kernel::Quat &getRelativeRot() const = 0;
+  virtual const Kernel::Quat getRelativeRot() const = 0;
   //! Get the absolute orientation of the IComponent
   virtual const Kernel::Quat getRotation() const = 0;
   //! Get the distance to another IComponent

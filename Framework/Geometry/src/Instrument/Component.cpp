@@ -354,7 +354,7 @@ V3D Component::getPos() const {
 /** Gets the rotation relative to the parent
 * @returns A quaternion of the relative rotation
 */
-const Quat &Component::getRelativeRot() const {
+const Quat Component::getRelativeRot() const {
   if (m_map) {
     if (m_map->contains(m_base, "rot")) {
       return m_map->get(m_base, "rot")->value<Quat>();

@@ -138,7 +138,7 @@ public:
   Kernel::V3D getPos() const override;
 
   //! Get the relative Orientation
-  const Kernel::Quat &getRelativeRot() const override;
+  const Kernel::Quat getRelativeRot() const override;
 
   //! Get the absolute orientation of the IComponent
   const Kernel::Quat getRotation() const override;

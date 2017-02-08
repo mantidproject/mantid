@@ -228,7 +228,7 @@ protected:
   const Kernel::V3D getRelativePos() const override {
     throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");
   }
-  const Kernel::Quat &getRelativeRot() const override {
+  const Kernel::Quat getRelativeRot() const override {
     throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup");
   }
   const Kernel::Quat getRotation() const override { return Kernel::Quat(); }
