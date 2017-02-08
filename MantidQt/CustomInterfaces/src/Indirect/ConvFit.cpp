@@ -104,6 +104,18 @@ void ConvFit::setup() {
   // Advanced options for FABADA
   m_properties["FABADAAdvanced"] = m_blnManager->addProperty("Advanced");
   m_blnManager->setValue(m_properties["FABADAAdvanced"], false);
+  m_properties["FABADAStepsBetweenValues"] =
+	  m_dblManager->addProperty("Steps Between Values");
+  m_dblManager->setDecimals(m_properties["FABADAStepsBetweenValues"], 0);
+  m_dblManager->setValue(m_properties["FABADAStepsBetweenValues"], 10);
+  m_properties["FABADAConvergenceCriteria"] =
+      m_dblManager->addProperty("Convergence Criteria");
+  m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.01);
+  m_properties["FABADAInactiveConvergenceCriterion"] =
+      m_dblManager->addProperty("Inactive Convergence Criterion");
+  m_dblManager->setDecimals(m_properties["FABADAInactiveConvergenceCriterion"],
+                            0);
+  m_dblManager->setValue(m_properties["FABADAInactiveConvergenceCriterion"], 5);
   m_properties["FABADASimAnnealingApplied"] =
       m_blnManager->addProperty("Sim Annealing Applied");
   m_properties["FABADAMaximumTemperature"] =
@@ -120,6 +132,10 @@ void ConvFit::setup() {
   m_properties["FABADAOverexploration"] =
       m_blnManager->addProperty("Overexploration");
   m_cfTree->addProperty(m_properties["FABADA"]);
+  m_properties["FABADANumberBinsPDF"] =
+      m_dblManager->addProperty("Number Bins PDF");
+  m_dblManager->setDecimals(m_properties["FABADANumberBinsPDF"], 0);
+  m_dblManager->setValue(m_properties["FABADANumberBinsPDF"], 20);
 
   // Background type
   m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
@@ -994,21 +1010,38 @@ QString ConvFit::minimizerString(QString outputName) const {
 
     if (m_blnManager->value(m_properties["FABADASimAnnealingApplied"])) {
       minimizer += ",SimAnnealingApplied=1";
-      double maximumTemperature =
-          m_dblManager->value(m_properties["FABADAMaximumTemperature"]);
-      minimizer += ",MaximumTemperature=" + QString::number(maximumTemperature);
-      double refSteps =
-          m_dblManager->value(m_properties["FABADANumRefrigerationSteps"]);
-      minimizer += ",NumRefrigerationSteps=" + QString::number(refSteps);
-      double simAnnealingIter =
-          m_dblManager->value(m_properties["FABADASimAnnealingIterations"]);
-      minimizer +=
-          ",SimAnnealingIterations=" + QString::number(simAnnealingIter);
-      bool overexploration =
-          m_blnManager->value(m_properties["FABADAOverexploration"]);
-      minimizer += ",Overexploration=";
-      minimizer += overexploration ? "1" : "0";
+    } else {
+      minimizer += ",SimAnnealingApplied=0";
     }
+    double maximumTemperature =
+        m_dblManager->value(m_properties["FABADAMaximumTemperature"]);
+    minimizer += ",MaximumTemperature=" + QString::number(maximumTemperature);
+    double refSteps =
+        m_dblManager->value(m_properties["FABADANumRefrigerationSteps"]);
+    minimizer += ",NumRefrigerationSteps=" + QString::number(refSteps);
+    double simAnnealingIter =
+        m_dblManager->value(m_properties["FABADASimAnnealingIterations"]);
+    minimizer += ",SimAnnealingIterations=" + QString::number(simAnnealingIter);
+    bool overexploration =
+        m_blnManager->value(m_properties["FABADAOverexploration"]);
+    minimizer += ",Overexploration=";
+    minimizer += overexploration ? "1" : "0";
+
+    double stepsBetweenValues =
+        m_dblManager->value(m_properties["FABADAStepsBetweenValues"]);
+    minimizer += ",StepsBetweenValues=" + QString::number(stepsBetweenValues);
+
+    double convCriteria =
+        m_dblManager->value(m_properties["FABADAConvergenceCriteria"]);
+    minimizer += ",ConvergenceCriteria=" + QString::number(convCriteria);
+
+    double inactiveConvCriterion =
+        m_dblManager->value(m_properties["FABADAInactiveConvergenceCriterion"]);
+    minimizer += ",InnactiveConvergenceCriterion=" +
+                 QString::number(inactiveConvCriterion);
+
+    double binsPDF = m_dblManager->value(m_properties["FABADANumberBinsPDF"]);
+    minimizer += ",NumberBinsPDF=" + QString::number(binsPDF);
   }
 
   return minimizer;
@@ -1489,6 +1522,12 @@ void ConvFit::showFABADA(bool advanced) {
   m_properties["FABADA"]->addSubProperty(m_properties["FABADAAdvanced"]);
   if (advanced) {
     m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAStepsBetweenValues"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAConvergenceCriteria"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAInactiveConvergenceCriterion"]);
+    m_properties["FABADA"]->addSubProperty(
         m_properties["FABADASimAnnealingApplied"]);
     m_properties["FABADA"]->addSubProperty(
         m_properties["FABADAMaximumTemperature"]);
@@ -1498,8 +1537,15 @@ void ConvFit::showFABADA(bool advanced) {
         m_properties["FABADASimAnnealingIterations"]);
     m_properties["FABADA"]->addSubProperty(
         m_properties["FABADAOverexploration"]);
+    m_properties["FABADA"]->addSubProperty(m_properties["FABADANumberBinsPDF"]);
   } else {
     m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAStepsBetweenValues"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAConvergenceCriteria"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAInactiveConvergenceCriterion"]);
+    m_properties["FABADA"]->removeSubProperty(
         m_properties["FABADASimAnnealingApplied"]);
     m_properties["FABADA"]->removeSubProperty(
         m_properties["FABADAMaximumTemperature"]);
@@ -1509,6 +1555,8 @@ void ConvFit::showFABADA(bool advanced) {
         m_properties["FABADASimAnnealingIterations"]);
     m_properties["FABADA"]->removeSubProperty(
         m_properties["FABADAOverexploration"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADANumberBinsPDF"]);
   }
 }
 
@@ -1526,6 +1574,12 @@ void ConvFit::hideFABADA() {
   m_properties["FABADA"]->removeSubProperty(m_properties["FABADAAdvanced"]);
 
   // Advanced options
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAStepsBetweenValues"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAConvergenceCriteria"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAInactiveConvergenceCriterion"]);
   m_properties["FABADA"]->removeSubProperty(
       m_properties["FABADASimAnnealingApplied"]);
   m_properties["FABADA"]->removeSubProperty(
