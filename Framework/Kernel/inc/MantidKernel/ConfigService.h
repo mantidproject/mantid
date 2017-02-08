@@ -121,6 +121,8 @@ public:
     std::string m_prev;  ///< The previous value for the property
   };
 
+  /// Setup the base directory
+  void setBaseDirectory();
   /// Reset to "factory" settings. Removes current user properties
   void reset();
   /// Wipe out the current configuration and load a new one

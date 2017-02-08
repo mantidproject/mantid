@@ -350,21 +350,6 @@ public:
     // 4 values
     goodWS->dataY(17)[0] = goodWS->dataY(19)[0] = goodWS->dataY(23)[0] = 4;
 
-    /*
-    using Mantid::Kernel::V3D;
-    V3D origin(0.016, 0.016, 0);
-    V3D diff ;
-    double r,t,p;
-    for (int i = 0; i<25; i++){
-      auto det = goodWS->getDetector(i);
-      diff = det->getPos()- origin;
-      diff.getSpherical(r,t,p);
-      std::cout << "ind " << i << " -> theta = " << t << " phi = " << p << " r =
-    " << r << '\n';
-    }
-    throw std::runtime_error("stop");
-     */
-
     return goodWS;
   }
 

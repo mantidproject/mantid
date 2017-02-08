@@ -94,7 +94,7 @@ class AbinsLoadCRYSTALTest(unittest.TestCase):
         with open(AbinsTestHelpers.find_file(filename + "_data.txt")) as data_file:
             correct_data = json.loads(data_file.read().replace("\n", " "))
 
-        array = np.loadtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt"), dtype=complex)
+        array = np.genfromtxt(AbinsTestHelpers.find_file(filename + "_atomic_displacements_data.txt"), dtype=complex)
         array.reshape(shape)
         k = len(correct_data["datasets"]["k_points_data"]["weights"])
         atoms = len(correct_data["datasets"]["atoms_data"])
