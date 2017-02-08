@@ -28,7 +28,6 @@ import numpy as np
 from scipy import stats  # older version of numpy does not support nanmean and nanmedian
 from docutils.core import publish_string
 import post_processing as postproc
-import os
 
 # Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
