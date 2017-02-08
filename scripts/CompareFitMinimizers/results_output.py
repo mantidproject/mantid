@@ -86,8 +86,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             with open(fname + '.txt', 'w') as tbl_file:
                 print(tbl_acc_indiv, file=tbl_file)
             with open(color_definitions) as cd:
-                content = cd.read() + "\n"
-                content += tbl_acc_indiv
+                content = cd.read() + "\n" + tbl_acc_indiv
             html = publish_string(content, writer_name='html')
             with open(fname + '.html', 'w') as tbl_file:
                 print(html, file=tbl_file)
@@ -121,8 +120,7 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
             with open(fname + '.txt', 'w') as tbl_file:
                 print(tbl_runtime_indiv, file=tbl_file)
             with open(color_definitions) as cd:
-                content = cd.read() + "\n"
-                content += tbl_runtime_indiv
+                content = cd.read() + "\n" + tbl_runtime_indiv
             html = publish_string(content, writer_name='html')
             with open(fname + '.html', 'w') as tbl_file:
                 print(html, file=tbl_file)
