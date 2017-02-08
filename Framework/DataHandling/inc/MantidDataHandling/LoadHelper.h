@@ -68,7 +68,7 @@ public:
   Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws,
                                    const std::string &componentName);
   template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
+  T getPropertyFromRun(API::MatrixWorkspace_sptr inputWS,
                                    const std::string &propertyName) {
     if (inputWS->run().hasProperty(propertyName)) {
       Kernel::Property *prop = inputWS->run().getProperty(propertyName);
