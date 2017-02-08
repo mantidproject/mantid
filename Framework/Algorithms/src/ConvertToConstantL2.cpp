@@ -10,6 +10,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <boost/format.hpp>
@@ -115,7 +116,7 @@ void ConvertToConstantL2::exec() {
     V3D newPos;
     newPos.spherical(m_l2, theta, phi);
 
-    const size_t detIndex = inputSpecInfo.detector(i).index();
+    const size_t detIndex = inputSpecInfo.spectrumDefinition(i)[0].first;
     outputDetInfo.setPosition(detIndex, newPos);
 
     m_outputWS->mutableX(i) -= deltaTOF;
