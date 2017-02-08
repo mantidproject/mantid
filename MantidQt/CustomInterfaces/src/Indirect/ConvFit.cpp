@@ -108,9 +108,6 @@ void ConvFit::setup() {
 	  m_dblManager->addProperty("Steps Between Values");
   m_dblManager->setDecimals(m_properties["FABADAStepsBetweenValues"], 0);
   m_dblManager->setValue(m_properties["FABADAStepsBetweenValues"], 10);
-  m_properties["FABADAConvergenceCriteria"] =
-      m_dblManager->addProperty("Convergence Criteria");
-  m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.01);
   m_properties["FABADAInactiveConvergenceCriterion"] =
       m_dblManager->addProperty("Inactive Convergence Criterion");
   m_dblManager->setDecimals(m_properties["FABADAInactiveConvergenceCriterion"],
@@ -1031,10 +1028,6 @@ QString ConvFit::minimizerString(QString outputName) const {
         m_dblManager->value(m_properties["FABADAStepsBetweenValues"]);
     minimizer += ",StepsBetweenValues=" + QString::number(stepsBetweenValues);
 
-    double convCriteria =
-        m_dblManager->value(m_properties["FABADAConvergenceCriteria"]);
-    minimizer += ",ConvergenceCriteria=" + QString::number(convCriteria);
-
     double inactiveConvCriterion =
         m_dblManager->value(m_properties["FABADAInactiveConvergenceCriterion"]);
     minimizer += ",InnactiveConvergenceCriterion=" +
@@ -1524,8 +1517,6 @@ void ConvFit::showFABADA(bool advanced) {
     m_properties["FABADA"]->addSubProperty(
         m_properties["FABADAStepsBetweenValues"]);
     m_properties["FABADA"]->addSubProperty(
-        m_properties["FABADAConvergenceCriteria"]);
-    m_properties["FABADA"]->addSubProperty(
         m_properties["FABADAInactiveConvergenceCriterion"]);
     m_properties["FABADA"]->addSubProperty(
         m_properties["FABADASimAnnealingApplied"]);
@@ -1541,8 +1532,6 @@ void ConvFit::showFABADA(bool advanced) {
   } else {
     m_properties["FABADA"]->removeSubProperty(
         m_properties["FABADAStepsBetweenValues"]);
-    m_properties["FABADA"]->removeSubProperty(
-        m_properties["FABADAConvergenceCriteria"]);
     m_properties["FABADA"]->removeSubProperty(
         m_properties["FABADAInactiveConvergenceCriterion"]);
     m_properties["FABADA"]->removeSubProperty(
@@ -1576,8 +1565,6 @@ void ConvFit::hideFABADA() {
   // Advanced options
   m_properties["FABADA"]->removeSubProperty(
       m_properties["FABADAStepsBetweenValues"]);
-  m_properties["FABADA"]->removeSubProperty(
-      m_properties["FABADAConvergenceCriteria"]);
   m_properties["FABADA"]->removeSubProperty(
       m_properties["FABADAInactiveConvergenceCriterion"]);
   m_properties["FABADA"]->removeSubProperty(
