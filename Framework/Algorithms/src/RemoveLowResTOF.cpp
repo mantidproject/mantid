@@ -261,8 +261,8 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
     std::map<detid_t, double> offsets; // just an empty offsets map
     Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
     double dspmap =
-        Instrument::calcConversion(l1, beamline, beamline_norm, samplePos,
-                                   instrument, detNumbers, offsets);
+        Conversion::tofToDSpacingFactor(l1, beamline, beamline_norm, samplePos,
+                                        instrument, detNumbers, offsets);
 
     // this is related to the reference tof
     double sqrtdmin =
