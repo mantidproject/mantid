@@ -8988,7 +8988,11 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
   FloatingWindow *fw = w->getFloatingWindow();
   if (fw) {
     if (activateOuterWindow) {
-      w->setNormal();
+      if (fw->isMaximized()) {
+        w->setMaximized();
+      } else {
+        w->setNormal();
+      }
     }
   } else {
     QMainWindow::activateWindow();

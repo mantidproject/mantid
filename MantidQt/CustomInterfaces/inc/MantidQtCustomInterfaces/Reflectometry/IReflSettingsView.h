@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace MantidQt {
 
@@ -56,6 +56,8 @@ public:
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getDirectBeam() const = 0;
   virtual std::string getTransmissionRuns() const = 0;
+  virtual std::string getStartOverlap() const = 0;
+  virtual std::string getEndOverlap() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
