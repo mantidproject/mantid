@@ -1106,20 +1106,19 @@ void ConvFit::plotGuess() {
       m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
   const size_t nData = binIndexHigh - binIndexLow;
 
-  std::vector<double> dataX;
-  const auto xPoints = m_cfInputWS->points(0);
-  const bool isHistogram = m_cfInputWS->isHistogramData();
-
+  const auto &xPoints = m_cfInputWS->points(0);
+  
+  std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
             dataX.begin());
 
-  QVector<double> dataY;
   FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
-
+  
+  std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
-    dataY.append(outputData.getCalculated(i));
+    dataY[i] = outputData.getCalculated(i);
   }
 
   IAlgorithm_sptr createWsAlg =
@@ -1130,7 +1129,7 @@ void ConvFit::plotGuess() {
   createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
   createWsAlg->setProperty("NSpec", 1);
   createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY.toStdVector());
+  createWsAlg->setProperty("DataY", dataY);
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
