@@ -101,6 +101,24 @@ void ConvFit::setup() {
   m_properties["FABADAJumpAcceptanceRate"] =
       m_dblManager->addProperty("Acceptance Rate");
   m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
+  // Advanced options for FABADA
+  m_properties["FABADAAdvanced"] = m_blnManager->addProperty("Advanced");
+  m_blnManager->setValue(m_properties["FABADAAdvanced"], false);
+  m_properties["FABADASimAnnealingApplied"] =
+      m_blnManager->addProperty("Sim Annealing Applied");
+  m_properties["FABADAMaximumTemperature"] =
+      m_dblManager->addProperty("Maximum Temperature");
+  m_dblManager->setValue(m_properties["FABADAMaximumTemperature"], 10.0);
+  m_properties["FABADANumRefrigerationSteps"] =
+      m_dblManager->addProperty("Num Refrigeration Steps");
+  m_dblManager->setDecimals(m_properties["FABADANumRefrigerationSteps"], 0);
+  m_dblManager->setValue(m_properties["FABADANumRefrigerationSteps"], 5);
+  m_properties["FABADASimAnnealingIterations"] =
+      m_dblManager->addProperty("Sim Annealing Iterations");
+  m_dblManager->setDecimals(m_properties["FABADASimAnnealingIterations"], 0);
+  m_dblManager->setValue(m_properties["FABADASimAnnealingIterations"], 10000);
+  m_properties["FABADAOverexploration"] =
+      m_blnManager->addProperty("Overexploration");
   m_cfTree->addProperty(m_properties["FABADA"]);
 
   // Background type
@@ -973,6 +991,24 @@ QString ConvFit::minimizerString(QString outputName) const {
 
     if (m_blnManager->value(m_properties["OutputFABADAChain"]))
       minimizer += ",Chains=" + outputName + "_Chain";
+
+    if (m_blnManager->value(m_properties["FABADASimAnnealingApplied"])) {
+      minimizer += ",SimAnnealingApplied=1";
+      double maximumTemperature =
+          m_dblManager->value(m_properties["FABADAMaximumTemperature"]);
+      minimizer += ",MaximumTemperature=" + QString::number(maximumTemperature);
+      double refSteps =
+          m_dblManager->value(m_properties["FABADANumRefrigerationSteps"]);
+      minimizer += ",NumRefrigerationSteps=" + QString::number(refSteps);
+      double simAnnealingIter =
+          m_dblManager->value(m_properties["FABADASimAnnealingIterations"]);
+      minimizer +=
+          ",SimAnnealingIterations=" + QString::number(simAnnealingIter);
+      bool overexploration =
+          m_blnManager->value(m_properties["FABADAOverexploration"]);
+      minimizer += ",Overexploration=";
+      minimizer += overexploration ? "1" : "0";
+    }
   }
 
   return minimizer;
@@ -1428,26 +1464,78 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
     if (checked) {
       // FABADA needs a much higher iteration limit
       m_dblManager->setValue(m_properties["MaxIterations"], 20000);
-
-      m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
-      m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
-      m_properties["FABADA"]->addSubProperty(
-          m_properties["FABADAConvergenceCriteria"]);
-      m_properties["FABADA"]->addSubProperty(
-          m_properties["FABADAJumpAcceptanceRate"]);
+      showFABADA(m_blnManager->value(m_properties["FABADAAdvanced"]));
     } else {
       m_dblManager->setValue(m_properties["MaxIterations"], 500);
-
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["OutputFABADAChain"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAChainLength"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAConvergenceCriteria"]);
-      m_properties["FABADA"]->removeSubProperty(
-          m_properties["FABADAJumpAcceptanceRate"]);
+      hideFABADA();
     }
+  } else if (prop == m_properties["FABADAAdvanced"]) {
+    showFABADA(checked);
   }
+}
+
+/** Shows FABADA minimizer options in the property browser
+*
+* @param advanced :: true if advanced options should be shown, false otherwise
+*/
+void ConvFit::showFABADA(bool advanced) {
+
+  m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
+  m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+  m_properties["FABADA"]->addSubProperty(
+      m_properties["FABADAConvergenceCriteria"]);
+  m_properties["FABADA"]->addSubProperty(
+      m_properties["FABADAJumpAcceptanceRate"]);
+  m_properties["FABADA"]->addSubProperty(m_properties["FABADAAdvanced"]);
+  if (advanced) {
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADASimAnnealingApplied"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAMaximumTemperature"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADANumRefrigerationSteps"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADASimAnnealingIterations"]);
+    m_properties["FABADA"]->addSubProperty(
+        m_properties["FABADAOverexploration"]);
+  } else {
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADASimAnnealingApplied"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAMaximumTemperature"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADANumRefrigerationSteps"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADASimAnnealingIterations"]);
+    m_properties["FABADA"]->removeSubProperty(
+        m_properties["FABADAOverexploration"]);
+  }
+}
+
+/** Hide FABADA minimizer options from the browser
+*
+*/
+void ConvFit::hideFABADA() {
+
+  m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
+  m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAConvergenceCriteria"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAJumpAcceptanceRate"]);
+  m_properties["FABADA"]->removeSubProperty(m_properties["FABADAAdvanced"]);
+
+  // Advanced options
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADASimAnnealingApplied"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAMaximumTemperature"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADANumRefrigerationSteps"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADASimAnnealingIterations"]);
+  m_properties["FABADA"]->removeSubProperty(
+      m_properties["FABADAOverexploration"]);
 }
 
 void ConvFit::fitContextMenu(const QPoint &) {
