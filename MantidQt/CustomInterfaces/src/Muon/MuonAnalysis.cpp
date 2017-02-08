@@ -1841,6 +1841,16 @@ void MuonAnalysis::selectMultiPeak(const QString &wsName,
 }
 
 /**
+ * Pass through to selectMultiPeak(wsName, filePath) where filePath is set
+ * to blank. Enables connection as a slot without Qt understanding
+ * boost::optional.
+ * @param wsName Name of the selected workspace
+ */
+void MuonAnalysis::selectMultiPeak(const QString &wsName) {
+  selectMultiPeak(wsName, boost::optional<QString>());
+}
+
+/**
  * Disable tools for all the graphs within MantidPlot.
  */
 void MuonAnalysis::disableAllTools() { runPythonCode("disableTools()"); }

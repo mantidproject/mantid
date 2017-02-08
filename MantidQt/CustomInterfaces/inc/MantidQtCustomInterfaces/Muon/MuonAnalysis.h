@@ -200,9 +200,12 @@ private slots:
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString &wsName);
 
-  /// Enable PP tool for the plot of the given WS
+  /// Enable PP tool for the plot of the given WS and optional filepath
   void selectMultiPeak(const QString &wsName,
                        const boost::optional<QString> &filePath);
+
+  /// Enable PP tool for the plot of the given WS overload to take just a ws
+  void selectMultiPeak(const QString &wsName);
 
   /// Disable tools for all the graphs within MantidPlot
   void disableAllTools();
