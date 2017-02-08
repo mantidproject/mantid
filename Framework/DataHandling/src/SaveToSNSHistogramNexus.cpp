@@ -574,14 +574,11 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             // 1 dimension, with that number of bin boundaries
             dataDimensions[0] = static_cast<int>(X.size());
             // The output TOF axis will be whatever size in the workspace.
-            // boost::scoped_array<float> tof_data(new
-            // float[dataDimensions[0]]);
             std::vector<float> tof_data(dataDimensions[0]);
 
             // And fill it with the X data
-            // Use a for loop to avoid double to float warning
-            for (size_t i = 0; i < X.size(); i++)
-              tof_data[i] = static_cast<float>(X[i]);
+            std::transform(X.cbegin(), X.cend(), tof_data.begin(),
+                           [](double x) { return static_cast<float>(x); });
 
             if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions,
                                NX_COMP_LZW, dataDimensions) != NX_OK)

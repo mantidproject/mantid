@@ -382,7 +382,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   //-----------------------------------------
   // Add Q with units  + uncertainty definition
-  const auto &qValue = workspace->x(0);
+  const auto &qValue = workspace->points(0);
   std::map<std::string, std::string> qAttributes;
   auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
   qUnit = getMomentumTransferLabel(qUnit);
@@ -391,15 +391,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
     qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
   }
 
-  if (workspace->isHistogramData()) {
-    std::vector<double> qValueCentres;
-    Mantid::Kernel::VectorHelper::convertToBinCentre(qValue.rawData(),
-                                                     qValueCentres);
-    writeArray1DWithStrAttributes(data, sasDataQ, qValueCentres, qAttributes);
-  } else {
-    writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(),
-                                  qAttributes);
-  }
+  writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
 
   //-----------------------------------------
   // Add I with units + uncertainty definition
@@ -426,20 +418,12 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
   //-----------------------------------------
   // Add Qdev with units if available
   if (workspace->hasDx(0)) {
-    const auto qResolution = workspace->dx(0);
+    const auto qResolution = workspace->pointStandardDeviations(0);
     std::map<std::string, std::string> xUncertaintyAttributes;
     xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
 
-    if (workspace->isHistogramData()) {
-      std::vector<double> qResolutionCentres;
-      Mantid::Kernel::VectorHelper::convertToBinCentre(qResolution.rawData(),
-                                                       qResolutionCentres);
-      writeArray1DWithStrAttributes(data, sasDataQdev, qResolutionCentres,
-                                    xUncertaintyAttributes);
-    } else {
-      writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(),
-                                    xUncertaintyAttributes);
-    }
+    writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(),
+                                  xUncertaintyAttributes);
   }
 }
 
@@ -713,11 +697,17 @@ void SaveNXcanSAS::init() {
                       "Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
-  std::vector<std::string> radiation_source{
-      "Spallation Neutron Source", "Pulsed Reactor Neutron Source",
-      "Reactor Neutron Source", "Synchrotron X-ray Source",
-      "Pulsed Muon Source", "Rotating Anode X-ray", "Fixed Tube X-ray",
-      "neutron", "x-ray", "muon", "electron"};
+  std::vector<std::string> radiation_source{"Spallation Neutron Source",
+                                            "Pulsed Reactor Neutron Source",
+                                            "Reactor Neutron Source",
+                                            "Synchrotron X-ray Source",
+                                            "Pulsed Muon Source",
+                                            "Rotating Anode X-ray",
+                                            "Fixed Tube X-ray",
+                                            "neutron",
+                                            "x-ray",
+                                            "muon",
+                                            "electron"};
   declareProperty(
       "RadiationSource", "Spallation Neutron Source",
       boost::make_shared<Kernel::StringListValidator>(radiation_source),
