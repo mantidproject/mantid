@@ -14,7 +14,6 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -555,9 +554,11 @@ void MuonAnalysis::runSaveGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultsave.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -594,9 +595,11 @@ void MuonAnalysis::runLoadGroupButton() {
   // Get value for "dir". If the setting doesn't exist then use
   // the the path in "defaultsave.directory"
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultload.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultload.directory")))
+          .toString();
 
   QString filter;
   filter.append("Files (*.xml *.XML)");
@@ -1715,9 +1718,9 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   safeWSName.replace("'", "\'");
   pyS.replace("%WSNAME%", safeWSName);
   pyS.replace("%PREV%", m_currentDataName);
-  pyS.replace("%USEPREV%", policy == MuonAnalysisOptionTab::PreviousWindow
-                               ? "True"
-                               : "False");
+  pyS.replace("%USEPREV%",
+              policy == MuonAnalysisOptionTab::PreviousWindow ? "True"
+                                                              : "False");
   pyS.replace("%ERRORS%", params["ShowErrors"]);
   pyS.replace("%CONNECT%", params["ConnectType"]);
   pyS.replace("%LOGSCALE%", logScale ? "True" : "False");
@@ -2325,6 +2328,37 @@ void MuonAnalysis::getFullCode(int originalSize, QString &run) {
 }
 
 /**
+* Sets the fitting ranges on the dataselectot and fitbrowser
+*
+* @param xmin :: The minimum x value
+* @param xmax :: The maximum x value
+*/
+void MuonAnalysis::setFittingRanges(double xmin, double xmax) {
+  if (xmin == 0.0 && xmax == 0.0) {
+    // A previous fitting range of [0,0] means this is the first time the
+    // user goes to "Data Analysis" tab
+    // We have to initialise the fitting range
+    m_dataSelector->setStartTime(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+    m_dataSelector->setEndTime(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+    m_uiForm.fitBrowser->setStartX(
+        m_uiForm.timeAxisStartAtInput->text().toDouble());
+    m_uiForm.fitBrowser->setEndX(
+        m_uiForm.timeAxisFinishAtInput->text().toDouble());
+
+  }
+  // or set it to the previous values provided by the user:
+  else {
+    // A previous fitting range already exists, so we use it
+    m_dataSelector->setStartTime(xmin);
+    m_dataSelector->setEndTime(xmax);
+    m_uiForm.fitBrowser->setStartX(xmin);
+    m_uiForm.fitBrowser->setEndX(xmax);
+  }
+}
+
+/**
  * Is called every time when tab gets changed
  *
  * @param newTabIndex :: The index of the tab we switch to
@@ -2370,6 +2404,8 @@ void MuonAnalysis::changeTab(int newTabIndex) {
         ConfigService::Instance().getString(PEAK_RADIUS_CONFIG);
     ConfigService::Instance().setString(PEAK_RADIUS_CONFIG, "99");
 
+    setFittingRanges(xmin, xmax);
+
     // If a workspace is selected:
     // - Show connected plot and attach PP tool to it (if has been assigned)
     // - Set input of data selector to selected workspace
@@ -2385,29 +2421,9 @@ void MuonAnalysis::changeTab(int newTabIndex) {
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString &)),
             this, SLOT(selectMultiPeak(const QString &)), Qt::QueuedConnection);
 
-    if (xmin == 0.0 && xmax == 0.0) {
-      // A previous fitting range of [0,0] means this is the first time the
-      // user goes to "Data Analysis" tab
-      // We have to initialise the fitting range
-      m_dataSelector->setStartTime(
-          m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_dataSelector->setEndTime(
-          m_uiForm.timeAxisFinishAtInput->text().toDouble());
-      m_uiForm.fitBrowser->setStartX(
-          m_uiForm.timeAxisStartAtInput->text().toDouble());
-      m_uiForm.fitBrowser->setEndX(
-          m_uiForm.timeAxisFinishAtInput->text().toDouble());
-
-    }
-    // or set it to the previous values provided by the user:
-    else {
-      // A previous fitting range already exists, so we use it
-      m_dataSelector->setStartTime(xmin);
-      m_dataSelector->setEndTime(xmax);
-      m_uiForm.fitBrowser->setStartX(xmin);
-      m_uiForm.fitBrowser->setEndX(xmax);
-    }
-
+    // repeat setting the fitting ranges as the above code can set them to an
+    // unwanted default value
+    setFittingRanges(xmin, xmax);
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
