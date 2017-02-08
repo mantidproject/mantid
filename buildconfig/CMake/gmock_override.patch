@@ -1,10 +1,24 @@
+:100644 100644 7e9708e... 0000000... M	include/gmock/gmock-actions.h
 :100644 100644 44055c9... 0000000... M	include/gmock/gmock-matchers.h
 :100644 100644 2dd733b... 0000000... M	include/gmock/gmock-spec-builders.h
 :100644 100644 50ec728... 0000000... M	src/gmock-cardinalities.cc
 :100644 100644 fb53080... 0000000... M	src/gmock-internal-utils.cc
 
+diff --git a/include/gmock/gmock-actions.h b/include/gmock/gmock-actions.h
+index 7e9708e..cb199ef 100644
+--- a/include/gmock/gmock-actions.h
++++ b/include/gmock/gmock-actions.h
+@@ -492,7 +492,7 @@ class ReturnAction {
+     explicit Impl(R value)
+         : value_(::testing::internal::ImplicitCast_<Result>(value)) {}
+ 
+-    virtual Result Perform(const ArgumentTuple&) { return value_; }
++    virtual Result Perform(const ArgumentTuple&) override { return value_; }
+ 
+    private:
+     GTEST_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
 diff --git a/include/gmock/gmock-matchers.h b/include/gmock/gmock-matchers.h
-index 44055c9..19b2177 100644
+index 44055c9..519a9a3 100644
 --- a/include/gmock/gmock-matchers.h
 +++ b/include/gmock/gmock-matchers.h
 @@ -425,15 +425,15 @@ class PolymorphicMatcher {
@@ -45,6 +59,19 @@ index 44055c9..19b2177 100644
        source_matcher_.DescribeNegationTo(os);
      }
  
+@@ -840,9 +840,9 @@ template <typename T>
+ class AnyMatcherImpl : public MatcherInterface<T> {
+  public:
+   virtual bool MatchAndExplain(
+-      T /* x */, MatchResultListener* /* listener */) const { return true; }
+-  virtual void DescribeTo(::std::ostream* os) const { *os << "is anything"; }
+-  virtual void DescribeNegationTo(::std::ostream* os) const {
++      T /* x */, MatchResultListener* /* listener */) const override { return true; }
++  virtual void DescribeTo(::std::ostream* os) const override { *os << "is anything"; }
++  virtual void DescribeNegationTo(::std::ostream* os) const override {
+     // This is mostly for completeness' safe, as it's not very useful
+     // to write Not(A<bool>()).  However we cannot completely rule out
+     // such a possibility, and it doesn't hurt to be prepared.
 @@ -888,14 +888,14 @@ class AnythingMatcher {
       public: \
        explicit Impl(const Rhs& rhs) : rhs_(rhs) {} \
@@ -64,9 +91,36 @@ index 44055c9..19b2177 100644
          UniversalPrint(rhs_, os); \
        } \
 diff --git a/include/gmock/gmock-spec-builders.h b/include/gmock/gmock-spec-builders.h
-index 2dd733b..db39a83 100644
+index 2dd733b..a212af8 100644
 --- a/include/gmock/gmock-spec-builders.h
 +++ b/include/gmock/gmock-spec-builders.h
+@@ -1059,7 +1059,7 @@ class TypedExpectation : public ExpectationBase {
+ 
+   // If this mock method has an extra matcher (i.e. .With(matcher)),
+   // describes it to the ostream.
+-  virtual void MaybeDescribeExtraMatcherTo(::std::ostream* os) {
++  virtual void MaybeDescribeExtraMatcherTo(::std::ostream* os) override {
+     if (extra_matcher_specified_) {
+       *os << "    Expected args: ";
+       extra_matcher_.DescribeTo(os);
+@@ -1073,7 +1073,7 @@ class TypedExpectation : public ExpectationBase {
+ 
+   // Returns an Expectation object that references and co-owns this
+   // expectation.
+-  virtual Expectation GetHandle() {
++  virtual Expectation GetHandle() override {
+     return owner_->GetHandleOf(this);
+   }
+ 
+@@ -1333,7 +1333,7 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
+   }
+ 
+   // Prints the held value as an action's result to os.
+-  virtual void PrintAsActionResult(::std::ostream* os) const {
++  virtual void PrintAsActionResult(::std::ostream* os) const override {
+     *os << "\n          Returns: ";
+     // T may be a reference type, so we don't use UniversalPrint().
+     UniversalPrinter<T>::Print(value_, os);
 @@ -1370,11 +1370,9 @@ class ActionResultHolder : public UntypedActionResultHolderBase {
  template <>
  class ActionResultHolder<void> : public UntypedActionResultHolderBase {
