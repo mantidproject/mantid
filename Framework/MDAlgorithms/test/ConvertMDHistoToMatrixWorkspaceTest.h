@@ -494,17 +494,21 @@ public:
   }
 };
 
-class ConvertMDHistoToMatrixWorkspaceTestPerformance
-    : public CxxTest::TestSuite {
+/* Disabling clang format because the CXX parsser cannot read across multiple lines. 
+ Clang formatting has therefore been disabled to prevent compiler errors. 
+ When the parsser has been fixed (can read across multiple lines) the clang formatting 
+can be enabled */
+
+// clang-format off
+class ConvertMDHistoToMatrixWorkspaceTestPerformance:public CxxTest::TestSuite {
 public:
   static ConvertMDHistoToMatrixWorkspaceTestPerformance *createSuite() {
     return new ConvertMDHistoToMatrixWorkspaceTestPerformance;
   }
-  static void
-  destroySuite(ConvertMDHistoToMatrixWorkspaceTestPerformance *suite) {
+  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTestPerformance *suite) {
     delete suite;
   }
-
+//clang-format on
   ConvertMDHistoToMatrixWorkspaceTestPerformance() {
     std::vector<size_t> nonIntegr(2);
     nonIntegr[0] = 0;
