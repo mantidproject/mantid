@@ -74,10 +74,10 @@ private:
   void exec() override;
   /// Converting to theta.
   void createThetaMap(API::Progress &progress, const std::string &targetUnit,
-                      API::MatrixWorkspace_sptr &inputWS, size_t nHist);
+                      API::MatrixWorkspace_sptr &inputWS);
   /// Converting to Q and QSquared
   void createElasticQMap(API::Progress &progress, const std::string &targetUnit,
-                         API::MatrixWorkspace_sptr &inputWS, size_t nHist);
+                         API::MatrixWorkspace_sptr &inputWS);
   /// Creates an output workspace.
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,

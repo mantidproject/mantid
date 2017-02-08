@@ -81,9 +81,9 @@ void ConvertSpectrumAxis2::exec() {
   // Call the functions to convert to the different forms of theta or Q.
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
-    createThetaMap(progress, unitTarget, inputWS, nHist);
+    createThetaMap(progress, unitTarget, inputWS);
   } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
-    createElasticQMap(progress, unitTarget, inputWS, nHist);
+    createElasticQMap(progress, unitTarget, inputWS);
   }
 
   // Create an output workspace and set the property for it.
@@ -96,12 +96,10 @@ void ConvertSpectrumAxis2::exec() {
 * @param progress :: Progress indicator
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input Workspace
-* @param nHist :: Stores the number of histograms
 */
 void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
                                           const std::string &targetUnit,
-                                          API::MatrixWorkspace_sptr &inputWS,
-                                          size_t nHist) {
+                                          API::MatrixWorkspace_sptr &inputWS) {
   // Not sure about default, previously there was a call to a null function?
   bool signedTheta = false;
   if (targetUnit.compare("signed_theta") == 0 ||
@@ -114,7 +112,7 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
   bool warningGiven = false;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  for (size_t i = 0; i < nHist; ++i) {
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     if (!spectrumInfo.hasDetectors(i)) {
       if (!warningGiven)
         g_log.warning("The instrument definition is incomplete - spectra "
@@ -139,12 +137,10 @@ void ConvertSpectrumAxis2::createThetaMap(API::Progress &progress,
 * @param progress :: Progress indicator
 * @param targetUnit :: Target conversion unit
 * @param inputWS :: Input workspace
-* @param nHist :: Stores the number of histograms
 */
-void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
-                                             const std::string &targetUnit,
-                                             API::MatrixWorkspace_sptr &inputWS,
-                                             size_t nHist) {
+void ConvertSpectrumAxis2::createElasticQMap(
+    API::Progress &progress, const std::string &targetUnit,
+    API::MatrixWorkspace_sptr &inputWS) {
 
   const std::string emodeStr = getProperty("EMode");
   int emode = 0;
@@ -155,6 +151,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto &detectorInfo = inputWS->detectorInfo();
+  const size_t nHist = spectrumInfo.size();
   for (size_t i = 0; i < nHist; i++) {
     double theta(0.0), efixed(0.0);
     if (!spectrumInfo.isMonitor(i)) {
@@ -162,7 +159,7 @@ void ConvertSpectrumAxis2::createElasticQMap(API::Progress &progress,
       /*
        * Two assumptions made in the following code.
        * 1. Getting the detector index of the first detector in the spectrum
-       * defnition is enough (this should be completely safe).
+       * definition is enough (this should be completely safe).
        * 2. That the time index is not important (first element of pair only
        * accessed). i.e we are not performing scanning. Step scanning is not
        * supported at the time of writing.
