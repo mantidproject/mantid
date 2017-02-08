@@ -70,6 +70,7 @@ private:
                                 const std::string &logName,
                                 const std::string &logText,
                                 const std::string &logType);
+  void initFABADAOptions();
   void showFABADA(bool advanced);
   void hideFABADA();
 
