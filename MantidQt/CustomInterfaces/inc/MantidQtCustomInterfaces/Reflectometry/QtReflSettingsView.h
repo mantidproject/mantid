@@ -52,6 +52,10 @@ public:
   std::string getDirectBeam() const override;
   /// Return transmission runs
   std::string getTransmissionRuns() const override;
+  /// Return start overlap for transmission runs
+  std::string getStartOverlap() const override;
+  /// Return end overlap for transmission runs
+  std::string getEndOverlap() const override;
   /// Return selected polarisation corrections
   std::string getPolarisationCorrections() const override;
   /// Return CRho

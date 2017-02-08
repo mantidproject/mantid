@@ -60,6 +60,11 @@ Transmission
 
 - Option to calculate number density from mass density
 
+Diffraction
+###########
+
+- Add option for normalisation by vanadium to spectroscopy mode. Divides the sample by vanadium after container subtraction.
+
 Vesuvio
 #######
 
