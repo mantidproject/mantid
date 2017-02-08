@@ -239,7 +239,8 @@ public:
     std::vector<Workspace_sptr> badWorkspaces;
     badWorkspaces.push_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    badWorkspaces.push_back(WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
+    badWorkspaces.push_back(
+        WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
 
     TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces),
                      std::invalid_argument);

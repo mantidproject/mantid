@@ -114,11 +114,12 @@ template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
 template <typename YType, typename EType>
 Mantid::HistogramData::Histogram createHisto(bool isHistogram, YType &&yAxis,
                                              EType &&eAxis);
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size, bool isHisto);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size,
+                                                            bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
-create1DWorkspaceConstant(int size, double value, double error,
-                          bool isHisto);
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto);
+create1DWorkspaceConstant(int size, double value, double error, bool isHisto);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size,
+                                                           bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
 create1DWorkspaceConstantWithXerror(int size, double value, double error,
                                     double xError, bool isHisto = true);

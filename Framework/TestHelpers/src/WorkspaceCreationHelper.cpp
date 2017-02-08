@@ -104,22 +104,21 @@ Workspace2D_sptr create1DWorkspaceRand(int size, bool isHisto) {
   return retVal;
 }
 
-Workspace2D_sptr create1DWorkspaceConstant(int size, double value,
-                                           double error, bool isHisto) {
-    Counts yVals(size, value);
-    CountStandardDeviations errVals(size, error);
-	auto generatedHisto = createHisto(isHisto, yVals, errVals);
+Workspace2D_sptr create1DWorkspaceConstant(int size, double value, double error,
+                                           bool isHisto) {
+  Counts yVals(size, value);
+  CountStandardDeviations errVals(size, error);
+  auto generatedHisto = createHisto(isHisto, yVals, errVals);
 
-	auto retVal = boost::make_shared<Workspace2D>();
-	retVal->initialize(1, std::move(generatedHisto));
-	return retVal;
-
-
+  auto retVal = boost::make_shared<Workspace2D>();
+  retVal->initialize(1, std::move(generatedHisto));
+  return retVal;
 }
 
 Workspace2D_sptr create1DWorkspaceConstantWithXerror(int size, double value,
                                                      double error,
-                                                     double xError, bool isHisto) {
+                                                     double xError,
+                                                     bool isHisto) {
   auto ws = create1DWorkspaceConstant(size, value, error, isHisto);
   auto dx1 = Kernel::make_cow<HistogramData::HistogramDx>(size, xError);
   ws->setSharedDx(0, dx1);
