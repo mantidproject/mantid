@@ -283,7 +283,7 @@ public:
     ws->sortAll(TOF_SORT, NULL);
 
     IAlgorithm_sptr alg2 =
-        AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     alg2->initialize();
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace1", origWS);
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace2", ws);
@@ -291,7 +291,7 @@ public:
     alg2->setProperty<bool>("CheckAxes", false);
     alg2->execute();
     if (alg2->isExecuted()) {
-      TS_ASSERT(alg2->getPropertyValue("Result") == "Success!");
+      TS_ASSERT(alg2->getProperty("Result"));
     } else {
       TS_ASSERT(false);
     }

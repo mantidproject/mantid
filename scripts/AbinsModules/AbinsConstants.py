@@ -32,7 +32,7 @@ ALL_SYMBOLS = ["Ac", "Ag", "Al", "Am", "Ar", "As", "At", "Au", "B", "Ba", "Be", 
                "Th", "Ti", "Tl", "Tm", "U", "Uuo", "Uup", "Uus", "Uut", "V", "W", "Xe", "Y", "Yb", "Zn", "Zr",
                ]
 
-SMALL_K = 1.0e-7  # norm of k vector below this value is considered zero
+SMALL_K = 1.0e-1  # norm of k vector below this value is considered zero
 
 K_2_HARTREE = constants.codata.value("kelvin-hartree relationship")  # K * K_2_HARTREE =  Hartree
 

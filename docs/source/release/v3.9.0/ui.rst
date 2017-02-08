@@ -9,10 +9,24 @@ UI & Usability Changes
 User Interface
 --------------
 
+Windows
+#######
+
+.. figure:: ../../images/close_all_windows.png
+   :class: screenshot
+   :width: 209px
+   :align: right
+
+   Close All Graph Windows
+
+- If you have lots of windows that you want to close, there is now an option to close all of the windows of a certain type in one go in the window menu.
+  The type of window is based on the selected window, so to close all graph windows, just click on a graph window and go to ``Windows->Close All Graph Windows``. The option will only appear if you have more than one of that type of window.
+
 Instrument View
 ###############
 
 - New peak comparison tool on the pick tab. The user can select two peaks and information relating to their properties and the angles between them.
+- New tool for computing in-plane and out-of-plane angles in Qlab space for crystal alignment.
 - Added the ability to drag and drop mask workspaces onto the instrument view. This will apply the store workspace to the view.
 - Added the ability to store masking/ROI/grouping shapes to a table workspace, which can be dragged & dropped back onto different instrument views. 
 
@@ -27,7 +41,7 @@ Plotting Improvements
    :width: 550px
    :align: right
 
-   plotSubplots image
+   plotSubplots 
 
 Algorithm Toolbox
 #################
@@ -49,6 +63,7 @@ SliceViewer Improvements
 ------------------------
 
 - Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
+- Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructoir is fixed.
 
 .. figure:: ../../images/SliceViewerNonOrthogonal.png
    :class: screenshot
@@ -76,6 +91,7 @@ Bugs Resolved
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
+- Fixed a bug where closing a second plot window would cause a newly activated window to be resized.
 
 
 VSI Improvements

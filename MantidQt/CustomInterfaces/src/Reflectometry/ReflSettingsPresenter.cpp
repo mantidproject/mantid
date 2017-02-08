@@ -110,6 +110,16 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     options.push_back("ProcessingInstructions=" + procInst);
   }
 
+  // Add start overlap
+  auto startOv = m_view->getStartOverlap();
+  if (!startOv.empty())
+    options.push_back("StartOverlap=" + startOv);
+
+  // Add end overlap
+  auto endOv = m_view->getEndOverlap();
+  if (!endOv.empty())
+    options.push_back("EndOverlap=" + endOv);
+
   return boost::algorithm::join(options, ",");
 }
 
@@ -222,6 +232,16 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
   }
+
+  // Add start overlap
+  auto startOv = m_view->getStartOverlap();
+  if (!startOv.empty())
+    options.push_back("StartOverlap=" + startOv);
+
+  // Add end overlap
+  auto endOv = m_view->getEndOverlap();
+  if (!endOv.empty())
+    options.push_back("EndOverlap=" + endOv);
 
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns();
