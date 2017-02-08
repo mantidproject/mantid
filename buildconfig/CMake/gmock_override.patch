@@ -4,9 +4,47 @@
 :100644 100644 fb53080... 0000000... M	src/gmock-internal-utils.cc
 
 diff --git a/include/gmock/gmock-matchers.h b/include/gmock/gmock-matchers.h
-index 44055c9..7421ff7 100644
+index 44055c9..19b2177 100644
 --- a/include/gmock/gmock-matchers.h
 +++ b/include/gmock/gmock-matchers.h
+@@ -425,15 +425,15 @@ class PolymorphicMatcher {
+    public:
+     explicit MonomorphicImpl(const Impl& impl) : impl_(impl) {}
+ 
+-    virtual void DescribeTo(::std::ostream* os) const {
++    virtual void DescribeTo(::std::ostream* os) const override {
+       impl_.DescribeTo(os);
+     }
+ 
+-    virtual void DescribeNegationTo(::std::ostream* os) const {
++    virtual void DescribeNegationTo(::std::ostream* os) const override {
+       impl_.DescribeNegationTo(os);
+     }
+ 
+-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
++    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const override {
+       return impl_.MatchAndExplain(x, listener);
+     }
+ 
+@@ -548,15 +548,15 @@ class MatcherCastImpl<T, Matcher<U> > {
+         : source_matcher_(source_matcher) {}
+ 
+     // We delegate the matching logic to the source matcher.
+-    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const {
++    virtual bool MatchAndExplain(T x, MatchResultListener* listener) const override {
+       return source_matcher_.MatchAndExplain(static_cast<U>(x), listener);
+     }
+ 
+-    virtual void DescribeTo(::std::ostream* os) const {
++    virtual void DescribeTo(::std::ostream* os) const override {
+       source_matcher_.DescribeTo(os);
+     }
+ 
+-    virtual void DescribeNegationTo(::std::ostream* os) const {
++    virtual void DescribeNegationTo(::std::ostream* os) const override {
+       source_matcher_.DescribeNegationTo(os);
+     }
+ 
 @@ -888,14 +888,14 @@ class AnythingMatcher {
       public: \
        explicit Impl(const Rhs& rhs) : rhs_(rhs) {} \
