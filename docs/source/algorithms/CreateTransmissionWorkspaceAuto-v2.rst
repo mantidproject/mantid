@@ -58,10 +58,10 @@ Output:
 
 .. testoutput:: ExCreateTransWSAutoSimple
 
-    0.0564
-    0.0577
-    0.0582
-    0.0590
+    0.0827
+    0.0859
+    0.0861
+    0.0869
 
     
 **Example - Create a transmission run, overriding some default parameters**
@@ -81,10 +81,10 @@ Output:
 
 .. testoutput:: ExCreateTransWSAutoOverload
 
-    0.056
-    0.057
-    0.058
-    0.059
+    0.083
+    0.086
+    0.086
+    0.087
 
     
 **Example - Create a transmission run from two runs**
@@ -104,10 +104,10 @@ Output:
 
 .. testoutput:: ExCreateTransWSAutoTwo
 
-    0.0822
-    0.0847
-    0.0863
-    0.0869
+    0.0816
+    0.0841
+    0.0857
+    0.0862
 
 .. categories::
 
