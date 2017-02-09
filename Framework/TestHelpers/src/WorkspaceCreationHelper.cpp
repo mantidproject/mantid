@@ -79,12 +79,12 @@ void removeWS(const std::string &name) {
   * Creates bin or point based histograms based on the data passed
   * in for Y and E values and the bool specified.
   *
-  * @param isHistogram:: Specifies whether the returned histogram
+  * @param isHistogram :: Specifies whether the returned histogram
   * should use points or bin edges for the x axis. True gives bin edges.
-  * @param yAxis:: Takes an rvalue (move) of the y axis for the new histogram
-  * @param eAxis:: Takes an rvalue (move) of the e axis for the new histogram
+  * @param yAxis :: Takes an rvalue (move) of the y axis for the new histogram
+  * @param eAxis :: Takes an rvalue (move) of the e axis for the new histogram
   *
-  * @return:: Returns a histogram with the user specified X axis type
+  * @return :: Returns a histogram with the user specified X axis type
   * and the data the user passed in.
   */
 template <typename YType, typename EType>
