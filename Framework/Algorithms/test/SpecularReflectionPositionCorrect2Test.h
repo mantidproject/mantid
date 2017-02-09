@@ -17,6 +17,31 @@ class SpecularReflectionPositionCorrect2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_interWS;
 
+  // Initialise the algorithm and set the properties
+  void setupAlgorithm(SpecularReflectionPositionCorrect2 &alg,
+                      const double twoTheta, const std::string &correctionType,
+                      const std::string &detectorName) {
+    if (!alg.isInitialized())
+      alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("TwoTheta", twoTheta);
+    if (!correctionType.empty())
+      alg.setProperty("CorrectionType", correctionType);
+    if (!detectorName.empty())
+      alg.setProperty("DetectorComponentName", detectorName);
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+  }
+
+  // Run the algorithm and do some basic checks. Returns the output workspace.
+  MatrixWorkspace_const_sptr
+  runAlgorithm(SpecularReflectionPositionCorrect2 &alg) {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outWS);
+    return outWS;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -81,16 +106,8 @@ public:
     // Omit the CorrectionType property to check that a vertical shift
     // is done by default
     SpecularReflectionPositionCorrect2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoTheta", 1.4);
-    alg.setProperty("DetectorComponentName", "point-detector");
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT(outWS);
+    setupAlgorithm(alg, 1.4, "", "point-detector");
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();
     auto instrOut = outWS->getInstrument();
@@ -109,17 +126,8 @@ public:
 
   void test_correct_point_detector_rotation() {
     SpecularReflectionPositionCorrect2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoTheta", 1.4);
-    alg.setProperty("CorrectionType", "RotateAroundSample");
-    alg.setProperty("DetectorComponentName", "point-detector");
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT(outWS);
+    setupAlgorithm(alg, 1.4, "RotateAroundSample", "point-detector");
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();
     auto instrOut = outWS->getInstrument();
@@ -139,17 +147,8 @@ public:
 
   void test_correct_linear_detector_vertical_shift() {
     SpecularReflectionPositionCorrect2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoTheta", 1.4);
-    alg.setProperty("CorrectionType", "VerticalShift");
-    alg.setProperty("DetectorComponentName", "linear-detector");
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT(outWS);
+    setupAlgorithm(alg, 1.4, "VerticalShift", "linear-detector");
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();
     auto instrOut = outWS->getInstrument();
@@ -168,17 +167,8 @@ public:
 
   void test_correct_linear_detector_rotation() {
     SpecularReflectionPositionCorrect2 alg;
-    alg.initialize();
-    alg.setChild(true);
-    alg.setProperty("InputWorkspace", m_interWS);
-    alg.setProperty("TwoTheta", 1.4);
-    alg.setProperty("CorrectionType", "RotateAroundSample");
-    alg.setProperty("DetectorComponentName", "linear-detector");
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-
-    TS_ASSERT(outWS);
+    setupAlgorithm(alg, 1.4, "RotateAroundSample", "linear-detector");
+    MatrixWorkspace_const_sptr outWS = runAlgorithm(alg);
 
     auto instrIn = m_interWS->getInstrument();
     auto instrOut = outWS->getInstrument();
