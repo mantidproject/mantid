@@ -123,7 +123,7 @@ void MonteCarloAbsorption::exec() {
   auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
                                seed, interpolateOpt);
 
-  setProperty("OutputWorkspace", outputWS.get());
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 /**
