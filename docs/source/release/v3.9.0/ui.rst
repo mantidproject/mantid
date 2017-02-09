@@ -114,6 +114,7 @@ Bugs Resolved
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
 - Fixed a bug where closing a second plot window would cause a newly activated window to be resized.
+- Fixed a bug where pressing the pick mode button in the SplatterPlotView of the VSI caused Mantid to crash.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
