@@ -1,7 +1,6 @@
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -10,6 +9,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -30,6 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::interpolateLinearInplace;
+using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -224,7 +225,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
 MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  auto outputWS = DataObjects::create<MatrixWorkspace>(inputWS);
+  auto outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);
