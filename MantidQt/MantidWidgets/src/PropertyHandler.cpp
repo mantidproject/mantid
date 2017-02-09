@@ -371,7 +371,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
       size_t istart = 0, iend = 0;
       for (size_t i = 0; i < X.size() - 1; ++i) {
         double x = X[i];
-        if (x < m_browser->startX()) 
+        if (x < m_browser->startX())
           istart = i;
         if (x > m_browser->endX()) {
           iend = i;
