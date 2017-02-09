@@ -225,7 +225,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
 
 MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  auto outputWS = DataObjects::create<Workspace2D>(inputWS);
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);
