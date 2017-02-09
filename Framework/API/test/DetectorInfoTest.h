@@ -5,6 +5,7 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -342,6 +343,32 @@ public:
     TS_ASSERT_EQUALS(detInfo.rotation(2), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detInfo.rotation(3), Quat(1.0, 0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(detInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
+  }
+
+  void test_positions_rotations_multi_level() {
+    WorkspaceTester ws;
+    ws.initialize(9, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    auto &detInfo = ws.mutableDetectorInfo();
+    const auto root = ws.getInstrument();
+    const auto bank = root->getComponentByName("bank1");
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
+    const auto rootRot = root->getRotation();
+    const auto rootPos = root->getPos();
+    const auto bankPos = bank->getPos();
+    V3D axis{0.1, 0.2, 0.7};
+    Quat rot(42.0, axis);
+    V3D delta1{-11.0, 7.0, 42.0};
+    V3D delta2{1.0, 3.0, 2.0};
+    detInfo.setRotation(*root, rot);
+    detInfo.setPosition(*root, delta1);
+    detInfo.setPosition(*bank, delta1 + delta2);
+    // Undo, but *not* in reverse order.
+    detInfo.setRotation(*root, rootRot);
+    detInfo.setPosition(*root, rootPos);
+    detInfo.setPosition(*bank, bankPos);
+    TS_ASSERT_EQUALS(detInfo.position(0), (V3D{-0.008, -0.0002, 5.0}));
   }
 
   void test_detectorIDs() {
