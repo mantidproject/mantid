@@ -4,11 +4,18 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+// anonymous namespace
+namespace {
+#define VERTICAL "VerticalShift"
+#define ROTATION "RotateAroundSample"
+} // anonymous namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,7 +31,7 @@ const std::string SpecularReflectionPositionCorrect2::name() const {
 
 /// Algorithm's summary. @see Algorithm::summary
 const std::string SpecularReflectionPositionCorrect2::summary() const {
-  return "Corrects a detector component vertically based on TwoTheta.";
+  return "Corrects a detector component's position based on TwoTheta.";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
@@ -54,6 +61,18 @@ void SpecularReflectionPositionCorrect2::init() {
       make_unique<PropertyWithValue<double>>("TwoTheta", Mantid::EMPTY_DBL(),
                                              thetaValidator, Direction::Input),
       "Angle used to correct the detector component.");
+
+  const std::vector<std::string> correctionType{VERTICAL, ROTATION};
+  auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
+  correctionTypeValidator->add(
+      boost::make_shared<MandatoryValidator<std::string>>());
+  correctionTypeValidator->add(
+      boost::make_shared<StringListValidator>(correctionType));
+  declareProperty(
+      "CorrectionType", correctionType[0], correctionTypeValidator,
+      "Whether detectors should be shifted vertically or rotated around the "
+      "sample position.",
+      Direction::Input);
 
   declareProperty(
       Mantid::Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -103,6 +122,9 @@ void SpecularReflectionPositionCorrect2::exec() {
   IComponent_const_sptr sample = inst->getComponentByName(sampleName);
   const V3D samplePosition = sample->getPos();
 
+  // Type of movement (vertical shift or rotation around the sample)
+  const std::string correctionType = getProperty("CorrectionType");
+
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;
   // Reference frame
@@ -111,19 +133,42 @@ void SpecularReflectionPositionCorrect2::exec() {
   auto horizontalAxis = referenceFrame->pointingHorizontalAxis();
   auto upAxis = referenceFrame->pointingUpAxis();
 
-  // We just recalculate beam offset.
-  const double beamOffset =
+  // Get the offset from the sample in the beam direction
+  double beamOffset = 0.0;
+  const double beamOffsetOld =
       sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam());
-  // We only correct vertical position
+
+  if (correctionType == VERTICAL) {
+    // Only shifting vertically, so the beam offset remains the same
+    beamOffset = beamOffsetOld;
+  } else if (correctionType == ROTATION) {
+    // The radius for the rotation is the distance from the sample to
+    // the detector in the Beam-Vertical plane
+    const double upOffsetOld =
+        sampleToDetector.scalar_prod(referenceFrame->vecPointingUp());
+    const double radius =
+        std::sqrt(beamOffsetOld * beamOffsetOld + upOffsetOld * upOffsetOld);
+    beamOffset = radius * std::cos(twoThetaInRad);
+  } else {
+    // Shouldn't get here unless there's been a coding error
+    std::ostringstream message;
+    message << "Invalid correction type '" << correctionType;
+    throw std::runtime_error(message.str());
+  }
+
+  // Calculate the offset in the vertical direction, and the total
+  // offset in the beam direction
   const double upOffset = (beamOffset * std::tan(twoThetaInRad));
+  const double beamOffsetFromOrigin =
+      beamOffset +
+      samplePosition.scalar_prod(referenceFrame->vecPointingAlongBeam());
 
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
   moveAlg->setProperty("Workspace", outWS);
   moveAlg->setProperty("ComponentName", detectorName);
   moveAlg->setProperty("RelativePosition", false);
-  moveAlg->setProperty(beamAxis, detectorPosition.scalar_prod(
-                                     referenceFrame->vecPointingAlongBeam()));
+  moveAlg->setProperty(beamAxis, beamOffsetFromOrigin);
   moveAlg->setProperty(horizontalAxis, 0.0);
   moveAlg->setProperty(upAxis, upOffset);
   moveAlg->execute();
