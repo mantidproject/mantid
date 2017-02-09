@@ -75,8 +75,22 @@ void removeWS(const std::string &name) {
   Mantid::API::AnalysisDataService::Instance().remove(name);
 }
 
+/**
+  * Creates bin or point based histograms based on the data passed
+  * in for Y and E values and the bool specified.
+  *
+  * @param isHistogram:: Specifies whether the returned histogram
+  * should use points or bin edges for the x axis. True gives bin edges.
+  * @param yAxis:: Takes an rvalue (move) of the y axis for the new histogram
+  * @param eAxis:: Takes an rvalue (move) of the e axis for the new histogram
+  *
+  * @return:: Returns a histogram with the user specified X axis type
+  * and the data the user passed in.
+  */
 template <typename YType, typename EType>
 Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
+  // We don't need to check if y.size() == e.size() as the histogram
+  // type does this at construction
   const size_t yValsSize = yAxis.size();
   if (isHistogram) {
     BinEdges xAxis(yValsSize + 1, LinearGenerator(1, 1));
@@ -1194,7 +1208,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   */
 template <typename T>
 void populateWsWithInitList(T &destination, size_t startingIndex,
-                            std::initializer_list<double> values) {
+                            const std::initializer_list<double> &values) {
   size_t index = 0;
   for (const double val : values) {
     destination[startingIndex + index] = val;

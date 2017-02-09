@@ -111,6 +111,8 @@ template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
 }
 
+/// Creates and returns point or bin based histograms with the data specified in
+/// parameters
 template <typename YType, typename EType>
 Mantid::HistogramData::Histogram createHisto(bool isHistogram, YType &&yAxis,
                                              EType &&eAxis);
@@ -340,7 +342,7 @@ Mantid::DataObjects::RebinnedOutput_sptr createRebinnedOutputWorkspace();
 /// specified index
 template <typename T>
 void populateWsWithInitList(T &destination, size_t startingIndex,
-                            std::initializer_list<double> values);
+                            const std::initializer_list<double> &values);
 
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
