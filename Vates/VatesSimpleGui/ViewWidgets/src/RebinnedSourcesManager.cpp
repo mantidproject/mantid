@@ -465,7 +465,8 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
           builder->createFilter("filters", "Threshold", endOfSource2Pipeline);
     } else {
       QString message = QString("The filter ") + QString(proxy1->GetXMLName()) +
-                        QString(" is not known. You need to add it to the list of filters in the RebinnedSourcesManager");
+                        QString(" is not known. You need to add it to the list "
+                                "of filters in the RebinnedSourcesManager");
       throw std::runtime_error(message.toStdString());
     }
 
