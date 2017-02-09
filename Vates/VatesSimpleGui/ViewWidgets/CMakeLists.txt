@@ -156,7 +156,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # Create test file projects
-include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
+include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
 include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
 set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp

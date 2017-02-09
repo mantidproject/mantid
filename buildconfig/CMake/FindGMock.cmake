@@ -51,10 +51,12 @@ else()
                            FOLDER "UnitTests/gmock" )
   endforeach()
 
+  find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
+              PATHS ${CMAKE_BINARY_DIR}/googletest-src/gmock/include
+              NO_DEFAULT_PATH )
+  find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
+              PATHS ${CMAKE_BINARY_DIR}/googletest-src/gtest/include
+              NO_DEFAULT_PATH )
 
-  # The gtest/gmock targets carry header search path dependencies
-  # automatically when using CMake 2.8.11 or later. Otherwise we have
-  # to add them here ourselves.
-  include_directories("${gtest_SOURCE_DIR}/include"
-                      "${gmock_SOURCE_DIR}/include")
+  mark_as_advanced ( GMOCK_INCLUDE_DIR GTEST_INCLUDE_DIR )
 endif()

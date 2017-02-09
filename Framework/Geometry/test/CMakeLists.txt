@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
   # This is required to pick up ComponentCreationHelper, which is the only TestHelpers class that may be
   # used by Geometry tests (as it does not depend on any higher package than geometry)
