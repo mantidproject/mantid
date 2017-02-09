@@ -37,12 +37,21 @@ else()
   # Use static libraries as the dynamic ones are built with different
   # flags and don't load correctly for us. This does not affect
   # the global scope
-  set ( BUILD_SHARED_LIBS OFF )
+  #set ( BUILD_SHARED_LIBS OFF )
 
   # Add googletest directly to our build. This defines
   # the gtest and gtest_main targets.
   add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src/gmock
                    ${CMAKE_BINARY_DIR}/googletest-build)
+
+  # Put the targets in the UnitTests folder
+  foreach( target_var
+      gmock gtest )
+    set_target_properties( ${target_var}
+                           PROPERTIES EXCLUDE_FROM_ALL TRUE
+                           FOLDER "UnitTests/gmock" )
+  endforeach()
+
 
   # The gtest/gmock targets carry header search path dependencies
   # automatically when using CMake 2.8.11 or later. Otherwise we have
