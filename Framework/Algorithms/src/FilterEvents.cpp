@@ -210,7 +210,8 @@ void FilterEvents::exec() {
   //for (miter = m_outputWorkspacesMap.begin();
   //     miter != m_outputWorkspacesMap.end(); ++miter) {
   //  outputwsnames.push_back(miter->second->name());
-  for (miter = m_outputWS.begin(); miter != m_outputWS.end(); ++miter) {
+  for (miter = m_outputWorkspacesMap.begin();
+       miter != m_outputWorkspacesMap.end(); ++miter) {
     outputwsnames.push_back(miter->second->getName());
   }
   setProperty("OutputWorkspaceNames", outputwsnames);

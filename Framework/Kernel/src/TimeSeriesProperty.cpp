@@ -528,12 +528,13 @@ void TimeSeriesProperty<TYPE>::splitByTime(
 /// 1. vector outputs must be defined before this method is called;
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::splitByTimeVector(
-    std::vector<double> &time_vec, std::vector<int> &target_vec,
+    std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
     std::vector<TimeSeriesProperty *> outputs) {
   // check inputs
-  if (time_vec.size() != target_vec.size() + 1)
+  if (splitter_time_vec.size() != target_vec.size() + 1)
     throw std::runtime_error("Input time vector's size does not match taget "
                              "workspace index vector's size.");
+  // return if the output vector TimeSeriesProperties is not defined
   if (outputs.empty())
     return;
 
@@ -544,40 +545,92 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   // FIXME - should access the class variable m_time
   std::vector<Kernel::DateAndTime> tsp_time_vec = this->timesAsVector();
 
-  TimeSeriesProperty<TYPE> *current_tsp = 0;
-
   // go over both filter time vector and time series property time vector
-  bool continue_search = true;
-  size_t index_time_filter = 0;
+  size_t index_splitter = 0;
   size_t index_tsp_time = 0;
+
+  DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
+  DateAndTime split_start_time = splitter_time_vec[index_splitter];
+  DateAndTime split_stop_time = splitter_time_vec[index_splitter + 1];
+
+  // move splitter index such that the first entry of TSP is before the stop
+  // time of a splitter
+  bool continue_search = true;
+  bool no_entry_in_range = false;
   while (continue_search) {
-
-    Kernel::DateAndTime tsp_time = tsp_time_vec[index_tsp_time];
-    Kernel::DateAndTime start_filter_time = time_vec[index_time_filter];
-    Kernel::DateAndTime stop_filter_time = time_vec[index_time_filter + 1];
-    int current_target_index = target_vec[index_time_filter];
-
-    // TODO/FIXME - define current_tsp
-    current_tsp = outputs[current_target_index];
-
-    if (tsp_time < stop_filter_time) {
-      // the time series entry is still in the filter, add this entry to current
-      // times series property
-        current_tsp->addValue(tsp_time, m_values[index_tsp_time].value()); // _values[i_property - 1].time(), m_values[i_property - 1].value()
-      ++index_tsp_time;
+    if (tsp_time < split_stop_time) {
+      // requirement is met
+      continue_search = false;
     } else {
-      // the filter ends, then it is a time to ends with time series property
-      // and advance to next
-      throw std::runtime_error("Finish this! blabla");
+      // continue to move splitter index
+      ++index_splitter;
+      if (index_splitter == splitter_time_vec.size() - 1) {
+        // even the last splitter is before first entry
+        continue_search = false;
+        no_entry_in_range = true;
+      } else {
+        // advance
+        split_start_time = split_stop_time;
+        split_stop_time = splitter_time_vec[index_splitter + 1];
+      }
     }
+  } // END-WHILE: to move the splitters to the first entry
 
-    // check loop's termination criteria
-    if (index_time_filter >= time_vec.size() - 1) {
-      // filter is advanced to the last entry of the input time vector
+  // move along the entries to find the entry inside the current splitter
+  continue_search = false;
+  while (continue_search && !no_entry_in_range) {
+    if (tsp_time < split_start_time) {
+      // current entry is before the current splitters
+      ++index_tsp_time;
+      if (index_tsp_time == tsp_time_vec.size()) {
+        // already last entry, then it means that the splitters are too behind
+        continue_search = false;
+        no_entry_in_range = true;
+      } else {
+        // move the next entry
+        tsp_time = tsp_time_vec[index_tsp_time];
+      }
+    }
+  } // END-WHILE: to move the entries of TSP to the current splitter
+
+  // now it is the time to put TSP's entries to corresponding
+  while (continue_search) {
+    // get the first entry index
+    if (index_tsp_time > 0)
+      --index_tsp_time;
+
+    int target = target_vec[index_splitter];
+
+    bool continue_add = true;
+    while (continue_add) {
+      // add current entry
+      outputs[target]->addValue(m_values[index_tsp_time].time(),
+                                m_values[index_tsp_time].value());
+      // advance to next entry
+      ++index_tsp_time;
+      if (index_tsp_time == splitter_time_vec.size()) {
+        // last entry. quit all loops
+        continue_add = false;
+        continue_search = false;
+      } else if (splitter_time_vec[index_tsp_time] > split_stop_time) {
+        // next entry is out of this splitter: add the next one and quit
+        outputs[target]->addValue(m_values[index_tsp_time].time(),
+                                  m_values[index_tsp_time].value());
+        continue_add = false;
+      } else {
+        // advance to next time
+        tsp_time = tsp_time_vec[index_tsp_time];
+      }
+    } // END-WHILE continue add
+
+    // make splitters to advance to next
+    ++index_splitter;
+    if (index_splitter == splitter_time_vec.size() - 1) {
+      // already last splitters
       continue_search = false;
-    } else if (index_tsp_time >= tsp_time_vec.size()) {
-      // time series property is advanced to the last entry
-      continue_search = false;
+    } else {
+      split_start_time = split_stop_time;
+      split_stop_time = splitter_time_vec[index_splitter + 1];
     }
   } // END-OF-WHILE
 
