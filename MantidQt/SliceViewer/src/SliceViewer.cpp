@@ -1299,6 +1299,11 @@ QPixmap SliceViewer::getImage() {
   // Hide the line overlay handles
   this->m_lineOverlay->setShowHandles(false);
   this->m_colorBar->setRenderMode(true);
+  auto previousStyle = ui.frmPlot->styleSheet();
+  ui.frmPlot->setStyleSheet("background-color: white;");
+  MantidQt::MantidWidgets::ColorBarWidget::CheckboxStrategy test =
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE;
+  this->m_colorBar->setCheckBoxMode(test);
 
   // Grab it
   QCoreApplication::processEvents();
@@ -1309,7 +1314,9 @@ QPixmap SliceViewer::getImage() {
   this->m_lineOverlay->setShowHandles(true);
   this->m_colorBar->setRenderMode(false);
   this->setFastRender(oldFast);
-
+  this->m_colorBar->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_BOTH);
+  ui.frmPlot->setStyleSheet(previousStyle);
   return pix;
 }
 
