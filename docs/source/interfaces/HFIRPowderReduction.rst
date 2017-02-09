@@ -176,9 +176,4 @@ Raw data correction files
    - Location example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__gaps.txt*
 
 
-Limitation
-----------
-
-- HFIR powder reduction GUI supports for instrument HB2A only in release 3.4.0;
-
 .. categories:: Interfaces
