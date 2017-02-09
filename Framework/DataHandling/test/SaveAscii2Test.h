@@ -482,6 +482,9 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "3"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
 
@@ -525,6 +528,65 @@ public:
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_valid_SpectrumList() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumList", "1"));
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // the algorithm shouldn't have written a file to disk
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    std::string header1, header2, header3, separator, comment;
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
+    TS_ASSERT_EQUALS(specID, 2);
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+
+    std::string binlines;
+    std::vector<std::string> binstr;
+    std::vector<double> bins;
+    std::getline(in, binlines);
+    std::getline(in, binlines);
+
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 0);
+    TS_ASSERT_EQUALS(bins[1], 4);
+    TS_ASSERT_EQUALS(bins[2], 1);
+
+    std::getline(in, binlines);
+    bins.clear();
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 1.66667);
+    TS_ASSERT_EQUALS(bins[1], 17.3333);
+    TS_ASSERT_EQUALS(bins[2], 1);
+
+    in.close();
+
+    Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
 
