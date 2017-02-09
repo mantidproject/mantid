@@ -38,13 +38,13 @@ public:
   void tearDown() override { delete m_model; }
 
   void test_setData() {
-    std::vector<double> y = {100, 1, 2, 100, 100, 3, 4, 5, 100};
-    std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<double> yTestData = {100, 1, 2, 100, 100, 3, 4, 5, 100};
+    std::vector<double> xTestData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+        "Workspace2D", 1, yTestData.size(), yTestData.size());
+    data->mutableY(0) = yTestData;
+    data->mutableX(0) = xTestData;
 
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
@@ -54,21 +54,21 @@ public:
 
     MatrixWorkspace_const_sptr modelData = m_model->data();
 
-    TS_ASSERT_EQUALS(modelData->readX(0), data->readX(0));
-    TS_ASSERT_EQUALS(modelData->readY(0), data->readY(0));
-    TS_ASSERT_EQUALS(modelData->readE(0), data->readE(0));
+    TS_ASSERT_EQUALS(modelData->x(0).rawData(), data->x(0).rawData());
+    TS_ASSERT_EQUALS(modelData->y(0).rawData(), data->y(0).rawData());
+    TS_ASSERT_EQUALS(modelData->e(0).rawData(), data->e(0).rawData());
   }
 
   void test_fit() {
-    std::vector<double> e = {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
-    std::vector<double> y = {100, 1, 2, 100, 100, 3, 4, 5, 100};
-    std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    std::vector<double> eTestData = {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
+    std::vector<double> yTestData = {100, 1, 2, 100, 100, 3, 4, 5, 100};
+    std::vector<double> xTestData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
-    data->dataE(0) = e;
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+        "Workspace2D", 1, yTestData.size(), yTestData.size());
+    data->mutableE(0) = eTestData;
+    data->mutableY(0) = yTestData;
+    data->mutableX(0) = xTestData;
 
     m_model->setData(data);
 
@@ -98,12 +98,12 @@ public:
       TS_ASSERT_EQUALS(corrected->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(corrected->blocksize(), 9);
 
-      TS_ASSERT_DELTA(corrected->readY(0)[0], 97.86021, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[2], -0.13979, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[5], 0.86021, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[8], 97.86021, 1E-5);
+      TS_ASSERT_DELTA(corrected->y(0).rawData()[0], 97.86021, 1E-5);
+      TS_ASSERT_DELTA(corrected->y(0).rawData()[2], -0.13979, 1E-5);
+      TS_ASSERT_DELTA(corrected->y(0).rawData()[5], 0.86021, 1E-5);
+      TS_ASSERT_DELTA(corrected->y(0).rawData()[8], 97.86021, 1E-5);
 
-      TS_ASSERT_EQUALS(corrected->readE(0), data->readE(0));
+      TS_ASSERT_EQUALS(corrected->e(0).rawData(), data->e(0).rawData());
     }
 
     ITableWorkspace_sptr parameters = m_model->parameterTable();
@@ -164,9 +164,9 @@ public:
   }
   void setUp() override { 
 	m_model = new ALCBaselineModellingModel();
-	x= {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
-    	y= {100, 1, 2, 100, 100, 3, 4, 5, 100};
-    	e= {1, 2, 3, 4, 5, 6, 7, 8, 9};
+	xTestData= {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
+    	yTestData= {100, 1, 2, 100, 100, 3, 4, 5, 100};
+    	eTestData= {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
  }
 
@@ -177,19 +177,19 @@ public:
   void test_setData() {
 
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+        "Workspace2D", 1, yTestData.size(), yTestData.size());
+    data->mutableY(0) = yTestData;
+    data->mutableX(0) = xTestData;
 
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
     MatrixWorkspace_const_sptr modelData = m_model->data();
   }
   void test_fit() {
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
-    data->dataE(0) = e;
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+        "Workspace2D", 1, yTestData.size(), yTestData.size());
+    data->mutableE(0) = eTestData;
+    data->mutableY(0) = yTestData;
+    data->mutableX(0) = xTestData;
 
     m_model->setData(data);
 
@@ -210,8 +210,8 @@ public:
 
 private:
     ALCBaselineModellingModel *m_model;
-    std::vector<double> e;
-    std::vector<double> y; 
-    std::vector<double> x;
+    std::vector<double> eTestData;
+    std::vector<double> yTestData; 
+    std::vector<double> xTestData;
 };
 #endif /* MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODELTEST_H_ */
