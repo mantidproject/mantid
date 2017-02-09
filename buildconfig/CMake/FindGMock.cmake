@@ -45,7 +45,7 @@ else()
                    ${CMAKE_BINARY_DIR}/googletest-build)
 
   # Hide targets from "all" and put them in the UnitTests folder in MSVS
-  foreach( target_var gmock gtest )
+  foreach( target_var gmock gtest gmock_main gtest_main )
     set_target_properties( ${target_var}
                            PROPERTIES EXCLUDE_FROM_ALL TRUE
                            FOLDER "UnitTests/gmock" )
