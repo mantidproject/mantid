@@ -1,0 +1,83 @@
+digraph DirectILLPrepareData {
+  label = "DirectILLPrepareData workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    bkgScaling [label="FlatBkgScaling"]
+    inputFile [label="InputFile"]
+    inputWS [label="InputWorkspace"]
+    inputEPP [label="EPPWorkspace"]
+    inputBkg [label="FlatBkgWorkspace"]
+    inputEi [label="IncidentEnergyWorkspace"]
+    outputBkg [label="OutputFlatBkgWorkspace"]
+    outputEi [label="OutputIncidentEnergyWorkspace"]
+    outputEPP [label="OutputEPPWorkspace"]
+    outputWS [label="OutputWorkspace"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CalculateFlatBackground [label="CalculateFlatBackground"]
+    CalibrateEi [label="Calibrate incident energy"]
+    CorrectTOFAxis [label="CorrectTOFAxis"]
+    ExtractMonitors [label="ExtractMonitors"]
+    FindEPP [label="FindEPP"]
+    IntegrateMonitor [label="Integrate monitor"]
+    LoadILLTOF [label="LoadILLTOF"]
+    MergeRuns [label="MergeRuns"]
+    Normalize [label="Normalise to monitor/time"]
+    ScaleBkg [label="Scale"]
+    SubtractBkgDetector [label="Subtract flat background"]
+    SubtractBkgMonitor [label="Subtract flat background"]
+  }
+
+  subgraph values {
+    $value_style
+    detectors [label="Detector workspace"]
+    monitors [label="Monitor workspace"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    inputBkgGiven [label="FlatBkgWorkspace given?"]
+    inputEiGiven [label="IncidentEnergyWorkspace given?"]
+    inputEPPGiven [label="EPPWorkspace given?"]
+    inputFileGiven [label="InputFile given?"]
+  }
+
+  inputFileGiven -> inputFile [label="yes"]
+  inputFile -> LoadILLTOF
+  LoadILLTOF -> MergeRuns
+  MergeRuns -> CorrectTOFAxis
+  inputFileGiven -> inputWS [label="no"]
+  inputWS -> CorrectTOFAxis
+  CorrectTOFAxis -> ExtractMonitors
+  ExtractMonitors -> monitors
+  monitors -> SubtractBkgMonitor
+  SubtractBkgMonitor -> IntegrateMonitor
+  IntegrateMonitor -> Normalize
+  ExtractMonitors -> detectors
+  detectors -> Normalize
+  Normalize -> inputBkgGiven
+  inputBkgGiven -> CalculateFlatBackground [label="no"]
+  CalculateFlatBackground -> outputBkg
+  CalculateFlatBackground -> ScaleBkg
+  inputBkgGiven -> inputBkg [label="yes"]
+  inputBkg -> ScaleBkg
+  bkgScaling -> ScaleBkg
+  ScaleBkg -> SubtractBkgDetector
+  Normalize -> SubtractBkgDetector
+  inputEPPGiven -> FindEPP [label="no"]
+  SubtractBkgDetector -> FindEPP
+  FindEPP -> outputEPP
+  FindEPP -> CalibrateEi
+  inputEPPGiven -> inputEPP [label="yes"]
+  inputEPP -> CalibrateEi
+  SubtractBkgDetector -> CalibrateEi
+  inputEiGiven -> inputEPPGiven [label="no"]
+  CalibrateEi -> outputEi
+  inputEiGiven -> inputEi [label="yes"]
+  inputEi -> CalibrateEi
+  CalibrateEi -> outputWS
+}

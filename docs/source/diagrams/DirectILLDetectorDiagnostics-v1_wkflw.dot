@@ -1,0 +1,50 @@
+digraph DirectILLDetectorDiagnostics {
+  label = "DirectILLDetectorDiagnostics workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    bkgThresholds [label="BkgDiagnostics thresholds"]
+    elasticPeakWidth [label="ElasticPeakWidthInSigmas"]
+    inputBkg [label="FlatBkgWorkspace"]
+    inputEPP [label="EPPWorkspace"]
+    inputWS [label="InputWorkspace"]
+    maskIndices [label="MaskedDetectors"]
+    maskComponents [label="MaskedComponents"]
+    outputDiagnostics [label="OutputWorkspace"]
+    peakThresholds [label="PeakDiagnostics thresholds"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DiagnoseBkg [label="Diagnose flat backgrounds"]
+    DiagnosePeaks [label="Diagnose elastic peaks"]
+    Integrate [label="Integrate elastic peak"]
+    Plus [label="Plus"]
+  }
+
+  subgraph values {
+    $value_style
+    bkgDiagnostics [label="Background diagnostics workspace"]
+    peakDiagnostics [label="Peak diagnostics workspace"]
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  inputWS -> Integrate
+  inputEPP -> Integrate
+  elasticPeakWidth -> Integrate
+  Integrate -> DiagnosePeaks
+  peakThresholds -> DiagnosePeaks
+  DiagnosePeaks -> peakDiagnostics
+  inputBkg -> DiagnoseBkg
+  bkgThresholds -> DiagnoseBkg
+  DiagnoseBkg -> bkgDiagnostics
+  peakDiagnostics -> Plus
+  bkgDiagnostics -> Plus
+  maskIndices -> Plus
+  maskComponents -> Plus
+  Plus -> outputDiagnostics
+}
