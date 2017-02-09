@@ -240,7 +240,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             return False
 
         # generic checks
-        if wksp.getName() is None or len(wksp.getName()) <= 0:
+        if wksp.name() is None or len(wksp.name()) <= 0:
             print "Workspace does not have a name"
             del wksp
             return False

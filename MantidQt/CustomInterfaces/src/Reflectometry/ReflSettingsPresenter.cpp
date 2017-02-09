@@ -1,12 +1,12 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSettingsPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
-#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
+#include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
 #include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
@@ -106,8 +106,10 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   return boost::algorithm::join(options, ",");
 }
@@ -126,28 +128,38 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add CRho
   auto crho = m_view->getCRho();
-  if (!crho.empty())
+  if (!crho.empty()) {
+    wrapWithQuotes(crho);
     options.push_back("CRho=" + crho);
+  }
 
   // Add CAlpha
   auto calpha = m_view->getCAlpha();
-  if (!calpha.empty())
+  if (!calpha.empty()) {
+    wrapWithQuotes(calpha);
     options.push_back("CAlpha=" + calpha);
+  }
 
   // Add CAp
   auto cap = m_view->getCAp();
-  if (!cap.empty())
+  if (!cap.empty()) {
+    wrapWithQuotes(cap);
     options.push_back("CAp=" + cap);
+  }
 
   // Add CPp
   auto cpp = m_view->getCPp();
-  if (!cpp.empty())
+  if (!cpp.empty()) {
+    wrapWithQuotes(cpp);
     options.push_back("CPp=" + cpp);
+  }
 
   // Add direct beam
   auto dbnr = m_view->getDirectBeam();
-  if (!dbnr.empty())
+  if (!dbnr.empty()) {
+    wrapWithQuotes(dbnr);
     options.push_back("RegionOfDirectBeam=" + dbnr);
+  }
 
   // Add polarisation corrections
   auto polCorr = m_view->getPolarisationCorrections();
@@ -207,8 +219,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 
   // Add detector limits
   auto procInst = m_view->getProcessingInstructions();
-  if (!procInst.empty())
+  if (!procInst.empty()) {
+    wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
+  }
 
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns();
@@ -309,6 +323,16 @@ void ReflSettingsPresenter::getExpDefaults() {
   defaults[6] = alg->getPropertyValue("ScaleFactor");
 
   m_view->setExpDefaults(defaults);
+}
+
+/** Wraps string with quote marks if it does not already have them
+* @param str :: [input] The string to be wrapped
+*/
+void ReflSettingsPresenter::wrapWithQuotes(std::string &str) const {
+  if (str.front() != '\"')
+    str = "\"" + str;
+  if (str.back() != '\"')
+    str = str + "\"";
 }
 
 /** Fills instrument settings with default values

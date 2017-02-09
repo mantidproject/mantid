@@ -85,6 +85,10 @@ private:
                            const std::vector<specnum_t> &spectraList,
                            const API::MatrixWorkspace_sptr WS,
                            const std::tuple<size_t, size_t, bool> &range_info);
+  void appendToDetectorListFromComponentList(
+      std::vector<detid_t> &detectorList,
+      const std::vector<std::string> &componentList,
+      const API::MatrixWorkspace_const_sptr WS);
   void
   appendToIndexListFromWS(std::vector<size_t> &indexList,
                           const API::MatrixWorkspace_sptr maskedWorkspace,
