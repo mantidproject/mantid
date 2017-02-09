@@ -207,7 +207,7 @@ void FilterEvents::exec() {
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-  //for (miter = m_outputWorkspacesMap.begin();
+  // for (miter = m_outputWorkspacesMap.begin();
   //     miter != m_outputWorkspacesMap.end(); ++miter) {
   //  outputwsnames.push_back(miter->second->name());
   for (miter = m_outputWorkspacesMap.begin();
