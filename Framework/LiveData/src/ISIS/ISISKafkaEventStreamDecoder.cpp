@@ -118,9 +118,9 @@ using Kernel::DateAndTime;
  * mapping
  */
 ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
-    std::unique_ptr<IKafkaBroker> broker, const std::string &eventTopic,
+    std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic)
-    : m_broker(std::move(broker)), m_eventTopic(eventTopic),
+    : m_broker(broker), m_eventTopic(eventTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
       m_interrupt(false), m_localEvents(), m_specToIdx(), m_runStart(),
       m_runNumber(-1), m_thread(), m_capturing(false), m_exception(),

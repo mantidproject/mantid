@@ -19,7 +19,7 @@ ISISKafkaEventListener::ISISKafkaEventListener() {
 
 /// @copydoc ILiveListener::connect
 bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
-  auto broker = Mantid::Kernel::make_unique<KafkaBroker>(address.toString());
+  auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
     const std::string eventTopic(instrumentName +
@@ -28,7 +28,7 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
         spDetInfoTopic(instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
     m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
-        std::move(broker), eventTopic, runInfoTopic, spDetInfoTopic);
+        broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
     g_log.error() << "ISISKafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";

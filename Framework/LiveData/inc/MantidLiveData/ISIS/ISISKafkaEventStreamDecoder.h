@@ -43,7 +43,7 @@ namespace LiveData {
 */
 class DLLExport ISISKafkaEventStreamDecoder {
 public:
-  ISISKafkaEventStreamDecoder(std::unique_ptr<IKafkaBroker> broker,
+  ISISKafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                               const std::string &eventTopic,
                               const std::string &runInfoTopic,
                               const std::string &spDetTopic);
@@ -89,7 +89,7 @@ private:
   API::Workspace_sptr extractDataImpl();
 
   /// Broker to use to subscribe to topics
-  std::unique_ptr<IKafkaBroker> m_broker;
+  std::shared_ptr<IKafkaBroker> m_broker;
   /// Topic names
   const std::string m_eventTopic;
   const std::string m_runInfoTopic;

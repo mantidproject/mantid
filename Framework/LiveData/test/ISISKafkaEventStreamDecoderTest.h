@@ -60,8 +60,8 @@ public:
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -98,8 +98,8 @@ public:
     using Mantid::DataObjects::EventWorkspace;
     using namespace Mantid::LiveData;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(2)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
@@ -135,8 +135,8 @@ public:
     using namespace ::testing;
     using namespace ISISKafkaTesting;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -156,8 +156,8 @@ public:
     using namespace ::testing;
     using namespace ISISKafkaTesting;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
@@ -174,8 +174,8 @@ public:
     using namespace ::testing;
     using namespace ISISKafkaTesting;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
@@ -192,8 +192,8 @@ public:
     using namespace ::testing;
     using namespace ISISKafkaTesting;
 
-    MockKafkaBroker mockBroker;
-    EXPECT_CALL(mockBroker, subscribe_(_))
+    auto mockBroker = std::make_shared<MockKafkaBroker>();
+    EXPECT_CALL(*mockBroker, subscribe_(_))
         .Times(Exactly(3))
         .WillOnce(Return(new FakeISISEventSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
@@ -208,7 +208,7 @@ public:
 
 private:
   std::unique_ptr<Mantid::LiveData::ISISKafkaEventStreamDecoder>
-  createTestDecoder(const Mantid::LiveData::IKafkaBroker &broker) {
+  createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
     return Mantid::Kernel::make_unique<ISISKafkaEventStreamDecoder>(broker, "",
                                                                     "", "");

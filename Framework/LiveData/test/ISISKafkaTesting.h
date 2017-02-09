@@ -34,6 +34,13 @@ public:
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
         this->subscribe_(s));
   }
+  MOCK_CONST_METHOD2(subscribe_,
+                     IKafkaStreamSubscriber_ptr(const std::string &, int64_t));
+  IKafkaStreamSubscriber_uptr subscribe(const std::string &s,
+                                        int64_t offset) const override {
+    return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
+        this->subscribe_(s, offset));
+  }
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 
@@ -44,6 +51,7 @@ class FakeExceptionThrowingStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer) override {
     buffer->clear();
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
@@ -57,6 +65,7 @@ class FakeEmptyStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer) override { buffer->clear(); }
 };
 
@@ -69,6 +78,7 @@ public:
   FakeISISEventSubscriber(int32_t nperiods)
       : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -120,6 +130,7 @@ class FakeISISRunInfoStreamSubscriber
 public:
   FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -154,6 +165,7 @@ class FakeISISSpDetStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
   void subscribe() override {}
+  void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
