@@ -91,7 +91,7 @@ index 44055c9..519a9a3 100644
          UniversalPrint(rhs_, os); \
        } \
 diff --git a/include/gmock/gmock-spec-builders.h b/include/gmock/gmock-spec-builders.h
-index 2dd733b..a212af8 100644
+index 2dd733b..54c3383 100644
 --- a/include/gmock/gmock-spec-builders.h
 +++ b/include/gmock/gmock-spec-builders.h
 @@ -1059,7 +1059,7 @@ class TypedExpectation : public ExpectationBase {
@@ -152,6 +152,51 @@ index 2dd733b..a212af8 100644
    }
  };
  
+@@ -1480,7 +1478,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+   // result.
+   // L = *
+   virtual UntypedActionResultHolderBase* UntypedPerformAction(
+-      const void* untyped_action, const void* untyped_args) const {
++      const void* untyped_action, const void* untyped_args) const override {
+     // Make a copy of the action before performing it, in case the
+     // action deletes the mock object (and thus deletes itself).
+     const Action<F> action = *static_cast<const Action<F>*>(untyped_action);
+@@ -1492,7 +1490,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+   // Implements UntypedFunctionMockerBase::ClearDefaultActionsLocked():
+   // clears the ON_CALL()s set on this mock function.
+   virtual void ClearDefaultActionsLocked()
+-      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) {
++      GTEST_EXCLUSIVE_LOCK_REQUIRED_(g_gmock_mutex) override {
+     g_gmock_mutex.AssertHeld();
+ 
+     // Deleting our default actions may trigger other mock objects to be
+@@ -1597,7 +1595,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+   virtual void UntypedDescribeUninterestingCall(
+       const void* untyped_args,
+       ::std::ostream* os) const
+-          GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
++          GTEST_LOCK_EXCLUDED_(g_gmock_mutex) override {
+     const ArgumentTuple& args =
+         *static_cast<const ArgumentTuple*>(untyped_args);
+     *os << "Uninteresting mock function call - ";
+@@ -1626,7 +1624,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+       const void* untyped_args,
+       const void** untyped_action, bool* is_excessive,
+       ::std::ostream* what, ::std::ostream* why)
+-          GTEST_LOCK_EXCLUDED_(g_gmock_mutex) {
++          GTEST_LOCK_EXCLUDED_(g_gmock_mutex) override {
+     const ArgumentTuple& args =
+         *static_cast<const ArgumentTuple*>(untyped_args);
+     MutexLock l(&g_gmock_mutex);
+@@ -1649,7 +1647,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+ 
+   // Prints the given function arguments to the ostream.
+   virtual void UntypedPrintArgs(const void* untyped_args,
+-                                ::std::ostream* os) const {
++                                ::std::ostream* os) const override {
+     const ArgumentTuple& args =
+         *static_cast<const ArgumentTuple*>(untyped_args);
+     UniversalPrint(args, os);
 diff --git a/src/gmock-cardinalities.cc b/src/gmock-cardinalities.cc
 index 50ec728..529502f 100644
 --- a/src/gmock-cardinalities.cc
