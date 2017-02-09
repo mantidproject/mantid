@@ -1059,9 +1059,9 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     }
     if (mws) {
       size_t wi = static_cast<size_t>(workspaceIndex());
-      if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty()) {
-        setStartX(mws->readX(wi).front());
-        setEndX(mws->readX(wi).back());
+      if (wi < mws->getNumberHistograms() && !mws->x(wi).empty()) {
+        setStartX(mws->x(wi).front());
+        setEndX(mws->x(wi).back());
       }
     }
   }
@@ -2919,9 +2919,10 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
     Mantid::API::MatrixWorkspace_sptr mws =
         Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                          rowCount, rowCount);
-    Mantid::MantidVec &X = mws->dataX(0);
-    Mantid::MantidVec &Y = mws->dataY(0);
-    Mantid::MantidVec &E = mws->dataE(0);
+    auto &X = mws->mutableX(0);
+    auto &Y = mws->mutableY(0);
+    auto &E = mws->mutableE(0);
+
     for (size_t row = 0; row < rowCount; ++row) {
       X[row] = xcol->toDouble(row);
       Y[row] = ycol->toDouble(row);

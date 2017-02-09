@@ -1349,9 +1349,9 @@ void DetectorPlotController::prepareDataForSinglePlot(
     return; // Detector doesn't have a workspace index relating to it
   }
   // get the data
-  const Mantid::MantidVec &X = ws->readX(wi);
-  const Mantid::MantidVec &Y = ws->readY(wi);
-  const Mantid::MantidVec &E = ws->readE(wi);
+  const auto &X = ws->x(wi);
+  const auto &Y = ws->y(wi);
+  const auto &E = ws->e(wi);
 
   // find min and max for x
   size_t imin, imax;
@@ -1402,7 +1402,7 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
   size_t imin, imax;
   m_instrActor->getBinMinMaxIndex(wi, imin, imax);
 
-  const Mantid::MantidVec &X = ws->readX(wi);
+  const auto &X = ws->x(wi);
   x.assign(X.begin() + imin, X.begin() + imax);
   if (ws->isHistogramData()) {
     // calculate the bin centres
@@ -1412,9 +1412,8 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
                    std::bind2nd(std::divides<double>(), 2.0));
   }
   y.resize(x.size(), 0);
-  if (err) {
+  if (err)
     err->resize(x.size(), 0);
-  }
 
   const int n = ass->nelements();
   for (int i = 0; i < n; ++i) {
@@ -1423,11 +1422,11 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
     if (idet) {
       try {
         size_t index = m_instrActor->getWorkspaceIndex(idet->getID());
-        const Mantid::MantidVec &Y = ws->readY(index);
+        const auto &Y = ws->y(index);
         std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
                        std::plus<double>());
         if (err) {
-          const Mantid::MantidVec &E = ws->readE(index);
+          const auto &E = ws->e(index);
           std::vector<double> tmp;
           tmp.assign(E.begin() + imin, E.begin() + imax);
           std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(),
@@ -1441,9 +1440,8 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
     }
   }
 
-  if (err) {
+  if (err)
     std::transform(err->begin(), err->end(), err->begin(), Sqrt());
-  }
 }
 
 /**
@@ -1549,11 +1547,11 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         }
         size_t index = m_instrActor->getWorkspaceIndex(id);
         // get the y-value for detector idet
-        const Mantid::MantidVec &Y = ws->readY(index);
+        const auto &Y = ws->y(index);
         double sum = std::accumulate(Y.begin() + imin, Y.begin() + imax, 0);
         xymap[xvalue] = sum;
         if (err) {
-          const Mantid::MantidVec &E = ws->readE(index);
+          const auto &E = ws->e(index);
           std::vector<double> tmp(imax - imin);
           // take squares of the errors
           std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
