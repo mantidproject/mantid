@@ -1349,7 +1349,7 @@ void DetectorPlotController::prepareDataForSinglePlot(
     return; // Detector doesn't have a workspace index relating to it
   }
   // get the data
-  const auto &X = ws->x(wi);
+  const auto &XPoints = ws->points(wi);
   const auto &Y = ws->y(wi);
   const auto &E = ws->e(wi);
 
@@ -1357,16 +1357,8 @@ void DetectorPlotController::prepareDataForSinglePlot(
   size_t imin, imax;
   m_instrActor->getBinMinMaxIndex(wi, imin, imax);
 
-  x.assign(X.begin() + imin, X.begin() + imax);
+  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.assign(Y.begin() + imin, Y.begin() + imax);
-  if (ws->isHistogramData()) {
-    // calculate the bin centres
-    std::transform(x.begin(), x.end(), X.begin() + imin + 1, x.begin(),
-                   std::plus<double>());
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::divides<double>(), 2.0));
-  }
-
   if (err) {
     err->assign(E.begin() + imin, E.begin() + imax);
   }
@@ -1402,15 +1394,8 @@ void DetectorPlotController::prepareDataForSumsPlot(int detid,
   size_t imin, imax;
   m_instrActor->getBinMinMaxIndex(wi, imin, imax);
 
-  const auto &X = ws->x(wi);
-  x.assign(X.begin() + imin, X.begin() + imax);
-  if (ws->isHistogramData()) {
-    // calculate the bin centres
-    std::transform(x.begin(), x.end(), X.begin() + imin + 1, x.begin(),
-                   std::plus<double>());
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::divides<double>(), 2.0));
-  }
+  const auto &XPoints = ws->points(wi);
+  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   if (err)
     err->resize(x.size(), 0);

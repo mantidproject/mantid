@@ -502,15 +502,8 @@ void InstrumentActor::sumDetectorsUniform(QList<int> &dets,
   getBinMinMaxIndex(wi, imin, imax);
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
-  const auto &X = ws->x(wi);
-  x.assign(X.begin() + imin, X.begin() + imax);
-  if (ws->isHistogramData()) {
-    // calculate the bin centres
-    std::transform(x.begin(), x.end(), X.begin() + imin + 1, x.begin(),
-                   std::plus<double>());
-    std::transform(x.begin(), x.end(), x.begin(),
-                   std::bind2nd(std::divides<double>(), 2.0));
-  }
+  const auto &XPoints = ws->points(wi);
+  x.assign(XPoints.begin() + imin, XPoints.begin() + imax);
   y.resize(x.size(), 0);
   // sum the spectra
   foreach (int id, dets) {
