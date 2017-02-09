@@ -146,4 +146,72 @@ public:
   }
 };
 
+class ALCBaselineModellingModelTestPerformance : public CxxTest::TestSuite {
+// ALCBaselineModellingModelPerformance *m_model;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ALCBaselineModellingModelTestPerformance *createSuite() {
+    return new ALCBaselineModellingModelTestPerformance();
+  }
+  static void destroySuite(ALCBaselineModellingModelTestPerformance *suite) {
+    delete suite;
+  }
+
+  ALCBaselineModellingModelTestPerformance() {
+    FrameworkManager::Instance(); // To make sure everything is initialized
+  }
+  void setUp() override { 
+	m_model = new ALCBaselineModellingModel();
+	x= {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
+    	y= {100, 1, 2, 100, 100, 3, 4, 5, 100};
+    	e= {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+ }
+
+  void tearDown() override { delete m_model; }
+
+
+
+  void test_setData() {
+
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, y.size(), y.size());
+    data->dataY(0) = y;
+    data->dataX(0) = x;
+
+    QSignalSpy spy(m_model, SIGNAL(dataChanged()));
+    MatrixWorkspace_const_sptr modelData = m_model->data();
+  }
+  void test_fit() {
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
+        "Workspace2D", 1, y.size(), y.size());
+    data->dataE(0) = e;
+    data->dataY(0) = y;
+    data->dataX(0) = x;
+
+    m_model->setData(data);
+
+    IFunction_const_sptr func = FunctionFactory::Instance().createInitialized(
+        "name=FlatBackground,A0=0");
+
+    std::vector<IALCBaselineModellingModel::Section> sections;
+    sections.emplace_back(2, 3);
+    sections.emplace_back(6, 8);
+
+
+    MatrixWorkspace_const_sptr corrected = m_model->correctedData();
+    ITableWorkspace_sptr parameters = m_model->parameterTable();
+
+  }
+
+
+
+private:
+    ALCBaselineModellingModel *m_model;
+    std::vector<double> e;
+    std::vector<double> y; 
+    std::vector<double> x;
+};
 #endif /* MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODELTEST_H_ */
