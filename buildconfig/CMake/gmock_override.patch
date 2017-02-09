@@ -1,4 +1,5 @@
 :100644 100644 7e9708e... 0000000... M	include/gmock/gmock-actions.h
+:100644 100644 2327393... 0000000... M	include/gmock/gmock-generated-actions.h
 :100644 100644 44055c9... 0000000... M	include/gmock/gmock-matchers.h
 :100644 100644 2dd733b... 0000000... M	include/gmock/gmock-spec-builders.h
 :100644 100644 50ec728... 0000000... M	src/gmock-cardinalities.cc
@@ -17,6 +18,19 @@ index 7e9708e..cb199ef 100644
  
     private:
      GTEST_COMPILE_ASSERT_(!internal::is_reference<Result>::value,
+diff --git a/include/gmock/gmock-generated-actions.h b/include/gmock/gmock-generated-actions.h
+index 2327393..b2ea8f9 100644
+--- a/include/gmock/gmock-generated-actions.h
++++ b/include/gmock/gmock-generated-actions.h
+@@ -1501,7 +1501,7 @@ DoAll(Action1 a1, Action2 a2, Action3 a3, Action4 a4, Action5 a5, Action6 a6,
+       typedef typename ::testing::internal::Function<F>::ArgumentTuple\
+           args_type;\
+       explicit gmock_Impl(p0##_type gmock_p0) : p0(gmock_p0) {}\
+-      virtual return_type Perform(const args_type& args) {\
++      virtual return_type Perform(const args_type& args) override {\
+         return ::testing::internal::ActionHelper<return_type, gmock_Impl>::\
+             Perform(this, args);\
+       }\
 diff --git a/include/gmock/gmock-matchers.h b/include/gmock/gmock-matchers.h
 index 44055c9..519a9a3 100644
 --- a/include/gmock/gmock-matchers.h
@@ -91,7 +105,7 @@ index 44055c9..519a9a3 100644
          UniversalPrint(rhs_, os); \
        } \
 diff --git a/include/gmock/gmock-spec-builders.h b/include/gmock/gmock-spec-builders.h
-index 2dd733b..54c3383 100644
+index 2dd733b..d452a9d 100644
 --- a/include/gmock/gmock-spec-builders.h
 +++ b/include/gmock/gmock-spec-builders.h
 @@ -1059,7 +1059,7 @@ class TypedExpectation : public ExpectationBase {
@@ -152,6 +166,15 @@ index 2dd733b..54c3383 100644
    }
  };
  
+@@ -1469,7 +1467,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
+   // L = *
+   virtual UntypedActionResultHolderBase* UntypedPerformDefaultAction(
+       const void* untyped_args,  // must point to an ArgumentTuple
+-      const string& call_description) const {
++      const string& call_description) const override {
+     const ArgumentTuple& args =
+         *static_cast<const ArgumentTuple*>(untyped_args);
+     return ResultHolder::PerformDefaultAction(this, args, call_description);
 @@ -1480,7 +1478,7 @@ class FunctionMockerBase : public UntypedFunctionMockerBase {
    // result.
    // L = *
