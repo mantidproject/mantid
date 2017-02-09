@@ -78,7 +78,7 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     // Find the corresponding relative position
     auto parent = comp.getParent();
     if (parent) {
-      Quat rot0 = parent->getRelativeRot();
+      Quat rot0 = parent->getRotation();
       rot0.inverse();
       newRot = rot * rot0;
     }
