@@ -7,6 +7,8 @@ Diffraction Changes
 
 Crystal Improvements
 --------------------
+- :ref:`StartLiveData <algm-StartLiveData>` will load "live"
+  data streaming from MaNDi data server.
 
 Engineering Diffraction
 -----------------------
