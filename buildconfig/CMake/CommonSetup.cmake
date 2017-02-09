@@ -31,14 +31,6 @@ if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )
 endif ( stdint )
 
-# look for pthread to help out gtest which is some hybrid of cmake and autotools
-check_include_files ( pthread.h pthread )
-if ( pthread )
-  add_definitions ( -DGTEST_HAS_PTHREAD=1 )
-else ( pthread )
-  add_definitions ( -DGTEST_HAS_PTHREAD=0 )
-endif ( pthread )
-
 # Configure a variable to hold the required test timeout value for all tests
 set ( TESTING_TIMEOUT 300 CACHE INTEGER
       "Timeout in seconds for each test (default 300=5minutes)")
