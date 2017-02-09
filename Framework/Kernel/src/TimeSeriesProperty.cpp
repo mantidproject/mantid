@@ -576,8 +576,10 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   } // END-WHILE: to move the splitters to the first entry
 
+  std::cout << "[DB  1] " << "TSP entry: " << index_tsp_time << ", Splitter index = " << index_splitter << "\n";
+
   // move along the entries to find the entry inside the current splitter
-  continue_search = false;
+  continue_search = true;
   while (continue_search && !no_entry_in_range) {
     if (tsp_time < split_start_time) {
       // current entry is before the current splitters
@@ -591,9 +593,18 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
         tsp_time = tsp_time_vec[index_tsp_time];
       }
     }
+    else
+    {
+        // current entry is after split start time. with while loop one, it is certain that the current entry
+        // is within the current splitter.
+        continue_search = false;
+    }
   } // END-WHILE: to move the entries of TSP to the current splitter
 
+  std::cout << "[DB  2] " << "TSP entry: " << index_tsp_time << ", Splitter index = " << index_splitter << "\n";
+
   // now it is the time to put TSP's entries to corresponding
+  continue_search = true;
   while (continue_search) {
     // get the first entry index
     if (index_tsp_time > 0)
