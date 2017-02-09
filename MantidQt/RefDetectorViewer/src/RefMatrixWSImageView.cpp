@@ -4,7 +4,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/IEventWorkspace.h"
 
 using Mantid::API::MatrixWorkspace_sptr;

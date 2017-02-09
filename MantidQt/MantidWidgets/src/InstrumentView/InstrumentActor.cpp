@@ -6,11 +6,9 @@
 #include "MantidQtMantidWidgets/InstrumentView/ObjCompAssemblyActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/ObjComponentActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/RectangularDetectorActor.h"
-#include "MantidQtMantidWidgets/InstrumentView/SampleActor.h"
 #include "MantidQtMantidWidgets/InstrumentView/StructuredDetectorActor.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -19,10 +17,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IObjComponent.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"

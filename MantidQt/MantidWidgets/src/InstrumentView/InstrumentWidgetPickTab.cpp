@@ -14,11 +14,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 
@@ -32,14 +30,9 @@
 #include <QMenu>
 #include <QAction>
 #include <QActionGroup>
-#include <QWidgetAction>
 #include <QLabel>
 #include <QMessageBox>
-#include <QDialog>
 #include <QGridLayout>
-#include <QHBoxLayout>
-#include <QComboBox>
-#include <QLineEdit>
 #include <QSignalMapper>
 #include <QPixmap>
 #include <QSettings>

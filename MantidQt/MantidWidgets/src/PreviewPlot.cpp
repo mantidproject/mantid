@@ -5,18 +5,12 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-#include <Poco/AutoPtr.h>
-#include <Poco/NObserver.h>
 
 #include <QAction>
-#include <QBrush>
 #include <QPalette>
-#include <QVBoxLayout>
 
 #include <qwt_array.h>
 #include <qwt_data.h>

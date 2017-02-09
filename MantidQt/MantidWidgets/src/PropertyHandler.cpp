@@ -1,6 +1,5 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-//#include "../FunctionCurve.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -12,7 +11,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
@@ -21,7 +19,6 @@
 #include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
-#include <QMenu>
 
 using std::size_t;
 

@@ -9,19 +9,14 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
@@ -31,7 +26,6 @@
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
 #include "ParameterPropertyManager.h"
@@ -39,18 +33,15 @@
 #include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QSettings>
-#include <QFileInfo>
 #include <QApplication>
 #include <QClipboard>
 #include <QSignalMapper>
-#include <QMetaMethod>
 #include <QTreeWidget>
 #include <QUrl>
 
