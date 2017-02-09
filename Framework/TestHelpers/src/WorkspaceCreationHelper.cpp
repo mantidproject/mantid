@@ -1201,9 +1201,9 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   * the destination has capacity for startingIndex + size(initializer list)
   * number of values
   *
-  * @param:: destination The array to populate with data
-  * @param:: startingIndex The index to start populating data at
-  * @param:: values The initializer list to populate the array with
+  * @param destination :: The array to populate with data
+  * @param startingIndex :: The index to start populating data at
+  * @param values :: The initializer list to populate the array with
   * starting at the index specified
   */
 template <typename T>
