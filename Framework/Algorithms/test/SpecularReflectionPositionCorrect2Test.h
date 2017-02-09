@@ -77,7 +77,9 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
-  void test_correct_point_detector() {
+  void test_correct_point_detector_vertical_shift_default() {
+    // Omit the CorrectionType property to check that a vertical shift
+    // is done by default
     SpecularReflectionPositionCorrect2 alg;
     alg.initialize();
     alg.setChild(true);
@@ -105,12 +107,43 @@ public:
     TS_ASSERT_DELTA(detOut.Y(), 0.06508, 1e-5);
   }
 
-  void test_correct_linear_detector() {
+  void test_correct_point_detector_rotation() {
     SpecularReflectionPositionCorrect2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", m_interWS);
     alg.setProperty("TwoTheta", 1.4);
+    alg.setProperty("CorrectionType", "RotateAroundSample");
+    alg.setProperty("DetectorComponentName", "point-detector");
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(outWS);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+    // 'point-detector' should have been moved  both vertically and in
+    // the beam direction
+    auto detIn = instrIn->getComponentByName("point-detector")->getPos();
+    auto detOut = instrOut->getComponentByName("point-detector")->getPos();
+    TS_ASSERT_EQUALS(detIn.X(), detOut.X());
+    TS_ASSERT_DELTA(detOut.Z(), 19.69921, 1e-5);
+    TS_ASSERT_DELTA(detOut.Y(), 0.06506, 1e-5);
+  }
+
+  void test_correct_linear_detector_vertical_shift() {
+    SpecularReflectionPositionCorrect2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("TwoTheta", 1.4);
+    alg.setProperty("CorrectionType", "VerticalShift");
     alg.setProperty("DetectorComponentName", "linear-detector");
     alg.setPropertyValue("OutputWorkspace", "test_out");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -125,12 +158,42 @@ public:
     auto sampleIn = instrIn->getSample()->getPos();
     auto sampleOut = instrOut->getSample()->getPos();
     TS_ASSERT_EQUALS(sampleIn, sampleOut);
-    // 'point-detector' should have been moved vertically only
+    // 'linear-detector' should have been moved vertically only
     auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
     auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
     TS_ASSERT_EQUALS(detIn.X(), detOut.X());
     TS_ASSERT_EQUALS(detIn.Z(), detOut.Z());
     TS_ASSERT_DELTA(detOut.Y(), 0.07730, 1e-5);
+  }
+
+  void test_correct_linear_detector_rotation() {
+    SpecularReflectionPositionCorrect2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("TwoTheta", 1.4);
+    alg.setProperty("CorrectionType", "RotateAroundSample");
+    alg.setProperty("DetectorComponentName", "linear-detector");
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    TS_ASSERT(outWS);
+
+    auto instrIn = m_interWS->getInstrument();
+    auto instrOut = outWS->getInstrument();
+
+    // Sample should not have moved
+    auto sampleIn = instrIn->getSample()->getPos();
+    auto sampleOut = instrOut->getSample()->getPos();
+    TS_ASSERT_EQUALS(sampleIn, sampleOut);
+    // 'linear-detector' should have been moved both vertically and in
+    // the beam direction
+    auto detIn = instrIn->getComponentByName("linear-detector")->getPos();
+    auto detOut = instrOut->getComponentByName("linear-detector")->getPos();
+    TS_ASSERT_EQUALS(detIn.X(), detOut.X());
+    TS_ASSERT_DELTA(detOut.Z(), 20.19906, 1e-5);
+    TS_ASSERT_DELTA(detOut.Y(), 0.07728, 1e-5);
   }
 };
 
