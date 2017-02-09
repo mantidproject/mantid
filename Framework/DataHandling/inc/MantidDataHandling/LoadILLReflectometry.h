@@ -1,12 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 #define MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/System.h"
+#include "MantidNexus/NexusClasses.h"
 
 Mantid::DataHandling::LoadHelper loadHelper;
 
@@ -52,7 +51,7 @@ public:
   const std::string category() const override {return "DataHandling\\Nexus";}
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
-    return "Loads a ILL/D17 nexus file.";
+    return "Loads an ILL reflectometry nexus file (instruments D17 and Figaro).";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
@@ -85,7 +84,7 @@ private:
   size_t m_numberOfHistograms{0};
   double m_wavelength{0};
   double m_channelWidth{0};
-  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17"};
+  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro"};
   LoadHelper m_loader;
 };
 

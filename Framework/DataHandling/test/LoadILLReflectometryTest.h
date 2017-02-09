@@ -5,12 +5,11 @@
 
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
-#include "MantidKernel/Unit.h"
-#include "MantidDataObjects/Workspace2D.h"
+// Attention: LoadHelper includes "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"         // Attention: LoadHelper will include this header
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
@@ -101,8 +100,8 @@ public:
     // Compare angles in rad
     double sampleAngle = loadHelper.getPropertyFromRun<double>(output, "san.value");
     const auto &spectrumInfo = output->spectrumInfo();
-    // Check twoTheta at mid detector
-    TS_ASSERT_DELTA(spectrumInfo.twoTheta(129), 2. * sampleAngle * M_PI / 180.0, 1.e-4);
+    // Check twoTheta between two center detectors 128 and 129 using workspace indices
+    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(130) * 180.0 / M_PI, 2. * sampleAngle);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();

@@ -1,15 +1,14 @@
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
+// Attention: LoadHelper includes "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
-//#include <boost/algorithm/string.hpp>
 #include <algorithm>
-
 #include <nexus/napi.h>
 
 namespace Mantid {
@@ -67,13 +66,28 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
-  declareProperty(
-      make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the Data file to load");
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
+                                            ".nxs", Direction::Input),
+                  "File path of the data file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace");
+
+  const std::vector<std::string> theta = {"san", "dan", "theta"};
+  declareProperty(
+      "Theta", Kernel::make_unique<StringListValidator>(theta),
+      "Optional angle for calculating the scattering angle.\n"
+      "San (sample angle), dan (detector angle), theta (user defined angle)");
+
+  const std::vector<std::string> scattering = {"coherent", "incoherent"};
+  declareProperty("ScatteringType",
+                  Kernel::make_unique<StringListValidator>(scattering));
+
+  declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", "",
+                                            FileProperty::OptionalLoad, ".nxs",
+                                            Direction::Input),
+                  "File path of the direct beam file to load");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -551,15 +565,40 @@ void LoadILLReflectometry::placeDetector() {
 
   twotheta = 2.0 * angle_bragg (rad)
 
+
+  ; calculate angle offset for flat detector surface
+  function cosmos_anal_calcangleoffset, peakpos, xoff, density, distance
+  return  atan(((peakpos - xoff) * density - (c_params.pixels_x / 2.)-0.5) *
+  c_params.pixelwidth, distance)
+
+  ; calculate corrected time of flight distance for flat detector surface
+  cosmos_anal_correctdistance(peakpos, xoff, density, distance)
+  return distance / cos(cosmos_anal_calcangleoffset(peakpos, xoff, density,
+  distance))
+
+  calculate lambda (wavelength in angstroms) determined for reflected beam only
+
+  temp1 = cosmos_anal_correctdistance(peakref, parref.x_min,
+  parref.pixeldensity, parref.tofd)
+  temp2 = abs(temp1 - cosmos_anal_correctdistance(peakdir, pardir.x_min,
+  pardir.pixeldensity, pardir.tofd))
+  ' Difference in corrected TOF distance between direct and reflect beams is '
+  temp2
+  if (temp2 / temp1) gt 0.01 then ' Run no. ' runno ': Different TOF distances
+  from direct and reflect runs.'
+  lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
+  parref.channelwidth + parref.delay) / temp1)
+
+
   */
 
   std::string componentName("uniq_detector");
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
 
-  double angle_rad = 2. * sample_angle * M_PI / 180.0;
+  double angle_rad = (2. * sample_angle) * M_PI / 180.0;
   // incident theta angle for being able to call the algorithm
   // ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta", double(angle_rad));
+  m_localWorkspace->mutableRun().addProperty("stheta", double(angle_rad / 2.));
   g_log.debug() << "2Theta " << 2. * sample_angle << " degrees\n";
 
   // move to new position
