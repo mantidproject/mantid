@@ -99,7 +99,7 @@ def _rebin(ws, params, wsNames, algorithmLogging):
     return rebinnedWS
 
 
-class DirectILLSofQW(DataProcessorAlgorithm):
+class DirectILLReduction(DataProcessorAlgorithm):
     """A data reduction workflow algorithm for the direct geometry TOF spectrometers at ILL."""
 
     def __init__(self):
@@ -112,7 +112,7 @@ class DirectILLSofQW(DataProcessorAlgorithm):
 
     def name(self):
         """Return the algorithm's name."""
-        return 'DirectILLSofQW'
+        return 'DirectILLReduction'
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -407,4 +407,4 @@ class DirectILLSofQW(DataProcessorAlgorithm):
         return transposedWS
 
 
-AlgorithmFactory.subscribe(DirectILLSofQW)
+AlgorithmFactory.subscribe(DirectILLReduction)
