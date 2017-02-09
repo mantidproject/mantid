@@ -9,6 +9,17 @@ UI & Usability Changes
 User Interface
 --------------
 
+Project Saving
+##############
+
+.. figure:: ../../images/PartialProjectSaveDialog.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
+- We have added a new dialog when saving a project that allows you to select which workspaces you want to save, and will tell you which graph windows will be included or excluded based on your selections.
+- The size of each workspace in memory is listed so you can speed up project saving (and reloading) by excluding large workspaces you do not need.
+
 Windows
 #######
 

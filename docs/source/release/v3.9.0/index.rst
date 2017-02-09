@@ -12,9 +12,9 @@ Mantid 3.9.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer.
+We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer, as well as partial project saving in the Mantidplot interface.
 
-This is just one of many improvements in this release, so please take a
+These are just two of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
