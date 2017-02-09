@@ -133,11 +133,6 @@ if ( OPENCL_BUILD )
   add_subdirectory ( GPUAlgorithms )
 endif ()
 
-# Unit test helper packages
-if ( CXXTEST_FOUND )
-  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
-endif ()
-
 add_subdirectory (MDAlgorithms)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
