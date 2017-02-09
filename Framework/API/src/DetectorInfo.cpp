@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -112,12 +113,12 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
 
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
-  return getDetector(index).getPos();
+  return Kernel::toV3D(m_detectorInfo.position(index));
 }
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const size_t index) const {
-  return getDetector(index).getRotation();
+  return Kernel::toQuat(m_detectorInfo.rotation(index));
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
@@ -137,19 +138,13 @@ void DetectorInfo::clearMaskFlags() {
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
-  const auto &det = getDetector(index);
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  moveComponent(det, *m_pmap, position, positionType);
+  m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
                                const Kernel::Quat &rotation) {
-  const auto &det = getDetector(index);
-  using namespace Geometry::ComponentHelper;
-  TransformType rotationType = Absolute;
-  rotateComponent(det, *m_pmap, rotation, rotationType);
+  m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
 /** Set the absolute position of the component `comp`. Not thread safe.
@@ -158,11 +153,17 @@ void DetectorInfo::setRotation(const size_t index,
  * typically still influence detector positions. */
 void DetectorInfo::setPosition(const Geometry::IComponent &comp,
                                const Kernel::V3D &pos) {
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  moveComponent(comp, *m_pmap, pos, positionType);
 
-  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+  if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
+    const auto index = indexOf(det->getID());
+    m_detectorInfo.setPosition(index, Kernel::toVector3d(pos));
+  } else {
+    // This will go badly wrong if the parameter map in the component is not
+    // identical to ours, but there does not seem to be a way to check?
+    const auto oldPos = comp.getPos();
+    using namespace Geometry::ComponentHelper;
+    TransformType positionType = Absolute;
+    moveComponent(comp, *m_pmap, pos, positionType);
     // If comp is a detector cached positions stay valid. In all other cases
     // (higher level in instrument tree, or other leaf component such as sample
     // or source) we flush all cached positions.
@@ -173,6 +174,14 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     // Detector positions are currently not cached, the cached pointers to
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
+    std::vector<Geometry::IDetector_const_sptr> dets;
+    m_instrument->getDetectorsInBank(dets, comp);
+    const auto delta = pos - oldPos;
+    for (const auto &det : dets) {
+      const auto index = indexOf(det->getID());
+      m_detectorInfo.setPosition(index,
+                                 Kernel::toVector3d(position(index) + delta));
+    }
   }
 }
 
@@ -182,11 +191,19 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
  * typically still influence detector positions rotations. */
 void DetectorInfo::setRotation(const Geometry::IComponent &comp,
                                const Kernel::Quat &rot) {
-  using namespace Geometry::ComponentHelper;
-  TransformType rotationType = Absolute;
-  rotateComponent(comp, *m_pmap, rot, rotationType);
-
-  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+  if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
+    const auto index = indexOf(det->getID());
+    m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rot));
+  } else {
+    // This will go badly wrong if the parameter map in the component is not
+    // identical to ours, but there does not seem to be a way to check?
+    const auto pos = comp.getPos();
+    auto invOldRot = comp.getRotation();
+    invOldRot.inverse();
+    const auto delta = rot * invOldRot;
+    using namespace Geometry::ComponentHelper;
+    TransformType rotationType = Absolute;
+    rotateComponent(comp, *m_pmap, rot, rotationType);
     // If comp is a detector cached positions and rotations stay valid. In all
     // other cases/ (higher level in instrument tree, or other leaf component
     // such as sample or source) we flush all cached positions and rotations.
@@ -197,6 +214,16 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // Detector positions and rotations are currently not cached, the cached
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
+    std::vector<Geometry::IDetector_const_sptr> dets;
+    m_instrument->getDetectorsInBank(dets, comp);
+    for (const auto &det : dets) {
+      const auto index = indexOf(det->getID());
+      m_detectorInfo.setRotation(
+          index, Kernel::toQuaterniond(delta * rotation(index)));
+      auto relativePos = position(index) - pos;
+      delta.rotate(relativePos);
+      m_detectorInfo.setPosition(index, Kernel::toVector3d(relativePos + pos));
+    }
   }
 }
 

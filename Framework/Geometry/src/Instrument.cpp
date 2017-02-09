@@ -191,9 +191,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.emplace(std::get<0>(in_det),
-                      ParComponentFactory::createDetector(
-                          std::get<1>(in_det).get(), m_map));
+      out_map.emplace(std::get<0>(in_det), getDetector(std::get<0>(in_det)));
     }
   } else {
     // You can just return the detector cache directly.
@@ -267,7 +265,33 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
   max = std::get<0>(*in_dets->rbegin());
 }
 
-//------------------------------------------------------------------------------------------
+/** Fill a vector with all the detectors contained (at any depth) in a named
+ *component. For example,
+ * you might have a bank10 with 4 tubes with 100 pixels each; this will return
+ *the
+ * 400 contained Detector objects.
+ *
+ * @param[out] dets :: vector filled with detector pointers
+ * @param comp :: the parent component assembly that contains detectors.
+ */
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                                    const IComponent &comp) const {
+  const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
+  if (bank) {
+    // Get a vector of children (recursively)
+    std::vector<boost::shared_ptr<const IComponent>> children;
+    bank->getChildren(children, true);
+    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
+    for (it = children.begin(); it != children.end(); ++it) {
+      IDetector_const_sptr det =
+          boost::dynamic_pointer_cast<const IDetector>(*it);
+      if (det) {
+        dets.push_back(det);
+      }
+    }
+  }
+}
+
 /** Fill a vector with all the detectors contained (at any depth) in a named
  *component. For example,
  * you might have a bank10 with 4 tubes with 100 pixels each; this will return
@@ -284,21 +308,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
-  boost::shared_ptr<const ICompAssembly> bank =
-      boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (bank) {
-    // Get a vector of children (recursively)
-    std::vector<boost::shared_ptr<const IComponent>> children;
-    bank->getChildren(children, true);
-    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
-    for (it = children.begin(); it != children.end(); ++it) {
-      IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const IDetector>(*it);
-      if (det) {
-        dets.push_back(det);
-      }
-    }
-  }
+  getDetectorsInBank(dets, *comp);
 }
 
 //------------------------------------------------------------------------------------------

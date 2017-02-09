@@ -194,6 +194,7 @@ protected:
 private:
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
+                             Geometry::ParameterMap &paramMapForPosAndRot,
                              const std::string &name,
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);

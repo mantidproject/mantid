@@ -14,6 +14,7 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidBeamline/DetectorInfo.h"
@@ -58,7 +59,7 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
@@ -197,7 +198,22 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
     for (size_t i = 0; i < numDets; ++i)
       if (newInstr.isMonitorViaIndex(i))
         monitors.push_back(i);
-    return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
+    std::vector<Eigen::Vector3d> positions;
+    std::vector<Eigen::Quaterniond> rotations;
+    const auto &detIDs = newInstr.getDetectorIDs();
+    for (const auto &id : detIDs) {
+      const auto &det = newInstr.getDetector(id);
+      // In the case of RectangularDetectorPixel the position is also affected
+      // by the parameters scalex and scaly, but `getPos()` takes that into
+      // account (if no DetectorInfo is set in the ParameterMap).
+      const auto &pos = det->getPos();
+      positions.emplace_back(pos[0], pos[1], pos[2]);
+      const auto &rot = det->getRotation();
+      rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
+    }
+
+    return Kernel::make_unique<Beamline::DetectorInfo>(
+        std::move(positions), std::move(rotations), monitors);
   }
 }
 }
@@ -217,6 +233,19 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
+  // We do not clear scalex and scaley since those parameters are also used for
+  // other methods apart from getPos() in RectangularDetector.
+  for (const auto id : sptr_instrument->getDetectorIDs()) {
+    const auto &det = sptr_instrument->getDetector(id);
+    m_parmap->clearParametersByName(ParameterMap::pos(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::posx(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::posy(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::posz(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::rot(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::rotx(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::roty(), det.get());
+    m_parmap->clearParametersByName(ParameterMap::rotz(), det.get());
+  }
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -322,6 +351,72 @@ struct ParameterValue {
 ///@endcond
 }
 
+namespace {
+bool isPositionParameter(const std::string &name) {
+  return ParameterMap::pos() == name;
+}
+
+bool isRotationParameter(const std::string &name) {
+  return ParameterMap::rot() == name;
+}
+
+bool isScaleParameter(const std::string &name) {
+  return (name == "scalex" || name == "scaley");
+}
+
+V3D getRelativePosition(const StringTokenizer &tokens,
+                        const std::string &paramValue) {
+  const auto &type = tokens[1];
+  const std::string name = "dummy";
+  auto param = ParameterFactory::create(type, name);
+  param->fromString(paramValue);
+  return param->value<V3D>();
+}
+
+Quat getRelativeRotation(const std::string &paramType,
+                         const std::string &paramValue) {
+  const std::string name = "dummy";
+  auto param = ParameterFactory::create(paramType, name);
+  param->fromString(paramValue);
+  return param->value<Quat>();
+}
+
+double getScaleFactor(const std::string &paramType,
+                      const std::string &paramValue) {
+  const std::string name = "dummy";
+  auto param = ParameterFactory::create(paramType, name);
+  param->fromString(paramValue);
+  return param->value<double>();
+}
+
+void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
+                                    const IComponent &component,
+                                    const std::string &paramName,
+                                    double factor) {
+  // Scale affects pixel positions, but we also add the parameter below.
+  const auto &det = dynamic_cast<const RectangularDetector &>(component);
+  double ScaleX = 1.0;
+  double ScaleY = 1.0;
+  if (paramName == "scalex")
+    ScaleX = factor;
+  else
+    ScaleY = factor;
+  V3D scale(ScaleX, ScaleY, 1);
+  det.getRotation().rotate(scale);
+  const auto origin = det.getPos();
+  for (int x = 0; x < det.xpixels(); x++) {
+    for (int y = 0; y < det.ypixels(); y++) {
+      const auto &pixel = det.getAtXY(x, y);
+      const auto index = detectorInfo.indexOf(pixel->getID());
+      const auto pos = detectorInfo.position(index);
+      const auto relPos = pos - origin;
+      auto newRelPos = relPos * scale;
+      detectorInfo.setPosition(index, pos - relPos + newRelPos);
+    }
+  }
+}
+}
+
 /** Add parameters to the instrument parameter map that are defined in
 * instrument
 *   definition file or parameter file, which may contain parameters that require
@@ -330,9 +425,6 @@ struct ParameterValue {
 */
 void ExperimentInfo::populateInstrumentParameters() {
   populateIfNotLoaded();
-  // Get instrument and sample
-  boost::shared_ptr<const Instrument> instrument =
-      getInstrument()->baseInstrument();
 
   // Reference to the run
   const auto &runData = run();
@@ -341,16 +433,20 @@ void ExperimentInfo::populateInstrumentParameters() {
   // about
   // the parameters that my be specified in the instrument definition file (IDF)
   Geometry::ParameterMap &paramMap = instrumentParameters();
+  Geometry::ParameterMap paramMapForPosAndRot;
+
+  // Get instrument and sample
+  auto &detectorInfo = mutableDetectorInfo();
+  const auto parInstrument = getInstrument();
+  const auto instrument = parInstrument->baseInstrument();
   const auto &paramInfoFromIDF = instrument->getLogfileCache();
 
   const double deg2rad(M_PI / 180.0);
   std::map<const IComponent *, RTP> rtpParams;
 
-  auto cacheEnd = paramInfoFromIDF.end();
-  for (auto cacheItr = paramInfoFromIDF.begin(); cacheItr != cacheEnd;
-       ++cacheItr) {
-    const auto &nameComp = cacheItr->first;
-    const auto &paramInfo = cacheItr->second;
+  for (const auto &item : paramInfoFromIDF) {
+    const auto &nameComp = item.first;
+    const auto &paramInfo = item.second;
     const std::string &paramN = nameComp.first;
 
     try {
@@ -376,15 +472,15 @@ void ExperimentInfo::populateInstrumentParameters() {
           // convert spherical coordinates to Cartesian coordinate values
           double x = rtpValues.radius * std::sin(rtpValues.theta) *
                      std::cos(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
           double y = rtpValues.radius * std::sin(rtpValues.theta) *
                      std::sin(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "y", y);
           double z = rtpValues.radius * std::cos(rtpValues.theta);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "z", z);
+          paramMapForPosAndRot.addV3D(paramInfo->m_component,
+                                      ParameterMap::pos(), V3D(x, y, z));
         }
       } else {
-        populateWithParameter(paramMap, paramN, *paramInfo, runData);
+        populateWithParameter(paramMap, paramMapForPosAndRot, paramN,
+                              *paramInfo, runData);
       }
     } catch (std::exception &exc) {
       g_log.information() << "Unable to add component parameter '"
@@ -392,6 +488,45 @@ void ExperimentInfo::populateInstrumentParameters() {
       continue;
     }
   }
+  for (const auto &item : paramMapForPosAndRot) {
+    if (isPositionParameter(item.second->name())) {
+      // Important: Get component WITH ParameterMap so we see correct parent
+      // positions and DetectorInfo updates correctly.
+      const auto &comp = parInstrument->getComponentByID(item.first);
+      const auto newRelPos = item.second->value<V3D>();
+      auto position = newRelPos;
+      if (auto parent = comp->getParent()) {
+        parent->getRotation().rotate(position);
+        position += parent->getPos();
+      }
+      detectorInfo.setPosition(*comp, position);
+    } else if (isRotationParameter(item.second->name())) {
+      // Important: Get component WITH ParameterMap so we see correct parent
+      // positions and DetectorInfo updates correctly.
+      const auto &comp = parInstrument->getComponentByID(item.first);
+      const auto newRelRot = item.second->value<Quat>();
+      auto rotation = newRelRot;
+      if (auto parent = comp->getParent()) {
+        rotation = newRelRot * parent->getRotation();
+      }
+      detectorInfo.setRotation(*comp, rotation);
+    }
+    // Parameters for individual components (x,y,z) are ignored. ParameterMap
+    // did compute the correct compound positions and rotations internally.
+  }
+  // Special case RectangularDetector: Parameters scalex and scaley affect pixel
+  // positions.
+  for (const auto &item : paramMap) {
+    if (isScaleParameter(item.second->name()))
+      // Important: Get component WITH ParameterMap so we see correct parent
+      // positions and DetectorInfo updates correctly.
+      adjustPositionsFromScaleFactor(
+          detectorInfo, *parInstrument->getComponentByID(item.first),
+          item.second->name(), item.second->value<double>());
+  }
+  // paramMapForPosAndRot goes out of scope, dropping all position and rotation
+  // parameters of detectors (parameters for non-detector components have been
+  // inserted into paramMap via DetectorInfo::setPosition(IComponent *)).
 }
 
 /**
@@ -1472,10 +1607,12 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     for (int i = 4; i < size; i++)
       paramValue += ";" + tokens[4];
 
-    if (tokens[2].compare("masked") == 0) {
-      const auto &type = tokens[1];
+    const auto &paramType = tokens[1];
+    const auto &paramName = tokens[2];
+    ParameterMap axisWiseRotationsParams;
+    if (paramName.compare("masked") == 0) {
       const std::string name = "dummy";
-      auto param = ParameterFactory::create(type, name);
+      auto param = ParameterFactory::create(paramType, name);
       param->fromString(paramValue);
       bool value = param->value<bool>();
       if (value) {
@@ -1488,8 +1625,33 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
           m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
                                     value);
       }
+    } else if (isPositionParameter(paramName)) {
+      // We are parsing a string obtained from a ParameterMap. The map may
+      // contain posx, posy, and posz (in addition to pos). However, when these
+      // component wise positions are set, 'pos' is updated accordingly. We are
+      // thus ignoring position components here.
+      const auto oldRelPos = comp->getRelativePos();
+      const auto newRelPos = getRelativePosition(tokens, paramValue);
+      const auto delta = newRelPos - oldRelPos;
+      const auto position = comp->getPos() + delta;
+      mutableDetectorInfo().setPosition(*comp, position);
+    } else if (isRotationParameter(paramName)) {
+      // We are parsing a string obtained from a ParameterMap. The map may
+      // contain rotx, roty, and rotz (in addition to rot). However, when these
+      // component wise rotations are set, 'rot' is updated accordingly. We are
+      // thus ignoring rotation components here.
+      auto invOldRelRot = comp->getRelativeRot();
+      invOldRelRot.inverse();
+      const auto newRelRot = getRelativeRotation(paramType, paramValue);
+      const auto delta = newRelRot * invOldRelRot;
+      const auto rotation = delta * comp->getRotation();
+      mutableDetectorInfo().setRotation(*comp, rotation);
     } else {
-      pmap.add(tokens[1], comp, tokens[2], paramValue);
+      // Scale affects pixel positions, but we also add the parameter below.
+      if (isScaleParameter(paramName))
+        adjustPositionsFromScaleFactor(mutableDetectorInfo(), *comp, paramName,
+                                       getScaleFactor(paramType, paramValue));
+      pmap.add(paramType, comp, paramName, paramValue);
     }
   }
 }
@@ -1504,7 +1666,8 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * @param runData A reference to the run object, which stores log value entries
  */
 void ExperimentInfo::populateWithParameter(
-    Geometry::ParameterMap &paramMap, const std::string &name,
+    Geometry::ParameterMap &paramMap,
+    Geometry::ParameterMap &paramMapForPosAndRot, const std::string &name,
     const Geometry::XMLInstrumentParameter &paramInfo, const Run &runData) {
   const std::string &category = paramInfo.m_type;
   ParameterValue paramValue(paramInfo,
@@ -1529,11 +1692,13 @@ void ExperimentInfo::populateWithParameter(
     }
   } else if (name.compare("x") == 0 || name.compare("y") == 0 ||
              name.compare("z") == 0) {
-    paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
+    paramMapForPosAndRot.addPositionCoordinate(paramInfo.m_component, name,
+                                               paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {
-    paramMap.addRotationParam(paramInfo.m_component, name, paramValue,
-                              pDescription);
+    // Effectively this is dropping any parameters named 'rot'.
+    paramMapForPosAndRot.addRotationParam(paramInfo.m_component, name,
+                                          paramValue, pDescription);
   } else if (category.compare("fitting") == 0) {
     std::ostringstream str;
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , "

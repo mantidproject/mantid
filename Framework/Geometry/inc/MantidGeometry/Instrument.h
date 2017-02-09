@@ -139,6 +139,8 @@ public:
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                          const IComponent &comp) const;
+  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                           const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors

@@ -1,5 +1,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid {
@@ -119,6 +121,36 @@ double Detector::getPhiOffset(const double &offset) const {
 det_topology Detector::getTopology(V3D &center) const {
   center = this->getPos();
   return rect;
+}
+
+/// Return the relative position to the parent
+const Kernel::V3D Detector::getRelativePos() const {
+  if (m_map && m_map->hasDetectorInfo())
+    return Kernel::toV3D(m_map->detectorInfo().position(index())) -
+           getParent()->getPos();
+  return ObjComponent::getRelativePos();
+}
+
+Kernel::V3D Detector::getPos() const {
+  if (m_map && m_map->hasDetectorInfo())
+    return Kernel::toV3D(m_map->detectorInfo().position(index()));
+  return ObjComponent::getPos();
+}
+
+const Kernel::Quat Detector::getRelativeRot() const {
+  if (m_map && m_map->hasDetectorInfo()) {
+    auto inverseParentRot = getParent()->getRotation();
+    inverseParentRot.inverse();
+    return Kernel::toQuat(m_map->detectorInfo().rotation(index())) *
+           inverseParentRot;
+  }
+  return ObjComponent::getRelativeRot();
+}
+
+const Kernel::Quat Detector::getRotation() const {
+  if (m_map && m_map->hasDetectorInfo())
+    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
+  return ObjComponent::getRotation();
 }
 
 /// Helper for legacy access mode. Returns a reference to the ParameterMap.
