@@ -16,42 +16,42 @@ Introduction of Tabs
 
 1.  **Setup and Data Access**: Configure the instrument name, data server URL and directories.
 
- - Configure the instrument name;
- - Set up and test HB3A data server's URL;
- - Configure the directory to save raw data;
- - Configure the directory to save working result;
- - Download data from server;
+    - Configure the instrument name;
+    - Set up and test HB3A data server's URL;
+    - Configure the directory to save raw data;
+    - Configure the directory to save working result;
+    - Download data from server;
 
 
 2.  **View Raw Data**: View 2D image of counts on detector of one measurement.
 
- - Plot the counts of the 256 by 256 2D detector;
+    - Plot the counts of the 256 by 256 2D detector;
 
 
 3.  **Calculate UB**: Calculate UB matrix.
 
- - Find peak in one measurement;
- - Option to load Miller index directly from SPICE file;
- - Calculate UB matrix;
- - Re-index the peaks;
- - Refine UB matrix with more than two peaks.
+    - Find peak in one measurement;
+    - Option to load Miller index directly from SPICE file;
+    - Calculate UB matrix;
+    - Re-index the peaks;
+    - Refine UB matrix with more than two peaks.
 
 
 4.  **Merge Scan**: Merge all the measurements in a scan.
 
- - Merge all measuring points in a scan to an MDEventWorkspace in HKL-frame or Q-sample-frame;
- - Allow various ways to set up UB matrix
+    - Merge all measuring points in a scan to an MDEventWorkspace in HKL-frame or Q-sample-frame;
+    - Allow various ways to set up UB matrix
 
 
 5.  **Peak Integration**: Integrate peaks
 
- - Still in developmenet
+    - Still in developmenet
 
 
 6.  **Survey**: Get experiments runs' information by scanning through all SPICE files in an experiment
 
- - For selected scans in an experiment, list the run (i.e., Pt.) with maximum detector counts in a specific scan;
- - For each listed run, the information show includes detector counts and HKL
+    - For selected scans in an experiment, list the run (i.e., Pt.) with maximum detector counts in a specific scan;
+    - For each listed run, the information show includes detector counts and HKL
 
 
 
@@ -92,28 +92,28 @@ Workflow to calculate and refine UB matrix
 
 Here is a typical use case to calculate UB matrix after initial setup.
 
- 1.  User specifies *Experiment* and pushes button *Set*
- 2.  Users may do a new survey or load a survey result file in tab *Survey*;
- 3.  User enters tab *View Raw Data* and inputs scan number and list all the measuring points (Pt.)
- 4.  User views all the measurements
+1.  User specifies *Experiment* and pushes button *Set*
+2.  Users may do a new survey or load a survey result file in tab *Survey*;
+3.  User enters tab *View Raw Data* and inputs scan number and list all the measuring points (Pt.)
+4.  User views all the measurements  
 
-   *  User finds out the measurement with the strongest reflection and push button use
-   *  Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
+    *  User finds out the measurement with the strongest reflection and push button use
+    *  Alternatively, user can use the survey result to find out the Pt. with the maximum counts of the scan
  
- 5.  GUI shifts to tab *Calculate UB* automatically
- 6.  User pushes button *Find Peak* with checking *Load HKL from file*
- 7.  GUI finds the peak center and load HKL
- 8.  User pushes button *Add peak* to add the peak to table
- 9.  User repeats step 2 to 9 to add other peaks
- 10.  User select the peaks that are linearly independent and pushes *Calcualte UB*
- 11.  GUI calculates UB matrix and show the result
- 12.  User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
- 13.  User may refine the UB matrix and thus lattice parameters
+5.  GUI shifts to tab *Calculate UB* automatically
+6.  User pushes button *Find Peak* with checking *Load HKL from file*
+7.  GUI finds the peak center and load HKL
+8.  User pushes button *Add peak* to add the peak to table
+9.  User repeats step 2 to 9 to add other peaks
+10.  User select the peaks that are linearly independent and pushes *Calcualte UB*
+11.  GUI calculates UB matrix and show the result
+12.  User may push *Index peak* to use the calculated UB matrix to index peaks in the table to check UB matrix;
+13.  User may refine the UB matrix and thus lattice parameters
  
-    a. user adds more peaks to the UB peak table;
-    b. user selects at least 3 non-degenerate peaks;
-    c. user clicks button *Refine*;
-    d. application refines UB matrix and outputs the refined UB matrix, refined lattice parameters and their error.
+     a. user adds more peaks to the UB peak table;
+     b. user selects at least 3 non-degenerate peaks;
+     c. user clicks button *Refine*;
+     d. application refines UB matrix and outputs the refined UB matrix, refined lattice parameters and their error. 
 
 
 Workflow to merge measurements in scan
@@ -151,17 +151,17 @@ and scaled up by same factor (e.g, 1500).
 
 1.  Set up region of interest
 
-  - define region of interest on the detector
-  - check whether the ROI does not exclude any peak
+    - define region of interest on the detector
+    - check whether the ROI does not exclude any peak
 
 2.  Specify background Pts.
 
-  - specify the Pts. in the scan that are used to estimate background
+    - specify the Pts. in the scan that are used to estimate background
 
 3.  Integrate peaks
 
-  -  select peaks to integrate
-  -  integrate peaks
+    -  select peaks to integrate
+    -  integrate peaks
 
 4.  Review the integration result
 5.  Export to Fullprof peak integration (.int) file.
@@ -277,8 +277,8 @@ where
   *  :math:`B_i` is the estimated background
   *  the set of measurements *<pt>* is defined by the motor positions in the range of :math:`x_0 \pm \frac{N}{2}FWHM`.
 
-    -  usually the default value of *N* is set to 2.
-    -  :math:`FWHM = 2\sqrt{2\ln2}s \approx 2.3548s`
+     -  usually the default value of *N* is set to 2.
+     -  :math:`FWHM = 2\sqrt{2\ln2}s \approx 2.3548s`
 
 The error can be calculated as
 
