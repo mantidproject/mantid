@@ -28,6 +28,7 @@ import numpy as np
 from scipy import stats  # older version of numpy does not support nanmean and nanmedian
 from docutils.core import publish_string
 import post_processing as postproc
+import os
 
 # Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
@@ -75,10 +76,13 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         header += "\n\n"
         print(header)
         print (tbl_acc_indiv)
+        # Get the correct script directory, even if the script is run from the commnand line in a different directory
+        script_dir = os.path.dirname(__file__)
+        rel_col_defs = '../../docs/source/concepts/minimizers_comparison/color_definitions.txt'
+        color_definitions = os.path.join(script_dir, rel_col_defs)
 
         # optionally save the above table to file
         if save_to_file:
-            color_definitions = 'color_definitions.txt'
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
                      format(weighted=weighted_suffix_string(use_errors),
                             version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
@@ -112,7 +116,6 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # optionally save the above table to file
         if save_to_file:
-            color_definitions = 'color_definitions.txt'
             fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
                      format(weighted=weighted_suffix_string(use_errors),
                             version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
