@@ -531,30 +531,30 @@ void MantidMatrix::goToColumn(int col) {
 
 double MantidMatrix::dataX(int row, int col) const {
   if (!m_workspace || row >= numRows() ||
-      col >= static_cast<int>(m_workspace->readX(row + m_startRow).size()))
+      col >= static_cast<int>(m_workspace->x(row + m_startRow).size()))
     return 0.;
-  double res = m_workspace->readX(row + m_startRow)[col];
+  double res = m_workspace->x(row + m_startRow)[col];
   return res;
 }
 
 double MantidMatrix::dataY(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readY(row + m_startRow)[col];
+  double res = m_workspace->y(row + m_startRow)[col];
   return res;
 }
 
 double MantidMatrix::dataE(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readE(row + m_startRow)[col];
+  double res = m_workspace->e(row + m_startRow)[col];
   return res;
 }
 
 double MantidMatrix::dataDx(int row, int col) const {
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readDx(row + m_startRow)[col];
+  double res = m_workspace->dx(row + m_startRow)[col];
   return res;
 }
 
@@ -578,9 +578,9 @@ QwtDoubleRect MantidMatrix::boundingRect() {
     int i0 = m_startRow;
     x_start = x_end = 0;
     while (x_start == x_end && i0 <= m_endRow) {
-      const Mantid::MantidVec &X = m_workspace->readX(i0);
+      const auto &X = m_workspace->x(i0);
       x_start = X[0];
-      if (X.size() != m_workspace->readY(i0).size())
+      if (X.size() != m_workspace->y(i0).size())
         x_end = X[m_workspace->blocksize()];
       else
         x_end = X[m_workspace->blocksize() - 1];
@@ -596,8 +596,8 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       bool theSame = true;
       double dx = 0.;
       for (int i = i0; i <= m_endRow; ++i) {
-        if (m_workspace->readX(i).front() != x_start ||
-            m_workspace->readX(i).back() != x_end) {
+        if (m_workspace->x(i).front() != x_start ||
+            m_workspace->x(i).back() != x_end) {
           theSame = false;
           break;
         }
@@ -610,7 +610,7 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         // that can be plotted from this matrix
         double ddx = dx;
         for (int i = m_startRow + 1; i <= m_endRow; ++i) {
-          const Mantid::MantidVec &X = m_workspace->readX(i);
+          const auto &X = m_workspace->x(i);
           if (X.front() < x_start) {
             double xs = X.front();
             if (!std::isfinite(xs))
@@ -1139,7 +1139,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
       double local_min, local_max;
-      const Mantid::MantidVec &Y = ws->readY(wi);
+      const auto &Y = ws->y(wi);
 
       local_min = std::numeric_limits<double>::max();
       local_max = -std::numeric_limits<double>::max();
