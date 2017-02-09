@@ -239,7 +239,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
   Geometry::ParameterMap &pmap = WS->instrumentParameters();
   auto &detectorInfo = WS->mutableDetectorInfo();
 
-  double scale, maxScale = -1e6, minScale = 1e6, aveScale = 0.0;
+  double maxScale = -1e6, minScale = 1e6, aveScale = 0.0;
   int scaleCount = 0;
   Progress prog(this, 0.5, 1.0, static_cast<int>(detectorInfo.size()));
 
@@ -258,15 +258,14 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
     // Set the "sca" instrument parameter
     auto itScale = scaleMap.find(idet);
     if (itScale != scaleMap.end()) {
-      scale = itScale->second;
+      const double scale = itScale->second;
       if (minScale > scale)
         minScale = scale;
       if (maxScale < scale)
         maxScale = scale;
       aveScale += fabs(1.0 - scale);
       scaleCount++;
-      pmap.addV3D(&detectorInfo.detector(i), "sca",
-                  V3D(1.0, scale, 1.0));
+      pmap.addV3D(&detectorInfo.detector(i), "sca", V3D(1.0, scale, 1.0));
     }
     prog.report();
   }
