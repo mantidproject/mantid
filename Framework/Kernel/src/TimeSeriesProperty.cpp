@@ -615,15 +615,18 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
     int target = target_vec[index_splitter];
 
-    std::cout << "Target = " << target << " with splitter index = " << index_splitter << "\n";
-    std::cout << "\t" << "Time index = " << index_tsp_time << "\n\n";
+    std::cout << "Target = " << target
+              << " with splitter index = " << index_splitter << "\n";
+    std::cout << "\t"
+              << "Time index = " << index_tsp_time << "\n\n";
 
     bool continue_add = true;
     while (continue_add) {
       // add current entry
-      std::cout << "Add entry " << index_tsp_time << " to target " << target << "\n";
-      if (outputs[target]->size() == 0 || outputs[target]->lastTime() < tsp_time)
-      {
+      std::cout << "Add entry " << index_tsp_time << " to target " << target
+                << "\n";
+      if (outputs[target]->size() == 0 ||
+          outputs[target]->lastTime() < tsp_time) {
         // avoid to add duplicate entry
         outputs[target]->addValue(m_values[index_tsp_time].time(),
                                   m_values[index_tsp_time].value());
@@ -632,7 +635,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // advance to next entry
       ++index_tsp_time;
 
-      std::cout << "\tEntry time " << tsp_time_vec[index_tsp_time] << ", stop time " << split_stop_time << "\n";
+      std::cout << "\tEntry time " << tsp_time_vec[index_tsp_time]
+                << ", stop time " << split_stop_time << "\n";
 
       if (index_tsp_time == splitter_time_vec.size()) {
         // last entry. quit all loops

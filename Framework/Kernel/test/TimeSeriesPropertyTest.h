@@ -724,32 +724,27 @@ public:
     }
 
     TimeSeriesProperty<int> *out_1 = outputs[1];
-    for (int j = 0; j < out_1->size(); ++j)
-    {
-        std::cout << out_1->nthTime(j) << ", " << out_1->nthValue(j) << "\n";
+    for (int j = 0; j < out_1->size(); ++j) {
+      std::cout << out_1->nthTime(j) << ", " << out_1->nthValue(j) << "\n";
     }
     TS_ASSERT_EQUALS(out_1->size(), 5);
-
 
     //  TS_ASSERT_EQUALS(1, 2);
   }
 
   //----------------------------------------------------------------------------
-  void test_splitByTimeVectorEarlySplitter()
-  {
-      // TODO - Implement this: last splitter is before first entry
+  void test_splitByTimeVectorEarlySplitter() {
+    // TODO - Implement this: last splitter is before first entry
   }
 
   //----------------------------------------------------------------------------
-  void test_splitByTimeVectorLaterSplitter()
-  {
-      // TODO - Implement this: first splitter is after last entry
+  void test_splitByTimeVectorLaterSplitter() {
+    // TODO - Implement this: first splitter is after last entry
   }
 
   //----------------------------------------------------------------------------
-  void test_splitByTimeVectorFastLogSplitter()
-  {
-      // TODO - Implement this: high-frequency splitters splits a slow change log
+  void test_splitByTimeVectorFastLogSplitter() {
+    // TODO - Implement this: high-frequency splitters splits a slow change log
   }
 
   //----------------------------------------------------------------------------
