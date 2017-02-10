@@ -296,7 +296,7 @@ index 35df303..2553eb4 100644
      if (file_name == NULL)
        file_name = "";
 diff --git a/src/gtest.cc b/src/gtest.cc
-index 6de53dd..e3ad4f3 100644
+index 6de53dd..90b718b 100644
 --- a/src/gtest.cc
 +++ b/src/gtest.cc
 @@ -2697,19 +2697,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
@@ -374,3 +374,12 @@ index 6de53dd..e3ad4f3 100644
  
   private:
    // Is c a whitespace character that is normalized to a space character
+@@ -3212,7 +3212,7 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
+ // Formats the given time in milliseconds as seconds.
+ std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
+   ::std::stringstream ss;
+-  ss << ms/1000.0;
++  ss << static_cast<double>(ms)/1000.0;
+   return ss.str();
+ }
+ 
