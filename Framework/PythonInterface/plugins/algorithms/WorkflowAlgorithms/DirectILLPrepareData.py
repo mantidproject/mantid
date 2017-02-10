@@ -296,13 +296,6 @@ class DirectILLPrepareData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm.')
-        self.declareProperty(ITableWorkspaceProperty(
-            name=common.PROP_MON_EPP_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Table workspace containing results from the FindEPP ' +
-                'algorithm for the monitor workspace.')
         self.declareProperty(name=common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                              defaultValue=3.0,
                              validator=positiveFloat,
