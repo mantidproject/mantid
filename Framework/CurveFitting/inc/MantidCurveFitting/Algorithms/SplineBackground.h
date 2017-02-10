@@ -7,6 +7,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
 
+#include <gsl/gsl_bspline.h>
+#include <gsl/gsl_multifit.h>
+#include <gsl/gsl_statistics.h>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -56,6 +60,26 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+
+  void addWsDataToSpline(const API::MatrixWorkspace *ws, const size_t specNum,
+                         int expectedNumBins);
+  void allocateBSplinePointers(int numBins, int ncoeffs);
+  void freeBSplinePointers();
+  size_t calculateNumBinsToProcess(const API::MatrixWorkspace *ws);
+  API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr ws,
+                                             const size_t spec);
+  void setupSpline(double xMin, double xMax, int numBins, int ncoeff);
+
+  /// Struct holding various pointers required by GSL
+  struct bSplinePointers {
+	  gsl_bspline_workspace *bw;
+	  gsl_vector *B;
+	  gsl_vector *c, *w, *x, *y;
+	  gsl_matrix *Z, *cov;
+	  gsl_multifit_linear_workspace *mw;
+  };
+
+  bSplinePointers m_splinePointers{};
 };
 
 } // namespace Algorithms
