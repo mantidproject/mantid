@@ -235,7 +235,7 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
   vector<double> vecdouble;
   for (auto &str : strs) {
     if (!str.empty()) {
-      double item = atof(str.c_str());
+      double item = stod(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
