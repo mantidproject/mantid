@@ -69,12 +69,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -298,15 +295,17 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(*spectraItr);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
     {
-      file << (m_ws->x(*spectraItr)[bin] + m_ws->x(*spectraItr)[bin + 1]) / 2;
+      file << pointsSpec[bin];
     }
 
     else if (m_isHistogram & m_isCommonBins) // bin centres,
     {
-      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
+      file << points0[bin];
     }
 
     else {
@@ -342,13 +341,15 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(spectraIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isHistogram & m_isCommonBins) // bin centres,
     {
-      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
+      file << points0[bin];
     } else if (!m_isCommonBins) // checking for ragged workspace
     {
-      file << (m_ws->x(spectraIndex)[bin] + m_ws->x(spectraIndex)[bin + 1]) / 2;
+      file << pointsSpec[bin];
     } else // data points
     {
       file << m_ws->x(0)[bin];

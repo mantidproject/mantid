@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -14,6 +15,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::HistogramDx;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::LinearGenerator;
 
 // Notice, the SaveCSV algorithm currently does not create
 // an output workspace and therefore no tests related to the
@@ -128,13 +132,9 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithDxValues(const size_t nSpec) const {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
                                                   nBins + 1, nBins);
+    BinEdges edges(nBins + 1, LinearGenerator(0, 1));
     for (size_t j = 0; j < nSpec; ++j) {
-      auto &X = ws->mutableX(j);
-      for (size_t k = 0; k < nBins + 1; ++k) {
-        X[k] = double(k);
-      }
-      ws->mutableY(j).assign(nBins, double(j));
-      ws->mutableE(j).assign(nBins, sqrt(double(j)));
+      ws->setHistogram(j, edges, Counts(nBins, double(j)));
       ws->setPointStandardDeviations(j, nBins, sqrt(double(j)));
     }
     return ws;
