@@ -19,7 +19,7 @@ else()
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
   # Download and unpack googletest at configure time
-  configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/CMakeLists.txt.gtest.in
+  configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/GoogleTest.in
                  ${CMAKE_BINARY_DIR}/googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
                   RESULT_VARIABLE result
