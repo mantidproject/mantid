@@ -133,10 +133,10 @@ public:
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
 
-    for (size_t i = 0; i < size; ++i) {
-      ws->dataX(0)[i] = static_cast<double>(i + 1);
-      ws->dataY(0)[i] = ws->dataX(0)[i] + deltaY;
-      ws->dataE(0)[i] = 1;
+	    for (size_t i = 0; i < size; ++i) {
+	      ws->mutableX(0)[i] = static_cast<double>(i + 1);
+	      ws->mutableY(0)[i] = ws-mutableX(0)[i] + deltaY;
+      	      ws->mutableE(0)[i] = 1;
     }
 
     return ws;
