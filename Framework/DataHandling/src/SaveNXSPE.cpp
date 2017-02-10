@@ -1,12 +1,12 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidGeometry/Instrument.h"
@@ -14,9 +14,9 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <boost/scoped_array.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/scoped_array.hpp>
 #include <limits>
 
 namespace Mantid {
@@ -186,8 +186,8 @@ void SaveNXSPE::exec() {
   // Energy bins
   // Get the Energy Axis (X) of the first spectra (they are all the same -
   // checked above)
-  const MantidVec &X = inputWS->readX(0);
-  nxFile.writeData("energy", X);
+  const auto &X = inputWS->x(0);
+  nxFile.writeData("energy", X.rawData());
   nxFile.openData("energy");
   nxFile.putAttr("units", "meV");
   nxFile.closeData();
@@ -237,10 +237,10 @@ void SaveNXSPE::exec() {
     if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
       // a detector but not a monitor
       if (!spectrumInfo.isMasked(i)) {
-        const auto &inY = inputWS->readY(i);
-        std::copy(inY.begin(), inY.end(), signalBufferStart);
-        const auto &inE = inputWS->readE(i);
-        std::copy(inE.begin(), inE.end(), errorBufferStart);
+        std::copy(inputWS->y(i).cbegin(), inputWS->y(i).cend(),
+                  signalBufferStart);
+        std::copy(inputWS->e(i).cbegin(), inputWS->e(i).cend(),
+                  errorBufferStart);
       } else {
         std::fill_n(signalBufferStart, nBins, MASK_FLAG);
         std::fill_n(errorBufferStart, nBins, MASK_ERROR);

@@ -113,10 +113,10 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
 
         # Check
         ref_file = LoadMD(Filename='TobyFitResolutionSimulationTest.nxs')
-        result = CheckWorkspacesMatch(Workspace1=slice_ws,
-                                      Workspace2=ref_file,
-                                      Tolerance=1e-08)
-        self._success = ('success' in result.lower())
+        result = CompareWorkspaces(Workspace1=slice_ws,
+                                   Workspace2=ref_file,
+                                   Tolerance=1e-08)
+        self._success = result[0]
 
         if not self._success:
             SaveMD(InputWorkspace=slice_ws,

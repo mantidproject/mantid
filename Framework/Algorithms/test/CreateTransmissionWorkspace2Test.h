@@ -160,11 +160,11 @@ public:
     TS_ASSERT(outLam);
     TS_ASSERT_EQUALS("Wavelength", outLam->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 8);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 3.1530, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 3.1530, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
   }
 
   void test_one_run_processing_instructions() {
@@ -183,12 +183,12 @@ public:
     TS_ASSERT(outLam);
     TS_ASSERT_EQUALS("Wavelength", outLam->getAxis(0)->unit()->unitID());
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 8);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    // Y counts, should be 3.1530 * 2
-    TS_ASSERT_DELTA(outLam->y(0)[0], 6.3060, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 6.3060, 0.0001);
+    // Y counts, should be 2.0000 * 2
+    TS_ASSERT_DELTA(outLam->y(0)[0], 4.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 4.0000, 0.0001);
   }
 
   void test_one_run_monitor_normalization() {
@@ -256,12 +256,12 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 10);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 16);
     TS_ASSERT(outLam->x(0)[0] >= 0.0);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    // Expected values are 0.3124 = 3.15301 (detectors) / (1.26139*8) (monitors)
-    TS_ASSERT_DELTA(outLam->y(0)[0], 0.3124, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 0.3124, 0.0001);
+    // Expected values are 0.1981 = 2.0000 (detectors) / (1.26139*8) (monitors)
+    TS_ASSERT_DELTA(outLam->y(0)[0], 0.1981, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 0.1981, 0.0001);
   }
 
   void test_two_transmission_runs() {
@@ -279,11 +279,11 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 8);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 14);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    TS_ASSERT_DELTA(outLam->y(0)[0], 3.1530, 0.0001);
-    TS_ASSERT_DELTA(outLam->y(0)[7], 3.1530, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[0], 2.0000, 0.0001);
+    TS_ASSERT_DELTA(outLam->y(0)[7], 2.0000, 0.0001);
   }
 
   void test_two_transmission_runs_stitch_params() {
@@ -302,13 +302,13 @@ public:
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS(outLam->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outLam->blocksize(), 113);
+    TS_ASSERT_EQUALS(outLam->blocksize(), 126);
     TS_ASSERT(outLam->x(0)[0] >= 1.5);
     TS_ASSERT(outLam->x(0)[7] <= 15.0);
-    TS_ASSERT_DELTA(outLam->x(0)[0], 2.8257, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[1], 2.9257, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[2], 3.0257, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[3], 3.1257, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[1], 1.8924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[2], 1.9924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[3], 2.0924, 0.0001);
   }
 };
 

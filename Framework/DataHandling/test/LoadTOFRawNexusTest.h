@@ -120,13 +120,12 @@ public:
 
     // Compare workspaces
     Mantid::API::IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
-        "CheckWorkspacesMatch", 8, "Workspace1", "outWS", "Workspace2",
+        "CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2",
         "outWS_event_2D", "Tolerance", "1e-4", "CheckAxes", "0");
     // We skip Axis check because of floating point imprecision makes a false
     // negative.
 
-    std::string s = alg->getPropertyValue("Result");
-    TS_ASSERT_EQUALS(s, "Success!");
+    TS_ASSERT(alg->getProperty("Result"));
 
     Mantid::API::MatrixWorkspace_sptr ws1, ws2;
     TS_ASSERT_THROWS_NOTHING(

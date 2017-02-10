@@ -11,9 +11,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -1685,9 +1687,6 @@ void SANSRunWindow::setGeometryDetails() {
 
   const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sampleWs->getInstrument();
-  const auto source = instr->getSource();
-
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
   const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
@@ -1702,18 +1701,22 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
-  if (dets.empty())
+  const auto &monitorDetectorIDs =
+      monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
+  if (monitorDetectorIDs.empty())
     return;
 
   double dist_mm(0.0);
   QString colour("black");
-  try {
-    Mantid::Geometry::IDetector_const_sptr detector =
-        instr->getDetector(*dets.begin());
 
-    double unit_conv(1000.);
-    dist_mm = detector->getDistance(*source) * unit_conv;
+  const auto &detectorInfo = sampleWs->detectorInfo();
+
+  try {
+    const auto &detector = detectorInfo.detector(
+        detectorInfo.indexOf(*monitorDetectorIDs.begin()));
+    const double unit_conv(1000.);
+    const auto &source = sampleWs->getInstrument()->getSource();
+    dist_mm = detector.getDistance(*source) * unit_conv;
   } catch (std::runtime_error &) {
     colour = "red";
   }
@@ -1817,14 +1820,8 @@ void SANSRunWindow::setGeometryDetails() {
 void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
-  double unitconv = 1000.;
-
-  Instrument_const_sptr instr = workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> sample =
-      instr->getSample();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-      instr->getSource();
-  double distance = source->getDistance(*sample) * unitconv;
+  const double unitconv = 1000.;
+  const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
   QLabel *dist_label(NULL);
@@ -2467,8 +2464,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   // that is about to start
   py_code += "\n_user_settings_copy = "
              "copy.deepcopy(i.ReductionSingleton().user_settings)";
-  const QString verb = m_uiForm.verbose_check ? "True" : "False";
-  py_code += "\ni.SetVerboseMode(" + verb + ")";
+  py_code += "\ni.SetVerboseMode(False)";
   // Need to check which mode we're in
   if (runMode == SingleMode) {
     py_code += readSampleObjectGUIChanges();
@@ -2537,9 +2533,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
     }
     py_code += "}";
 
-    if (m_uiForm.log_colette->isChecked()) {
-      py_code += ", verbose=True";
-    }
     py_code += ", reducer=i.ReductionSingleton().reference(),";
 
     py_code += "combineDet=";

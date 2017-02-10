@@ -52,6 +52,10 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         g = plotSpectrum("fake", [0, 1])
         self.g = g
 
+    def test_plotSpectrum_range_command(self):
+        g = plotSpectrum("fake", range(0, 2))
+        self.g = g
+
     def test_Customized1DPlot(self):
         g = plotSpectrum("fake", 0, error_bars=True)
         l = g.activeLayer()
@@ -110,4 +114,3 @@ class MantidPlot1DPlotTest(unittest.TestCase):
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)
-
