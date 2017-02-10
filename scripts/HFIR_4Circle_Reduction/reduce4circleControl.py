@@ -1131,6 +1131,27 @@ class CWSCDReductionControl(object):
 
         return True, (hkl, error)
 
+    def integrate_scan_peak(self, exp_number, scan_number, peak_centre, mask_name, normalization,
+                            scale_factor, background_pt_tuple):
+        """
+        new way to integrate a peak in a scan
+        Note: it is going to replace "integrate_scan_peaks()"
+        :param exp_number:
+        :param scan_number:
+        :param peak_centre:
+        :param mask_name:
+        :param normalization:
+        :param scale_factor:
+        :param background_pt_tuple:
+        :return:
+        """
+        # TODO/ISSUE/NOW - Implement
+
+        peak_integration_utility.integrate_peak_full_version()
+
+        return
+
+
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
                              normalization='', mask_ws_name=None,

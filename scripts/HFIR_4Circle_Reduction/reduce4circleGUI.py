@@ -222,7 +222,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_per_pt)  # integrate single peak
+                     self.do_integrate_single_scan)
+                     # self.do_integrate_per_pt)  # integrate single peak
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_normalization)  # calculate the normalized data again
         self.connect(self.ui.pushButton_fitGaussian, QtCore.SIGNAL('clicked()'),
@@ -1245,6 +1246,66 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_integrate_single_scan(self):
+        """
+        integrate a single scan in 'Peak Integration' tab
+        Note: this is an experimenntal replacement for do_integrate_per_pt
+        :return:
+        """
+        # parse experiment and scan number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_scanIntegratePeak])
+        if not status:
+            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
+            return
+        else:
+            exp_number, scan_number = ret_obj
+
+        # parse normalization type
+        normalization = str(self.ui.comboBox_ptCountType.currentText())
+        if normalization.count('Time') > 0:
+            norm_type = 'time'
+        elif normalization.count('Monitor') > 0:
+            norm_type = 'monitor'
+        else:
+            norm_type = ''
+
+        # parse scale factor
+        try:
+            intensity_scale_factor = float(self.ui.lineEdit_scaleFactorScan.text())
+        except ValueError:
+            intensity_scale_factor = 1.
+
+        # calculate peak center (weighted)
+        status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
+        if status is False:
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+            return
+        else:
+            this_peak_centre = ret_obj
+
+        # TODO/ISSUE/NOW - Parse ui.lineEdit_backgroundPts and set default in init_widgets
+        bkgd_pt_tuple = (1, 1)
+
+        status, ret_obj = self._myControl.integrate_scan_peak(exp=exp_number,
+                                                              scan=scan_number,
+                                                              peak_radius=1.0,
+                                                              peak_centre=this_peak_centre,
+                                                              merge_peaks=False,
+                                                              use_mask=False,
+                                                              normalization=norm_type,
+                                                              scale_factor=intensity_scale_factor,
+                                                              background_pt_tuple=bkgd_pt_tuple)
+
+        # set calculated values
+        blabla
+
+        # plot fitted Gaussian
+        blabla
+
+        return
+
     def do_integrate_per_pt(self):
         """
         Integrate and plot per Pt.
@@ -1368,8 +1429,8 @@ class MainWindow(QtGui.QMainWindow):
             info_text += 'Simple summation of counts masked by {0}'.format(mask_name)
         self.ui.lineEdit_rawSinglePeakIntensity.setText(str(simple_peak_intensity))
 
-        info_text += '; Normalized by {0}'.format(norm_type)
-        self.ui.label_ingreateInformation.setText(info_text)
+        info_text += ';\nNormalized by {0}'.format(norm_type)
+        self.ui.label_integrationInformation.setText(info_text)
 
         # Clear previous line and plot the Pt.
         self.ui.graphicsView_integratedPeakView.reset()
@@ -1599,7 +1660,8 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # integrate any how
-        self.do_integrate_per_pt()
+        # self.do_integrate_per_pt()
+        self.do_integrate_single_scan()
 
         return
 

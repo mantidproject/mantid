@@ -168,7 +168,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1078,6 +1078,13 @@ p, li { white-space: pre-wrap; }
                     </property>
                     <property name="text">
                      <string>Add Peaks</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_mergeScansSurvey">
+                    <property name="text">
+                     <string>Merge Scans</string>
                     </property>
                    </widget>
                   </item>
@@ -4362,6 +4369,23 @@ p, li { white-space: pre-wrap; }
                </spacer>
               </item>
               <item>
+               <widget class="QLabel" name="label_69">
+                <property name="text">
+                 <string>Scale Factor</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_scaleFactorScan">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QLabel" name="label_64">
                 <property name="text">
                  <string>Background Pts.</string>
@@ -4928,6 +4952,18 @@ p, li { white-space: pre-wrap; }
                 <property name="text">
                  <string>Function: 
 A * exp( - (x-x0)**2/(2 * sigma**2) )+B</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_integrationInformation">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string/>
                 </property>
                </widget>
               </item>
