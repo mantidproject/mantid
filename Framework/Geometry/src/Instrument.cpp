@@ -992,19 +992,9 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
-    Geometry::ParameterMap params(*getParameterMap());
-    // Masking is in DetectorInfo. Insert it into ParameterMap so it is saved
-    // alongside other parameters.
-    if (m_detectorInfo) {
-      const auto &detIDs = getDetectorIDs();
-      for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
-        if (m_detectorInfo->isMasked(i)) {
-          const auto *det = getBaseDetector(detIDs.at(i));
-          params.forceUnsafeSetMasked(det, true);
-        }
-      }
-    }
-    params.saveNexus(file, "instrument_parameter_map");
+    // Map with data extracted from DetectorInfo -> legacy compatible files.
+    const auto &params = makeLegacyParameterMap();
+    params->saveNexus(file, "instrument_parameter_map");
   }
 
   // Add physical detector and monitor data
