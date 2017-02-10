@@ -1068,7 +1068,7 @@ class Mask_ISIS(ReductionStep):
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML=
-                                     self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
+                                     self._mask_line(start_point, 100.0, self.arm_width, self.arm_angle))
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
@@ -2277,7 +2277,7 @@ class TransmissionCalc(ReductionStep):
         """
         return reducer.get_transmissions()
 
-    def calculate(self, reducer):
+    def calculate(self, reducer):  # noqa
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
         FITMETHOD = 'fit_method'
@@ -2388,8 +2388,14 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.execute()
 
         # Set the y axis label correctly for the transmission ratio data
-        fitted_trans_ws = mtd[fittedtransws]
-        unfitted_trans_ws = mtd[unfittedtransws]
+        try:
+            fitted_trans_ws = mtd[fittedtransws]
+            unfitted_trans_ws = mtd[unfittedtransws]
+        except KeyError as err:
+            message = "Something went wrong during the transmission calculation. The error message is " \
+                      "{0}. Check if you have any signal in the monitors which are used to record the " \
+                      "transmission and normalisation signal.".format(str(err))
+            raise RuntimeError(message)
         if fitted_trans_ws:
             fitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
         if unfitted_trans_ws:
