@@ -40,8 +40,8 @@ void vtkPeakMarkerFactory::initialize(Mantid::API::Workspace_sptr workspace) {
   validateWsNotNull();
 
   try {
-    m_peakRadius =
-        std::stod(m_workspace->run().getProperty("PeakRadius")->value().c_str());
+    m_peakRadius = std::stod(
+        m_workspace->run().getProperty("PeakRadius")->value().c_str());
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   }
