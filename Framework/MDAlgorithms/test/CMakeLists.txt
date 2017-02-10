@@ -29,6 +29,7 @@ if ( CXXTEST_FOUND )
             ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}
             ${NEXUS_LIBRARIES}
             ${HDF5_LIBRARIES} )
 

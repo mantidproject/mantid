@@ -16,7 +16,8 @@ if ( CXXTEST_FOUND )
             SINQ
             CurveFitting
             ${MANTIDLIBS}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
   # Test data
   add_dependencies ( PSISINQTest StandardTestData )

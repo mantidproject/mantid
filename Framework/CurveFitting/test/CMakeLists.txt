@@ -24,7 +24,8 @@ if ( CXXTEST_FOUND )
             ${GSL_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( CurveFittingTest Algorithms )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Test data

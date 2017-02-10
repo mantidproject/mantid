@@ -8,7 +8,8 @@ if ( CXXTEST_FOUND )
             RemoteJobManagers
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( FrameworkTests RemoteJobManagersTest )
   # Test data. Not using any for now. Remember to uncomment if data is added for these remote job managers
   # add_dependencies ( RemoteJobManagersTest StandardTestData )

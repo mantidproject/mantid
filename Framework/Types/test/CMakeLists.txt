@@ -4,7 +4,8 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( TypesTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( TypesTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
     ${Boost_LIBRARIES}
-    ${GMOCK_LIBRARIES} )
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES} )
 
   add_dependencies ( FrameworkTests TypesTest )
   # Add to the 'FrameworkTests' group in VS

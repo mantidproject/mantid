@@ -5,7 +5,8 @@ if ( CXXTEST_FOUND )
   target_link_libraries( BeamlineTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
     Beamline
     ${Boost_LIBRARIES}
-    ${GMOCK_LIBRARIES} )
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES} )
 
   add_dependencies ( FrameworkTests BeamlineTest )
   # Add to the 'FrameworkTests' group in VS

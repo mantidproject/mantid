@@ -22,7 +22,8 @@ if ( CXXTEST_FOUND )
             MDAlgorithms
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( CrystalTest Algorithms CurveFitting )
   add_dependencies ( FrameworkTests CrystalTest )
   # Test data

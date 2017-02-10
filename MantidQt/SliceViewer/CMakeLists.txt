@@ -200,7 +200,8 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${QT_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
   add_dependencies( GUITests SliceViewerTest )
   # Add to the 'UnitTests' group in VS

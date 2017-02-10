@@ -51,7 +51,8 @@ if ( CXXTEST_FOUND )
             Nexus
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( AlgorithmsTest Crystal CurveFitting )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Test data

@@ -26,7 +26,8 @@ if ( CXXTEST_FOUND )
             ${QWT_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
     add_dependencies( GUITests SliceViewerTest )
 

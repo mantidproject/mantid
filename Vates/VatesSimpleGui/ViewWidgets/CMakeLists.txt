@@ -177,7 +177,8 @@ target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIB
   ${MANTID_SUBPROJECT_LIBS}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES} )
+  ${GMOCK_LIBRARIES}
+  ${GTEST_LIBRARIES} )
 
 add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
 # Add to the 'UnitTests' group in VS

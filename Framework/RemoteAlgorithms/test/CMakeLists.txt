@@ -9,7 +9,8 @@ if ( CXXTEST_FOUND )
             RemoteAlgorithms
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            ${GMOCK_LIBRARIES} )
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( FrameworkTests RemoteAlgorithmsTest )
   # Test data. Not using any for now. Remember to uncomment if data is added for these remote alg. tests
   # add_dependencies ( RemoteAlgorithmsTest StandardTestData )

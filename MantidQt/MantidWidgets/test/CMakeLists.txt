@@ -20,6 +20,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}
             )
 
   # Add to the 'UnitTests' group in VS
