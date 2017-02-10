@@ -7,6 +7,9 @@ Diffraction Changes
 
 Crystal Improvements
 --------------------
+-  :ref:`PredictPeaks <algm-PredictPeaks>`
+   has been modified to optionally use the point group symmetry to reduce
+   the number of predicted peaks.
 
 Engineering Diffraction
 -----------------------
