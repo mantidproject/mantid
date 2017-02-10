@@ -48,12 +48,49 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         g = plotSpectrum(ws, 0, error_bars=True)
         self.g = g
 
-    def test_plotSpectrum_severalSpectra(self):
+    def test_plotSpectrum_single_integer(self):
+        g = plotSpectrum("fake", 1)
+        self._check_graph_contents(g, ["fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_single_str(self):
+        g = plotSpectrum("fake", "1")
+        self._check_graph_contents(g, ["fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_list_of_spectra(self):
         g = plotSpectrum("fake", [0, 1])
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_tuple_of_spectra(self):
+        g = plotSpectrum("fake", (0, 1))
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list(self):
+        g = plotSpectrum("fake", "0, 1")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_leading_comma(self):
+        g = plotSpectrum("fake", "0, 1,")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_trailing_comma(self):
+        g = plotSpectrum("fake", "0, 1,")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_empty_value(self):
+        g = plotSpectrum("fake", "0, ,1")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
         self.g = g
 
     def test_plotSpectrum_range_command(self):
         g = plotSpectrum("fake", range(0, 2))
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
         self.g = g
 
     def test_Customized1DPlot(self):
@@ -111,6 +148,14 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         g = plotBin("fake", (0,1))
         self.assertTrue(g is not None)
         self.g = g
+
+    # ---------------- Non-test methods ----------------
+    def _check_graph_contents(self, g, curve_titles):
+        layer = g.activeLayer()
+        self.assertEqual(len(curve_titles), layer.numCurves())
+        for i, title in enumerate(curve_titles):
+            self.assertEqual(title, layer.curveTitle(i))
+
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)

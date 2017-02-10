@@ -15,6 +15,7 @@ from pymantidplot.proxies import threadsafe_call, new_proxy, getWorkspaceNames
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
+import collections
 import os
 import time
 import mantid.api
@@ -1135,25 +1136,26 @@ def screenshot_to_dir(widget, filename, screenshot_dir):
 def __getWorkspaceIndices(source):
     """
         Returns a list of workspace indices from a source.
-        The source can be a list, a tuple, an int or a string.
+        The source can be an iterable, an int or a string.
     """
-    index_list = []
-    if isinstance(source, list) or isinstance(source, tuple):
-        for i in source:
-            nums = __getWorkspaceIndices(i)
-            for j in nums:
-                index_list.append(j)
-    elif isinstance(source, int):
-        index_list.append(source)
-    elif isinstance(source, str):
-        elems = source.split(',')
-        for i in elems:
+    index_list = None
+    if isinstance(source, str):
+        index_list = []
+        items = source.split(",")
+        for item in items:
+            cleaned = item.strip()
             try:
-                index_list.append(int(i))
+                index_list.append(int(cleaned))
             except ValueError:
-                pass
+                continue
+    elif isinstance(source, collections.Iterable):
+        index_list = list(source)
+    elif isinstance(source, int):
+        index_list = [source]
     else:
-        raise TypeError('Incorrect type passed as index argument "' + str(source) + '"')
+        raise TypeError("Cannot convert source argument to list of int. "
+                        "Expected iterable, int or "
+                        "comma-separated string. Found " + str(source))
     return index_list
 
 
@@ -1252,7 +1254,7 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
 
     This plots one or more spectra, with X as the bin boundaries,
     and Y as the counts in each bin.
-    
+
     If one workspace, each spectrum gets its own tile.
     Otherwise, each workspace gets its own tile.
 
@@ -1267,14 +1269,14 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
     """
 
     workspace_names = getWorkspaceNames(source)
-   
+
     # Deal with workspace groups that may contain various types:
     # Only want to plot MatrixWorkspaces
     to_plot = []
     for name in workspace_names:
         if isinstance(mantid.api.mtd[name], mantid.api.MatrixWorkspace):
             to_plot.append(name)
-            
+
     __checkPlotWorkspaces(to_plot)
     # check spectrum indices
     index_list = __getWorkspaceIndices(indices)
@@ -1289,11 +1291,11 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
             if idx > max_spec:
                 raise ValueError("Wrong spectrum index for workspace '%s': %d, which is bigger than the"
                                  " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
-    
+
     # Unwrap the window object, if any specified
     if window != None:
         window = window._getHeldObject()
-    
+
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSubplots,
                                           to_plot, index_list, distribution, error_bars, window))
     if graph._getHeldObject() == None:
