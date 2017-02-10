@@ -315,7 +315,7 @@ V3D ObjCompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat ObjCompAssembly::getRotation() const {
+Quat ObjCompAssembly::getRotation() const {
   if (m_map) {
     Quat rot;
     if (!m_map->getCachedRotation(m_base, rot)) {

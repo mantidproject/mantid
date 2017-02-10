@@ -124,7 +124,7 @@ det_topology Detector::getTopology(V3D &center) const {
 }
 
 /// Return the relative position to the parent
-const Kernel::V3D Detector::getRelativePos() const {
+Kernel::V3D Detector::getRelativePos() const {
   if (m_map && m_map->hasDetectorInfo())
     return Kernel::toV3D(m_map->detectorInfo().position(index())) -
            getParent()->getPos();
@@ -137,7 +137,7 @@ Kernel::V3D Detector::getPos() const {
   return ObjComponent::getPos();
 }
 
-const Kernel::Quat Detector::getRelativeRot() const {
+Kernel::Quat Detector::getRelativeRot() const {
   if (m_map && m_map->hasDetectorInfo()) {
     auto inverseParentRot = getParent()->getRotation();
     inverseParentRot.inverse();
@@ -147,7 +147,7 @@ const Kernel::Quat Detector::getRelativeRot() const {
   return ObjComponent::getRelativeRot();
 }
 
-const Kernel::Quat Detector::getRotation() const {
+Kernel::Quat Detector::getRotation() const {
   if (m_map && m_map->hasDetectorInfo())
     return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
   return ObjComponent::getRotation();

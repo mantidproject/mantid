@@ -93,7 +93,7 @@ public:
 
   Kernel::V3D getPos() const override;
 
-  const Kernel::Quat getRotation() const override;
+  Kernel::Quat getRotation() const override;
 
   /// Get the bounding box for this component and store it in the given argument
   void getBoundingBox(BoundingBox &assemblyBox) const override;
