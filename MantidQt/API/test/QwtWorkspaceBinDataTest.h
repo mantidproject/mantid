@@ -19,10 +19,10 @@ public:
     for (size_t i = 0; i < 3; i++) {
       ax1->setValue(i, 10.0 + static_cast<double>(i));
       for (size_t j = 0; j < 5; j++)
-        ws->dataX(i)[j] = double(i) + double(j);
+        ws->mutableX(i)[j] = double(i) + double(j);
       for (size_t j = 0; j < 4; j++) {
-        ws->dataY(i)[j] = double(i) + double(j) * 2;
-        ws->dataE(i)[j] = double(i) + double(j) * 3;
+        ws->mutableY(i)[j] = double(i) + double(j) * 2;
+        ws->mutableE(i)[j] = double(i) + double(j) * 3;
       }
     }
   }
@@ -58,7 +58,7 @@ public:
 
   /** In log scale, points below a minimum value are clipped to the minimum */
   void test_logScale() {
-    ws->dataY(2)[2] = -10;
+    ws->mutableY(2)[2] = -10;
     QwtWorkspaceBinData data(*ws, 2, true);
     TS_ASSERT_DELTA(data.y(1), 5.0, 1e-6);
     TS_ASSERT_DELTA(data.e(1), 7.0, 1e-6);
