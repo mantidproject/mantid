@@ -1,16 +1,97 @@
-:100644 100644 f63fa9a... 0000000... M	include/gtest/gtest-spi.h
-:100644 100644 77eb844... 0000000... M	include/gtest/gtest-test-part.h
-:100644 100644 6fa0a39... 0000000... M	include/gtest/gtest.h
-:100644 100644 2b3a78f... 0000000... M	include/gtest/internal/gtest-death-test-internal.h
-:100644 100644 d5e1028... 0000000... M	include/gtest/internal/gtest-param-util.h
-:100644 100644 a6023fc... 0000000... M	src/gtest-death-test.cc
-:100644 100644 35df303... 0000000... M	src/gtest-internal-inl.h
-:100644 100644 6de53dd... 0000000... M	src/gtest.cc
+:100644 100644 33b37a7... 0000000... M	googlemock/include/gmock/gmock-matchers.h
+:100644 100644 fed7de6... 0000000... M	googlemock/include/gmock/gmock-spec-builders.h
+:100644 100644 50ec728... 0000000... M	googlemock/src/gmock-cardinalities.cc
+:100644 100644 fb53080... 0000000... M	googlemock/src/gmock-internal-utils.cc
+:100644 100644 f63fa9a... 0000000... M	googletest/include/gtest/gtest-spi.h
+:100644 100644 77eb844... 0000000... M	googletest/include/gtest/gtest-test-part.h
+:100644 100644 f846c5b... 0000000... M	googletest/include/gtest/gtest.h
+:100644 100644 2b3a78f... 0000000... M	googletest/include/gtest/internal/gtest-death-test-internal.h
+:100644 100644 82cab9b... 0000000... M	googletest/include/gtest/internal/gtest-param-util.h
+:100644 100644 0094ed5... 0000000... M	googletest/include/gtest/internal/gtest-port.h
+:100644 100644 a01a369... 0000000... M	googletest/src/gtest-death-test.cc
+:100644 100644 ed8a682... 0000000... M	googletest/src/gtest-internal-inl.h
+:100644 100644 d882ab2... 0000000... M	googletest/src/gtest.cc
 
-diff --git a/include/gtest/gtest-spi.h b/include/gtest/gtest-spi.h
+diff --git a/googlemock/include/gmock/gmock-matchers.h b/googlemock/include/gmock/gmock-matchers.h
+index 33b37a7..ccb66ca 100644
+--- a/googlemock/include/gmock/gmock-matchers.h
++++ b/googlemock/include/gmock/gmock-matchers.h
+@@ -904,14 +904,14 @@ class ComparisonBase {
+    public:
+     explicit Impl(const Rhs& rhs) : rhs_(rhs) {}
+     virtual bool MatchAndExplain(
+-        Lhs lhs, MatchResultListener* /* listener */) const {
++        Lhs lhs, MatchResultListener* /* listener */) const override {
+       return Op()(lhs, rhs_);
+     }
+-    virtual void DescribeTo(::std::ostream* os) const {
++    virtual void DescribeTo(::std::ostream* os) const override {
+       *os << D::Desc() << " ";
+       UniversalPrint(rhs_, os);
+     }
+-    virtual void DescribeNegationTo(::std::ostream* os) const {
++    virtual void DescribeNegationTo(::std::ostream* os) const override {
+       *os << D::NegatedDesc() <<  " ";
+       UniversalPrint(rhs_, os);
+     }
+diff --git a/googlemock/include/gmock/gmock-spec-builders.h b/googlemock/include/gmock/gmock-spec-builders.h
+index fed7de6..0ce84c4 100644
+--- a/googlemock/include/gmock/gmock-spec-builders.h
++++ b/googlemock/include/gmock/gmock-spec-builders.h
+@@ -1421,7 +1421,7 @@ class ActionResultHolder<void> : public UntypedActionResultHolderBase {
+  public:
+   void Unwrap() { }
+ 
+-  virtual void PrintAsActionResult(::std::ostream* /* os */) const {}
++  virtual void PrintAsActionResult(::std::ostream* /* os */) const override {}
+ 
+   // Performs the given mock function's default action and returns ownership
+   // of an empty ActionResultHolder*.
+diff --git a/googlemock/src/gmock-cardinalities.cc b/googlemock/src/gmock-cardinalities.cc
+index 50ec728..529502f 100644
+--- a/googlemock/src/gmock-cardinalities.cc
++++ b/googlemock/src/gmock-cardinalities.cc
+@@ -71,18 +71,18 @@ class BetweenCardinalityImpl : public CardinalityInterface {
+ 
+   // Conservative estimate on the lower/upper bound of the number of
+   // calls allowed.
+-  virtual int ConservativeLowerBound() const { return min_; }
+-  virtual int ConservativeUpperBound() const { return max_; }
++  virtual int ConservativeLowerBound() const override { return min_; }
++  virtual int ConservativeUpperBound() const override { return max_; }
+ 
+-  virtual bool IsSatisfiedByCallCount(int call_count) const {
++  virtual bool IsSatisfiedByCallCount(int call_count) const override {
+     return min_ <= call_count && call_count <= max_;
+   }
+ 
+-  virtual bool IsSaturatedByCallCount(int call_count) const {
++  virtual bool IsSaturatedByCallCount(int call_count) const override {
+     return call_count >= max_;
+   }
+ 
+-  virtual void DescribeTo(::std::ostream* os) const;
++  virtual void DescribeTo(::std::ostream* os) const override;
+ 
+  private:
+   const int min_;
+diff --git a/googlemock/src/gmock-internal-utils.cc b/googlemock/src/gmock-internal-utils.cc
+index fb53080..e6e26ee 100644
+--- a/googlemock/src/gmock-internal-utils.cc
++++ b/googlemock/src/gmock-internal-utils.cc
+@@ -76,7 +76,7 @@ GTEST_API_ string ConvertIdentifierNameToWords(const char* id_name) {
+ class GoogleTestFailureReporter : public FailureReporterInterface {
+  public:
+   virtual void ReportFailure(FailureType type, const char* file, int line,
+-                             const string& message) {
++                             const string& message) override {
+     AssertHelper(type == kFatal ?
+                  TestPartResult::kFatalFailure :
+                  TestPartResult::kNonFatalFailure,
+diff --git a/googletest/include/gtest/gtest-spi.h b/googletest/include/gtest/gtest-spi.h
 index f63fa9a..f59ec6d 100644
---- a/include/gtest/gtest-spi.h
-+++ b/include/gtest/gtest-spi.h
+--- a/googletest/include/gtest/gtest-spi.h
++++ b/googletest/include/gtest/gtest-spi.h
 @@ -75,7 +75,7 @@ class GTEST_API_ ScopedFakeTestPartResultReporter
    //
    // This method is from the TestPartResultReporterInterface
@@ -20,10 +101,10 @@ index f63fa9a..f59ec6d 100644
   private:
    void Init();
  
-diff --git a/include/gtest/gtest-test-part.h b/include/gtest/gtest-test-part.h
+diff --git a/googletest/include/gtest/gtest-test-part.h b/googletest/include/gtest/gtest-test-part.h
 index 77eb844..b93b114 100644
---- a/include/gtest/gtest-test-part.h
-+++ b/include/gtest/gtest-test-part.h
+--- a/googletest/include/gtest/gtest-test-part.h
++++ b/googletest/include/gtest/gtest-test-part.h
 @@ -162,8 +162,8 @@ class GTEST_API_ HasNewFatalFailureHelper
      : public TestPartResultReporterInterface {
   public:
@@ -35,11 +116,11 @@ index 77eb844..b93b114 100644
    bool has_new_fatal_failure() const { return has_new_fatal_failure_; }
   private:
    bool has_new_fatal_failure_;
-diff --git a/include/gtest/gtest.h b/include/gtest/gtest.h
-index 6fa0a39..82b58dc 100644
---- a/include/gtest/gtest.h
-+++ b/include/gtest/gtest.h
-@@ -1011,21 +1011,21 @@ class TestEventListener {
+diff --git a/googletest/include/gtest/gtest.h b/googletest/include/gtest/gtest.h
+index f846c5b..5df3dab 100644
+--- a/googletest/include/gtest/gtest.h
++++ b/googletest/include/gtest/gtest.h
+@@ -1043,21 +1043,21 @@ class TestEventListener {
  // above.
  class EmptyTestEventListener : public TestEventListener {
   public:
@@ -74,10 +155,10 @@ index 6fa0a39..82b58dc 100644
  };
  
  // TestEventListeners lets users add listeners to track events in Google Test.
-diff --git a/include/gtest/internal/gtest-death-test-internal.h b/include/gtest/internal/gtest-death-test-internal.h
+diff --git a/googletest/include/gtest/internal/gtest-death-test-internal.h b/googletest/include/gtest/internal/gtest-death-test-internal.h
 index 2b3a78f..a82aec1 100644
---- a/include/gtest/internal/gtest-death-test-internal.h
-+++ b/include/gtest/internal/gtest-death-test-internal.h
+--- a/googletest/include/gtest/internal/gtest-death-test-internal.h
++++ b/googletest/include/gtest/internal/gtest-death-test-internal.h
 @@ -148,7 +148,7 @@ class DeathTestFactory {
  class DefaultDeathTestFactory : public DeathTestFactory {
   public:
@@ -87,16 +168,13 @@ index 2b3a78f..a82aec1 100644
  };
  
  // Returns true if exit_status describes a process that was terminated
-diff --git a/include/gtest/internal/gtest-param-util.h b/include/gtest/internal/gtest-param-util.h
-index d5e1028..5a7954f 100644
---- a/include/gtest/internal/gtest-param-util.h
-+++ b/include/gtest/internal/gtest-param-util.h
-@@ -270,12 +270,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
-   template <typename ForwardIterator>
-   ValuesInIteratorRangeGenerator(ForwardIterator begin, ForwardIterator end)
+diff --git a/googletest/include/gtest/internal/gtest-param-util.h b/googletest/include/gtest/internal/gtest-param-util.h
+index 82cab9b..a64b698 100644
+--- a/googletest/include/gtest/internal/gtest-param-util.h
++++ b/googletest/include/gtest/internal/gtest-param-util.h
+@@ -296,10 +296,10 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
        : container_(begin, end) {}
--  virtual ~ValuesInIteratorRangeGenerator() {}
-+  virtual ~ValuesInIteratorRangeGenerator() override {}
+   virtual ~ValuesInIteratorRangeGenerator() {}
  
 -  virtual ParamIteratorInterface<T>* Begin() const {
 +  virtual ParamIteratorInterface<T>* Begin() const override {
@@ -107,7 +185,7 @@ index d5e1028..5a7954f 100644
      return new Iterator(this, container_.end());
    }
  
-@@ -289,14 +289,14 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
+@@ -313,14 +313,14 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
          : base_(base), iterator_(iterator) {}
      virtual ~Iterator() {}
  
@@ -125,7 +203,7 @@ index d5e1028..5a7954f 100644
        return new Iterator(*this);
      }
      // We need to use cached value referenced by iterator_ because *iterator_
-@@ -306,12 +306,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
+@@ -330,12 +330,12 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
      // can advance iterator_ beyond the end of the range, and we cannot
      // detect that fact. The client code, on the other hand, is
      // responsible for not calling Current() on an out-of-range iterator.
@@ -140,11 +218,33 @@ index d5e1028..5a7954f 100644
        // Having the same base generator guarantees that the other
        // iterator is of the same type and we can downcast.
        GTEST_CHECK_(BaseGenerator() == other.BaseGenerator())
-diff --git a/src/gtest-death-test.cc b/src/gtest-death-test.cc
-index a6023fc..c158d0b 100644
---- a/src/gtest-death-test.cc
-+++ b/src/gtest-death-test.cc
-@@ -373,8 +373,8 @@ class DeathTestImpl : public DeathTest {
+diff --git a/googletest/include/gtest/internal/gtest-port.h b/googletest/include/gtest/internal/gtest-port.h
+index 0094ed5..e924906 100644
+--- a/googletest/include/gtest/internal/gtest-port.h
++++ b/googletest/include/gtest/internal/gtest-port.h
+@@ -2098,7 +2098,7 @@ class ThreadLocal {
+   class DefaultValueHolderFactory : public ValueHolderFactory {
+    public:
+     DefaultValueHolderFactory() {}
+-    virtual ValueHolder* MakeNewHolder() const { return new ValueHolder(); }
++    virtual ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
+ 
+    private:
+     GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
+@@ -2107,7 +2107,7 @@ class ThreadLocal {
+   class InstanceValueHolderFactory : public ValueHolderFactory {
+    public:
+     explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
+-    virtual ValueHolder* MakeNewHolder() const {
++    virtual ValueHolder* MakeNewHolder() const override {
+       return new ValueHolder(value_);
+     }
+ 
+diff --git a/googletest/src/gtest-death-test.cc b/googletest/src/gtest-death-test.cc
+index a01a369..f7241cd 100644
+--- a/googletest/src/gtest-death-test.cc
++++ b/googletest/src/gtest-death-test.cc
+@@ -384,8 +384,8 @@ class DeathTestImpl : public DeathTest {
    // read_fd_ is expected to be closed and cleared by a derived class.
    ~DeathTestImpl() { GTEST_DEATH_TEST_CHECK_(read_fd_ == -1); }
  
@@ -155,7 +255,7 @@ index a6023fc..c158d0b 100644
  
    const char* statement() const { return statement_; }
    const RE* regex() const { return regex_; }
-@@ -778,7 +778,7 @@ class ForkingDeathTest : public DeathTestImpl {
+@@ -789,7 +789,7 @@ class ForkingDeathTest : public DeathTestImpl {
    ForkingDeathTest(const char* statement, const RE* regex);
  
    // All of these virtual functions are inherited from DeathTest.
@@ -164,7 +264,7 @@ index a6023fc..c158d0b 100644
  
   protected:
    void set_child_pid(pid_t child_pid) { child_pid_ = child_pid; }
-@@ -814,7 +814,7 @@ class NoExecDeathTest : public ForkingDeathTest {
+@@ -825,7 +825,7 @@ class NoExecDeathTest : public ForkingDeathTest {
   public:
    NoExecDeathTest(const char* a_statement, const RE* a_regex) :
        ForkingDeathTest(a_statement, a_regex) { }
@@ -173,7 +273,7 @@ index a6023fc..c158d0b 100644
  };
  
  // The AssumeRole process for a fork-and-run death test.  It implements a
-@@ -870,7 +870,7 @@ class ExecDeathTest : public ForkingDeathTest {
+@@ -881,7 +881,7 @@ class ExecDeathTest : public ForkingDeathTest {
    ExecDeathTest(const char* a_statement, const RE* a_regex,
                  const char* file, int line) :
        ForkingDeathTest(a_statement, a_regex), file_(file), line_(line) { }
@@ -182,23 +282,22 @@ index a6023fc..c158d0b 100644
   private:
    static ::std::vector<testing::internal::string>
    GetArgvsForDeathTestChildProcess() {
-diff --git a/src/gtest-internal-inl.h b/src/gtest-internal-inl.h
-index 35df303..2553eb4 100644
---- a/src/gtest-internal-inl.h
-+++ b/src/gtest-internal-inl.h
-@@ -442,9 +442,9 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
-   OsStackTraceGetter() : caller_frame_(NULL) {}
+diff --git a/googletest/src/gtest-internal-inl.h b/googletest/src/gtest-internal-inl.h
+index ed8a682..c89fe14 100644
+--- a/googletest/src/gtest-internal-inl.h
++++ b/googletest/src/gtest-internal-inl.h
+@@ -446,8 +446,8 @@ class OsStackTraceGetter : public OsStackTraceGetterInterface {
+  public:
+   OsStackTraceGetter() {}
  
-   virtual string CurrentStackTrace(int max_depth, int skip_count)
--      GTEST_LOCK_EXCLUDED_(mutex_);
-+      GTEST_LOCK_EXCLUDED_(mutex_) override;
+-  virtual string CurrentStackTrace(int max_depth, int skip_count);
+-  virtual void UponLeavingGTest();
++  virtual string CurrentStackTrace(int max_depth, int skip_count) override;
++  virtual void UponLeavingGTest() override;
  
--  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_);
-+  virtual void UponLeavingGTest() GTEST_LOCK_EXCLUDED_(mutex_) override;
- 
-   // This string is inserted in place of stack frames that are part of
-   // Google Test's implementation.
-@@ -477,7 +477,7 @@ class DefaultGlobalTestPartResultReporter
+  private:
+   GTEST_DISALLOW_COPY_AND_ASSIGN_(OsStackTraceGetter);
+@@ -468,7 +468,7 @@ class DefaultGlobalTestPartResultReporter
    explicit DefaultGlobalTestPartResultReporter(UnitTestImpl* unit_test);
    // Implements the TestPartResultReporterInterface. Reports the test part
    // result in the current test.
@@ -207,7 +306,7 @@ index 35df303..2553eb4 100644
  
   private:
    UnitTestImpl* const unit_test_;
-@@ -493,7 +493,7 @@ class DefaultPerThreadTestPartResultReporter
+@@ -484,7 +484,7 @@ class DefaultPerThreadTestPartResultReporter
    explicit DefaultPerThreadTestPartResultReporter(UnitTestImpl* unit_test);
    // Implements the TestPartResultReporterInterface. The implementation just
    // delegates to the current global test part result reporter of *unit_test_.
@@ -216,7 +315,7 @@ index 35df303..2553eb4 100644
  
   private:
    UnitTestImpl* const unit_test_;
-@@ -1100,7 +1100,7 @@ class StreamingListener : public EmptyTestEventListener {
+@@ -1065,7 +1065,7 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
      }
  
      // Sends a string to the socket.
@@ -225,7 +324,7 @@ index 35df303..2553eb4 100644
        GTEST_CHECK_(sockfd_ != -1)
            << "Send() can be called only when there is a connection.";
  
-@@ -1117,7 +1117,7 @@ class StreamingListener : public EmptyTestEventListener {
+@@ -1082,7 +1082,7 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
      void MakeConnection();
  
      // Closes the socket.
@@ -234,7 +333,7 @@ index 35df303..2553eb4 100644
        GTEST_CHECK_(sockfd_ != -1)
            << "CloseConnection() can be called only when there is a connection.";
  
-@@ -1141,11 +1141,11 @@ class StreamingListener : public EmptyTestEventListener {
+@@ -1106,11 +1106,11 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
    explicit StreamingListener(AbstractSocketWriter* socket_writer)
        : socket_writer_(socket_writer) { Start(); }
  
@@ -248,7 +347,7 @@ index 35df303..2553eb4 100644
      // Note that Google Test current only report elapsed time for each
      // test iteration, not for the entire test program.
      SendLn("event=TestProgramEnd&passed=" + FormatBool(unit_test.Passed()));
-@@ -1154,39 +1154,39 @@ class StreamingListener : public EmptyTestEventListener {
+@@ -1119,39 +1119,39 @@ class GTEST_API_ StreamingListener : public EmptyTestEventListener {
      socket_writer_->CloseConnection();
    }
  
@@ -295,11 +394,11 @@ index 35df303..2553eb4 100644
      const char* file_name = test_part_result.file_name();
      if (file_name == NULL)
        file_name = "";
-diff --git a/src/gtest.cc b/src/gtest.cc
-index 6de53dd..90b718b 100644
---- a/src/gtest.cc
-+++ b/src/gtest.cc
-@@ -2697,19 +2697,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
+diff --git a/googletest/src/gtest.cc b/googletest/src/gtest.cc
+index d882ab2..041047d 100644
+--- a/googletest/src/gtest.cc
++++ b/googletest/src/gtest.cc
+@@ -3034,19 +3034,19 @@ class PrettyUnitTestResultPrinter : public TestEventListener {
    }
  
    // The following methods override what's in the TestEventListener class.
@@ -332,7 +431,7 @@ index 6de53dd..90b718b 100644
  
   private:
    static void PrintFailedTests(const UnitTest& unit_test);
-@@ -2908,19 +2908,19 @@ class TestEventRepeater : public TestEventListener {
+@@ -3245,19 +3245,19 @@ class TestEventRepeater : public TestEventListener {
    bool forwarding_enabled() const { return forwarding_enabled_; }
    void set_forwarding_enabled(bool enable) { forwarding_enabled_ = enable; }
  
@@ -365,7 +464,7 @@ index 6de53dd..90b718b 100644
  
   private:
    // Controls whether events will be forwarded to listeners_. Set to false
-@@ -3013,7 +3013,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
+@@ -3350,7 +3350,7 @@ class XmlUnitTestResultPrinter : public EmptyTestEventListener {
   public:
    explicit XmlUnitTestResultPrinter(const char* output_file);
  
@@ -374,12 +473,3 @@ index 6de53dd..90b718b 100644
  
   private:
    // Is c a whitespace character that is normalized to a space character
-@@ -3212,7 +3212,7 @@ std::string XmlUnitTestResultPrinter::RemoveInvalidXmlCharacters(
- // Formats the given time in milliseconds as seconds.
- std::string FormatTimeInMillisAsSeconds(TimeInMillis ms) {
-   ::std::stringstream ss;
--  ss << ms/1000.0;
-+  ss << static_cast<double>(ms)/1000.0;
-   return ss.str();
- }
- 

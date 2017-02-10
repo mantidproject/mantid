@@ -3,7 +3,7 @@
 # GMOCK_FOUND If false, do not try to use Google Mock
 
 # Make gtest_version available everywhere
-set (gtest_version "1.7.0" CACHE INTERNAL "")
+set (gtest_version "1.8.0" CACHE INTERNAL "")
 
 option(USE_SYSTEM_GTEST "Use the system installed GTest - v${gtest_version}?" OFF)
 
@@ -36,7 +36,7 @@ else()
 
   # Add googletest directly to our build. This defines
   # the gtest and gtest_main targets.
-  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src/gmock
+  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                    ${CMAKE_BINARY_DIR}/googletest-build)
 
   # Hide targets from "all" and put them in the UnitTests folder in MSVS
@@ -54,10 +54,10 @@ else()
   set( GTEST_LIBRARIES optimized ${GTEST_LIB} debug ${GTEST_LIB_DEBUG} )
 
   find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
-              PATHS ${CMAKE_BINARY_DIR}/googletest-src/gmock/include
+              PATHS ${CMAKE_BINARY_DIR}/googletest-src/googlemock/include
               NO_DEFAULT_PATH )
   find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
-              PATHS ${CMAKE_BINARY_DIR}/googletest-src/gtest/include
+              PATHS ${CMAKE_BINARY_DIR}/googletest-src/googletest/include
               NO_DEFAULT_PATH )
 
 
