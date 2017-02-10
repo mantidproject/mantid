@@ -1,5 +1,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <functional>
@@ -100,6 +101,9 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
   auto &detIDs = m_detectorIDs.access();
   for (size_t i = 0; i < detectorIDs.size(); ++i)
     detIDs[i] = {detectorIDs[i]};
+  // Setting new detector ID grouping makes definitions outdated.
+  m_spectrumDefinitions =
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
 }
 
 /// Set a vector of detector IDs for each index.
@@ -116,6 +120,22 @@ void IndexInfo::setDetectorIDs(
     std::sort(ids.begin(), ids.end());
     ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
   }
+  // Setting new detector ID grouping makes definitions outdated.
+  m_spectrumDefinitions =
+      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
+}
+
+void IndexInfo::setSpectrumDefinitions(
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+  if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
+    throw std::runtime_error(
+        "IndexInfo: Size mismatch when setting new spectrum definitions");
+  m_spectrumDefinitions = spectrumDefinitions;
+}
+
+const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
+IndexInfo::spectrumDefinitions() const {
+  return m_spectrumDefinitions;
 }
 
 } // namespace Indexing
