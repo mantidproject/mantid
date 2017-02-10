@@ -317,10 +317,10 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
   return outputWS;
 }
 
-/** Process an input workspace according to specified processing commands to get
-* a detector workspace.
-* @param inputWS :: the input workspace in wavelength
-* @return :: the detector workspace
+/** Process an input workspace in TOF according to specified processing commands
+* to get a detector workspace in wavelength.
+* @param inputWS :: the input workspace in TOF
+* @return :: the detector workspace in wavelength
 */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
@@ -334,16 +334,19 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
 
+  detectorWS = convertToWavelength(detectorWS);
+
   return detectorWS;
 }
 
-/** Creates a monitor workspace. This method should only be called if
-* IOMonitorIndex has been specified and MonitorBackgroundWavelengthMin and
-* MonitorBackgroundWavelengthMax have been given.
-* @param inputWS :: the input workspace in wavelength
+/** Creates a monitor workspace in wavelength from an input workspace in TOF.
+* This method should only be called if IOMonitorIndex has been specified and
+* MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax have been
+* given.
+* @param inputWS :: the input workspace in TOF
 * @param integratedMonitors :: boolean to indicate if monitors should be
 * integrated
-* @return :: the monitor workspace
+* @return :: the monitor workspace in wavelength
 */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
@@ -359,6 +362,8 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr monitorWS =
       cropWorkspaceAlg->getProperty("OutputWorkspace");
+
+  monitorWS = convertToWavelength(monitorWS);
 
   // Flat background correction
   const double backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
@@ -397,6 +402,25 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
       integrationAlg->getProperty("OutputWorkspace");
 
   return integratedMonitor;
+}
+
+/** Rebin a detector workspace in wavelength to a given monitor workspace in
+* wavelength.
+* @param detectorWS :: the detector workspace in wavelength
+* @param monitorWS :: the monitor workspace in wavelength
+* @return :: the rebinned detector workspace
+*/
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
+    MatrixWorkspace_sptr detectorWS, MatrixWorkspace_sptr monitorWS) {
+
+  auto rebin = createChildAlgorithm("RebinToWorkspace");
+  rebin->initialize();
+  rebin->setProperty("WorkspaceToRebin", detectorWS);
+  rebin->setProperty("WorkspaceToMatch", monitorWS);
+  rebin->execute();
+  MatrixWorkspace_sptr rebinnedWS = rebin->getProperty("OutputWorkspace");
+
+  return rebinnedWS;
 }
 
 /** Set monitor properties

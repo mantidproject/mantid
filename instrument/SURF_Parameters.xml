@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "SURF" valid-from = "2012-01-31T00:00:00">
+<parameter-file instrument = "SURF" valid-from = "2017-01-31T00:00:00">
 <component-link name = "SURF">
-  <parameter name="MonitorIntegralMin">
-    <value val="4.0"/> 
-  </parameter>
-
-  <parameter name="MonitorIntegralMax">
-    <value val="6.0"/>
-  </parameter>
 
   <parameter name="MonitorBackgroundMin">
     <value val="7.6"/>
@@ -15,6 +8,14 @@
 
   <parameter name="MonitorBackgroundMax">
     <value val="8.5"/>
+  </parameter>  
+  
+  <parameter name="MonitorIntegralMin">
+    <value val="4.0"/> 
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+    <value val="6.0"/>
   </parameter>
 
   <parameter name="PointDetectorStart">
@@ -26,7 +27,10 @@
   </parameter>
 
   <parameter name="MultiDetectorStart">
-    <value val="1"/>
+      <!--
+  This channel number is marks the start of all other linear and/or area detectors.
+   -->
+    <value val="3"/>
   </parameter>
 
   <parameter name="I0MonitorIndex">
