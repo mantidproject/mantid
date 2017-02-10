@@ -1,0 +1,15 @@
+:100644 100644 572d044... 0000000... M	CMakeLists.txt
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 572d044..16bf622 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,7 +7,7 @@
+ 
+ # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
+ # make it prominent in the GUI.
+-option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)
++set(BUILD_SHARED_LIBS OFF)
+ 
+ option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
+ 
