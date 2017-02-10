@@ -25,6 +25,7 @@ const char* MantidVersion::versionShort()
 
 std::string MantidVersion::releaseNotes()
 {
+
   const std::string STEM = "qthelp://org.mantidproject/doc/release/v";
   const std::string END = "/index.html";
   // Cast here in those cases where patch number is of the form 20131022.1356.

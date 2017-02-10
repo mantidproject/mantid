@@ -64,9 +64,20 @@ Reflectometry Reduction Interfaces
 ISIS Reflectometry (Polref)
 ###########################
 
-- A new tab, 'Settings' has been added. This tab displays global options for experiment and instrument settings.
 - A new tab, 'Event handling' has been added. This tab allows users to select custom time slices to analyze event data.
+- A new tab, 'Settings' has been added. This tab displays global options for experiment and instrument settings.
 - A new tab, 'Save ASCII' has been added. This tab is similar in function and purpose to the 'Save Workspaces' window accessible from Interfaces->ISIS Reflectometry->File->Save Workspaces.
+
+.. figure:: ../../images/Reflectometry-GUI-release3.9-fig1.png
+   :class: screenshot
+   :width: 530px
+   :align: left
+
+.. figure:: ../../images/Reflectometry-GUI-release3.9-fig2.png
+   :class: screenshot
+   :width: 530px
+   :align: right
+
 - The interface is now arranged in two different groups. Groups apply to tabs 'Run', 'Event Handling' and 'Settings'.
 - When runs are transferred to the processing table groups are now labeled according to run title.
 - ``StartOverlap`` and ``EndOverlap`` are used to calculate the integration range in :ref:`algm-Stitch1DMany`, when specified.
@@ -77,6 +88,7 @@ ISIS Reflectometry (Polref)
 - Error messages are displayed if the user either attempts to transfer zero runs or transfer runs with a different strategy to the one they used to search for runs with. 
 - Fixed a bug where if the user answered 'no' to a popup asking if they wanted to process all runs, the progress bar would show activity as though a data reduction was occurring.
 - Documentation regarding the interface has been updated accordingly.
+
 
 ISIS Reflectometry
 ##################

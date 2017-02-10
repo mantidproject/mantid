@@ -1171,11 +1171,7 @@ void IFunction::fixAll() {
 }
 
 /// Free all parameters
-void IFunction::unfixAll() {
-  for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
-  }
-}
+void IFunction::unfixAll() { clearTies(); }
 
 /// Get number of domains required by this function.
 /// If it returns a number greater than 1 then the domain
