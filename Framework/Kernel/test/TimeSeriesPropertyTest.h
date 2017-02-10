@@ -703,6 +703,12 @@ public:
     log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
     log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
     log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
 
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
@@ -717,7 +723,33 @@ public:
       std::cout << "otuput " << i << " has entries: " << out_i->size() << "\n";
     }
 
+    TimeSeriesProperty<int> *out_1 = outputs[1];
+    for (int j = 0; j < out_1->size(); ++j)
+    {
+        std::cout << out_1->nthTime(j) << ", " << out_1->nthValue(j) << "\n";
+    }
+    TS_ASSERT_EQUALS(out_1->size(), 5);
+
+
     //  TS_ASSERT_EQUALS(1, 2);
+  }
+
+  //----------------------------------------------------------------------------
+  void test_splitByTimeVectorEarlySplitter()
+  {
+      // TODO - Implement this: last splitter is before first entry
+  }
+
+  //----------------------------------------------------------------------------
+  void test_splitByTimeVectorLaterSplitter()
+  {
+      // TODO - Implement this: first splitter is after last entry
+  }
+
+  //----------------------------------------------------------------------------
+  void test_splitByTimeVectorFastLogSplitter()
+  {
+      // TODO - Implement this: high-frequency splitters splits a slow change log
   }
 
   //----------------------------------------------------------------------------
