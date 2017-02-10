@@ -519,7 +519,7 @@ public:
 
     // get 2theta from workspace
     double twotheta_raw =
-        stod(outws->run().getProperty("_2theta")->value().c_str());
+        std::stod(outws->run().getProperty("_2theta")->value().c_str());
 
     Kernel::Property *raw_property = outws->run().getProperty("2theta");
     Kernel::TimeSeriesProperty<double> *twotheta_property =
