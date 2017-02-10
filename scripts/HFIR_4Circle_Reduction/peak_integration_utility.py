@@ -278,9 +278,10 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
         raise RuntimeError('Parameter dictionary must have "A", "Sigma" but now only {0}. Error message: {1}'
                            ''.format(parameter_dict.keys(), key_err))
 
-    # TODO/ISSUE/NOW - Continue from here to calcualte Gaussian area
+    # TODO/ISSUE/NOW - Continue from here to calculate Gaussian area
 
     return 1E20
+
 
 def get_finer_grid(vec_x, factor):
     """
