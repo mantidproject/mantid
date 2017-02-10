@@ -139,6 +139,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
   }
+// test if it can convert a string to a double, if the string is numeric 
   void testStringToDouble() {
 
 	  ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
@@ -149,8 +150,8 @@ public:
 	  size_t n = 10;
 	  for (size_t i = 0; i < n; ++i) {
 		  TableRow row = tws->appendRow();
-		  std::string x = "1";// boost::lexical_cast<std::string>(i);
-		  double y = i * 1.1;
+		  std::string x = "1";
+		  double y = double(i) * 1.1;
 		  double e = sqrt(y);
 		  row << x << y << e;
 	  }
@@ -191,9 +192,9 @@ public:
 	  TS_ASSERT(label);
 	  TS_ASSERT_EQUALS(label->caption(), "A");
 	  TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
-	  
 	  API::AnalysisDataService::Instance().remove("out");
   }
+// test that an error is thrown when a non-numeric string is used
   void testNotANumber() {
 
 	  ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
@@ -204,8 +205,8 @@ public:
 	  size_t n = 10;
 	  for (size_t i = 0; i < n; ++i) {
 		  TableRow row = tws->appendRow();
-		  std::string x = "not a number";// boost::lexical_cast<std::string>(i);
-		  double y = i * 1.1;
+		  std::string x = "not a number";
+		  double y = double(i) * 1.1;
 		  double e = sqrt(y);
 		  row << x << y << e;
 	  }
