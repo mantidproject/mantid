@@ -15,6 +15,7 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( GeometryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             Geometry
+            Beamline
             Kernel
             ${NEXUS_LIBRARIES}
             ${GSL_LIBRARIES}

@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -1252,6 +1253,49 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
   const auto &baseInstr = m_map ? *m_instr : *this;
   const auto it = find(baseInstr.m_detectorCache, detID);
   return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
+/// Returns a legacy ParameterMap, containing information that is now stored in
+/// DetectorInfo (masking, positions, rotations).
+boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+  pmap->setDetectorInfo(nullptr);
+  pmap->setInstrument(nullptr);
+
+  if (!hasDetectorInfo())
+    return pmap;
+
+  const auto &detIDs = getDetectorIDs();
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
+    const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
+    if (m_detectorInfo->isMasked(i)) {
+      pmap->forceUnsafeSetMasked(det.get(), true);
+    }
+
+    // Compare detector position with position based on pmap. Note that we
+    // previously stripped the DetectorInfo from pmap so we do not get positions
+    // from the DetectorInfo but only those directly stored in pmap.
+    const auto parDet = ParComponentFactory::create(det, pmap.get());
+    auto relPos = m_detectorInfo->position(i);
+    auto relRot = m_detectorInfo->rotation(i);
+    if (const auto parent = parDet->getParent()) {
+      relPos -= toVector3d(parent->getPos());
+      const auto invParentRot =
+          toQuaterniond(parent->getRotation()).conjugate();
+      relPos = invParentRot * relPos;
+      // Note the unusual order, see Component.cpp
+      relRot = invParentRot * relRot;
+    }
+    // Tolerance 1e-6 m. Is this a good value?
+    if ((relPos - toVector3d(parDet->getRelativePos())).norm() > 1e-6)
+      pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+
+    if (!(relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
+             .isApprox(Eigen::Quaterniond::Identity(), 1e-6))
+      pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
+  }
+  return pmap;
 }
 
 namespace Conversion {

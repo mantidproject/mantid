@@ -246,6 +246,8 @@ public:
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
 
+  boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
+
 private:
   /// Save information about a set of detectors to Nexus
   void saveDetectorSetInfoToNexus(::NeXus::File *file,
