@@ -177,7 +177,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
     return subtractedWS
 
 
-class DirectILLPrepareData(DataProcessorAlgorithm):
+class DirectILLCollectData(DataProcessorAlgorithm):
     """A workflow algorithm for the initial sample, vanadium and empty container reductions."""
 
     def __init__(self):
@@ -190,7 +190,7 @@ class DirectILLPrepareData(DataProcessorAlgorithm):
 
     def name(self):
         """Return the algorithm's name."""
-        return 'DirectILLPrepareData'
+        return 'DirectILLCollectData'
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -561,4 +561,4 @@ class DirectILLPrepareData(DataProcessorAlgorithm):
         return detWS, monWS
 
 
-AlgorithmFactory.subscribe(DirectILLPrepareData)
+AlgorithmFactory.subscribe(DirectILLCollectData)

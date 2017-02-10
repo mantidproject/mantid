@@ -1,5 +1,5 @@
-digraph DirectILLPrepareData {
-  label = "DirectILLPrepareData workflow diagram"
+digraph DirectILLCollectData {
+  label = "DirectILLCollectData workflow diagram"
   $global_style
 
   subgraph params {

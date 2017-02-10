@@ -17,7 +17,7 @@ This algorithm integrates the workspace given in *InputWorkspace* using the :ref
 Input workspaces
 ################
 
-The *InputWorkspace* should be loaded using the :ref:`DirectILLPrepareData <algm-DirectILLPrepareData>` algorithm. It will also give the EPP workspace  needed for *EPPWorkspace*.
+The *InputWorkspace* should be loaded using the :ref:`DirectILLCollectData <algm-DirectILLCollectData>` algorithm. It will also give the EPP workspace  needed for *EPPWorkspace*.
 
 Usage
 -----

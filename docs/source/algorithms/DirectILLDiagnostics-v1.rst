@@ -31,7 +31,7 @@ Flat backgrounds in *FlatBkgWorkspace* are used for the diagnostics as-is.
 Input workspaces
 ################
 
-The workspace in *InputWorkspace* should be loaded using the :ref:`DirectILLPrepareData <algm-DirectILLPrepareData>` algorithm. It also provides the data needed for *EPPWorkspace* and *FlatBkgWorkspace*.
+The workspace in *InputWorkspace* should be loaded using the :ref:`DirectILLCollectData <algm-DirectILLCollectData>` algorithm. It also provides the data needed for *EPPWorkspace* and *FlatBkgWorkspace*.
 
 Usage
 -----
