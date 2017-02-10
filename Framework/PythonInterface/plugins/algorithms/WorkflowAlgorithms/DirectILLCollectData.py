@@ -319,10 +319,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  ' and ' + common.PROP_DETS_AT_L2 +
                                  ' properties.')
         self.declareProperty(name=common.PROP_MON_INDEX,
-                             defaultValue=0,
+                             defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
                              direction=Direction.Input,
-                             doc='Index of the main monitor.')
+                             doc='Index of the incident monitor, if not specified in instrument parameters.')
         self.declareProperty(name=common.PROP_INCIDENT_ENERGY_CALIBRATION,
                              defaultValue=common.INCIDENT_ENERGY_CALIBRATION_ON,
                              validator=StringListValidator([
@@ -423,8 +423,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 eiCalibrationDets = self.getProperty(common.PROP_DETS_AT_L2).value
                 indexType = self.getProperty(common.PROP_INDEX_TYPE).value
                 eiCalibrationDets = common.convertListToWorkspaceIndices(eiCalibrationDets, mainWS, indexType)
-                monIndex = self.getProperty(common.PROP_MON_INDEX).value
-                monIndex = common.convertToWorkspaceIndex(monIndex, monWS, indexType)
+                if self.getProperty(common.PROP_MON_INDEX).isDefault:
+                    NON_RECURSIVE = False  # Prevent recursive calls in the following. 
+                    if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
+                        raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
+                                           common.PROP_MON_INDEX + ' must be specified.')
+                    monIndex = monWS.getInstrument().getIntParameter('default-incident-monitor-spectrum', NON_RECURSIVE)[0]
+                    monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
+                else:
+                    monIndex = self.getProperty(common.PROP_MON_INDEX).value
+                    monIndex = common.convertToWorkspaceIndex(monIndex, monWS, indexType)
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, eiCalibrationDets, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:

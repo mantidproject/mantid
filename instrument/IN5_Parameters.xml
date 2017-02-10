@@ -20,6 +20,11 @@
 			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
 		</parameter>
 
+		<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum">
+			<value val="1"/>
+		</parameter>
+
 	</component-link>
 
 </parameter-file>
