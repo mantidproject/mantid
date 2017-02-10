@@ -162,20 +162,17 @@ public:
         typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
                                   Type, InconvertibleToDoubleType>::type
             DoubleType;
-	if (typeid(m_data[i]) == typeid(std::string))
-	{
-		std::string trimmedString =boost::lexical_cast<std::string>(m_data[i]); // so not to alter the original data
-		
-		if(char(trimmedString.back())==':')
-		{
-			trimmedString.pop_back(); // so not to alter the original data
-		}
-		return boost::lexical_cast<double>(trimmedString);
-	}
-	else
-	{
-		return boost::numeric_cast<double, DoubleType>(m_data[i]);
-	}
+    if (typeid(m_data[i]) == typeid(std::string)) {
+      std::string trimmedString = boost::lexical_cast<std::string>(
+          m_data[i]); // so not to alter the original data
+
+      if (char(trimmedString.back()) == ':') {
+        trimmedString.pop_back(); // so not to alter the original data
+      }
+      return boost::lexical_cast<double>(trimmedString);
+    } else {
+      return boost::numeric_cast<double, DoubleType>(m_data[i]);
+    }
   }
 
   /**
