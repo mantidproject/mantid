@@ -69,12 +69,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -303,10 +300,7 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
     if (!m_isCommonBins) // checking for ragged workspace
     {
       file << pointsSpec[bin];
-    }
-
-    else if (m_isCommonBins) // bin centres,
-    {
+    } else {
       file << points0[bin];
     }
     file << m_sep;
@@ -342,10 +336,9 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto points0 = m_ws->points(0);
   auto pointsSpec = m_ws->points(spectraIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
-    if (m_isCommonBins) // bin centres,
-    {
+    if (m_isCommonBins) {
       file << points0[bin];
-    } else if (!m_isCommonBins) // checking for ragged workspace
+    } else // checking for ragged workspace
     {
       file << pointsSpec[bin];
     }
