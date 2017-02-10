@@ -1301,7 +1301,8 @@ QPixmap SliceViewer::getImage() {
   this->m_colorBar->setRenderMode(true);
   auto previousStyle = ui.frmPlot->styleSheet();
   ui.frmPlot->setStyleSheet("background-color: white;");
-  this->m_colorBar->setCheckBoxMode(MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE);
+  this->m_colorBar->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE);
 
   // Grab it
   QCoreApplication::processEvents();
