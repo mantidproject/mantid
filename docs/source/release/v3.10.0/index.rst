@@ -1,20 +1,22 @@
 ==========================
-Mantid 3.9.0 Release Notes
+Mantid 3.10.0 Release Notes
 ==========================
 
-.. figure:: ../../images/release39.png
+.. figure:: ../../images/ReleaseUnderConstruction.jpg
    :class: screenshot
    :width: 550px
    :align: right
 
-   The Slice Viewer now is able to display data with non orthogonal axes
+   Release image
 
 .. contents:: Table of Contents
    :local:
 
-We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer, as well as partial project saving in the Mantidplot interface.
+.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
-These are just two of many improvements in this release, so please take a
+**TODO: Add paragraph summarizing big changes**
+
+This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -35,12 +37,7 @@ Citation
 
 Please cite any usage of Mantid as follows:
 
-- *O. Arnold, et al., Mantid—Data analysis and visualization package for neutron scattering and μSR experiments, Nuclear Instruments and Methods in Physics Research Section A, Volume 764, 11 November 2014, Pages 156-166*, doi: `10.1016/j.nima.2014.07.029 <http://dx.doi.org/10.1016/j.nima.2014.07.029>`_
-
-If you want to cite this specific release please use:
-
-- *Mantid 3.9: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.9
-  `Full author list <http://data.datacite.org/10.5286/SOFTWARE/MANTID3.9>`_
+- *Mantid 3.10: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*. doi: http://dx.doi.org/10.5286/SOFTWARE/MANTID3.10
 
 Changes
 -------
@@ -54,7 +51,6 @@ Changes
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>
    Diffraction <diffraction>
-   Imaging <imaging>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
 
@@ -67,6 +63,6 @@ For a full list of all issues addressed during this release please see the `GitH
 
 .. _forum: http://forum.mantidproject.org
 
-.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Aclosed
+.. _GitHub milestone: http://github.com/mantidproject/mantid/pulls?utf8=%E2%9C%93&q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Aclosed
 
-.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v3.9.0
+.. _GitHub release page: https://github.com/mantidproject/mantid/releases/tag/v3.10.0
