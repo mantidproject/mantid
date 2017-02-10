@@ -1,5 +1,5 @@
-digraph DirectILLDetectorDiagnostics {
-  label = "DirectILLDetectorDiagnostics workflow diagram"
+digraph DirectILLDiagnostics {
+  label = "DirectILLDiagnostics workflow diagram"
   $global_style
 
   subgraph params {

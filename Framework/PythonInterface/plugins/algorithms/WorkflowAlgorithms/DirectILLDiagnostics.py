@@ -188,7 +188,7 @@ def _reportSinglePeakDiagnostics(report, diagnostics, wsIndex):
                       .format(wsIndex))
 
 
-class DirectILLDetectorDiagnostics(DataProcessorAlgorithm):
+class DirectILLDiagnostics(DataProcessorAlgorithm):
     """A workflow algorithm for detector diagnostics."""
 
     def __init__(self):
@@ -201,7 +201,7 @@ class DirectILLDetectorDiagnostics(DataProcessorAlgorithm):
 
     def name(self):
         """Return the algorithm's name."""
-        return 'DirectILLDetectorDiagnostics'
+        return 'DirectILLDiagnostics'
 
     def summary(self):
         """Return a summary of the algorithm."""
@@ -441,4 +441,4 @@ class DirectILLDetectorDiagnostics(DataProcessorAlgorithm):
         return mainWS
 
 
-AlgorithmFactory.subscribe(DirectILLDetectorDiagnostics)
+AlgorithmFactory.subscribe(DirectILLDiagnostics)

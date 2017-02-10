@@ -1,13 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
-from mantid.simpleapi import (DirectILLDetectorDiagnostics, DirectILLPrepareData)
+from mantid.simpleapi import (DirectILLDiagnostics, DirectILLPrepareData)
 import numpy.testing
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
 
-class DirectILLDetectorDiagnosticsTest(unittest.TestCase):
+class DirectILLDiagnosticsTest(unittest.TestCase):
     _BKG_LEVEL = 1.42
     _BKG_WS_NAME = 'bkgWS_'
     _EPP_WS_NAME = 'eppWS_'
@@ -48,7 +48,7 @@ class DirectILLDetectorDiagnosticsTest(unittest.TestCase):
             'FlatBkgWorkspace': self._BKG_WS_NAME,
             'rethrow': True
         }
-        run_algorithm('DirectILLDetectorDiagnostics', **kwargs)
+        run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
@@ -82,7 +82,7 @@ class DirectILLDetectorDiagnosticsTest(unittest.TestCase):
             'NoisyBkgDiagnosticsHighThreshold': 9.99,
             'rethrow': True
         }
-        run_algorithm('DirectILLDetectorDiagnostics', **kwargs)
+        run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         inWS = mtd[self._TEST_WS_NAME]
         outWS = mtd[outWSName]
@@ -120,7 +120,7 @@ class DirectILLDetectorDiagnosticsTest(unittest.TestCase):
             'ElasticPeakDiagnosticsHighThreshold': 9.7,
             'rethrow': True
         }
-        run_algorithm('DirectILLDetectorDiagnostics', **kwargs)
+        run_algorithm('DirectILLDiagnostics', **kwargs)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
         self.assertEquals(outWS.getNumberHistograms(), spectraCount)

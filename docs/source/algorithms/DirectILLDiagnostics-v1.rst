@@ -11,7 +11,7 @@ Description
 
 This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*. The output is a mask workspace which can be further fed to :ref:`DirectILLApplyDiagnostics <algm-DirectILLApplyDiagnostics>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
 
-.. diagram:: DirectILLDetectorDiagnostics-v1_wkflw.dot
+.. diagram:: DirectILLDiagnostics-v1_wkflw.dot
 
 Diagnostics performed
 #####################
