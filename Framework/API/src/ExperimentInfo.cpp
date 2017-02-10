@@ -465,18 +465,11 @@ void ExperimentInfo::populateInstrumentParameters() {
           rtpValues.theta = deg2rad * value;
         else if (paramN.compare(0, 1, "p") == 0)
           rtpValues.phi = deg2rad * value;
-        else {
-        }
-        if (rtpValues.haveRadius) // Just overwrite x,y,z
-        {
-          // convert spherical coordinates to Cartesian coordinate values
-          double x = rtpValues.radius * std::sin(rtpValues.theta) *
-                     std::cos(rtpValues.phi);
-          double y = rtpValues.radius * std::sin(rtpValues.theta) *
-                     std::sin(rtpValues.phi);
-          double z = rtpValues.radius * std::cos(rtpValues.theta);
+        if (rtpValues.haveRadius) {
+          V3D pos;
+          pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
           paramMapForPosAndRot.addV3D(paramInfo->m_component,
-                                      ParameterMap::pos(), V3D(x, y, z));
+                                      ParameterMap::pos(), pos);
         }
       } else {
         populateWithParameter(paramMap, paramMapForPosAndRot, paramN,
