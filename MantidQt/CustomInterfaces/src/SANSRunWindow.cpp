@@ -3422,11 +3422,7 @@ bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
   assignCom.append(")");
   // assign the workspace name to a Python variable and read back some details
   QString pythonC = "t1, t2 = " + assignCom + ";print('" + PYTHON_SEP +
-                    "' + "
-                    " + t1 + "
-                    " + '" +
-                    PYTHON_SEP + "' + "
-                                 " + t2";
+                    "' + ' ' +  t1 + ' ' + '" + PYTHON_SEP + "' + ' ' + t2)";
   QString ws_names = runReduceScriptFunction(pythonC);
   if (ws_names.startsWith("error", Qt::CaseInsensitive)) {
     throw std::runtime_error("Couldn't load a transmission file");
