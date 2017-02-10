@@ -11,6 +11,7 @@ Changes
 - Mantid now supports automatic updates to the facilities.xml file in the same way that it does the instrument definitions.  This allows extensions and changes to the list of supported instruments without needing to install a new release of Mantid.
 - This has been initially put into place to support a data file naming change for Vesuvio, but will help for future changes as well.
 - Mantid is aware of the change to file naming for Vesuvio, you can continue to use EVS or VESUVIO as a prefix when trying to load files from this instrument, and Mantid will map that to the correct filenames.
+- Mantid will correctly handle the naming format changes to Polaris, it will automatically select between the old and new filename format whilst loading files correctly.
 
 Algorithms
 ----------
@@ -99,18 +100,17 @@ The following (previously deprecated) algorithms versions have now been removed:
 CurveFitting
 ------------
 
-- Systemtest and FittingBenchmarks have been added for testing the minimizer, the scripts generate the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This Systemtest also demo how these tables can be created as a standard Mantid script.
 - Recommendations for which fitting method to use for a given data set has been added to :ref:`FittingMinimzers page <FittingMinimizers>`.
 - Improved documentation of the these fitting minimizers.
 - Algorithm :ref:`CalculateCostFunction <algm-CalculateCostFunction>` calculates a value of any available cost function.
 - Algorithm :ref:`EstimateFitParameters <algm-EstimateFitParameters>` estimates the initial values of a fiting function in given intervals.
 - `Exclude` is new property of :ref:`Fit <algm-Fit>`, which allows for a user defined range to be excluded from a fit.
-- Fit Function :ref:`FunctionQDepends <func-FunctionQDepends>` as the base class for QENS models depending on Q.
+- System tests and Fitting Benchmarks have been added for testing the minimizer, the scripts generate the tables displayed on :ref:`FittingMinimzers page <FittingMinimizers>`. This System tests also demo how these tables can be created as a standard Mantid script.
 
 Improved
 ########
 
-- The `Peak Radius` global setting for 1D peaks is replaced with `PeakRadius` property of the :ref:`Fit <algm-Fit>` algorithm (see algorithm's description for the details).
+- The `Peak Radius` global setting for 1D peaks is replaced with `PeakRadius` property of the :ref:`Fit <algm-Fit>` algorithm (see algorithm's :ref:`description <algm-Fit>` for the details).
 
 .. figure:: ../../images/NoPeakRadius_3.9.png
    :class: screenshot

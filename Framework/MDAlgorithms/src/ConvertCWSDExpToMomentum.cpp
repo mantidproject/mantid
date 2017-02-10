@@ -2,6 +2,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -270,9 +271,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
     std::string errmsg;
 
     std::stringstream filess;
-    if (m_isBaseName) {
+    if (m_isBaseName)
       filess << m_dataDir << sep;
-    }
     filess << rawfilename;
     std::string filename(filess.str());
 
@@ -281,17 +281,15 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       g_log.error(errmsg);
       continue;
     }
-    if (m_removeBackground) {
+    if (m_removeBackground)
       removeBackground(spicews);
-    }
 
     // Convert from MatrixWorkspace to MDEvents and add events to
-    // int runid = static_cast<int>(ir) + 1;
     int scanid = m_expDataTableWS->cell<int>(ir, m_iColScan);
     g_log.notice() << "[DB] Scan = " << scanid << "\n";
     int runid = m_expDataTableWS->cell<int>(ir, m_iColPt);
-    g_log.notice() << "Pt = " << runid << "\n" << m_iTime
-                   << "-th for time/duration"
+    g_log.notice() << "Pt = " << runid << "\n"
+                   << m_iTime << "-th for time/duration"
                    << "\n";
     double time(0.);
     try {
@@ -301,8 +299,6 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
       time = m_expDataTableWS->cell<double>(ir, m_iTime);
     }
 
-    // double time =
-    //   static_cast<double>(m_expDataTableWS->cell<float>(ir, m_iTime));
     int monitor_counts = m_expDataTableWS->cell<int>(ir, m_iMonitorCounts);
     if (!usevirtual)
       start_detid = 0;
@@ -310,8 +306,7 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
                                          scanid, runid, time, monitor_counts);
   }
 
-  // Set box extentes
-  // typename std::vector<API::IMDNode *> boxes;
+  // Set box extents
   std::vector<API::IMDNode *> boxes;
 
   // Set extents for all MDBoxes
@@ -417,6 +412,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 
   // Go though each spectrum to conver to MDEvent
   size_t numspec = dataws->getNumberHistograms();
+  const auto &specInfo = dataws->spectrumInfo();
   double maxsignal = 0;
   size_t nummdevents = 0;
   for (size_t iws = 0; iws < numspec; ++iws) {
@@ -426,13 +422,13 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     if (fabs(signal) < 0.001)
       continue;
     double error = sqrt(fabs(signal));
-    Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
+    Kernel::V3D detpos = specInfo.position(iws);
     std::vector<Mantid::coord_t> q_sample(3);
 
     // Calculate Q-sample and new detector ID in virtual instrument.
     Kernel::V3D qlab = convertToQSample(samplePos, ki, detpos, momentum,
                                         q_sample, rotationMatrix);
-    detid_t native_detid = dataws->getDetector(iws)->getID();
+    detid_t native_detid = specInfo.detector(iws).getID();
     detid_t detid = native_detid + startdetid;
 
     // Insert
@@ -624,9 +620,8 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
 
     double wavelength = getProperty("UserDefinedWavelength");
 
-    if (wavelength != EMPTY_DBL()) {
+    if (wavelength != EMPTY_DBL())
       loader->setProperty("UserSpecifiedWaveLength", wavelength);
-    }
 
     loader->execute();
 

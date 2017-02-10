@@ -644,7 +644,7 @@ def _WavRangeReduction(name_suffix=None):
         for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
             if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
                 trans.direct.move2ws(period)
-                trans.trans.move2next(period)
+                trans.trans.move2ws(period)
         return
 
     def _applySuffix(result, name_suffix):

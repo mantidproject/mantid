@@ -127,10 +127,10 @@ void SaveWorkspaces::setupLine2(
   QPushButton *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveNIST = new QCheckBox("NIST Qxy");
-  QCheckBox *saveRKH = new QCheckBox("RKH");
-  QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS");
-  QCheckBox *saveCan = new QCheckBox("CanSAS");
+  QCheckBox *saveNIST = new QCheckBox("NIST Qxy (2D)");
+  QCheckBox *saveRKH = new QCheckBox("RKH (1D/2D)");
+  QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
+  QCheckBox *saveCan = new QCheckBox("CanSAS (1D)");
 
   // link the save option tick boxes to their save algorithm
   m_savFormats.insert(saveNIST, "SaveNISTDAT");

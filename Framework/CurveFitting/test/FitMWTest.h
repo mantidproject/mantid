@@ -17,6 +17,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -659,12 +660,12 @@ public:
 
     std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
     pmap.add("fitting", det.get(), "Lifetime", value);
-    boost::shared_ptr<const Mantid::Geometry::IDetector> pdet =
-        instrument->getDetector(det->getID());
-    TS_ASSERT(pdet);
+    const auto &detectorInfo = ws->detectorInfo();
+    const auto detIndex = detectorInfo.indexOf(det->getID());
+    const auto &detFromWS = detectorInfo.detector(detIndex);
 
     Geometry::Parameter_sptr param =
-        pmap.getRecursive(pdet.get(), "Lifetime", "fitting");
+        pmap.getRecursive(&detFromWS, "Lifetime", "fitting");
     TS_ASSERT(param);
 
     API::IFunction_sptr expDecay(new ExpDecay);
@@ -714,7 +715,7 @@ public:
     // workspace with 100 points on interval -10 <= x <= 10
     boost::shared_ptr<WorkspaceTester> data =
         boost::make_shared<WorkspaceTester>();
-    data->init(1, 100, 100);
+    data->initialize(1, 100, 100);
 
     auto &xData = data->mutableX(0);
     for (size_t i = 0; i < data->blocksize(); i++) {
