@@ -8,8 +8,7 @@ option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OF
 
 if(USE_SYSTEM_EIGEN)
   message(STATUS "Using system Eigen")
-  find_package(Eigen3 ${eigen_version} EXACT REQUIRED
-               PATH_SUFFIXES eigen3 eigen )
+  find_package(Eigen3 ${eigen_version} REQUIRED)
 else()
   message(STATUS "Using Eigen in ExternalProject")
 
