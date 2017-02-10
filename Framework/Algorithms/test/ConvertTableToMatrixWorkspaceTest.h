@@ -139,7 +139,87 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
   }
+  void testStringToDouble() {
 
+	  ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
+	  tws->addColumn("str", "A");
+	  tws->addColumn("double", "B");
+	  tws->addColumn("double", "C");
+
+	  size_t n = 10;
+	  for (size_t i = 0; i < n; ++i) {
+		  TableRow row = tws->appendRow();
+		  std::string x = "1";// boost::lexical_cast<std::string>(i);
+		  double y = i * 1.1;
+		  double e = sqrt(y);
+		  row << x << y << e;
+	  }
+
+      TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
+	  TS_ASSERT_THROWS_NOTHING(
+		  m_converter->setPropertyValue("OutputWorkspace", "out"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
+
+	  TS_ASSERT(m_converter->execute());
+
+	  MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+		  API::AnalysisDataService::Instance().retrieve("out"));
+
+	  TS_ASSERT(mws);
+	  TS_ASSERT_EQUALS(mws->getNumberHistograms(), 1);
+	  TS_ASSERT(!mws->isHistogramData());
+	  TS_ASSERT_EQUALS(mws->blocksize(), tws->rowCount());
+
+	  auto &X = mws->x(0);
+	  auto &Y = mws->y(0);
+	  auto &E = mws->e(0);
+
+	  for (size_t i = 0; i < tws->rowCount(); ++i) {
+		  TableRow row = tws->getRow(i);
+		  std::string x;
+		  double y, e;
+		  row >> x >> y >> e;
+		  TS_ASSERT_EQUALS(boost::lexical_cast<double>(x), X[i]);
+		  TS_ASSERT_EQUALS(y, Y[i]);
+		  TS_ASSERT_EQUALS(e, E[i]);
+	  }
+
+	  boost::shared_ptr<Units::Label> label =
+		  boost::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+	  TS_ASSERT(label);
+	  TS_ASSERT_EQUALS(label->caption(), "A");
+	  TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
+	  
+	  API::AnalysisDataService::Instance().remove("out");
+  }
+  void testNotANumber() {
+
+	  ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
+	  tws->addColumn("str", "A");
+	  tws->addColumn("double", "B");
+	  tws->addColumn("double", "C");
+
+	  size_t n = 10;
+	  for (size_t i = 0; i < n; ++i) {
+		  TableRow row = tws->appendRow();
+		  std::string x = "not a number";// boost::lexical_cast<std::string>(i);
+		  double y = i * 1.1;
+		  double e = sqrt(y);
+		  row << x << y << e;
+	  }
+
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setProperty("InputWorkspace", tws));
+	  TS_ASSERT_THROWS_NOTHING(
+		  m_converter->setPropertyValue("OutputWorkspace", "out"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnX", "A"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
+	  TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
+
+	  TS_ASSERT_THROWS(m_converter->execute(),boost::bad_lexical_cast);
+	  API::AnalysisDataService::Instance().remove("out");
+  }
 private:
   IAlgorithm_sptr m_converter;
   ITableWorkspace_sptr tws;

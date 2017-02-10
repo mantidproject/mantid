@@ -162,7 +162,15 @@ public:
         typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
                                   Type, InconvertibleToDoubleType>::type
             DoubleType;
-    return boost::numeric_cast<double, DoubleType>(m_data[i]);
+	if (typeid(m_data[i]) == typeid(std::string))
+	{
+		return boost::lexical_cast<double>(m_data[i]);
+
+	}
+	else
+	{
+		return boost::numeric_cast<double, DoubleType>(m_data[i]);
+	}
   }
 
   /**
