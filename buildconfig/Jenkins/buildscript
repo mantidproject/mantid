@@ -185,6 +185,11 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
+    # Add '-python3' to package name and install path
+    if [[ ${JOB_NAME} == *python3* ]]; then
+	PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+    fi
+
     # Only unsuffixed release builds create envvars scripts
     if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
       PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
@@ -259,9 +264,9 @@ rm -f $userprops
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 
 ###############################################################################
-# Run the documentation tests on Ubuntu when doing a pull request build.
+# Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
 ###############################################################################
-if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
+if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]] && [[ ! ${JOB_NAME} == *python3* ]]; then
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then
@@ -277,7 +282,7 @@ fi
 if [[ ${BUILDPKG} == true ]]; then
   # Workaround so that the target can find the properties file
   # CMake doesn't easily allow environment variables on custom targets
-  if [[ ${ON_MACOS} == 'Darwin' ]]; then
+  if [[ ${ON_MACOS} == true ]]; then
     export MANTIDPATH=$PWD/bin
   fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-qthelp"

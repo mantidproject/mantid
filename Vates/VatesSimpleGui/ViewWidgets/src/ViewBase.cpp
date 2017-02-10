@@ -482,6 +482,9 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z) {
  */
 void ViewBase::onParallelProjection(bool state) {
   pqRenderView *cview = this->getPvActiveView();
+  if (cview == nullptr) {
+    return;
+  }
   vtkSMProxy *proxy = cview->getProxy();
   vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
   proxy->UpdateVTKObjects();

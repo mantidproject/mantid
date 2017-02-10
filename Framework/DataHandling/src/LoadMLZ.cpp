@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -200,8 +201,8 @@ void LoadMLZ::initWorkSpace(
  */
 void LoadMLZ::initInstrumentSpecific() {
   // Read data from IDF: distance source-sample and distance sample-detectors
-  m_l1 = m_mlzloader.getL1(m_localWorkspace);
-  m_l2 = m_mlzloader.getL2(m_localWorkspace);
+  m_l1 = m_localWorkspace->spectrumInfo().l1();
+  m_l2 = m_localWorkspace->spectrumInfo().l2(1);
 
   g_log.debug() << "L1: " << m_l1 << ", L2: " << m_l2 << '\n';
 }

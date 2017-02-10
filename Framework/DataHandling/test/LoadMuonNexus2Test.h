@@ -104,10 +104,6 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
@@ -390,10 +386,6 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =

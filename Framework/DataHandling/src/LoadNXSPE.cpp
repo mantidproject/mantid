@@ -317,7 +317,7 @@ void LoadNXSPE::exec() {
 
   // If an instrument name is defined, load instrument parameter file for Emode
   // NB. LoadParameterFile must be used on a workspace with an instrument
-  if (!instrument_name.empty()) {
+  if (!instrument_name.empty() && instrument_name != "NXSPE") {
     std::string IDF_filename =
         ExperimentInfo::getInstrumentFilename(instrument_name);
     std::string instrument_parfile =

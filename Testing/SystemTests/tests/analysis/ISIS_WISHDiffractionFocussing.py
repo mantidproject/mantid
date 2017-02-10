@@ -10,7 +10,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         return ["WISH00035991.raw", "35922_h00_RW.cal", "35991-foc-h00.nxs"]
 
     def requiredMemoryMB(self):
-        return 4000
+        return 16000
 
     def cleanup(self):
         for ws in self._focused_workspaces:
