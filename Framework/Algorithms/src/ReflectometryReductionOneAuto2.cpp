@@ -8,12 +8,6 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-// anonymous namespace
-namespace {
-#define VERTICAL "VerticalShift"
-#define ROTATION "RotateAroundSample"
-} // anonymous namespace
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -139,7 +133,7 @@ void ReflectometryReductionOneAuto2::init() {
                   Direction::Input);
 
   // Detector position correction type
-  const std::vector<std::string> correctionType{VERTICAL, ROTATION};
+  const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
   auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
       boost::make_shared<MandatoryValidator<std::string>>());

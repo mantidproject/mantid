@@ -11,12 +11,6 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-// anonymous namespace
-namespace {
-#define VERTICAL "VerticalShift"
-#define ROTATION "RotateAroundSample"
-} // anonymous namespace
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -62,7 +56,7 @@ void SpecularReflectionPositionCorrect2::init() {
                                              thetaValidator, Direction::Input),
       "Angle used to correct the detector component.");
 
-  const std::vector<std::string> correctionType{VERTICAL, ROTATION};
+  const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
   auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
       boost::make_shared<MandatoryValidator<std::string>>());
@@ -138,10 +132,10 @@ void SpecularReflectionPositionCorrect2::exec() {
   const double beamOffsetOld =
       sampleToDetector.scalar_prod(referenceFrame->vecPointingAlongBeam());
 
-  if (correctionType == VERTICAL) {
+  if (correctionType == "VerticalShift") {
     // Only shifting vertically, so the beam offset remains the same
     beamOffset = beamOffsetOld;
-  } else if (correctionType == ROTATION) {
+  } else if (correctionType == "RotateAroundSample") {
     // The radius for the rotation is the distance from the sample to
     // the detector in the Beam-Vertical plane
     const double upOffsetOld =
