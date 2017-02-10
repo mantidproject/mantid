@@ -69,6 +69,12 @@ class LoadMLZTestPerformance : public CxxTest::TestSuite {
 public:
   LoadMLZTestPerformance() : m_dataFile("TOFTOFTestdata.nxs") {}
 
+  static LoadMLZTestPerformance *createSuite() {
+    return new LoadMLZTestPerformance();
+  }
+
+  static void destroySuite(LoadMLZTestPerformance *suite) { delete suite; }
+
   void setUp() override {
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);

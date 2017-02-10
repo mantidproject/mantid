@@ -242,6 +242,14 @@ public:
 
 class LoadNexusMonitorsTestPerformance : public CxxTest::TestSuite {
 public:
+  static LoadNexusMonitorsTestPerformance *createSuite() {
+    return new LoadNexusMonitorsTestPerformance();
+  }
+
+  static void destroySuite(LoadNexusMonitorsTestPerformance *suite) {
+    delete suite;
+  }
+
   void setUp() override {
     ld.initialize();
     ld2.initialize();

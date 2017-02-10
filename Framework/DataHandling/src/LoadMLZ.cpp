@@ -24,6 +24,8 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
@@ -365,22 +367,17 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   }
 
   // Assign calculated bins to first X axis
-  m_localWorkspace->mutableX(0) = detectorTofBins;
+  BinEdges edges(std::move(detectorTofBins));
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(0));
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 
-      m_localWorkspace->mutableY(spec)
-          .assign(data_p, data_p + m_numberOfChannels);
-      // Assign Error
-      auto &E = m_localWorkspace->mutableE(spec);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     [](double dat) { return sqrt(dat); });
+      m_localWorkspace->setHistogram(
+          spec, edges, Counts(data_p, data_p + m_numberOfChannels));
 
       ++spec;
       progress.report();

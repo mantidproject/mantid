@@ -36,6 +36,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::HistogramData::BinEdges;
 
 /**
  * Calculate the confidence in the string value. This is used for file
@@ -299,10 +300,11 @@ void LoadNXSPE::exec() {
                                 itdataend, iterrorend;
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
+  BinEdges edges(std::move(energies));
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
-    outputWS->mutableX(i) = energies;
+    outputWS->setBinEdges(i, edges);
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       spectrumInfo.setMasked(i, true);
