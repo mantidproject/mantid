@@ -75,6 +75,10 @@ double DetectorInfo::l2(const size_t index) const {
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 
@@ -89,6 +93,10 @@ double DetectorInfo::twoTheta(const size_t index) const {
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
 double DetectorInfo::signedTwoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
   const auto samplePos = samplePosition();
   const auto beamLine = samplePos - sourcePosition();
 

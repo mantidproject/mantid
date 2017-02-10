@@ -71,13 +71,9 @@ bool SpectrumInfo::isMasked(const size_t index) const {
  */
 double SpectrumInfo::l2(const size_t index) const {
   double l2{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto detIndex : getDetectorIndices(index))
     l2 += m_detectorInfo.l2(detIndex);
-  }
-  return l2 / static_cast<double>(dets.size());
+  return l2 / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /** Returns the scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -86,18 +82,10 @@ double SpectrumInfo::l2(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
-  if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
-
   double twoTheta{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto detIndex : getDetectorIndices(index))
     twoTheta += m_detectorInfo.twoTheta(detIndex);
-  }
-  return twoTheta / static_cast<double>(dets.size());
+  return twoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /** Returns the signed scattering angle 2 theta in radians (angle w.r.t. to beam
@@ -106,30 +94,18 @@ double SpectrumInfo::twoTheta(const size_t index) const {
  * Throws an exception if the spectrum is a monitor.
  */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
-  if (isMonitor(index))
-    throw std::logic_error(
-        "Two theta (scattering angle) is not defined for monitors.");
-
   double signedTwoTheta{0.0};
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto detIndex : getDetectorIndices(index))
     signedTwoTheta += m_detectorInfo.signedTwoTheta(detIndex);
-  }
-  return signedTwoTheta / static_cast<double>(dets.size());
+  return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
-  const auto &dets = getDetectorVector(index);
-  for (const auto &det : dets) {
-    const auto &detIndex = m_detectorInfo.indexOf(det->getID());
-    m_detectorInfo.setCachedDetector(detIndex, det);
+  for (const auto detIndex : getDetectorIndices(index))
     newPos += m_detectorInfo.position(detIndex);
-  }
-  return newPos / static_cast<double>(dets.size());
+  return newPos / static_cast<double>(spectrumDefinition(index).size());
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
