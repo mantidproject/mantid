@@ -28,7 +28,7 @@ using namespace API;
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
+      m_writeID(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -69,12 +69,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -123,7 +120,6 @@ void SaveAscii2::exec() {
   m_ws = getProperty("InputWorkspace");
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
-  m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
@@ -306,13 +302,9 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
       file << pointsSpec[bin];
     }
 
-    else if (m_isHistogram & m_isCommonBins) // bin centres,
+    else if (m_isCommonBins) // bin centres,
     {
       file << points0[bin];
-    }
-
-    else {
-      file << m_ws->x(0)[bin];
     }
     file << m_sep;
     file << m_ws->y(*spectraItr)[bin];
@@ -347,15 +339,12 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   auto points0 = m_ws->points(0);
   auto pointsSpec = m_ws->points(spectraIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
-    if (m_isHistogram & m_isCommonBins) // bin centres,
+    if (m_isCommonBins) // bin centres,
     {
       file << points0[bin];
     } else if (!m_isCommonBins) // checking for ragged workspace
     {
       file << pointsSpec[bin];
-    } else // data points
-    {
-      file << m_ws->x(0)[bin];
     }
     file << m_sep;
     file << m_ws->y(spectraIndex)[bin];
