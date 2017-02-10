@@ -19,6 +19,7 @@
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 from __future__ import (absolute_import, division, print_function)
 
+
 class FittingTestProblem(object):
     """
     Definition of a fitting test problem, normally loaded from a problem definition file.

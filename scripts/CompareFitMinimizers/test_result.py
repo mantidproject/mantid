@@ -19,6 +19,7 @@
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 from __future__ import (absolute_import, division, print_function)
 
+
 class FittingTestResult(object):
     """
     Minimal definition of a class to hold results from a fitting problem test.
