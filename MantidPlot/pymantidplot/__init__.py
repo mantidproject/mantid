@@ -10,31 +10,36 @@ try:
 except ImportError:
     raise ImportError('The "mantidplot" module can only be used from within MantidPlot.')
 
+# -------------------------- WARNING!!!!!! -------------------------------
+# Be careful about adding/changing imports here. This whole module gets imported into the MantidPlot
+# namespace wholesale. This means that names that we don't want there should be hidden with the _ prefix.
+# User scripts may be accidentally dependent on these names without knowing about it and we shouldn't
+# break those.
 import pymantidplot.proxies as proxies
 from pymantidplot.proxies import threadsafe_call, new_proxy, getWorkspaceNames
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
-import collections
+from PyQt4.QtCore import Qt # noqa
+import collections as _collections
 import os
 import time
 import mantid.api
 import mantidqtpython
-from mantidqtpython import GraphOptions
+from mantidqtpython import GraphOptions # noqa
 # historical names in MantidPlot
 from mantidqtpython import MantidQt as _MantidQt
 from six.moves import range
-InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
-InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 
-# Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
-from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView)
+from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView) # noqa
 
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
-from _qti import app
+from _qti import app # noqa
 
-
+# Aliases
+# Import into the global namespace qti classes that:
+InstrumentViewMaskTab = _MantidQt.MantidWidgets.InstrumentWidgetMaskTab
+InstrumentViewPickTab = _MantidQt.MantidWidgets.InstrumentWidgetPickTab
 # Alias threadsafe_call so users have a more understandable name
 gui_cmd = threadsafe_call
 
@@ -208,7 +213,7 @@ def newTiledWindow(name=None, sources = None, ncols = None):
     if ncols is None:
         ncols = proxy.columnCount()
 
-    if not sources is None:
+    if sources is not None:
         row = 0
         col = 0
         for source in sources:
@@ -261,7 +266,7 @@ def plotSpectrum(source, indices, distribution = mantidqtpython.MantidQt.Distrib
                                  " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
 
     # Unwrap the window object, if any specified
-    if window != None:
+    if window is not None:
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
@@ -358,7 +363,7 @@ def plot2D(source, style=DEFAULT_2D_STYLE, window=None):
         raise ValueError("No workspace names given to plot")
 
     # Unwrap the window object, if any specified
-    if window != None:
+    if window is not None:
         window = window._getHeldObject()
 
     handles = []
@@ -419,7 +424,7 @@ def plotMD(source, plot_axis=-2, normalization=DEFAULT_MD_NORMALIZATION, error_b
                     "Incorrect axis index given for workspace '%s': %d, should be < %d" % (name, plot_axis, max_axis))
 
     # Unwrap the window object, if any specified
-    if window != None:
+    if window is not None:
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotMDList, workspace_names, plot_axis, normalization,
@@ -432,7 +437,6 @@ def fitBrowser():
     """
     Access the fit browser.
     """
-    import mantidqtpython
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 
@@ -475,7 +479,7 @@ def plotBin(source, indices, error_bars=False, type=-1, window=None, clearWindow
                                  " number of bins in this workspace - 1 (%d)" % (name, idx, max_bin))
 
     # Unwrap the window object, if any specified
-    if window != None:
+    if window is not None:
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
@@ -502,11 +506,11 @@ def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
         A string representation of the stem plot
     """
     # Turn the optional arguments into the magic numbers that the C++ expects
-    if power == None:
+    if power is None:
         power = 1001
-    if startPoint == None:
+    if startPoint is None:
         startPoint = 0
-    if endPoint == None:
+    if endPoint is None:
         endPoint = -1
 
     if isinstance(source, proxies.QtProxyObject):
@@ -723,6 +727,7 @@ InstrumentWidgetPickTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidget
 InstrumentWidgetMaskTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetMaskTab
 InstrumentWidgetTreeTab = mantidqtpython.MantidQt.MantidWidgets.InstrumentWidgetTreeTab
 
+
 def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     """Create an instrument view window based on the given workspace.
 
@@ -737,6 +742,7 @@ def getInstrumentView(name, tab=InstrumentWidget.RENDER):
     if name not in ads:
         raise ValueError("Workspace '%s' does not exist" % name)
     return new_proxy(proxies.InstrumentView, _qti.app.mantidUI.getInstrumentView, name, tab)
+
 
 def importMatrixWorkspace(name, firstIndex=None, lastIndex=None, showDialog=False, visible=False):
     """Create a MantidMatrix object from the named workspace.
@@ -796,7 +802,9 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
     Optional Keyword Args:
         label :: label for the window title
         xydim :: indexes or names of the dimensions to plot, as an (X,Y) list or tuple. See SliceViewer::setXYDim()
-        slicepoint :: list with the slice point in each dimension.  Must be the same length as the number of dimensions of the workspace. See SliceViewer::setSlicePoint()
+        slicepoint :: list with the slice point in each dimension.
+                      Must be the same length as the number of dimensions of the workspace.
+                      See SliceViewer::setSlicePoint()
         colormin :: value of the minimum color in the scale. See SliceViewer::setColorScaleMin()
         colormax :: value of the maximum color in the scale. See SliceViewer::setColorScaleMax()
         colorscalelog :: value of the maximum color in the scale. See SliceViewer::setColorScaleLog()
@@ -923,10 +931,9 @@ DistrFlag.DistrDefault = mantidqtpython.MantidQt.DistributionDefault
 DistrFlag.DistrTrue = mantidqtpython.MantidQt.DistributionTrue
 DistrFlag.DistrFalse = mantidqtpython.MantidQt.DistributionFalse
 
+
 # -----------------------------------------------------------------------------
 # --------------------------- "Private" functions -----------------------------
-# -----------------------------------------------------------------------------
-
 # -----------------------------------------------------------------------------
 def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
                     colormin=None, colormax=None, colorscalelog=False,
@@ -953,14 +960,14 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
 
     sv = threadsafe_call(svw.getSlicer)
     # --- X/Y Dimensions ---
-    if (not xydim is None):
+    if (xydim is not None):
         if len(xydim) != 2:
             raise Exception("You need to specify two values in the 'xydim' parameter")
         else:
             threadsafe_call(sv.setXYDim, xydim[0], xydim[1])
 
     # --- Slice point ---
-    if not slicepoint is None:
+    if slicepoint is not None:
         for d in range(len(slicepoint)):
             try:
                 val = float(slicepoint[d])
@@ -973,18 +980,20 @@ def __doSliceViewer(wsname, label="", xydim=None, slicepoint=None,
     threadsafe_call(sv.setNormalization, normalization)
 
     # --- Color scale ---
-    if (not colormin is None) and (not colormax is None):
+    if (colormin is not None) and (colormax is not None):
         threadsafe_call(sv.setColorScale, colormin, colormax, colorscalelog)
     else:
-        if (not colormin is None): threadsafe_call(sv.setColorScaleMin, colormin)
-        if (not colormax is None): threadsafe_call(sv.setColorScaleMax, colormax)
+        if colormin is not None:
+            threadsafe_call(sv.setColorScaleMin, colormin)
+        if colormax is not None:
+            threadsafe_call(sv.setColorScaleMax, colormax)
     try:
         threadsafe_call(sv.setColorScaleLog, colorscalelog)
     except:
         print("Log color scale not possible.")
 
     # --- XY limits ---
-    if not limits is None:
+    if limits is not None:
         threadsafe_call(sv.setXYLimits, limits[0], limits[1], limits[2], limits[3])
 
     return svw
@@ -995,7 +1004,7 @@ def get_screenshot_dir():
     or NONE if not set """
     expected_env_var = 'MANTID_SCREENSHOT_REPORT'
     dest = os.getenv(expected_env_var)
-    if not dest is None:
+    if dest is not None:
         # Create the report directory if needed
         if not os.path.exists(dest):
             os.mkdir(dest)
@@ -1086,7 +1095,7 @@ def screenshot(widget, filename, description, png_exists=False):
     :param png_exists: if True, then the 'filename' already exists. Don't grab a screenshot, but add to the report.
     """
     dest = get_screenshot_dir()
-    if not dest is None:
+    if dest is not None:
         report = os.path.join(dest, "index.html")
 
         if png_exists:
@@ -1148,7 +1157,7 @@ def __getWorkspaceIndices(source):
                 index_list.append(int(cleaned))
             except ValueError:
                 continue
-    elif isinstance(source, collections.Iterable):
+    elif isinstance(source, _collections.Iterable):
         index_list = list(source)
     elif isinstance(source, int):
         index_list = [source]
@@ -1236,7 +1245,7 @@ def __checkPlotSliceWorkspaces(ws_names):
 # Creates and shows the detector table
 def createDetectorTable(source):
     try:
-        import mantidqtpython
+        import mantidqtpython # noqa
     except:
         print("Could not find module mantidqtpython. Cannot open the detector table.")
         return
@@ -1248,7 +1257,7 @@ def createDetectorTable(source):
     else:
         return new_proxy(proxies.MDIWindow, _qti.app.mantidUI.createDetectorTable, workspace_names[0])
 
-# -----------------------------------------------------------------------------
+
 def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.DistributionDefault, error_bars=False, window=None):
     """Open a tiled plot.
 
@@ -1293,7 +1302,7 @@ def plotSubplots(source, indices, distribution = mantidqtpython.MantidQt.Distrib
                                  " number of spectra in this workspace - 1 (%d)" % (name, idx, max_spec))
 
     # Unwrap the window object, if any specified
-    if window != None:
+    if window is not None:
         window = window._getHeldObject()
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plotSubplots,

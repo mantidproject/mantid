@@ -3,7 +3,6 @@ Test of basic 1D plotting methods in MantidPlot
 """
 import mantidplottests
 from mantidplottests import *
-import time
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -20,7 +19,10 @@ X = np.append(X1, X2)
 Y = np.append(Y1, Y2)
 E = np.sqrt(Y)
 
-CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
+CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E),
+                NSpec=2, UnitX="TOF", YUnitLabel="Counts",
+                WorkspaceTitle="Faked data Workspace")
+
 
 class MantidPlot1DPlotTest(unittest.TestCase):
 
@@ -30,13 +32,13 @@ class MantidPlot1DPlotTest(unittest.TestCase):
     def tearDown(self):
         """Clean up by closing the created window """
         if hasattr(self, "g") and self.g is not None:
-          self.g.confirmClose(False)
-          self.g.close()
+            self.g.confirmClose(False)
+            self.g.close()
         try:
-          self.t.confirmClose(False)
-          self.t.close()
+            self.t.confirmClose(False)
+            self.t.close()
         except AttributeError:
-          pass
+            pass
         QtCore.QCoreApplication.processEvents()
 
     def test_plotSpectrum_errorBars(self):
@@ -119,7 +121,9 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         self.g = g
         l = g.activeLayer() # Plot columns 2, 3 and 4
         for i in range(0, l.numCurves()):
-            l.setCurveLineColor(i, 1 + i) # Curve color is defined as an integer value. Alternatively, the 2nd argument can be of type QtGui.QColor.
+            # Curve color is defined as an integer value. Alternatively, the
+            # 2nd argument can be of type QtGui.QColor.
+            l.setCurveLineColor(i, 1 + i)
             l.setCurveLineWidth(i, 0.5 + 2*i)
 
             l.setCurveLineStyle(1, QtCore.Qt.DotLine)
