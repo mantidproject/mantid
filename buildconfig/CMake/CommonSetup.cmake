@@ -275,7 +275,7 @@ else ()
 endif ()
 
 # Some unit tests need GMock/GTest
-find_package ( GMock )
+include ( GoogleTest )
 
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
