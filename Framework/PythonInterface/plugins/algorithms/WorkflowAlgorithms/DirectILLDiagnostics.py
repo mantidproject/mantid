@@ -283,17 +283,6 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc="Width of the elastic peak in multiples " +
                                  " of 'Sigma' in the EPP table.")
-        self.declareProperty(name=common.PROP_INDEX_TYPE,
-                             defaultValue=common.INDEX_TYPE_WS_INDEX,
-                             validator=StringListValidator([
-                                 common.INDEX_TYPE_WS_INDEX,
-                                 common.INDEX_TYPE_SPECTRUM_NUMBER,
-                                 common.INDEX_TYPE_DET_ID]),
-                             direction=Direction.Input,
-                             doc='Type of numbers in ' +
-                                 common.PROP_MON_INDEX +
-                                 ' and ' + common.PROP_DETS_AT_L2 +
-                                 ' properties.')
         self.declareProperty(IntArrayProperty(name=common.PROP_DETS_AT_L2,
                                               values='',
                                               validator=positiveIntArray,
@@ -382,28 +371,15 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
     def _applyUserMask(self, mainWS, wsNames, wsCleanup, algorithmLogging):
         """Apply user mask to a workspace."""
         userMask = self.getProperty(common.PROP_USER_MASK).value
-        indexType = self.getProperty(common.PROP_INDEX_TYPE).value
         maskComponents = self.getProperty(common.PROP_USER_MASK_COMPONENTS).value
         maskedWSName = wsNames.withSuffix('masked')
         maskedWS = CloneWorkspace(InputWorkspace=mainWS,
                                   OutputWorkspace=maskedWSName,
                                   EnableLogging=algorithmLogging)
-        if indexType == common.INDEX_TYPE_DET_ID:
-            MaskDetectors(Workspace=maskedWS,
-                          DetectorList=userMask,
-                          ComponentList=maskComponents,
-                          EnableLogging=algorithmLogging)
-        elif indexType == common.INDEX_TYPE_SPECTRUM_NUMBER:
-            MaskDetectors(Workspace=maskedWS,
-                          SpectraList=userMask,
-                          ComponentList=maskComponents,
-                          EnableLogging=algorithmLogging)
-        elif indexType == common.INDEX_TYPE_WS_INDEX:
-            MaskDetectors(Workspace=maskedWS,
-                          WorkspaceIndexList=userMask,
-                          ComponentList=maskComponents,
-                          EnableLogging=algorithmLogging)
-        wsCleanup.cleanup(mainWS)
+        MaskDetectors(Workspace=maskedWS,
+                      DetectorList=userMask,
+                      ComponentList=maskComponents,
+                      EnableLogging=algorithmLogging)
         return maskedWS
 
     def _detDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
@@ -418,8 +394,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
         bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
         detectorsAtL2 = self.getProperty(common.PROP_DETS_AT_L2).value
-        indexType = self.getProperty(common.PROP_INDEX_TYPE).value
-        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS, indexType)
+        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS)
         diagnosticsReportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
         bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
         eppWS = self.getProperty(common.PROP_EPP_WS).value

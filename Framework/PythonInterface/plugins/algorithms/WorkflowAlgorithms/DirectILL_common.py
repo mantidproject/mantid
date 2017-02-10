@@ -225,7 +225,7 @@ class Report:
                 log.error(entry.contents())
 
 
-def convertToWorkspaceIndex(i, ws, indexType):
+def convertToWorkspaceIndex(i, ws, indexType = INDEX_TYPE_DET_ID):
     """Convert given number to workspace index."""
     if indexType == INDEX_TYPE_WS_INDEX:
         return i
@@ -237,7 +237,7 @@ def convertToWorkspaceIndex(i, ws, indexType):
                 return j
         raise RuntimeError('No workspace index found for detector id {0}'.format(i))
 
-def convertListToWorkspaceIndices(indices, ws, indexType):
+def convertListToWorkspaceIndices(indices, ws, indexType = INDEX_TYPE_DET_ID):
     """Convert a list of spectrum nubmers/detector IDs to workspace indices."""
     return [convertToWorkspaceIndex(i, ws, indexType) for i in indices]
 

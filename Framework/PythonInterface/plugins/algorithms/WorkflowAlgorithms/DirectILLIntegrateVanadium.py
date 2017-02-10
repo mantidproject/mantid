@@ -72,12 +72,6 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
             optional=PropertyMode.Mandatory,
             direction=Direction.Input),
             doc='Input workspace.')
-        self.declareProperty(ITableWorkspaceProperty(
-            name=common.PROP_EPP_WS,
-            defaultValue='',
-            direction=Direction.Input,
-            optional=PropertyMode.Mandatory),
-            doc='Table workspace containing results from the FindEPP algorithm.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
@@ -97,6 +91,12 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
+        self.declareProperty(ITableWorkspaceProperty(
+            name=common.PROP_EPP_WS,
+            defaultValue='',
+            direction=Direction.Input,
+            optional=PropertyMode.Mandatory),
+            doc='Table workspace containing results from the FindEPP algorithm.')
         self.declareProperty(name=common.PROP_TEMPERATURE,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,

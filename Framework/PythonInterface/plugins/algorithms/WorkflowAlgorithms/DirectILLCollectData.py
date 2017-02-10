@@ -307,17 +307,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              validator=IntBoundedValidator(lower=0),
                              direction=Direction.Input,
                              doc='The bin number of the elastic channel.')
-        self.declareProperty(name=common.PROP_INDEX_TYPE,
-                             defaultValue=common.INDEX_TYPE_WS_INDEX,
-                             validator=StringListValidator([
-                                 common.INDEX_TYPE_WS_INDEX,
-                                 common.INDEX_TYPE_SPECTRUM_NUMBER,
-                                 common.INDEX_TYPE_DET_ID]),
-                             direction=Direction.Input,
-                             doc='Type of numbers in ' +
-                                 common.PROP_MON_INDEX +
-                                 ' and ' + common.PROP_DETS_AT_L2 +
-                                 ' properties.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -421,18 +410,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             eiInWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
             if not eiInWS:
                 eiCalibrationDets = self.getProperty(common.PROP_DETS_AT_L2).value
-                indexType = self.getProperty(common.PROP_INDEX_TYPE).value
-                eiCalibrationDets = common.convertListToWorkspaceIndices(eiCalibrationDets, mainWS, indexType)
-                if self.getProperty(common.PROP_MON_INDEX).isDefault:
-                    NON_RECURSIVE = False  # Prevent recursive calls in the following. 
-                    if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
-                        raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
-                                           common.PROP_MON_INDEX + ' must be specified.')
-                    monIndex = monWS.getInstrument().getIntParameter('default-incident-monitor-spectrum', NON_RECURSIVE)[0]
-                    monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
-                else:
-                    monIndex = self.getProperty(common.PROP_MON_INDEX).value
-                    monIndex = common.convertToWorkspaceIndex(monIndex, monWS, indexType)
+                eiCalibrationDets = common.convertListToWorkspaceIndices(eiCalibrationDets, mainWS)
+                monIndex = self._monitorIndex()
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, eiCalibrationDets, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:
@@ -465,8 +444,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 return mainWS
             index = mainWS.run().getLogData('Detector.elasticpeak').value
         detectorsAtL2 = self.getProperty(common.PROP_DETS_AT_L2).value
-        indexType = self.getProperty(common.PROP_INDEX_TYPE).value
-        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS, indexType)
+        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS)
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
                                      IndexType='Workspace Index',
@@ -537,6 +515,19 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.protect(mainWS)
         return mainWS
 
+    def _monitorIndex(self)
+        if self.getProperty(common.PROP_MON_INDEX).isDefault:
+            NON_RECURSIVE = False  # Prevent recursive calls in the following. 
+            if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
+                raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
+                                   common.PROP_MON_INDEX + ' must be specified.')
+            monIndex = monWS.getInstrument().getIntParameter('default-incident-monitor-spectrum', NON_RECURSIVE)[0]
+            monIndex = common.convertToWorkspaceIndex(monIndex, monWS, common.INDEX_TYPE_SPECTRUM_NUMBER)
+        else:
+            monIndex = self.getProperty(common.PROP_MON_INDEX).value
+            monIndex = common.convertToWorkspaceIndex(monIndex, monWS)
+        return monIndex
+
     def _normalize(self, mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging):
         """Normalize to monitor or measurement time."""
         normalisationMethod = self.getProperty(common.PROP_NORMALISATION).value
@@ -544,9 +535,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if normalisationMethod == common.NORM_METHOD_MON:
                 sigmaMultiplier = \
                     self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-                monIndex = self.getProperty(common.PROP_MON_INDEX).value
-                indexType = self.getProperty(common.PROP_INDEX_TYPE).value
-                monIndex = common.convertToWorkspaceIndex(monIndex, monWS, indexType)
+                monIndex = self._monitorIndex()
                 normalizedWS = _normalizeToMonitor(mainWS, monWS, monEPPWS, sigmaMultiplier, monIndex, wsNames, wsCleanup,
                                                    subalgLogging)
             elif normalisationMethod == common.NORM_METHOD_TIME:
