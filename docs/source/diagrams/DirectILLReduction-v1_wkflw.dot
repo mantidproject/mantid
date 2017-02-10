@@ -8,26 +8,26 @@ digraph DirectILLReduction {
     inputVana [label="IntegratedVanadiumWorkspace"]
     inputWS [label="InputWorkspace"]
     outputWS [label="OutputWorkspace"]
-    outputOptionalWS [label="OutputSofThetaEnergyWorkspace"]
-    qBinParams [label="q rebinning settings"]
     wRebinParams [label="Energy rebinning settings"]
   }
 
   subgraph decisions {
     $decision_style
     inputDiagnosticsGiven [label="DiagnosticsWorkspace given?"]
+    rebinEnabled [label="Energy rebinning enabled?"]
+    chooseVerticalUnits [label="Vertical axis units?"]
   }
 
   subgraph algorithms {
     $algorithm_style
     ApplyDiagnostics [label="Mask spectra"]
+    ConvertSpectrumAxis [label="ConvertSpectrumAxis"]
     ConvertToEnergy [label="Convert TOF to energy transfer"]
     CorrectKiKf [label="CorrectKiKf"]
     DetectorEfficiency [label="DetectorEfficiencyCorUser"]
     GroupDetectors [label="GroupDetectors"]
     Normalize [label="Divide"]
     Rebin [label="Rebin in energy"]
-    SofQW [label="SofQWNormalisedPolygon"]
   }
 
   subgraph values {
@@ -42,12 +42,14 @@ digraph DirectILLReduction {
   inputVana -> Normalize
   Normalize -> ConvertToEnergy
   ConvertToEnergy -> CorrectKiKf
-  CorrectKiKf -> Rebin
-  wRebinParams -> Rebin
-  Rebin -> DetectorEfficiency
+  CorrectKiKf -> DetectorEfficiency
   DetectorEfficiency -> GroupDetectors
-  GroupDetectors -> outputOptionalWS
-  GroupDetectors -> SofQW
-  qBinParams -> SofQW
-  SofQW -> outputWS
+  GroupDetectors -> rebinEnabled
+  rebinEnabled -> chooseVerticalUnits [label="no"]
+  rebinEnabled -> Rebin [label="yes"]
+  wRebinParams -> Rebin
+  Rebin -> chooseVerticalUnits
+  chooseVerticalUnits -> outputWS [label="Spectrum Number"]
+  chooseVerticalUnits -> ConvertSpectrumAxis [label="Scattering Angle"]
+  ConvertSpectrumAxis -> outputWS
 }
