@@ -185,13 +185,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
-        self.declareProperty(MatrixWorkspaceProperty(
-            name=common.PROP_VANA_WS,
-            defaultValue='',
-            validator=inputWorkspaceValidator,
-            direction=Direction.Input,
-            optional=PropertyMode.Optional),
-            doc='Reduced vanadium workspace.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
                                                defaultValue='',
                                                direction=Direction.Output),
@@ -211,6 +204,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
+        self.declareProperty(MatrixWorkspaceProperty(
+            name=common.PROP_VANA_WS,
+            defaultValue='',
+            validator=inputWorkspaceValidator,
+            direction=Direction.Input,
+            optional=PropertyMode.Optional),
+            doc='Reduced vanadium workspace.')
+        self.declareProperty(MatrixWorkspaceProperty(
+            name=common.PROP_DIAGNOSTICS_WS,
+            defaultValue='',
+            direction=Direction.Input,
+            optional=PropertyMode.Mandatory),
+            doc='Detector diagnostics workspace obtained from another ' +
+                'reduction run.')
         self.declareProperty(name=common.PROP_REBINNING_MODE_W,
                              defaultValue=common.REBIN_AUTO_ELASTIC_PEAK,
                              validator=StringListValidator([
@@ -250,11 +257,27 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_OUTPUT_THETA_W_WS,
                               common.PROPGROUP_OPTIONAL_OUTPUT)
 
-
     def validateInputs(self):
         """Check for issues with user input."""
         # TODO
         return dict()
+
+    def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Mask workspace according to diagnostics."""
+        diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
+        if not diagnosticsWS:
+            return mainWS
+        maskedWSName = wsNames.withSuffix('diagnostics_applied')
+        maskedWS = CloneWorkspace(InputWorkspace=mainWS,
+                                  OutputWorkspace=maskedWSName,
+                                  EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
+        MaskDetectors(Workspace=maskedWS,
+                      MaskedWorkspace=diagnosticsWS,
+                      EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return maskedWS
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""

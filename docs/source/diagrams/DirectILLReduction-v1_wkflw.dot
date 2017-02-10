@@ -4,6 +4,7 @@ digraph DirectILLReduction {
 
   subgraph params {
     $param_style
+    inputDiagnostics [label="DiagnosticsWorkspace"]
     inputVana [label="IntegratedVanadiumWorkspace"]
     inputWS [label="InputWorkspace"]
     outputWS [label="OutputWorkspace"]
@@ -14,10 +15,12 @@ digraph DirectILLReduction {
 
   subgraph decisions {
     $decision_style
+    inputDiagnosticsGiven [label="DiagnosticsWorkspace given?"]
   }
 
   subgraph algorithms {
     $algorithm_style
+    ApplyDiagnostics [label="Mask spectra"]
     ConvertToEnergy [label="Convert TOF to energy transfer"]
     CorrectKiKf [label="CorrectKiKf"]
     DetectorEfficiency [label="DetectorEfficiencyCorUser"]
@@ -31,8 +34,12 @@ digraph DirectILLReduction {
   $value_style
   }
 
+  inputWS -> inputDiagnosticsGiven
+  inputDiagnosticsGiven -> Normalize [label="no"]
+  inputDiagnosticsGiven -> ApplyDiagnostics [label="yes"]
+  inputDiagnostics -> ApplyDiagnostics
+  ApplyDiagnostics -> Normalize
   inputVana -> Normalize
-  inputWS -> Normalize
   Normalize -> ConvertToEnergy
   ConvertToEnergy -> CorrectKiKf
   CorrectKiKf -> Rebin

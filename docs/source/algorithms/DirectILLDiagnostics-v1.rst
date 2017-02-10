@@ -9,14 +9,14 @@
 Description
 -----------
 
-This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*. The output is a mask workspace which can be further fed to :ref:`DirectILLApplyDiagnostics <algm-DirectILLApplyDiagnostics>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
+This algorithm performs detector diagnostics for the workspace provided by *InputWorkspace*. The output is a mask workspace which can be further fed to :ref:`DirectILLReduction <algm-DirectILLReduction>` to mask the detectors diagnosed as bad. Optionally, a user specified hard mask given by *MaskedDetectors* or *MaskedComponents* can be added to the diagnostics mask. Algorithm's workflow diagram is shown below:
 
 .. diagram:: DirectILLDiagnostics-v1_wkflw.dot
 
 Diagnostics performed
 #####################
 
-The algorithm does two test for each spectrum in *InputWorkspace*: elastic peak diagnostics and flat background diagnostics. Roughly speaking, both tests calculate the median of the test values over all spectra, then compare the individual values to the median. For more detailed information, see :ref:`MedianDetectorTest <algm-MedianDetectorTest>`.
+The algorithm does two test for each spectrum in *InputWorkspace*: elastic peak diagnostics and flat background diagnostics. Basically both tests calculate the median of the test values over all spectra, then compare the individual values to the median. For more detailed information, see :ref:`MedianDetectorTest <algm-MedianDetectorTest>`.
 
 Elastic peak diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^
