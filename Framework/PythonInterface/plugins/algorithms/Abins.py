@@ -7,6 +7,7 @@ except ImportError:
 
 import numpy as np
 import six
+import os
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
 # noinspection PyProtectedMember
@@ -128,7 +129,7 @@ class Abins(PythonAlgorithm):
 
         dft_program = self.getProperty("DFTprogram").value
         phonon_filename = self.getProperty("PhononFile").value
-        output = input_file_validators[dft_program](filename=phonon_filename)
+        output = input_file_validators[dft_program](filename_full_path=phonon_filename)
         if output["Invalid"]:
             issues["PhononFile"] = output["Comment"]
 
@@ -628,7 +629,7 @@ class Abins(PythonAlgorithm):
         """
 
         unitx = mtd[wrk].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Loss", 'cm^-1')
+        unitx.setLabel("Energy Loss", 'cm<sup>-1</sup>')
 
         mtd[wrk].setYUnitLabel("S /Arbitrary Units")
         mtd[wrk].setYUnit("Arbitrary Units")
@@ -794,61 +795,54 @@ class Abins(PythonAlgorithm):
             if atoms_threads * q_threads > mp.cpu_count():
                 raise RuntimeError("User asked for more threads than available.")
 
-    def _validate_crystal_input_file(self, filename=None):
+    def _validate_crystal_input_file(self, filename_full_path=None):
         """
         Method to validate input file for CRYSTAL DFT program.
-        @param filename: name of file.
+        @param filename_full_path: full path of a file to check.
         @return: True if file is valid otherwise false.
         """
         logger.information("Validate CRYSTAL phonon file: ")
 
         output = {"Invalid": False, "Comment": ""}
-        msg_err = "Invalid %s file. " % filename
+        msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
-        # check name of file
-        if "." not in filename:
-            return dict(Invalid=True, Comment=msg_err + " One dot '.' is expected in the name of file! " + msg_rename)
-
-        if filename.count(".") != 1:
-            return dict(Invalid=True, Comment=msg_err + " Only one dot should be in the name of file! " + msg_rename)
-
-        if filename[filename.find(".") + 1:].lower() != "out":
-            return dict(Invalid=True, Comment=msg_err + " The expected extension of file is out "
-                                                        "(case of letter does not matter)! " + msg_rename)
-
+        # check  extension of a file
+        filename_ext = os.path.splitext(filename_full_path)[1]
+        if filename_ext != ".out":
+            return dict(Invalid=True,
+                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected."
+                                        + " The expected extension of file is .out . (found: " + filename_ext + ") "
+                                        + msg_rename)
         return output
 
-    def _validate_castep_input_file(self, filename=None):
+    def _validate_castep_input_file(self, filename_full_path=None):
         """
         Check if input DFT phonon file has been produced by CASTEP. Currently the crucial keywords in the first few
         lines are checked (to be modified if a better validation is found...)
 
 
-        :param filename: name of the file to check
+        :param filename_full_path: full path of a file to check
         :return: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
                  comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
         logger.information("Validate CASTEP phonon file: ")
 
         output = {"Invalid": False, "Comment": ""}
-        msg_err = "Invalid %s file. " % filename
+        msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
-        # check name of file
-        if "." not in filename:
-            return dict(Invalid=True, Comment=msg_err + " One dot '.' is expected in the name of file! " + msg_rename)
-
-        if filename.count(".") != 1:
-            return dict(Invalid=True, Comment=msg_err + " Only one dot should be in the name of file! " + msg_rename)
-
-        if filename[filename.find(".") + 1:].lower() != "phonon":
-            return dict(Invalid=True, Comment=msg_err + " The expected extension of file is phonon "
-                                                        "(case of letter does not matter)! " + msg_rename)
+        # check  extension of a file
+        filename_ext = os.path.splitext(filename_full_path)[1]
+        if filename_ext != ".phonon":
+            return dict(Invalid=True,
+                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected."
+                                        + " The expected extension of file is .phonon . (found: " + filename_ext + ") "
+                                        + msg_rename)
 
         # check a structure of the header part of file.
         # Here fortran convention is followed: case of letter does not matter
-        with open(filename) as castep_file:
+        with open(filename_full_path) as castep_file:
 
             line = self._get_one_line(castep_file)
             if not self._compare_one_line(line, "beginheader"):  # first line is BEGIN header

@@ -46,9 +46,10 @@ private:
   void exec() override;
 
   template <class T>
-  void convertEventList(int workspaceIndex, DataObjects::EventList &el);
+  void convertEventList(int workspaceIndex, const API::SpectrumInfo &specInfo,
+                        DataObjects::EventList &el);
 
-  void convertSpectrum(int workspaceIndex);
+  void convertSpectrum(const API::SpectrumInfo &specInfo, int workspaceIndex);
 
   /// The input MatrixWorkspace
   API::MatrixWorkspace_sptr m_inWS;

@@ -475,7 +475,7 @@ set ( TEST_FILES
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFITSTest.h
-	SaveFocussedXYETest.h
+	SaveFocusedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
@@ -488,6 +488,7 @@ set ( TEST_FILES
 	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
+	SaveOpenGenieAsciiTest.h
 	SavePARTest.h
 	SavePDFGuiTest.h
 	SavePHXTest.h

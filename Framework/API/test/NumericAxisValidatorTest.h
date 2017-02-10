@@ -19,7 +19,7 @@ public:
 
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     auto newAxis = new NumericAxis(2);
     ws->replaceAxis(1, newAxis);
     NumericAxisValidator validator;
@@ -28,7 +28,7 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     NumericAxisValidator validator;
     TS_ASSERT_EQUALS(
         validator.isValid(ws),

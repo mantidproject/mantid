@@ -30,11 +30,12 @@ User interface *HFIR 4Circle Reduction* has been modified to allow user to speci
 
 Engineering Diffraction
 -----------------------
+:ref:`algm-SaveOpenGenieAscii` has been rewritten and works with the analyze_scan procedure in OpenGenie. It should also work with other procedures that use a standard set of parameters.
 
 Powder Diffraction
 ------------------
 
-:ref:`algm-SNSPowderReduction` had an error in logic of subtracting the vanadium background. It was not being subtracted when ``PreserveEvents=True``.
+:ref:`algm-SNSPowderReduction` had an error in logic of subtracting the vanadium background. It was not being subtracted when ``PreserveEvents=True``. There is also a fix in reducing a series of runs from the powder diffraction gui.
 
 :ref:`algm-PDLoadCharacterizations` and
 :ref:`algm-PDDetermineCharacterizations` have been upgraded to support

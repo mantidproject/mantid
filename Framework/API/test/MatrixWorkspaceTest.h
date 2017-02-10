@@ -15,6 +15,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
@@ -169,6 +170,19 @@ public:
     TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0, 7}));
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
     TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+  }
+
+  void test_setIndexInfo_shares_spectrumDefinition() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    IndexInfo indices(3);
+    indices.setSpectrumNumbers({2, 4, 6});
+    indices.setDetectorIDs({{0}, {1}, {2, 3}});
+
+    auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
+    TS_ASSERT_THROWS_NOTHING(indices.setSpectrumDefinitions(defs));
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
+    TS_ASSERT_EQUALS(ws.indexInfo().spectrumDefinitions().get(), defs.get());
   }
 
   void test_toString_Produces_Expected_Contents() {
@@ -883,7 +897,7 @@ public:
 
   void test_getXIndex() {
     WorkspaceTester ws;
-    ws.init(1, 4, 3);
+    ws.initialize(1, 4, 3);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -997,7 +1011,7 @@ public:
 
   void test_getImage_0_width() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1011,7 +1025,7 @@ public:
 
   void test_getImage_wrong_start() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1027,7 +1041,7 @@ public:
 
   void test_getImage_wrong_stop() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1043,7 +1057,7 @@ public:
 
   void test_getImage_empty_set() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1057,7 +1071,7 @@ public:
 
   void test_getImage_non_rectangular() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1069,7 +1083,7 @@ public:
 
   void test_getImage_wrong_indexStart() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1082,7 +1096,7 @@ public:
                      std::runtime_error);
 
     WorkspaceTester wsh;
-    wsh.init(9, 1, 1);
+    wsh.initialize(9, 1, 1);
     startX = 2;
     endX = 2;
     TS_ASSERT_THROWS(wsh.getImageY(start, stop, width, startX, endX),
@@ -1091,7 +1105,7 @@ public:
 
   void test_getImage_wrong_indexEnd() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1104,7 +1118,7 @@ public:
                      std::runtime_error);
 
     WorkspaceTester wsh;
-    wsh.init(9, 2, 2);
+    wsh.initialize(9, 2, 2);
     auto &X1 = ws.dataX(0);
     X1[0] = 1.0;
     X1[1] = 2.0;
@@ -1116,7 +1130,7 @@ public:
 
   void test_getImage_single_bin_histo() {
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1151,7 +1165,7 @@ public:
 
   void test_getImage_single_bin_points() {
     WorkspaceTester ws;
-    ws.init(9, 1, 1);
+    ws.initialize(9, 1, 1);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
@@ -1185,7 +1199,7 @@ public:
 
   void test_getImage_multi_bin_histo() {
     WorkspaceTester ws;
-    ws.init(9, 4, 3);
+    ws.initialize(9, 4, 3);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1221,7 +1235,7 @@ public:
 
   void test_getImage_multi_bin_points() {
     WorkspaceTester ws;
-    ws.init(9, 3, 3);
+    ws.initialize(9, 3, 3);
     auto &X = ws.dataX(0);
     X[0] = 1.0;
     X[1] = 2.0;
@@ -1257,21 +1271,21 @@ public:
   void test_setImage_too_large() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(2, 2, 1);
+    ws.initialize(2, 2, 1);
     TS_ASSERT_THROWS(ws.setImageY(*image), std::runtime_error);
   }
 
   void test_setImage_not_single_bin() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(20, 3, 2);
+    ws.initialize(20, 3, 2);
     TS_ASSERT_THROWS(ws.setImageY(*image), std::runtime_error);
   }
 
   void test_setImageY() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(6, 2, 1);
+    ws.initialize(6, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageY(*image));
     TS_ASSERT_EQUALS(ws.readY(0)[0], 1);
     TS_ASSERT_EQUALS(ws.readY(1)[0], 2);
@@ -1284,7 +1298,7 @@ public:
   void test_setImageE() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(6, 2, 1);
+    ws.initialize(6, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageE(*image));
     TS_ASSERT_EQUALS(ws.readE(0)[0], 1);
     TS_ASSERT_EQUALS(ws.readE(1)[0], 2);
@@ -1297,7 +1311,7 @@ public:
   void test_setImageY_start() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageY(*image, 3));
     TS_ASSERT_EQUALS(ws.readY(3)[0], 1);
     TS_ASSERT_EQUALS(ws.readY(4)[0], 2);
@@ -1310,7 +1324,7 @@ public:
   void test_setImageE_start() {
     auto image = createImage(2, 3);
     WorkspaceTester ws;
-    ws.init(9, 2, 1);
+    ws.initialize(9, 2, 1);
     TS_ASSERT_THROWS_NOTHING(ws.setImageE(*image, 2));
     TS_ASSERT_EQUALS(ws.readE(2)[0], 1);
     TS_ASSERT_EQUALS(ws.readE(3)[0], 2);
@@ -1357,7 +1371,7 @@ public:
     const size_t numspec = 4;
     const size_t j = 3;
     const size_t k = j;
-    ws.init(numspec, j, k);
+    ws.initialize(numspec, j, k);
 
     double values[3] = {10, 11, 17};
     size_t workspaceIndexWithDx[3] = {0, 1, 2};
@@ -1482,7 +1496,7 @@ public:
 
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -1505,7 +1519,8 @@ public:
     m_sansBank = sansInstrument->getComponentByName("Bank1");
 
     numberOfHistograms = sansInstrument->getNumberDetectors();
-    m_workspaceSans.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspaceSans.initialize(numberOfHistograms, numberOfBins + 1,
+                               numberOfBins);
     m_workspaceSans.setInstrument(sansInstrument);
     m_workspaceSans.getAxis(0)->setUnit("TOF");
     m_workspaceSans.rebuildSpectraMapping();

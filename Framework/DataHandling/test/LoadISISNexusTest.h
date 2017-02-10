@@ -1552,6 +1552,19 @@ public:
     AnalysisDataService::Instance().remove("outWS_monitors");
   }
 
+  void test_that_multiple_time_regime_file_is_detected_and_loads() {
+    // Arrange
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.setRethrows(true);
+    ld.initialize();
+    ld.setPropertyValue("Filename", "LARMOR00009848.nxs");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+    ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+  }
+
   //------------------------------------------------------------------
   // Exceptions
   //------------------------------------------------------------------

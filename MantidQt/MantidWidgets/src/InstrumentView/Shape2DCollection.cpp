@@ -332,9 +332,17 @@ bool Shape2DCollection::selectAtXY(const QPointF &point, bool edit) {
 * @param y :: Mouse y coordinate.
 */
 void Shape2DCollection::deselectAtXY(int x, int y) {
-  QPointF p = m_transform.inverted().map(QPointF(x, y));
+  const QPointF p = m_transform.inverted().map(QPointF(x, y));
+  deselectAtXY(p);
+}
+
+/**
+* Deselect a shape under the cursor.
+* @param point :: point where peaks should be deselected
+*/
+void Shape2DCollection::deselectAtXY(const QPointF &point) {
   foreach (Shape2D *shape, m_shapes) {
-    bool picked = shape->selectAt(p);
+    bool picked = shape->selectAt(point);
     if (picked) {
       removeFromSelection(shape);
       return;

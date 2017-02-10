@@ -10,6 +10,7 @@ Tomographic reconstruction graphical user interface
 
 - Running local reconstructions is now possible, only a single reconstruction process can be run at any one time.
 - You can now use Auto-find button in the ROI tab to calculate the Center of Rotation for a sample using TomoPy. The calculated Center of Rotation is automatically loaded back into the GUI. Both the Center of Rotation relative to the crop and the full image are printed. Remote submission for finding the Center of Rotation can be done via the Custom Command tool.
+- Run and Setup tabs have now been merged together. Functionality for loading an image in the Run tab has been removed.
 
 Bug Fixes
 ---------

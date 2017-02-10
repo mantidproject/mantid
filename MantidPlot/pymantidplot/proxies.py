@@ -734,11 +734,12 @@ class SliceViewerWindowProxy(QtProxyObject):
         # Set the width.
         if not width is None:
             liner.setThickness(width)
+            liner.setPlanarWidth(width*0.5)
         else:
-            liner.setPlanarWidth(planar_width)
+            liner.setPlanarWidth(planar_width*0.5)
             if not thicknesses is None:
                 for d in xrange(len(thicknesses)):
-                    liner.setThickness(d, thicknesses[i])
+                    liner.setThickness(d, thicknesses[d])
         # Bins
         liner.setNumBins(num_bins)
         liner.apply()

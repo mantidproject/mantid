@@ -573,7 +573,7 @@ void createInstrumentForWorkspaceWithDistances(
   instrument->markAsSource(source);
 
   ObjComponent *sample = new ObjComponent("sample");
-  source->setPos(samplePosition);
+  sample->setPos(samplePosition);
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

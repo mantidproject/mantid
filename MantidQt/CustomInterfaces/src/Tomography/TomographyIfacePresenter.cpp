@@ -132,10 +132,6 @@ void TomographyIfacePresenter::notify(
     processVisualizeJobs();
     break;
 
-  case ITomographyIfacePresenter::ViewImg:
-    processViewImg();
-    break;
-
   case ITomographyIfacePresenter::AggregateEnergyBands:
     processAggregateEnergyBands();
     break;
@@ -872,39 +868,6 @@ bool TomographyIfacePresenter::usableEnergyBandsPaths(
 void TomographyIfacePresenter::processShutDown() {
   m_view->saveSettings();
   cleanup();
-}
-
-void TomographyIfacePresenter::processViewImg() {
-  std::string ip = m_view->showImagePath();
-  QString suf = QFileInfo(QString::fromStdString(ip)).suffix();
-  // This is not so great, as we check extensions and not really file
-  // content/headers, as it should be.
-  if ((0 == QString::compare(suf, "fit", Qt::CaseInsensitive)) ||
-      (0 == QString::compare(suf, "fits", Qt::CaseInsensitive))) {
-    WorkspaceGroup_sptr wsg = m_model->loadFITSImage(ip);
-    if (!wsg)
-      return;
-    MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
-    if (!ws)
-      return;
-
-    m_view->showImage(ws);
-
-    // clean-up container group workspace
-    if (wsg)
-      AnalysisDataService::Instance().remove(wsg->getName());
-  } else if ((0 == QString::compare(suf, "tif", Qt::CaseInsensitive)) ||
-             (0 == QString::compare(suf, "tiff", Qt::CaseInsensitive)) ||
-             (0 == QString::compare(suf, "png", Qt::CaseInsensitive))) {
-    m_view->showImage(ip);
-  } else {
-    m_view->userWarning(
-        "Failed to load image - format issue",
-        "Could not load image because the extension of the file " + ip +
-            ", suffix: " + suf.toStdString() +
-            " does not correspond to FITS or TIFF files.");
-  }
 }
 
 void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
