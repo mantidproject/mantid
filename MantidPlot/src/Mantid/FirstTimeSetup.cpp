@@ -175,7 +175,8 @@ void FirstTimeSetup::openManageUserDirectories() {
 }
 
 void FirstTimeSetup::openReleaseNotes() {
-  MantidQt::API::HelpWindow::showPage(this, Mantid::Kernel::MantidVersion::releaseNotes());
+  MantidQt::API::HelpWindow::showPage(
+      this, Mantid::Kernel::MantidVersion::releaseNotes());
 }
 
 void FirstTimeSetup::openSampleDatasets() {
