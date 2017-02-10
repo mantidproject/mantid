@@ -214,21 +214,71 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
 def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     """
-
+    construct a data as motor position vs counts, and do the fit with Gaussian + flat background
     :param motor_pos_dict:
     :param integrated_pt_dict:
     :return:
     """
-    # TODO/ISSUE/NOW - Implement!
+    # check inputs
+    assert isinstance(motor_pos_dict, dict), 'Input motor position {0} must be a dictionary but not a {1}.' \
+                                             ''.format(motor_pos_dict, type(motor_pos_dict))
+    assert isinstance(integrated_pt_dict, dict), 'Input integrated Pt. intensity {0} must be a dictionary but not a ' \
+                                                 '{1}.'.format(integrated_pt_dict, type(integrated_pt_dict))
+
+    # construct the data
+    list_motor_pos = list()
+    list_intensity = list()
+
+    pt_list = motor_pos_dict.keys()
+    pt_list.sort()
+
+    for pt in pt_list:
+        if pt not in integrated_pt_dict:
+            raise RuntimeError('Pt. {0} does not exist in integrated intensity dictionary {1}'
+                               ''.format(pt, integrated_pt_dict))
+        list_motor_pos.append(motor_pos_dict[pt])
+        list_intensity.append(integrated_pt_dict[pt])
+    # END-FOR
+
+    vec_x = numpy.array(list_motor_pos)
+    vec_y = numpy.array(list_intensity)
+    # try to avoid negative Y value
+    vec_e = numpy.ndarray(shape=(len(vec_x),), dtype='float')
+    for index in range(len(vec_y)):
+        if vec_y[index] > 1.:
+            vec_e[index] = numpy.sqrt(vec_y[index])
+        else:
+            vec_e[index] = 1.
+    # END-FOR
+
+    # fit
+    # TODO/ISSUE/NOW - Need to find out the return result
+    fit_gaussian_linear_background(vec_x, vec_y, vec_e)
 
     return
 
 def gaussian_peak_intensity(parameter_dict, error_dict):
     """
-
+    calculate peak intensity as a Gaussian
+    :param parameter_dict:
+    :param error_dict:
     :return:
     """
-    # TODO/ISSUE/NOW
+    # check input
+    assert isinstance(parameter_dict, dict), 'Parameters {0} must be given as a dictionary but not a {1}.' \
+                                             ''.format(parameter_dict, type(parameter_dict))
+    assert isinstance(error_dict, dict), 'Errors {0} must be given as a dictionary but not a {1}.' \
+                                         ''.format(error_dict, type(error_dict))
+
+    # get the parameters from the dictionary
+    try:
+        gauss_a = parameter_dict['A']
+        gauss_sigma = parameter_dict['Sigma']
+    except KeyError as key_err:
+        raise RuntimeError('Parameter dictionary must have "A", "Sigma" but now only {0}. Error message: {1}'
+                           ''.format(parameter_dict.keys(), key_err))
+
+    # TODO/ISSUE/NOW - Continue from here to calcualte Gaussian area
 
     return 1E20
 
@@ -453,10 +503,12 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step):
     :return:
     """
     # check
-    assert isinstance(pt_intensity_dict, dict), 'blabla'
-    assert isinstance(bg_value, float) and bg_value >= 0.
-
-    # calculate motor
+    assert isinstance(pt_intensity_dict, dict), 'Pt. intensities {0} should be a dictionary but not a {1}.' \
+                                                ''.format(pt_intensity_dict, type(pt_intensity_dict))
+    assert isinstance(bg_value, float) and bg_value >= 0., 'Background value {0} must be a non-negative float.' \
+                                                           ''.format(bg_value)
+    assert isinstance(motor_step, float) and motor_step > 0., 'Motor step {0} must be a positive float but not a' \
+                                                              ' {1}.'.format(motor_step, type(motor_step))
 
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
