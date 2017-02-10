@@ -8,7 +8,7 @@ set (gtest_version "1.7.0" CACHE INTERNAL "")
 option(USE_SYSTEM_GTEST "Use the system installed GTest - v${gtest_version}?" OFF)
 
 if(USE_SYSTEM_GTEST)
-  message(STATUS "Using system gtest")
+  message(STATUS "Using system gtest - currently untested")
   find_package(GTest ${gtest_version} EXACT REQUIRED)
   find_package(GMock ${gtest_version} EXACT REQUIRED)
 else()
@@ -51,6 +51,13 @@ else()
                            FOLDER "UnitTests/gmock" )
   endforeach()
 
+  set( GMOCK_LIB gmock )
+  set( GMOCK_LIB_DEBUG gmock )
+  set( GMOCK_LIBRARIES optimized ${GMOCK_LIB} debug ${GMOCK_LIB_DEBUG} )
+  set( GTEST_LIB gtest )
+  set( GTEST_LIB_DEBUG gtest )
+  set( GTEST_LIBRARIES optimized ${GTEST_LIB} debug ${GTEST_LIB_DEBUG} )
+
   find_path ( GMOCK_INCLUDE_DIR gmock/gmock.h
               PATHS ${CMAKE_BINARY_DIR}/googletest-src/gmock/include
               NO_DEFAULT_PATH )
@@ -58,5 +65,15 @@ else()
               PATHS ${CMAKE_BINARY_DIR}/googletest-src/gtest/include
               NO_DEFAULT_PATH )
 
-  mark_as_advanced ( GMOCK_INCLUDE_DIR GTEST_INCLUDE_DIR )
+
+  # handle the QUIETLY and REQUIRED arguments and set GMOCK_FOUND to TRUE if
+  # all listed variables are TRUE
+  include ( FindPackageHandleStandardArgs )
+  find_package_handle_standard_args( GMOCK DEFAULT_MSG GMOCK_INCLUDE_DIR
+    GMOCK_LIBRARIES )
+  find_package_handle_standard_args( GTEST DEFAULT_MSG GTEST_INCLUDE_DIR
+    GTEST_LIBRARIES )
+
+  mark_as_advanced ( GMOCK_INCLUDE_DIR GMOCK_LIB GMOCK_LIB_DEBUG )
+  mark_as_advanced ( GTEST_INCLUDE_DIR GTEST_LIB GTEST_LIB_DEBUG )
 endif()

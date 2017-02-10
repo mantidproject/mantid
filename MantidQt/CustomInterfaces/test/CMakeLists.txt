@@ -24,7 +24,7 @@ if ( CXXTEST_FOUND )
             ${POCO_LIBRARIES}
             ${QWT_LIBRARIES}
             ${QT_LIBRARIES}
-            gmock )
+            ${GMOCK_LIBRARIES} )
 
   add_dependencies( CustomInterfacesTest MDAlgorithms )
   # Test data

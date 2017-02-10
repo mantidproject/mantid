@@ -14,7 +14,7 @@ if ( CXXTEST_FOUND )
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            gmock
+            ${GMOCK_LIBRARIES}
             ${JSONCPP_LIBRARIES}
             ${TBB_LIBRARIES}
             ${TBB_MALLOC_LIBRARIES}

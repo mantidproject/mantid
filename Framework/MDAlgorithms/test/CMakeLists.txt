@@ -28,7 +28,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
-            gmock
+            ${GMOCK_LIBRARIES}
             ${NEXUS_LIBRARIES}
             ${HDF5_LIBRARIES} )
 

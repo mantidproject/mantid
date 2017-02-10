@@ -25,7 +25,7 @@ if ( CXXTEST_FOUND )
             ${QWT_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            gmock )
+            ${GMOCK_LIBRARIES} )
     add_dependencies( GUITests MantidQtAPITest )
 
     # Add to the 'UnitTests' group in VS

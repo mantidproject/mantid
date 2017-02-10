@@ -11,7 +11,7 @@ if ( CXXTEST_FOUND )
             ScriptRepository
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            gmock )
+            ${GMOCK_LIBRARIES} )
 
   add_dependencies ( FrameworkTests ScriptRepositoryTest )
   # Add to the 'FrameworkTests' group in VS

@@ -20,7 +20,7 @@ if ( CXXTEST_FOUND )
             ${GSL_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            gmock )
+            ${GMOCK_LIBRARIES} )
 
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS

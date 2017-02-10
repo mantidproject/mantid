@@ -267,7 +267,7 @@ target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  gmock
+  ${GMOCK_LIBRARIES}
   ${QWT_LIBRARIES}
   Qt4::QtCore
   )

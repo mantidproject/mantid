@@ -25,7 +25,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
-            gmock )
+            ${GMOCK_LIBRARIES} )
 
   add_dependencies ( FrameworkTests APITest )
   # Test data

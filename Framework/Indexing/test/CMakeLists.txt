@@ -5,7 +5,7 @@ if ( CXXTEST_FOUND )
   target_link_libraries( IndexingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
     Indexing
     ${Boost_LIBRARIES}
-    gmock )
+    ${GMOCK_LIBRARIES} )
 
   add_dependencies ( FrameworkTests IndexingTest )
   # Add to the 'FrameworkTests' group in VS

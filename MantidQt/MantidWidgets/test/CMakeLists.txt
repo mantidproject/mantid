@@ -19,7 +19,7 @@ if ( CXXTEST_FOUND )
             ${QT_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
-            gmock
+            ${GMOCK_LIBRARIES}
             )
 
   # Add to the 'UnitTests' group in VS
