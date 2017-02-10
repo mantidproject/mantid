@@ -39,22 +39,23 @@ namespace Kernel {
 */
 
 /// Converts Eigen::Vector3d to Kernel::V3D
-MANTID_KERNEL_DLL Kernel::V3D toV3D(const Eigen::Vector3d &vec) {
+MANTID_KERNEL_DLL inline Kernel::V3D toV3D(const Eigen::Vector3d &vec) {
   return Kernel::V3D(vec[0], vec[1], vec[2]);
 }
 
 /// Converts Eigen::Quaterniond to Kernel::Quat
-MANTID_KERNEL_DLL Kernel::Quat toQuat(const Eigen::Quaterniond &quat) {
+MANTID_KERNEL_DLL inline Kernel::Quat toQuat(const Eigen::Quaterniond &quat) {
   return Kernel::Quat(quat.w(), quat.x(), quat.y(), quat.z());
 }
 
 /// Converts Kernel::V3D to Eigen::Vector3d
-MANTID_KERNEL_DLL Eigen::Vector3d toVector3d(const Kernel::V3D &vec) {
+MANTID_KERNEL_DLL inline Eigen::Vector3d toVector3d(const Kernel::V3D &vec) {
   return Eigen::Vector3d(vec[0], vec[1], vec[2]);
 }
 
 /// Converts Kernel::Quat to Eigen::Quaterniond
-MANTID_KERNEL_DLL Eigen::Quaterniond toQuaterniond(const Kernel::Quat &quat) {
+MANTID_KERNEL_DLL inline Eigen::Quaterniond
+toQuaterniond(const Kernel::Quat &quat) {
   return Eigen::Quaterniond(quat.real(), quat.imagI(), quat.imagJ(),
                             quat.imagK());
 }
