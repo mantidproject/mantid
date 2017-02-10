@@ -2,7 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import DirectILLReduction_common as common
+import DirectILL_common as common
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty,
