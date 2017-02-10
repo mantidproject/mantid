@@ -141,8 +141,10 @@ Kernel::Quat Detector::getRelativeRot() const {
   if (m_map && m_map->hasDetectorInfo()) {
     auto inverseParentRot = getParent()->getRotation();
     inverseParentRot.inverse();
-    return Kernel::toQuat(m_map->detectorInfo().rotation(index())) *
-           inverseParentRot;
+    // Note the unusual order. This matches the convention in Component::getPos
+    // (child rotations first, then parent, then grandparent, ...).
+    return inverseParentRot *
+           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
   }
   return ObjComponent::getRelativeRot();
 }
