@@ -245,11 +245,8 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
 
 double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
                                    const SpectrumInfo &spectrumInfo) {
-  const Kernel::V3D &sourcePos = spectrumInfo.sourcePosition();
-  const Kernel::V3D &samplePos = spectrumInfo.samplePosition();
-  const Kernel::V3D &beamline = samplePos - sourcePos;
+
   const double l1 = spectrumInfo.l1();
-  double beamline_norm = 2. * l1;
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
@@ -260,9 +257,9 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
     Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-    double dspmap =
-        Conversion::tofToDSpacingFactor(l1, beamline, beamline_norm, samplePos,
-                                        instrument, detNumbers, offsets);
+    double dspmap = Conversion::tofToDSpacingFactor(
+        l1, spectrumInfo.l2(workspaceIndex),
+        spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
 
     // this is related to the reference tof
     double sqrtdmin =

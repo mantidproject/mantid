@@ -105,8 +105,7 @@ void CalculateDIFC::calculate(API::Progress &progress,
         offset = offsetsWS->getValue(detectorIDs[i], 0.);
 
       double difc = Geometry::Conversion::tofToDSpacingFactor(
-          l1, beamline, beamlineNorm, samplePos, detectorInfo.position(i),
-          offset);
+          l1, detectorInfo.l2(i), detectorInfo.twoTheta(i), offset);
       difc = 1. / difc; // tofToDSpacingFactor gives 1/DIFC
       localWS->setValue(detectorIDs[i], difc);
     }

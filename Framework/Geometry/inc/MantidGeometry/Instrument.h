@@ -323,17 +323,15 @@ private:
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
 namespace Conversion {
-MANTID_GEOMETRY_DLL double
-tofToDSpacingFactor(const double l1, const Kernel::V3D &beamline,
-                    const double beamline_norm, const Kernel::V3D &samplePos,
-                    const Kernel::V3D &detPos, const double offset);
+
+MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
+                                               const double theta,
+                                               const double offset);
 
 double MANTID_GEOMETRY_DLL
-tofToDSpacingFactor(const double l1, const Kernel::V3D &beamline,
-                    const double beamline_norm, const Kernel::V3D &samplePos,
-                    const boost::shared_ptr<const Instrument> &instrument,
-                    const std::vector<detid_t> &detectors,
-                    const std::map<detid_t, double> &offsets);
+    tofToDSpacingFactor(const double l1, const double l2, const double theta,
+                        const std::vector<detid_t> &detectors,
+                        const std::map<detid_t, double> &offsets);
 }
 
 } // namespace Geometry

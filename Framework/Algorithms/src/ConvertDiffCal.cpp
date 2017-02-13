@@ -104,17 +104,11 @@ double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index,
                      const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
-  double l1 = spectrumInfo.l1();
-  Kernel::V3D samplePos = spectrumInfo.samplePosition();
-  Kernel::V3D sourcePos = spectrumInfo.sourcePosition();
-  Kernel::V3D beamline = samplePos - sourcePos;
-  double beamline_norm = beamline.norm() * 2.0;
-  const Geometry::IDetector &detector = spectrumInfo.detector(index);
-
   // the factor returned is what is needed to convert TOF->d-spacing
   // the table is supposed to be filled with DIFC which goes the other way
   const double factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
-      l1, beamline, beamline_norm, samplePos, detector.getPos(), offset);
+      spectrumInfo.l1(), spectrumInfo.l2(index), spectrumInfo.twoTheta(index),
+      offset);
   return 1. / factor;
 }
 

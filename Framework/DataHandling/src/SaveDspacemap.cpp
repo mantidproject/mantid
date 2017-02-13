@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include <fstream>
 
@@ -54,6 +55,7 @@ void SaveDspacemap::CalculateDspaceFromCal(
   const char *filename = DFileName.c_str();
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
+  const auto &detectorInfo = offsetsWS->detectorInfo();
   double l1;
   Kernel::V3D beamline, samplePos;
   double beamline_norm;
@@ -70,6 +72,10 @@ void SaveDspacemap::CalculateDspaceFromCal(
     if (detectorID > maxdetID)
       maxdetID = detectorID;
   }
+
+  // detid_t maxdetID = allDetectors.rbegin()->first; // Maps are sorted.
+  // Largest key is the last.
+
   detid_t paddetID = detid_t(getProperty("PadDetID"));
   if (maxdetID < paddetID)
     maxdetID = paddetID;
@@ -86,9 +92,10 @@ void SaveDspacemap::CalculateDspaceFromCal(
     it = allDetectors.find(i);
     if (it != allDetectors.end()) {
       det = it->second;
+      const auto detectorIndex = detectorInfo.indexOf(i); // TODO. Needs fixing.
       factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
-          l1, beamline, beamline_norm, samplePos, det->getPos(),
-          offsetsWS->getValue(i, 0.0));
+          l1, detectorInfo.l2(detectorIndex),
+          detectorInfo.twoTheta(detectorIndex), offsetsWS->getValue(i, 0.0));
       // Factor of 10 between ISAW and Mantid
       factor *= 0.1;
       if (factor < 0)
