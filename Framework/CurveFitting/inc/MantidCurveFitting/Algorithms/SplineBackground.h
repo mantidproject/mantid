@@ -72,11 +72,12 @@ private:
 
   /// Struct holding various pointers required by GSL
   struct bSplinePointers {
-	  gsl_bspline_workspace *bw;
-	  gsl_vector *B;
-	  gsl_vector *c, *w, *x, *y;
-	  gsl_matrix *Z, *cov;
-	  gsl_multifit_linear_workspace *mw;
+    gsl_bspline_workspace *splineToProcess;
+    gsl_vector *inputSplineWs;
+    gsl_vector *xData, *yData;
+    gsl_vector *coefficients, *binWeights;
+    gsl_matrix *fittedWs, *covariance;
+    gsl_multifit_linear_workspace *weightedLinearFitWs;
   };
 
   bSplinePointers m_splinePointers{};

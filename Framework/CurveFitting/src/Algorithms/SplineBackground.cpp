@@ -69,7 +69,8 @@ void SplineBackground::exec() {
     // Create temporary alias to reduce the size of the call
     bSplinePointers &sp = m_splinePointers;
     // do the fit
-    gsl_multifit_wlinear(sp.Z, sp.w, sp.y, sp.c, sp.cov, &chisq, sp.mw);
+    gsl_multifit_wlinear(sp.fittedWs, sp.binWeights, sp.yData, sp.coefficients,
+                         sp.covariance, &chisq, sp.weightedLinearFitWs);
   }
 
   auto outWS = saveSplineOutput(inWS, spec);
@@ -112,9 +113,9 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
   for (size_t i = 0; i < yInputVals.size(); ++i) {
     if (hasMaskedBins && masked[i])
       continue;
-    gsl_vector_set(m_splinePointers.x, numUnmaskedBins, xInputVals[i]);
-    gsl_vector_set(m_splinePointers.y, numUnmaskedBins, yInputVals[i]);
-    gsl_vector_set(m_splinePointers.w, numUnmaskedBins,
+    gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xInputVals[i]);
+    gsl_vector_set(m_splinePointers.yData, numUnmaskedBins, yInputVals[i]);
+    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins,
                    eInputVals[i] > 0. ? 1. / (eInputVals[i] * eInputVals[i])
                                       : 0.);
 
@@ -139,40 +140,40 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   // Create an alias to tidy it up
   bSplinePointers &sp = m_splinePointers;
   // allocate a cubic bspline workspace (k = 4)
-  sp.bw = gsl_bspline_alloc(k, nbreak);
-  sp.B = gsl_vector_alloc(ncoeffs);
+  sp.splineToProcess = gsl_bspline_alloc(k, nbreak);
+  sp.inputSplineWs = gsl_vector_alloc(ncoeffs);
 
-  sp.x = gsl_vector_alloc(numBins);
-  sp.y = gsl_vector_alloc(numBins);
-  sp.Z = gsl_matrix_alloc(numBins, ncoeffs);
-  sp.c = gsl_vector_alloc(ncoeffs);
-  sp.w = gsl_vector_alloc(numBins);
-  sp.cov = gsl_matrix_alloc(ncoeffs, ncoeffs);
-  sp.mw = gsl_multifit_linear_alloc(numBins, ncoeffs);
+  sp.xData = gsl_vector_alloc(numBins);
+  sp.yData = gsl_vector_alloc(numBins);
+  sp.fittedWs = gsl_matrix_alloc(numBins, ncoeffs);
+  sp.coefficients = gsl_vector_alloc(ncoeffs);
+  sp.binWeights = gsl_vector_alloc(numBins);
+  sp.covariance = gsl_matrix_alloc(ncoeffs, ncoeffs);
+  sp.weightedLinearFitWs = gsl_multifit_linear_alloc(numBins, ncoeffs);
 }
 
 void SplineBackground::freeBSplinePointers() {
   // Create an alias to tidy it up
   bSplinePointers &sp = m_splinePointers;
 
-  gsl_bspline_free(sp.bw);
-  sp.bw = nullptr;
-  gsl_vector_free(sp.B);
-  sp.B = nullptr;
-  gsl_vector_free(sp.x);
-  sp.x = nullptr;
-  gsl_vector_free(sp.y);
-  sp.y = nullptr;
-  gsl_matrix_free(sp.Z);
-  sp.Z = nullptr;
-  gsl_vector_free(sp.c);
-  sp.c = nullptr;
-  gsl_vector_free(sp.w);
-  sp.w = nullptr;
-  gsl_matrix_free(sp.cov);
-  sp.cov = nullptr;
-  gsl_multifit_linear_free(sp.mw);
-  sp.mw = nullptr;
+  gsl_bspline_free(sp.splineToProcess);
+  sp.splineToProcess = nullptr;
+  gsl_vector_free(sp.inputSplineWs);
+  sp.inputSplineWs = nullptr;
+  gsl_vector_free(sp.xData);
+  sp.xData = nullptr;
+  gsl_vector_free(sp.yData);
+  sp.yData = nullptr;
+  gsl_matrix_free(sp.fittedWs);
+  sp.fittedWs = nullptr;
+  gsl_vector_free(sp.coefficients);
+  sp.coefficients = nullptr;
+  gsl_vector_free(sp.binWeights);
+  sp.binWeights = nullptr;
+  gsl_matrix_free(sp.covariance);
+  sp.covariance = nullptr;
+  gsl_multifit_linear_free(sp.weightedLinearFitWs);
+  sp.weightedLinearFitWs = nullptr;
 }
 
 MatrixWorkspace_sptr
@@ -192,9 +193,11 @@ SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
 
   for (size_t i = 0; i < yInputVals.size(); i++) {
     double xi = xInputVals[i];
-    gsl_bspline_eval(xi, m_splinePointers.B, m_splinePointers.bw);
-    gsl_multifit_linear_est(m_splinePointers.B, m_splinePointers.c,
-                            m_splinePointers.cov, &yi, &yerr);
+    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs,
+                     m_splinePointers.splineToProcess);
+    gsl_multifit_linear_est(m_splinePointers.inputSplineWs,
+                            m_splinePointers.coefficients,
+                            m_splinePointers.covariance, &yi, &yerr);
     yVals[i] = yi;
     eVals[i] = yerr;
   }
@@ -205,19 +208,20 @@ SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
 void SplineBackground::setupSpline(double xMin, double xMax, int numBins,
                                    int ncoeff) {
   /* use uniform breakpoints */
-  gsl_bspline_knots_uniform(xMin, xMax, m_splinePointers.bw);
+  gsl_bspline_knots_uniform(xMin, xMax, m_splinePointers.splineToProcess);
 
   /* construct the fit matrix X */
   for (int i = 0; i < numBins; ++i) {
-    double xi = gsl_vector_get(m_splinePointers.x, i);
+    double xi = gsl_vector_get(m_splinePointers.xData, i);
 
     /* compute B_j(xi) for all j */
-    gsl_bspline_eval(xi, m_splinePointers.B, m_splinePointers.bw);
+    gsl_bspline_eval(xi, m_splinePointers.inputSplineWs,
+                     m_splinePointers.splineToProcess);
 
     /* fill in row i of X */
     for (int j = 0; j < ncoeff; ++j) {
-      double Bj = gsl_vector_get(m_splinePointers.B, j);
-      gsl_matrix_set(m_splinePointers.Z, i, j, Bj);
+      double Bj = gsl_vector_get(m_splinePointers.inputSplineWs, j);
+      gsl_matrix_set(m_splinePointers.fittedWs, i, j, Bj);
     }
   }
 }
