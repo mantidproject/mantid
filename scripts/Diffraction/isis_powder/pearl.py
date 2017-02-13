@@ -24,18 +24,18 @@ class Pearl(AbstractInst):
         self._cached_run_details = None
         self._cached_run_details_number = None
 
-    def focus(self, run_number, **kwargs):
+    def focus(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
+        return self._focus(run_number=self._inst_settings.run_number, input_batching=InputBatchingEnum.Summed,
                            do_van_normalisation=self._inst_settings.van_norm)
 
-    def create_vanadium(self, run_in_range, **kwargs):
+    def create_vanadium(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = False
         self._inst_settings.update_attributes(kwargs=kwargs)
 
-        run_details = self._get_run_details(run_number_string=run_in_range)
+        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
 
         return self._create_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
