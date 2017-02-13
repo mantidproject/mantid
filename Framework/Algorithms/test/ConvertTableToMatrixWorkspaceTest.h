@@ -217,7 +217,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnY", "B"));
     TS_ASSERT_THROWS_NOTHING(m_converter->setPropertyValue("ColumnE", "C"));
 
-    TS_ASSERT_THROWS(m_converter->execute(), boost::bad_lexical_cast);
+    TS_ASSERT_THROWS(m_converter->execute(),std::invalid_argument);
     API::AnalysisDataService::Instance().remove("out");
   }
 
