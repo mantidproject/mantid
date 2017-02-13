@@ -1,11 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -113,18 +110,15 @@ void RotateInstrumentComponent::exec() {
   }
 
   // Do the rotation
-  using namespace Geometry::ComponentHelper;
-  TransformType rotType = Absolute;
+  Quat rotation(angle, V3D(X, Y, Z));
   if (relativeRotation)
-    rotType = Relative;
+    // Note the unusual order. This is as in Component::getRotation().
+    rotation = comp->getRotation() * rotation;
+
   if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+    inputW->mutableDetectorInfo().setRotation(*comp, rotation);
   } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *comp, pmap, Quat(angle, V3D(X, Y, Z)), rotType);
+    inputP->mutableDetectorInfo().setRotation(*comp, rotation);
   }
 }
 
