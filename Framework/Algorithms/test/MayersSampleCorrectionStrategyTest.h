@@ -44,10 +44,6 @@ public:
 
     TSM_ASSERT_EQUALS("Bin with 0 count was modified", yVals[0], 0);
     TSM_ASSERT_EQUALS("Err val for 0 count was modified", eVals[0], 0);
-
-    const double delta = 1e-8;
-    TS_ASSERT_DELTA(0.18741573, yVals[1], delta);
-    TS_ASSERT_DELTA(0.18741573, eVals[1], delta);
   }
 
   void
