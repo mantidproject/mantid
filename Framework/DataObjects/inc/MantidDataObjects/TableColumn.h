@@ -169,7 +169,6 @@ public:
       if (trimmedString.back() == ':') {
         trimmedString.pop_back(); // so not to alter the original data
       }
-      //return boost::lexical_cast<double>(trimmedString);
       return std::stod(trimmedString);
     } else {
       return boost::numeric_cast<double, DoubleType>(m_data[i]);
