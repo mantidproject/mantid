@@ -246,7 +246,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 self._elt_workspace = sort_alg.getProperty("OutputWorkspace").value
             else:
                 clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
-                clone_alg.setProperty("InputWorkspace", sort_alg.getProperty("OutputWorkspace").value)
+                clone_alg.setProperty("InputWorkspace", self.getProperty("OutputELF").value)
                 clone_alg.setProperty("OutputWorkspace", self._elt_workspace)
                 clone_alg.execute()
                 self._elt_workspace = clone_alg.getProperty("OutputWorkspace").value
