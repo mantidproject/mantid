@@ -34,19 +34,20 @@ public:
   }
 
   void test_Correction_Skips_Zero_Counts() {
-	  Histogram histo(Points{ 2, LinearGenerator(0,1) } , Counts{2, LinearGenerator(0, 1)});
-	  MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
-	  const auto outHisto = mscat.getCorrectedHisto();
+    Histogram histo(Points{2, LinearGenerator(0, 1)},
+                    Counts{2, LinearGenerator(0, 1)});
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), histo);
+    const auto outHisto = mscat.getCorrectedHisto();
 
-	  const auto &yVals = outHisto.y();
-	  const auto &eVals = outHisto.e();
+    const auto &yVals = outHisto.y();
+    const auto &eVals = outHisto.e();
 
-	  TSM_ASSERT_EQUALS("Bin with 0 count was modified", yVals[0], 0);
-	  TSM_ASSERT_EQUALS("Err val for 0 count was modified", eVals[0], 0);
-	  
-	  const double delta = 1e-8;
-	  TS_ASSERT_DELTA(0.18741573, yVals[1], delta);
-	  TS_ASSERT_DELTA(0.18741573, eVals[1], delta);
+    TSM_ASSERT_EQUALS("Bin with 0 count was modified", yVals[0], 0);
+    TSM_ASSERT_EQUALS("Err val for 0 count was modified", eVals[0], 0);
+
+    const double delta = 1e-8;
+    TS_ASSERT_DELTA(0.18741573, yVals[1], delta);
+    TS_ASSERT_DELTA(0.18741573, eVals[1], delta);
   }
 
   void
