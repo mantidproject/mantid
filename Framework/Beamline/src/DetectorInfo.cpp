@@ -48,19 +48,23 @@ void DetectorInfo::setMasked(const size_t index, bool masked) {
   m_isMasked.access()[index] = masked;
 }
 
+/// Returns the position of the detector with given index.
 Eigen::Vector3d DetectorInfo::position(const size_t index) const {
   return (*m_positions)[index];
 }
 
+/// Returns the rotation of the detector with given index.
 Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
   return (*m_rotations)[index];
 }
 
+/// Set the position of the detector with given index.
 void DetectorInfo::setPosition(const size_t index,
                                const Eigen::Vector3d &position) {
   m_positions.access()[index] = position;
 }
 
+/// Set the rotation of the detector with given index.
 void DetectorInfo::setRotation(const size_t index,
                                const Eigen::Quaterniond &rotation) {
   m_rotations.access()[index] = rotation;
