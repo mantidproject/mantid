@@ -135,7 +135,7 @@ public:
 
 	    for (size_t i = 0; i < size; ++i) {
 	      ws->mutableX(0)[i] = static_cast<double>(i + 1);
-	      ws->mutableY(0)[i] = ws-mutableX(0)[i] + deltaY;
+	      ws->mutableY(0)[i] = ws->mutableX(0)[i] + deltaY;
       	      ws->mutableE(0)[i] = 1;
     }
 

@@ -199,7 +199,6 @@ public:
     std::vector<IALCBaselineModellingModel::Section> sections;
     sections.emplace_back(2, 3);
     sections.emplace_back(6, 8);
-    m_model->disableUnwantedPoitns(data,sections);
 
     MatrixWorkspace_const_sptr corrected = m_model->correctedData();
     ITableWorkspace_sptr parameters = m_model->parameterTable();
