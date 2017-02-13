@@ -32,12 +32,12 @@ class Polaris(AbstractInst):
         return self._focus(run_number=self._inst_settings.run_number, input_batching=self._inst_settings.input_mode,
                            do_van_normalisation=self._inst_settings.do_van_normalisation)
 
-    def create_calibration_vanadium(self, **kwargs):
+    def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_calibration_vanadium(
+        return self._create_vanadium(
             vanadium_runs=run_details.vanadium_run_numbers, empty_runs=run_details.empty_runs,
             do_absorb_corrections=self._inst_settings.do_absorb_corrections,
             gen_absorb_correction=None)  # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?

@@ -1,10 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from abc import ABCMeta, abstractmethod
-
-from six import add_metaclass
-
 from isis_powder.routines import calibrate, focus
 
 
@@ -17,7 +13,6 @@ from isis_powder.routines import calibrate, focus
 # to denote internal methods to abstract_inst we will use '_abs_' to denote it as a
 # private method for the scripts
 
-@add_metaclass(ABCMeta)
 class AbstractInst(object):
     def __init__(self, user_name=None, calibration_dir=None, output_dir=None):
         # ----- Properties common to ALL instruments -------- #
@@ -32,10 +27,6 @@ class AbstractInst(object):
         return self._calibration_dir
 
     @property
-    def raw_data_dir(self):
-        return self._raw_data_dir
-
-    @property
     def output_dir(self):
         return self._output_dir
 
@@ -43,8 +34,8 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_calibration_vanadium(self, vanadium_runs, empty_runs,
-                                     do_absorb_corrections=True, gen_absorb_correction=False):
+    def _create_vanadium(self, vanadium_runs, empty_runs,
+                         do_absorb_corrections=True, gen_absorb_correction=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param vanadium_runs: The vanadium run or run in range (depending on instrument) to process
@@ -69,26 +60,23 @@ class AbstractInst(object):
 
     # Mandatory overrides
 
-    @abstractmethod
     def _get_run_details(self, run_number_string):
         """
         Returns a RunDetails object with various properties related to the current run set
         :param run_number_string: The run number to look up the properties of
         :return: A RunDetails object containing attributes relevant to that run_number_string
         """
-        pass
+        raise NotImplementedError("get_run_details must be implemented per instrument")
 
     @staticmethod
-    @abstractmethod
     def _generate_input_file_name(run_number):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        pass
+        raise NotImplementedError("generate_input_file_name must be implemented per instrument")
 
-    @abstractmethod
     def _generate_output_file_name(self, run_number_string):
         """
         Generates the filename which is used to uniquely identify and save the workspace. This should include any
@@ -96,26 +84,26 @@ class AbstractInst(object):
         :param run_number_string: The run string to uniquely identify the run
         :return: The file name which identifies the run and appropriate parameter settings
         """
-        raise NotImplementedError("Output names not implemented")
+        raise NotImplementedError("generate_output_file_name must be implemented per instrument")
 
-    @abstractmethod
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         """
         Takes a background spline of the list of processed vanadium banks
         :param focused_vanadium_banks: The list processed (and cropped) vanadium banks to take a spline of
         :return: The splined vanadium workspaces as a list
         """
-        return None
+        # XXX: Although this could be moved to common if enough instruments spline the same way and have
+        # the instrument override the optional behaviour
+        raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
     # Optional overrides
-    @abstractmethod
     def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         """
         Generates vanadium absorption corrections to compensate for the container
         :param van_ws: A reference vanadium workspace to match the binning of or correct
         :return: A workspace containing the corrections
         """
-        raise NotImplementedError("Not implemented for this instrument yet")
+        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
 
     def _attenuate_workspace(self, input_workspace):
         """
@@ -205,7 +193,6 @@ class AbstractInst(object):
         """
         Generates the various output paths and file names to be used during saving or as workspace names
         :param run_details: The run details associated with this run
-        :param output_directory: The output directory to use as part of the output path
         :return: A dictionary containing the various output paths and generated output name
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)

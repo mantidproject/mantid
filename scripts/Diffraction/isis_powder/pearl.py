@@ -9,6 +9,7 @@ from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_
 
 
 class Pearl(AbstractInst):
+
     def __init__(self, **kwargs):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
 
@@ -29,7 +30,7 @@ class Pearl(AbstractInst):
         return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
                            do_van_normalisation=self._inst_settings.van_norm)
 
-    def create_calibration_vanadium(self, run_in_range, **kwargs):
+    def create_vanadium(self, run_in_range, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         kwargs["perform_attenuation"] = False
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -37,9 +38,9 @@ class Pearl(AbstractInst):
         run_details = self._get_run_details(run_number_string=run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
-                                                 empty_runs=run_details.empty_runs,
-                                                 do_absorb_corrections=self._inst_settings.absorb_corrections)
+        return self._create_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
+                                     empty_runs=run_details.empty_runs,
+                                     do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     # Params #
 
