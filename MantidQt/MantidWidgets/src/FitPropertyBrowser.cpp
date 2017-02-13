@@ -3066,7 +3066,7 @@ void FitPropertyBrowser::functionHelp() {
     // Create and open the URL of the help page
     QString url =
         QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
-                               handler->ifun()->name());
+                               handler->ifun()->name() + ".html");
     MantidDesktopServices::openUrl(QUrl(url));
   }
 }
