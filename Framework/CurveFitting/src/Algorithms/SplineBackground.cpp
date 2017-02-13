@@ -181,7 +181,7 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   * @return:: The bin weight to use within the GSL allocation
   */
 double SplineBackground::calculateBinWeight(double errValue) {
-  double outBinWeight = 0;
+  double outBinWeight = -1;
   if (errValue <= 0 || !std::isfinite(errValue)) {
     // Regardless of which warning we print we should
     // set the bin weight
