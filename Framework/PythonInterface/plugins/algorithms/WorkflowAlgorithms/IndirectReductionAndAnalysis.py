@@ -153,7 +153,8 @@ class IndirectReductionAndAnalysis(DataProcessorAlgorithm):
         self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
                              doc='Workspace for the scan results.')
         self.declareProperty(WorkspaceGroupProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
-                                                    direction=Direction.Output),
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
                              doc='Workspace for the diffraction results')
 
     def PyExec(self):
