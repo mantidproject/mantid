@@ -93,18 +93,8 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS) {
   // Get a pointer to the instrument contained in the workspace
 
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-
-  Instrument_const_sptr instrument = offsetsWS->getInstrument();
-  instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-
-  detid2det_map allDetectors;
-  instrument->getDetectors(allDetectors);
-
   const auto &detectorInfo = offsetsWS->detectorInfo();
-
+  const double l1 = detectorInfo.l1();
   // Read in the POWGEN-style Dspace mapping file
   const char *filename = DFileName.c_str();
   std::ifstream fin(filename, std::ios_base::in | std::ios_base::binary);
@@ -118,9 +108,12 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     dspace.push_back(read);
   }
 
-  for (auto it = allDetectors.begin(); it != allDetectors.end(); ++it) {
-    const auto detectorId = it->first;
-    const auto detectorIndex = detectorInfo.indexOf(detectorId);
+  auto detectorIds = detectorInfo.detectorIDs();
+
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
+       ++detectorIndex) {
+    const auto detectorId = detectorIds[detectorIndex];
+
     // Compute the factor
     double offset = 0.0;
     double factor = Geometry::Conversion::tofToDSpacingFactor(
