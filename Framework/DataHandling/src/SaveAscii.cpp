@@ -201,7 +201,7 @@ void SaveAscii::exec() {
   auto pointDeltas = ws->pointStandardDeviations(0);
   auto points = ws->points(0);
   for (int bin = 0; bin < nBins; bin++) {
-    file << (points[bin]) / 2;
+    file << points[bin];
 
     if (idx.empty())
       for (int spec = 0; spec < nSpectra; spec++) {
