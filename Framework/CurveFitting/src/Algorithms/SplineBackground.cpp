@@ -115,9 +115,24 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
       continue;
     gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xInputVals[i]);
     gsl_vector_set(m_splinePointers.yData, numUnmaskedBins, yInputVals[i]);
-    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins,
-                   eInputVals[i] > 0. ? 1. / (eInputVals[i] * eInputVals[i])
-                                      : 0.);
+
+    double eVal = eInputVals[i];
+    if (!std::isnormal(eVal)) {
+      if (eVal == 0) {
+        g_log.warning(
+            "Spline background found an error value of 0 on an unmasked"
+            " bin. This bin will have no weight during the fitting process");
+      } else {
+        // nan / inf
+        eVal = 0;
+        g_log.warning(
+            "Spline background found an error value of nan or inf on an"
+            " unmasked bin. This bin will have no weight during the fitting"
+            " process");
+      }
+    }
+
+    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins, eVal);
 
     ++numUnmaskedBins;
   }
