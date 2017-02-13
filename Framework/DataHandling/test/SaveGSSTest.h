@@ -35,7 +35,7 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
   double dt = 0.01;
   size_t numhist = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numhist; ++iws) {
-    MantidVec &dataX = dataws->dataX(iws);
+    auto &dataX = dataws->mutableX(iws);
     dataX[0] = t0;
     for (size_t i = 1; i < dataX.size(); ++i)
       dataX[i] = (1 + dt) * dataX[i - 1];
@@ -44,8 +44,8 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
   // Set y and e
   for (size_t iws = 0; iws < numhist; ++iws) {
     const MantidVec &vecX = dataws->readX(iws);
-    MantidVec &dataY = dataws->dataY(iws);
-    MantidVec &dataE = dataws->dataE(iws);
+    auto &dataY = dataws->mutableY(iws);
+    auto &dataE = dataws->mutableE(iws);
     double factor = (static_cast<double>(iws) + 1) * 1000.;
     for (size_t i = 0; i < dataY.size(); ++i) {
       dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
@@ -318,37 +318,51 @@ private:
   API::MatrixWorkspace_sptr generateNoInstrumentWorkspace() {
     MatrixWorkspace_sptr dataws =
         WorkspaceCreationHelper::create2DWorkspace(2, 100);
-    dataws->getAxis(0)->setUnit("TOF");
+    populateWorkspaceWithLogData(dataws.get());
+    return dataws;
+  }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a matrix workspace for writing to gsas file
+    */
+  API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
+    // Create workspace
+    MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+            2, 100, false, false, true, "TestFake"));
+    populateWorkspaceWithLogData(dataws.get());
+    return dataws;
+  }
+
+  void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
+    wsPointer->getAxis(0)->setUnit("TOF");
     // Set data with logarithm bin
     double t0 = 5000.;
     double dt = 0.01;
-    size_t numhist = dataws->getNumberHistograms();
+    const size_t numhist = wsPointer->getNumberHistograms();
     for (size_t iws = 0; iws < numhist; ++iws) {
-      MantidVec &dataX = dataws->dataX(iws);
-      dataX[0] = t0;
-      for (size_t i = 1; i < dataX.size(); ++i)
-        dataX[i] = (1 + dt) * dataX[i - 1];
+      auto &mutableXVals = wsPointer->mutableX(iws);
+      mutableXVals[0] = t0;
+      for (size_t i = 1; i < mutableXVals.size(); ++i)
+        mutableXVals[i] = (1 + dt) * mutableXVals[i - 1];
     }
 
     // Set y and e
     for (size_t iws = 0; iws < numhist; ++iws) {
-      const MantidVec &vecX = dataws->readX(iws);
-      MantidVec &dataY = dataws->dataY(iws);
-      MantidVec &dataE = dataws->dataE(iws);
-      double factor = (static_cast<double>(iws) + 1) * 1000.;
-      for (size_t i = 0; i < dataY.size(); ++i) {
-        dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
-                                     (vecX[i] - 7000. - factor) /
-                                     (0.01 * factor * factor));
-        if (dataY[i] < 0.01)
-          dataE[i] = 0.1;
+      const auto &xVals = wsPointer->x(iws);
+      auto &mutableYVals = wsPointer->mutableY(iws);
+      auto &mutableEVals = wsPointer->mutableE(iws);
+      const double factor = (static_cast<double>(iws) + 1) * 1000.;
+      for (size_t i = 0; i < mutableYVals.size(); ++i) {
+        mutableYVals[i] = factor * std::exp(-(xVals[i] - 7000. - factor) *
+                                            (xVals[i] - 7000. - factor) /
+                                            (0.01 * factor * factor));
+        if (mutableYVals[i] < 0.01)
+          mutableEVals[i] = 0.1;
         else
-          dataE[i] = std::sqrt(dataY[i]);
+          mutableEVals[i] = std::sqrt(mutableYVals[i]);
       }
     }
-
-    return dataws;
   }
 };
 

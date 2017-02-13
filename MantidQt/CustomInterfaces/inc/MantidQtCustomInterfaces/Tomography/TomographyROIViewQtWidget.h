@@ -113,26 +113,26 @@ public:
 
   void updateImageType(const Mantid::API::WorkspaceGroup_sptr wsg) override;
 
-  virtual std::string askSingleImagePath() override;
-
-  std::string askImgOrStackPath() override;
+  std::string askImagePath(const std::string &windowTitle) override;
 
   std::string askColorMapFile() override;
 
   void updateColorMap(const std::string &filename) override;
 
   void saveSettings() const override;
+  void imageOrStackLoaded(const std::string &path) override;
 
 signals:
-  void findCORClicked(const std::string &exec,
-                      const std::vector<std::string> &args);
+  void findCORClickedSignal(const std::string &exec,
+                            const std::vector<std::string> &args);
+
+  void imageOrStackLoadedSignal(const std::string &path);
 
 public slots:
   void readCoRFromProcessOutput(const QString &str);
 
 protected:
   void initLayout();
-  void showImg();
 
   void resetCoR() override;
   void resetROI() override;

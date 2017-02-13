@@ -3,10 +3,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
-#include "MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyROIView.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyROIPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
 using namespace MantidQt::CustomInterfaces;
@@ -131,23 +131,28 @@ void TomographyROIPresenter::processInit() {
 }
 
 void TomographyROIPresenter::processBrowseImage() {
-  const std::string path = m_view->askSingleImagePath();
+  const std::string path = m_view->askImagePath();
 
   if (path.empty())
     return;
 
   m_stackPath = path;
   processLoadSingleImage();
+  m_view->imageOrStackLoaded(trimFileNameFromPath(path));
 }
 
 void TomographyROIPresenter::processBrowseStack() {
-  const std::string path = m_view->askImgOrStackPath();
+  const std::string path = m_view->askImagePath("Open directory");
 
   if (path.empty())
     return;
 
-  m_stackPath = path;
+  // we're loading at stack so we trim the filename
+  const std::string trimmedPath = trimFileNameFromPath(path);
+
+  m_stackPath = trimmedPath;
   processLoadStackOfImages();
+  m_view->imageOrStackLoaded(trimmedPath);
 }
 
 /**

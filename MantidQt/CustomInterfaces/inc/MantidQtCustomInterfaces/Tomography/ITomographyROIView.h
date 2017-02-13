@@ -230,23 +230,14 @@ public:
   virtual void updateRotationAngle(float angle) = 0;
 
   /**
-   * Get the path/location of a single image file.
+   * Get the WHOLE path/location of a single image file. This includes the
+   * filename and the whole path of directories to it. If you want only the
+   * directories the filename must be trimmed.
    *
    * @return location as a string
    */
-  virtual std::string askSingleImagePath() = 0;
-
-  /**
-   * Get the path/location of a stack of images (or single image as a
-   * particular case) that the user is requesting to display.  The
-   * path would be expected to point to a recognized directory
-   * structure (sample/dark/white) or image file (as a particular
-   * case).
-   *
-   * @return location (can be a directory, file, etc.) that needs to
-   * be figured out elsewhere
-   */
-  virtual std::string askImgOrStackPath() = 0;
+  virtual std::string
+  askImagePath(const std::string &windowTitle = "Open image") = 0;
 
   /**
    * Get the path of a color map file from the user.
@@ -285,6 +276,12 @@ public:
    * to default (none).
    */
   virtual void resetNormArea() = 0;
+
+  /**
+   * Notifies the main view that an image has been loaded, so that it can update
+   * the paths
+   */
+  virtual void imageOrStackLoaded(const std::string &path) = 0;
 };
 
 } // namespace CustomInterfaces

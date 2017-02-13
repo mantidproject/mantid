@@ -190,4 +190,4 @@ epub_uid = "Mantid Reference: " + version
 # Place in a separate file for clarity
 builder_options_file = "@CMAKE_CURRENT_SOURCE_DIR@/conf-@BUILDER@.py"
 if os.path.exists(builder_options_file):
-    execfile(builder_options_file)
+    exec(compile(open(builder_options_file).read(), builder_options_file, 'exec'))

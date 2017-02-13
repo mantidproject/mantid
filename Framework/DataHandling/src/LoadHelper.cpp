@@ -4,6 +4,7 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -103,17 +104,6 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
                                             wavelength * 1e-10); // m/s
 
   return distance / velocity;
-}
-
-double LoadHelper::getL1(const API::MatrixWorkspace_sptr &workspace) {
-  const auto &spectrumInfo = workspace->spectrumInfo();
-  return spectrumInfo.l1();
-}
-
-double LoadHelper::getL2(const API::MatrixWorkspace_sptr &workspace,
-                         int detId) {
-  const auto &spectrumInfo = workspace->spectrumInfo();
-  return spectrumInfo.l2(detId);
 }
 
 /*
@@ -501,16 +491,11 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
                                const V3D &newPos) {
 
   try {
-
     Geometry::Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = ws->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(
-        *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
+    ws->mutableDetectorInfo().setPosition(*component, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +
@@ -526,16 +511,11 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
                                  const Kernel::Quat &rot) {
 
   try {
-
     Geometry::Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = ws->instrumentParameters();
-    Geometry::ComponentHelper::rotateComponent(
-        *component, pmap, rot, Geometry::ComponentHelper::Absolute);
+    ws->mutableDetectorInfo().setRotation(*component, rot);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

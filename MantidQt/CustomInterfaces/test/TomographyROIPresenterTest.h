@@ -92,8 +92,7 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, askImgOrStackPath()).Times(0);
-    EXPECT_CALL(mockView, askSingleImagePath()).Times(1);
+    EXPECT_CALL(mockView, askImagePath(testing::_)).Times(1);
 
     // No error, no warning, just ignore
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -125,8 +124,9 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, askImgOrStackPath()).Times(1).WillOnce(Return(""));
-    EXPECT_CALL(mockView, askSingleImagePath()).Times(0);
+    EXPECT_CALL(mockView, askImagePath(testing::_))
+        .Times(1)
+        .WillOnce(Return(""));
 
     // No error, no warnings, just ignored
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -158,10 +158,9 @@ public:
     testing::NiceMock<MockTomographyROIView> mockView;
     MantidQt::CustomInterfaces::TomographyROIPresenter pres(&mockView);
 
-    EXPECT_CALL(mockView, askImgOrStackPath())
+    EXPECT_CALL(mockView, askImagePath(testing::_))
         .Times(1)
         .WillOnce(Return("dont_look_for_me_i_dont_exist"));
-    EXPECT_CALL(mockView, askSingleImagePath()).Times(0);
 
     // A warning
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);

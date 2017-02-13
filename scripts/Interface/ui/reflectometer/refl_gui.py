@@ -601,27 +601,31 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         tup = ()
         for idx in self.listMain.selectedItems():
-            split_title = re.split("th=|:", idx.text())
-            if len(split_title) != 3:
+            split_title = re.split(":th=|th=|:|dq/q=", idx.text())
+            if len(split_title) < 3:
                 split_title = re.split(":", idx.text())
-                if len(split_title) != 2:
+                if len(split_title) < 2:
                     logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
+                    continue
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
-                    tup = tup + (split_title,)
-            else:
-                tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
+            if len(split_title) < 4:
+                dqq = 0
+                split_title.append(dqq) # Append a dummy dq/q value.
+            tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta, dq/q)
 
         tupsort = sorted(tup, key=itemgetter(1, 2))  # now sorted by title then theta
         row = 0
         for _key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
             col = 0
+            dqq = 0 # only one value of dqq per row
             run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
             for object in group:  # loop over all with equal title
 
                 run_no = object[0]
-                angle = object[-1]
+                dqq = object[-1]
+                angle = object[-2]
                 run_angle_pairs_of_title.append((run_no, angle))
 
             for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]):
@@ -645,6 +649,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 col = col + 5
                 if col >= 11:
                     col = 0
+
+            # set dq/q
+            item = QtGui.QTableWidgetItem()
+            item.setText(str(dqq))
+            self.tableMain.setItem(row, 15, item)
 
             row = row + 1
 
@@ -775,7 +784,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         # Populate runlist
                         first_wq = None
                         for i in range(0, len(runno)):
-                            theta, qmin, qmax, _wlam, wq = self._do_run(runno[i], row, i)
+                            theta, qmin, qmax, _wlam, _wqBinned, wq = self._do_run(runno[i], row, i)
                             if not first_wq:
                                 first_wq = wq # Cache the first Q workspace
                             theta = round(theta, 3)
@@ -976,7 +985,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
-        wlam, wq, th = None, None, None
+        wlam, wq, th, wqBinned = None, None, None, None
 
         # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
@@ -1020,6 +1029,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
+                wqGroupBinned = []
                 wqGroup = []
                 wlamGroup = []
                 thetaGroup = []
@@ -1028,26 +1038,60 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws,
-                                                                 thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),
-                                                                 ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
-                                                                 Version=1)
+
+                    alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                    alg.initialize()
+                    alg.setProperty("InputWorkspace", ws[i])
+                    alg.setProperty("FirstTransmissionRun", group_trans_ws)
+                    if angle is not None:
+                        alg.setProperty("ThetaIn", angle)
+                    alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned_'+str(i+1))
+                    alg.setProperty("OutputWorkspace", runno+'_IvsQ_'+str(i+1))
+                    alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam_'+str(i+1))
+                    alg.setProperty("ScaleFactor", factor)
+                    if Qstep is not None:
+                        alg.setProperty("MomentumTransferStep", Qstep)
+                    if Qmin is not None:
+                        alg.setProperty("MomentumTransferMin", Qmin)
+                    if Qmax is not None:
+                        alg.setProperty("MomentumTransferMax", Qmax)
+                    alg.execute()
+                    wqBinned = mtd[runno+'_IvsQ_binned_'+str(i+1)]
+                    wq = mtd[runno+'_IvsQ_'+str(i+1)]
+                    wlam = mtd[runno+'_IvsLam_'+str(i+1)]
+                    th = alg.getProperty("ThetaIn").value
+
+                    wqGroupBinned.append(wqBinned)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
 
+                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ_binned')
                 wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws,
-                                                             thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
-                                                             OutputWorkspaceWavelength=runno+'_IvsLam',
-                                                             ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax,
-                                                             Version=1)
+                alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                alg.initialize()
+                alg.setProperty("InputWorkspace", ws)
+                alg.setProperty("FirstTransmissionRun", transmission_ws)
+                if angle is not None:
+                    alg.setProperty("ThetaIn", angle)
+                alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned')
+                alg.setProperty("OutputWorkspace", runno+'_IvsQ')
+                alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam')
+                alg.setProperty("ScaleFactor", factor)
+                if Qstep is not None:
+                    alg.setProperty("MomentumTransferStep", Qstep)
+                if Qmin is not None:
+                    alg.setProperty("MomentumTransferMin", Qmin)
+                if Qmax is not None:
+                    alg.setProperty("MomentumTransferMax", Qmax)
+                alg.execute()
+                wqBinned = mtd[runno+'_IvsQ_binned']
+                wq = mtd[runno+'_IvsQ']
+                wlam = mtd[runno+'_IvsLam']
+                th = alg.getProperty("ThetaIn").value
 
             cleanup()
         else:
@@ -1075,7 +1119,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
 
-        return th, qmin, qmax, wlam, wq
+        return th, qmin, qmax, wlam, wqBinned, wq
 
     def _save_table_contents(self, filename):
         """
