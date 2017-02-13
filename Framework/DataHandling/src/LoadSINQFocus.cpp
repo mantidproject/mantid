@@ -170,7 +170,7 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > 0) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->mutableX(spec) = x;
+        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(0));
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j));
