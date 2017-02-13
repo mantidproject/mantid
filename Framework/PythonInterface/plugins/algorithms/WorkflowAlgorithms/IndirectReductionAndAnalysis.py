@@ -26,7 +26,7 @@ def _elems_or_none(l):
         return None
 
 
-class EnergyWindowScan(DataProcessorAlgorithm):
+class IndirectReductionAndAnalysis(DataProcessorAlgorithm):
 
     # Reduction Inputs
     _data_files = None
@@ -145,8 +145,10 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Toggle input file summing or sequential processing')
+
         # Output properties
-        self.declareProperty(name='ReducedWorkspace', defaultValue='Reduced',
+        self.declareProperty(WorkspaceGroupProperty(name='ReducedWorkspace', defaultValue='Reduced',
+                                                    direction=Direction.Output),
                              doc='Workspace group for the resulting workspaces.')
         self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
                              doc='Workspace for the scan results.')
@@ -181,6 +183,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         scan_alg.setProperty('UnitX', self._output_x_units)
         scan_alg.setProperty('OutputWorkspace', self._output_ws)
         scan_alg.execute()
+        self.setProperty('ReducedWorkspace', scan_alg.getProperty('OutputWorkspace').value)
 
         logger.information('OutputWorkspace : %s' % self._output_ws)
         logger.information('ScanWorkspace : %s' % self._scan_ws)
@@ -208,7 +211,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         elwin_alg.setProperty("IntegrationRangeEnd", self._inelastic_range[1])
         elwin_alg.setProperty("SampleEnvironmentLogName", self._sample_log_name)
         elwin_alg.setProperty("SampleEnvironmentLogValue", self._sample_log_value)
-        elwin_alg.setAlwaysStoreInADS(True)
         elwin_alg.setProperty("OutputInQ", self._scan_ws + '_inel_eq1')
         elwin_alg.setProperty("OutputInQSquared", self._scan_ws + '_inel_eq2')
         elwin_alg.setProperty("OutputELF", self._scan_ws + '_inel_elf')
@@ -228,7 +230,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
         num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
-        if len(x_values) < 2:
+        if len(x_values) < 2 and self._msdfit:
             logger.error("Unable to perform MSDFit")
             self._msdfit = False
 
@@ -244,8 +246,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             msd_alg.setProperty("OutputWorkspace", self._scan_ws + '_msd')
             msd_alg.setProperty("FitWorkspaces", self._scan_ws + '_msd_fit')
             msd_alg.execute()
-            mtd.addOrReplace(self._scan_ws + '_msd', msd_alg.getProperty("OutputWorkspace").value)
-            mtd.addOrReplace(self._scan_ws + '_msd_fit', msd_alg.getProperty("FitWorkspaces").value)
 
         if self._diffraction:
             diff_prog = Progress(self, start=0.9,end=1.0,nreports=1)
@@ -377,4 +377,4 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(EnergyWindowScan)
+AlgorithmFactory.subscribe(IndirectReductionAndAnalysis)
