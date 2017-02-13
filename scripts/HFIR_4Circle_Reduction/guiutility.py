@@ -149,7 +149,7 @@ def parse_float_array(array_str):
     return True, float_list
 
 
-def parse_integer_list(array_str):
+def parse_integer_list(array_str, expected_size=None):
     """ Parse a string to an array of integer separated by ','
     also, the format as 'a-b' is supported too
     :param array_str:
@@ -197,6 +197,10 @@ def parse_integer_list(array_str):
 
             integer_list.extend(xrange(start_value, end_value+1))
     # END-FOR
+
+    # check size
+    if expected_size is not None and len(integer_list) != expected_size:
+        raise RuntimeError('It is required to have {0} integers given in {1}.'.format(expected_size, array_str))
 
     return integer_list
 

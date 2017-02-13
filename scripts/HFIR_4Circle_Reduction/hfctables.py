@@ -123,12 +123,82 @@ class MatrixTable(tableBase.NTableWidget):
         return
 
 
+class PeakIntegrationTable(tableBase.NTableWidget):
+    """
+    Peak integration information table. Each row is for a peak measured in a scan containing multiple Pts.
+    """
+    Table_Setup = [('Scan', 'int'),
+                   ('Mask', 'str'),
+                   ('Raw Intensity', 'float'),
+                   ('Error', 'float'),
+                   ('Intensity 2', 'float'),
+                   ('Error', 'float'),
+                   ('Intensity 3', 'float'),
+                   ('Error', 'float')]
+
+    def __init__(self, parent):
+        """
+        initialization
+        :param parent:
+        """
+        super(PeakIntegrationTable, self).__init__(parent)
+
+        # define column indexes
+        self._colIndexScan = None
+        self._colIndexMask = None
+        self._colIndexRawIntensity = None
+        self._colIndexRawError = None
+        self._colIndexIntensity2 = None
+        self._colIndexError2 = None
+        self._colIndexIntensity3 = None
+        self._colIndexError3 = None
+
+        return
+
+    def add_scan_information(self, scan_number, mask, raw_intensity, raw_error, intensity2, error2,
+                             intensity3, error3):
+        """
+
+        :param scan_number:
+        :param mask:
+        :param raw_intensity:
+        :param raw_error:
+        :param intensity2:
+        :param error2:
+        :param intensity3:
+        :param error3:
+        :return:
+        """
+        row_list = [scan_number, mask, raw_intensity, raw_error, intensity2, error2, intensity3, error3]
+        self.append_row(row_list)
+
+        return
+
+    def setup(self):
+        """
+        Init setup
+        :return:
+        """
+        self.init_setup(self.Table_Setup)
+
+        # get column names
+        col_name_list = self.getColumnNames()
+
+        self._colIndexScan = col_name_list.index('Scan')
+        self._colIndexMask = col_name_list.index('Mask')
+        self._colIndexRawIntensity = col_name_list.index('Raw Intensity')
+        self._colIndexRawError = col_name_list.index('Error')
+        self._colIndexIntensity2 = col_name_list.index('Intensity 2')
+        self._colIndexError2 = col_name_list.index('Error', self._colIndexRawError+1)
+        self._colIndexIntensity3 = col_name_list.index('Intensity 3')
+        self._colIndexError3 = col_name_list.index('Error', self._colIndexError2+1)
+
+        return
+
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """
-    Extended table widget for studying peak integration of scan on various Pts.
+    Extended table widget for studying peak integration of a single scan on various Pts.
     """
-
-    # UB peak information table
     Table_Setup = [('Pt', 'int'),
                    ('Raw', 'float'),
                    ('Masked', 'float'),
@@ -1232,24 +1302,42 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         return scan_list
 
-    def get_selected_run_surveyed(self):
+    def get_selected_run_surveyed(self, required_size=1):
         """
         Purpose: Get selected pt number and run number that is set as selected
         Requirements: there must be one and only one run that is selected
         Guarantees: a 2-tuple for integer for return as scan number and Pt. number
-        :return: a 2-tuple of integer
+        :param required_size: if specified as an integer, then if the number of selected rows is different,
+                              an exception will be thrown.
+        :return: a 2-tuple of integer if required size is 1 (as old implementation) or a list of 2-tuple of integer
         """
+        # check required size?
+        assert isinstance(required_size, int) or required_size is None, 'Required number of runs {0} must be None ' \
+                                                                        'or an integer but not a {1}.' \
+                                                                        ''.format(required_size, type(required_size))
+
         # get the selected row indexes and check
         row_index_list = self.get_selected_rows(True)
-        assert len(row_index_list) == 1, 'There must be exactly one run that is selected. Now' \
-                                         'there are %d runs that are selected' % len(row_index_list)
 
-        # get scan and pt
-        row_index = row_index_list[0]
-        scan_number = self.get_cell_value(row_index, 0)
-        pt_number = self.get_cell_value(row_index, 1)
+        if required_size is not None and required_size != len(row_index_list):
+            raise RuntimeError('It is required to have {0} runs selected, but now there are {1} runs that are '
+                               'selected.'.format(required_size, row_index_list))
 
-        return scan_number, pt_number
+        # get all the scans and rows that are selected
+        scan_run_list = list()
+        for i_row in row_index_list:
+            # get scan and pt.
+            scan_number = self.get_cell_value(i_row, 0)
+            pt_number = self.get_cell_value(i_row, 1)
+            scan_run_list.append(scan_number)
+
+        # special case for only 1 run that is selected
+        if len(row_index_list) == 1 and required_size is not None:
+            # get scan and pt
+            return scan_run_list[0]
+        # END-IF
+
+        return scan_run_list
 
     def show_reflections(self, num_rows):
         """

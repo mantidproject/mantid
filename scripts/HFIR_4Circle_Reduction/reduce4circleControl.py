@@ -419,20 +419,27 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
-    def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag):
+    def check_generate_mask_workspace(self, exp_number, scan_number, mask_tag, check_throw):
         """
-        Check whether a workspace does exist.
+        Check whether a MaskWorkspace exists according to the tag
         If it does not, then generate one according to the tag
+
+        A MaskWorkspace's name is exactly the same as the tag of the mask specified by user in
+        reduction GUI.
+
         :param exp_number:
         :param scan_number:
-        :param mask_tag:
+        :param mask_tag: string as the tag of the mask.
+        :param check_throw
         :return:
         """
         # Check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(mask_tag, str)
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'blabla'
+        assert isinstance(mask_tag, str), 'blabla'
 
+        # MaskWorkspace's name is same as mask's tag
         mask_ws_name = mask_tag
 
         if AnalysisDataService.doesExist(mask_ws_name) is False:
@@ -443,7 +450,11 @@ class CWSCDReductionControl(object):
             ur = region_of_interest[1]
             self.generate_mask_workspace(exp_number, scan_number, ll, ur, mask_ws_name)
 
-        return
+        if check_throw:
+            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
+                                                                 '' % mask_ws_name
+
+        return mask_ws_name
 
     def does_file_exist(self, exp_number, scan_number, pt_number=None):
         """
@@ -1145,11 +1156,60 @@ class CWSCDReductionControl(object):
         :param background_pt_tuple:
         :return:
         """
-        # TODO/ISSUE/NOW - Implement
+        # TODO/ISSUE/NOW - Test
 
-        peak_integration_utility.integrate_peak_full_version()
+        # check inputs
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
+        assert isinstance(mask_name, str), 'Mask name {0} must be a string but not a {1}.' \
+                                           ''.format(mask_name, type(mask_name))
+        assert isinstance(normalization, str), 'Normalization type {0} must be a string but not a {1}.' \
+                                               ''.format(normalization, type(normalization))
+        assert isinstance(scale_factor, float), 'Scale factor {0} must be a float but not a {1}.' \
+                                                ''.format(scale_factor, type(scale_factor))
+        print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
+        assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
-        return
+        # get input MDEventWorkspace name for merged scan
+        status, ret_obj = self.get_pt_numbers(exp_number, scan_number)
+        if status:
+            pt_list = ret_obj
+        else:
+            raise RuntimeError('Unable to get Pt. list from Exp {0} Scan {1} due to {2}'
+                               ''.format(exp_number,scan_number, ret_obj))
+        md_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number, pt_list)
+
+        # get the TableWorkspace name for Spice
+        spice_table_ws = get_spice_table_name(exp_number, scan_number)
+
+        # output PeaksWorkspace name and MaskWorkspace
+        if len(mask_name) > 0:
+            mask_ws_name = self.check_generate_mask_workspace(exp_number, scan_number, mask_name, check_throw=True)
+        else:
+            mask_ws_name = None
+        peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask_name)
+
+        # peak center
+        try:
+            peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
+                                              peak_centre[2])
+        except IndexError:
+            raise RuntimeError('Peak center {0} must have 3 elements.'.format(peak_centre))
+        except ValueError:
+            raise RuntimeError('Peak center {0} must have floats.'.format(peak_centre))
+
+        int_peak_dict = peak_integration_utility.integrate_peak_full_version(scan_md_ws_name=md_ws_name,
+                                                                             spice_table_name=spice_table_ws,
+                                                                             output_peak_ws_name=peak_ws_name,
+                                                                             peak_center=peak_centre_str,
+                                                                             mask_workspace_name=mask_ws_name,
+                                                                             norm_type=normalization,
+                                                                             intensity_scale_factor=scale_factor,
+                                                                             background_pt_list=background_pt_tuple)
+
+        return int_peak_dict
 
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,

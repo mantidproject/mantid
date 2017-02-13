@@ -62,6 +62,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
+        # children windows
+        self._my3DWindow = None
+        self._refineConfigWindow = None
+        self._peakIntegrationInfoWindow = None
+
         # Make UI scrollable
         if NO_SCROLL is False:
             self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
@@ -215,10 +220,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_convert_merged_to_hkl)
         self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
                      self.do_show_workspaces)
-
-        # TODO/ISSUE/NOW - implement a real method to pop out a table with detailed information
         self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_workspaces)
+                     self.do_show_integratoin_details)
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -240,6 +243,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_view_survey_peak)
         self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
                      self.do_add_peaks_for_ub)
+        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_merge_scans_survey)
         self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_select_all_survey)
         self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
@@ -295,8 +300,6 @@ class MainWindow(QtGui.QMainWindow):
         self._ubPeakTableFlag = True
 
         # Sub window
-        self._my3DWindow = None
-        self._refineConfigWindow = None
         self._baseTitle = 'Title is not initialized'
 
         # Timing and thread 'global'
@@ -386,6 +389,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # check boxes
         self.ui.graphicsView_detector2dPlot.set_parent_window(self)
+
+        # background points
+        self.ui.lineEdit_backgroundPts.setText('1, 1')
 
         return
 
@@ -1285,24 +1291,36 @@ class MainWindow(QtGui.QMainWindow):
         else:
             this_peak_centre = ret_obj
 
-        # TODO/ISSUE/NOW - Parse ui.lineEdit_backgroundPts and set default in init_widgets
-        bkgd_pt_tuple = (1, 1)
+        # mask workspace
+        mask_name = str(self.ui.comboBox_maskNames2.currentText())
+        if mask_name.lower() == 'no mask':
+            mask_name = ''
 
-        status, ret_obj = self._myControl.integrate_scan_peak(exp=exp_number,
-                                                              scan=scan_number,
-                                                              peak_radius=1.0,
-                                                              peak_centre=this_peak_centre,
-                                                              merge_peaks=False,
-                                                              use_mask=False,
-                                                              normalization=norm_type,
-                                                              scale_factor=intensity_scale_factor,
-                                                              background_pt_tuple=bkgd_pt_tuple)
+        # ui.lineEdit_backgroundPts and set default in init_widgets
+        bkgd_pt_tuple = gutil.parse_integer_list(str(self.ui.lineEdit_backgroundPts.text()), 2)
+
+        # integrate peak
+        try:
+            int_peak_dict = self._myControl.integrate_scan_peak(exp_number=exp_number,
+                                                                scan_number=scan_number,
+                                                                peak_centre=this_peak_centre,
+                                                                mask_name=mask_name,
+                                                                normalization=norm_type,
+                                                                scale_factor=intensity_scale_factor,
+                                                                background_pt_tuple=bkgd_pt_tuple)
+        except RuntimeError as run_error:
+            self.pop_one_button_dialog('Unable to integrate peak for scan {0} due to {1}.'
+                                       ''.format(scan_number, run_error))
+            return
 
         # set calculated values
-        blabla
+        self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['raw intensity']))
+        self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
+        self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
 
         # plot fitted Gaussian
-        blabla
+        fit_gauss_dict = int_peak_dict['gauss parameters']
+        self.ui.graphicsView_integratedPeakView.plot_model(fit_gauss_dict)
 
         return
 
@@ -1903,7 +1921,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Warning
-        self.pop_one_button_dialog('Data processing is long. Be patient!')
+        self.pop_one_button_dialog('Merging scans can take long time. Please be patient!')
 
         # Process
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -1952,6 +1970,29 @@ class MainWindow(QtGui.QMainWindow):
             # Sleep for a while
             time.sleep(0.1)
         # END-FOR
+
+        return
+
+    def do_merge_scans_survey(self):
+        """
+        Merge each selected scans in the 'List Scans' tab to Q-sample space
+        :return:
+        """
+        # get the selected scans
+        scan_run_list = self.ui.tableWidget_surveyTable.get_selected_run_surveyed(required_size=None)
+        if len(scan_run_list) == 0:
+            self.pop_one_button_dialog('There is no run that is selected.')
+
+        # start to add scan/run to table
+        # Set table
+        scan_list = list()
+        for scan, pt in scan_run_list:
+            scan_list.append(scan)
+        scan_list.sort()
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
+
+        # switch tab
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Scans Processing'])
 
         return
 
@@ -2626,6 +2667,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_infoDetCenter.setText('%d, %d' % (user_center_row, user_center_col))
 
         return
+
+    def do_show_integratoin_details(self):
+        """
+        show the details (in table) about the integration of scans
+        :return:
+        """
+        # check whether the integration information table
+        if self._peakIntegrationInfoWindow is None:
+            self._peakIntegrationInfoWindow = XX
 
     def do_show_spice_file(self):
         """

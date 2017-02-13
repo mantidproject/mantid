@@ -252,10 +252,28 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     # END-FOR
 
     # fit
-    # TODO/ISSUE/NOW - Need to find out the return result
-    fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+    gauss_error, gauss_parameters, cov_matrix = fit_gaussian_linear_background(vec_x, vec_y, vec_e)
+    print '[DB] Overall Gaussian error = ', gauss_error
+    print '[DB] Gaussian fitted parameters = ', gauss_parameters
+    print '[DB] Gaussian covariance matrix = ', cov_matrix
+    # function parameters (in order): x0, sigma, a, b
 
-    return
+    # construct parameter dictionary and error dictionary
+    gauss_parameter_dict = dict()
+    gauss_error_dict = dict()
+
+    gauss_parameter_dict['x0'] = gauss_parameters[0]
+    gauss_parameter_dict['s'] = gauss_parameters[1]
+    gauss_parameter_dict['A'] = gauss_parameters[2]
+    gauss_parameter_dict['B'] = gauss_parameters[3]
+
+    gauss_error_dict['x02'] = cov_matrix[0, 0]
+    gauss_error_dict['s2'] = cov_matrix[1, 1]
+    gauss_error_dict['A2'] = cov_matrix[2, 2]
+    gauss_error_dict['B2'] = cov_matrix[3, 3]
+    gauss_error_dict['s_A'] = cov_matrix[1, 2]
+
+    return gauss_parameter_dict, gauss_error_dict
 
 def gaussian_peak_intensity(parameter_dict, error_dict):
     """
@@ -310,20 +328,19 @@ def get_finer_grid(vec_x, factor):
     return new_vector
 
 
-def integrate_scan_peaks(#exp, scan,
-                         merged_scan_workspace_name, integrated_peak_ws_name,
-                         peak_radius, peak_centre,
-                         merge_peaks=True, use_mask=False,
-                         normalization='', mask_ws_name=None,
-                         scale_factor=1):
-    """
-    # :param exp:
-    # :param scan:
+def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_name,
+                               peak_radius, peak_centre,
+                               merge_peaks=True,
+                               normalization='', mask_ws_name=None,
+                               scale_factor=1):
+
+    """ Integrate the peak in a single scan with merged Pt.
+    :param merged_scan_workspace_name: MDEventWorkspace with merged Pts.
+    :param integrated_peak_ws_name: output PeaksWorkspace for integrated peak
     :param peak_radius:
     :param peak_centre:  a float radius or None for not using
     :param merge_peaks: If selected, merged all the Pts can return 1 integrated peak's value;
                         otherwise, integrate peak for each Pt.
-    :param use_mask:
     :param normalization: normalization set up (by time or ...)
     :param mask_ws_name: mask workspace name or None
     :param scale_factor: integrated peaks' scaling factor
@@ -332,9 +349,11 @@ def integrate_scan_peaks(#exp, scan,
     # check
     # assert isinstance(exp, int)
     # assert isinstance(scan, int)
-    assert isinstance(peak_radius, float) or peak_radius is None
-    assert len(peak_centre) == 3
-    assert isinstance(merge_peaks, bool)
+    assert isinstance(peak_radius, float) or peak_radius is None, 'Peak radius {0} must be of type float but not ' \
+                                                                  '{1}.'.format(peak_radius, type(peak_radius))
+    assert len(peak_centre) == 3, 'Peak center {0} of type {1} must have 3 elements but not {2}.' \
+                                  ''.format(peak_centre, type(peak_centre), len(peak_centre))
+    assert isinstance(merge_peaks, bool), 'blabla'
 
     # get spice file
     # spice_table_name = get_spice_table_name(exp, scan)
@@ -377,6 +396,7 @@ def integrate_scan_peaks(#exp, scan,
         norm_by_mon = True
 
     # integrate peak of a scan
+    print '[DB...BAT] Inputs are ', merged_scan_workspace_name, integrated_peak_ws_name, peak_radius, merge_peaks, norm_by_mon, norm_by_time, mask_ws_name, scale_factor
     mantidsimple.IntegratePeaksCWSD(InputWorkspace=merged_scan_workspace_name,
                                     OutputWorkspace=integrated_peak_ws_name,
                                     PeakRadius=peak_radius,
@@ -415,24 +435,50 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     1. simple summation
     2. simple summation with gaussian fit
     3. integrate with fitted gaussian
-    :return:
+    :return: peak integration result in dictionary
     """
+    def create_peak_integration_dict():
+        """
+        create a standard dictionary for recording peak integration result
+        keys are
+         - simple intensity
+         - simple error
+         - simple background
+         - intensity 2
+         - error 2
+         - gauss intensity
+         - gauss error
+         - gauss background
+         - gauss parameters
+        :return:
+        """
+        info_dict = {'simple intensity': 0.,
+                     'simple error': 0.,
+                     'simple background': 0.,
+                     'intensity 2': 0.,
+                     'error 2': 0.,
+                     'gauss intensity': 0.,
+                     'gauss error': 0.,
+                     'gauss background': 0.,
+                     'gauss parameters': None,
+                     'gauss errors': None
+                     }
+
     # integrate the peak in MD workspace
-    # spice_table_name, integrated_peak_ws_name, md_ws_name,
-    status, ret_obj = integrate_scan_peaks(merged_scan_workspace_name=scan_md_ws_name,
-                                           integrated_peak_ws_name=output_peak_ws_name,
-                                           peak_radius=1.0,
-                                           peak_centre=peak_center,
-                                           merge_peaks=False,
-                                           use_mask=True,
-                                           mask_ws_name=mask_workspace_name,
-                                           normalization=norm_type,
-                                           scale_factor=intensity_scale_factor)
+    status, ret_obj = integrate_single_scan_peak(merged_scan_workspace_name=scan_md_ws_name,
+                                                 integrated_peak_ws_name=output_peak_ws_name,
+                                                 peak_radius=1.0,
+                                                 peak_centre=peak_center,
+                                                 merge_peaks=False,
+                                                 mask_ws_name=mask_workspace_name,
+                                                 normalization=norm_type,
+                                                 scale_factor=intensity_scale_factor)
 
     # result due to error
     if status is False:
         error_message = ret_obj
-        return False, error_message
+        raise RuntimeError('Unable to integrate peak of workspace {0} due to {1}.'
+                           ''.format(scan_md_ws_name, error_message))
     else:
         # process result
         integrated_pt_dict = ret_obj
@@ -441,16 +487,25 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     # get moving motor information. candidates are 2theta, phi and chi
     motor, motor_pos_dict = get_moving_motor_information(spice_table_name)
 
+
+    # create output dictionary
+    peak_int_dict = create_peak_integration_dict()
+
     # calculate the intensity with background removed and correct intensity by background value
     averaged_background = estimate_background(integrated_pt_dict, background_pt_list)
     simple_intensity, simple_intensity_error = simple_integrate_peak(integrated_pt_dict, averaged_background,
                                                                      motor_pos_dict)
+    peak_int_dict['simple intensity'] = simple_intensity
+    peak_int_dict['simple error'] = simple_intensity_error
+    peak_int_dict['simple background'] = averaged_background
 
     # fit gaussian + flat background
     parameters, errors = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
+    peak_int_dict['gauss parameters'] = parameters
+    peak_int_dict['gauss errors'] = errors
 
     # calculate intensity with method 2
-    intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'])
+    intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
 
     # calculate gaussian
     intensity_gauss, intensity_guass_error = gaussian_peak_intensity(parameters, errors)
@@ -496,11 +551,45 @@ def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     return motor_step
 
 
-def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step):
+def get_motor_step_for_intensity(motor_pos_dict):
+    """
+    get the motor step for each measurement Pts.
+    if it is the first or last Pt. then use the difference between this Pt and its nearest Pts as motor step
+    else use 1/2 as the motor step to its previous one and 1/2 as the motor step to its following one.
+    :param motor_pos_dict:
+    :return: dictionary of motor steps for calculating intensity
+    """
+    # check
+    assert isinstance(motor_pos_dict, dict), 'Input motor position must in dictionary.'
+
+    # get Pt list
+    pt_list = motor_pos_dict.keys()
+    pt_list.sort()
+
+    # get step dictionary
+    motor_step_dict = dict()
+
+    for i_pt, pt in enumerate(pt_list):
+        if i_pt == 0:
+            # first motor position
+            motor_step = motor_pos_dict[1] - motor_pos_dict[0]
+        elif i_pt == len(pt_list) - 1:
+            # last motor position
+            motor_step = motor_pos_dict[-1] - motor_pos_dict[-2]
+        else:
+            # regular
+            motor_step = 0.5 * (motor_step_dict[i_pt+1] - motor_step_dict[i_pt-1])
+        motor_step_dict[i_pt] = motor_step
+
+    return motor_step_dict
+
+
+def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
     """
     A simple approach to integrate peak in a cuboid with background removed.
     :param pt_intensity_dict:
     :param bg_value:
+    :param motor_step_dict:
     :return:
     """
     # check
@@ -508,14 +597,19 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step):
                                                 ''.format(pt_intensity_dict, type(pt_intensity_dict))
     assert isinstance(bg_value, float) and bg_value >= 0., 'Background value {0} must be a non-negative float.' \
                                                            ''.format(bg_value)
-    assert isinstance(motor_step, float) and motor_step > 0., 'Motor step {0} must be a positive float but not a' \
-                                                              ' {1}.'.format(motor_step, type(motor_step))
+    assert isinstance(motor_step_dict, dict), 'Motor steps {0} must be given as a dictionary of Pt but not a {1}.' \
+                                             ''.format(motor_step_dict, type(motor_step_dict))
+
+    pt_list = pt_intensity_dict.keys()
+    pt_list.sort()
 
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
     error_2 = 0.
-    for intensity in pt_intensity_dict.values():
-        sum_intensity += (intensity - bg_value) * motor_step
-        error_2 += numpy.sqrt(intensity) * motor_step
+    for i_pt, pt in enumerate(pt_list):
+        intensity = pt_intensity_dict[pt]
+        motor_step_i = motor_step_dict[i_pt]
+        sum_intensity += (intensity - bg_value) * motor_step_i
+        error_2 += numpy.sqrt(intensity) * motor_step_i
 
     return sum_intensity, error_2
