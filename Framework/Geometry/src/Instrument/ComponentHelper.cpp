@@ -80,7 +80,7 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     if (parent) {
       Quat rot0 = parent->getRotation();
       rot0.inverse();
-      newRot = rot * rot0;
+      newRot = rot0 * rot;
     }
   } else if (rotType == Relative) {
     const Quat &Rot0 = comp.getRelativeRot();
