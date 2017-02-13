@@ -156,6 +156,12 @@ void FindSXPeaks::exec() {
     if (!spectrumInfo.hasDetectors(static_cast<size_t>(i))) {
       continue;
     }
+    if (!spectrumInfo.hasUniqueDetector(i)) {
+      std::ostringstream sout;
+      sout << "Spectrum at workspace index " << i
+           << " has unsupported number of detectors.";
+      throw std::runtime_error(sout.str());
+    }
     const auto &det = spectrumInfo.detector(static_cast<size_t>(i));
 
     double phi = det.getPhi();

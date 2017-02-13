@@ -218,6 +218,29 @@ public:
                       results[2]);
   }
 
+  void testSpectrumWithoutUniqueDetectorsThrows() {
+    const int nHist = 10;
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
+    makeOnePeak(2, 400, 5, workspace);
+    Mantid::DataHandling::GroupDetectors2 grouping;
+    grouping.setChild(true);
+    grouping.initialize();
+    grouping.setProperty("InputWorkspace", workspace);
+    grouping.setProperty("OutputWorkspace", "unused_for_child");
+    grouping.setProperty("GroupingPattern", "0,1-3,4,5");
+    grouping.execute();
+    MatrixWorkspace_sptr grouped = grouping.getProperty("OutputWorkspace");
+    std::cout << grouped->getNumberHistograms() << '\n';
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", grouped);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.setRethrows(true);
+    TSM_ASSERT_THROWS_ANYTHING("FindSXPeak should have thrown.", alg.execute());
+    TSM_ASSERT("FindSXPeak should not have been executed.", !alg.isExecuted());
+  }
+
   void testUseWorkspaceRangeCropping() {
     // creates a workspace where all y-values are 2
     Workspace2D_sptr workspace =
