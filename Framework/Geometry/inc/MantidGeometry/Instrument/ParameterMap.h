@@ -10,6 +10,7 @@
 #include "tbb/concurrent_unordered_map.h"
 
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <typeinfo>
 
@@ -378,6 +379,7 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  std::mutex m_detectorInfoMutex;
 };
 
 /// ParameterMap shared pointer typedef

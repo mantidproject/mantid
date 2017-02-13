@@ -1166,8 +1166,10 @@ const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   if (detectorInfo != m_detectorInfo) {
-    PARALLEL_CRITICAL(ParameterMap_setDetectorInfo)
-    m_detectorInfo = std::move(detectorInfo);
+    std::lock_guard<std::mutex> lock(m_detectorInfoMutex);
+    if (detectorInfo != m_detectorInfo) {
+      m_detectorInfo = std::move(detectorInfo);
+    }
   }
 }
 
