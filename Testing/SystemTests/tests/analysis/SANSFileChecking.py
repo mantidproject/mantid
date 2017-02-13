@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 #pylint: disable=too-many-public-methods
 """
 Check that file manipulation works fine
