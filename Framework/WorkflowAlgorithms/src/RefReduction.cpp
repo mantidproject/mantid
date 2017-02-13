@@ -14,6 +14,7 @@
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -308,10 +309,12 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
+  std::string polarizationTranslation(polarization);
+  std::replace(polarizationTranslation.begin(),polarizationTranslation.end(),'-','_');
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      "OutputWorkspace_jc_" + polarizationTranslation, "Lambda_" + polarization,
       Direction::Output));
-  setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
+  setProperty("OutputWorkspace_jc_" + polarizationTranslation, outputWS2);
 
   // Conversion to Q
   IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
