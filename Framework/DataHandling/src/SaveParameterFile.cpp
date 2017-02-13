@@ -70,7 +70,7 @@ void SaveParameterFile::exec() {
   const std::string filename = getProperty("Filename");
 
   const Instrument_const_sptr instrument = ws->getInstrument();
-  const ParameterMap_sptr params = instrument->getParameterMap();
+  const ParameterMap_sptr params = instrument->makeLegacyParameterMap();
 
   // maps components to a tuple of parameters' name, type, and value
   std::map<ComponentID,
