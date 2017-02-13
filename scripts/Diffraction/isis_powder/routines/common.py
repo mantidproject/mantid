@@ -11,8 +11,11 @@ def create_calibration_by_names(calibration_runs, startup_objects, grouping_file
 
 
 def crop_banks_in_tof(bank_list, crop_values_list):
+    if not isinstance(crop_values_list, list):
+        raise ValueError("The cropping values were not in a list type")
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
+
     output_list = []
     for spectra, cropping_values in zip(bank_list, crop_values_list):
         output_list.append(crop_in_tof(ws_to_crop=spectra, x_min=cropping_values[0], x_max=cropping_values[-1]))

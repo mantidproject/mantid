@@ -113,8 +113,8 @@ class Polaris(AbstractInst):
         return cropped_ws
 
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
-        cropped_ws = common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_crop_values[0],
-                                        x_max=self._inst_settings.van_crop_values[-1])
+        cropped_ws = common.crop_banks_in_tof(bank_list=van_ws_to_crop,
+                                              crop_values_list=self._inst_settings.van_crop_values)
         return cropped_ws
 
     def _crop_banks_to_user_tof(self, focused_banks):
