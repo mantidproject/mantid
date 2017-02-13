@@ -63,10 +63,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
     _scan_ws = None
     _diff_workspace = None
 
-
     _ipf_filename = None
-
-
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect;Workflow\\MIDAS'
@@ -135,7 +132,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='Diffraction', defaultValue=False,
                              doc='Perform a diffraction reduction')
 
-        self.declareProperty(IntArrayProperty(name='DiffractionSpectraRange', defaultValue=[3, 53],
+        self.declareProperty(IntArrayProperty(name='DiffractionSpectraRange', values=[105, 112],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Spectra to use for diffraction reduction')
 
@@ -153,7 +150,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
                              doc='Workspace group for the resulting workspaces.')
         self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
                              doc='Workspace for the scan results.')
-        self.declareProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
+        self.declareProperty(WorkspaceGroupProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
+                                                    direction=Direction.Output),
                              doc='Workspace for the diffraction results')
 
     def PyExec(self):
@@ -249,6 +247,22 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             mtd.addOrReplace(self._scan_ws + '_msd', msd_alg.getProperty("OutputWorkspace").value)
             mtd.addOrReplace(self._scan_ws + '_msd_fit', msd_alg.getProperty("FitWorkspaces").value)
 
+        if self._diffraction:
+            diff_prog = Progress(self, start=0.9,end=1.0,nreports=1)
+            diff_prog.report('Diffraction Reduction')
+            diff_red_alg = self.createChildAlgorithm("ISISIndirectDiffractionReduction", enableLogging=False)
+            diff_red_alg.setProperty('InputFiles', self._data_files)
+            diff_red_alg.setProperty('ContainerFiles',self._can_files)
+            diff_red_alg.setProperty('SumFiles', self._sum_files)
+            diff_red_alg.setProperty('LoadLogFiles', self._load_logs)
+            diff_red_alg.setProperty('Instrument', self._instrument_name)
+            diff_red_alg.setProperty('Mode', self._diff_mode)
+            diff_red_alg.setProperty('SpectraRange',self._diff_spec)
+            diff_red_alg.setProperty('GroupingPolicy', self._grouping_method)
+            diff_red_alg.setProperty('OutputWorkspace', self._diff_workspace)
+            diff_red_alg.execute()
+            self.setProperty("DiffractionWorkspace", diff_red_alg.getProperty("OutputWorkspace").value)
+
     def validateInputs(self):
         """
         Validates algorithm properties.
@@ -332,7 +346,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self._output_x_units = 'DeltaE'
 
         self._msdfit = self.getProperty('MSDFit').value
-        self._diffraction = self.getProperrt('Diffraction').value
+        self._diffraction = self.getProperty('Diffraction').value
         self._diff_spec = self.getProperty('DiffractionSpectraRange').value
         self._can_files = self.getProperty('ContainerFiles').value
         self._diff_mode = self.getProperty('Mode').value
