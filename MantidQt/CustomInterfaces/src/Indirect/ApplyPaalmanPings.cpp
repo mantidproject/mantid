@@ -133,7 +133,7 @@ void ApplyPaalmanPings::updateContainer() {
       rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
       rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
       rebin->execute();
-    } else if (!sampleValid){
+    } else if (!sampleValid) {
       // Sample was not valid so do not rebin
       m_uiForm.ppPreview->removeSpectrum("Container");
       return;
@@ -178,9 +178,8 @@ void ApplyPaalmanPings::run() {
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
-      const char *text =
-          "Binning on sample and container does not match."
-          "Would you like to enable rebinning of the container?";
+      const char *text = "Binning on sample and container does not match."
+                         "Would you like to enable rebinning of the container?";
 
       int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
