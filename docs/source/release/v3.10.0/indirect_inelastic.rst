@@ -11,11 +11,12 @@ New features
 Algorithms
 ##########
 
+- *EnergyWindowScan* has been renamed to :ref:`IndirectReductionAndAnalysis <algm-IndirectReductionAndAnalysis>`
+- An option for Diffraction Reduction has been added to :ref:`IndirectReductionAndAnalysis <algm-IndirectReductionAndAnalysis>`
+
 Data Analysis
 #############
 
-Jump Fit
-~~~~~~~~
 
 Improvements
 ------------
