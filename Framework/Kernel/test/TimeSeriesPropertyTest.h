@@ -729,14 +729,16 @@ public:
     TS_ASSERT_EQUALS(out_0->size(), 3);
     for (int j = 0; j < out_0->size(); ++j) {
       ;
-      // std::cout << "out 0 " << j << ": " <<  out_0->nthTime(j) << ", " << out_0->nthValue(j) << "\n";
+      // std::cout << "out 0 " << j << ": " <<  out_0->nthTime(j) << ", " <<
+      // out_0->nthValue(j) << "\n";
     }
     // pop out this: TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
 
     TimeSeriesProperty<int> *out_1 = outputs[1];
     for (int j = 0; j < out_1->size(); ++j) {
       ;
-      // std::cout << "out 1 " << j << ": " << out_1->nthTime(j) << ", " << out_1->nthValue(j) << "\n";
+      // std::cout << "out 1 " << j << ": " << out_1->nthTime(j) << ", " <<
+      // out_1->nthValue(j) << "\n";
     }
     // TS_ASSERT_EQUALS(out_1->nthTime(0), X);
     // TS_ASSERT_EQUALS(out_1->nthValue(0), Y);
@@ -747,7 +749,8 @@ public:
     TS_ASSERT_EQUALS(out_2->size(), 2);
     for (int j = 0; j < out_2->size(); ++j) {
       ;
-      // std::cout << "out 2 " << j << ": " << out_2->nthTime(j) << ", " << out_2->nthValue(j) << "\n";
+      // std::cout << "out 2 " << j << ": " << out_2->nthTime(j) << ", " <<
+      // out_2->nthValue(j) << "\n";
     }
 
     TimeSeriesProperty<int> *out_3 = outputs[3];
