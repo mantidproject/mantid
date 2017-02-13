@@ -9,7 +9,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtMantidWidgets/RangeSelector.h"
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 // 3rd party library headers

@@ -4,12 +4,8 @@
 #include "MantidQtCustomDialogs/FitDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 // Qt
-#include <QCheckBox>
 #include <QComboBox>
 #include <QSpinBox>
-#include <QUrl>
-#include <QDesktopWidget>
-#include <QFileInfo>
 
 // Mantid
 #include "MantidKernel/Property.h"

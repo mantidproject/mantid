@@ -5,8 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
-#include <qwt_plot_curve.h>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
