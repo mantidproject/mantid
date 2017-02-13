@@ -134,7 +134,8 @@ public:
     }
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
@@ -167,7 +168,7 @@ public:
     }
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
@@ -200,7 +201,7 @@ public:
     }
 
     const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
 
     AnalysisDataService::Instance().remove(output);
@@ -265,15 +266,15 @@ public:
     // the first spectrum should have a group of detectors the other spectra
     // a single detector
     const auto &spectrumInfo = outputWS->spectrumInfo();
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
     TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(1));
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(2));
+    TS_ASSERT(spectrumInfo.hasDetectors(2));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(2));
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(3));
+    TS_ASSERT(spectrumInfo.hasDetectors(3));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(3));
-    TS_ASSERT_THROWS_NOTHING(spectrumInfo.detector(4));
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
     TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
     AnalysisDataService::Instance().remove(output);
