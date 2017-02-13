@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import (DeleteWorkspace, CreateSampleWorkspace,
                               AddSampleLog, EditInstrumentGeometry,
-                              CloneWorkspace, CheckWorkspacesMatch, FindEPP)
+                              CloneWorkspace, CompareWorkspaces, FindEPP)
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 from scipy.constants import N_A, hbar, k
@@ -118,8 +118,7 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
                                  EPPTable=self._table,
                                  OutputWorkspace=outputWorkspaceName)
         self.assertTrue(alg_test.isExecuted())
-        self.assertEqual("Success!", CheckWorkspacesMatch(backup,
-                         self._input_ws))
+        self.assertTrue(CompareWorkspaces(backup, self._input_ws)[0])
         DeleteWorkspace(backup)
 
     def tearDown(self):
@@ -143,8 +142,8 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
         dwf = np.exp(
             -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
-        self.assertAlmostEqual(y_sum*dwf, wsoutput.readY(1)[0])
-        self.assertAlmostEqual(e_sum*dwf, wsoutput.readE(1)[0])
+        self.assertAlmostEqual(y_sum/dwf, wsoutput.readY(1)[0])
+        self.assertAlmostEqual(e_sum/dwf, wsoutput.readE(1)[0])
 
 
 if __name__ == "__main__":

@@ -49,7 +49,6 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
 # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
     # ===================================================================================
-
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
@@ -58,7 +57,6 @@ class AbinsLoadCASTEPTest(unittest.TestCase):
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
     # ===================================================================================
-
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
