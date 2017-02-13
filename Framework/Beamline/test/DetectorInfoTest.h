@@ -41,6 +41,10 @@ public:
                      std::out_of_range);
   }
 
+  void test_constructor_length_mismatch() {
+    TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), std::runtime_error);
+  }
+
   void test_copy() {
     const DetectorInfo source(PosVec(7), RotVec(7));
     const auto copy(source);
@@ -115,6 +119,58 @@ public:
     source.setMasked(0, false);
     TS_ASSERT(!source.isMasked(0));
     TS_ASSERT(copy.isMasked(0));
+  }
+
+  void test_constructors_set_positions_correctly() {
+    Eigen::Vector3d pos0{1, 2, 3};
+    Eigen::Vector3d pos1{2, 3, 4};
+    PosVec positions{pos0, pos1};
+    const DetectorInfo info(positions, RotVec(2));
+    TS_ASSERT_EQUALS(info.position(0), pos0);
+    TS_ASSERT_EQUALS(info.position(1), pos1);
+    const DetectorInfo info_with_monitors(positions, RotVec(2), {1});
+    TS_ASSERT_EQUALS(info_with_monitors.position(0), pos0);
+    TS_ASSERT_EQUALS(info_with_monitors.position(1), pos1);
+  }
+
+  void test_constructors_set_rotations_correctly() {
+    Eigen::Quaterniond rot0{1, 2, 3, 4};
+    Eigen::Quaterniond rot1{2, 3, 4, 5};
+    RotVec rotations{rot0, rot1};
+    const DetectorInfo info(PosVec(2), rotations);
+    TS_ASSERT_EQUALS(info.rotation(0).coeffs(), rot0.coeffs());
+    TS_ASSERT_EQUALS(info.rotation(1).coeffs(), rot1.coeffs());
+    const DetectorInfo info_with_monitors(PosVec(2), rotations);
+    TS_ASSERT_EQUALS(info_with_monitors.rotation(0).coeffs(), rot0.coeffs());
+    TS_ASSERT_EQUALS(info_with_monitors.rotation(1).coeffs(), rot1.coeffs());
+  }
+
+  void test_position_rotation_copy() {
+    DetectorInfo source(PosVec(7), RotVec(7));
+    source.setPosition(0, {1, 2, 3});
+    source.setRotation(0, Eigen::Quaterniond::Identity());
+    const auto copy(source);
+    source.setPosition(0, {3, 2, 1});
+    source.setRotation(0, Eigen::Quaterniond(Eigen::AngleAxisd(
+                              30.0, Eigen::Vector3d{1, 2, 3})));
+    TS_ASSERT_EQUALS(copy.size(), 7);
+    TS_ASSERT_EQUALS(copy.position(0), Eigen::Vector3d(1, 2, 3));
+    TS_ASSERT_EQUALS(copy.rotation(0).coeffs(),
+                     Eigen::Quaterniond::Identity().coeffs());
+  }
+
+  void test_setPosition() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    Eigen::Vector3d pos{1, 2, 3};
+    info.setPosition(0, pos);
+    TS_ASSERT_EQUALS(info.position(0), pos);
+  }
+
+  void test_setRotattion() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    Eigen::Quaterniond rot{1, 2, 3, 4};
+    info.setRotation(0, rot);
+    TS_ASSERT_EQUALS(info.rotation(0).coeffs(), rot.coeffs());
   }
 };
 
