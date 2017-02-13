@@ -27,6 +27,8 @@ def _elems_or_none(l):
 
 
 class EnergyWindowScan(DataProcessorAlgorithm):
+
+    # Reduction Inputs
     _data_files = None
     _sum_files = None
     _load_logs = None
@@ -37,19 +39,34 @@ class EnergyWindowScan(DataProcessorAlgorithm):
     _efixed = None
     _spectra_range = None
     _background_range = None
-    _elastic_range = None
-    _inelastic_range = None
     _rebin_string = None
     _detailed_balance = None
     _grouping_method = None
     _grouping_ws = None
     _grouping_map_file = None
-    _output_ws = None
     _output_x_units = None
-    _ipf_filename = None
+
+    # ElasticWindow Inputs
+    _elastic_range = None
+    _inelastic_range = None
     _sample_log_name = None
     _sample_log_value = None
+
+    # Diffraction Inputs
+    _diffraction = None
+    _diff_spec = None
+    _can_files = None
+    _diff_mode = None
+
+    # Outputs
+    _output_ws = None
     _scan_ws = None
+    _diff_workspace = None
+
+
+    _ipf_filename = None
+
+
 
     def category(self):
         return 'Workflow\\Inelastic;Inelastic\\Indirect;Workflow\\MIDAS'
@@ -115,6 +132,20 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self.declareProperty(name='MSDFit', defaultValue=False,
                              doc='Perform an MSDFit')
 
+        self.declareProperty(name='Diffraction', defaultValue=False,
+                             doc='Perform a diffraction reduction')
+
+        self.declareProperty(IntArrayProperty(name='DiffractionSpectraRange', defaultValue=[3, 53],
+                                              validator=IntArrayMandatoryValidator()),
+                             doc='Spectra to use for diffraction reduction')
+
+        self.declareProperty(StringArrayProperty(name='ContainerFiles'),
+                             doc='Comma separated list of input files for the empty container runs for diffraction reduction.')
+
+        self.declareProperty(name='Mode', defaultValue='diffspec',
+                             validator=StringListValidator(['diffspec', 'diffonly']),
+                             doc='Diffraction mode used')
+
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Toggle input file summing or sequential processing')
         # Output properties
@@ -122,6 +153,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
                              doc='Workspace group for the resulting workspaces.')
         self.declareProperty(name='ScanWorkspace', defaultValue='Scan',
                              doc='Workspace for the scan results.')
+        self.declareProperty(name='DiffractionWorkspace', defaultValue='Diffraction',
+                             doc='Workspace for the diffraction results')
 
     def PyExec(self):
 
@@ -299,12 +332,17 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         self._output_x_units = 'DeltaE'
 
         self._msdfit = self.getProperty('MSDFit').value
+        self._diffraction = self.getProperrt('Diffraction').value
+        self._diff_spec = self.getProperty('DiffractionSpectraRange').value
+        self._can_files = self.getProperty('ContainerFiles').value
+        self._diff_mode = self.getProperty('Mode').value
 
         self._output_ws = self.getPropertyValue('ReducedWorkspace')
         self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
         self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
 
         self._scan_ws = self.getPropertyValue('ScanWorkspace')
+        self._diff_workspace = self.getPropertyValue('DiffractionWorkspace')
 
         # Disable sum files if there is only one file
         if (len(self._data_files) == 1) & self._sum_files:
@@ -322,6 +360,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(EnergyWindowScan)
