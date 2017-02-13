@@ -209,6 +209,12 @@ void IkedaCarpenterPV::constFunction(double *out, const double *xValues,
   const double voigtsigmaSquared = getParameter("SigmaSquared");
   const double voigtgamma = getParameter("Gamma");
   const double X0 = getParameter("X0");
+  if (I < 0.0 || alpha0 < 0.0 || alpha1 < 0.0 || beta0 < 0.0 || kappa < 0.0 ||
+      voigtsigmaSquared < 0.0 || voigtgamma < 0.0 || X0 < 0.0) {
+    for (int i = 0; i < nData; i++)
+      out[i] = std::numeric_limits<double>::infinity();
+    return;
+  }
 
   // cal pseudo voigt sigmaSq and gamma and eta
   double gamma = 1.0; // dummy initialization
@@ -291,6 +297,12 @@ void IkedaCarpenterPV::functionLocal(double *out, const double *xValues,
   const double voigtsigmaSquared = getParameter("SigmaSquared");
   const double voigtgamma = getParameter("Gamma");
   const double X0 = getParameter("X0");
+  if (I < 0.0 || alpha0 < 0.0 || alpha1 < 0.0 || beta0 < 0.0 || kappa < 0.0 ||
+      voigtsigmaSquared < 0.0 || voigtgamma < 0.0 || X0 < 0.0) {
+    for (size_t i = 0; i < nData; i++)
+      out[i] = std::numeric_limits<double>::infinity();
+    return;
+  }
 
   // cal pseudo voigt sigmaSq and gamma and eta
   double gamma = 1.0; // dummy initialization
