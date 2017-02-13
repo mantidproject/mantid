@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -100,20 +101,29 @@ void ResizeRectangularDetector::exec() {
   if (!det)
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-    pmap.clearPositionSensitiveCaches();
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  Geometry::ParameterMap &pmap = input->instrumentParameters();
+  auto &detectorInfo = input->mutableDetectorInfo();
+  // Add a parameter for the new scale factors
+  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  pmap.clearPositionSensitiveCaches();
 
-    pmap.clearPositionSensitiveCaches();
+  // Positions of detectors are now stored in DetectorInfo, so we must update
+  // positions there.
+  V3D scale(ScaleX, ScaleY, 1);
+  det->getRotation().rotate(scale);
+  const auto origin = det->getPos();
+  const auto idstart = det->idstart();
+  const auto idstep = det->idstep();
+  const auto count = det->xpixels() * det->ypixels();
+  for (detid_t id = idstart; id < idstart + idstep * count; ++id) {
+    const auto index = detectorInfo.indexOf(id);
+    const auto pos = detectorInfo.position(index);
+    const auto relPos = pos - origin;
+    auto newRelPos = relPos * scale;
+    detectorInfo.setPosition(index, pos - relPos + newRelPos);
   }
 }
 
