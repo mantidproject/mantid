@@ -28,14 +28,6 @@ absorption_correction_params = {
     "cylinder_position": [0., 0., 0.],
 
     "chemical_formula": "V",
-    "attenuation_cross_section": 4.88350,
-    "scattering_cross_section": 5.15775,
-    "sample_number_density": 0.0718956,
-
-    "number_of_slices": 10,
-    "number_of_annuli": 10,
-    "number_of_wavelength_points": 100,
-    "exponential_method": "Normal"
 }
 
 variable_help = {

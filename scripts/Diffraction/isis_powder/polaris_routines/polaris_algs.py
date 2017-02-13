@@ -13,10 +13,7 @@ def calculate_absorb_corrections(ws_to_correct):
     absorb_dict = polaris_advanced_config.absorption_correction_params
     geometry_json = {'Shape': 'Cylinder', 'Height': absorb_dict["cylinder_sample_height"],
                      'Radius': absorb_dict["cylinder_sample_radius"], 'Center': absorb_dict["cylinder_position"]}
-    material_json = {'AttenuationXSection': absorb_dict["attenuation_cross_section"],
-                     'ChemicalFormula': absorb_dict["chemical_formula"],
-                     'ScatteringXSection':  absorb_dict["scattering_cross_section"],
-                     'SampleNumberDensity': absorb_dict["sample_number_density"]}
+    material_json = {'ChemicalFormula': absorb_dict["chemical_formula"]}
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 

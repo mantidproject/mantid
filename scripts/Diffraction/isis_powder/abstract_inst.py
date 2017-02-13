@@ -201,15 +201,14 @@ class AbstractInst(object):
 
     # Steps applicable to all instruments
 
-    def _generate_out_file_paths(self, run_details, output_directory=None):
+    def _generate_out_file_paths(self, run_details):
         """
         Generates the various output paths and file names to be used during saving or as workspace names
         :param run_details: The run details associated with this run
         :param output_directory: The output directory to use as part of the output path
         :return: A dictionary containing the various output paths and generated output name
         """
-        if not output_directory:
-            output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
+        output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         file_name = str(self._generate_output_file_name(run_number_string=run_details.run_number))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
