@@ -1,11 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -108,18 +105,14 @@ void MoveInstrumentComponent::exec() {
   }
 
   // Do the move
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
+  V3D position(X, Y, Z);
   if (relativePosition)
-    positionType = Relative;
+    position += comp->getPos();
+
   if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
+    inputW->mutableDetectorInfo().setPosition(*comp, position);
   } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
+    inputP->mutableDetectorInfo().setPosition(*comp, position);
   }
 }
 
