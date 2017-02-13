@@ -15,7 +15,6 @@ exclude =
     MantidPlot,
     MantidQt,
     QtPropertyBrowser,
-    scripts/lib1to2,
     scripts/test,
     Testing/PerformanceTests,
     Testing/SystemTests/lib,

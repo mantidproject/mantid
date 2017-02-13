@@ -8,9 +8,6 @@ Muon Analysis
 Interfaces
 ----------
 
-ALC
-###
-
 Muon Analysis
 #############
 
@@ -25,13 +22,7 @@ Muon Analysis
 - The default Plot Policy has been changed to **Use Previous Window**.  This avoids the speed and stability issues that could occur with **Create New Window** once hundreds of graph windows had accumulated over several days of an experiement.
 - Fixed a bug for the time averaging within the muon analysis. Now uses the time average function. 
 
-Algorithms
-----------
 
-Fit Functions
--------------
-
-|
 
 `Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
 on GitHub.

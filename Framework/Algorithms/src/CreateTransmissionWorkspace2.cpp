@@ -103,13 +103,11 @@ CreateTransmissionWorkspace2::validateInputs() {
 void CreateTransmissionWorkspace2::exec() {
 
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
-  firstTransWS = convertToWavelength(firstTransWS);
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
   MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
   if (secondTransWS) {
-    secondTransWS = convertToWavelength(secondTransWS);
     secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
     secondTransWS = cropWavelength(secondTransWS);
 
@@ -164,6 +162,8 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
       !(intMinProperty->isDefault() || intMaxProperty->isDefault());
 
   auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
+  if (!integratedMonitors)
+    detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
 
   return divide(detectorWS, monitorWS);
 }
