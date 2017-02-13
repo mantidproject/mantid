@@ -1278,7 +1278,8 @@ double tofToDSpacingFactor(const double l1, const double l2,
  * @param offsets
  * @return
  */
-double tofToDSpacingFactor(const double l1, const double l2, const double theta,
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta,
                            const std::vector<detid_t> &detectors,
                            const std::map<detid_t, double> &offsets) {
   double factor = 0.;
@@ -1290,7 +1291,7 @@ double tofToDSpacingFactor(const double l1, const double l2, const double theta,
     } else {
       offset = 0.;
     }
-    factor += tofToDSpacingFactor(l1, l2, theta, offset);
+    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
   }
   return factor / static_cast<double>(detectors.size());
 }

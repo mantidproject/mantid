@@ -58,48 +58,38 @@ void CreateLogTimeCorrection::exec() {
     throw runtime_error(errmsg.str());
   }
 
-  // 2. Explore geometry
-  const double l1 = getInstrumentSetup(dataWS->detectorInfo());
+  const auto &detectorInfo = dataWS->detectorInfo();
+
+  // 2. Log some information
+  logGeometryInformation(detectorInfo);
 
   // 3. Calculate log time correction
-  calculateCorrection(l1);
+  auto corrections = calculateCorrections(detectorInfo);
 
   // 4. Output
-  TableWorkspace_sptr outWS = generateCorrectionTable();
+  TableWorkspace_sptr outWS =
+      generateCorrectionTable(detectorInfo, corrections);
   setProperty("OutputWorkspace", outWS);
 
   string filename = getProperty("OutputFilename");
   g_log.information() << "Output file name is " << filename << ".\n";
   if (!filename.empty()) {
-    writeCorrectionToFile(filename);
+    writeCorrectionToFile(filename, detectorInfo, corrections);
   }
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get instrument geometry setup including L2 for each detector and L1
   */
-double
-CreateLogTimeCorrection::getInstrumentSetup(const DetectorInfo &detectorInfo) {
+void CreateLogTimeCorrection::logGeometryInformation(
+    const API::DetectorInfo &detectorInfo) const {
 
-  // 2. Get detector IDs
-
-  std::vector<detid_t> detids = detectorInfo.detectorIDs();
-  for (size_t index = 0; index < detectorInfo.size(); ++index) {
-    if (!detectorInfo.isMonitor(index)) {
-      double l2 = detectorInfo.l2(index);
-      m_l2map.emplace(detids[index], l2);
-    }
-  }
-
-  const double l1 = detectorInfo.l1();
-  // 3. Output information
   g_log.information() << "Sample position = " << detectorInfo.samplePosition()
                       << "; "
                       << "Source position = " << detectorInfo.sourcePosition()
-                      << ", L1 = " << l1 << "; "
+                      << ", L1 = " << detectorInfo.l1() << "; "
                       << "Number of detector/pixels = " << detectorInfo.size()
                       << ".\n";
-  return l1;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -107,42 +97,45 @@ CreateLogTimeCorrection::getInstrumentSetup(const DetectorInfo &detectorInfo) {
  * time at detector
   * to time at sample
   */
-void CreateLogTimeCorrection::calculateCorrection(const double l1) {
-  map<int, double>::iterator miter;
-  for (miter = m_l2map.begin(); miter != m_l2map.end(); ++miter) {
-    int detid = miter->first;
-    double l2 = miter->second;
-    double corrfactor = l1 / (l1 + l2);
-    m_correctionMap.emplace(detid, corrfactor);
+std::vector<double> CreateLogTimeCorrection::calculateCorrections(
+    const API::DetectorInfo &detectorInfo) const {
+
+  std::vector<double> corrections(detectorInfo.size());
+  const double l1 = detectorInfo.l1();
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
+       ++detectorIndex) {
+
+    double corrfactor = l1 / (l1 + detectorInfo.l2(detectorIndex));
+    corrections[detectorIndex] = corrfactor;
   }
+  return corrections;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Write L2 map and correction map to a TableWorkspace
   */
-TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
+TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
+    const API::DetectorInfo &detectorInfo,
+    const std::vector<double> &corrections) const {
   auto tablews = boost::make_shared<TableWorkspace>();
 
   tablews->addColumn("int", "DetectorID");
   tablews->addColumn("double", "Correction");
   tablews->addColumn("double", "L2");
 
-  if (m_l2map.size() != m_correctionMap.size())
-    throw runtime_error("Program logic error!");
+  const auto &detectorIds = detectorInfo.detectorIDs();
 
-  map<int, double>::iterator l2iter, citer;
-  for (l2iter = m_l2map.begin(); l2iter != m_l2map.end(); ++l2iter) {
-    int detid = l2iter->first;
-    double l2 = l2iter->second;
+  for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
+       ++detectorIndex) {
 
-    citer = m_correctionMap.find(detid);
-    if (citer == m_correctionMap.end()) {
-      throw runtime_error("Program logic error (B)!");
+    if (!detectorInfo.isMonitor(detectorIndex)) {
+      const detid_t detid = detectorIds[detectorIndex];
+      const double correction = corrections[detectorIndex];
+      const double l2 = detectorInfo.l2(detectorIndex);
+
+      TableRow newrow = tablews->appendRow();
+      newrow << detid << correction << l2;
     }
-    double correction = citer->second;
-
-    TableRow newrow = tablews->appendRow();
-    newrow << detid << correction << l2;
   }
 
   return tablews;
@@ -150,17 +143,21 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable() {
 //----------------------------------------------------------------------------------------------
 /** Write correction map to a text file
   */
-void CreateLogTimeCorrection::writeCorrectionToFile(string filename) {
+void CreateLogTimeCorrection::writeCorrectionToFile(
+    const string filename, const DetectorInfo &detectorInfo,
+    const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());
 
   if (ofile.is_open()) {
-    map<int, double>::iterator miter;
-    for (miter = m_correctionMap.begin(); miter != m_correctionMap.end();
-         ++miter) {
-      int detid = miter->first;
-      double corr = miter->second;
-      ofile << detid << "\t" << setw(20) << setprecision(5) << corr << "\n";
+
+    const auto &detectorIds = detectorInfo.detectorIDs();
+    for (size_t detectorIndex = 0; detectorIndex < corrections.size();
+         ++detectorIndex) {
+      if (!detectorInfo.isMonitor(detectorIndex)) {
+        ofile << detectorIds[detectorIndex] << "\t" << setw(20)
+              << setprecision(5) << corrections[detectorIndex] << "\n";
+      }
     }
     ofile.close();
   } else {

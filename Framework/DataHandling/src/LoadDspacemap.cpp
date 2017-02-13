@@ -108,7 +108,7 @@ void LoadDspacemap::CalculateOffsetsFromDSpacemapFile(
     dspace.push_back(read);
   }
 
-  auto detectorIds = detectorInfo.detectorIDs();
+  const auto &detectorIds = detectorInfo.detectorIDs();
 
   for (size_t detectorIndex = 0; detectorIndex < detectorInfo.size();
        ++detectorIndex) {
