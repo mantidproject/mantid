@@ -78,6 +78,11 @@ void SplineBackground::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
+/**
+ * Calculates the number of unmasked bins to process within spline background
+ *
+ * @param ws:: The input workspace to calculate the number of unmasked bins of
+*/
 size_t
 SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
   const int spec = getProperty("WorkspaceIndex");
@@ -92,6 +97,14 @@ SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
   return ySize;
 }
 
+/**
+ * Adds the data from the workspace into various GSL vectors
+ * for the spline later
+ *
+ * @param ws:: The workspace containing data to process
+ * @param specNum:: The spectrum number to process from the input WS
+ * @param expectedNumBins:: The expected number of unmasked bins to add
+ */
 void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
                                          const size_t specNum,
                                          int expectedNumBins) {
@@ -145,6 +158,13 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
   }
 }
 
+/**
+  * Allocates the various vectors and workspaces within the GSL
+  *
+  * @param numBins:: The number of unmasked bins in the input workspaces to
+  *process
+  * @param ncoeffs:: The user specified number of coefficients to process
+  */
 void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   const int k = 4; // order of the spline + 1 (cubic)
   const int nbreak = ncoeffs - (k - 2);
@@ -167,6 +187,9 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   sp.weightedLinearFitWs = gsl_multifit_linear_alloc(numBins, ncoeffs);
 }
 
+/**
+ * Frees various vectors and workspaces within the GSL
+ */
 void SplineBackground::freeBSplinePointers() {
   // Create an alias to tidy it up
   bSplinePointers &sp = m_splinePointers;
@@ -191,6 +214,15 @@ void SplineBackground::freeBSplinePointers() {
   sp.weightedLinearFitWs = nullptr;
 }
 
+/**
+ * Makes a clone of the input workspace and retrieves fitted values
+ * and stores them in the output workspace with the user specified name
+ *
+ * @param ws:: The input workspace to clone
+ * @param spec:: The user specified spectrum number in the input ws to process
+ *
+ * @return:: A shared pointer to the output workspace
+ */
 MatrixWorkspace_sptr
 SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
                                    const size_t spec) {
@@ -220,6 +252,14 @@ SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
   return outWS;
 }
 
+/**
+ * Sets up GSL with various parameters needed for subsequent fitting
+ *
+ * @param xMin:: The minimum x value in the input workspace
+ * @param xMax:: The maximum x value in the input workspace
+ * @param numBins:: The number of unmasked bins in the input workspace
+ * @param ncoeff:: The user specified coefficient to use
+ */
 void SplineBackground::setupSpline(double xMin, double xMax, int numBins,
                                    int ncoeff) {
   /* use uniform breakpoints */

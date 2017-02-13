@@ -61,13 +61,25 @@ private:
   void init() override;
   void exec() override;
 
+  /// Adds data from the workspace to the GSL vectors for later processing
   void addWsDataToSpline(const API::MatrixWorkspace *ws, const size_t specNum,
                          int expectedNumBins);
+
+  /// Allocates various pointers used within GSL
   void allocateBSplinePointers(int numBins, int ncoeffs);
+
+  /// Deallocates various pointers within GSL
   void freeBSplinePointers();
+
+  /// Calculates the number on unmasked bins to process
   size_t calculateNumBinsToProcess(const API::MatrixWorkspace *ws);
+
+  /// Gets the values from the fitted GSL, and creates a clone of input
+  /// workspace with new values
   API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr ws,
                                              const size_t spec);
+
+  /// Sets up the splines for later fitting
   void setupSpline(double xMin, double xMax, int numBins, int ncoeff);
 
   /// Struct holding various pointers required by GSL
