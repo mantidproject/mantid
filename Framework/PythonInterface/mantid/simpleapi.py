@@ -567,8 +567,12 @@ def _get_function_spec(func):
     :param func: A Python function object
     """
     import inspect
+    import six
     try:
-        argspec = inspect.getargspec(func)
+        if six.PY3:
+            argspec = inspect.getfullargspec(func)
+        else:
+            argspec = inspect.getargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
