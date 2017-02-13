@@ -54,12 +54,9 @@ void SaveAscii::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -192,8 +189,6 @@ void SaveAscii::exec() {
     file << '\n';
   }
 
-  bool isHistogram = ws->isHistogramData();
-
   // Set the number precision
   int prec = getProperty("Precision");
   if (prec != EMPTY_INT())
@@ -201,14 +196,9 @@ void SaveAscii::exec() {
 
   Progress progress(this, 0, 1, nBins);
   auto pointDeltas = ws->pointStandardDeviations(0);
+  auto points = ws->points(0);
   for (int bin = 0; bin < nBins; bin++) {
-    if (isHistogram) // bin centres
-    {
-      file << (ws->x(0)[bin] + ws->x(0)[bin + 1]) / 2;
-    } else // data points
-    {
-      file << ws->x(0)[bin];
-    }
+    file << (points[bin]) / 2;
 
     if (idx.empty())
       for (int spec = 0; spec < nSpectra; spec++) {
