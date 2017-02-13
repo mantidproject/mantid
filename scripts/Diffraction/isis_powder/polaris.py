@@ -58,11 +58,20 @@ class Polaris(AbstractInst):
 
     @staticmethod
     def _generate_input_file_name(run_number):
+        polaris_old_name = "POL"
+        polaris_new_name = "POLARIS"
+        first_run_new_name = 96912
+
         if isinstance(run_number, list):
-            updated_list = ["POL" + str(val) for val in run_number]
+            # Lists use recursion to deal with individual entries
+            updated_list = []
+            for run in run_number:
+                updated_list.append(Polaris._generate_input_file_name(run_number=run))
             return updated_list
         else:
-            return "POL" + str(run_number)
+            # Select between old and new prefix
+            prefix = polaris_new_name if int(run_number) >= first_run_new_name else polaris_old_name
+            return prefix + str(run_number)
 
     def _generate_output_file_name(self, run_number_string):
         return self._generate_input_file_name(run_number=run_number_string)
@@ -85,7 +94,8 @@ class Polaris(AbstractInst):
         return output
 
     def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
-        return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws)
+        return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
+                                                         multiple_scattering=self._inst_settings.multiple_scattering)
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(run_details=run_details,

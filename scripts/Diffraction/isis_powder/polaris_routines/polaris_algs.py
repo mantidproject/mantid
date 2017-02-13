@@ -7,7 +7,7 @@ from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
 
 
-def calculate_absorb_corrections(ws_to_correct):
+def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
@@ -18,7 +18,8 @@ def calculate_absorb_corrections(ws_to_correct):
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
     ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="TOF")
-    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
+    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                                  MultipleScattering=multiple_scattering)
     ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="dSpacing")
 
     return ws_to_correct
