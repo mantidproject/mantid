@@ -723,28 +723,191 @@ public:
       std::cout << "otuput " << i << " has entries: " << out_i->size() << "\n";
     }
 
+    // Exam the split entries
+    TimeSeriesProperty<int> *out_0 = outputs[0];
+    TS_ASSERT_EQUALS(out_0->size(), 4);
+    for (int j = 0; j < out_0->size(); ++j) {
+      std::cout << out_0->nthTime(j) << ", " << out_0->nthValue(j) << "\n";
+    }
+    // pop out this: TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
+
     TimeSeriesProperty<int> *out_1 = outputs[1];
     for (int j = 0; j < out_1->size(); ++j) {
       std::cout << out_1->nthTime(j) << ", " << out_1->nthValue(j) << "\n";
     }
     TS_ASSERT_EQUALS(out_1->size(), 5);
 
-    //  TS_ASSERT_EQUALS(1, 2);
+    TimeSeriesProperty<int> *out_2 = outputs[2];
+    TS_ASSERT_EQUALS(out_2->size(), 3);
+    for (int j = 0; j < out_2->size(); ++j) {
+      std::cout << out_2->nthTime(j) << ", " << out_2->nthValue(j) << "\n";
+    }
+
+    TimeSeriesProperty<int> *out_3 = outputs[3];
+    TS_ASSERT_EQUALS(out_3->size(), 4);
+    for (int j = 0; j < out_3->size(); ++j) {
+      std::cout << out_3->nthTime(j) << ", " << out_3->nthValue(j) << "\n";
+    }
   }
 
   //----------------------------------------------------------------------------
+  /** last splitter is before first entry
+   * @brief test_splitByTimeVectorEarlySplitter
+   */
   void test_splitByTimeVectorEarlySplitter() {
-    // TODO - Implement this: last splitter is before first entry
+    // create the splitters
+    std::vector<DateAndTime> split_time_vec;
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:40"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:55"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:56"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:09"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:45"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:12:50"));
+
+    std::vector<int> split_target_vec;
+    split_target_vec.push_back(1);
+    split_target_vec.push_back(0);
+    split_target_vec.push_back(2);
+    split_target_vec.push_back(0);
+    split_target_vec.push_back(1);
+    split_target_vec.push_back(3);
+
+    TimeSeriesProperty<int> log("test log");
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
+
+    // Initialze the 4 splitters
+    std::vector<TimeSeriesProperty<int> *> outputs;
+    for (int itarget = 0; itarget < 4; ++itarget) {
+      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
+      outputs.push_back(tsp);
+    }
+
+    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    // check
+    for (int i = 0; i < 4; ++i)
+    {
+      TimeSeriesProperty<int> *out_i = outputs[i];
+      TS_ASSERT_EQUALS(out_i->size(), 0);
+    }
+
   }
 
   //----------------------------------------------------------------------------
+  /** first splitter is after last entry
+   * @brief test_splitByTimeVectorLaterSplitter
+   */
   void test_splitByTimeVectorLaterSplitter() {
-    // TODO - Implement this: first splitter is after last entry
+    // create the splitters
+    std::vector<DateAndTime> split_time_vec;
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:10"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:40"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:55"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:56"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:09"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:45"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:12:50"));
+
+    std::vector<int> split_target_vec;
+    split_target_vec.push_back(1);
+    split_target_vec.push_back(0);
+    split_target_vec.push_back(2);
+    split_target_vec.push_back(0);
+    split_target_vec.push_back(1);
+    split_target_vec.push_back(3);
+
+    // create test log
+    TimeSeriesProperty<int> log("test log");
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
+
+    // Initialze the 4 splitters
+    std::vector<TimeSeriesProperty<int> *> outputs;
+    for (int itarget = 0; itarget < 4; ++itarget) {
+      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
+      outputs.push_back(tsp);
+    }
+
+    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    // check
+    for (int i = 0; i < 4; ++i)
+    {
+      TimeSeriesProperty<int> *out_i = outputs[i];
+      TS_ASSERT_EQUALS(out_i->size(), 0);
+    }
+
   }
 
   //----------------------------------------------------------------------------
+  /** high-frequency splitters splits a slow change log
+   * @brief test_splitByTimeVectorFastLogSplitter
+   */
   void test_splitByTimeVectorFastLogSplitter() {
-    // TODO - Implement this: high-frequency splitters splits a slow change log
+    // create test log
+    TimeSeriesProperty<int> log("test log");
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
+
+    // create a high frequency splitter
+    DateAndTime split_time("2007-11-30T16:17:00");
+    int64_t dt = 100*1000;
+
+    std::vector<DateAndTime> vec_split_times;
+    std::vector<int> vec_split_target;
+
+    for (int i = 0; i < 10; ++i)
+    {
+      for (int j = 0; j < 10; ++j)
+      {
+        vec_split_times.push_back(split_time);
+        split_time += dt;
+        vec_split_target.push_back(j);
+      }
+    }
+
+    // push back last split-time (split stop)
+    vec_split_times.push_back(split_time);
+
+    // Initialze the 10 splitters
+    std::vector<TimeSeriesProperty<int> *> outputs;
+    for (int itarget = 0; itarget < 10; ++itarget) {
+      TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
+      outputs.push_back(tsp);
+    }
+
+    // split time series property
+    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+
+    // test
+    // TODO - FROM HERE!
+
   }
 
   //----------------------------------------------------------------------------
