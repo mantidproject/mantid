@@ -1,4 +1,4 @@
-﻿"""
+"""
     This module defines a simple function-style API for running Mantid
     algorithms. Each algorithm within Mantid is mapped to a Python
     function of the same name with the parameters of the algorithm becoming

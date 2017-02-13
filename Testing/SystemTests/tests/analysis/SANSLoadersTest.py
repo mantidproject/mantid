@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
 take considerable time because it involves loading data. Besides, it uses data that is
