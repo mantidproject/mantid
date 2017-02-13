@@ -795,12 +795,10 @@ public:
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
     // check
-    for (int i = 0; i < 4; ++i)
-    {
+    for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
     }
-
   }
 
   //----------------------------------------------------------------------------
@@ -849,12 +847,10 @@ public:
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
     // check
-    for (int i = 0; i < 4; ++i)
-    {
+    for (int i = 0; i < 4; ++i) {
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
     }
-
   }
 
   //----------------------------------------------------------------------------
@@ -877,15 +873,13 @@ public:
 
     // create a high frequency splitter
     DateAndTime split_time("2007-11-30T16:17:00");
-    int64_t dt = 100*1000;
+    int64_t dt = 100 * 1000;
 
     std::vector<DateAndTime> vec_split_times;
     std::vector<int> vec_split_target;
 
-    for (int i = 0; i < 10; ++i)
-    {
-      for (int j = 0; j < 10; ++j)
-      {
+    for (int i = 0; i < 10; ++i) {
+      for (int j = 0; j < 10; ++j) {
         vec_split_times.push_back(split_time);
         split_time += dt;
         vec_split_target.push_back(j);
@@ -907,7 +901,6 @@ public:
 
     // test
     // TODO - FROM HERE!
-
   }
 
   //----------------------------------------------------------------------------
