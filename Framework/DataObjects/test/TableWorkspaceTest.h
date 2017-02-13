@@ -360,7 +360,8 @@ public:
     TS_ASSERT_EQUALS(d, 0.0);
     TS_ASSERT_THROWS_NOTHING(d = tw.getColumn("T")->toDouble(0));
     TS_ASSERT_EQUALS(d, 1.0);
-    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0), boost::bad_lexical_cast);
+    TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0),
+                     boost::bad_lexical_cast);
   }
   void testGetVectorSetVectorValues() {
 
