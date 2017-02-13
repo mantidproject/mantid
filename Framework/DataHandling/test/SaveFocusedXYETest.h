@@ -453,4 +453,54 @@ private:
   const double m_tol;
 };
 
+class SaveFocusedXYETestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    // Create a workspace for writing out
+    Mantid::API::MatrixWorkspace_sptr dataws =
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(m_wsName, dataws);
+
+    for (int i = 0; i < numberOfIterations; ++i) {
+      saveAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testSaveFocusedPerformance() {
+    for (auto alg : saveAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete saveAlgPtrs[i];
+      saveAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(m_wsName);
+    Poco::File focusedFile(m_filename);
+    if (focusedFile.exists())
+      focusedFile.remove();
+  }
+
+private:
+  std::vector<Mantid::DataHandling::SaveFocusedXYE *> saveAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string m_wsName = "SaveFocusedXYETestPerformance";
+  const std::string m_filename = "test_performance.txt";
+
+  Mantid::DataHandling::SaveFocusedXYE *setupAlg() {
+    Mantid::DataHandling::SaveFocusedXYE *saver =
+        new Mantid::DataHandling::SaveFocusedXYE;
+    saver->initialize();
+    saver->setPropertyValue("InputWorkspace", m_wsName);
+    saver->setProperty("Filename", m_filename);
+    saver->setRethrows(true);
+    return saver;
+  }
+};
+
 #endif // SAVEFOCUSEDXYETEST_H_

@@ -105,11 +105,6 @@ private:
   void writeMAUDSpectraHeader(std::ostream &os, size_t index1, size_t index2,
                               double flightPath, double tth,
                               const std::string &caption);
-  /// Determine the focused position for the supplied spectrum.
-  void getFocusedPos(API::MatrixWorkspace_const_sptr wksp,
-                     const size_t spectrum, double &l1, double &l2,
-                     double &tth);
-
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
