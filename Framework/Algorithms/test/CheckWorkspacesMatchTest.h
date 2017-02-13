@@ -543,7 +543,7 @@ public:
       checker.initialize();
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(2);
+        WorkspaceCreationHelper::create1DWorkspaceFib(2, true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
