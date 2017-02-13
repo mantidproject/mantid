@@ -3,6 +3,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
@@ -1278,8 +1279,13 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       relRot = invParentRot * relRot;
     }
     // Tolerance 1e-6 m. Is this a good value?
-    if ((relPos - toVector3d(parDet->getRelativePos())).norm() > 1e-6)
+    if ((relPos - toVector3d(parDet->getRelativePos())).norm() > 1e-6) {
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(parDet))
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
       pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+    }
 
     if (!(relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
              .isApprox(Eigen::Quaterniond::Identity(), 1e-6))

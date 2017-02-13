@@ -17,6 +17,28 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
+namespace {
+  boost::shared_ptr<Beamline::DetectorInfo> makeDetectorInfo(const Instrument &instrument) {
+    const auto numDets = instrument.getNumberDetectors();
+    std::vector<size_t> monitors;
+    for (size_t i = 0; i < numDets; ++i)
+      if (instrument.isMonitorViaIndex(i))
+        monitors.push_back(i);
+    std::vector<Eigen::Vector3d> positions;
+    std::vector<Eigen::Quaterniond> rotations;
+    const auto &detIDs = instrument.getDetectorIDs();
+    for (const auto &id : detIDs) {
+      const auto &det = instrument.getDetector(id);
+      const auto &pos = det->getPos();
+      positions.emplace_back(pos[0], pos[1], pos[2]);
+      const auto &rot = det->getRotation();
+      rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
+    }
+    return boost::make_shared<Beamline::DetectorInfo>(
+        std::move(positions), std::move(rotations), monitors);
+  }
+}
+
 class InstrumentTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -517,24 +539,8 @@ public:
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
     Instrument instrument(baseInstrument, pmap);
 
-    // Extract information form instrument to create DetectorInfo
-    const auto numDets = instrument.getNumberDetectors();
-    std::vector<size_t> monitors;
-    for (size_t i = 0; i < numDets; ++i)
-      if (instrument.isMonitorViaIndex(i))
-        monitors.push_back(i);
-    std::vector<Eigen::Vector3d> positions;
-    std::vector<Eigen::Quaterniond> rotations;
-    const auto &detIDs = instrument.getDetectorIDs();
-    for (const auto &id : detIDs) {
-      const auto &det = instrument.getDetector(id);
-      const auto &pos = det->getPos();
-      positions.emplace_back(pos[0], pos[1], pos[2]);
-      const auto &rot = det->getRotation();
-      rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
-    }
-    auto detInfo = boost::make_shared<Beamline::DetectorInfo>(
-        std::move(positions), std::move(rotations), monitors);
+    // Extract information from instrument to create DetectorInfo
+    auto detInfo = makeDetectorInfo(instrument);
 
     instrument.setDetectorInfo(detInfo);
     // bank 1
@@ -583,6 +589,62 @@ public:
                      V3D(0.0002, -0.008, 15.0));
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
+  }
+
+  void test_makeLegacyParameterMap_scaled_RectangularDetector() {
+    const auto &baseInstrument =
+        ComponentCreationHelper::createTestInstrumentRectangular(1 ,2);
+    const auto bank1 = baseInstrument->getComponentByName("bank1");
+    auto pmap = boost::make_shared<ParameterMap>();
+    double scalex = 1.7;
+    double scaley = 1.3;
+    pmap->addDouble(bank1->getComponentID(), "scalex", scalex);
+    pmap->addDouble(bank1->getComponentID(), "scaley", scaley);
+    Instrument instrument(baseInstrument, pmap);
+
+    // Extract information from instrument to create DetectorInfo
+    auto detInfo = makeDetectorInfo(instrument);
+
+    instrument.setDetectorInfo(detInfo);
+    // bank 1
+    double pitch = 0.008;
+    TS_ASSERT(
+        detInfo->position(0).isApprox(toVector3d(V3D{0.0, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(detInfo->position(1)
+                  .isApprox(toVector3d(V3D{0.0, scaley * pitch, 5.0}), 1e-12));
+    TS_ASSERT(detInfo->position(2)
+                  .isApprox(toVector3d(V3D{scalex * pitch, 0.0, 5.0}), 1e-12));
+    TS_ASSERT(detInfo->position(3).isApprox(
+        toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}), 1e-12));
+
+    const V3D detOffset{0.2, 0.3, 0.4};
+    const V3D detEpsilon{5e-7, 5e-7, 5e-7};
+
+    detInfo->setPosition(2, detInfo->position(2) + toVector3d(detEpsilon));
+    // 2 bank parameters, det pos/rot is in DetectorInfo
+    TS_ASSERT_EQUALS(pmap->size(), 2);
+
+    const auto legacyMap = instrument.makeLegacyParameterMap();
+
+    // Legacy instrument does not support positions in ParameterMap for
+    // RectangularDetectorPixel (parameters ignored by
+    // RectangularDetectorPixel::getRelativePos), so we cannot support this.
+    detInfo->setPosition(3, detInfo->position(3) + toVector3d(detOffset));
+    TS_ASSERT_THROWS(instrument.makeLegacyParameterMap(), std::runtime_error);
+
+    // 2 bank parameters + 0 det parameters
+    TS_ASSERT_EQUALS(legacyMap->size(), 2);
+    Instrument legacyInstrument(baseInstrument, legacyMap);
+    TS_ASSERT(!legacyInstrument.hasDetectorInfo());
+
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(4)->getPos(),
+                     V3D(0.0, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(5)->getPos(),
+                     V3D(0.0, scaley * pitch, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(6)->getPos(),
+                     V3D(scalex * pitch, 0.0, 5.0));
+    TS_ASSERT_EQUALS(legacyInstrument.getDetector(7)->getPos(),
+                     V3D(scalex * pitch, scaley * pitch, 5.0));
   }
 
 private:
