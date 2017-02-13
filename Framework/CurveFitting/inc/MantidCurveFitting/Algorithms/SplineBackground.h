@@ -68,6 +68,9 @@ private:
   /// Allocates various pointers used within GSL
   void allocateBSplinePointers(int numBins, int ncoeffs);
 
+  /// Calculates the bin weight using the error values in the WS
+  double calculateBinWeight(double errValue);
+
   /// Deallocates various pointers within GSL
   void freeBSplinePointers();
 

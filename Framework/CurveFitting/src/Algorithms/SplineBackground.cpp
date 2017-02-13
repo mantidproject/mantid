@@ -128,24 +128,8 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
       continue;
     gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xInputVals[i]);
     gsl_vector_set(m_splinePointers.yData, numUnmaskedBins, yInputVals[i]);
-
-    double eVal = eInputVals[i];
-    if (!std::isnormal(eVal)) {
-      if (eVal == 0) {
-        g_log.warning(
-            "Spline background found an error value of 0 on an unmasked"
-            " bin. This bin will have no weight during the fitting process");
-      } else {
-        // nan / inf
-        eVal = 0;
-        g_log.warning(
-            "Spline background found an error value of nan or inf on an"
-            " unmasked bin. This bin will have no weight during the fitting"
-            " process");
-      }
-    }
-
-    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins, eVal);
+    gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins,
+                   calculateBinWeight(eInputVals[i]));
 
     ++numUnmaskedBins;
   }
@@ -185,6 +169,39 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   sp.binWeights = gsl_vector_alloc(numBins);
   sp.covariance = gsl_matrix_alloc(ncoeffs, ncoeffs);
   sp.weightedLinearFitWs = gsl_multifit_linear_alloc(numBins, ncoeffs);
+}
+
+/**
+  * Calculates the bin weight from the error value passed
+  * logs a warning if the value is less than or equal to 0
+  * or a special floating point value
+  *
+  * @param errValue:: The error value to use within the calculation
+  *
+  * @return:: The bin weight to use within the GSL allocation
+  */
+double SplineBackground::calculateBinWeight(double errValue) {
+  double outBinWeight = 0;
+  if (errValue < 0 || !std::isnormal(errValue)) {
+    // Regardless of which warning we print we should
+    // set the bin weight
+    outBinWeight = 0;
+    if (errValue <= 0) {
+      g_log.warning(
+          "Spline background found an error value of 0 or less on an unmasked"
+          " bin. This bin will have no weight during the fitting process");
+    } else {
+      // nan / inf
+      g_log.warning(
+          "Spline background found an error value of nan or inf on an"
+          " unmasked bin. This bin will have no weight during the fitting"
+          " process");
+    }
+  } else {
+    // Value is perfectly normal in every way
+    outBinWeight = 1. / (errValue * errValue);
+  }
+  return outBinWeight;
 }
 
 /**
