@@ -310,7 +310,8 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
   std::string polarizationTranslation(polarization);
-  std::replace(polarizationTranslation.begin(),polarizationTranslation.end(),'-','_');
+  std::replace(polarizationTranslation.begin(), polarizationTranslation.end(),
+               '-', '_');
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
       "OutputWorkspace_jc_" + polarizationTranslation, "Lambda_" + polarization,
       Direction::Output));
