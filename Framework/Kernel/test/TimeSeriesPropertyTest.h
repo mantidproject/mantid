@@ -897,7 +897,7 @@ public:
     }
 
     // split time series property
-    log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
+    log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
     // test
     // TODO - FROM HERE!
