@@ -71,7 +71,7 @@ public:
       int x;
       double y, e;
       row >> x >> y >> e;
-      TS_ASSERT_EQUALS(double(x), X[i]);
+      TS_ASSERT_EQUALS(static_cast<double>(x), X[i]);
       TS_ASSERT_EQUALS(y, Y[i]);
       TS_ASSERT_EQUALS(e, E[i]);
     }
@@ -89,7 +89,7 @@ public:
     size_t n = 10;
     for (size_t i = 0; i < n; ++i) {
       TableRow row = tws->appendRow();
-      double x = double(i);
+      double x = static_cast<double>(i);
       double y = x * 1.1;
       row << x << y;
     }
@@ -142,7 +142,7 @@ public:
   // test if it can convert a string to a double, if the string is numeric
   void testStringToDouble() {
 
-    ITableWorkspace_sptr tws = WorkspaceFactory::Instance().createTable();
+    auto tws = WorkspaceFactory::Instance().createTable();
     tws->addColumn("str", "A");
     tws->addColumn("double", "B");
     tws->addColumn("double", "C");
@@ -151,7 +151,7 @@ public:
     for (size_t i = 0; i < n; ++i) {
       TableRow row = tws->appendRow();
       std::string x = "1";
-      double y = double(i) * 1.1;
+      double y = static_cast<double>(i) * 1.1;
       double e = sqrt(y);
       row << x << y << e;
     }
@@ -182,13 +182,12 @@ public:
       std::string x;
       double y, e;
       row >> x >> y >> e;
-      TS_ASSERT_EQUALS(boost::lexical_cast<double>(x), X[i]);
+      TS_ASSERT_EQUALS(std::stod(x), X[i]);
       TS_ASSERT_EQUALS(y, Y[i]);
       TS_ASSERT_EQUALS(e, E[i]);
     }
 
-    boost::shared_ptr<Units::Label> label =
-        boost::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
+    auto label = boost::dynamic_pointer_cast<Units::Label>(mws->getAxis(0)->unit());
     TS_ASSERT(label);
     TS_ASSERT_EQUALS(label->caption(), "A");
     TS_ASSERT_EQUALS(mws->YUnitLabel(), "B");
@@ -206,7 +205,7 @@ public:
     for (size_t i = 0; i < n; ++i) {
       TableRow row = tws->appendRow();
       std::string x = "not a number";
-      double y = double(i) * 1.1;
+      double y = static_cast<double>(i) * 1.1;
       double e = sqrt(y);
       row << x << y << e;
     }
