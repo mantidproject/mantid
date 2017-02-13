@@ -211,7 +211,7 @@ TODO talk about defaults?
 - `perform_attenuation` - If set to true uses the user specified attenuation file
   (see `attenuation_file_name`) and applies the correction.
 
-- `run_in_range` - Only used during vanadium calibration. The run specified
+- `run_in_cycle` - Only used during vanadium calibration. The run specified
   here is used with the calibration mapping file see:
   :ref:`pearl_cal_map_isis-powder-diffraction-ref` to determine the current cycle
   and the vanadium/empty run numbers for the subsequent processing.
