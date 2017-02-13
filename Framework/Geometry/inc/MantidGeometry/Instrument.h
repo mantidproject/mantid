@@ -329,9 +329,9 @@ MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
                                                const double offset);
 
 double MANTID_GEOMETRY_DLL
-    tofToDSpacingFactor(const double l1, const double l2, const double theta,
-                        const std::vector<detid_t> &detectors,
-                        const std::map<detid_t, double> &offsets);
+tofToDSpacingFactor(const double l1, const double l2, const double theta,
+                    const std::vector<detid_t> &detectors,
+                    const std::map<detid_t, double> &offsets);
 }
 
 } // namespace Geometry
