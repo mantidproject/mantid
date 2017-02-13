@@ -263,9 +263,7 @@ double ConvertSpectrumAxis2::getEfixed(
 
       std::vector<double> efixedVec =
           detectorSingle.getNumberParameter("Efixed");
-      if (efixedVec.empty()) {
-        efixedVec = detectorSingle.getNumberParameter("Efixed");
-      }
+
       if (!efixedVec.empty()) {
         efixed = efixedVec.at(0);
         g_log.debug() << "Detector: " << detectorID << " EFixed: " << efixed
