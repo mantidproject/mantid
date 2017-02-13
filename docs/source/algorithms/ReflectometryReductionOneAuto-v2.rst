@@ -21,7 +21,7 @@ detectors of interest. Only the detectors of interest will be corrected, the res
 will remain in the original position. Note that when :literal:`ProcessingInstructions` is not set, its value
 is inferred from other properties, depending on the value of :literal:`AnalysisMode`:
 
-* If :literal:`AnalysisMode = PointDetectorAnalaysis` the algorithm will search for :literal:`PointDetectorStart` and :literal:`PointDetectorStep` in the parameter file, and :literal:`ProcessingInstructions` will be set to :literal:`PointDetectorStart:PointDetectorEnd`.
+* If :literal:`AnalysisMode = PointDetectorAnalaysis` the algorithm will search for :literal:`PointDetectorStart` and :literal:`PointDetectorStop` in the parameter file, and :literal:`ProcessingInstructions` will be set to :literal:`PointDetectorStart:PointDetectorEnd`.
 * If :literal:`AnalysisMode = MultiDetectorAnalaysis` the algorithm will search for :literal:`MultiDetectorStart` in the parameter file and all of the spectra from this value onwards will be used.
 
 Note that ProcessingInstructions are workspace indices, not detector IDs. The first few workspaces may correspond
@@ -186,7 +186,7 @@ Output:
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, CorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
     print "%.5f" % (IvsLam.readY(0)[175])
     print "%.5f" % (IvsLam.readY(0)[176])
@@ -201,10 +201,10 @@ Output:
 
     0.00441
     0.00462
-    0.64231
-    0.41456
+    0.64241
+    0.41453
     0.51028
-    0.52242
+    0.52241
 
 .. categories::
 
