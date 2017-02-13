@@ -182,7 +182,7 @@ void SplineBackground::allocateBSplinePointers(int numBins, int ncoeffs) {
   */
 double SplineBackground::calculateBinWeight(double errValue) {
   double outBinWeight = 0;
-  if (errValue < 0 || !std::isnormal(errValue)) {
+  if (errValue <= 0 || !std::isfinite(errValue)) {
     // Regardless of which warning we print we should
     // set the bin weight
     outBinWeight = 0;
