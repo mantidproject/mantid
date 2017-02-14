@@ -356,7 +356,8 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace_" + polarizationTranslation, wsName, Direction::Output));
+        "OutputWorkspace_" + polarizationTranslation, wsName,
+        Direction::Output));
     setProperty("OutputWorkspace_" + polarizationTranslation, outputWS);
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "OutputWorkspace2D_" + polarizationTranslation, "2D_" + wsName,
