@@ -354,24 +354,14 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   auto const &instrument = m_localWorkspace->getInstrument();
 
-  const auto monitorIDs = instrument->getMonitors();
-
-  for (const auto &monitor : monitors) {
-    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
-                                   Counts(monitor.begin(), monitor.end()));
-    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[spec]);
-    spec++;
-  }
-
   const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
-  const size_t numberOfMonitors = monitors.size();
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  loadSpectra(spec, numberOfMonitors, m_numberOfTubes, detectorIDs, data,
+  loadSpectra(spec, m_numberOfTubes, detectorIDs, data,
               progress);
 
-  g_log.debug() << "Loading data into the workspace: DONE!\n";
+  g_log.debug() << "Loading detector data into the workspace: DONE!\n";
 
   /**
    * IN4 Rosace detectors are in a different NeXus entry
@@ -389,8 +379,18 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     Progress progressRosace(this, 0, 1,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
-    loadSpectra(spec, numberOfMonitors, numberOfTubes, detectorIDs, dataRosace,
+    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace,
                 progressRosace);
+  }
+
+  const auto monitorIDs = instrument->getMonitors();
+
+  for (size_t i = 0; i < monitors.size(); ++i) {
+    const auto &monitor = monitors[i];
+    m_localWorkspace->setHistogram(spec, m_localWorkspace->binEdges(0),
+                                   Counts(monitor.begin(), monitor.end()));
+    m_localWorkspace->getSpectrum(spec).setDetectorID(monitorIDs[i]);
+    spec++;
   }
 }
 
@@ -405,7 +405,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * @param data The NeXus data to load into the workspace
  * @param progress The progress monitor
  */
-void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfMonitors,
+void LoadILLTOF2::loadSpectra(size_t &spec,
                               const size_t numberOfTubes,
                               const std::vector<detid_t> &detectorIDs,
                               NXInt data, Progress progress) {
@@ -416,7 +416,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfMonitors,
           spec, m_localWorkspace->binEdges(0),
           Counts(data_p, data_p + m_numberOfChannels));
       m_localWorkspace->getSpectrum(spec)
-          .setDetectorID(detectorIDs[spec - numberOfMonitors]);
+          .setDetectorID(detectorIDs[spec]);
       spec++;
       progress.report();
     }
