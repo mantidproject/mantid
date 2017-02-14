@@ -289,6 +289,27 @@
                     </property>
                   </spacer>
                 </item>
+                <item row="8" column="0">
+                  <widget class="QLabel" name="correctionTypeLabel">
+                    <property name="text">
+                      <string>CorrectionType</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="8" column="1">
+                  <widget class="QComboBox" name="correctionTypeComboBox">
+                    <item>
+                      <property name="text">
+                        <string>VerticalShift</string>
+                      </property>
+                    </item>
+                    <item>
+                      <property name="text">
+                        <string>RotateAroundSample</string>
+                      </property>
+                    </item>
+                  </widget>
+                </item>
               </layout>
             </item>
             <item>

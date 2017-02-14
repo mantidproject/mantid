@@ -78,6 +78,13 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
+
+  int ctIndex =
+      m_ui.correctionTypeComboBox->findText(QString::fromStdString(defaults[6]));
+  if (ctIndex != -1)
+    m_ui.correctionTypeComboBox->setCurrentIndex(ctIndex);
+
+
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -234,6 +241,14 @@ std::string QtReflSettingsView::getMomentumTransferStep() const {
 std::string QtReflSettingsView::getScaleFactor() const {
 
   return m_ui.scaleFactorEdit->text().toStdString();
+}
+
+/** Return selected correction type
+* @return :: selected correction type
+*/
+std::string QtReflSettingsView::getCorrectionType() const {
+
+  return m_ui.correctionTypeComboBox->currentText().toStdString();
 }
 
 /** Return integrated monitors option

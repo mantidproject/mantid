@@ -220,6 +220,11 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
   if (!scaleFactor.empty())
     options.push_back("ScaleFactor=" + scaleFactor);
 
+  // Add correction type
+  auto correctionType = m_view->getCorrectionType();
+  if (!correctionType.empty())
+    options.push_back("CorrectionType=" + correctionType);
+
   // Add momentum transfer limits
   auto qTransStep = m_view->getMomentumTransferStep();
   if (!qTransStep.empty()) {
@@ -319,7 +324,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(6);
+  std::vector<std::string> defaults(7);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
@@ -338,6 +343,8 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
     defaults[5] = cPp[0];
+
+  defaults[6] = alg->getPropertyValue("CorrectionType");
 
   m_view->setExpDefaults(defaults);
 }

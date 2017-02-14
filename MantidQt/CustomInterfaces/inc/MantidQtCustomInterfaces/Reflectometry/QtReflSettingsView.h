@@ -70,6 +70,8 @@ public:
   std::string getMomentumTransferStep() const override;
   /// Return scale factor
   std::string getScaleFactor() const override;
+  /// Return selected correction type
+  std::string getCorrectionType() const override;
   /// Return integrated monitors option
   std::string getIntMonCheck() const override;
   /// Return monitor integral wavelength min

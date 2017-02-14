@@ -65,6 +65,7 @@ public:
   virtual std::string getCPp() const = 0;
   virtual std::string getMomentumTransferStep() const = 0;
   virtual std::string getScaleFactor() const = 0;
+  virtual std::string getCorrectionType() const = 0;
   /// Instrument settings
   virtual std::string getIntMonCheck() const = 0;
   virtual std::string getMonitorIntegralMin() const = 0;
