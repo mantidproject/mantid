@@ -18,14 +18,14 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
-    corrected_van_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                              CalibrationFile=run_details.calibration_file_path)
 
     if absorb:
-        corrected_van_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
-                                                     corrected_van_ws=corrected_van_ws, gen_absorb=gen_absorb)
+        aligned_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
+                                               van_ws=aligned_ws, gen_absorb=gen_absorb)
 
-    focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=corrected_van_ws,
+    focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
@@ -37,6 +37,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
     common.remove_intermediate_workspace(corrected_van_ws)
+    common.remove_intermediate_workspace(aligned_ws)
     common.remove_intermediate_workspace(focused_vanadium)
     common.remove_intermediate_workspace(focused_spectra)
 
@@ -53,8 +54,8 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
     mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace="Van_spline_data")
 
 
-def _apply_absorb_corrections(instrument, run_details, corrected_van_ws, gen_absorb):
-    absorb_ws = instrument._apply_absorb_corrections(run_details, corrected_van_ws, gen_absorb=gen_absorb)
+def _apply_absorb_corrections(instrument, run_details, van_ws, gen_absorb):
+    absorb_ws = instrument._apply_absorb_corrections(run_details, van_ws, gen_absorb=gen_absorb)
     return absorb_ws
 
 

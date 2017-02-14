@@ -81,6 +81,7 @@ def _divide_by_vanadium_splines(spectra_list, spline_file_path):
         vanadium_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=data_ws)
         output_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_ws)
         output_list.append(output_ws)
+        common.remove_intermediate_workspace(vanadium_ws)
     return output_list
 
 
