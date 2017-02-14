@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 #                 Maps friendly user name -> script name
-attr_mapping = [("attenuation_file",            "attenuation_file_path"),
+attr_mapping = [("attenuation_file_path",       "attenuation_file_path"),
                 ("config_file",                 "config_file_name"),
                 ("calibration_config_path",     "cal_map_path"),
                 ("calibration_directory",       "calibration_dir"),

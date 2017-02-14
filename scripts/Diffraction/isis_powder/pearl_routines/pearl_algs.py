@@ -9,12 +9,17 @@ from isis_powder.routines.RunDetails import RunDetails
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
+    original_units = ws_to_correct.getAxis(0).getUnit().unitID()
     wc_attenuated = mantid.PearlMCAbsorption(attenuation_file_path)
     wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
+    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                        Target=wc_attenuated.getAxis(0).getUnit().unitID())
     wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=ws_to_correct,
                                             OutputWorkspace=wc_attenuated)
     pearl_attenuated_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=wc_attenuated)
     common.remove_intermediate_workspace(workspaces=wc_attenuated)
+    pearl_attenuated_ws = mantid.ConvertUnits(InputWorkspace=pearl_attenuated_ws, OutputWorkspace=pearl_attenuated_ws,
+                                              Target=original_units)
     return pearl_attenuated_ws
 
 
