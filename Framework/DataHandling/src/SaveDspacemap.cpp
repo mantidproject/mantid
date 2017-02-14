@@ -73,9 +73,6 @@ void SaveDspacemap::CalculateDspaceFromCal(
       maxdetID = detectorID;
   }
 
-  // detid_t maxdetID = allDetectors.rbegin()->first; // Maps are sorted.
-  // Largest key is the last.
-
   detid_t paddetID = detid_t(getProperty("PadDetID"));
   if (maxdetID < paddetID)
     maxdetID = paddetID;
