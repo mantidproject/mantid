@@ -83,6 +83,8 @@ public:
         .WillOnce(Return("12"));
     auto options = presenter.getTransmissionOptions();
 
+    std::string s;
+    std::getline(std::cin, s);
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec.size(), 11);
@@ -153,6 +155,9 @@ public:
     EXPECT_CALL(mockView, getScaleFactor())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
+    EXPECT_CALL(mockView, getCorrectionType())
+        .Times(Exactly(1))
+        .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getMomentumTransferStep())
         .Times(Exactly(1))
         .WillOnce(Return("-0.02"));
@@ -172,7 +177,7 @@ public:
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
+    TS_ASSERT_EQUALS(optionsVec.size(), 23);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
@@ -189,13 +194,14 @@ public:
     TS_ASSERT_EQUALS(optionsVec[13], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[18], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[19], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[20],
-                     "FirstTransmissionRun=TRANS_INTER00013463");
+    TS_ASSERT_EQUALS(optionsVec[16], "CorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[19], "StartOverlap=10");
+    TS_ASSERT_EQUALS(optionsVec[20], "EndOverlap=12");
     TS_ASSERT_EQUALS(optionsVec[21],
+                     "FirstTransmissionRun=TRANS_INTER00013463");
+    TS_ASSERT_EQUALS(optionsVec[22],
                      "SecondTransmissionRun=TRANS_INTER00013464");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
@@ -237,11 +243,13 @@ public:
     presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
+        "PointDetectorAnalysis",
+        "None",
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0"};
+        "0.972762,0.001828,-0.000261,0.0",
+        "VerticalShift"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
