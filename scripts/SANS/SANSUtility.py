@@ -730,11 +730,11 @@ def check_if_is_event_data(file_name):
         file_name = full_file_path[0]
     with h5.File(file_name) as h5_file:
         # Open first entry
-        keys = h5_file.keys()
+        keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         # Open instrument group
         is_event_mode = False
-        for value in first_entry.values():
+        for value in list(first_entry.values()):
             if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
                 is_event_mode = True
                 break
@@ -748,7 +748,7 @@ def is_nexus_file(file_name):
     is_nexus = True
     try:
         with h5.File(file_name) as h5_file:
-            keys = h5_file.keys()
+            keys = list(h5_file.keys())
             nexus_test = "raw_data_1" in keys or "mantid_workspace_1" in keys
             is_nexus = True if nexus_test else False
     except:  # noqa
@@ -1976,7 +1976,7 @@ def parseLogFile(logfile):
     file_log = open(logfile, 'rU')
     for line in file_log:
         entry = line.split()[1]
-        if entry in logkeywords.keys():
+        if entry in list(logkeywords.keys()):
             logkeywords[entry] = float(line.split()[2])
 
     return tuple(logkeywords.values())

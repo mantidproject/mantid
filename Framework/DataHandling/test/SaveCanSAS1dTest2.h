@@ -299,7 +299,7 @@ private:
                                     double expectedWidth,
                                     double expectedHeight) {
     // Create sample workspace
-    auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3);
+    auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3, true);
     auto axis = wsIn->getAxis(0);
     axis->unit() = UnitFactory::Instance().create("MomentumTransfer");
     axis->title() = "|Q|";
