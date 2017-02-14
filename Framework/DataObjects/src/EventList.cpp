@@ -3837,6 +3837,7 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
   output.setHistogram(m_histogram);
+  output.setSortOrder(this->order);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
@@ -3870,6 +3871,7 @@ void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
   output.switchTo(eventType);
   output.setDetectorIDs(this->getDetectorIDs());
   output.setHistogram(m_histogram);
+  output.setSortOrder(this->order);
 
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {

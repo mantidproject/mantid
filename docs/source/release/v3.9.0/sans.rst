@@ -10,7 +10,7 @@ Features
 
 - Make added multi-period event files available for the ISIS SANS reduction.
 - Added NXcanSAS as an output format of the ISIS SANS Gui.
-
+- Added MASK/LINE for LOQ. This allows for masking of the beam stop arm.
 
 Bug Fixes
 ---------
@@ -22,6 +22,9 @@ Bug Fixes
 - Issue where Gui changes were not picked up for batch reductions was resolved.
 - Remove SaveNexusProcessed and SaveCSV as an option. Reorder options by dimensionality.
 - Fix for merged reduction with phi masking.
+- Fix SAScollimation issue in SaveCanSAS1D and LoadCanSAS1D.
+- Improved CropToComponent and removed detector ordering.
+- Fix for faulty beam stop arm masking for certain angles.
 
 X uncertainties (delta-Q)
 -------------------------

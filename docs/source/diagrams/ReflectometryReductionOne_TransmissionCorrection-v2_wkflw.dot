@@ -1,0 +1,63 @@
+digraph ReflectometryReductionOne {
+label = "\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  inputWorkspace    [label="OutputWorkspaceWavelength"]
+  outputWorkspace   [label="OutputWorkspaceWavelength"]
+  corrAlg           [label="CorrectionAlgorithm"]
+  firstTransRun     [label="FirstTransmissionRun"]
+  secondTransRun    [label="SecondTransmissionRun"]
+  polynomial        [label="Polynomial"]
+  c0                [label="C0"]
+  c1                [label="C1"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkTransRun   [label="FirstTransmissionRun\ngiven?"]
+  checkCorrAlg    [label="CorrectionAlgorithm?"]
+  checkTransRun   [label="FirstTransmissionRun\ngiven?"]
+}
+
+subgraph algorithms {
+ $algorithm_style
+  rebinByTransWS  [label="RebinToWorkspace"]
+  polyCorr        [label="PolynomialCorrection"]
+  expCorr         [label="ExponentialCorrection"]
+  createTransWS   [label="CreateTransmissionWorkspace"]
+  rebinByTransWS  [label="RebinToWorkspace"]
+  divideTrans     [label="Divide by\ntransmission run"]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+}
+
+inputWorkspace    -> checkTransRun
+checkTransRun     -> checkCorrAlg     [label="No"]
+checkTransRun     -> divideTrans      [label="Yes"]
+corrAlg           -> checkCorrAlg
+polynomial        -> polyCorr
+checkCorrAlg      -> polyCorr         [label="Polynomial"]
+checkCorrAlg      -> outputWorkspace  [label="None"]
+c0                -> expCorr
+c1                -> expCorr
+checkCorrAlg      -> expCorr          [label="Exponential"]
+polyCorr          -> outputWorkspace
+expCorr           -> outputWorkspace
+firstTransRun     -> createTransWS
+secondTransRun    -> createTransWS
+createTransWS     -> rebinByTransWS
+inputWorkspace	  -> rebinByTransWS
+rebinByTransWS    -> divideTrans
+divideTrans       -> outputWorkspace
+
+{rank=same; checkCorrAlg; divideTrans}
+{rank=same; inputWorkspace; firstTransRun; secondTransRun}
+}

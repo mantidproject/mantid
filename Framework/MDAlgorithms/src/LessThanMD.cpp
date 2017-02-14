@@ -30,7 +30,7 @@ void LessThanMD::execHistoHisto(
 void LessThanMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->lessThan(scalar->dataY(0)[0]);
+  out->lessThan(scalar->y(0)[0]);
 }
 
 } // namespace Mantid

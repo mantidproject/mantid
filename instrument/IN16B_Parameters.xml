@@ -15,6 +15,23 @@
   <value val="111,311" />
 </parameter>
 
+<!-- Sample log merging behaviour -->
+<parameter name="sample_logs_time_series" type="string">
+    <value val="sample.temperature, sample.pressure" />
+</parameter>
+<parameter name="sample_logs_list" type="string">
+    <value val="run_number" />
+</parameter>
+<parameter name="sample_logs_warn" type="string">
+</parameter>
+<parameter name="sample_logs_warn_tolerances" type="string">
+</parameter>
+<parameter name="sample_logs_fail" type="string">
+    <value val="Doppler.mirror_sense, acquisition_mode, Doppler.velocity_profile, Doppler.maximum_delta_energy" />
+</parameter>
+<parameter name="sample_logs_fail_tolerances" type="string">
+    <value val="0, 0, 0, 0.001" />
+</parameter>
 
 <!-- Reduction workflow parameters under this line -->
 <parameter name="Workflow.beam-width" type="string">
@@ -25,6 +42,7 @@
 </parameter>
 <parameter name="Workflow.GroupingFile" type="string">
   <value val="IN16B_Grouping.xml" />
+  <!-- Note that equivalent IN16B_map.map file also exists. -->
 </parameter>
 </component-link>
 

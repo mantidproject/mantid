@@ -78,7 +78,6 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
-  m_ui.scaleFactorEdit->setText(QString::fromStdString(defaults[6]));
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -163,6 +162,22 @@ std::string QtReflSettingsView::getDirectBeam() const {
 std::string QtReflSettingsView::getTransmissionRuns() const {
 
   return m_ui.transmissionRunsEdit->text().toStdString();
+}
+
+/** Return start overlap
+* @return :: start overlap
+*/
+std::string QtReflSettingsView::getStartOverlap() const {
+
+  return m_ui.startOverlapEdit->text().toStdString();
+}
+
+/** Return end overlap
+* @return :: end overlap
+*/
+std::string QtReflSettingsView::getEndOverlap() const {
+
+  return m_ui.endOverlapEdit->text().toStdString();
 }
 
 /** Return selected polarisation corrections
