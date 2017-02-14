@@ -5,6 +5,7 @@ from mantid.simpleapi import mtd, LoadAclimax, Load, CompareWorkspaces
 from AbinsModules import AbinsTestHelpers
 import numpy as np
 
+
 def old_modules():
     """" Check if there are proper versions of  Python and numpy."""
     is_python_old = AbinsTestHelpers.old_python()
