@@ -186,8 +186,10 @@ double DiffractionEventCalibrateDetectors::intensity(
   const MantidVec &yValues = outputW->readY(0);
   auto it = std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
-  if (peakHeight == 0)
+  if (peakHeight == 0) {
+    movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
     return -0.000;
+  }
   double peakLoc = outputW->readX(0)[it - yValues.begin()];
 
   IAlgorithm_sptr fit_alg;
