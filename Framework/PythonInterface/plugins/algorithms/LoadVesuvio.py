@@ -37,7 +37,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
     _ws_index = None
     _spectrum_no = None
     foil_map = None
-    _inst_prefix = None
     _back_scattering = None
     _load_common_called = False
     _load_monitors = False
@@ -324,12 +323,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._setup_raw(all_spectra)
         else:
             isis = config.getFacility("ISIS")
-            inst_prefix = isis.instrument("VESUVIO").shortName()
-
-            try:
-                run_str = inst_prefix + runs[0] +'.raw'
-            except ValueError:
-                run_str = runs[0]
+            vesuvio = isis.instrument("VESUVIO")
+            run_no = runs[0]
+            run_str = vesuvio.filePrefix(int(run_no)) + run_no
 
             self._raise_error_period_scatter(run_str, self._back_scattering)
             all_spectra = [item for sublist in self._spectra for item in sublist]
@@ -423,13 +419,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
             logger.warning("LoadMonitors is true while monitor spectra are defined in the spectra list.")
             logger.warning("Monitors have been loaded into the data workspace not separately.")
         if mons_in_ws:
-            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                       EnableLogging=_LOGGING_)
+            ms.Load(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
+                    EnableLogging=_LOGGING_)
         else:
             all_spec_inc_mon = self._mon_spectra
             all_spec_inc_mon.extend(all_spectra)
-            ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
-                       LoadMonitors='Separate', EnableLogging=_LOGGING_)
+            ms.Load(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spec_inc_mon,
+                    LoadMonitors='Separate', EnableLogging=_LOGGING_)
             if self._load_monitors:
                 monitor_group = mtd[SUMMED_WS +'_monitors']
                 mon_out_name = self.getPropertyValue(WKSP_PROP) + "_monitors"
@@ -441,6 +437,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 self._load_monitors_workspace = self._sum_monitors_in_group(monitor_group,
                                                                             self._load_monitors_workspace)
             self._raw_monitors = mtd[SUMMED_WS +'_monitors']
+
 #----------------------------------------------------------------------------------------
 
     def _load_common_inst_parameters(self):
@@ -461,7 +458,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             return list(range(int(elements[0]),int(elements[1]) + 1)) # range goes x_l,x_h-1
 
         # Attach parameters as attributes
-        self._inst_prefix = isis.instrument("VESUVIO").shortName()
         parnames = empty_vesuvio.getParameterNames(False)
         for name in parnames:
             # Irritating parameter access doesn't let you query the type
@@ -585,28 +581,26 @@ class LoadVesuvio(LoadEmptyVesuvio):
             @returns a tuple of length 2 containing (main_detector_ws, monitor_ws)
         """
         isis = config.getFacility("ISIS")
-        inst_prefix = isis.instrument("VESUVIO").shortName()
-
+        vesuvio = isis.instrument("VESUVIO")
         runs = self._get_runs()
 
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         spec_inc_mon = self._mon_spectra
         spec_inc_mon.extend(spectra)
         for index, run in enumerate(runs):
-            run = inst_prefix + str(run)
-            self._raise_error_period_scatter(run, self._back_scattering)
+            filename = vesuvio.filePrefix(int(run)) + str(run)
+            self._raise_error_period_scatter(filename, self._back_scattering)
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_WS + '_monitors'
             else:
                 out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_WS + 'tmp_monitors'
 
             # Load data
-            raw_filepath = FileFinder.findRuns(run)[0]
-            ms.LoadRaw(Filename=raw_filepath,
-                       SpectrumList=spec_inc_mon,
-                       OutputWorkspace=out_name,
-                       LoadMonitors='Separate',
-                       EnableLogging=_LOGGING_)
+            ms.Load(Filename=filename,
+                    SpectrumList=spec_inc_mon,
+                    OutputWorkspace=out_name,
+                    LoadMonitors='Separate',
+                    EnableLogging=_LOGGING_)
 
             # Sum
             if index > 0:
@@ -685,7 +679,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             runs = list(range(int(lower), int(upper)+1))
 
         elif "," in run_str:
-            runs =  run_str.split(",")
+            runs = run_str.split(",")
         else:
             runs = [run_str]
 
