@@ -92,7 +92,7 @@ void SaveDspacemap::CalculateDspaceFromCal(
     it = allDetectors.find(i);
     if (it != allDetectors.end()) {
       det = it->second;
-      const auto detectorIndex = detectorInfo.indexOf(i); // TODO. Needs fixing.
+      const auto detectorIndex = detectorInfo.indexOf(i);
       factor = Mantid::Geometry::Conversion::tofToDSpacingFactor(
           l1, detectorInfo.l2(detectorIndex),
           detectorInfo.twoTheta(detectorIndex), offsetsWS->getValue(i, 0.0));
