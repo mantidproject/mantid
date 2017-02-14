@@ -19,18 +19,18 @@ def mask_ws(ws_to_mask, xstart, xend):
 
     if xstart > 0:
         logger.debug('Mask bins smaller than {0}'.format(xstart))
-        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[xstart])
+        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[0], XMax=x_values[int(xstart)])
     else:
         logger.debug('No masking due to x bin <= 0!: {0}'.format(xstart))
     if xend < len(x_values) - 1:
         logger.debug('Mask bins larger than {0}'.format(xend))
-        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[xend + 1], XMax=x_values[-1])
+        MaskBins(InputWorkspace=ws_to_mask, OutputWorkspace=ws_to_mask, XMin=x_values[int(xend) + 1], XMax=x_values[-1])
     else:
         logger.debug('No masking due to x bin >= len(x_values) - 1!: {0}'.format(xend))
 
     if xstart > 0 and xend < len(x_values) - 1:
         logger.information('Bins out of range {0} {1} [Unit of X-axis] are masked'.format
-                           (x_values[xstart],x_values[xend + 1]))
+                           (x_values[int(xstart)],x_values[int(xend) + 1]))
 
 
 class MatchPeaks(PythonAlgorithm):

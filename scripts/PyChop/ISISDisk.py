@@ -203,7 +203,7 @@ class ISISDisk:
         if len(ie_list) == 1:
             chop_width = chop_width[ie_list]
             mod_width = mod_width[ie_list]
-            res_el = res_el[ie_list]
+            res_el = res_el[int(ie_list)]
         return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
 
     def getElasticResolution(self, Ei_in=None, frequency=None):
