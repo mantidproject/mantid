@@ -85,7 +85,7 @@ protected:
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos,
                                         Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
-  void addDetector(const Mantid::Geometry::IDetector_const_sptr det,
+  void addDetector(const Mantid::Geometry::IDetector &det,
                    const Mantid::Kernel::V3D &refPos, int index,
                    Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane

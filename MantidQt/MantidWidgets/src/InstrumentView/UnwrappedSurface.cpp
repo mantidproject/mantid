@@ -30,15 +30,16 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector() {
+    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(0) {
   color[0] = 0;
   color[1] = 0;
   color[2] = 0;
 }
 
 UnwrappedDetector::UnwrappedDetector(const unsigned char *c,
-                                     boost::shared_ptr<const IDetector> det)
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector(det) {
+                                     const IDetector &det)
+    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(det.getID()),
+      position(det.getPos()), rotation(det.getRotation()), shape(det.shape()), scaleFactor(det.getScaleFactor()) {
   color[0] = *c;
   color[1] = *(c + 1);
   color[2] = *(c + 2);
@@ -52,16 +53,20 @@ UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) {
 /** Assignment operator */
 UnwrappedDetector &UnwrappedDetector::
 operator=(const UnwrappedDetector &other) {
+  color[0] = other.color[0];
+  color[1] = other.color[1];
+  color[2] = other.color[2];
   u = other.u;
   v = other.v;
   width = other.width;
   height = other.height;
   uscale = other.uscale;
   vscale = other.vscale;
-  detector = other.detector;
-  color[0] = other.color[0];
-  color[1] = other.color[1];
-  color[2] = other.color[2];
+  detID = other.detID;
+  position = other.position;
+  rotation = other.rotation;
+  shape = other.shape;
+  scaleFactor = other.scaleFactor;
   return *this;
 }
 
@@ -120,12 +125,9 @@ void UnwrappedSurface::cacheAllAssemblies() {
 
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-
-    if (!udet.detector)
-      continue;
     // Get the BARE parent (not parametrized) to speed things up.
-    const Mantid::Geometry::IComponent *bareDet =
-        udet.detector->getComponentID();
+    auto &detector = m_instrActor->getDetectorByDetID(udet.detID);
+    const Mantid::Geometry::IComponent *bareDet = detector.getComponentID();
     const Mantid::Geometry::IComponent *parent = bareDet->getBareParent();
     if (parent) {
       QRectF detRect;
@@ -215,9 +217,6 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
 
-    if (!udet.detector)
-      continue;
-
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
     double w = (iw == 0) ? dw : udet.width / 2;
@@ -255,10 +254,10 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
       rot.getAngleAxis(deg, ax0, ax1, ax2);
       glRotated(deg, ax0, ax1, ax2);
 
-      Mantid::Kernel::V3D scaleFactor = udet.detector->getScaleFactor();
+      Mantid::Kernel::V3D scaleFactor = udet.scaleFactor;
       glScaled(scaleFactor[0], scaleFactor[1], scaleFactor[2]);
 
-      udet.detector->shape()->draw();
+      udet.shape->draw();
 
       glPopMatrix();
     }
@@ -327,7 +326,7 @@ void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
     for (it = m_unwrappedDetectors.begin(); it != m_unwrappedDetectors.end();
          ++it) {
       const UnwrappedDetector &udet = *it;
-      if (udet.detector && udet.detector->getID() == detID) {
+      if (udet.detID == detID) {
         double w = udet.width;
         if (w > m_width_max)
           w = m_width_max;
@@ -409,11 +408,9 @@ void UnwrappedSurface::getSelectedDetectors(QList<int> &dets) {
   // select detectors with u,v within the allowed boundaries
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.detector)
-      continue;
     if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom &&
         udet.v <= vtop) {
-      dets.push_back(udet.detector->getID());
+      dets.push_back(udet.detID);
     }
   }
 }
@@ -424,10 +421,8 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
     return;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.detector)
-      continue;
     if (m_maskShapes.isMasked(udet.u, udet.v)) {
-      dets.append(udet.detector->getID());
+      dets.append(udet.detID);
     }
   }
 }
@@ -435,10 +430,8 @@ void UnwrappedSurface::getMaskedDetectors(QList<int> &dets) const {
 void UnwrappedSurface::changeColorMap() {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     UnwrappedDetector &udet = m_unwrappedDetectors[i];
-    if (!udet.detector)
-      continue;
     unsigned char color[3];
-    m_instrActor->getColor(udet.detector->getID()).getUB3(&color[0]);
+    m_instrActor->getColor(udet.detID).getUB3(&color[0]);
     udet.color[0] = color[0];
     udet.color[1] = color[1];
     udet.color[2] = color[2];
@@ -538,9 +531,6 @@ void UnwrappedSurface::drawSimpleToImage(QImage *image, bool picking) const {
 
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
-
-    if (!udet.detector)
-      continue;
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
@@ -669,8 +659,8 @@ void UnwrappedSurface::calcSize(UnwrappedDetector &udet) {
   Mantid::Kernel::Quat R;
   this->rotate(udet, R);
 
-  Mantid::Geometry::BoundingBox bbox = udet.detector->shape()->getBoundingBox();
-  Mantid::Kernel::V3D scale = udet.detector->getScaleFactor();
+  Mantid::Geometry::BoundingBox bbox = udet.shape->getBoundingBox();
+  Mantid::Kernel::V3D scale = udet.scaleFactor;
 
   // sizes of the detector along each 3D axis
   Mantid::Kernel::V3D size = bbox.maxPoint() - bbox.minPoint();

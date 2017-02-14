@@ -43,12 +43,12 @@ void UnwrappedSphere::rotate(const UnwrappedDetector &udet,
   Mantid::Kernel::Quat R1;
   // direction in which to look: from sample to detector
   Mantid::Kernel::V3D eye;
-  eye = m_pos - udet.detector->getPos();
+  eye = m_pos - udet.position;
   if (!eye.nullVector()) {
     InstrumentActor::rotateToLookAt(eye, m_zaxis, R1);
   }
   // add detector's own rotation
-  R = R1 * udet.detector->getRotation();
+  R = R1 * udet.rotation;
 }
 
 } // MantidWidgets

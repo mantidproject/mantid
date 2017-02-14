@@ -41,7 +41,7 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
   // rotation from the global axes to those where
   // the z axis points to the detector
   Mantid::Kernel::Quat R1;
-  eye = m_pos - udet.detector->getPos();
+  eye = m_pos - udet.position;
   if (!eye.nullVector()) {
     // eye must point towards the detector and be perpendicular to the
     // cylinder's axis
@@ -54,7 +54,7 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
     }
   }
   // add detector's own rotation
-  R = R1 * udet.detector->getRotation();
+  R = R1 * udet.rotation;
 }
 
 } // MantidWidgets

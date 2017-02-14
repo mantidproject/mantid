@@ -204,7 +204,7 @@ private:
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
   QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
                                             Mantid::Geometry::IPeak *> &peaks);
-  QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
+  QString getParameterInfo(const Mantid::Geometry::IComponent &comp);
   QString getPeakOverlayInfo();
 
   InstrumentWidgetPickTab *m_tab;

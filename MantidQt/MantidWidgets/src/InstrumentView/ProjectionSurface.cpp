@@ -441,10 +441,10 @@ int ProjectionSurface::getDetectorID(int x, int y) const {
 }
 
 //------------------------------------------------------------------------------
-boost::shared_ptr<const Mantid::Geometry::IDetector>
-ProjectionSurface::getDetector(int x, int y) const {
+const Mantid::Geometry::IDetector &ProjectionSurface::getDetector(int x,
+                                                                  int y) const {
   size_t pickID = getPickID(x, y);
-  return m_instrActor->getDetector(pickID);
+  return m_instrActor->getDetectorByPickID(pickID);
 }
 
 /**
