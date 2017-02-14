@@ -133,7 +133,8 @@ void ReflectometryReductionOneAuto2::init() {
                   Direction::Input);
 
   // Detector position correction type
-  const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
+  const std::vector<std::string> correctionType{"VerticalShift",
+                                                "RotateAroundSample"};
   auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
       boost::make_shared<MandatoryValidator<std::string>>());

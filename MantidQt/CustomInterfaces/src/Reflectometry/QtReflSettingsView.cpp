@@ -79,12 +79,10 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
 
-  int ctIndex =
-      m_ui.correctionTypeComboBox->findText(QString::fromStdString(defaults[6]));
+  int ctIndex = m_ui.correctionTypeComboBox->findText(
+      QString::fromStdString(defaults[6]));
   if (ctIndex != -1)
     m_ui.correctionTypeComboBox->setCurrentIndex(ctIndex);
-
-
 }
 
 /* Sets default values for all instrument settings given a list of default

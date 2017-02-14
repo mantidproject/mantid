@@ -56,7 +56,8 @@ void SpecularReflectionPositionCorrect2::init() {
                                              thetaValidator, Direction::Input),
       "Angle used to correct the detector component.");
 
-  const std::vector<std::string> correctionType{"VerticalShift", "RotateAroundSample"};
+  const std::vector<std::string> correctionType{"VerticalShift",
+                                                "RotateAroundSample"};
   auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
   correctionTypeValidator->add(
       boost::make_shared<MandatoryValidator<std::string>>());
