@@ -1,19 +1,18 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTION_H_
 
-#include "MantidSINQ/DllConfig.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include <string>
-
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include <string>
 
 namespace Mantid {
 namespace Poldi {
