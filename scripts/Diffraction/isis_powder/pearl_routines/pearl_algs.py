@@ -36,6 +36,15 @@ def apply_vanadium_absorb_corrections(van_ws, run_details):
     return van_ws
 
 
+def generate_out_name(run_number_string, absorb_on, long_mode_on, tt_mode):
+    output_name = "PRL" + str(run_number_string)
+    # Append each mode of operation
+    output_name += "_" + str(tt_mode)
+    output_name += "_absorb" if absorb_on else ""
+    output_name += "_long" if long_mode_on else ""
+    return output_name
+
+
 def generate_vanadium_absorb_corrections(van_ws):
     raise NotImplementedError("Generating absorption corrections needs to be implemented correctly")
 
@@ -65,7 +74,8 @@ def get_run_details(run_number_string, inst_settings):
 
     splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
                                                        vanadium_run_string=vanadium_run_numbers,
-                                                       long_mode_on=inst_settings.long_mode)
+                                                       long_mode_on=inst_settings.long_mode,
+                                                       tt_mode=inst_settings.tt_mode)
 
     calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
@@ -96,6 +106,7 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
                                                 XMin=lambda_values[0], XMax=lambda_values[-1])
+    # TODO move these masks to the adv. config file
     ex_regions = numpy.zeros((2, 4))
     ex_regions[:, 0] = [3.45, 3.7]
     ex_regions[:, 1] = [2.96, 3.2]
@@ -141,10 +152,8 @@ def strip_bragg_peaks(ws_list_to_correct):
     return ws_list_to_correct
 
 
-def _generate_splined_van_name(absorb_on, long_mode_on, vanadium_run_string):
-    output_string = "SVan_" + str(vanadium_run_string)
-    output_string += "_absorb" if absorb_on else ""
-    output_string += "_long" if long_mode_on else ""
-
-    output_string += ".nxs"
+def _generate_splined_van_name(vanadium_run_string, absorb_on, long_mode_on, tt_mode):
+    generated_out_name = generate_out_name(run_number_string=vanadium_run_string, absorb_on=absorb_on,
+                                           long_mode_on=long_mode_on, tt_mode=tt_mode)
+    output_string = "SplinedVan_" + generated_out_name + ".nxs"
     return output_string

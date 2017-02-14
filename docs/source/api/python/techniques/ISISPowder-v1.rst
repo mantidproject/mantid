@@ -179,9 +179,8 @@ For background on script parameters and how they are evaluated see:
 
 TODO talk about defaults?
 
-- `attenuation_file_name` - The attenuation file name, this file must be located in
-  the top level directory of the calibration directory. More information
-  here: :ref:`pearl_cal_folder_isis-powder-diffraction-ref`
+- `attenuation_file` - The full path to the attenuation file. This is used with
+  the algorithm :ref:`PearlMCAbsorption<algm-PearlMCAbsorption>`
 
 - `calibration_directory` - This folder must contain various files such as
   detector offsets and detector grouping information. Additionally calibrated

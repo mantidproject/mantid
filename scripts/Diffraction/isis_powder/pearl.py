@@ -32,7 +32,7 @@ class Pearl(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        kwargs["perform_attenuation"] = False  # Hard code this off as it is not implemented
+        kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         if str(self._inst_settings.tt_mode).lower() == "all":
@@ -66,19 +66,15 @@ class Pearl(AbstractInst):
 
     @staticmethod
     def _generate_input_file_name(run_number):
-        return _generate_file_name(run_number=run_number)
+        return _generate_inst_padding(run_number=run_number)
 
     def _generate_output_file_name(self, run_number_string):
-
-        output_name = "PRL" + str(run_number_string)
-        # Append each mode of operation
-        output_name += "_" + self._inst_settings.tt_mode
-        output_name += "_absorb" if self._inst_settings.absorb_corrections else ""
-        output_name += "_long" if self._inst_settings.long_mode else ""
-        return output_name
+        inst = self._inst_settings
+        return pearl_algs.generate_out_name(run_number_string=run_number_string, absorb_on=inst.absorb_corrections,
+                                            long_mode_on=inst.long_mode, tt_mode=inst.tt_mode)
 
     def _attenuate_workspace(self, input_workspace):
-        attenuation_path = self._attenuation_full_path
+        attenuation_path = self._inst_settings.attenuation_file_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
@@ -99,9 +95,6 @@ class Pearl(AbstractInst):
         return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
                                                    num_splines=self._inst_settings.spline_coefficient)
 
-    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
-        return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
-
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
@@ -109,7 +102,7 @@ class Pearl(AbstractInst):
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
                                                         perform_attenuation=self._inst_settings.perform_atten)
-        group_name = "PEARL" + str(run_details.run_number) + "-Results-D-Grp"
+        group_name = "PEARL" + str(run_details.run_number) + '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 
@@ -137,7 +130,7 @@ class Pearl(AbstractInst):
                                               suppress_warnings=True)
 
 
-def _generate_file_name(run_number):
+def _generate_inst_padding(run_number):
     digit = len(str(run_number))
 
     number_of_digits = 8
