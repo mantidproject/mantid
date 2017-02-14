@@ -441,7 +441,6 @@ void ExperimentInfo::populateInstrumentParameters() {
   const auto instrument = parInstrument->baseInstrument();
   const auto &paramInfoFromIDF = instrument->getLogfileCache();
 
-  const double deg2rad(M_PI / 180.0);
   std::map<const IComponent *, RTP> rtpParams;
 
   for (const auto &item : paramInfoFromIDF) {
@@ -462,9 +461,9 @@ void ExperimentInfo::populateInstrumentParameters() {
           rtpValues.radius = value;
           rtpValues.haveRadius = true;
         } else if (paramN.compare(0, 1, "t") == 0)
-          rtpValues.theta = deg2rad * value;
+          rtpValues.theta = value;
         else if (paramN.compare(0, 1, "p") == 0)
-          rtpValues.phi = deg2rad * value;
+          rtpValues.phi = value;
         if (rtpValues.haveRadius) {
           V3D pos;
           pos.spherical(rtpValues.radius, rtpValues.theta, rtpValues.phi);
