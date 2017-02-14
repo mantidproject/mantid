@@ -582,7 +582,7 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre,
   auto facmol = 2 * (gj - 1) * c_myb;
   auto facext = gj * c_myb;
   // Negative nre means arbitrary J, with abs(nre) = 2J. dimj=2J+1
-  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre)+1);
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   auto j = 0.5 * (dimj - 1.0);
   int dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);
@@ -699,7 +699,7 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
   }
 
   // initialize some rare earth constants
-  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre)+1);
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
 
   //------------------------------------------------------------
   //       transform the Bkq with
@@ -929,7 +929,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
                           DoubleFortranVector &e_energies,
                           DoubleFortranMatrix &i_energies) {
   int dim = static_cast<int>(energies.size());
-  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre)+1);
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   if (static_cast<double>(dim) != dimj) {
     throw std::runtime_error("calculateIntensities was called for a wrong ion");
   }
@@ -1051,7 +1051,7 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
 void calculateMagneticMoment(const ComplexFortranMatrix &ev,
                              const DoubleFortranVector &Hdir, const int nre,
                              DoubleFortranVector &moment) {
-  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre)+1);
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
   auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   moment.allocate(dim);
   for (auto i = 1; i <= dim; ++i) {
@@ -1070,7 +1070,7 @@ void calculateMagneticMoment(const ComplexFortranMatrix &ev,
 void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
                                    const std::vector<double> &Hdir,
                                    const int nre, ComplexFortranMatrix &mumat) {
-  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre)+1);
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
   auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   mumat.allocate(1, dim, 1, dim);
   for (auto i = 1; i <= dim; ++i) {

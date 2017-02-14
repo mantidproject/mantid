@@ -352,10 +352,8 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
             nre = -(int)J2;
             break;
           }
-        }
-        catch (const std::invalid_argument &e) {
-        }
-        catch (const std::out_of_range &e) {
+        } catch (const std::invalid_argument &e) {
+        } catch (const std::out_of_range &e) {
         }
       }
       // fall through
