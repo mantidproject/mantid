@@ -131,8 +131,9 @@ void IndirectDiffractionReduction::run() {
       showInformationBox("Rebinning parameters are incorrect.");
       return;
     }
+    runGenericReduction(instName, mode);
   }
-  runGenericReduction(instName, mode);
+
 }
 
 /**
