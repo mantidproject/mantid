@@ -3,6 +3,7 @@
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -3063,11 +3064,7 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    // Create and open the URL of the help page
-    QString url =
-        QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
-                               handler->ifun()->name() + ".html");
-    MantidDesktopServices::openUrl(QUrl(url));
+    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),handler->ifun()->name());
   }
 }
 
