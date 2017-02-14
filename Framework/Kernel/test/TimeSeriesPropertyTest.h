@@ -679,6 +679,13 @@ public:
   }
 
   //----------------------------------------------------------------------------
+  /**
+   * otuput 0 has entries: 3
+   * otuput 1 has entries: 5
+   * otuput 2 has entries: 2
+   * otuput 3 has entries: 7
+   * @brief test_splitByTimeVector
+   */
   void test_splitByTimeVector() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
@@ -718,54 +725,44 @@ public:
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
-    for (int i = 0; i < 4; ++i) {
-      TimeSeriesProperty<int> *out_i = outputs[i];
-      std::cout << "otuput " << i << " has entries: " << out_i->size() << "\n";
-    }
 
     // Exam the split entries
     TimeSeriesProperty<int> *out_0 = outputs[0];
     // FIXME - Check whether out_0 is correct!
     TS_ASSERT_EQUALS(out_0->size(), 3);
-    for (int j = 0; j < out_0->size(); ++j) {
-      ;
-      // std::cout << "out 0 " << j << ": " <<  out_0->nthTime(j) << ", " <<
-      // out_0->nthValue(j) << "\n";
-    }
-    // pop out this: TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
+    TS_ASSERT_EQUALS(out_0->nthValue(0), 2);
+    TS_ASSERT_EQUALS(out_0->nthValue(1), 3);
+    TS_ASSERT_EQUALS(out_0->nthValue(2), 4);
 
     TimeSeriesProperty<int> *out_1 = outputs[1];
-    for (int j = 0; j < out_1->size(); ++j) {
-      ;
-      // std::cout << "out 1 " << j << ": " << out_1->nthTime(j) << ", " <<
-      // out_1->nthValue(j) << "\n";
-    }
-    // TS_ASSERT_EQUALS(out_1->nthTime(0), X);
-    // TS_ASSERT_EQUALS(out_1->nthValue(0), Y);
     TS_ASSERT_EQUALS(out_1->size(), 5);
+    TS_ASSERT_EQUALS(out_1->nthValue(0), 1);
+    TS_ASSERT_EQUALS(out_1->nthValue(1), 2);
+    TS_ASSERT_EQUALS(out_1->nthValue(2), 3);
+    TS_ASSERT_EQUALS(out_1->nthValue(3), 4);
+    TS_ASSERT_EQUALS(out_1->nthValue(4), 5);
 
-    // THERE IS A SEGEMENATION FAULT!
     TimeSeriesProperty<int> *out_2 = outputs[2];
     TS_ASSERT_EQUALS(out_2->size(), 2);
-    for (int j = 0; j < out_2->size(); ++j) {
-      ;
-      // std::cout << "out 2 " << j << ": " << out_2->nthTime(j) << ", " <<
-      // out_2->nthValue(j) << "\n";
-    }
+    TS_ASSERT_EQUALS(out_2->nthValue(0), 2);
+    TS_ASSERT_EQUALS(out_2->nthValue(1), 3);
+
 
     TimeSeriesProperty<int> *out_3 = outputs[3];
-    TS_ASSERT_EQUALS(out_3->size(), 4);
+    TS_ASSERT_EQUALS(out_3->size(), 7);
+    // out[3] should have entries: 4, 5, 6, 7, 8, 9, 10
     for (int j = 0; j < out_3->size(); ++j) {
-      ;
-      // std::cout << out_3->nthTime(j) << ", " << out_3->nthValue(j) << "\n";
+        TS_ASSERT_EQUALS(out_3->nthValue(j), j+4);
     }
+
+    return;
   }
 
   //----------------------------------------------------------------------------
   /** last splitter is before first entry
    * @brief test_splitByTimeVectorEarlySplitter
    */
-  void SegmentFault_test_splitByTimeVectorEarlySplitter() {
+  void test_splitByTimeVectorEarlySplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
     split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));
@@ -810,13 +807,15 @@ public:
       TimeSeriesProperty<int> *out_i = outputs[i];
       TS_ASSERT_EQUALS(out_i->size(), 0);
     }
+
+    return;
   }
 
   //----------------------------------------------------------------------------
   /** first splitter is after last entry
    * @brief test_splitByTimeVectorLaterSplitter
    */
-  void Failedtest_splitByTimeVectorLaterSplitter() {
+  void test_splitByTimeVectorLaterSplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
     split_time_vec.push_back(DateAndTime("2007-12-30T16:00:10"));
@@ -868,7 +867,7 @@ public:
   /** high-frequency splitters splits a slow change log
    * @brief test_splitByTimeVectorFastLogSplitter
    */
-  void Incomplete_test_splitByTimeVectorFastLogSplitter() {
+  void test_splitByTimeVectorFastLogSplitter() {
     // create test log
     TimeSeriesProperty<int> log("test log");
     log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
@@ -907,11 +906,26 @@ public:
       outputs.push_back(tsp);
     }
 
+    size_t num_splits = vec_split_target.size();
+    for (size_t i = 0; i < num_splits; ++i)
+    {
+        std::cout << "s[" << i << "]  start = " << vec_split_times[i] << ", stop = " << vec_split_times[i+1]
+                  << ":  target = " << vec_split_target[i] << "\n";
+    }
+
     // split time series property
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
+    // TODO/FIXME/ - continue to debug from here!
+    // for in in range(11):
+    //    print time.. value ...
+
     // test
-    // TODO - FROM HERE!
+    for (size_t i = 0; i < 10; ++i)
+    {
+        TS_ASSERT_EQUALS(outputs[i]->size(), 2);
+    }
+
   }
 
   //----------------------------------------------------------------------------
