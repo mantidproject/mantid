@@ -50,7 +50,8 @@ class MainWindow(QtGui.QMainWindow):
     TabPage = {'View Raw Data': 2,
                'Calculate UB': 3,
                'UB Matrix': 4,
-               'Peak Integration': 6}
+               'Peak Integration': 6,
+               'Scans Processing': 5}
 
     def __init__(self, parent=None):
         """ Initialization and set up
@@ -1322,7 +1323,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # set calculated values
         try:
-            self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['raw intensity']))
+            self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
             self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
             self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
 

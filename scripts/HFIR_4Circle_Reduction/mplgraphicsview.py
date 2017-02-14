@@ -1104,7 +1104,7 @@ class Qt4MplCanvas(FigureCanvas):
         """
         # Check input
         if isinstance(vec_x, np.ndarray) is False or isinstance(vec_y, np.ndarray) is False:
-            raise NotImplementedError('Input vec_x or vec_y for addPlot() must be numpy.array.')
+            raise NotImplementedError('Input vec_x or vec_y for addPlot() must be numpy.array. blabla')
         plot_error = y_err is not None
         if plot_error is True:
             if isinstance(y_err, np.ndarray) is False:

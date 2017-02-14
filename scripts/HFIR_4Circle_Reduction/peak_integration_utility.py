@@ -458,7 +458,7 @@ def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
     """
     pt_list = sorted(integrated_pt_dict.keys())
 
-    if len(motor_pos_dict) != pt_list:
+    if len(motor_pos_dict) != len(pt_list):
         raise RuntimeError('Integrated Pt intensities does not match motor positions')
 
     pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
