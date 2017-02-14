@@ -3064,7 +3064,8 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),handler->ifun()->name());
+    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),
+                                               handler->ifun()->name());
   }
 }
 
