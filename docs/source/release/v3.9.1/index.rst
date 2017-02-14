@@ -25,6 +25,7 @@ Changes in this version
 -----------------------
 
 * `18833 <https://www.github.com/mantidproject/mantid/pull/18833>`_ Added check for if nonorthogonal axes should be displayed
+* `18857 <https://www.github.com/mantidproject/mantid/pull/18857>`_ Indirect Diffraction - OSIRIS diffonly interface crash
 * `18865 <https://www.github.com/mantidproject/mantid/pull/18865>`_ Fix bug in reflectometry GUI
 * `18875 <https://www.github.com/mantidproject/mantid/pull/18875>`_ U correction not correctly applied to viewport
 * `18891 <https://www.github.com/mantidproject/mantid/pull/18891>`_ Fix bug in gd_prtn_chrg for chunked data
@@ -42,6 +43,8 @@ Summary of impact
 |       |                                                                                   |                                             | Probability  |
 +=======+===================================================================================+=============================================+==============+
 | 18833 | HKL axes now respect the non-orthogonal checkbox                                  | Add check if button is in a checked state   | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18857 | Diffraction reduction in diffonly mode does not crash fro OSIRIS                  | Only run OSIRIS-specific reduction          | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18865 | Correct behaviour when no transmission run is provided                            | Add check if runs are provided              | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
