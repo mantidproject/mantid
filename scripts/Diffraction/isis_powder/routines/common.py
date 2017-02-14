@@ -5,11 +5,6 @@ import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import InputBatchingEnum
 
 
-def create_calibration_by_names(calibration_runs, startup_objects, grouping_file_name, group_names):
-    _create_blank_cal_file(calibration_runs=calibration_runs, group_names=group_names,
-                           out_grouping_file_name=grouping_file_name, instrument=startup_objects)
-
-
 def crop_banks_in_tof(bank_list, crop_values_list):
     if not isinstance(crop_values_list, list):
         raise ValueError("The cropping values were not in a list type")
@@ -159,16 +154,6 @@ def _check_load_range(list_of_runs_to_load):
     if len(list_of_runs_to_load) > maximum_range_len:
         raise ValueError("More than " + str(maximum_range_len) + " runs were selected."
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
-
-
-def _create_blank_cal_file(calibration_runs, out_grouping_file_name, instrument, group_names):
-    input_ws_list = load_current_normalised_ws_list(calibration_runs, instrument,
-                                                    input_batching=InputBatchingEnum.Summed)
-    calibration_d_spacing_ws = mantid.ConvertUnits(InputWorkspace=input_ws_list[0], Target="dSpacing")
-    mantid.CreateCalFileByNames(InstrumentWorkspace=calibration_d_spacing_ws,
-                                GroupingFileName=out_grouping_file_name, GroupNames=group_names)
-    remove_intermediate_workspace(calibration_d_spacing_ws)
-    remove_intermediate_workspace(input_ws_list)
 
 
 def _load_raw_files(run_number_string, instrument):
