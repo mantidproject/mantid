@@ -21,8 +21,9 @@ using namespace HistogramData;
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF2)
 
 /// A vector containing the supported instrument names
-const std::vector<std::string> LoadILLTOF2::SUPPORTED_INSTRUMENTS = {
-    "IN4", "IN5", "IN6"};
+const std::vector<std::string> LoadILLTOF2::SUPPORTED_INSTRUMENTS = { "IN4",
+                                                                      "IN5",
+                                                                      "IN6" };
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -38,12 +39,11 @@ int LoadILLTOF2::confidence(Kernel::NexusDescriptor &descriptor) const {
   if (descriptor.pathExists("/entry0/wavelength") &&
       descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
-      !descriptor.pathExists(
-          "/entry0/dataSD") // This one is for LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
+      !descriptor.pathExists("/entry0/dataSD") // This one is for
+                                               // LoadILLIndirect
+      && !descriptor.pathExists(
+              "/entry0/instrument/VirtualChopper") // This one is for
+                                                   // LoadILLReflectometry
       ) {
     return 80;
   } else {
@@ -61,8 +61,8 @@ void LoadILLTOF2::init() {
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "File path of the Data file to load");
 
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(make_unique<WorkspaceProperty<> >("OutputWorkspace", "",
+                                                    Direction::Output),
                   "The name to use for the output workspace");
 }
 
@@ -108,10 +108,10 @@ void LoadILLTOF2::exec() {
  *
  * @return List of monitor data
  */
-std::vector<std::vector<int>>
+std::vector<std::vector<int> >
 LoadILLTOF2::getMonitorInfo(NeXus::NXEntry &firstEntry) {
 
-  std::vector<std::vector<int>> monitorList;
+  std::vector<std::vector<int> > monitorList;
 
   for (std::vector<NXClassInfo>::const_iterator it =
            firstEntry.groups().begin();
@@ -168,8 +168,9 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
  * @param entry The NeXus entry
  * @param monitors List of monitor data
  */
-void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
-                                const std::vector<std::vector<int>> &monitors) {
+void
+LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
+                           const std::vector<std::vector<int> > &monitors) {
 
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -333,7 +334,7 @@ void LoadILLTOF2::addPulseInterval() {
  * @param monitors List of monitor data
  */
 void LoadILLTOF2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+    NeXus::NXEntry &entry, const std::vector<std::vector<int> > &monitors) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
@@ -358,8 +359,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 
-  loadSpectra(spec, m_numberOfTubes, detectorIDs, data,
-              progress);
+  loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
 
   g_log.debug() << "Loading detector data into the workspace: DONE!\n";
 
@@ -379,8 +379,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     Progress progressRosace(this, 0, 1,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
-    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace,
-                progressRosace);
+    loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);
   }
 
   const auto monitorIDs = instrument->getMonitors();
@@ -405,8 +404,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * @param data The NeXus data to load into the workspace
  * @param progress The progress monitor
  */
-void LoadILLTOF2::loadSpectra(size_t &spec,
-                              const size_t numberOfTubes,
+void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
                               const std::vector<detid_t> &detectorIDs,
                               NXInt data, Progress progress) {
   for (size_t i = 0; i < numberOfTubes; ++i) {
@@ -415,8 +413,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec,
       m_localWorkspace->setHistogram(
           spec, m_localWorkspace->binEdges(0),
           Counts(data_p, data_p + m_numberOfChannels));
-      m_localWorkspace->getSpectrum(spec)
-          .setDetectorID(detectorIDs[spec]);
+      m_localWorkspace->getSpectrum(spec).setDetectorID(detectorIDs[spec]);
       spec++;
       progress.report();
     }
@@ -437,7 +434,8 @@ void LoadILLTOF2::runLoadInstrument() {
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(false));
     loadInst->execute();
-  } catch (...) {
+  }
+  catch (...) {
     g_log.information("Cannot load the instrument definition.");
   }
 }

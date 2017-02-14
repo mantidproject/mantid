@@ -60,9 +60,9 @@ private:
   void exec() override;
 
   void loadInstrumentDetails(NeXus::NXEntry &);
-  std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
+  std::vector<std::vector<int> > getMonitorInfo(NeXus::NXEntry &firstEntry);
   void initWorkSpace(NeXus::NXEntry &entry,
-                     const std::vector<std::vector<int>> &);
+                     const std::vector<std::vector<int> > &);
   void initInstrumentSpecific();
   void addAllNexusFieldsAsProperties(const std::string &filename);
   void addEnergyToRun();
@@ -71,9 +71,8 @@ private:
 
   void loadTimeDetails(NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry,
-                                const std::vector<std::vector<int>> &);
-  void loadSpectra(size_t &spec,
-                   const size_t numberOfTubes,
+                                const std::vector<std::vector<int> > &);
+  void loadSpectra(size_t &spec, const size_t numberOfTubes,
                    const std::vector<Mantid::detid_t> &detectorIDs,
                    NeXus::NXInt data, Mantid::API::Progress progress);
 

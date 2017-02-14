@@ -40,12 +40,10 @@ public:
    * This test only loads the Sample Data
    * The elastic peak is obtained on the fly from the sample data.
    */
-  MatrixWorkspace_sptr loadDataFile(const std::string dataFile,
-                                    const size_t numberOfHistograms,
-                                    const size_t numberOfMonitors,
-                                    const size_t numberOfChannels,
-                                    const double tofDelay,
-                                    const double tofChannelWidth) {
+  MatrixWorkspace_sptr
+  loadDataFile(const std::string dataFile, const size_t numberOfHistograms,
+               const size_t numberOfMonitors, const size_t numberOfChannels,
+               const double tofDelay, const double tofChannelWidth) {
     LoadILLTOF2 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
@@ -112,8 +110,8 @@ public:
     const size_t histogramCount = 397;
     const size_t monitorCount = 1;
     MatrixWorkspace_sptr ws =
-        loadDataFile("ILL/IN4/084446.nxs", histogramCount, monitorCount, channelCount,
-                     tofDelay, tofChannelWidth);
+        loadDataFile("ILL/IN4/084446.nxs", histogramCount, monitorCount,
+                     channelCount, tofDelay, tofChannelWidth);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
@@ -127,8 +125,8 @@ public:
     const size_t channelCount = 512;
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
-    loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount, channelCount, tofDelay,
-                 tofChannelWidth);
+    loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount,
+                 channelCount, tofDelay, tofChannelWidth);
   }
 
   void test_IN6_load() {
@@ -139,8 +137,8 @@ public:
     const size_t histogramCount = 340;
     const size_t monitorCount = 3;
     MatrixWorkspace_sptr ws =
-        loadDataFile("ILL/IN6/164192.nxs", histogramCount, monitorCount, channelCount,
-                     tofDelay, tofChannelWidth);
+        loadDataFile("ILL/IN6/164192.nxs", histogramCount, monitorCount,
+                     channelCount, tofDelay, tofChannelWidth);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
