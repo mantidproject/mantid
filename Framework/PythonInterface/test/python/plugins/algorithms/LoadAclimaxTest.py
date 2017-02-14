@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid import logger
-from mantid.simpleapi import mtd, LoadAclimax, Load, CompareWorkspaces
+from mantid.simpleapi import mtd, LoadAclimax, Load, CompareWorkspaces, DeleteWorkspace
 from AbinsModules import AbinsTestHelpers
 import numpy as np
 
@@ -36,8 +36,10 @@ def skip_if(skipping_criteria):
 @skip_if(old_modules)
 class LoadAclimaxTest(unittest.TestCase):
 
-    _aclimax_csv_file = "benzene_LoadAclimax.csv"
-    _aclimax_csv_file_ref = "BenzeneCSVLoadAclimax.nxs"
+    _aclimax_csv_file = "benzene_LoadAclimax.csv"  # used in both tests for origin and full
+    _aclimax_csv_file_ref_origin = "BenzeneCSVLoadAclimax.nxs"
+    _aclimax_csv_file_ref_full = "BenzeneFullCSVLoadAclimax.nxs"
+
 
     def tearDown(self):
         AbinsTestHelpers.remove_output_files(list_of_names=["LoadAclimax"])
@@ -48,8 +50,20 @@ class LoadAclimaxTest(unittest.TestCase):
 
     def test_good_case(self):
 
+
+        # only origin
         wrk = LoadAclimax(aClimaxCVSFile=self._aclimax_csv_file)
-        wrk_ref = Load(self._aclimax_csv_file_ref)
+        wrk_ref = Load(self._aclimax_csv_file_ref_origin)
+        (result, messages) = CompareWorkspaces(wrk_ref, wrk)
+
+        self.assertEqual(result, True)
+
+        DeleteWorkspace(wrk_ref)
+        DeleteWorkspace(wrk)
+
+        # full =  origin + phonon_wings
+        wrk = LoadAclimax(aClimaxCVSFile=self._aclimax_csv_file, PhononWings=True)
+        wrk_ref = Load(self._aclimax_csv_file_ref_full)
         (result, messages) = CompareWorkspaces(wrk_ref, wrk)
 
         self.assertEqual(result, True)
