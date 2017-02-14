@@ -27,7 +27,7 @@ class Pearl(AbstractInst):
     def focus(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number=self._inst_settings.run_number, input_batching=InputBatchingEnum.Summed,
+        return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
@@ -53,14 +53,12 @@ class Pearl(AbstractInst):
     # Params #
 
     def _get_run_details(self, run_number_string):
-        input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
-        first_run = input_run_number_list[0]
-        if self._cached_run_details_number == first_run:
+        if self._cached_run_details_number == run_number_string:
             return self._cached_run_details
 
         run_details = pearl_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings)
 
-        self._cached_run_details_number = first_run
+        self._cached_run_details_number = run_number_string
         self._cached_run_details = run_details
         return run_details
 
@@ -102,7 +100,8 @@ class Pearl(AbstractInst):
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
                                                         perform_attenuation=self._inst_settings.perform_atten)
-        group_name = "PEARL" + str(run_details.run_number) + '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
+        group_name = "PEARL" + str(run_details.user_input_run_number)
+        group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 

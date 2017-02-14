@@ -4,7 +4,7 @@ import mantid.simpleapi as mantid
 import os
 
 
-def save_polaris_focused_data(d_spacing_group, tof_group, output_paths, run_number):
+def save_polaris_focused_data(d_spacing_group, tof_group, output_paths, run_number_string):
     mantid.SaveGSS(InputWorkspace=tof_group, Filename=output_paths["gss_filename"], SplitFiles=False, Append=False)
     mantid.SaveNexusProcessed(InputWorkspace=tof_group, Filename=output_paths["nxs_filename"], Append=False)
 
@@ -13,9 +13,9 @@ def save_polaris_focused_data(d_spacing_group, tof_group, output_paths, run_numb
     if not os.path.exists(dat_file_destination):
         os.makedirs(dat_file_destination)
 
-    _save_xye(ws_group=d_spacing_group, ws_units="d", run_number=run_number,
+    _save_xye(ws_group=d_spacing_group, ws_units="d", run_number=run_number_string,
               output_folder=dat_file_destination)
-    _save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_number,
+    _save_xye(ws_group=tof_group, ws_units="TOF", run_number=run_number_string,
               output_folder=dat_file_destination)
 
 

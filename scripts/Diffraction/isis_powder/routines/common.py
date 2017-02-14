@@ -84,7 +84,10 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     return load_monitor_ws
 
 
-def load_current_normalised_ws_list(run_number_string, instrument, input_batching):
+def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None):
+    if not input_batching:
+        input_batching = instrument._get_input_batching_mode()
+
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 

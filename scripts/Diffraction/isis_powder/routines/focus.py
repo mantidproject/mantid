@@ -8,12 +8,12 @@ import os
 import warnings
 
 
-def focus(run_number, instrument, input_batching, perform_vanadium_norm=True):
+def focus(run_number_string, instrument, perform_vanadium_norm=True):
+    input_batching = instrument._get_input_batching_mode()
     if input_batching.lower() == InputBatchingEnum.Individual.lower():
-        return _individual_run_focusing(input_batching, instrument, perform_vanadium_norm,
-                                        run_number)
+        return _individual_run_focusing(instrument, perform_vanadium_norm, run_number_string)
     else:
-        return _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number)
+        return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string)
 
 
 def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
@@ -24,13 +24,14 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     # Subtract and crop to largest acceptable TOF range
     input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
                                                    empty_sample_ws_string=run_details.empty_runs)
+
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
     # Align / Focus
-    input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                            CalibrationFile=run_details.calibration_file_path)
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
+                                       CalibrationFile=run_details.calibration_file_path)
 
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
+    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
     calibrated_spectra = _apply_vanadium_corrections(instrument=instrument, run_number=run_number,
@@ -42,6 +43,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
 
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
+    common.remove_intermediate_workspace(aligned_ws)
     common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(calibrated_spectra)
 
@@ -62,12 +64,12 @@ def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform
     return processed_spectra
 
 
-def _batched_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number):
-    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number,
-                                                          input_batching=input_batching, instrument=instrument)
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string):
+    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
+                                                          instrument=instrument)
     output = None
     for ws in read_ws_list:
-        output = _focus_one_ws(ws=ws, run_number=run_number, instrument=instrument,
+        output = _focus_one_ws(ws=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm)
     return output
 
@@ -82,13 +84,12 @@ def _divide_by_vanadium_splines(spectra_list, spline_file_path):
     return output_list
 
 
-def _individual_run_focusing(input_batching, instrument, perform_vanadium_norm, run_number):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     output = None
     for run in run_numbers:
-        ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument,
-                                                    input_batching=input_batching)
+        ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm)
     return output

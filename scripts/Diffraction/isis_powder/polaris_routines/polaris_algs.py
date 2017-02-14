@@ -25,8 +25,12 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     return ws_to_correct
 
 
-def get_run_details(run_number, inst_settings):
-    yaml_dict = yaml_parser.get_run_dictionary(run_number=run_number, file_path=inst_settings.cal_mapping_file)
+def get_run_details(run_number_string, inst_settings):
+    run_number = common.generate_run_numbers(run_number_string=run_number_string)
+    if isinstance(run_number, list):
+        # Only take first run number
+        run_number = run_number[0]
+    yaml_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=inst_settings.cal_mapping_file)
 
     if inst_settings.chopper_on:
         chopper_config = yaml_dict["chopper_on"]
@@ -47,6 +51,7 @@ def get_run_details(run_number, inst_settings):
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number)
+    run_details.user_input_run_number = run_number_string
     run_details.empty_runs = empty_runs
     run_details.vanadium_run_numbers = vanadium_runs
     run_details.label = label
@@ -59,14 +64,12 @@ def get_run_details(run_number, inst_settings):
 
 
 def split_into_tof_d_spacing_groups(run_details, processed_spectra):
-    name_index = 1
     d_spacing_output = []
     tof_output = []
-    run_number = str(run_details.run_number)
-    for ws in processed_spectra:
-        d_spacing_out_name = run_number + "-ResultD-" + str(name_index)
-        tof_out_name = run_number + "-ResultTOF-" + str(name_index)
-        name_index += 1
+    run_number = str(run_details.user_input_run_number)
+    for name_index, ws in enumerate(processed_spectra):
+        d_spacing_out_name = run_number + "-ResultD-" + str(name_index + 1)
+        tof_out_name = run_number + "-ResultTOF-" + str(name_index + 1)
 
         d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name,
                                                     Target="dSpacing"))

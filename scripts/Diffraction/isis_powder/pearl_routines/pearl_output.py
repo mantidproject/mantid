@@ -24,12 +24,12 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, p
     return processed_nexus_files
 
 
-def _attenuate_workspace(instrument, output_file_paths, ws_to_attenuate):
+def _attenuate_workspace(instrument, output_file_paths, attenuated_ws):
     # Clone a workspace which is not attenuated
     no_att = output_file_paths["output_name"] + "_noatten"
-    mantid.CloneWorkspace(InputWorkspace=ws_to_attenuate, OutputWorkspace=no_att)
-    ws_to_attenuate = instrument._attenuate_workspace(ws_to_attenuate)
-    return ws_to_attenuate
+    mantid.CloneWorkspace(InputWorkspace=attenuated_ws, OutputWorkspace=no_att)
+    attenuated_ws = instrument._attenuate_workspace(attenuated_ws)
+    return attenuated_ws
 
 
 def _focus_mode_mods(output_file_paths, calibrated_spectra):

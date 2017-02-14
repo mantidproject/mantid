@@ -70,7 +70,12 @@ def generate_vanadium_absorb_corrections(van_ws):
 
 
 def get_run_details(run_number_string, inst_settings):
-    mapping_dict = yaml_parser.get_run_dictionary(run_number=run_number_string, file_path=inst_settings.cal_map_path)
+    if isinstance(run_number_string, str) and not run_number_string.isdigit():
+        run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+        first_run_number = run_number_list[0]
+    else:
+        first_run_number = run_number_string
+    mapping_dict = yaml_parser.get_run_dictionary(run_number_string=first_run_number, file_path=inst_settings.cal_map_path)
 
     calibration_file_name = mapping_dict["calibration_file"]
     empty_run_numbers = mapping_dict["empty_run_numbers"]
@@ -95,7 +100,8 @@ def get_run_details(run_number_string, inst_settings):
 
     splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
 
-    run_details = RunDetails(run_number=run_number_string)
+    run_details = RunDetails(run_number=first_run_number)
+    run_details.user_input_run_number = run_number_string
     run_details.calibration_file_path = calibration_file_path
     run_details.grouping_file_path = grouping_file_path
     run_details.empty_runs = empty_run_numbers

@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from isis_powder.routines import calibrate, focus
+from isis_powder.routines import calibrate, focus, common_enums
 
 
 # This class provides common hooks for instruments to override
@@ -47,16 +47,15 @@ class AbstractInst(object):
         return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
-    def _focus(self, run_number, input_batching, do_van_normalisation):
+    def _focus(self, run_number_string, do_van_normalisation):
         """
         Focuses the user specified run - should be called by the concrete instrument
-        :param run_number: The run number(s) to be processed
-        :param input_batching: How to process the runs specified if a range. E.g. Individual/Batched. See common enums.
+        :param run_number_string: The run number(s) to be processed
         :param do_van_normalisation: True to divide by the vanadium run, false to not.
         :return:
         """
-        return focus.focus(run_number=run_number, input_batching=input_batching,
-                           perform_vanadium_norm=do_van_normalisation, instrument=self)
+        return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
+                           instrument=self)
 
     # Mandatory overrides
 
@@ -160,6 +159,14 @@ class AbstractInst(object):
         # automatic calibration
         raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")
 
+    def _get_input_batching_mode(self):
+        """
+        Returns the user specified input batching (e.g. summed or individual processing). This is set to summed
+        by default for instruments who do not with to specify it
+        :return: The current input batching type from the InputBatchingEnum
+        """
+        return common_enums.InputBatchingEnum.Summed
+
     def _get_monitor_spectra_index(self, run_number):
         """
         Returns the spectra number a monitor is located at
@@ -196,7 +203,7 @@ class AbstractInst(object):
         :return: A dictionary containing the various output paths and generated output name
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
-        file_name = str(self._generate_output_file_name(run_number_string=run_details.run_number))
+        file_name = str(self._generate_output_file_name(run_number_string=run_details.user_input_run_number))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))
