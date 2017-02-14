@@ -16,13 +16,16 @@ the spline. Values smaller or larger than the interpolation range will
 be set to the first and last value of the WorkspaceToInterpolate,
 respectively. This applies only for the OutputWorkspace and for example
 not for the workspace of derivatives, where all y values outside of the
-interpolation range will be zero.
+interpolation range will be zero. The input workspaces require strictly
+ascending x values. In case of unsorted x values, workspaces containing
+point data will be sorted and a warning appears in the Results Log window.
+However, only the x values will be sorted for histogram workspaces. 
 
 If multiple spectra are defined in the WorkspaceToInterpolate workspace,
 they will all be interpolated against the first spectra in
 WorkspaceToMatch.
 
-Optionally, the algorithm can perform a linear interpolation, if the
+The algorithm can perform a linear interpolation, if the
 WorkspaceToMatch contains two points exactly.
 
 Optionally, this algorithm can also calculate the first and second

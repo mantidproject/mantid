@@ -83,7 +83,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
       g_log.warning() << "Spline x parameters are not in ascending order. "
                          "Only x values will be sorted.\n";
       std::sort(x.get(), x.get() + n);
-      continue;
+      break;
     }
 
     y[i] = getParameter(yName);

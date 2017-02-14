@@ -107,7 +107,7 @@ private:
                  MatrixWorkspace_const_sptr interpolationWorkspace) const;
 
   /// Check increasing x-values and sort x, y, e-values if needed
-  void ensureXIncreasing(MatrixWorkspace_sptr inputWorkspace);
+  MatrixWorkspace_sptr ensureXIncreasing(MatrixWorkspace_sptr inputWorkspace);
 };
 
 } // namespace Algorithms

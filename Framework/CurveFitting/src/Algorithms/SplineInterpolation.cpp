@@ -130,10 +130,6 @@ void SplineInterpolation::exec() {
   MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
   MatrixWorkspace_sptr refws = getProperty(refWorkspace);
 
-  // avoid x-value sorting in CubicSpline and ensure sorting if Linear2Points
-  ensureXIncreasing(mws);
-  ensureXIncreasing(iws);
-
   int histNo = static_cast<int>(iws->getNumberHistograms());
   size_t binsNo = static_cast<int>(iws->blocksize());
   int binsNoInterp = static_cast<int>(mws->blocksize());
@@ -150,7 +146,17 @@ void SplineInterpolation::exec() {
 
   // convert data to binned data to point data as required
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
-  MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
+  MatrixWorkspace_sptr iwspt = convertBinnedData(iws);
+
+  // for point data: avoid x-value sorting in CubicSpline and ensure sorting if
+  // Linear2Points
+  // attention: if histogram data only x values will be sorted
+  mws = ensureXIncreasing(mws);
+  iws = ensureXIncreasing(iws);
+  // point data
+  mwspt = ensureXIncreasing(mwspt);
+  iwspt = ensureXIncreasing(iwspt);
+
   // setup OutputWorkspace
   // eventually keep x-Values of histograms
   size_t sizeX = mws->readX(0).size();
@@ -272,9 +278,8 @@ SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const {
     }
 
     return pointWorkspace;
-  }
-
-  return workspace;
+  } else
+    return workspace;
 }
 
 /** Sets the points defining the spline
@@ -374,7 +379,7 @@ void SplineInterpolation::setXRange(
       if (nOutsideLeft > 0) {
         double *yValues = &(inputWorkspace->mutableY(n)[0]);
         std::fill_n(yValues, nOutsideLeft, yRef[0]);
-        g_log.warning() << nOutsideLeft
+        g_log.warning() << "Workspace index " << n << ": " << nOutsideLeft
                         << " x value(s) smaller than integration "
                            "range, will not be calculated.\n";
       }
@@ -382,9 +387,10 @@ void SplineInterpolation::setXRange(
         double *yValuesEnd =
             &(inputWorkspace->mutableY(n)[nData - nOutsideRight]);
         std::fill_n(yValuesEnd, nOutsideRight, yRef[nintegData - 1]);
-        g_log.warning() << nOutsideRight << " x value(s) larger than "
-                                            "integration range, will not be "
-                                            "calculated.\n";
+        g_log.warning() << "Workspace index " << n << ": " << nOutsideRight
+                        << " x value(s) larger than "
+                           "integration range, will not be "
+                           "calculated.\n";
       }
     }
   }
@@ -393,24 +399,31 @@ void SplineInterpolation::setXRange(
 /** Sets up the spline object by with the parameters and attributes
  *
  * @param inputWorkspace :: The input workspace being checked
+ * @return outputWorkspace :: The sorted output workspace
  */
-void SplineInterpolation::ensureXIncreasing(
-    MatrixWorkspace_sptr inputWorkspace) {
-  // setup input parameters
+MatrixWorkspace_sptr
+SplineInterpolation::ensureXIncreasing(MatrixWorkspace_sptr inputWorkspace) {
+  // this part can be deleted if SortXAxis checks if the workspace is already
+  // sorted
   const size_t nData = inputWorkspace->y(0).size();
   const double *xValues = &(inputWorkspace->x(0)[0]);
-
+  int sortFlag = 0;
   for (size_t i = 1; i < nData; ++i) {
-    // x values must be stricly increasing
     if (xValues[i] < xValues[i - 1]) {
-      g_log.warning() << "x values must be stricly increasing. Start "
-                         "sorting ...\n";
-      Algorithm_sptr sorter = createChildAlgorithm("SortXAxis");
-      sorter->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
-      sorter->setProperty<Workspace_sptr>("OutputWorkspace", inputWorkspace);
-      sorter->execute();
-      continue;
+      g_log.warning() << "x values are not stricly increasing.\n";
+      sortFlag = 1;
+      break;
     }
+  }
+  if (sortFlag == 1 && (inputWorkspace->isHistogramData() == 0)) {
+    g_log.warning() << "Start sorting " << inputWorkspace->getName() << "\n";
+    Algorithm_sptr sorter = createChildAlgorithm("SortXAxis");
+    sorter->initialize();
+    sorter->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
+    sorter->execute();
+    return sorter->getProperty("OutputWorkspace");
+  } else {
+    return inputWorkspace;
   }
 }
 
