@@ -135,7 +135,7 @@ public:
   void setRow(int m_row);
   void setCol(int m_col);
 
-  Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
   double getL2() const override;
 
