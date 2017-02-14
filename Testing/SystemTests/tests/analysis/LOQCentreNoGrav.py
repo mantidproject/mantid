@@ -1,4 +1,5 @@
-﻿#pylint: disable=no-init
+#pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *

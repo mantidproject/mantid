@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -17,7 +18,7 @@ class StateDataTest(unittest.TestCase):
                          "sample_direct": "test", "can_scatter": "test",
                          "can_transmission": "test", "can_direct": "test"}
 
-        for key, value in data_settings.items():
+        for key, value in list(data_settings.items()):
             if key in data_entries:
                 value = data_entries[key]
             if value is not None:  # If the value is None, then don't set it

@@ -35,6 +35,11 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Include Eigen as an external project
+###########################################################################
+include ( Eigen )
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 # VATES flag. Requires ParaView
