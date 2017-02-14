@@ -32,12 +32,20 @@ class Pearl(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        kwargs["perform_attenuation"] = False
+        kwargs["perform_attenuation"] = False  # Hard code this off as it is not implemented
         self._inst_settings.update_attributes(kwargs=kwargs)
 
+        if str(self._inst_settings.tt_mode).lower() == "all":
+            for new_tt_mode in ["tt35", "tt70", "tt88"]:
+                self._inst_settings.tt_mode = new_tt_mode
+                self._run_create_vanadium()
+        else:
+            self._run_create_vanadium()
+
+    def _run_create_vanadium(self):
+        # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
-
         return self._create_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
                                      empty_runs=run_details.empty_runs,
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)

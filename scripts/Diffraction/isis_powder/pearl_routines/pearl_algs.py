@@ -72,8 +72,12 @@ def get_run_details(run_number_string, inst_settings):
 
     absorption_file_path = os.path.join(calibration_dir, inst_settings.van_absorb_file)
     calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file_name)
-    tt_grouping_key = inst_settings.tt_mode.lower() + '_grouping'
-    grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
+    tt_grouping_key = str(inst_settings.tt_mode).lower() + '_grouping'
+    try:
+        grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
+    except AttributeError:
+        raise ValueError("The tt_mode: " + str(inst_settings.tt_mode).lower() + " is unknown")
+
     splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number_string)

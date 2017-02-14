@@ -222,7 +222,7 @@ TODO talk about defaults?
   on them if there are multiple runs specified.
 
 - `tt_mode` - Specifies the detectors to be considered.
-  Acceptable options: `tt35`, `tt70`, `tt88`.
+  Acceptable options: `tt35`, `tt70`, `tt88`, `all` (when creating vanadium).
 
 - `user_name` - Used to create a folder with that name in the output directory
 
@@ -342,7 +342,7 @@ Vanadium Calibration
 ^^^^^^^^^^^^^^^^^^^^^
 Following on from the examples configuring the scripts (see:
 :ref:`pearl_config_scripts_isis-powder-diffraction-ref`) we can run a vanadium
-calibration with the `create_calibration_vanadium` method.
+calibration with the `create_vanadium` method.
 
 TODO the following parameters are needed...
 
@@ -350,9 +350,9 @@ TODO the following parameters are needed...
 
  # Lets use the "pearl_object_override" which stores in "My custom location"
  # from the previous examples
- pearl_object_override.create_calibration_vanadium(run_in_range=12345,
-                                                   do_absorb_corrections=True
-                                                   long_mode=False, tt_mode=tt88)
+ pearl_object_override.create_vanadium(run_in_range=12345,
+                                       do_absorb_corrections=True
+                                       long_mode=False, tt_mode=tt88)
 
 This will generate a calibration for the specified vanadium and empty runs
 specified in the calibration mapping file (see: :ref:`pearl_cal_map_isis-powder-diffraction-ref`)
@@ -575,7 +575,7 @@ The scripts can be setup in 3 ways:
 Vanadium Calibration
 ^^^^^^^^^^^^^^^^^^^^
 Within the objects now configured we can run the vanadium calibrations. This
-is done with the `create_calibration_vanadium` method.
+is done with the `create_vanadium` method.
 
 This will generate a calibration for the matching vanadium and empty runs in
 the calibration mapping file (see :ref:`polaris_calibration_map-powder-diffraction-ref`)
@@ -591,7 +591,7 @@ TODO the following parameters are needed.
 
   # Using the manually specified object where we put in the calibration folder
   # location when configuring the scripts
-  polaris_manually_specified.create_calibration_vanadium(run_in_range="123", ...)
+  polaris_manually_specified.create_vanadium(run_in_range="123", ...)
 
 Focusing
 ^^^^^^^^
