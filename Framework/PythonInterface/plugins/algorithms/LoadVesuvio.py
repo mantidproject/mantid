@@ -402,7 +402,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if self._sumspectra:
             self._sum_all_spectra()
 
-        ms.DeleteWorkspace(Workspace=SUMMED_WS)
+        ms.DeleteWorkspace(Workspace=SUMMED_WS, EnableLogging=_LOGGING_)
         self._store_results()
         self._cleanup_raw()
 
