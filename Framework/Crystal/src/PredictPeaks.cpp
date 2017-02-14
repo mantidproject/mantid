@@ -3,6 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/VirtualPeak.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
@@ -440,7 +441,23 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // Add it to the workspace
     m_pw->addPeak(p);
-  } // Detector was found
+  } else {
+    auto space = m_inst->getComponentByName("extended-detector-space");
+    VirtualPeak vp(m_inst, q);
+    // Only add peaks that hit the detector
+    vp.setGoniometerMatrix(goniometerMatrix);
+    // Save the run number found before.
+    vp.setRunNumber(m_runNumber);
+    vp.setHKL(hkl * m_qConventionFactor);
+
+    if (m_sfCalculator) {
+      vp.setIntensity(m_sfCalculator->getFSquared(hkl));
+    }
+
+    // Add it to the workspace
+    m_pw->addPeak(vp);
+
+  }
 }
 
 } // namespace Mantid
