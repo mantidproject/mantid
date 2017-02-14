@@ -1,4 +1,4 @@
-﻿"""
+"""
     This module defines a simple function-style API for running Mantid
     algorithms. Each algorithm within Mantid is mapped to a Python
     function of the same name with the parameters of the algorithm becoming
@@ -24,6 +24,7 @@ from __future__ import (absolute_import, division,
 
 import os
 from six import iteritems
+from collections import OrderedDict, namedtuple
 
 from . import api as _api
 from . import kernel as _kernel
@@ -566,8 +567,12 @@ def _get_function_spec(func):
     :param func: A Python function object
     """
     import inspect
+    import six
     try:
-        argspec = inspect.getargspec(func)
+        if six.PY3:
+            argspec = inspect.getfullargspec(func)
+        else:
+            argspec = inspect.getargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -789,7 +794,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
     for index, expr in enumerate(ignore_regex):
         ignore_regex[index] = re.compile(expr)
 
-    retvals = []
+    retvals = OrderedDict()
     for name in algm_obj.outputProperties():
         if ignore_property(name, ignore_regex):
             continue
@@ -801,14 +806,14 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
             try:
-                retvals.append(_api.AnalysisDataService[value_str])
+                retvals[name]=_api.AnalysisDataService[value_str]
             except KeyError:
                 if not prop.isOptional():
                     raise RuntimeError("Internal error. Output workspace property '%s' on algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
         else:
             if hasattr(prop, 'value'):
-                retvals.append(prop.value)
+                retvals[name]=prop.value
             else:
                 raise RuntimeError('Internal error. Unknown property type encountered. "%s" on algorithm "%s" is not understood by '
                        'Python. Please contact development team' % (name, algm_obj.name()))
@@ -821,10 +826,13 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
         # Let's not have the more cryptic unpacking error raised
         raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
                            "These numbers must match." % (func_name, nvals, nlhs))
-    if nvals > 1:
-        return tuple(retvals) # Create a tuple
-    elif nvals == 1:
-        return retvals[0]
+    if nvals > 0:
+        ret_type=namedtuple(func_name+"_returns",retvals.keys())
+        ret_value=ret_type(**retvals)
+        if nvals==1:
+            return ret_value[0]
+        else:
+            return ret_value
     else:
         return None
 
