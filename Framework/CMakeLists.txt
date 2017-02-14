@@ -174,20 +174,27 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
 if ( WIN32 ) # General windows environment
   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
     # Excludes .so files & _win32 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+              EXCLUDE PATTERN "test/*" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+              EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+              EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt"
+              EXCLUDE PATTERN "test/*" EXCLUDE )
   endif ()
-    # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
-    file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
-    install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
-  else ()
+
+  # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
+  file ( GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll" )
+  install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
+else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
-  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-            PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
+  install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
+            EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
+            EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt"
+            EXCLUDE PATTERN "test/*" EXCLUDE )
 endif ()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.
