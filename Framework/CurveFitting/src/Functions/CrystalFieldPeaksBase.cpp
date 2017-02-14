@@ -337,29 +337,34 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   auto ionIter = ION_2_NRE.find(ion);
   if (ionIter == ION_2_NRE.end()) {
     // If 'Ion=S2', or 'Ion=J2.5' etc, interpret as arbitrary J values with gJ=2
-    // Allow lower cases, but values must be half-integral. E.g. 'Ion=S2.4' fails
-    switch(ion[0]) {
-      case 'S':
-      case 's':
-      case 'J':
-      case 'j':
-        {
-          std::string numbers ("0123456789");
-          if (numbers.find(ion[1]) != std::string::npos) {
-            // Need to store as 2J to allow half-integer values
-            auto J2 = std::stof(ion.substr(1)) * 2.;
-            if (fabs(J2 - (int)J2) < 0.001) {
-              nre = -(int)J2;
-              break;
-            } 
+    // Allow lower case, but values must be half-integral. E.g. 'Ion=S2.4' fails
+    switch (ion[0]) {
+    case 'S':
+    case 's':
+    case 'J':
+    case 'j': {
+      std::string numbers("0123456789");
+      if (numbers.find(ion[1]) != std::string::npos) {
+        // Need to store as 2J to allow half-integer values
+        try {
+          auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (fabs(J2 - (int)J2) < 0.001) {
+            nre = -(int)J2;
+            break;
           }
-          // fall through
         }
-      default:
-        throw std::runtime_error("Unknown ion name '"+ion+"' passed to CrystalFieldPeaks.");
+        catch (const std::invalid_argument &e) {
+        }
+        catch (const std::out_of_range &e) {
+        }
+      }
+      // fall through
     }
-  }
-  else {
+    default:
+      throw std::runtime_error("Unknown ion name '" + ion +
+                               "' passed to CrystalFieldPeaks.");
+    }
+  } else {
     nre = ionIter->second;
   }
 
