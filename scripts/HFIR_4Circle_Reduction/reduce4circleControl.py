@@ -1169,6 +1169,7 @@ class CWSCDReductionControl(object):
                                                ''.format(normalization, type(normalization))
         assert isinstance(scale_factor, float), 'Scale factor {0} must be a float but not a {1}.' \
                                                 ''.format(scale_factor, type(scale_factor))
+        assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
         print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
@@ -1192,18 +1193,10 @@ class CWSCDReductionControl(object):
         peak_ws_name = get_integrated_peak_ws_name(exp_number, scan_number, pt_list, mask_name)
 
         # peak center
-        try:
-            peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
-                                              peak_centre[2])
-        except IndexError:
-            raise RuntimeError('Peak center {0} must have 3 elements.'.format(peak_centre))
-        except ValueError:
-            raise RuntimeError('Peak center {0} must have floats.'.format(peak_centre))
-
         int_peak_dict = peak_integration_utility.integrate_peak_full_version(scan_md_ws_name=md_ws_name,
                                                                              spice_table_name=spice_table_ws,
                                                                              output_peak_ws_name=peak_ws_name,
-                                                                             peak_center=peak_centre_str,
+                                                                             peak_center=peak_centre,
                                                                              mask_workspace_name=mask_ws_name,
                                                                              norm_type=normalization,
                                                                              intensity_scale_factor=scale_factor,

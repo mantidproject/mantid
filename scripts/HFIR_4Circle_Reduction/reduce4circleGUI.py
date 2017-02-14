@@ -1097,6 +1097,8 @@ class MainWindow(QtGui.QMainWindow):
         The assumption is that for each scan, from Pt 1 to last Pt, it measures a complete peak
         :return:
         """
+        # TODO/ISSUE/NOW - Consider to replace the following part by method plot_model_data
+
         # get the data from UI
         try:
             vec_x, vec_y = self.ui.graphicsView_integratedPeakView.get_raw_data()
@@ -1313,16 +1315,50 @@ class MainWindow(QtGui.QMainWindow):
                                        ''.format(scan_number, run_error))
             return
 
-        # set calculated values
-        self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['raw intensity']))
-        self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
-        self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
+        # plot calculated motor position (or Pt.) - integrated intensity per Pts.
+        motor_pos_vec = int_peak_dict['motor positions']
+        pt_intensity_vec = int_peak_dict['pt intensities']
+        self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
 
-        # plot fitted Gaussian
-        fit_gauss_dict = int_peak_dict['gauss parameters']
-        self.ui.graphicsView_integratedPeakView.plot_model(fit_gauss_dict)
+        # set calculated values
+        try:
+            self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['raw intensity']))
+            self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
+            self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
+
+            # plot fitted Gaussian
+            fit_gauss_dict = int_peak_dict['gauss parameters']
+        except KeyError as key_err:
+            raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
+                               ''.format(int_peak_dict.keys(), key_err))
+        # plot model
+        self.ui.graphicsView_integratedPeakView.plot_model(motor_pos_vec, fit_gauss_dict)
 
         return
+
+    def plot_model_data(self, vec_x, params):
+        """
+
+        :return:
+        """
+        # check inputs
+        assert isinstance(vec_x, numpy.ndarray), 'blabla'
+
+        # get parameters
+        x0 = params['x0']
+        gauss_sigma = params['s']
+        gauss_a = params['A']
+        background = params['B']
+        info_str = 'bla bla bla'
+
+        # plot the data
+        # make modelX and modelY for more fine grids
+        model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
+        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma,
+                                                                      gauss_a, background)
+
+        # plot the model
+        self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
 
     def do_integrate_per_pt(self):
         """
@@ -1980,6 +2016,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get the selected scans
         scan_run_list = self.ui.tableWidget_surveyTable.get_selected_run_surveyed(required_size=None)
+        print '[DB...BAT] returned scan/run list = ', scan_run_list
         if len(scan_run_list) == 0:
             self.pop_one_button_dialog('There is no run that is selected.')
 

@@ -272,12 +272,16 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     gauss_error_dict['A2'] = cov_matrix[2, 2]
     gauss_error_dict['B2'] = cov_matrix[3, 3]
     gauss_error_dict['s_A'] = cov_matrix[1, 2]
+    gauss_error_dict['A_s'] = cov_matrix[2, 1]
 
     return gauss_parameter_dict, gauss_error_dict
+
 
 def gaussian_peak_intensity(parameter_dict, error_dict):
     """
     calculate peak intensity as a Gaussian
+    the equation to calculate Gaussian from -infinity to +infinity is
+    I = A\times s\times\sqrt{2\pi}
     :param parameter_dict:
     :param error_dict:
     :return:
@@ -291,14 +295,27 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
     # get the parameters from the dictionary
     try:
         gauss_a = parameter_dict['A']
-        gauss_sigma = parameter_dict['Sigma']
+        gauss_sigma = parameter_dict['s']
     except KeyError as key_err:
-        raise RuntimeError('Parameter dictionary must have "A", "Sigma" but now only {0}. Error message: {1}'
+        raise RuntimeError('Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}'
                            ''.format(parameter_dict.keys(), key_err))
 
-    # TODO/ISSUE/NOW - Continue from here to calculate Gaussian area
+    # I = A\times s\times\sqrt{2\pi}
+    peak_intensity = gauss_a * gauss_sigma * numpy.sqrt(2/numpy.pi)
 
-    return 1E20
+    # calculate error
+    # \sigma_I^2 = 2\pi (A^2\cdot \sigma_s^2 + \sigma_A^2\cdot s^2 + 2\cdot A\cdot s\cdot \sigma_{As})
+    try:
+        error_a_sq = error_dict['A2']
+        error_s_sq = error_dict['s2']
+        error_a_s = error_dict['A_s']
+    except KeyError as key_err:
+        raise RuntimeError('Error dictionary must have "A2", "s2", "A_s" but not only found {0}. FYI: {1}'
+                           ''.format(error_dict.keys(), key_err))
+    intensity_error = numpy.sqrt(2/numpy.pi * (gauss_a**2 * error_s_sq + error_a_sq * gauss_sigma**2 +
+                                               2 * gauss_a * gauss_sigma * error_a_s))
+
+    return peak_intensity, intensity_error
 
 
 def get_finer_grid(vec_x, factor):
@@ -366,8 +383,13 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     # assert status, str(pt_list)
     # md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
 
-    peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
-                                      peak_centre[2])
+    try:
+        peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
+                                          peak_centre[2])
+    except IndexError:
+        raise RuntimeError('Peak center {0} must have 3 elements.'.format(peak_centre))
+    except ValueError:
+        raise RuntimeError('Peak center {0} must have floats.'.format(peak_centre))
 
     # mask workspace
     # if use_mask:
@@ -427,6 +449,28 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     return True, pt_dict
 
 
+def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+    """
+    :except: raise RuntimeError if
+    :param integrated_pt_dict:
+    :param motor_pos_dict:
+    :return: motor_pos_vec, pt_intensity_vec
+    """
+    pt_list = sorted(integrated_pt_dict.keys())
+
+    if len(motor_pos_dict) != pt_list:
+        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+
+    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+
+    for i_pt, pt in enumerate(pt_list):
+        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
+        motor_pos_vec[i_pt] = motor_pos_dict[pt]
+
+    return motor_pos_vec, pt_intensity_vec
+
+
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
                                 intensity_scale_factor, background_pt_list):
@@ -450,6 +494,8 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
          - gauss error
          - gauss background
          - gauss parameters
+         - motor positions: numpy array of motor positions
+         - pt intensities: numpy array of integrated intensities per Pt.
         :return:
         """
         info_dict = {'simple intensity': 0.,
@@ -461,8 +507,13 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
                      'gauss error': 0.,
                      'gauss background': 0.,
                      'gauss parameters': None,
-                     'gauss errors': None
+                     'gauss errors': None,
+                     'motor positions': None,
+                     'pt intensities': None
                      }
+
+        return info_dict
+    # END-DEF: create_peak_integration_dict()
 
     # integrate the peak in MD workspace
     status, ret_obj = integrate_single_scan_peak(merged_scan_workspace_name=scan_md_ws_name,
@@ -484,12 +535,16 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         integrated_pt_dict = ret_obj
         assert isinstance(integrated_pt_dict, dict), 'Returned masked Pt dict must be a dictionary'
 
+    # create output dictionary
+    peak_int_dict = create_peak_integration_dict()
+
     # get moving motor information. candidates are 2theta, phi and chi
     motor, motor_pos_dict = get_moving_motor_information(spice_table_name)
 
-
-    # create output dictionary
-    peak_int_dict = create_peak_integration_dict()
+    # check motor position dictionary and integrated per Pt. peak intensity
+    motor_pos_vec, pt_intensity_vec = convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict)
+    peak_int_dict['motor positions'] = motor_pos_vec
+    peak_int_dict['pt intensities'] = pt_intensity_vec
 
     # calculate the intensity with background removed and correct intensity by background value
     averaged_background = estimate_background(integrated_pt_dict, background_pt_list)
@@ -506,29 +561,15 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
 
     # calculate intensity with method 2
     intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
+    peak_int_dict['intensity 2'] = intensity_m2
+    peak_int_dict['error 2'] = error_m2
 
     # calculate gaussian
-    intensity_gauss, intensity_guass_error = gaussian_peak_intensity(parameters, errors)
+    intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
+    peak_int_dict['gauss intensity'] = intensity_gauss
+    peak_int_dict['gauss error'] = intensity_gauss_error
 
-    return
-
-    #
-    #
-    #
-    # simple_peak_intensity = self.ui.tableWidget_peakIntegration.sum_masked_intensity()
-    #     info_text += 'Simple summation of counts masked by {0}'.format(mask_name)
-    # self.ui.lineEdit_rawSinglePeakIntensity.setText(str(simple_peak_intensity))
-    #
-    # info_text += '; Normalized by {0}'.format(norm_type)
-    # self.ui.label_ingreateInformation.setText(info_text)
-    #
-    # # Clear previous line and plot the Pt.
-    # self.ui.graphicsView_integratedPeakView.reset()
-    # x_array = numpy.array(pt_list)
-    # y_array = numpy.array(intensity_list)
-    # self.ui.graphicsView_integratedPeakView.plot_raw_data(x_array, y_array)
-
-    return
+    return peak_int_dict
 
 
 def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
@@ -537,7 +578,8 @@ def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     :param pt_motor_dict:
     :return:
     """
-    assert isinstance(motor_pos_array, numpy.ndarray), 'blabla 2'
+    assert isinstance(motor_pos_array, numpy.ndarray), 'Motor positions {0} must be given as a numpy array but not ' \
+                                                       'a {1}.'.format(motor_pos_array, type(motor_pos_array))
     # need to check somewhere: assert len(pt_motor_dict) == len(pt_intensity_dict), 'blabla 3'
 
     motor_step_vector = motor_pos_array[1:] - motor_pos_array[:-1]
@@ -606,9 +648,9 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
     error_2 = 0.
-    for i_pt, pt in enumerate(pt_list):
+    for pt in pt_list:
         intensity = pt_intensity_dict[pt]
-        motor_step_i = motor_step_dict[i_pt]
+        motor_step_i = motor_step_dict[pt]
         sum_intensity += (intensity - bg_value) * motor_step_i
         error_2 += numpy.sqrt(intensity) * motor_step_i
 

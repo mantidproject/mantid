@@ -746,7 +746,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """ Generate a list for empty row with scan number
         :param scan_number:
         :param status:
-        :param frame: HKL or QSample
         :param ws_name
         :return:
         """
@@ -1329,7 +1328,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
             # get scan and pt.
             scan_number = self.get_cell_value(i_row, 0)
             pt_number = self.get_cell_value(i_row, 1)
-            scan_run_list.append(scan_number)
+            scan_run_list.append((scan_number, pt_number))
 
         # special case for only 1 run that is selected
         if len(row_index_list) == 1 and required_size is not None:
