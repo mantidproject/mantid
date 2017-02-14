@@ -37,8 +37,8 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
         if 'VESUVIO' in ipf_filename:
-            evs_filename = os.path.basename(str(filename)).replace('EVS', '')
-            LoadVesuvio(Filename=evs_filename,
+            # Load all spectra. They are cropped later
+            LoadVesuvio(Filename=str(filename),
                         OutputWorkspace=ws_name,
                         SpectrumList='1-198',
                         **load_opts)
