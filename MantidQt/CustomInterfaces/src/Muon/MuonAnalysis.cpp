@@ -146,7 +146,7 @@ void MuonAnalysis::initLayout() {
   // Allow loading current run, provided platform and facility support this
   setLoadCurrentRunEnabled(true);
 
-  // If facility if not supported by the interface - show a warning, but still
+  // If facility is not supported by the interface - show a warning, but still
   // open it
   if (supportedFacilities.find(userFacility) == supportedFacilities.end()) {
     const std::string supportedFacilitiesStr = Strings::join(
