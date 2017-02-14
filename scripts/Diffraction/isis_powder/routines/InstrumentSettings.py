@@ -20,6 +20,9 @@ class InstrumentSettings(object):
         self._basic_conf_dict = basic_conf_dict
         self._kwargs = kwargs
 
+        # We parse in the order advanced config, basic config (if specified), kwargs.
+        # This means that users can use the advanced config as a safe set of defaults, with their own preferences as
+        # the next layer which can override defaults and finally script arguments as their final override.
         self._parse_attributes(dict_to_parse=adv_conf_dict)
         self._parse_attributes(dict_to_parse=basic_conf_dict)
         self._parse_attributes(dict_to_parse=kwargs)
@@ -35,8 +38,8 @@ class InstrumentSettings(object):
             # has asked for a class attribute which does not exist. These attributes are set in a mapping file which
             # is passed in whilst InstrumentSettings is being constructed. Check that the 'script name' (i.e. not user
             # friendly name) is typed correctly in both the script(s) and mapping file.
-            raise AttributeError("The attribute in the script with name " + str(item) + " is unknown to the mapping."
-                                 "\nPlease contact the development team.")
+            raise AttributeError("The attribute in the script with name " + str(item) + " was not found in the "
+                                 "mapping file. \nPlease contact the development team.")
 
     def check_expected_attributes_are_set(self, expected_attr_names):
         for expected_attr in expected_attr_names:
@@ -54,6 +57,10 @@ class InstrumentSettings(object):
         self._kwargs = kwargs if kwargs else self._kwargs
 
         # Only update if one in hierarchy below it has been updated
+        # so if advanced_config has been changed we need to parse the basic and kwargs again to ensure
+        # the overrides are respected. Additionally we check whether we should suppress warnings based on
+        # whether this was the attribute that was changed. If it was then produce warnings - if we are
+        # reapplying overrides silence them.
         if advanced_config:
             self._parse_attributes(self._adv_config_dict, suppress_warnings=suppress_warnings)
         if advanced_config or basic_config:

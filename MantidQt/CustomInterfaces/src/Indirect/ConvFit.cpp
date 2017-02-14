@@ -7,12 +7,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <QDoubleValidator>
-#include <QFileInfo>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -1108,28 +1106,19 @@ void ConvFit::plotGuess() {
       m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
   const size_t nData = binIndexHigh - binIndexLow;
 
-  std::vector<double> inputXData(nData);
-  const Mantid::MantidVec &XValues = m_cfInputWS->readX(0);
-  const bool isHistogram = m_cfInputWS->isHistogramData();
+  const auto &xPoints = m_cfInputWS->points(0);
 
-  for (size_t i = 0; i < nData; i++) {
-    if (isHistogram) {
-      inputXData[i] =
-          0.5 * (XValues[binIndexLow + i] + XValues[binIndexLow + i + 1]);
-    } else {
-      inputXData[i] = XValues[binIndexLow + i];
-    }
-  }
+  std::vector<double> dataX(nData);
+  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
+            dataX.begin());
 
-  FunctionDomain1DVector domain(inputXData);
+  FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
 
-  QVector<double> dataX, dataY;
-
+  std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
-    dataX.append(inputXData[i]);
-    dataY.append(outputData.getCalculated(i));
+    dataY[i] = outputData.getCalculated(i);
   }
 
   IAlgorithm_sptr createWsAlg =
@@ -1139,8 +1128,8 @@ void ConvFit::plotGuess() {
   createWsAlg->setLogging(false);
   createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
   createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX.toStdVector());
-  createWsAlg->setProperty("DataY", dataY.toStdVector());
+  createWsAlg->setProperty("DataX", dataX);
+  createWsAlg->setProperty("DataY", dataY);
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 

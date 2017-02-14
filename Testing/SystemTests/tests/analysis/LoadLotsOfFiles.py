@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy

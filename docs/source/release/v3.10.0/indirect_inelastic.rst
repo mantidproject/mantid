@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
+
 Data Analysis
 #############
 

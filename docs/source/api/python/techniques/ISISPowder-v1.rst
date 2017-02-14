@@ -86,12 +86,13 @@ common properties to all of them. These include the vanadium and empty run numbe
 offset file and label for those runs. Each format is bespoke to the instrument's
 requirements and is documented as part of the instrument documentation.
 
-The first line in all examples holds the run numbers so is documented here.
-The range of run numbers that this block (a block is the lines starting
-with consistent number of spaces throughout) holds details for. In this case it specifies
-runs 123-130 (inclusive) and runs 135-140 (inclusive) should use the following details.
-Additionally a single range of runs can be unbounded such as `200-` which would match
-runs >= 200. There is several sanity checks in place that ensure there is not multiple
+- The first line in all examples holds the run numbers.
+- This is the range of runs inclusively for example *123-130*
+- If the ending number is not known the range can be left unbounded for example
+  *123-* this would match any runs with a run number greater or equal to 123
+
+
+There is several sanity checks in place that ensure there is not multiple
 unbounded entries and that all other runs specified are not within the unbounded range.
 
 PEARL
