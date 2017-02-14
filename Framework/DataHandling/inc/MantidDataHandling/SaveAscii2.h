@@ -78,7 +78,6 @@ private:
   std::string m_sep;
   bool m_writeDX;
   bool m_writeID;
-  bool m_isHistogram;
   bool m_isCommonBins;
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;

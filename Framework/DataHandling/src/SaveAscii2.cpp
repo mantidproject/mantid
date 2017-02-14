@@ -1,10 +1,10 @@
-#include <set>
 #include <fstream>
+#include <set>
 
-#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -14,8 +14,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,7 +28,7 @@ using namespace API;
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
+      m_writeID(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -123,7 +123,6 @@ void SaveAscii2::exec() {
   m_ws = getProperty("InputWorkspace");
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
-  m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
@@ -295,22 +294,24 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(wsIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
-    if (m_isHistogram & m_isCommonBins) {
+    if (m_isCommonBins) {
       // bin centres,
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
+      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
     } else if (!m_isCommonBins) {
       // checking for ragged workspace
-      file << (m_ws->readX(wsIndex)[bin] + m_ws->readX(wsIndex)[bin + 1]) / 2;
+      file << (m_ws->x(wsIndex)[bin] + m_ws->x(wsIndex)[bin + 1]) / 2;
     } else {
       // data points
-      file << m_ws->readX(0)[bin];
+      file << m_ws->x(0)[bin];
     }
     file << m_sep;
-    file << m_ws->readY(wsIndex)[bin];
+    file << m_ws->y(wsIndex)[bin];
 
     file << m_sep;
-    file << m_ws->readE(wsIndex)[bin];
+    file << m_ws->e(wsIndex)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];
