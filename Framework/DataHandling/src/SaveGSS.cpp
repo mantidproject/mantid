@@ -204,8 +204,8 @@ void SaveGSS::writeGSASFile(const std::string &outfilename, bool append,
     } else {
       l1 = l2 = tth = difc = 0;
     }
-    g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1 << "  L2 = " << l2
-                  << "  2theta = " << tth << "\n";
+    g_log.debug() << "Spectrum " << histoIndex << ": L1 = " << l1
+                  << "  L2 = " << l2 << "  2theta = " << tth << "\n";
 
     std::stringstream tmpbuffer;
 

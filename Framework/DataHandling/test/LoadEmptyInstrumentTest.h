@@ -584,8 +584,8 @@ public:
     TS_ASSERT_EQUALS(detAfter.getID(), 78);
     TS_ASSERT_EQUALS(detAfter.getName(), "Detector #70");
 
-	const auto &paramMap2 = ws->constInstrumentParameters();
-	param = paramMap2.get(&detAfter, "Efixed");
+    const auto &paramMap2 = ws->constInstrumentParameters();
+    param = paramMap2.get(&detAfter, "Efixed");
     TS_ASSERT_DELTA(param->value<double>(), 4.00000, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);

@@ -526,8 +526,8 @@ void LoadVulcanCalFile::convertOffsets() {
     detid_t detid = spectrumInfo.detector(iws).getID();
     int bankid = detid / static_cast<int>(NUMBERRESERVEDPERMODULE);
 
-	double l2 = spectrumInfo.l2(iws);
-	double twotheta = spectrumInfo.twoTheta(iws);
+    double l2 = spectrumInfo.l2(iws);
+    double twotheta = spectrumInfo.twoTheta(iws);
 
     // Get effective
     mfiter = m_effLTheta.find(bankid);

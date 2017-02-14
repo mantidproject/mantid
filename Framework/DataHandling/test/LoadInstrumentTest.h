@@ -463,9 +463,8 @@ public:
     instLoader.setRethrows(true);
     instLoader.initialize();
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
-    instLoader.setProperty(
-        "Workspace",
-        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
+                                            "EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
     instLoader.setProperty(
         "InstrumentName",
@@ -479,9 +478,8 @@ public:
   void test_failure_if_InstrumentXML_property_set_but_not_InstrumentName() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty(
-        "Workspace",
-        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
+                                            "EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<doesn't matter what>");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     TS_ASSERT(!instLoader.execute())
@@ -490,9 +488,8 @@ public:
   void test_failure_if_InstrumentXML_is_malformed() {
     LoadInstrument instLoader;
     instLoader.initialize();
-    instLoader.setProperty(
-        "Workspace",
-        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
+                                            "EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", "<instrument>");
     instLoader.setProperty("InstrumentName", "Nonsense");
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
@@ -537,9 +534,8 @@ public:
     LoadInstrument instLoader;
     instLoader.setRethrows(true);
     instLoader.initialize();
-    instLoader.setProperty(
-        "Workspace",
-        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
+                                            "EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXML);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.setProperty(
@@ -559,9 +555,8 @@ public:
         instrumentXML, "<!-- view -->",
         "<default-view view=\"cylindrical_y\"/>");
 
-    instLoader.setProperty(
-        "Workspace",
-        WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    instLoader.setProperty("Workspace", WorkspaceFactory::Instance().create(
+                                            "EventWorkspace", 1, 1, 1));
     instLoader.setProperty("InstrumentXML", instrumentXMLwithView);
     instLoader.setProperty("RewriteSpectraMap", OptionalBool(true));
     instLoader.setProperty(

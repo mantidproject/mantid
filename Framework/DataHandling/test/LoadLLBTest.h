@@ -91,7 +91,7 @@ private:
   const std::string outWSName = "LoadLLBWsOut";
 
   LoadLLB *setupAlg() {
-	  LoadLLB *loader = new LoadLLB;
+    LoadLLB *loader = new LoadLLB;
     loader->initialize();
     loader->isInitialized();
     loader->setPropertyValue("Filename", inFileName);

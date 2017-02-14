@@ -86,7 +86,6 @@ void LoadInstrumentFromNexus::exec() {
   }
   source->setPos(0.0, -1.0 * l1, 0.0);
   progress(1.0);
-
 }
 
 } // namespace DataHandling
