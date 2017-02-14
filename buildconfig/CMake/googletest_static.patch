@@ -2,7 +2,7 @@
 :100644 100644 621d0f0... 0000000... M	googletest/CMakeLists.txt
 
 diff --git a/googlemock/CMakeLists.txt b/googlemock/CMakeLists.txt
-index beb259a..e2667f9 100644
+index beb259a..d38128a 100644
 --- a/googlemock/CMakeLists.txt
 +++ b/googlemock/CMakeLists.txt
 @@ -7,7 +7,7 @@
@@ -14,8 +14,23 @@ index beb259a..e2667f9 100644
  
  option(gmock_build_tests "Build all of Google Mock's own tests." OFF)
  
+@@ -103,10 +103,10 @@ endif()
+ ########################################################################
+ #
+ # Install rules
+-install(TARGETS gmock gmock_main
+-  DESTINATION lib)
+-install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
+-  DESTINATION include)
++#install(TARGETS gmock gmock_main
++#  DESTINATION lib)
++#install(DIRECTORY ${gmock_SOURCE_DIR}/include/gmock
++#  DESTINATION include)
+ 
+ ########################################################################
+ #
 diff --git a/googletest/CMakeLists.txt b/googletest/CMakeLists.txt
-index 621d0f0..d0ac179 100644
+index 621d0f0..6181e5c 100644
 --- a/googletest/CMakeLists.txt
 +++ b/googletest/CMakeLists.txt
 @@ -7,7 +7,7 @@
@@ -27,3 +42,18 @@ index 621d0f0..d0ac179 100644
  
  # When other libraries are using a shared version of runtime libraries,
  # Google Test also has to use one.
+@@ -102,10 +102,10 @@ endif()
+ ########################################################################
+ #
+ # Install rules
+-install(TARGETS gtest gtest_main
+-  DESTINATION lib)
+-install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
+-  DESTINATION include)
++#install(TARGETS gtest gtest_main
++#  DESTINATION lib)
++#install(DIRECTORY ${gtest_SOURCE_DIR}/include/gtest
++#  DESTINATION include)
+ 
+ ########################################################################
+ #
