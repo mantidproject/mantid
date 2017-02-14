@@ -186,6 +186,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
+    const auto pmap = oldInstr.getParameterMap();
     // Currently monitors flags are stored in the detector cache of the base
     // instrument. The copy being made here is strictly speaking duplicating
     // that data, but with future refactoring this will no longer be the case.
@@ -210,6 +211,17 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
       positions.emplace_back(pos[0], pos[1], pos[2]);
       const auto &rot = det->getRotation();
       rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
+      pmap->clearParametersByName(ParameterMap::pos(), det.get());
+      pmap->clearParametersByName(ParameterMap::posx(), det.get());
+      pmap->clearParametersByName(ParameterMap::posy(), det.get());
+      pmap->clearParametersByName(ParameterMap::posz(), det.get());
+      pmap->clearParametersByName(ParameterMap::rot(), det.get());
+      pmap->clearParametersByName(ParameterMap::rotx(), det.get());
+      pmap->clearParametersByName(ParameterMap::roty(), det.get());
+      pmap->clearParametersByName(ParameterMap::rotz(), det.get());
+      // Note that scalex and scaley also affect positions when set for a
+      // RectangularDetector, but those are not parameters of the the detector
+      // itself so they are not cleared.
     }
 
     return Kernel::make_unique<Beamline::DetectorInfo>(
@@ -226,26 +238,18 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
+    // We take a *copy* of the ParameterMap since we are modifying it by setting
+    // a pointer to our DetectorInfo, and in case it contains legacy parameters
+    // such as positions or rotations.
     m_parmap = boost::make_shared<ParameterMap>(*instr->getParameterMap());
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
-  m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
+  const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
+      sptr_instrument, m_parmap);
+  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
-  // We do not clear scalex and scaley since those parameters are also used for
-  // other methods apart from getPos() in RectangularDetector.
-  for (const auto id : sptr_instrument->getDetectorIDs()) {
-    const auto &det = sptr_instrument->getDetector(id);
-    m_parmap->clearParametersByName(ParameterMap::pos(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::posx(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::posy(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::posz(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::rot(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::rotx(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::roty(), det.get());
-    m_parmap->clearParametersByName(ParameterMap::rotz(), det.get());
-  }
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
