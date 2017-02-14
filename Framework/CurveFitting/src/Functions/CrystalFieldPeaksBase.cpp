@@ -352,7 +352,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
             nre = -(int)J2;
             break;
           }
-        // Catch exceptions thrown by stof so we get a more meaningful error
+          // Catch exceptions thrown by stof so we get a more meaningful error
         } catch (const std::invalid_argument &) {
         } catch (const std::out_of_range &) {
         }
