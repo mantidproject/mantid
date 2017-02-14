@@ -252,8 +252,7 @@ fi
 ###############################################################################
 # Build step
 ###############################################################################
-$SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
-$SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
+$SCL_ON_RHEL6 "cmake --build . --target all AllTests -- -j$BUILD_THREADS"
 
 ###############################################################################
 # Run the unit tests
