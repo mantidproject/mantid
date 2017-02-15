@@ -904,22 +904,26 @@ public:
       outputs.push_back(tsp);
     }
 
+    /*
     size_t num_splits = vec_split_target.size();
     for (size_t i = 0; i < num_splits; ++i) {
       std::cout << "s[" << i << "]  start = " << vec_split_times[i]
                 << ", stop = " << vec_split_times[i + 1]
                 << ":  target = " << vec_split_target[i] << "\n";
     }
+    */
 
     // split time series property
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
     // TODO/FIXME/ - continue to debug from here!
+    /*
     TimeSeriesProperty<int> *out0 = outputs[0];
-    for (size_t i = 0; i < out0->size(); ++i) {
+    for (int i = 0; i < out0->size(); ++i) {
       std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i)
                 << "\n";
     }
+    */
 
     // test
     for (size_t i = 0; i < 10; ++i) {
