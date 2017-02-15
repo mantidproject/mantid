@@ -8,8 +8,14 @@
 #include "MantidAPI/IFunction1D.h"
 #include <boost/shared_array.hpp>
 
+namespace Mantid {
+  namespace Kernel {
+    class MuParserExtd;
+  }
+}
+
 namespace mu {
-class Parser;
+  class Parser;
 }
 
 namespace Mantid {
@@ -83,7 +89,8 @@ public:
 private:
   /// The formula
   std::string m_formula;
-  /// muParser instance
+  /// extended muParser instance
+  //Mantid::Kernel::MuParserExtd *m_parser;
   mu::Parser *m_parser;
   /// Used as 'x' variable in m_parser.
   mutable double m_x;

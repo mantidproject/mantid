@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+//#include "MantidKernel/Math/MuParserExtd.h"
+#include "MantidAPI/MuParserUtils.h"
 #include <boost/tokenizer.hpp>
 #include "MantidGeometry/muParser_Silent.h"
 
@@ -15,13 +17,16 @@ using namespace CurveFitting;
 // Register the class into the function factory
 DECLARE_FUNCTION(UserFunction)
 
+using Mantid::API::MuParserUtils::extraOneVarFunctions;
 using namespace Kernel;
-
 using namespace API;
 
 /// Constructor
 UserFunction::UserFunction()
-    : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) {}
+    : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) {
+  extraOneVarFunctions(*m_parser);
+}
+//    : m_parser(new Mantid::Kernel::MuParserExtd()), m_x(0.), m_x_set(false) {}
 
 /// Destructor
 UserFunction::~UserFunction() { delete m_parser; }
@@ -63,7 +68,9 @@ void UserFunction::setAttribute(const std::string &attName,
   clearAllParameters();
 
   try {
+    //Mantid::Kernel::MuParserExtd tmp_parser;
     mu::Parser tmp_parser;
+    extraOneVarFunctions(tmp_parser);
     tmp_parser.SetVarFactory(AddVariable, this);
 
     m_formula = value.asString();
