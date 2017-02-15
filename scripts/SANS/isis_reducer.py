@@ -1,4 +1,4 @@
-﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 

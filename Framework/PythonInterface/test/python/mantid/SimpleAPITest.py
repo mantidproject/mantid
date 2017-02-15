@@ -173,7 +173,7 @@ IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bi
         self.assertTrue( wsname in mtd )
         self.assertTrue( wsname_box in mtd )
         
-        self.assertTrue( type(query) == tuple )
+        self.assertTrue( isinstance(query, tuple) )
         self.assertEquals( 2, len(query) )
         
         self.assertTrue( isinstance(query[0], ITableWorkspace) )

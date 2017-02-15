@@ -11,8 +11,15 @@ New features
 Algorithms
 ##########
 
+- A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
+
 Data Analysis
 #############
+
+Conv Fit
+~~~~~~~~
+
+* All FABADA minimizer options are now accessible from the function browser.
 
 Jump Fit
 ~~~~~~~~

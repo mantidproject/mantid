@@ -2954,7 +2954,7 @@ void SliceViewer::switchAxis() {
   if (m_canSwitchScales) { // cannot be called when sliceviewer first
                            // initialised because axis is inaccurate
     auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
-    if (isHKL) {
+    if (isHKL && ui.btnNonOrthogonalToggle->isChecked()) {
       applyNonOrthogonalAxisScaleDraw();
     } else {
       applyOrthogonalAxisScaleDraw();
