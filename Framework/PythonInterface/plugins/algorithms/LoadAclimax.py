@@ -145,7 +145,7 @@ class LoadAclimax(PythonAlgorithm):
         if self._read_phonon_wings:
             # partial workspaces for phonon wings
             for i in range(num_partial_overtones, num_partial_overtones + num_partial_wings):
-                wrk_names.append(self._out_ws_name + "_phonon_wing_%s" % (i + 1))
+                wrk_names.append(self._out_ws_name + "_phonon_wing_%s" % (i + 1 - num_partial_overtones))
                 CreateWorkspace(DataX=x, DataY=y[i], OutputWorkspace=wrk_names[i])
                 self._set_workspace_units(wrk=wrk_names[i])
 
