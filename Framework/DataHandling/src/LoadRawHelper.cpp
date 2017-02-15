@@ -382,14 +382,12 @@ void LoadRawHelper::setWorkspaceData(
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
+
   // But note that the last (overflow) bin is kept
-  MantidVec &Y = newWorkspace->dataY(wsIndex);
+  auto &Y = newWorkspace->mutableY(wsIndex);
   Y.assign(isisRaw->dat1 + binStart, isisRaw->dat1 + lengthIn);
   // Fill the vector for the errors, containing sqrt(count)
-  MantidVec &E = newWorkspace->dataE(wsIndex);
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  newWorkspace->setCountVariances(wsIndex, Y.rawData());
 
   newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
