@@ -219,7 +219,7 @@ void PanelsSurface::addFlatBank(ComponentID bankId,
     m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
     for (int i = 0; i < nelem; ++i) {
       // setup detector info
-      auto &det =
+      auto det =
           boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
               assembly->getChild(i));
       if (!doneRotation) {
