@@ -25,6 +25,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
   m_runningLayout->setObjectName("testA");
 
   m_runningButton = new QPushButton("Details");
+  m_runningButton->setToolTip("Show details or cancel running algorithms");
   m_runningLayout->addStretch();
   m_runningLayout->addWidget(m_runningButton);
   updateDetailsButton();
