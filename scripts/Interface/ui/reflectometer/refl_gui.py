@@ -1067,7 +1067,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
 
-                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ_binned')
+                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno+'_IvsQ_binned')
                 wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
