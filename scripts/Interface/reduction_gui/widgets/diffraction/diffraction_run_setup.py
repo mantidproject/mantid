@@ -399,9 +399,11 @@ class RunSetupWidget(BaseWidget):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        return False, 'blabla' + valuestr, valuestr
+                        err_msg = 'String {0} cannot be converted to an integer properly.'.format(valuestr)
+                        return False, err_msg, ''
                 except ValueError:
-                    return False, valuestr, valuestr
+                    err_msg = 'String {0} cannot be converted to an integer.'.format(valuestr)
+                    return False, err_msg, ''
 
             elif numdashes == 1:
                 # Integer range
