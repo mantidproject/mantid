@@ -30,7 +30,7 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
-    
+
 def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = False):
     number_of_times = 10
     for i in range(0, number_of_times):
@@ -1567,6 +1567,7 @@ class TestQuaternionToAngleAndAxis(unittest.TestCase):
         # There shouldn't be an axis for angle 0
         self._do_test_quaternion(angle, axis)
 
+
 class TestTransmissionName(unittest.TestCase):
     def test_that_suffix_is_added_if_not_exists(self):
         # Arrange
@@ -1584,6 +1585,18 @@ class TestTransmissionName(unittest.TestCase):
         # Assert
         expected = workspace_name
         self.assertTrue(unfitted_workspace_name == expected)
+
+
+class TestAddingUserFileExtension(unittest.TestCase):
+    def test_that_does_not_alter_user_file_name_when_contains_txt_ending(self):
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXt") == ["test.TXt"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.txt") == ["test.txt"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXT") == ["test.TXT"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tXt") == ["test.tXt"])
+
+    def test_that_does_alters_user_file_name_when_does_contain_txt_ending(self):
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tt") == ["test.tt.txt", "test.tt.TXT"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test") == ["test.txt", "test.TXT"])
 
 if __name__ == "__main__":
     unittest.main()

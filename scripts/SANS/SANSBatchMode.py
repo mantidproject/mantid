@@ -197,6 +197,14 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_user_file=original_user_file,
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
+            # When we set a new user file, that means that the combineDet feature could be invalid, 
+            # ie if the detector under investigation changed in the user file. We need to change this
+            # here too. But only if it is not None.
+            #if combinDet is not None:
+               # new_combineDet = ReductionSingleton().instrument.get_detector_selection()
+               # combineDet = su.get_correct_combinDet_setting(new_combineDet, instrument_name)
+
+
         except (RunTimeError, ValueError) as e:
             sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
                 str(run['user_file']),str(e)))
@@ -496,7 +504,13 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
 
     # Try to find the user file in the default paths
     if not os.path.isfile(new_user_file):
-        user_file = FileFinder.getFullPath(new_user_file)
+        # Find the user file in the Mantid path. we make sure that the user file has a txt extension.
+        user_file_names_with_extension = su.get_user_file_name_options_with_txt_extension(new_user_file)
+        for user_file_name_with_extension in user_file_names_with_extension:
+            user_file = FileFinder.getFullPath(user_file_name_with_extension)
+            if user_file:
+                break
+
         if not os.path.isfile(user_file):
             user_file_to_set = original_user_file
         else:

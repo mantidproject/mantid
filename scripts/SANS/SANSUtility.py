@@ -1962,6 +1962,22 @@ def get_unfitted_transmission_workspace_name(workspace_name):
     return unfitted_workspace_name
 
 
+def get_user_file_name_options_with_txt_extension(user_file_name):
+    """
+    A user file is a .txt file. The user file can be specified without the .txt ending. Which will prevent the
+    FileFinder from picking it up.
+
+    @param user_file_name: the name of the user file
+    @return: either the original user file name or a list of user file names with .txt and .TXT extensions
+    """
+    capitalized_user_file = user_file_name.upper()
+    if capitalized_user_file.endswith('.TXT'):
+        user_file_with_extension = [user_file_name]
+    else:
+        user_file_with_extension = [user_file_name + ".txt", user_file_name + ".TXT"]
+    return user_file_with_extension
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
