@@ -21,7 +21,6 @@ public:
   }
 
 private:
-
   static bool extraOneVarFunctionsDefined(const mu::Parser &parser) {
     const auto functionMap = parser.GetFunDef();
     for (const auto pair : MuParserUtils::MUPARSER_CONSTANTS) {

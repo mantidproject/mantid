@@ -68,7 +68,7 @@ void UserFunction::setAttribute(const std::string &attName,
   clearAllParameters();
 
   try {
-    //Mantid::Kernel::MuParserExtd tmp_parser;
+    // Mantid::Kernel::MuParserExtd tmp_parser;
     mu::Parser tmp_parser;
     extraOneVarFunctions(tmp_parser);
     tmp_parser.SetVarFactory(AddVariable, this);

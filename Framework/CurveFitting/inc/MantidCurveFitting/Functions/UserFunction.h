@@ -9,13 +9,13 @@
 #include <boost/shared_array.hpp>
 
 namespace Mantid {
-  namespace Kernel {
-    class MuParserExtd;
-  }
+namespace Kernel {
+class MuParserExtd;
+}
 }
 
 namespace mu {
-  class Parser;
+class Parser;
 }
 
 namespace Mantid {
@@ -90,7 +90,7 @@ private:
   /// The formula
   std::string m_formula;
   /// extended muParser instance
-  //Mantid::Kernel::MuParserExtd *m_parser;
+  // Mantid::Kernel::MuParserExtd *m_parser;
   mu::Parser *m_parser;
   /// Used as 'x' variable in m_parser.
   mutable double m_x;
