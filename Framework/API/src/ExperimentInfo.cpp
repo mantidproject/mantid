@@ -1565,7 +1565,9 @@ void ExperimentInfo::loadInstrumentParametersNexus(::NeXus::File *file,
  */
 void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
   Geometry::ParameterMap &pmap = this->instrumentParameters();
-  Instrument_const_sptr instr = this->getInstrument()->baseInstrument();
+  auto &detectorInfo = mutableDetectorInfo();
+  const auto parInstrument = getInstrument();
+  const auto instr = parInstrument->baseInstrument();
 
   int options = Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
   options += Mantid::Kernel::StringTokenizer::TOK_TRIM;
@@ -1619,35 +1621,46 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
           throw std::runtime_error("Found masking for a non-detector "
                                    "component. This is not possible");
         } else
-          m_detectorInfo->setMasked(detectorInfo().indexOf(det->getID()),
-                                    value);
+          detectorInfo.setMasked(detectorInfo.indexOf(det->getID()), value);
       }
     } else if (isPositionParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain posx, posy, and posz (in addition to pos). However, when these
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components here.
-      const auto oldRelPos = comp->getRelativePos();
+      // Important: Get component WITH ParameterMap so we see correct parent
+      // positions and DetectorInfo updates correctly.
+      const auto &parComp = parInstrument->getComponentByID(comp);
       const auto newRelPos = getRelativePosition(tokens, paramValue);
-      const auto delta = newRelPos - oldRelPos;
-      const auto position = comp->getPos() + delta;
-      mutableDetectorInfo().setPosition(*comp, position);
+      auto position = newRelPos;
+      if (auto parent = parComp->getParent()) {
+        parent->getRotation().rotate(position);
+        position += parent->getPos();
+      }
+      mutableDetectorInfo().setPosition(*parComp, position);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components here.
-      auto invOldRelRot = comp->getRelativeRot();
-      invOldRelRot.inverse();
+      // Important: Get component WITH ParameterMap so we see correct parent
+      // positions and DetectorInfo updates correctly.
+      const auto &parComp = parInstrument->getComponentByID(comp);
       const auto newRelRot = getRelativeRotation(paramType, paramValue);
-      const auto delta = newRelRot * invOldRelRot;
-      const auto rotation = delta * comp->getRotation();
-      mutableDetectorInfo().setRotation(*comp, rotation);
+      auto rotation = newRelRot;
+      if (auto parent = parComp->getParent()) {
+        // Note the unusual order. This is what Component::getRotation does.
+        rotation = parent->getRotation() * newRelRot ;
+      }
+      detectorInfo.setRotation(*parComp, rotation);
     } else {
       // Scale affects pixel positions, but we also add the parameter below.
       if (isScaleParameter(paramName))
-        adjustPositionsFromScaleFactor(mutableDetectorInfo(), *comp, paramName,
-                                       getScaleFactor(paramType, paramValue));
+        // Important: Get component WITH ParameterMap so we see correct parent
+        // positions and DetectorInfo updates correctly.
+        adjustPositionsFromScaleFactor(
+            mutableDetectorInfo(), *parInstrument->getComponentByID(comp),
+            paramName, getScaleFactor(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue);
     }
   }
