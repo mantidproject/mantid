@@ -917,8 +917,11 @@ public:
     log.splitByTimeVector(vec_split_times, vec_split_target, outputs);
 
     // TODO/FIXME/ - continue to debug from here!
-    // for in in range(11):
-    //    print time.. value ...
+    TimeSeriesProperty<int> *out0 = outputs[0];
+    for (size_t i = 0; i < out0->size(); ++i)
+    {
+      std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i) << "\n";
+    }
 
     // test
     for (size_t i = 0; i < 10; ++i)

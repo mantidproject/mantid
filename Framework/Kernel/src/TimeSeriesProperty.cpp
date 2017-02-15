@@ -652,8 +652,14 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
         continue_search = false;
       } else if (tsp_time_vec[index_tsp_time] > split_stop_time) {
         // next entry is out of this splitter: add the next one and quit
-        outputs[target]->addValue(m_values[index_tsp_time].time(),
-                                  m_values[index_tsp_time].value());
+        if (outputs[target]->lastTime() < m_values[index_tsp_time].time())
+        {
+          // avoid the duplicate cases occured in fast frequency issue
+          outputs[target]->addValue(m_values[index_tsp_time].time(),
+                                    m_values[index_tsp_time].value());
+        }
+        // FIXME - in future, need to find out WHETHER there is way to skip the rest
+        //         without going through the whole sequence
         continue_add = false;
         // reset time entry as the next splitter will add
         // --index_tsp_time;
