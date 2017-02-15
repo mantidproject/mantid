@@ -34,8 +34,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, vanadium_runs, empty_runs,
-                         do_absorb_corrections=True, gen_absorb_correction=False):
+    def _create_vanadium(self, run_details, do_absorb_corrections=True, gen_absorb_correction=False):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param vanadium_runs: The vanadium run or run in range (depending on instrument) to process
@@ -44,7 +43,7 @@ class AbstractInst(object):
         :param gen_absorb_correction: Set to true if absorption corrections should be recalculated
         :return: d_spacing focused vanadium group
         """
-        return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
+        return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
 
     def _focus(self, run_number_string, do_van_normalisation):

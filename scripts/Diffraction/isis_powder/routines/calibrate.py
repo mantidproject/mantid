@@ -6,7 +6,8 @@ import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import InputBatchingEnum
 
 
-def create_van(instrument, van, empty, absorb, gen_absorb):
+def create_van(instrument, run_details, absorb, gen_absorb):
+    van = run_details.vanadium_run_numbers
     run_details = instrument._get_run_details(run_number_string=van)
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,

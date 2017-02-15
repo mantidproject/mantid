@@ -4,4 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 attr_mapping = [("calibration_directory",       "calibration_dir"),
                 ("config_file",                 "config_file"),
                 ("output_directory",            "output_dir"),
-                ("user_name",                   "user_name")]
+                ("run_in_range",                "run_in_range"),
+                ("run_number",                  "run_number"),
+                ("user_name",                   "user_name"),
+                ("vanadium_normalisation",      "do_van_norm")]

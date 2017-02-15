@@ -4,7 +4,7 @@ import mantid.simpleapi as mantid
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_param_mapping
-from isis_powder.routines import InstrumentSettings, yaml_parser
+from isis_powder.routines import InstrumentSettings, RunDetails, yaml_parser
 
 
 class Gem(AbstractInst):
@@ -24,27 +24,37 @@ class Gem(AbstractInst):
         raise NotImplementedError()
 
     def focus(self, **kwargs):
-        raise NotImplementedError()
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        return self._focus(run_number_string=self._inst_settings.run_number,
+                           do_van_normalisation=self._inst_settings.van_norm)
 
     def create_vanadium(self, **kwargs):
-        raise NotImplementedError()
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        # First get a run_details object to find out the vanadium number
+        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
+        # Set the run and vanadium run equal
+        run_details.run_number = run_details.vanadium_run_numbers
+        # TODO remove gen absorb_corrections param if we remove it on POLARIS
+        return self._create_vanadium(run_details=run_details,
+                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                                     gen_absorb_correction=None)
 
     def _get_run_details(self, run_number_string):
-        pass
+        raise NotImplementedError()
 
     def _generate_auto_vanadium_calibration(self, run_details):
-        pass
+        raise NotImplementedError()
 
     def _generate_output_file_name(self, run_number_string):
-        pass
+        raise NotImplementedError()
 
     @staticmethod
     def _generate_input_file_name(run_number):
-        pass
+        raise NotImplementedError()
 
     def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
-        pass
+        raise NotImplementedError()
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
-        pass
+        raise NotImplementedError()
 

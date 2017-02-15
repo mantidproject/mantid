@@ -37,10 +37,10 @@ class Polaris(AbstractInst):
         run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_vanadium(
-            vanadium_runs=run_details.vanadium_run_numbers, empty_runs=run_details.empty_runs,
-            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-            gen_absorb_correction=None)  # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?
+        # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?
+        return self._create_vanadium(run_details=run_details,
+                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                                     gen_absorb_correction=None)
 
     # Overrides
 
