@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -59,9 +58,11 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  /// Writes a spectrum to the file using a workspace index
+  /**writes a spectrum to the file using a workspace ID
+  @param spectraIndex :: an integer relating to a workspace index
+  @param file :: the file writer object
+  */
   void writeSpectrum(const int &wsIndex, std::ofstream &file);
-
   std::vector<std::string> stringListToVector(std::string &inputString);
   void populateQMetaData();
   void populateSpectrumNumberMetaData();

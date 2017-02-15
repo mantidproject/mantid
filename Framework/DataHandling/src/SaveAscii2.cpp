@@ -69,12 +69,9 @@ void SaveAscii2::init() {
                   "Character(s) to put in front of comment lines.");
 
   // For the ListValidator
-  std::string spacers[6][2] = {{"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  std::string spacers[6][2] = {
+      {"CSV", ","},   {"Tab", "\t"},      {"Space", " "},
+      {"Colon", ":"}, {"SemiColon", ";"}, {"UserDefined", "UserDefined"}};
   std::vector<std::string> sepOptions;
   for (auto &spacer : spacers) {
     std::string option = spacer[0];
@@ -279,8 +276,9 @@ void SaveAscii2::exec() {
 }
 
 /** Writes a spectrum to the file using a workspace index
-@param wsIndex :: an integer relating to a workspace index
-@param file :: the file writer object
+*
+* @param wsIndex :: an integer relating to a workspace index
+* @param file :: the file writer object
 */
 void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
 
@@ -298,14 +296,10 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
   auto pointsSpec = m_ws->points(wsIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (m_isCommonBins) {
-      // bin centres,
-      file << (m_ws->x(0)[bin] + m_ws->x(0)[bin + 1]) / 2;
-    } else if (!m_isCommonBins) {
-      // checking for ragged workspace
-      file << (m_ws->x(wsIndex)[bin] + m_ws->x(wsIndex)[bin + 1]) / 2;
-    } else {
-      // data points
-      file << m_ws->x(0)[bin];
+      file << points0[bin];
+    } else // checking for ragged workspace
+    {
+      file << pointsSpec[bin];
     }
     file << m_sep;
     file << m_ws->y(wsIndex)[bin];
@@ -321,11 +315,11 @@ void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
 }
 
 /**
- * Converts a comma separated list to a vector of strings
- * Also ensures all strings are valid input
- * @param inputString	:: The user input comma separated string list
- * @return A vector of valid meta data strings
- */
+* Converts a comma separated list to a vector of strings
+* Also ensures all strings are valid input
+* @param inputString	:: The user input comma separated string list
+* @return A vector of valid meta data strings
+*/
 std::vector<std::string>
 SaveAscii2::stringListToVector(std::string &inputString) {
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
@@ -345,9 +339,9 @@ SaveAscii2::stringListToVector(std::string &inputString) {
 }
 
 /**
- * Populate the map with the Q values associated with each spectrum in the
- * workspace
- */
+* Populate the map with the Q values associated with each spectrum in the
+* workspace
+*/
 void SaveAscii2::populateQMetaData() {
   std::vector<std::string> qValues;
   const auto nHist = m_ws->getNumberHistograms();
@@ -376,8 +370,8 @@ void SaveAscii2::populateQMetaData() {
 }
 
 /**
- * Populate the map with the SpectrumNumber for each Spectrum in the workspace
- */
+* Populate the map with the SpectrumNumber for each Spectrum in the workspace
+*/
 void SaveAscii2::populateSpectrumNumberMetaData() {
   std::vector<std::string> spectrumNumbers;
   const size_t nHist = m_ws->getNumberHistograms();
@@ -390,8 +384,8 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
 }
 
 /**
- * Populate the map with the Angle for each spectrum in the workspace
- */
+* Populate the map with the Angle for each spectrum in the workspace
+*/
 void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const size_t nHist = m_ws->getNumberHistograms();
@@ -407,8 +401,8 @@ void SaveAscii2::populateAngleMetaData() {
 }
 
 /**
- * Populate all required meta data in the meta data map
- */
+* Populate all required meta data in the meta data map
+*/
 void SaveAscii2::populateAllMetaData() {
   for (const auto &metaDataType : m_metaData) {
     if (metaDataType.compare("spectrumnumber") == 0)
