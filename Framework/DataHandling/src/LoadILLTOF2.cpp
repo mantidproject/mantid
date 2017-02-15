@@ -397,7 +397,6 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
  * of detector types in the workspace.
  *
  * @param spec The current spectrum id
- * @param numberOfMonitors The number of monitors in the workspace
  * @param numberOfTubes The number of detector tubes in the workspace
  * @param detectorIDs A list of all of the detector IDs
  * @param data The NeXus data to load into the workspace
