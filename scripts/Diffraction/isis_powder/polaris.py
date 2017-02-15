@@ -133,4 +133,3 @@ class Polaris(AbstractInst):
                                                  output_paths=output_paths,
                                                  run_number_string=run_details.user_input_run_number)
         return d_spacing_group
-

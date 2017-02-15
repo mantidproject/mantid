@@ -19,7 +19,7 @@ def create_van(instrument, van, empty, absorb, gen_absorb):
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
-                                             CalibrationFile=run_details.calibration_file_path)
+                                       CalibrationFile=run_details.calibration_file_path)
 
     if absorb:
         aligned_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
