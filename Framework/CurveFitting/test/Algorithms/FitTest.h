@@ -1574,7 +1574,7 @@ public:
     TS_ASSERT_DELTA(chi2, 0.0, 0.1);
 
     IFunction_sptr out = fit.getProperty("Function");
-    TS_ASSERT_DELTA(out->getParameter("I"), 3090.1432, 0.1);
+    TS_ASSERT_DELTA(out->getParameter("I"), 3090.1432, 0.25);
     TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6, 0.0001);
     TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.5, 0.001);
     TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9, 0.0001);
