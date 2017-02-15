@@ -27,7 +27,7 @@ Plotting Improvements
 Algorithm Toolbox
 #################
 
-- The Algroithm Progress bar has been improved to handle reporting the progress of multiple algorithms much better.  Now it will correctly show the progress of the most recently started algorithms, and correctly move onto the next most recent should  the first finish sooner.  In addition the "Details" button now sows wether Mantid is Idle or how many algorithms it is running.
+- The Algorithm Progress bar has been improved to handle reporting the progress of multiple algorithms much better.  Now it will correctly show the progress of the most recently started algorithms, and correctly move onto the next most recent should  the first finish sooner.  In addition the "Details" button now shows whether Mantid is Idle or how many algorithms it is running.
   
 .. figure:: ../../images/Progress_running.png
    :class: screenshot
