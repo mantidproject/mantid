@@ -46,6 +46,11 @@ protected:
   /// UnwrappedSurface::project().
   double applyUCorrection(double u) const;
 
+  /// Update the view rect to offset for the U correction
+  void updateViewRectForUCorrection();
+  /// Calculate UV offsets from the view rect
+  std::pair<double, double> calculateViewRectOffsets();
+
   const Mantid::Kernel::V3D m_pos; ///< Origin (sample position)
   const Mantid::Kernel::V3D
       m_zaxis; ///< The z axis of the surface specific coord system
