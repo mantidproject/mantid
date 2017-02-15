@@ -5,6 +5,23 @@ import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import InputBatchingEnum
 
 
+def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
+    """
+    Provides a light wrapper around the dictionary key helper which provides a generic error
+    message stating the following key could not be found in the calibration mapping file. As
+    several instruments will use this message it makes sense to localise it to common. If a
+    message is passed in append_to_error_message it will append that to the end of the generic
+    error message in its own line when an exception is raised.
+    :param dictionary: The dictionary to search in for the key
+    :param key: The key to search for
+    :param append_to_error_message: (Optional) The message to append to the end of the error message
+    :return: The found key if it exists
+    """
+    err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
+    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
+
+
 def crop_banks_in_tof(bank_list, crop_values_list):
     """
     Crops the each bank by the specified tuple values from a list of tuples in TOF. The number
@@ -43,8 +60,6 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
         cropped_ws = _crop_single_ws_in_tof(ws_to_crop, x_max=x_max, x_min=x_min)
 
     return cropped_ws
-
-
 def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
@@ -118,6 +133,18 @@ def generate_run_numbers(run_number_string):
     run_list = _run_number_generator(processed_string=run_boundaries)
     return run_list
 
+
+def get_first_run_number(run_number_string):
+    """
+    Takes a run number string and returns the first user specified run from that string
+    :param run_number_string: The string to parse to find the first user rnu
+    :return: The first run for the user input of runs
+    """
+    run_numbers = generate_run_numbers(run_number_string=run_number_string)
+    if isinstance(run_numbers, list):
+        run_numbers = run_numbers[0]
+
+    return  run_numbers
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
     """

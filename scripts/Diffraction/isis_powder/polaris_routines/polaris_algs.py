@@ -7,6 +7,7 @@ from isis_powder.routines import common, yaml_parser
 from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
 
+
 def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
@@ -26,21 +27,20 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
 
 
 def get_run_details(run_number_string, inst_settings):
-    run_number = common.generate_run_numbers(run_number_string=run_number_string)
-    if isinstance(run_number, list):
-        # Only take first run number
-        run_number = run_number[0]
-    yaml_dict = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=inst_settings.cal_mapping_file)
+    run_number = common.get_first_run_number(run_number_string=run_number_string)
+    cal_mapping = yaml_parser.get_run_dictionary(run_number_string=run_number, file_path=inst_settings.cal_mapping_file)
+
+    label = common.cal_map_dictionary_key_helper(cal_mapping, "label")
+    offset_file_name = common.cal_map_dictionary_key_helper(cal_mapping, "offset_file_name")
 
     if inst_settings.chopper_on:
-        chopper_config = yaml_dict["chopper_on"]
+        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_on")
     else:
-        chopper_config = yaml_dict["chopper_off"]
+        chopper_config = common.cal_map_dictionary_key_helper(cal_mapping, "chopper_off")
 
-    label = yaml_dict["label"]
-    offset_file_name = yaml_dict["offset_file_name"]
-    empty_runs = chopper_config["empty_run_numbers"]
-    vanadium_runs = chopper_config["vanadium_run_numbers"]
+    err_message = "This must be under the relevant chopper_on / chopper_off section."
+    empty_runs = common.cal_map_dictionary_key_helper(chopper_config, "empty_run_numbers", err_message)
+    vanadium_runs = common.cal_map_dictionary_key_helper(chopper_config, "vanadium_run_numbers", err_message)
 
     grouping_full_path = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     grouping_full_path = os.path.join(grouping_full_path, inst_settings.grouping_file_name)

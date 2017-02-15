@@ -70,17 +70,14 @@ def generate_vanadium_absorb_corrections(van_ws):
 
 
 def get_run_details(run_number_string, inst_settings):
-    if isinstance(run_number_string, str) and not run_number_string.isdigit():
-        run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
-        first_run_number = run_number_list[0]
-    else:
-        first_run_number = run_number_string
-    mapping_dict = yaml_parser.get_run_dictionary(run_number_string=first_run_number, file_path=inst_settings.cal_map_path)
+    first_run_number = common.get_first_run_number(run_number_string=run_number_string)
+    mapping_dict = yaml_parser.get_run_dictionary(run_number_string=first_run_number,
+                                                  file_path=inst_settings.cal_map_path)
 
-    calibration_file_name = mapping_dict["calibration_file"]
-    empty_run_numbers = mapping_dict["empty_run_numbers"]
-    label = mapping_dict["label"]
-    vanadium_run_numbers = mapping_dict["vanadium_run_numbers"]
+    calibration_file_name = common.cal_map_dictionary_key_helper(mapping_dict, "calibration_file")
+    empty_run_numbers = common.cal_map_dictionary_key_helper(mapping_dict, "empty_run_numbers")
+    label = common.cal_map_dictionary_key_helper(mapping_dict, "label")
+    vanadium_run_numbers = common.cal_map_dictionary_key_helper(mapping_dict, "vanadium_run_numbers")
 
     splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
                                                        vanadium_run_string=vanadium_run_numbers,
