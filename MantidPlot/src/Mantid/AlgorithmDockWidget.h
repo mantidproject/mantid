@@ -23,7 +23,7 @@ public slots:
 
 protected:
   void showProgressBar();
-  void hideProgressBar(void * alg);
+  void hideProgressBar(void *alg);
   void updateDetailsButton() const;
 
   MantidQt::MantidWidgets::AlgorithmSelectorWidget *m_selector;

@@ -53,8 +53,7 @@ void AlgorithmDockWidget::updateProgress(void *alg, const double p,
   if (m_algID.empty())
     return;
   if (alg == m_algID.first() && p >= 0 && p <= 100) {
-    if (!m_progressBar)
-    {
+    if (!m_progressBar) {
       showProgressBar();
     }
     m_progressBar->setValue(static_cast<int>(p));
@@ -89,7 +88,7 @@ void AlgorithmDockWidget::updateDetailsButton() const {
   if (m_algID.size() > 0) {
     mess << "Running " << m_algID.size();
     m_runningButton->setDisabled(false);
-  } else  {
+  } else {
     mess << "Idle";
     m_runningButton->setDisabled(true);
   }
@@ -122,7 +121,7 @@ void AlgorithmDockWidget::showProgressBar() {
   }
 }
 
-void AlgorithmDockWidget::hideProgressBar(void * alg) {
+void AlgorithmDockWidget::hideProgressBar(void *alg) {
   if (m_algID.empty())
     return;
   if (m_progressBar && (alg == m_algID.first())) {
