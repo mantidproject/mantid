@@ -393,12 +393,51 @@ double getScaleFactor(const std::string &paramType,
   return param->value<double>();
 }
 
+void updatePosition(DetectorInfo &detectorInfo, const Instrument &instrument,
+                    const IComponent *component, const V3D &newRelPos) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error(
+        "Need parametrized instrument for updating positions");
+  const auto &parComp = instrument.getComponentByID(component);
+  auto position = newRelPos;
+  if (auto parent = parComp->getParent()) {
+    parent->getRotation().rotate(position);
+    position += parent->getPos();
+  }
+  detectorInfo.setPosition(*parComp, position);
+}
+
+void updateRotation(DetectorInfo &detectorInfo, const Instrument &instrument,
+                    const IComponent *component, const Quat &newRelRot) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error(
+        "Need parametrized instrument for updating rotations");
+  const auto &parComp = instrument.getComponentByID(component);
+  auto rotation = newRelRot;
+  if (auto parent = parComp->getParent()) {
+    // Note the unusual order. This is what Component::getRotation does.
+    rotation = parent->getRotation() * newRelRot;
+  }
+  detectorInfo.setRotation(*parComp, rotation);
+}
+
 void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
-                                    const IComponent &component,
+                                    const Instrument &instrument,
+                                    const IComponent *component,
                                     const std::string &paramName,
                                     double factor) {
+  // Important: Get component WITH ParameterMap so we see correct parent
+  // positions and rotations and DetectorInfo updates correctly.
+  if (!instrument.isParametrized())
+    throw std::runtime_error("Need parametrized instrument for updating "
+                             "positions from scale factors");
+  const auto &parComp = instrument.getComponentByID(component);
   // Scale affects pixel positions, but we also add the parameter below.
-  const auto &det = dynamic_cast<const RectangularDetector &>(component);
+  const auto &det = dynamic_cast<const RectangularDetector &>(*parComp);
   double ScaleX = 1.0;
   double ScaleY = 1.0;
   if (paramName == "scalex")
@@ -486,27 +525,11 @@ void ExperimentInfo::populateInstrumentParameters() {
   }
   for (const auto &item : paramMapForPosAndRot) {
     if (isPositionParameter(item.second->name())) {
-      // Important: Get component WITH ParameterMap so we see correct parent
-      // positions and DetectorInfo updates correctly.
-      const auto &comp = parInstrument->getComponentByID(item.first);
       const auto newRelPos = item.second->value<V3D>();
-      auto position = newRelPos;
-      if (auto parent = comp->getParent()) {
-        parent->getRotation().rotate(position);
-        position += parent->getPos();
-      }
-      detectorInfo.setPosition(*comp, position);
+      updatePosition(detectorInfo, *parInstrument, item.first, newRelPos);
     } else if (isRotationParameter(item.second->name())) {
-      // Important: Get component WITH ParameterMap so we see correct parent
-      // positions and DetectorInfo updates correctly.
-      const auto &comp = parInstrument->getComponentByID(item.first);
       const auto newRelRot = item.second->value<Quat>();
-      auto rotation = newRelRot;
-      if (auto parent = comp->getParent()) {
-        // Note the unusual order. This is what Component::getRotation does.
-        rotation = parent->getRotation() * newRelRot ;
-      }
-      detectorInfo.setRotation(*comp, rotation);
+      updateRotation(detectorInfo, *parInstrument, item.first, newRelRot);
     }
     // Parameters for individual components (x,y,z) are ignored. ParameterMap
     // did compute the correct compound positions and rotations internally.
@@ -515,11 +538,9 @@ void ExperimentInfo::populateInstrumentParameters() {
   // positions.
   for (const auto &item : paramMap) {
     if (isScaleParameter(item.second->name()))
-      // Important: Get component WITH ParameterMap so we see correct parent
-      // positions and DetectorInfo updates correctly.
-      adjustPositionsFromScaleFactor(
-          detectorInfo, *parInstrument->getComponentByID(item.first),
-          item.second->name(), item.second->value<double>());
+      adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, item.first,
+                                     item.second->name(),
+                                     item.second->value<double>());
   }
   // paramMapForPosAndRot goes out of scope, dropping all position and rotation
   // parameters of detectors (parameters for non-detector components have been
@@ -1628,39 +1649,22 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // contain posx, posy, and posz (in addition to pos). However, when these
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components here.
-      // Important: Get component WITH ParameterMap so we see correct parent
-      // positions and DetectorInfo updates correctly.
-      const auto &parComp = parInstrument->getComponentByID(comp);
       const auto newRelPos = getRelativePosition(tokens, paramValue);
-      auto position = newRelPos;
-      if (auto parent = parComp->getParent()) {
-        parent->getRotation().rotate(position);
-        position += parent->getPos();
-      }
-      mutableDetectorInfo().setPosition(*parComp, position);
+      updatePosition(detectorInfo, *parInstrument, comp, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components here.
-      // Important: Get component WITH ParameterMap so we see correct parent
-      // positions and DetectorInfo updates correctly.
-      const auto &parComp = parInstrument->getComponentByID(comp);
       const auto newRelRot = getRelativeRotation(paramType, paramValue);
-      auto rotation = newRelRot;
-      if (auto parent = parComp->getParent()) {
-        // Note the unusual order. This is what Component::getRotation does.
-        rotation = parent->getRotation() * newRelRot ;
-      }
-      detectorInfo.setRotation(*parComp, rotation);
+      updateRotation(detectorInfo, *parInstrument, comp, newRelRot);
     } else {
-      // Scale affects pixel positions, but we also add the parameter below.
+      // Special case RectangularDetector: Parameters scalex and scaley affect
+      // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
-        // Important: Get component WITH ParameterMap so we see correct parent
-        // positions and DetectorInfo updates correctly.
-        adjustPositionsFromScaleFactor(
-            mutableDetectorInfo(), *parInstrument->getComponentByID(comp),
-            paramName, getScaleFactor(paramType, paramValue));
+        adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, comp,
+                                       paramName,
+                                       getScaleFactor(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue);
     }
   }
