@@ -14,7 +14,7 @@ from isis_powder.routines import calibrate, focus, common_enums
 # private method for the scripts
 
 class AbstractInst(object):
-    def __init__(self, user_name=None, calibration_dir=None, output_dir=None):
+    def __init__(self, user_name, calibration_dir, output_dir):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")

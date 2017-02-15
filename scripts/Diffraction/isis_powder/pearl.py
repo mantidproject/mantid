@@ -3,7 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, InstrumentSettings, yaml_parser
-from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
 
@@ -50,8 +49,6 @@ class Pearl(AbstractInst):
                                      empty_runs=run_details.empty_runs,
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
-    # Params #
-
     def _get_run_details(self, run_number_string):
         if self._cached_run_details_number == run_number_string:
             return self._cached_run_details
@@ -61,6 +58,8 @@ class Pearl(AbstractInst):
         self._cached_run_details_number = run_number_string
         self._cached_run_details = run_details
         return run_details
+
+    # Params #
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -84,6 +83,11 @@ class Pearl(AbstractInst):
                                                         lambda_values=self._inst_settings.monitor_lambda)
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
+
+    def _generate_auto_vanadium_calibration(self, run_details):
+        # The instrument scientists prefer everything to be explicit on this instrument so
+        # instead we don't try to run this automatically
+        raise NotImplementedError("You must run the create_vanadium method manually on Pearl")
 
     def _get_monitor_spectra_index(self, run_number):
         return self._inst_settings.monitor_spec_no
