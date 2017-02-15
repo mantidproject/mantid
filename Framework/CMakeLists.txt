@@ -64,6 +64,9 @@ endif ()
 add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
 
+include_directories (Types/inc)
+add_subdirectory (Types)
+
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
@@ -128,11 +131,6 @@ endif ()
 set ( OPENCL_BUILD OFF CACHE BOOL "Enable building the GPUAlgorithms package using OpenCL. Requires OpenCL." )
 if ( OPENCL_BUILD )
   add_subdirectory ( GPUAlgorithms )
-endif ()
-
-# Unit test helper packages
-if ( CXXTEST_FOUND )
-  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
 add_subdirectory (MDAlgorithms)

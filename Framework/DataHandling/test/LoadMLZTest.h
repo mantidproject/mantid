@@ -1,10 +1,10 @@
 #ifndef LOADMLZTEST_H_
 #define LOADMLZTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadMLZ.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadMLZ.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadMLZ;
@@ -69,15 +69,24 @@ class LoadMLZTestPerformance : public CxxTest::TestSuite {
 public:
   LoadMLZTestPerformance() : m_dataFile("TOFTOFTestdata.nxs") {}
 
-  void testDefaultLoad() {
-    Mantid::DataHandling::LoadMLZ loader;
+  static LoadMLZTestPerformance *createSuite() {
+    return new LoadMLZTestPerformance();
+  }
+
+  static void destroySuite(LoadMLZTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", "ws");
-    TS_ASSERT(loader.execute());
   }
 
+  void tearDown() override { AnalysisDataService::Instance().remove("ws"); }
+
+  void testDefaultLoad() { loader.execute(); }
+
 private:
+  Mantid::DataHandling::LoadMLZ loader;
   std::string m_dataFile;
 };
 

@@ -100,7 +100,7 @@ void ColorBarWidget::setRenderMode(bool rendering) {
 *	 ADD_AUTOSCALE_CURRENT_SLICE
 *	 ADD_AUTOSCALE_ON_LOAD
 *	 ADD_AUTOSCALE_BOTH
-*
+*	 ADD_AUTOSCALE_NONE
 * @param strategy :: select which checkboxes are shown
 */
 void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
@@ -125,6 +125,13 @@ void ColorBarWidget::setCheckBoxMode(CheckboxStrategy strategy) {
     ui.autoScale->setEnabled(true);
     ui.autoScaleForCurrentSlice->setVisible(true);
     ui.autoScaleForCurrentSlice->setEnabled(true);
+    break;
+
+  case ADD_AUTOSCALE_NONE: // for exporting images
+    ui.autoScale->setVisible(false);
+    ui.autoScale->setEnabled(false);
+    ui.autoScaleForCurrentSlice->setVisible(false);
+    ui.autoScaleForCurrentSlice->setEnabled(false);
     break;
   }
 }

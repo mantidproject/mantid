@@ -60,7 +60,7 @@ Usage
 
 **Example - Align the X and Z position of bank26 in POWGEN:**
 
-.. code-block:: python
+.. testcode:: position
 
       LoadCalFile(InstrumentName="PG3",
             CalFilename="PG3_golden.cal",
@@ -81,14 +81,14 @@ Usage
 
 Output:
 
-.. code-block:: none
+.. testoutput:: position
 
     Start position is [1.54436,0.863271,-1.9297]
     Final position is [1.50591,0.863271,-1.92734]
 
 **Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
 
-.. code-block:: python
+.. testcode:: rotation
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -116,7 +116,7 @@ Output:
 
 Output:
 
-.. code-block:: none
+.. testoutput:: rotation
 
       Start bank26 rotation is [-24.061.0.120,18.016]
       Start bank46 rotation is [-41.092.0.061,17.795]
@@ -125,7 +125,7 @@ Output:
 
 **Example - Align sample position in POWGEN:**
 
-.. code-block:: python
+.. testcode:: sample
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -147,7 +147,7 @@ Output:
 
 Output:
 
-.. code-block:: none
+.. testoutput:: sample
 
       Start sample position is 0.0
       Final sample position is 0.02826
