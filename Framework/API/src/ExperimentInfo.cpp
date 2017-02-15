@@ -220,7 +220,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
       pmap->clearParametersByName(ParameterMap::roty(), det.get());
       pmap->clearParametersByName(ParameterMap::rotz(), det.get());
       // Note that scalex and scaley also affect positions when set for a
-      // RectangularDetector, but those are not parameters of the the detector
+      // RectangularDetector, but those are not parameters of the detector
       // itself so they are not cleared.
     }
 
@@ -503,7 +503,8 @@ void ExperimentInfo::populateInstrumentParameters() {
       const auto newRelRot = item.second->value<Quat>();
       auto rotation = newRelRot;
       if (auto parent = comp->getParent()) {
-        rotation = newRelRot * parent->getRotation();
+        // Note the unusual order. This is what Component::getRotation does.
+        rotation = parent->getRotation() * newRelRot ;
       }
       detectorInfo.setRotation(*comp, rotation);
     }
