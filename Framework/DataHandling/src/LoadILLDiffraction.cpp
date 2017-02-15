@@ -2,7 +2,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/RegisterFileLoader.h"
 
 #include <nexus/napi.h>
 
@@ -29,19 +28,21 @@ int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string LoadILLDiffraction::name() const { return "LoadILLDiffraction"; }
+const std::string LoadILLDiffraction::name() const {
+  return "LoadILLDiffraction";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadILLDiffraction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLDiffraction::category() const {
-  return "TODO: FILL IN A CATEGORY";
+  return "DataHandling\\Nexus";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string LoadILLDiffraction::summary() const {
-  return "TODO: FILL IN A SUMMARY";
+  return "Loads ILL diffraction nexus files.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -60,42 +61,31 @@ void LoadILLDiffraction::init() {
 /** Execute the algorithm.
  */
 void LoadILLDiffraction::exec() {
-    // Retrieve filename
-    std::string filenameData = getPropertyValue("Filename");
 
-    // open the root node
-    NeXus::NXRoot dataRoot(filenameData);
-    NXEntry firstEntry = dataRoot.openFirstEntry();
+  // open the root node
+  NeXus::NXRoot dataRoot(getPropertyValue("Filename"));
+  NXEntry firstEntry = dataRoot.openFirstEntry();
 
-    // read in the data
-    NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
-    NXInt data = dataGroup.openIntData();
-    // load the counts from the file into memory
-    data.load();
+  // read in the data
+  NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
+  NXInt data = dataGroup.openIntData();
+  data.load();
 
-    g_log.information("Dimentsions 1: " + std::to_string(data.dim0()));
-    g_log.information("Dimentsions 2: " + std::to_string(data.dim1()));
-    g_log.information("Dimentsions 3: " + std::to_string(data.dim2()));
+  m_outWorkspace = WorkspaceFactory::Instance().create(
+      "Workspace2D", data.dim0(), data.dim1(), data.dim1());
 
-    m_localWorkspace =
-        WorkspaceFactory::Instance().create("Workspace2D", data.dim0(), data.dim1() + 1, data.dim1());
-
-    // Assign Y values
-    for (int i = 0; i < data.dim0(); ++i) {
-        for (int j = 0; j<= data.dim1(); ++j ) {
-            m_localWorkspace->mutableX(i)[j] = j;
-        }
+  // Assign X-Y values
+  for (int i = 0; i < data.dim0(); ++i) {
+    for (int j = 0; j < data.dim1(); ++j) {
+      double y = double(data()[i * data.dim1() + j]);
+      m_outWorkspace->mutableX(i)[j] = j;
+      m_outWorkspace->mutableY(i)[j] = y;
+      m_outWorkspace->mutableE(i)[j] = sqrt(y);
     }
+  }
 
-    // Assign Y values
-    for (int i = 0; i < data.dim0(); ++i) {
-        for (int j = 0; j< data.dim1(); ++j ) {
-            m_localWorkspace->mutableY(i)[j] = double(data()[i*data.dim1()+j]);
-        }
-    }
-
-    // Set the output workspace property
-    setProperty("OutputWorkspace", m_localWorkspace);
+  // Set the output workspace property
+  setProperty("OutputWorkspace", m_outWorkspace);
 }
 
 } // namespace DataHandling

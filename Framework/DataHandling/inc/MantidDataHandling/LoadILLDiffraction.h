@@ -2,15 +2,13 @@
 #define MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
 
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadILLDiffraction : TODO: DESCRIPTION
+/** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -45,7 +43,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  API::MatrixWorkspace_sptr m_localWorkspace;
+  API::MatrixWorkspace_sptr m_outWorkspace;
 };
 
 } // namespace DataHandling
