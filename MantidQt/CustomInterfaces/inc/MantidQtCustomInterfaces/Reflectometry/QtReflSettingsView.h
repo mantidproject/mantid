@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 class IReflSettingsPresenter;
 
 /** QtReflSettingsView : Provides an interface for the "Settings" widget in the
-Reflectometry (Polref) interface.
+ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

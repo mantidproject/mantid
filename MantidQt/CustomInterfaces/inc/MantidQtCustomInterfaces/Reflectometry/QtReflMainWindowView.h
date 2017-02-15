@@ -48,7 +48,7 @@ public:
   /// Destructor
   ~QtReflMainWindowView() override;
   /// Name of the interface
-  static std::string name() { return "ISIS Reflectometry (Polref)"; }
+  static std::string name() { return "ISIS Reflectometry"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Reflectometry"; }
 

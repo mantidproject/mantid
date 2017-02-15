@@ -13,7 +13,7 @@ class IReflEventView;
 /** @class ReflEventPresenter
 
 ReflEventPresenter is a presenter class for the widget 'Event' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

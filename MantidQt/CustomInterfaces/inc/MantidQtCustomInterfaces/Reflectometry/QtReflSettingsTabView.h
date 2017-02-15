@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 class IReflSettingsTabPresenter;
 
 /** QtReflSettingsTabView : Provides an interface for the "Settings" tab in the
-Reflectometry (Polref) interface.
+ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
