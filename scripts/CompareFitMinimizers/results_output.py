@@ -80,23 +80,13 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         header += "\n\n"
         print(header)
         print (tbl_acc_indiv)
-        rel_col_defs = '../../docs/source/concepts/minimizers_comparison/color_definitions.txt'
-        color_definitions = os.path.join(SCRIPT_DIR, rel_col_defs)
 
         # optionally save the above table to a .txt file and a .html file
         if save_to_file:
-            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
-                     format(weighted=weighted_suffix_string(use_errors),
-                            version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name=group_name))
-            with open(fname + '.txt', 'w') as tbl_file:
-                print(tbl_acc_indiv, file=tbl_file)
-            print('Saved {fname}.txt to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
-            with open(color_definitions) as cd:
-                content = cd.read() + "\n" + tbl_acc_indiv
-            html = publish_string(content, writer_name='html')
-            with open(fname + '.html', 'w') as tbl_file:
-                print(html, file=tbl_file)
-            print('Saved {fname}.html to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
+            save_table_to_file(table_data=tbl_acc_indiv, errors=use_errors, group_name=group_name,
+                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension='txt')
+            save_table_to_file(table_data=tbl_acc_indiv, errors=use_errors, group_name=group_name,
+                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension='html')
 
         # print out accuracy summary table for this group of fit problems
         ext_summary_cols = minimizers
@@ -120,18 +110,10 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
         # optionally save the above table to a .txt file and a .html file
         if save_to_file:
-            fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}'.
-                     format(weighted=weighted_suffix_string(use_errors),
-                            version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name=group_name))
-            with open(fname + '.txt', 'w') as tbl_file:
-                print(tbl_runtime_indiv, file=tbl_file)
-            print('Saved {fname}.txt to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
-            with open(color_definitions) as cd:
-                content = cd.read() + "\n" + tbl_runtime_indiv
-            html = publish_string(content, writer_name='html')
-            with open(fname + '.html', 'w') as tbl_file:
-                print(html, file=tbl_file)
-            print('Saved {fname}.html to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
+            save_table_to_file(table_data=tbl_runtime_indiv, errors=use_errors, group_name=group_name,
+                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension='txt')
+            save_table_to_file(table_data=tbl_runtime_indiv, errors=use_errors, group_name=group_name,
+                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension='html')
 
         # print out runtime summary table for this group of fit problems
         tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
