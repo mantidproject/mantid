@@ -182,19 +182,6 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   return *m_lastDetector[thread];
 }
 
-std::vector<Geometry::IDetector_const_sptr>
-SpectrumInfo::getDetectorVector(const size_t index) const {
-  const auto &det = getDetector(index);
-  const auto &ndet = det.nDets();
-  if (ndet > 1) {
-    const auto group = dynamic_cast<const Geometry::DetectorGroup *>(&det);
-    return group->getDetectors();
-  } else {
-    size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-    return {m_lastDetector[thread]};
-  }
-}
-
 std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
   std::vector<size_t> detIndices;
   for (const auto &def : spectrumDefinition(index))

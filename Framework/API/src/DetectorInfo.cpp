@@ -283,14 +283,6 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   return m_lastDetector[thread];
 }
 
-/// Sets the cached detector. This is an optimization used by SpectrumInfo.
-void DetectorInfo::setCachedDetector(
-    size_t index, boost::shared_ptr<const Geometry::IDetector> detector) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  m_lastIndex[thread] = index;
-  m_lastDetector[thread] = detector;
-}
-
 /// Returns a reference to the source component. The value is cached, so calling
 /// it repeatedly is cheap.
 const Geometry::IComponent &DetectorInfo::getSource() const {

@@ -109,9 +109,6 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
-  void setCachedDetector(
-      size_t index,
-      boost::shared_ptr<const Geometry::IDetector> detector) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
 
