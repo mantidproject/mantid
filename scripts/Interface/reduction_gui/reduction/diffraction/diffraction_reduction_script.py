@@ -251,6 +251,8 @@ class DiffractionReductionScripter(BaseReductionScripter):
         """
 
         runnumbers_str = str(runsetupdict["RunNumber"])
+        if runnumbers_str.count(':') > 0:
+            runnumbers_str = runnumbers_str.replace(':', '-')
         runnumbers_str = FileFinder.findRuns(self.instrument_name + runnumbers_str)
         runnumbers_str = [os.path.split(filename)[-1] for filename in runnumbers_str]
 
@@ -320,9 +322,6 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 # Option to take user input run number
                 if runnumber is not None:
                     propvalue = '%s%s' % (self.instrument_name, str(runnumber))
-
-                    raise NotImplementedError('Run number {0} ... has : is not acceptible.'.format(runnumber)
-                    runnumber = runnumber.replace(':', '-')
 
                 script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, 'Filename', str(propvalue))
                 continue
