@@ -57,8 +57,8 @@ void SplineBackground::exec() {
   allocateBSplinePointers(numBins, ncoeffs);
   addWsDataToSpline(inWS.get(), spec, numBins);
 
-  const auto &xInputPoints = inWS->x(spec);
-  setupSpline(xInputPoints.front(), xInputPoints.back(), numBins, ncoeffs);
+  const auto &xVals = inWS->x(spec);
+  setupSpline(xVals.front(), xVals.back(), numBins, ncoeffs);
 
   // Wrap this in its own block so we can alias the member variable
   // to a shorter name for the duration of this call
@@ -108,7 +108,7 @@ SplineBackground::calculateNumBinsToProcess(const API::MatrixWorkspace *ws) {
 void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
                                          const size_t specNum,
                                          int expectedNumBins) {
-  const auto xInputVals = ws->points(specNum);
+  const auto xPointData = ws->points(specNum);
   const auto yInputVals = ws->y(specNum);
   const auto eInputVals = ws->e(specNum);
   const bool hasMaskedBins = ws->hasMaskedBins(specNum);
@@ -126,7 +126,7 @@ void SplineBackground::addWsDataToSpline(const API::MatrixWorkspace *ws,
   for (size_t i = 0; i < yInputVals.size(); ++i) {
     if (hasMaskedBins && masked[i])
       continue;
-    gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xInputVals[i]);
+    gsl_vector_set(m_splinePointers.xData, numUnmaskedBins, xPointData[i]);
     gsl_vector_set(m_splinePointers.yData, numUnmaskedBins, yInputVals[i]);
     gsl_vector_set(m_splinePointers.binWeights, numUnmaskedBins,
                    calculateBinWeight(eInputVals[i]));
