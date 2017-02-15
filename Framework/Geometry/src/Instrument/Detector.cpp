@@ -131,12 +131,14 @@ Kernel::V3D Detector::getRelativePos() const {
   return ObjComponent::getRelativePos();
 }
 
+/// Return the absolute position of the Detector
 Kernel::V3D Detector::getPos() const {
   if (m_map && m_map->hasDetectorInfo())
     return Kernel::toV3D(m_map->detectorInfo().position(index()));
   return ObjComponent::getPos();
 }
 
+/// Return the relative rotation to the parent
 Kernel::Quat Detector::getRelativeRot() const {
   if (m_map && m_map->hasDetectorInfo()) {
     auto inverseParentRot = getParent()->getRotation();
@@ -149,6 +151,7 @@ Kernel::Quat Detector::getRelativeRot() const {
   return ObjComponent::getRelativeRot();
 }
 
+/// Return the absolute rotation of the Detector
 Kernel::Quat Detector::getRotation() const {
   if (m_map && m_map->hasDetectorInfo())
     return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
