@@ -1042,7 +1042,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                     alg.initialize()
                     alg.setProperty("InputWorkspace", ws[i])
-                    alg.setProperty("FirstTransmissionRun", group_trans_ws)
+                    if group_trans_ws:
+                        alg.setProperty("FirstTransmissionRun", group_trans_ws)
                     if angle is not None:
                         alg.setProperty("ThetaIn", angle)
                     alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned_'+str(i+1))
@@ -1074,7 +1075,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
                 alg.initialize()
                 alg.setProperty("InputWorkspace", ws)
-                alg.setProperty("FirstTransmissionRun", transmission_ws)
+                if transmission_ws:
+                    alg.setProperty("FirstTransmissionRun", transmission_ws)
                 if angle is not None:
                     alg.setProperty("ThetaIn", angle)
                 alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned')
