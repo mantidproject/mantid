@@ -47,6 +47,7 @@ public:
                     const Mantid::Geometry::IDetector &det);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
+  bool isValid() const;
   unsigned char color[3]; ///< red, green, blue colour components (0 - 255)
   double u;               ///< horizontal "unwrapped" coordinate
   double v;               ///< vertical "unwrapped" coordinate

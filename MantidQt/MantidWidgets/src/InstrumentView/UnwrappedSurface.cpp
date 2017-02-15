@@ -70,6 +70,11 @@ operator=(const UnwrappedDetector &other) {
   return *this;
 }
 
+/** Check if the object is valid*/
+bool UnwrappedDetector::isValid() const {
+  return static_cast<bool>(shape);
+}
+
 /**
 * Constructor.
 * @param rootActor :: The instrument actor.
@@ -217,6 +222,8 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
 
+    if (!udet.isValid()) continue;
+
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
     double w = (iw == 0) ? dw : udet.width / 2;
@@ -226,8 +233,6 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
     if (!(m_viewRect.contains(udet.u - w, udet.v - h) ||
           m_viewRect.contains(udet.u + w, udet.v + h)))
       continue;
-    // QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
-    // if ( !m_viewRect.intersects(detectorRect) ) continue;
 
     // apply the detector's colour
     setColor(int(i), picking);

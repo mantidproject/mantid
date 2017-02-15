@@ -86,7 +86,7 @@ void RotationSurface::init() {
 
   // For each detector in the order of actors
   // cppcheck-suppress syntaxError
- //                       PRAGMA_OMP(parallel for)
+                        PRAGMA_OMP(parallel for)
                         for (int ii = 0; ii < int(ndet); ++ii) {
                           if (!exceptionThrown)
                             try {
@@ -96,17 +96,17 @@ void RotationSurface::init() {
                               Mantid::detid_t id = m_instrActor->getDetID(i);
 
                               try {
-                                auto &det = m_instrActor->getDetectorByDetID(id);
+                                auto &det =
+                                    m_instrActor->getDetectorByDetID(id);
 
-                                //if (!det ||
-                                //    detectorInfo.isMonitor(
-                                //        detectorInfo.indexOf(id)) ||
-                                //    (id < 0)) {
-                                //  // Not a detector or a monitor
-                                //  // Make some blank, empty thing that won't
-                                //  // draw
-                                //  m_unwrappedDetectors[i] = UnwrappedDetector();
-                                //} else {
+                                if (detectorInfo.isMonitor(
+                                        detectorInfo.indexOf(id)) ||
+                                    (id < 0)) {
+                                  // Not a detector or a monitor
+                                  // Make some blank, empty thing that won't
+                                  // draw
+                                  m_unwrappedDetectors[i] = UnwrappedDetector();
+                                } else {
                                   // A real detector.
                                   m_instrActor->getColor(id).getUB3(&color[0]);
 
@@ -123,7 +123,7 @@ void RotationSurface::init() {
                                   this->calcUV(udet, pos);
 
                                   m_unwrappedDetectors[i] = udet;
-                                //} // is a real detectord
+                                } // is a real detector
                               } catch (
                                   Mantid::Kernel::Exception::NotFoundError &) {
                                 // do nothing
@@ -223,8 +223,6 @@ void RotationSurface::findAndCorrectUGap() {
   std::vector<UnwrappedDetector>::const_iterator ud =
       m_unwrappedDetectors.begin();
   for (; ud != m_unwrappedDetectors.end(); ++ud) {
-    //if (!ud->detector)
-    //  continue;
     double u = ud->u;
     int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
@@ -261,8 +259,6 @@ void RotationSurface::findAndCorrectUGap() {
 
     std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for (; ud != m_unwrappedDetectors.end(); ++ud) {
-      //if (!ud->detector)
-      //  continue;
       double &u = ud->u;
       u = applyUCorrection(u);
     }
