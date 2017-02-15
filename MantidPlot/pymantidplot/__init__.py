@@ -1,4 +1,4 @@
-﻿"""
+"""
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
