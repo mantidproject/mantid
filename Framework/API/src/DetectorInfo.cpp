@@ -183,7 +183,8 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
     std::vector<Geometry::IDetector_const_sptr> dets;
-    m_instrument->getDetectorsInBank(dets, comp);
+    // Using the base component should be slightly faster
+    m_instrument->getDetectorsInBank(dets, *comp.getBaseComponent());
     const auto delta = pos - oldPos;
     for (const auto &det : dets) {
       const auto index = indexOf(det->getID());
@@ -213,7 +214,7 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     TransformType rotationType = Absolute;
     rotateComponent(comp, *m_pmap, rot, rotationType);
     // If comp is a detector cached positions and rotations stay valid. In all
-    // other cases/ (higher level in instrument tree, or other leaf component
+    // other cases (higher level in instrument tree, or other leaf component
     // such as sample or source) we flush all cached positions and rotations.
     if (m_source)
       m_sourcePos = m_source->getPos();
@@ -223,7 +224,8 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
     std::vector<Geometry::IDetector_const_sptr> dets;
-    m_instrument->getDetectorsInBank(dets, comp);
+    // Using the base component should be slightly faster
+    m_instrument->getDetectorsInBank(dets, *comp.getBaseComponent());
     for (const auto &det : dets) {
       const auto index = indexOf(det->getID());
       m_detectorInfo.setRotation(
