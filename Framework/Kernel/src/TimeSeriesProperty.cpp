@@ -558,12 +558,16 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   bool no_entry_in_range = false;
   // TODO/FIXME/ - use binary search to replace
   //  (ForwardIterator first, ForwardIterator last, const T& val);
-  //   Returns an iterator pointing to the first element in the range [first,last) which does not compare less than val.
+  //   Returns an iterator pointing to the first element in the range
+  //   [first,last) which does not compare less than val.
   std::vector<DateAndTime>::iterator low;
-  low=std::lower_bound (splitter_time_vec.begin(), splitter_time_vec.end(), tsp_time);
+  low = std::lower_bound(splitter_time_vec.begin(), splitter_time_vec.end(),
+                         tsp_time);
 
   while (continue_search) {
-      std::cout << "[*]  Split Index = " << index_splitter << ": start = " << split_start_time << ", stop = " << split_stop_time << "\n";
+    std::cout << "[*]  Split Index = " << index_splitter
+              << ": start = " << split_start_time
+              << ", stop = " << split_stop_time << "\n";
     if (tsp_time < split_stop_time) {
       // requirement is met
       continue_search = false;
@@ -578,7 +582,9 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
         // advance
         split_start_time = split_stop_time;
         split_stop_time = splitter_time_vec[index_splitter + 1];
-        std::cout << "Split Index = " << index_splitter << ": start = " << split_start_time << ", stop = " << split_stop_time << "\n";
+        std::cout << "Split Index = " << index_splitter
+                  << ": start = " << split_start_time
+                  << ", stop = " << split_stop_time << "\n";
       }
     }
   } // END-WHILE: to move the splitters to the first entry
@@ -652,13 +658,13 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
         continue_search = false;
       } else if (tsp_time_vec[index_tsp_time] > split_stop_time) {
         // next entry is out of this splitter: add the next one and quit
-        if (outputs[target]->lastTime() < m_values[index_tsp_time].time())
-        {
+        if (outputs[target]->lastTime() < m_values[index_tsp_time].time()) {
           // avoid the duplicate cases occured in fast frequency issue
           outputs[target]->addValue(m_values[index_tsp_time].time(),
                                     m_values[index_tsp_time].value());
         }
-        // FIXME - in future, need to find out WHETHER there is way to skip the rest
+        // FIXME - in future, need to find out WHETHER there is way to skip the
+        // rest
         //         without going through the whole sequence
         continue_add = false;
         // reset time entry as the next splitter will add

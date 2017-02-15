@@ -725,7 +725,6 @@ public:
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
 
-
     // Exam the split entries
     TimeSeriesProperty<int> *out_0 = outputs[0];
     // FIXME - Check whether out_0 is correct!
@@ -747,12 +746,11 @@ public:
     TS_ASSERT_EQUALS(out_2->nthValue(0), 2);
     TS_ASSERT_EQUALS(out_2->nthValue(1), 3);
 
-
     TimeSeriesProperty<int> *out_3 = outputs[3];
     TS_ASSERT_EQUALS(out_3->size(), 7);
     // out[3] should have entries: 4, 5, 6, 7, 8, 9, 10
     for (int j = 0; j < out_3->size(); ++j) {
-        TS_ASSERT_EQUALS(out_3->nthValue(j), j+4);
+      TS_ASSERT_EQUALS(out_3->nthValue(j), j + 4);
     }
 
     return;
@@ -907,10 +905,10 @@ public:
     }
 
     size_t num_splits = vec_split_target.size();
-    for (size_t i = 0; i < num_splits; ++i)
-    {
-        std::cout << "s[" << i << "]  start = " << vec_split_times[i] << ", stop = " << vec_split_times[i+1]
-                  << ":  target = " << vec_split_target[i] << "\n";
+    for (size_t i = 0; i < num_splits; ++i) {
+      std::cout << "s[" << i << "]  start = " << vec_split_times[i]
+                << ", stop = " << vec_split_times[i + 1]
+                << ":  target = " << vec_split_target[i] << "\n";
     }
 
     // split time series property
@@ -918,17 +916,15 @@ public:
 
     // TODO/FIXME/ - continue to debug from here!
     TimeSeriesProperty<int> *out0 = outputs[0];
-    for (size_t i = 0; i < out0->size(); ++i)
-    {
-      std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i) << "\n";
+    for (size_t i = 0; i < out0->size(); ++i) {
+      std::cout << i << "-th: " << out0->nthTime(i) << ", " << out0->nthValue(i)
+                << "\n";
     }
 
     // test
-    for (size_t i = 0; i < 10; ++i)
-    {
-        TS_ASSERT_EQUALS(outputs[i]->size(), 2);
+    for (size_t i = 0; i < 10; ++i) {
+      TS_ASSERT_EQUALS(outputs[i]->size(), 2);
     }
-
   }
 
   //----------------------------------------------------------------------------
