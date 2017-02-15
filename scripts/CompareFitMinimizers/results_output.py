@@ -142,6 +142,22 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         print(tbl_runtime_summary)
 
 
+def save_table_to_file(table_data, errors, group_name, metric_type, file_extension):
+    file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
+                 .format(weighted=weighted_suffix_string(errors),
+                         version=BENCHMARK_VERSION_STR, metric_type=metric_type, group_name=group_name))
+
+    if file_extension == 'html':
+        rst_content = '.. include:: ' + str(os.path.join(SCRIPT_DIR, 'Definitions/color_definitions.txt'))
+        rst_content += '\n' + table_data
+        table_data = publish_string(rst_content, writer_name='html')
+
+    with open(file_name + file_extension, 'w') as tbl_file:
+        print(table_data, file=tbl_file)
+    print('Saved {file_name}{extension} to {working_directory}'.
+          format(file_name=file_name, extension=file_extension, working_directory=WORKING_DIR))
+
+
 def build_indiv_linked_problems(results_per_test, group_name):
     """
     Makes a list of linked problem names which would be used for the
