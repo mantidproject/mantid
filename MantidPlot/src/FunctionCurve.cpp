@@ -150,7 +150,7 @@ void FunctionCurve::loadData(int points) {
       X.reserve(wsXPoints.size());
 
       for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
-        double x = wsXPoints[i];
+        const double x = wsXPoints[i];
         if (x < d_from)
           continue;
         if (x > d_to)
@@ -267,7 +267,7 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
     X.reserve(wsXPoints.size());
 
     for (int i = 0; i < static_cast<int>(ws->blocksize()); i++) {
-      double x = wsXPoints[i];
+      const double x = wsXPoints[i];
       if (x < d_from)
         continue;
       if (x > d_to)

@@ -179,12 +179,14 @@ void RefRoi::extract2D() {
 
       for (size_t t = 0; t < YOut.size(); t++) {
         size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
+        const double YInValue = YIn[t_index];
+        const double EInValue = EIn[t_index];
         if (sum_pixels && normalize && error_weighting) {
-          signal_vector[t] += YIn[t_index];
-          error_vector[t] += EIn[t_index] * EIn[t_index];
+          signal_vector[t] += YInValue;
+          error_vector[t] += EInValue * EInValue;
         } else {
-          YOut[t] += YIn[t_index];
-          EOut[t] += EIn[t_index] * EIn[t_index];
+          YOut[t] += YInValue;
+          EOut[t] += EInValue * EInValue;
         }
       }
     }
