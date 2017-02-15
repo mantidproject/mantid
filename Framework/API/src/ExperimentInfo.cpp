@@ -4,6 +4,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -444,19 +445,8 @@ void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
     ScaleX = factor;
   else
     ScaleY = factor;
-  V3D scale(ScaleX, ScaleY, 1);
-  det.getRotation().rotate(scale);
-  const auto origin = det.getPos();
-  for (int x = 0; x < det.xpixels(); x++) {
-    for (int y = 0; y < det.ypixels(); y++) {
-      const auto &pixel = det.getAtXY(x, y);
-      const auto index = detectorInfo.indexOf(pixel->getID());
-      const auto pos = detectorInfo.position(index);
-      const auto relPos = pos - origin;
-      auto newRelPos = relPos * scale;
-      detectorInfo.setPosition(index, pos - relPos + newRelPos);
-    }
-  }
+  applyRectangularDetectorScaleToDetectorInfo(detectorInfo, det, ScaleX,
+                                              ScaleY);
 }
 }
 

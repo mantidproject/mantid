@@ -3,6 +3,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -104,7 +105,6 @@ void ResizeRectangularDetector::exec() {
 
   auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
   Geometry::ParameterMap &pmap = input->instrumentParameters();
-  auto &detectorInfo = input->mutableDetectorInfo();
   // Add a parameter for the new scale factors
   pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
   pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
@@ -112,19 +112,8 @@ void ResizeRectangularDetector::exec() {
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
   // positions there.
-  V3D scale(ScaleX, ScaleY, 1);
-  det->getRotation().rotate(scale);
-  const auto origin = det->getPos();
-  const auto idstart = det->idstart();
-  const auto idstep = det->idstep();
-  const auto count = det->xpixels() * det->ypixels();
-  for (detid_t id = idstart; id < idstart + idstep * count; ++id) {
-    const auto index = detectorInfo.indexOf(id);
-    const auto pos = detectorInfo.position(index);
-    const auto relPos = pos - origin;
-    auto newRelPos = relPos * scale;
-    detectorInfo.setPosition(index, pos - relPos + newRelPos);
-  }
+  applyRectangularDetectorScaleToDetectorInfo(input->mutableDetectorInfo(),
+                                              *det, ScaleX, ScaleY);
 }
 
 } // namespace Mantid
