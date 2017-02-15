@@ -32,8 +32,8 @@ Output:
 
 .. testoutput:: AbinsCastepSimple
 
-   benzene_wrk_quantum_event_1
-   benzene_wrk_quantum_event_2
-   benzene_wrk_quantum_event_3
-   benzene_wrk_quantum_event_4
-   benzene_wrk_total
+    benzene_wrk_origin_quantum_event_1
+    benzene_wrk_origin_quantum_event_2
+    benzene_wrk_origin_quantum_event_3
+    benzene_wrk_origin_quantum_event_4
+    benzene_wrk_total
