@@ -529,7 +529,11 @@ void FilterEvents::createOutputWorkspaces() {
     if (add2output) {
       // Generate output property name
       std::stringstream propertynamess;
-      propertynamess << "OutputWorkspace_" << wsgroup;
+      if (wsgroup == -1) {
+        propertynamess << "OutputWorkspace_unfiltered";
+      } else {
+        propertynamess << "OutputWorkspace_" << wsgroup;
+      }
 
       // Inserted this pair to map
       m_wsNames.push_back(wsname.str());
