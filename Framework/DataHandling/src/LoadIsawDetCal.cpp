@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -195,6 +196,9 @@ void LoadIsawDetCal::exec() {
     }
   }
 
+  auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto &detectorInfo = expInfoWS->mutableDetectorInfo();
+
   while (std::getline(input, line)) {
     if (line[0] == '7') {
       double mL1, mT0;
@@ -202,9 +206,9 @@ void LoadIsawDetCal::exec() {
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
       if (instname.compare("WISH") == 0)
-        center(0.0, 0.0, -0.01 * mL1, "undulator", ws);
+        center(0.0, 0.0, -0.01 * mL1, "undulator", ws, detectorInfo);
       else
-        center(0.0, 0.0, -0.01 * mL1, "moderator", ws);
+        center(0.0, 0.0, -0.01 * mL1, "moderator", ws, detectorInfo);
       // mT0 and time of flight are both in microsec
       if (inputW) {
         API::Run &run = inputW->mutableRun();
@@ -264,19 +268,24 @@ void LoadIsawDetCal::exec() {
     }
     if (det) {
       detname = det->getName();
-      IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
-      alg1->setProperty<Workspace_sptr>("Workspace", ws);
-      alg1->setProperty("ComponentName", detname);
-      // Convert from cm to m
-      alg1->setProperty("ScaleX", 0.01 * width / det->xsize());
-      alg1->setProperty("ScaleY", 0.01 * height / det->ysize());
-      alg1->executeAsChildAlg();
+
+      auto &pmap = expInfoWS->instrumentParameters();
+      pmap.addDouble(det->getComponentID(), "scalex",
+                     0.01 * width / det->xsize());
+      pmap.addDouble(det->getComponentID(), "scaley",
+                     0.01 * height / det->ysize());
+      pmap.clearPositionSensitiveCaches();
+
+      // We need to get mutableDetectorInfo again, as we have written to the
+      // paramater map and set scaling factors
+      auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+      auto &detectorInfo = expInfoWS->mutableDetectorInfo();
 
       // Convert from cm to m
       x *= 0.01;
       y *= 0.01;
       z *= 0.01;
-      center(x, y, z, detname, ws);
+      center(x, y, z, detname, ws, detectorInfo);
 
       // These are the ISAW axes
       V3D rX(base_x, base_y, base_z);
@@ -322,15 +331,7 @@ void LoadIsawDetCal::exec() {
         Rot *= rot0;
       }
 
-      if (inputW) {
-        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      } else if (inputP) {
-        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      }
+      detectorInfo.setRotation(*comp.get(), Rot);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
@@ -357,7 +358,7 @@ void LoadIsawDetCal::exec() {
       y *= 0.01;
       z *= 0.01;
       detname = comp->getFullName();
-      center(x, y, z, detname, ws);
+      center(x, y, z, detname, ws, detectorInfo);
 
       // These are the ISAW axes
       V3D rX(base_x, base_y, base_z);
@@ -404,15 +405,7 @@ void LoadIsawDetCal::exec() {
         Rot = Rot * rot0;
       }
 
-      if (inputW) {
-        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      } else if (inputP) {
-        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      }
+      detectorInfo.setRotation(*comp.get(), Rot);
     }
   }
 
@@ -430,8 +423,8 @@ void LoadIsawDetCal::exec() {
  */
 
 void LoadIsawDetCal::center(const double x, const double y, const double z,
-                            const std::string &detname,
-                            API::Workspace_sptr ws) {
+                            const std::string &detname, API::Workspace_sptr ws,
+                            API::DetectorInfo &detectorInfo) {
 
   Instrument_sptr inst = getCheckInst(ws);
 
@@ -443,23 +436,10 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
     throw std::runtime_error(mess.str());
   }
 
-  using namespace Geometry::ComponentHelper;
-  const TransformType positionType = Absolute;
   const V3D position(x, y, z);
 
   // Do the move
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
-                                             positionType);
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
-                                             positionType);
-  }
+  detectorInfo.setPosition(*comp, position);
 }
 
 /**
