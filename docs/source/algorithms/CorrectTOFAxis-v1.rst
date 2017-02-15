@@ -20,7 +20,7 @@ If *ReferenceWorkspace* is set, this algorithm copies the X axis as well as the 
 Calculating new TOF axis
 ########################
 
-If no *ReferenceWorkspace* is given, the algorithm takes the L1 distance :math:`l_1` from the instrument attached to *InputWorkspace* and calculates the average L2 distance :math:`l_2` using the histograms specified by *ReferenceSpectra*. The algorithm also needs to know the TOF :math:`t_{elastic}` corresponding to the zero-energy transfer. This is either taken from the first spectrum in *InputWorkspace* as the bin centre of the bin specified by *ElasticBinIndex*, or calculated from the elastic peak positions given in *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. In this case the algorithm averages the `PeakCentre` column for histograms listed in *ReferenceSpectra*. Finally, the algorithm needs the incident energy :math:`E_i` which can be either specified by *EFixed* or is taken from the sample logs of *InputWorkspace*. In case *EFixed* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
+If no *ReferenceWorkspace* is given, the algorithm takes the source-to-sample distance :math:`l_1` from the instrument attached to *InputWorkspace*. The source-to-detector distance :math:`l_2` can either be given directly by the *L2* property, or it is calculated as the mean L2 distance from the histograms specified by *ReferenceSpectra*. The algorithm also needs to know the TOF :math:`t_{elastic}` corresponding to the zero-energy transfer. This is either taken from the first spectrum in *InputWorkspace* as the bin centre of the bin specified by *ElasticBinIndex*, or calculated from the elastic peak positions given in *EPPTable*. *EPPTable* should be in the format returned by the :ref:`algm-FindEPP` algorithm. In this case the algorithm averages the `PeakCentre` column for histograms listed in *ReferenceSpectra*. Finally, the algorithm needs the incident energy :math:`E_i` which can be either specified by *EFixed* or is taken from the sample logs of *InputWorkspace*. In case *EFixed* is specified, the 'Ei' and 'wavelength' sample logs of *OutputWorkspace* are updated accordingly.
 
 The TOF shift :math:`\Delta t` is calculated by
 
@@ -35,7 +35,7 @@ Whether the *ReferenceSpectra* input property refers to workspace indices, spect
 Usage
 -----
 
-**Example - CorrectTOFAxis by specifying the elatic bin**
+**Example - CorrectTOFAxis by specifying the elatic bin and L2 from reference spectra**
 
 .. testcode:: ExElasticBin
 
