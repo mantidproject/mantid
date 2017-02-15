@@ -347,6 +347,9 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
         // Need to store as 2J to allow half-integer values
         try {
           auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (J2 > 99.) {
+            throw std::out_of_range("");
+          }
           if (fabs(J2 - (int)J2) < 0.001) {
             nre = -(int)J2;
             break;

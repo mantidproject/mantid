@@ -401,6 +401,8 @@ class CrystalField(object):
             if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
                 value = arbitraryJ.group(0)
                 self._nre = int(-float(arbitraryJ.group(1)) * 2.)
+                if self._nre < -99:
+                    raise RuntimeError('J value ' + str(-self._nre / 2) + ' is too large.')
             else:
                 raise RuntimeError(msg+', S<n>, J<n>')
         else:
@@ -1099,6 +1101,8 @@ class CrystalField(object):
         """
         if self._dirty_eigensystem:
             import CrystalField.energies as energies
+            if self._nre < -99:
+                raise RuntimeError('J value ' + str(-self._nre / 2) + ' is too large.')
             self._eigenvalues, self._eigenvectors, self._hamiltonian = energies.energies(self._nre, **self._fieldParameters)
             self._dirty_eigensystem = False
 
