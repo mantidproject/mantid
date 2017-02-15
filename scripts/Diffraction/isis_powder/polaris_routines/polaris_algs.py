@@ -38,17 +38,19 @@ def get_run_details(run_number_string, inst_settings):
         chopper_config = yaml_dict["chopper_off"]
 
     label = yaml_dict["label"]
+    offset_file_name = yaml_dict["offset_file_name"]
     empty_runs = chopper_config["empty_run_numbers"]
     vanadium_runs = chopper_config["vanadium_run_numbers"]
-
-    splined_vanadium_name = _generate_splined_van_name(chopper_on=inst_settings.chopper_on,
-                                                       vanadium_run_string=vanadium_runs)
 
     grouping_full_path = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     grouping_full_path = os.path.join(grouping_full_path, inst_settings.grouping_file_name)
 
     in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
-    calibration_full_path = os.path.join(in_calib_dir, yaml_dict["offset_file_name"])
+    calibration_full_path = os.path.join(in_calib_dir, offset_file_name)
+    # Generate the name of the splined file we will either be loading or saving
+    splined_vanadium_name = _generate_splined_van_filename(chopper_on=inst_settings.chopper_on,
+                                                           vanadium_run_string=vanadium_runs,
+                                                           offset_file_name=offset_file_name)
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number)
@@ -106,13 +108,11 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
     return output_workspaces
 
 
-def _generate_splined_van_name(chopper_on, vanadium_run_string):
-    output_string = "SVan_" + str(vanadium_run_string) + "_chopper"
-    if chopper_on:
-        output_string += "On"
-    else:
-        output_string += "Off"
-
+def _generate_splined_van_filename(chopper_on, vanadium_run_string, offset_file_name):
+    output_string = "SplinedVan_" + str(vanadium_run_string) + "_chopper"
+    output_string += "On" if chopper_on else "Off"
+    output_string += '_' + offset_file_name
+    output_string += ".nxs"
     return output_string
 
 
