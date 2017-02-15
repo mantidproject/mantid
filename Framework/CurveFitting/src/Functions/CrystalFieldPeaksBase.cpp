@@ -343,8 +343,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
     case 's':
     case 'J':
     case 'j': {
-      std::string numbers("0123456789");
-      if (numbers.find(ion[1]) != std::string::npos) {
+      if (ion.size() > 1 && std::isdigit(ion[1])) {
         // Need to store as 2J to allow half-integer values
         try {
           auto J2 = std::stof(ion.substr(1)) * 2.;
@@ -354,7 +353,11 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
           }
           // Catch exceptions thrown by stof so we get a more meaningful error
         } catch (const std::invalid_argument &) {
+          throw std::runtime_error("Invalid value '" + ion.substr(1) +
+                               "' of J passed to CrystalFieldPeaks.");
         } catch (const std::out_of_range &) {
+          throw std::runtime_error("Value of J: '" + ion.substr(1) +
+                               "' passed to CrystalFieldPeaks is too big.");
         }
       }
       // fall through
