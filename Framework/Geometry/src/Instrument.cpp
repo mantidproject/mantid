@@ -410,7 +410,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 *   @return A pointer to the component.
 */
 boost::shared_ptr<const IComponent>
-Instrument::getComponentByID(ComponentID id) const {
+Instrument::getComponentByID(const IComponent *id) const {
   const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(

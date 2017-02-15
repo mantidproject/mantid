@@ -154,7 +154,8 @@ public:
   getPlottable() const;
 
   /// Returns a shared pointer to a component
-  boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByID(const IComponent *id) const;
 
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<const IComponent>>
