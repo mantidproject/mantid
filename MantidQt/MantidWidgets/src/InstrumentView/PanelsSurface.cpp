@@ -289,7 +289,7 @@ void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId,
   // loop over the detectors
   for (int i = 0; i < detectors.size(); ++i) {
     ComponentID id = detectors[i];
-    auto &det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+    auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
         instr->getComponentByID(id));
 
     if (i == 0) {
