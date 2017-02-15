@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <nexus/napi.h>
@@ -8,12 +9,12 @@
 namespace Mantid {
 namespace DataHandling {
 
-using namespace Kernel;
 using namespace API;
+using namespace Kernel;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadILLDiffraction)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
