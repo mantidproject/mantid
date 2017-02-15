@@ -18,6 +18,9 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
@@ -287,15 +290,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     pdws->getAxis(0)->setUnit("Degrees");
   }
 
-  MantidVec &dataX = pdws->dataX(0);
-  for (size_t i = 0; i < sizex; ++i)
-    dataX[i] = vecx[i];
-  MantidVec &dataY = pdws->dataY(0);
-  MantidVec &dataE = pdws->dataE(0);
-  for (size_t i = 0; i < sizey; ++i) {
-    dataY[i] = vecy[i];
-    dataE[i] = vece[i];
-  }
+  pdws->setHistogram(0, BinEdges(vecx), Counts(vecy),
+                     CountStandardDeviations(vece));
 
   // Interpolation
   m_infitesimal = 0.1 / (maxmonitorcounts);
