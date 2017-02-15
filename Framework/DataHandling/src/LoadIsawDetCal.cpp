@@ -198,6 +198,7 @@ void LoadIsawDetCal::exec() {
 
   auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
   auto &detectorInfo = expInfoWS->mutableDetectorInfo();
+  std::vector<ComponentScaling> rectangularDetectorScalings;
 
   while (std::getline(input, line)) {
     if (line[0] == '7') {
@@ -206,33 +207,26 @@ void LoadIsawDetCal::exec() {
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
       if (instname.compare("WISH") == 0)
-        center(0.0, 0.0, -0.01 * mL1, "undulator", ws, detectorInfo);
+        center(0.0, 0.0, -CM_TO_M * mL1, "undulator", ws, detectorInfo);
       else
-        center(0.0, 0.0, -0.01 * mL1, "moderator", ws, detectorInfo);
+        center(0.0, 0.0, -CM_TO_M * mL1, "moderator", ws, detectorInfo);
       // mT0 and time of flight are both in microsec
       if (inputW) {
         API::Run &run = inputW->mutableRun();
         // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
         if (run.hasProperty("T0")) {
           double T0IDF = run.getPropertyValueAsType<double>("T0");
-          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           alg1->setProperty("Offset", mT0 - T0IDF);
-          alg1->executeAsChildAlg();
-          inputW = alg1->getProperty("OutputWorkspace");
-          // set T0 in the run parameters
-          run.addProperty<double>("T0", mT0, true);
         } else {
-          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           alg1->setProperty("Offset", mT0);
-          alg1->executeAsChildAlg();
-          inputW = alg1->getProperty("OutputWorkspace");
-          // set T0 in the run parameters
-          run.addProperty<double>("T0", mT0, true);
         }
+        alg1->executeAsChildAlg();
+        inputW = alg1->getProperty("OutputWorkspace");
+        // set T0 in the run parameters
+        run.addProperty<double>("T0", mT0, true);
       }
     }
 
@@ -269,22 +263,16 @@ void LoadIsawDetCal::exec() {
     if (det) {
       detname = det->getName();
 
-      auto &pmap = expInfoWS->instrumentParameters();
-      pmap.addDouble(det->getComponentID(), "scalex",
-                     0.01 * width / det->xsize());
-      pmap.addDouble(det->getComponentID(), "scaley",
-                     0.01 * height / det->ysize());
-      pmap.clearPositionSensitiveCaches();
-
-      // We need to get mutableDetectorInfo again, as we have written to the
-      // paramater map and set scaling factors
-      auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
-      auto &detectorInfo = expInfoWS->mutableDetectorInfo();
+      ComponentScaling detScaling;
+      detScaling.scaleX = CM_TO_M * width / det->xsize();
+      detScaling.scaleY = CM_TO_M * height / det->ysize();
+      detScaling.compID = det->getComponentID();
+      rectangularDetectorScalings.push_back(detScaling);
 
       // Convert from cm to m
-      x *= 0.01;
-      y *= 0.01;
-      z *= 0.01;
+      x *= CM_TO_M;
+      y *= CM_TO_M;
+      z *= CM_TO_M;
       center(x, y, z, detname, ws, detectorInfo);
 
       // These are the ISAW axes
@@ -354,9 +342,9 @@ void LoadIsawDetCal::exec() {
       // Omitted resizing tubes
 
       // Convert from cm to m
-      x *= 0.01;
-      y *= 0.01;
-      z *= 0.01;
+      x *= CM_TO_M;
+      y *= CM_TO_M;
+      z *= CM_TO_M;
       detname = comp->getFullName();
       center(x, y, z, detname, ws, detectorInfo);
 
@@ -409,6 +397,9 @@ void LoadIsawDetCal::exec() {
     }
   }
 
+  // Do this last, to avoid the issue of invalidating DetectorInfo
+  applyScalings(expInfoWS, rectangularDetectorScalings);
+
   setProperty("InputWorkspace", ws);
 }
 
@@ -430,10 +421,8 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
-    std::ostringstream mess;
-    mess << "Component with name " << detname << " was not found.";
-    g_log.error(mess.str());
-    throw std::runtime_error(mess.str());
+    throw std::runtime_error("Component with name " + detname +
+                             " was not found.");
   }
 
   const V3D position(x, y, z);
@@ -493,6 +482,17 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
     filenamesFromPropertyUnraveld.push_back(filename2);
 
   return filenamesFromPropertyUnraveld;
+}
+
+void LoadIsawDetCal::applyScalings(
+    ExperimentInfo_sptr &expInfoWS,
+    const std::vector<ComponentScaling> &rectangularDetectorScalings) {
+  auto &pmap = expInfoWS->instrumentParameters();
+
+  for (const auto &scaling : rectangularDetectorScalings) {
+    pmap.addDouble(scaling.compID, "scalex", scaling.scaleX);
+    pmap.addDouble(scaling.compID, "scaley", scaling.scaleY);
+  }
 }
 
 } // namespace Algorithm

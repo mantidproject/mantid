@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 namespace Mantid {
@@ -61,16 +62,27 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
 private:
+  const double CM_TO_M = 0.01;
+
+  struct ComponentScaling {
+    Geometry::IComponent *compID;
+    double scaleX;
+    double scaleY;
+  };
+
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
 
   /// Set the center of the supplied detector name
   void center(const double x, const double y, const double z,
-              const std::string &detname, API::Workspace_sptr ws, API::DetectorInfo &detectorInfo);
+              const std::string &detname, API::Workspace_sptr ws,
+              API::DetectorInfo &detectorInfo);
 
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
   std::vector<std::string> getFilenames();
+
+  void applyScalings(API::ExperimentInfo_sptr &expInfoWS, const std::vector<ComponentScaling> &rectangularDetectorScalings);
 };
 
 } // namespace DataHandling
