@@ -858,8 +858,7 @@ QString ComponentInfoController::displayDetectorInfo(Mantid::detid_t detid) {
     // collect info about selected detector and add it to text
     auto &det = m_instrActor->getDetectorByDetID(detid);
 
-    text =
-        "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
+    text = "Selected detector: " + QString::fromStdString(det.getName()) + "\n";
     text += "Detector ID: " + QString::number(detid) + '\n';
     QString wsIndex;
     try {
@@ -1048,7 +1047,8 @@ void ComponentInfoController::displayAlignPeaksInfo(
 /**
 * Form a string for output from the components instrument parameters
 */
-QString ComponentInfoController::getParameterInfo(const Mantid::Geometry::IComponent &comp) {
+QString ComponentInfoController::getParameterInfo(
+    const Mantid::Geometry::IComponent &comp) {
   QString text = "";
   std::map<Mantid::Geometry::ComponentID, std::vector<std::string>>
       mapCmptToNameVector;

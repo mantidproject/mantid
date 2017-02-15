@@ -360,17 +360,18 @@ const MantidColorMap &InstrumentActor::getColorMap() const {
 }
 
 /// Get a detector reference given a pick ID.
-const Mantid::Geometry::IDetector &InstrumentActor::getDetectorByPickID(size_t pickID) const {
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByPickID(size_t pickID) const {
   return getDetectorByDetID(m_detIDs.at(pickID));
 }
 
 /// Get a reference to a detector by a detector ID.
-const Mantid::Geometry::IDetector &InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
+const Mantid::Geometry::IDetector &
+InstrumentActor::getDetectorByDetID(Mantid::detid_t detID) const {
   const auto &detectorInfo = getWorkspace()->detectorInfo();
   auto detectorIndex = detectorInfo.indexOf(detID);
   return detectorInfo.detector(detectorIndex);
 }
-
 
 Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
   if (pickID < m_detIDs.size()) {

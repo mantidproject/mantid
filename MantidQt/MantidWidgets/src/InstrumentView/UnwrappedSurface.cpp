@@ -39,7 +39,8 @@ UnwrappedDetector::UnwrappedDetector()
 UnwrappedDetector::UnwrappedDetector(const unsigned char *c,
                                      const IDetector &det)
     : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detID(det.getID()),
-      position(det.getPos()), rotation(det.getRotation()), shape(det.shape()), scaleFactor(det.getScaleFactor()) {
+      position(det.getPos()), rotation(det.getRotation()), shape(det.shape()),
+      scaleFactor(det.getScaleFactor()) {
   color[0] = *c;
   color[1] = *(c + 1);
   color[2] = *(c + 2);
@@ -71,9 +72,7 @@ operator=(const UnwrappedDetector &other) {
 }
 
 /** Check if the object is valid*/
-bool UnwrappedDetector::isValid() const {
-  return static_cast<bool>(shape);
-}
+bool UnwrappedDetector::isValid() const { return static_cast<bool>(shape); }
 
 /**
 * Constructor.
@@ -222,7 +221,8 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget, bool picking) const {
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
 
-    if (!udet.isValid()) continue;
+    if (!udet.isValid())
+      continue;
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);

@@ -290,9 +290,8 @@ void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId,
   // loop over the detectors
   for (int i = 0; i < detectors.size(); ++i) {
     ComponentID id = detectors[i];
-    auto &det =
-        boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-            instr->getComponentByID(id));
+    auto &det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+        instr->getComponentByID(id));
 
     if (i == 0) {
       pos0 = det->getPos();
@@ -626,10 +625,9 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
   return Mantid::Kernel::Quat(normal, m_zaxis);
 }
 
-void PanelsSurface::addDetector(
-    const Mantid::Geometry::IDetector &det,
-    const Mantid::Kernel::V3D &refPos, int index,
-    Mantid::Kernel::Quat &rotation) {
+void PanelsSurface::addDetector(const Mantid::Geometry::IDetector &det,
+                                const Mantid::Kernel::V3D &refPos, int index,
+                                Mantid::Kernel::Quat &rotation) {
   // setup detector info
   Mantid::Kernel::V3D pos = det.getPos();
   Mantid::detid_t detid = det.getID();

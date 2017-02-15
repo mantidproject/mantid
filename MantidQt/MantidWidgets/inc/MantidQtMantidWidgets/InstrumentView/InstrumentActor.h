@@ -142,7 +142,8 @@ public:
   /// the pick image.
   const Mantid::Geometry::IDetector &getDetectorByPickID(size_t pickID) const;
   /// Get a reference to a detector by a detector ID.
-  const Mantid::Geometry::IDetector &getDetectorByDetID(Mantid::detid_t detID) const;
+  const Mantid::Geometry::IDetector &
+  getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
   /// Get a component ID for a non-detector.
