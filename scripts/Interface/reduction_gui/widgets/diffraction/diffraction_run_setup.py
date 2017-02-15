@@ -382,10 +382,10 @@ class RunSetupWidget(BaseWidget):
         """
         intliststring = str(intliststring)
         if intliststring == "":
-            return (True, "")
+            return True, "", intliststring
 
         # replace ':' by '-'
-        intliststring.replace(':', '-')
+        intliststring = intliststring.replace(':', '-')
 
         # 1. Split by ","
         termlevel0s = intliststring.split(",")
@@ -399,9 +399,9 @@ class RunSetupWidget(BaseWidget):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        return (False, valuestr)
+                        return False, 'blabla' + valuestr, valuestr
                 except ValueError:
-                    return (False, valuestr)
+                    return False, valuestr, valuestr
 
             elif numdashes == 1:
                 # Integer range
