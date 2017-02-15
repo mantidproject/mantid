@@ -564,25 +564,24 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   // low = std::lower_bound(splitter_time_vec.begin(), splitter_time_vec.end(),
   //                       tsp_time);
 
-  // use bindary search to find the first split stop time that is bigger than tsp_time
+  // use bindary search to find the first split stop time that is bigger than
+  // tsp_time
   std::vector<DateAndTime>::iterator splitter_iter;
-  splitter_iter = std::lower_bound(splitter_time_vec.begin(), splitter_time_vec.end(), tsp_time);
-  if (splitter_iter == splitter_time_vec.begin())
-  {
-    // do nothing as the first TimeSeriesProperty entry's time is before any splitters
+  splitter_iter = std::lower_bound(splitter_time_vec.begin(),
+                                   splitter_time_vec.end(), tsp_time);
+  if (splitter_iter == splitter_time_vec.begin()) {
+    // do nothing as the first TimeSeriesProperty entry's time is before any
+    // splitters
     ;
-  }
-  else if (splitter_iter == splitter_time_vec.end())
-  {
-    // already search to the last splitter which is still earlier than first TSP entry
+  } else if (splitter_iter == splitter_time_vec.end()) {
+    // already search to the last splitter which is still earlier than first TSP
+    // entry
     no_entry_in_range = true;
-  }
-  else
-  {
+  } else {
     // calculate the splitter's index (now we check the stop time)
     index_splitter = splitter_iter - splitter_time_vec.begin() - 1;
     split_start_time = splitter_time_vec[index_splitter];
-    split_stop_time = splitter_time_vec[index_splitter+1];
+    split_stop_time = splitter_time_vec[index_splitter + 1];
   }
 
   /*
@@ -617,19 +616,18 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
             << ", Splitter index = " << index_splitter << "\n";
 
   // move along the entries to find the entry inside the current splitter
-  if (!no_entry_in_range)
-  {
+  if (!no_entry_in_range) {
     std::vector<DateAndTime>::iterator tsp_time_iter;
-    tsp_time_iter = std::lower_bound(tsp_time_vec.begin(), tsp_time_vec.end(), split_start_time);
-    if (tsp_time_iter == tsp_time_vec.end())
-    {
-      // the first splitter's start time is LATER than the last TSP entry, then there won't be any
+    tsp_time_iter = std::lower_bound(tsp_time_vec.begin(), tsp_time_vec.end(),
+                                     split_start_time);
+    if (tsp_time_iter == tsp_time_vec.end()) {
+      // the first splitter's start time is LATER than the last TSP entry, then
+      // there won't be any
       // TSP entry to be split into any target splitter.
       no_entry_in_range = true;
-    }
-    else
-    {
-      // first splitter start time is between tsp_time_iter and the one before it.
+    } else {
+      // first splitter start time is between tsp_time_iter and the one before
+      // it.
       // so the index for tsp_time_iter is the first TSP entry in the splitter
       index_tsp_time = tsp_time_iter - tsp_time_vec.begin();
       tsp_time = *tsp_time_iter; // tsp_time_vec[index_splitter];
