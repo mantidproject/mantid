@@ -22,8 +22,9 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_exec()
+  void _test_exec()
   {
+        /*
     // Create test input if necessary
     MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
@@ -43,9 +44,10 @@ public:
     Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
+        */
   }
   
-  void test_Something()
+  void _test_Something()
   {
     TS_FAIL( "You forgot to write a test!");
   }

@@ -64,7 +64,7 @@ void LoadILLDiffraction::init() {
 void LoadILLDiffraction::exec() {
 
   // open the root node
-  NeXus::NXRoot dataRoot(getPropertyValue("Filename"));
+  NXRoot dataRoot(getPropertyValue("Filename"));
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   // read in the data
