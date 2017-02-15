@@ -37,14 +37,12 @@ class Polaris(AbstractInst):
         run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
-        # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?
         return self._create_vanadium(run_details=run_details,
-                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                                     gen_absorb_correction=None)
+                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     # Overrides
 
-    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws):
         return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
                                                          multiple_scattering=self._inst_settings.multiple_scattering)
 

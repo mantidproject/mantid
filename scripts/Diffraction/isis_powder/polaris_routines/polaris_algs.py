@@ -2,10 +2,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 import os
+
 from isis_powder.routines import common, yaml_parser
 from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
-
 
 def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
@@ -46,7 +46,7 @@ def get_run_details(run_number_string, inst_settings):
     grouping_full_path = os.path.join(grouping_full_path, inst_settings.grouping_file_name)
 
     in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
-    calibration_full_path = os.path.join(in_calib_dir, offset_file_name)
+    offsets_file_full_path = os.path.join(in_calib_dir, offset_file_name)
     # Generate the name of the splined file we will either be loading or saving
     splined_vanadium_name = _generate_splined_van_filename(chopper_on=inst_settings.chopper_on,
                                                            vanadium_run_string=vanadium_runs,
@@ -59,7 +59,7 @@ def get_run_details(run_number_string, inst_settings):
     run_details.vanadium_run_numbers = vanadium_runs
     run_details.label = label
 
-    run_details.calibration_file_path = calibration_full_path
+    run_details.offset_file_path = offsets_file_full_path
     run_details.grouping_file_path = grouping_full_path
     run_details.splined_vanadium_file_path = splined_vanadium
 

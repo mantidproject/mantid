@@ -121,7 +121,9 @@ class Pearl(AbstractInst):
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws):
+        # TODO move this to an instrument param
+        gen_absorb = False
         if gen_absorb:
             pearl_algs.generate_vanadium_absorb_corrections(van_ws=van_ws)
 

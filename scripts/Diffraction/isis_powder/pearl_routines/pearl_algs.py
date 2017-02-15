@@ -102,7 +102,7 @@ def get_run_details(run_number_string, inst_settings):
 
     run_details = RunDetails(run_number=first_run_number)
     run_details.user_input_run_number = run_number_string
-    run_details.calibration_file_path = calibration_file_path
+    run_details.offset_file_path = calibration_file_path
     run_details.grouping_file_path = grouping_file_path
     run_details.empty_runs = empty_run_numbers
     run_details.label = label

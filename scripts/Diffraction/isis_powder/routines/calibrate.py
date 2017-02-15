@@ -6,7 +6,7 @@ import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import InputBatchingEnum
 
 
-def create_van(instrument, run_details, absorb, gen_absorb):
+def create_van(instrument, run_details, absorb):
     van = run_details.vanadium_run_numbers
     run_details = instrument._get_run_details(run_number_string=van)
     # Always sum a range of inputs as its a vanadium run over multiple captures
@@ -24,7 +24,7 @@ def create_van(instrument, run_details, absorb, gen_absorb):
 
     if absorb:
         aligned_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
-                                               van_ws=aligned_ws, gen_absorb=gen_absorb)
+                                               van_ws=aligned_ws)
 
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
@@ -55,8 +55,8 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
     mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace="Van_spline_data")
 
 
-def _apply_absorb_corrections(instrument, run_details, van_ws, gen_absorb):
-    absorb_ws = instrument._apply_absorb_corrections(run_details, van_ws, gen_absorb=gen_absorb)
+def _apply_absorb_corrections(instrument, run_details, van_ws):
+    absorb_ws = instrument._apply_absorb_corrections(run_details=run_details, van_ws=van_ws)
     return absorb_ws
 
 

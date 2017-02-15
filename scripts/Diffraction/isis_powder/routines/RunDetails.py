@@ -14,7 +14,7 @@ class RunDetails(object):
         self.empty_runs = None
         self.label = None
 
-        self.calibration_file_path = None
+        self.offset_file_path = None
         self.grouping_file_path = None
 
         self.splined_vanadium_file_path = None
