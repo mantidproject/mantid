@@ -202,9 +202,8 @@ void CorrectTOFAxis::init() {
       PropertyNames::FIXED_ENERGY, EMPTY_DBL(), mustBePositiveDouble,
       "Incident energy if the 'EI' sample log is not present/incorrect.",
       Direction::Input);
-  declareProperty(
-      PropertyNames::L2, EMPTY_DBL(), mustBePositiveDouble,
-      "Sample to detector distance, in meters.", Direction::Input);
+  declareProperty(PropertyNames::L2, EMPTY_DBL(), mustBePositiveDouble,
+                  "Sample to detector distance, in meters.", Direction::Input);
 }
 
 /** Validate the algorithm's input properties.
@@ -252,7 +251,9 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
     const std::string indexType = getProperty(PropertyNames::INDEX_TYPE);
     m_elasticBinIndex = toWorkspaceIndex(elasticBinIndex, indexType, m_inputWs);
     if (spectra.empty() && l2 == EMPTY_DBL()) {
-      issues[PropertyNames::REFERENCE_SPECTRA] = "Either " + PropertyNames::REFERENCE_SPECTRA + " or " + PropertyNames::L2 + " has to be specified.";
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "Either " + PropertyNames::REFERENCE_SPECTRA + " or " +
+          PropertyNames::L2 + " has to be specified.";
       return issues;
     }
   } else {
@@ -273,7 +274,8 @@ std::map<std::string, std::string> CorrectTOFAxis::validateInputs() {
       return issues;
     }
     if (spectra.empty()) {
-      issues[PropertyNames::REFERENCE_SPECTRA] = "No reference spectra selected.";
+      issues[PropertyNames::REFERENCE_SPECTRA] =
+          "No reference spectra selected.";
       return issues;
     }
   }
