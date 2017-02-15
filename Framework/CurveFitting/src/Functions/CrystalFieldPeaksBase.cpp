@@ -357,10 +357,10 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
           // Catch exceptions thrown by stof so we get a more meaningful error
         } catch (const std::invalid_argument &) {
           throw std::runtime_error("Invalid value '" + ion.substr(1) +
-                               "' of J passed to CrystalFieldPeaks.");
+                                   "' of J passed to CrystalFieldPeaks.");
         } catch (const std::out_of_range &) {
           throw std::runtime_error("Value of J: '" + ion.substr(1) +
-                               "' passed to CrystalFieldPeaks is too big.");
+                                   "' passed to CrystalFieldPeaks is too big.");
         }
       }
       // fall through
