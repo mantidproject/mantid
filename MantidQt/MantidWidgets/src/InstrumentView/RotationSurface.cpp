@@ -86,82 +86,75 @@ void RotationSurface::init() {
 
   // For each detector in the order of actors
   // cppcheck-suppress syntaxError
-                        PRAGMA_OMP(parallel for)
-                        for (int ii = 0; ii < int(ndet); ++ii) {
-                          if (!exceptionThrown)
-                            try {
-                              size_t i = size_t(ii);
+  PRAGMA_OMP(parallel for)
+  for (int ii = 0; ii < int(ndet); ++ii) {
+    if (!exceptionThrown)
+      try {
+        size_t i = size_t(ii);
 
-                              unsigned char color[3];
-                              Mantid::detid_t id = m_instrActor->getDetID(i);
+        unsigned char color[3];
+        Mantid::detid_t id = m_instrActor->getDetID(i);
 
-                              boost::shared_ptr<
-                                  const Mantid::Geometry::IDetector> det;
-                              try {
-                                det = inst->getDetector(id);
-                              } catch (
-                                  Mantid::Kernel::Exception::NotFoundError &) {
-                              }
+        boost::shared_ptr<const Mantid::Geometry::IDetector> det;
+        try {
+          det = inst->getDetector(id);
+        } catch (Mantid::Kernel::Exception::NotFoundError &) {
+        }
 
-                              if (!det ||
-                                  detectorInfo.isMonitor(
-                                      detectorInfo.indexOf(id)) ||
-                                  (id < 0)) {
-                                // Not a detector or a monitor
-                                // Make some blank, empty thing that won't draw
-                                m_unwrappedDetectors[i] = UnwrappedDetector();
-                              } else {
-                                // A real detector.
-                                m_instrActor->getColor(id).getUB3(&color[0]);
+        if (!det || detectorInfo.isMonitor(detectorInfo.indexOf(id)) ||
+            (id < 0)) {
+          // Not a detector or a monitor
+          // Make some blank, empty thing that won't draw
+          m_unwrappedDetectors[i] = UnwrappedDetector();
+        } else {
+          // A real detector.
+          m_instrActor->getColor(id).getUB3(&color[0]);
 
-                                // Position, relative to origin
-                                // Mantid::Kernel::V3D pos = det->getPos() -
-                                // m_pos;
-                                Mantid::Kernel::V3D pos =
-                                    m_instrActor->getDetPos(i) - m_pos;
+          // Position, relative to origin
+          // Mantid::Kernel::V3D pos = det->getPos() -
+          // m_pos;
+          Mantid::Kernel::V3D pos = m_instrActor->getDetPos(i) - m_pos;
 
-                                // Create the unwrapped shape
-                                UnwrappedDetector udet(&color[0], det);
-                                // Calculate its position/size in UV coordinates
-                                this->calcUV(udet, pos);
+          // Create the unwrapped shape
+          UnwrappedDetector udet(&color[0], det);
+          // Calculate its position/size in UV coordinates
+          this->calcUV(udet, pos);
 
-                                m_unwrappedDetectors[i] = udet;
-                              } // is a real detectord
-                            } catch (std::exception &e) {
-                              // stop executing the body of the loop
-                              exceptionThrown = true;
-                              g_log.error() << e.what() << '\n';
-                            } catch (...) {
-                              // stop executing the body of the loop
-                              exceptionThrown = true;
-                              g_log.error("Unknown exception thrown.");
-                            }
-                        } // for each detector in pick order
+          m_unwrappedDetectors[i] = udet;
+        } // is a real detectord
+      } catch (std::exception &e) {
+        // stop executing the body of the loop
+        exceptionThrown = true;
+        g_log.error() << e.what() << '\n';
+      } catch (...) {
+        // stop executing the body of the loop
+        exceptionThrown = true;
+        g_log.error("Unknown exception thrown.");
+      }
+  } // for each detector in pick order
 
-                        // if the loop above has thrown stop execution
-                        if (exceptionThrown) {
-                          throw std::runtime_error(
-                              "An exception was thrown. See log for detail.");
-                        }
+  // if the loop above has thrown stop execution
+  if (exceptionThrown) {
+    throw std::runtime_error("An exception was thrown. See log for detail.");
+  }
 
-                        // find the overall edges in u and v coords
-                        findUVBounds();
+  // find the overall edges in u and v coords
+  findUVBounds();
 
-                        // apply a shift in u-coord either found automatically
-                        // or set manually
-                        if (!m_manual_u_correction) {
-                          // automatic gap correction
-                          findAndCorrectUGap();
-                        } else {
-                          // apply manually set shift
-                          m_u_min = manual_u_min;
-                          m_u_max = manual_u_max;
-                          for (size_t i = 0; i < m_unwrappedDetectors.size();
-                               ++i) {
-                            auto &udet = m_unwrappedDetectors[i];
-                            udet.u = applyUCorrection(udet.u);
-                          }
-                        }
+  // apply a shift in u-coord either found automatically
+  // or set manually
+  if (!m_manual_u_correction) {
+    // automatic gap correction
+    findAndCorrectUGap();
+  } else {
+    // apply manually set shift
+    m_u_min = manual_u_min;
+    m_u_max = manual_u_max;
+    for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
+      auto &udet = m_unwrappedDetectors[i];
+      udet.u = applyUCorrection(udet.u);
+    }
+  }
 }
 
 /** Update the view rect to account for the U correction
