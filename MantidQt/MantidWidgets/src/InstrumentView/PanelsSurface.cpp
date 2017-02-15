@@ -219,9 +219,8 @@ void PanelsSurface::addFlatBank(ComponentID bankId,
     m_unwrappedDetectors.reserve(m_unwrappedDetectors.size() + nelem);
     for (int i = 0; i < nelem; ++i) {
       // setup detector info
-      auto det =
-          boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
-              assembly->getChild(i));
+      auto det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+          assembly->getChild(i));
       if (!doneRotation) {
         pos0 = det->getPos();
         // find the rotation to put the bank on the plane
