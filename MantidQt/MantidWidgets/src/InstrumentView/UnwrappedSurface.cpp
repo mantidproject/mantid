@@ -129,6 +129,8 @@ void UnwrappedSurface::cacheAllAssemblies() {
 
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
+    if (!udet.isValid())
+      continue;
     // Get the BARE parent (not parametrized) to speed things up.
     auto &detector = m_instrActor->getDetectorByDetID(udet.detID);
     const Mantid::Geometry::IComponent *bareDet = detector.getComponentID();

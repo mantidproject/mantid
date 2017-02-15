@@ -192,6 +192,8 @@ void RotationSurface::findUVBounds() {
   m_v_max = -DBL_MAX;
   for (size_t i = 0; i < m_unwrappedDetectors.size(); ++i) {
     const UnwrappedDetector &udet = m_unwrappedDetectors[i];
+    if (!udet.isValid())
+      continue;
     if (udet.u < m_u_min)
       m_u_min = udet.u;
     if (udet.u > m_u_max)
@@ -223,6 +225,8 @@ void RotationSurface::findAndCorrectUGap() {
   std::vector<UnwrappedDetector>::const_iterator ud =
       m_unwrappedDetectors.begin();
   for (; ud != m_unwrappedDetectors.end(); ++ud) {
+    if (!ud->isValid())
+      continue;
     double u = ud->u;
     int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
@@ -259,6 +263,8 @@ void RotationSurface::findAndCorrectUGap() {
 
     std::vector<UnwrappedDetector>::iterator ud = m_unwrappedDetectors.begin();
     for (; ud != m_unwrappedDetectors.end(); ++ud) {
+      if (!ud->isValid())
+        continue;
       double &u = ud->u;
       u = applyUCorrection(u);
     }
