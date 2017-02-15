@@ -1,11 +1,13 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
@@ -411,22 +413,33 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_getDetectorByID() {
+  void test_accessing_SpectrumInfo_creates_default_grouping() {
+    using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
-    IDetector_const_sptr det;
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(!detGroup);
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+  }
+
+  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
+    using namespace Mantid;
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
 
     // Set a mapping
-    std::vector<Mantid::detid_t> group{1, 2};
+    std::set<detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
-    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
-    TS_ASSERT(det);
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
+    const auto &spectrumInfo = exptInfo->spectrumInfo();
+    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
+        &spectrumInfo.detector(0));
+    TS_ASSERT(detGroup);
+    TS_ASSERT_EQUALS(detGroup->getDetectorIDs(), (std::vector<detid_t>{1, 2}));
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
@@ -436,21 +449,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
   }
 
-  void test_Getting_Group_Members_For_Unknown_ID_Throws() {
+  void test_Getting_Group_For_Unknown_ID_Throws() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.getGroupMembers(1), std::runtime_error);
+    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
   }
 
   void
-  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
+  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_Group() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
-    mappings.emplace(1, std::vector<Mantid::detid_t>(1, 2));
+    mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    std::vector<Mantid::detid_t> ids;
-    TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
+    size_t index;
+    TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
+    TS_ASSERT_EQUALS(index, 0);
   }
 
   struct fromToEntry {
@@ -722,6 +736,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(eiCastNonConst = (ExperimentInfo_sptr)val);
     TS_ASSERT(eiCastNonConst != NULL);
     TS_ASSERT_EQUALS(eiCastConst, eiCastNonConst);
+  }
+
+  void test_getInstrument_setInstrument_copies_masking() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    TS_ASSERT(target.detectorInfo().isMasked(0));
+  }
+
+  void test_getInstrument_setInstrument_copy_on_write_not_broken() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    ExperimentInfo source;
+    ExperimentInfo target;
+    source.setInstrument(inst);
+    target.setInstrument(inst);
+
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
+    target.setInstrument(source.getInstrument());
+    source.mutableDetectorInfo().setMasked(0, true);
+    TS_ASSERT(!target.detectorInfo().isMasked(0));
   }
 
 private:

@@ -1,11 +1,12 @@
 #ifndef MANTID_DATAHANDLING_LOCALVULCANCALFILETEST_H_
 #define MANTID_DATAHANDLING_LOCALVULCANCALFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadVulcanCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -57,8 +58,8 @@ public:
 
     TS_ASSERT_EQUALS(groupWS->getNumberHistograms(), 7392);
 
-    TS_ASSERT_EQUALS(int(groupWS->readY(0)[0]), 1);
-    TS_ASSERT_EQUALS(int(groupWS->readY(7391)[0]), 6);
+    TS_ASSERT_EQUALS(int(groupWS->y(0)[0]), 1);
+    TS_ASSERT_EQUALS(int(groupWS->y(7391)[0]), 6);
 
     // Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("OffsetFilename"),
@@ -74,7 +75,7 @@ public:
       return;
 
     TS_ASSERT_DELTA(offsetsWS->getValue(26250), -0.000472175, 1e-7);
-    TS_ASSERT_DELTA(offsetsWS->readY(7391)[0], 6.39813e-05, 1e-7);
+    TS_ASSERT_DELTA(offsetsWS->y(7391)[0], 6.39813e-05, 1e-7);
     // Check if filename is saved
     TS_ASSERT_EQUALS(alg.getPropertyValue("OffsetFilename"),
                      offsetsWS->run().getProperty("Filename")->value());
@@ -145,11 +146,12 @@ public:
     if (!maskWS)
       return;
 
+    const auto &spectrumInfo = maskWS->spectrumInfo();
     size_t nummasked = 0;
     for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) {
-      if (maskWS->readY(i)[0] > 0.5) {
+      if (maskWS->y(i)[0] > 0.5) {
         ++nummasked;
-        TS_ASSERT(maskWS->getDetector(i)->isMasked());
+        TS_ASSERT(spectrumInfo.isMasked(i));
       }
     }
 

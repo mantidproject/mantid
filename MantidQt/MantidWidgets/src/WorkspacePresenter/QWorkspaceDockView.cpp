@@ -766,7 +766,7 @@ void QWorkspaceDockView::populateChildData(QTreeWidgetItem *item) {
     const size_t nmembers = group->getNumberOfEntries();
     for (size_t i = 0; i < nmembers; ++i) {
       auto ws = group->getItem(i);
-      auto *node = addTreeEntry(std::make_pair(ws->name(), ws), item);
+      auto *node = addTreeEntry(std::make_pair(ws->getName(), ws), item);
       excludeItemFromSort(node);
       if (shouldBeSelected(node->text(0)))
         node->setSelected(true);
@@ -1279,6 +1279,9 @@ void QWorkspaceDockView::popupContextMenu() {
     } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
+    } else {
+      // None of the above? -> not a workspace
+      return;
     }
     addClearMenuItems(menu, selectedWsName);
 

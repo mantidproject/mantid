@@ -1,12 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "boost/shared_ptr.hpp"
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 #include <QSettings>
-#include <QString>
 
 using namespace Mantid::API;
 
@@ -52,8 +47,8 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
     MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
   if (left && right) // check the workspaces actually point to something first
   {
-    auto leftX = left->readX(0);
-    auto rightX = right->readX(0);
+    const auto leftX = left->x(0);
+    const auto rightX = right->x(0);
     return std::equal(leftX.begin(), leftX.end(), rightX.begin());
   } else {
     throw std::runtime_error("CorrectionsTab: One of the operands is an "
@@ -77,7 +72,7 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
                                                 const std::string &unitID,
                                                 const std::string &suffix,
                                                 std::string eMode) {
-  std::string outputName = ws->name();
+  std::string outputName = ws->getName();
 
   if (suffix != "UNIT")
     outputName += suffix;
@@ -88,7 +83,7 @@ std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws,
       AlgorithmManager::Instance().create("ConvertUnits");
   convertAlg->initialize();
 
-  convertAlg->setProperty("InputWorkspace", ws->name());
+  convertAlg->setProperty("InputWorkspace", ws->getName());
   convertAlg->setProperty("OutputWorkspace", outputName);
   convertAlg->setProperty("Target", unitID);
 

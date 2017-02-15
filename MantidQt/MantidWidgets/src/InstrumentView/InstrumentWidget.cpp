@@ -9,6 +9,7 @@
 #include "MantidQtMantidWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -152,6 +153,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   connect(m_clearPeakOverlays, SIGNAL(triggered()), this,
           SLOT(clearPeakOverlays()));
 
+  // Clear alignment plane action
+  m_clearAlignment = new QAction("Clear alignment plane", this);
+  connect(m_clearAlignment, SIGNAL(triggered()), this,
+          SLOT(clearAlignmentPlane()));
+
   // confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -201,6 +207,30 @@ std::string InstrumentWidget::getWorkspaceNameStdString() const {
 
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
+}
+
+/**
+ * Get the axis vector for the surface projection type.
+ * @param surfaceType :: Surface type for this projection
+ * @return a V3D for the axis being projected on
+ */
+Mantid::Kernel::V3D
+InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
+  Mantid::Kernel::V3D axis;
+
+  // define the axis
+  if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
+    axis = Mantid::Kernel::V3D(0, 1, 0);
+  } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
+    axis = Mantid::Kernel::V3D(1, 0, 0);
+  } else // SIDE_BY_SIDE
+  {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  }
+
+  return axis;
 }
 
 /**
@@ -380,18 +410,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         throw InstrumentHasNoSampleError();
       }
       Mantid::Kernel::V3D sample_pos = sample->getPos();
-      Mantid::Kernel::V3D axis;
-      // define the axis
-      if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
-        axis = Mantid::Kernel::V3D(0, 1, 0);
-      } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
-        axis = Mantid::Kernel::V3D(1, 0, 0);
-      } else // SIDE_BY_SIDE
-      {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      }
+      auto axis = getSurfaceAxis(surfaceType);
 
       // create the surface
       if (surfaceType == FULL3D) {
@@ -907,6 +926,7 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
     if (getSurface()->hasPeakOverlays()) {
       context.addSeparator();
       context.addAction(m_clearPeakOverlays);
+      context.addAction(m_clearAlignment);
     }
     if (!context.isEmpty()) {
       context.exec(QCursor::pos());
@@ -934,39 +954,30 @@ void InstrumentWidget::setColorMapAutoscaling(bool on) {
 */
 bool InstrumentWidget::overlay(const QString &wsName) {
   using namespace Mantid::API;
-  Workspace_sptr workspace;
-  bool success(false);
-  try {
-    workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-  } catch (std::runtime_error) {
-    QMessageBox::warning(this, "MantidPlot - Warning",
-                         "No workspace called '" + wsName + "' found. ");
-    return success;
-  }
+
+  auto workspace = getWorkspaceFromADS(wsName.toStdString());
 
   auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
-  if (!pws) {
+  auto table = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
+  auto mask = boost::dynamic_pointer_cast<IMaskWorkspace>(workspace);
+
+  if (!pws && !table && !mask) {
     QMessageBox::warning(this, "MantidPlot - Warning",
                          "Work space called '" + wsName +
                              "' is not suitable."
                              " Please select another workspace. ");
-    return success;
+    return false;
   }
 
-  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
-  if (!surface) {
-    QMessageBox::warning(
-        this, "MantidPlot - Warning",
-        "Please change to an unwrapped view to see peak labels.");
-    return success;
+  if (pws) {
+    overlayPeaksWorkspace(pws);
+  } else if (table) {
+    overlayShapesWorkspace(table);
+  } else if (mask) {
+    overlayMaskedWorkspace(mask);
   }
 
-  if (pws && surface) {
-    surface->setPeaksWorkspace(pws);
-    updateInstrumentView();
-    success = true;
-  }
-  return success;
+  return true;
 }
 
 /**
@@ -974,6 +985,11 @@ bool InstrumentWidget::overlay(const QString &wsName) {
 */
 void InstrumentWidget::clearPeakOverlays() {
   getSurface()->clearPeakOverlays();
+  updateInstrumentView();
+}
+
+void InstrumentWidget::clearAlignmentPlane() {
+  getSurface()->clearAlignmentPlane();
   updateInstrumentView();
 }
 
@@ -1278,6 +1294,76 @@ void InstrumentWidget::renameHandle(const std::string &oldName,
 void InstrumentWidget::clearADSHandle() {
   emit clearingHandle();
   close();
+}
+
+/**
+ * Overlay a peaks workspace on the surface projection
+ * @param ws :: peaks workspace to overlay
+ */
+void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
+  auto surface = getUnwrappedSurface();
+  surface->setPeaksWorkspace(ws);
+  updateInstrumentView();
+}
+
+/**
+ * Overlay a mask workspace on the surface projection
+ * @param ws :: mask workspace to overlay
+ */
+void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
+  auto actor = getInstrumentActor();
+  actor->setMaskMatrixWorkspace(
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+  actor->updateColors();
+  updateInstrumentDetectors();
+  emit maskedWorkspaceOverlayed();
+}
+
+/**
+ * Overlay a table workspace containing shape parameters
+ * @param ws :: a workspace of shape parameters to create
+ */
+void InstrumentWidget::overlayShapesWorkspace(ITableWorkspace_sptr ws) {
+  auto surface = getUnwrappedSurface();
+  if (surface) {
+    surface->loadShapesFromTableWorkspace(ws);
+    updateInstrumentView();
+  }
+}
+
+/**
+ * Get a workspace from the ADS using its name
+ * @param name :: name of the workspace
+ * @return a handle to the workspace (null if not found)
+ */
+Workspace_sptr InstrumentWidget::getWorkspaceFromADS(const std::string &name) {
+  Workspace_sptr workspace;
+
+  try {
+    workspace = AnalysisDataService::Instance().retrieve(name);
+  } catch (std::runtime_error) {
+    QMessageBox::warning(this, "MantidPlot - Warning",
+                         "No workspace called '" +
+                             QString::fromStdString(name) + "' found. ");
+    return nullptr;
+  }
+
+  return workspace;
+}
+
+/**
+ * Get an unwrapped surface
+ * @return a handle to the unwrapped surface (or null if view was not found).
+ */
+boost::shared_ptr<UnwrappedSurface> InstrumentWidget::getUnwrappedSurface() {
+  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
+  if (!surface) {
+    QMessageBox::warning(
+        this, "MantidPlot - Warning",
+        "Please change to an unwrapped view to overlay a workspace.");
+    return nullptr;
+  }
+  return surface;
 }
 
 int InstrumentWidget::getCurrentTab() const {

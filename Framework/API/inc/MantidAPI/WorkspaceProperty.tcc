@@ -108,7 +108,7 @@ operator=(const WorkspaceProperty &right) {
 template <typename TYPE>
 boost::shared_ptr<TYPE> &WorkspaceProperty<TYPE>::
 operator=(const boost::shared_ptr<TYPE> &value) {
-  std::string wsName = value->name();
+  std::string wsName = value->getName();
   if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
     m_workspaceName = wsName;
   }
@@ -180,7 +180,7 @@ std::string WorkspaceProperty<TYPE>::setDataItem(
     const boost::shared_ptr<Kernel::DataItem> value) {
   boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
-    std::string wsName = typed->name();
+    std::string wsName = typed->getName();
     if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
       m_workspaceName = wsName;
     }

@@ -1,10 +1,10 @@
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidQtAPI/HelpWindow.h"
@@ -154,7 +154,7 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  * @param parent Parent window (most likely the Mantid main app window).
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIW(nullptr),
+    : UserSubWindow(parent), ITomographyIfaceView(), m_tabROIWidget(nullptr),
       m_tabImggFormats(nullptr), m_processingJobsIDs(), m_currentComputeRes(""),
       m_currentReconTool("TomoPy"), m_imgPath(""), m_logMsgs(),
       m_systemSettings(), m_settings(),
@@ -172,13 +172,10 @@ void TomographyIfaceViewQtGUI::initLayout() {
   QWidget *tabRunW = new QWidget(m_ui.tabMain);
   m_uiTabRun.setupUi(tabRunW);
   m_ui.tabMain->addTab(tabRunW, QString("Run"));
-  QWidget *tabSetupW = new QWidget(m_ui.tabMain);
-  m_uiTabSetup.setupUi(tabSetupW);
-  m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
   // this is a Qt widget, let Qt manage the pointer
-  m_tabROIW = new ImageROIViewQtWidget(m_ui.tabMain);
-  m_ui.tabMain->addTab(m_tabROIW, QString("ROI etc."));
+  m_tabROIWidget = new TomographyROIViewQtWidget(m_ui.tabMain);
+  m_ui.tabMain->addTab(m_tabROIWidget, QString("ROI etc."));
 
   QWidget *tabFiltersW = new QWidget();
   m_uiTabFilters.setupUi(tabFiltersW);
@@ -205,9 +202,9 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // basic UI setup
   doSetupGeneralWidgets();
   doSetupSectionSystemSettings();
-  doSetupSectionSetup();
   doSetupSectionRun();
   doSetupSectionFilters();
+  doSetupSectionRoi();
 
   // extra / experimental tabs:
   doSetupSectionVisualize();
@@ -223,6 +220,32 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
 }
 
+void TomographyIfaceViewQtGUI::doSetupSectionRoi() {
+  // connect the auto CoR button to run an external python process
+  connect(m_tabROIWidget,
+          SIGNAL(findCORClickedSignal(std::string, std::vector<std::string>)),
+          this,
+          SLOT(runExternalProcess(std::string, std::vector<std::string>)));
+  connect(this, SIGNAL(externalProcessFinished(QString)), m_tabROIWidget,
+          SLOT(readCoRFromProcessOutput(QString)));
+
+  connect(m_tabROIWidget, SIGNAL(imageOrStackLoadedSignal(std::string)), this,
+          SLOT(imageOrStackLoadedInRoi(std::string)));
+}
+
+void TomographyIfaceViewQtGUI::imageOrStackLoadedInRoi(
+    const std::string &path) {
+  m_pathsConfig.updatePathSamples(path);
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
+}
+
+void TomographyIfaceViewQtGUI::runExternalProcess(
+    const std::string &exec, const std::vector<std::string> &args) {
+  m_extExec = exec;
+  m_extArgs = args;
+  m_presenter->notify(ITomographyIfacePresenter::RunExternalProcess);
+}
+
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
 
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
@@ -232,59 +255,6 @@ void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
     connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
             SLOT(close()));
   }
-}
-
-void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
-  // populate setup values from defaults
-  const TomoPathsConfig cfg = currentPathsConfig();
-  m_uiTabSetup.lineEdit_path_samples->setText(
-      QString::fromStdString(cfg.pathSamples()));
-  m_uiTabSetup.lineEdit_path_flats->setText(
-      QString::fromStdString(cfg.pathOpenBeam()));
-  m_uiTabSetup.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
-  m_uiTabSetup.lineEdit_path_darks->setText(
-      QString::fromStdString(cfg.pathDarks()));
-  m_uiTabSetup.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
-
-  m_uiTabSetup.lineEdit_SCARF_password->setText("");
-  m_uiTabSetup.pushButton_SCARF_login->setEnabled(true);
-  m_uiTabSetup.pushButton_SCARF_logout->setEnabled(false);
-
-  // check boxes to enable search for dark and flat images
-  connect(m_uiTabSetup.checkBox_path_flats, SIGNAL(stateChanged(int)), this,
-          SLOT(flatsPathCheckStatusChanged(int)));
-  connect(m_uiTabSetup.checkBox_path_darks, SIGNAL(stateChanged(int)), this,
-          SLOT(darksPathCheckStatusChanged(int)));
-
-  // 'browse' buttons for image paths
-  connect(m_uiTabSetup.pushButton_samples_dir, SIGNAL(released()), this,
-          SLOT(samplesPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_flats_dir, SIGNAL(released()), this,
-          SLOT(flatsPathBrowseClicked()));
-  connect(m_uiTabSetup.pushButton_darks_dir, SIGNAL(released()), this,
-          SLOT(darksPathBrowseClicked()));
-
-  // also manage the edit fields when edited non-programmatically
-  connect(m_uiTabSetup.lineEdit_path_samples, SIGNAL(editingFinished()), this,
-          SLOT(samplesPathEditedByUser()));
-  connect(m_uiTabSetup.lineEdit_path_flats, SIGNAL(editingFinished()), this,
-          SLOT(flatsPathEditedByUser()));
-
-  connect(m_uiTabSetup.lineEdit_path_darks, SIGNAL(editingFinished()), this,
-          SLOT(darksPathEditedByUser()));
-
-  m_uiTabSetup.lineEdit_path_samples->setText(
-      QString::fromStdString(m_pathsConfig.pathSamples()));
-  m_uiTabSetup.lineEdit_path_flats->setText(
-      QString::fromStdString(m_pathsConfig.pathOpenBeam()));
-  m_uiTabSetup.lineEdit_path_darks->setText(
-      QString::fromStdString(m_pathsConfig.pathDarks()));
-
-  // log in/out
-  connect(m_uiTabSetup.pushButton_SCARF_login, SIGNAL(released()), this,
-          SLOT(SCARFLoginClicked()));
-  connect(m_uiTabSetup.pushButton_SCARF_logout, SIGNAL(released()), this,
-          SLOT(SCARFLogoutClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionRun() {
@@ -303,8 +273,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   sizes[1] = 100;
   m_uiTabRun.splitter_run_jobs->setSizes(sizes);
 
-  m_uiTabRun.label_image_name->setText("none");
-
   updateCompResourceStatus(false);
 
   // enable by default, which will use default tools setups
@@ -316,8 +284,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   m_uiTabRun.pushButton_run_job_visualize->setEnabled(false);
 
   // Button signals
-  connect(m_uiTabRun.pushButton_browse_image, SIGNAL(released()), this,
-          SLOT(browseImageClicked()));
   connect(m_uiTabRun.pushButton_reconstruct, SIGNAL(released()), this,
           SLOT(reconstructClicked()));
   connect(m_uiTabRun.pushButton_run_tool_setup, SIGNAL(released()), this,
@@ -340,6 +306,57 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 
   connect(m_uiTabRun.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
           SLOT(runToolIndexChanged(int)));
+
+  // populate setup values from defaults
+  const TomoPathsConfig cfg = currentPathsConfig();
+  m_uiTabRun.lineEdit_path_samples->setText(
+      QString::fromStdString(cfg.pathSamples()));
+  m_uiTabRun.lineEdit_path_flats->setText(
+      QString::fromStdString(cfg.pathOpenBeam()));
+  m_uiTabRun.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
+  m_uiTabRun.lineEdit_path_darks->setText(
+      QString::fromStdString(cfg.pathDarks()));
+  m_uiTabRun.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
+
+  m_uiTabRun.lineEdit_SCARF_password->setText("");
+  m_uiTabRun.pushButton_SCARF_login->setEnabled(true);
+  m_uiTabRun.pushButton_SCARF_logout->setEnabled(false);
+
+  // check boxes to enable search for dark and flat images
+  connect(m_uiTabRun.checkBox_path_flats, SIGNAL(stateChanged(int)), this,
+          SLOT(flatsPathCheckStatusChanged(int)));
+  connect(m_uiTabRun.checkBox_path_darks, SIGNAL(stateChanged(int)), this,
+          SLOT(darksPathCheckStatusChanged(int)));
+
+  // 'browse' buttons for image paths
+  connect(m_uiTabRun.pushButton_samples_dir, SIGNAL(released()), this,
+          SLOT(samplesPathBrowseClicked()));
+  connect(m_uiTabRun.pushButton_flats_dir, SIGNAL(released()), this,
+          SLOT(flatsPathBrowseClicked()));
+  connect(m_uiTabRun.pushButton_darks_dir, SIGNAL(released()), this,
+          SLOT(darksPathBrowseClicked()));
+
+  // also manage the edit fields when edited non-programmatically
+  connect(m_uiTabRun.lineEdit_path_samples, SIGNAL(editingFinished()), this,
+          SLOT(samplesPathEditedByUser()));
+  connect(m_uiTabRun.lineEdit_path_flats, SIGNAL(editingFinished()), this,
+          SLOT(flatsPathEditedByUser()));
+
+  connect(m_uiTabRun.lineEdit_path_darks, SIGNAL(editingFinished()), this,
+          SLOT(darksPathEditedByUser()));
+
+  m_uiTabRun.lineEdit_path_samples->setText(
+      QString::fromStdString(m_pathsConfig.pathSamples()));
+  m_uiTabRun.lineEdit_path_flats->setText(
+      QString::fromStdString(m_pathsConfig.pathOpenBeam()));
+  m_uiTabRun.lineEdit_path_darks->setText(
+      QString::fromStdString(m_pathsConfig.pathDarks()));
+
+  // log in/out
+  connect(m_uiTabRun.pushButton_SCARF_login, SIGNAL(released()), this,
+          SLOT(SCARFLoginClicked()));
+  connect(m_uiTabRun.pushButton_SCARF_logout, SIGNAL(released()), this,
+          SLOT(SCARFLogoutClicked()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionFilters() {
@@ -534,7 +551,7 @@ void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
   buttons.push_back(m_uiTabRun.pushButton_run_refresh);
   buttons.push_back(m_uiTabRun.pushButton_run_job_cancel);
   // no visualization yet, need vsi etc. support
-  // buttons.push_back(m_uiTabSetup.pushButton_run_job_visualize);
+  // buttons.push_back(m_uiTabRun.pushButton_run_job_visualize);
   buttons.push_back(m_uiTabRun.pushButton_reconstruct);
 
   for (size_t i = 0; i < buttons.size(); ++i) {
@@ -699,7 +716,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
                              .toString()
                              .toStdString();
 
-  m_uiTabSetup.lineEdit_SCARF_username->setText(
+  m_uiTabRun.lineEdit_SCARF_username->setText(
       qs.value("SCARF-remote-username",
                QString::fromStdString(
                    Mantid::Kernel::ConfigService::Instance().getUsername()))
@@ -871,7 +888,7 @@ void TomographyIfaceViewQtGUI::saveSettings() const {
               QString::fromStdString(m_setupExperimentRef));
 
   qs.setValue("SCARF-remote-username",
-              m_uiTabSetup.lineEdit_SCARF_username->text());
+              m_uiTabRun.lineEdit_SCARF_username->text());
 
   // Save all the SystemSettings via a Qt stream
   QByteArray sysSettings;
@@ -943,8 +960,8 @@ void TomographyIfaceViewQtGUI::enableRunReconstruct(bool on) {
  * @param loggedIn Status (true when logged in)
  */
 void TomographyIfaceViewQtGUI::updateLoginControls(bool loggedIn) {
-  m_uiTabSetup.pushButton_SCARF_login->setEnabled(!loggedIn);
-  m_uiTabSetup.pushButton_SCARF_logout->setEnabled(loggedIn);
+  m_uiTabRun.pushButton_SCARF_login->setEnabled(!loggedIn);
+  m_uiTabRun.pushButton_SCARF_logout->setEnabled(loggedIn);
 
   enableLoggedActions(loggedIn);
   updateCompResourceStatus(loggedIn);
@@ -980,14 +997,14 @@ void TomographyIfaceViewQtGUI::toolSetupClicked() {
  * sample/flats/dark input images.
  */
 void TomographyIfaceViewQtGUI::updatePathsConfig(const TomoPathsConfig &cfg) {
-  m_uiTabSetup.lineEdit_path_samples->setText(
+  m_uiTabRun.lineEdit_path_samples->setText(
       QString::fromStdString(cfg.pathSamples()));
-  m_uiTabSetup.lineEdit_path_flats->setText(
+  m_uiTabRun.lineEdit_path_flats->setText(
       QString::fromStdString(cfg.pathOpenBeam()));
-  m_uiTabSetup.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
-  m_uiTabSetup.lineEdit_path_darks->setText(
+  m_uiTabRun.checkBox_path_flats->setChecked(cfg.m_pathOpenBeamEnabled);
+  m_uiTabRun.lineEdit_path_darks->setText(
       QString::fromStdString(cfg.pathDarks()));
-  m_uiTabSetup.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
+  m_uiTabRun.checkBox_path_darks->setChecked(cfg.m_pathDarkEnabled);
   m_pathsConfig = cfg;
 }
 
@@ -1119,38 +1136,6 @@ void TomographyIfaceViewQtGUI::jobTableRefreshClicked() {
 }
 
 /**
- * Slot - user clicks the 'open/browse image' or similar button.
- */
-void TomographyIfaceViewQtGUI::browseImageClicked() {
-  // get path
-  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
-                            "(*.fits *.fit *.tiff *.tif *.png);;"
-                            "FITS, Flexible Image Transport System images "
-                            "(*.fits *.fit);;"
-                            "TIFF, Tagged Image File Format "
-                            "(*.tif *.tiff);;"
-                            "PNG, Portable Network Graphics "
-                            "(*.png);;"
-                            "Other extensions/all files (*)");
-  // Note that this could be done using UserSubWindow::openFileDialog(),
-  // but that method doesn't give much control over the text used for the
-  // allowed extensions.
-  QString prevPath =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString path(QFileDialog::getOpenFileName(this, tr("Open image file"),
-                                            prevPath, fitsStr));
-  if (!path.isEmpty()) {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
-        QFileInfo(path).absoluteDir().path());
-  } else {
-    return;
-  }
-
-  m_imgPath = path.toStdString();
-  m_presenter->notify(ITomographyIfacePresenter::ViewImg);
-}
-
-/**
  * Update the job status and general info table/tree from the info
  * stored in this class' data members, which ideally should have
  * information from a recent query to the server.
@@ -1238,7 +1223,7 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
 std::string TomographyIfaceViewQtGUI::getUsername() const {
   if (g_SCARFName ==
       m_uiTabRun.comboBox_run_compute_resource->currentText().toStdString())
-    return m_uiTabSetup.lineEdit_SCARF_username->text().toStdString();
+    return m_uiTabRun.lineEdit_SCARF_username->text().toStdString();
   else
     return "invalid";
 }
@@ -1251,48 +1236,33 @@ std::string TomographyIfaceViewQtGUI::getUsername() const {
 std::string TomographyIfaceViewQtGUI::getPassword() const {
   if (g_SCARFName ==
       m_uiTabRun.comboBox_run_compute_resource->currentText().toStdString())
-    return m_uiTabSetup.lineEdit_SCARF_password->text().toStdString();
+    return m_uiTabRun.lineEdit_SCARF_password->text().toStdString();
   else
     return "none";
 }
 
 void TomographyIfaceViewQtGUI::flatsPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
-  // Alternative behavior, whereby disabling would also imply clearing:
-  // TODOVIEW: not totally clear at the moment what users will prefer
-  // if (!enable) {
-  //   m_pathsConfig.updatePathOpenBeam("");
-  // } else {
-  //   m_uiTabSetup.lineEdit_path_flats->setText(
-  //       QString::fromStdString(m_pathsConfig));
-  // }
+  bool enable(0 != status);
 
   // grab new value and enable/disable related widgets
   m_pathsConfig.m_pathOpenBeamEnabled = enable;
-  m_uiTabSetup.lineEdit_path_flats->setEnabled(enable);
-  m_uiTabSetup.pushButton_flats_dir->setEnabled(enable);
+  m_uiTabRun.lineEdit_path_flats->setEnabled(enable);
+  m_uiTabRun.pushButton_flats_dir->setEnabled(enable);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darksPathCheckStatusChanged(int status) {
-  bool enable = 0 != status;
-  // Alternative behavior, whereby disabling would also imply clearing:
-  // TODOVIEW: not totally clear at the moment what users will prefer
-  // if (!enable) {
-  //   m_pathsConfig.updatePathDarks("");
-  // } else {
-  //   m_uiTabSetup.lineEdit_path_darks->setText(
-  //       QString::fromStdString(m_pathsConfig));
-  // }
+  bool enable(0 != status);
+
   m_pathsConfig.m_pathDarkEnabled = enable;
-  m_uiTabSetup.lineEdit_path_darks->setEnabled(enable);
-  m_uiTabSetup.pushButton_darks_dir->setEnabled(enable);
+  m_uiTabRun.lineEdit_path_darks->setEnabled(enable);
+  m_uiTabRun.pushButton_darks_dir->setEnabled(enable);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::samplesPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_samples, str);
+  processPathBrowseClick(m_uiTabRun.lineEdit_path_samples, str);
   if (!str.empty()) {
     m_pathsConfig.updatePathSamples(str);
     m_presenter->notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
@@ -1301,44 +1271,42 @@ void TomographyIfaceViewQtGUI::samplesPathBrowseClicked() {
 
 void TomographyIfaceViewQtGUI::flatsPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_flats, str);
+  processPathBrowseClick(m_uiTabRun.lineEdit_path_flats, str);
   if (!str.empty()) {
     m_pathsConfig.updatePathOpenBeam(
-        str, m_uiTabSetup.checkBox_path_flats->isChecked());
+        str, m_uiTabRun.checkBox_path_flats->isChecked());
     m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
   }
 }
 
 void TomographyIfaceViewQtGUI::darksPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_uiTabSetup.lineEdit_path_darks, str);
+  processPathBrowseClick(m_uiTabRun.lineEdit_path_darks, str);
   if (!str.empty()) {
-    m_pathsConfig.updatePathDarks(
-        str, m_uiTabSetup.checkBox_path_darks->isChecked());
+    m_pathsConfig.updatePathDarks(str,
+                                  m_uiTabRun.checkBox_path_darks->isChecked());
     m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
   }
 }
 
 void TomographyIfaceViewQtGUI::samplesPathEditedByUser() {
   const std::string path =
-      m_uiTabSetup.lineEdit_path_samples->text().toStdString();
+      m_uiTabRun.lineEdit_path_samples->text().toStdString();
   m_pathsConfig.updatePathSamples(path);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsEditedByUser);
 }
 
 void TomographyIfaceViewQtGUI::flatsPathEditedByUser() {
-  const std::string path =
-      m_uiTabSetup.lineEdit_path_flats->text().toStdString();
-  m_pathsConfig.updatePathOpenBeam(
-      path, m_uiTabSetup.checkBox_path_flats->isChecked());
+  const std::string path = m_uiTabRun.lineEdit_path_flats->text().toStdString();
+  m_pathsConfig.updatePathOpenBeam(path,
+                                   m_uiTabRun.checkBox_path_flats->isChecked());
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darksPathEditedByUser() {
-  const std::string path =
-      m_uiTabSetup.lineEdit_path_darks->text().toStdString();
+  const std::string path = m_uiTabRun.lineEdit_path_darks->text().toStdString();
   m_pathsConfig.updatePathDarks(path,
-                                m_uiTabSetup.checkBox_path_flats->isChecked());
+                                m_uiTabRun.checkBox_path_flats->isChecked());
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
@@ -1357,11 +1325,13 @@ void TomographyIfaceViewQtGUI::browseLocalReconScriptsDirClicked() {
                      "Select location of scripts (scripts subdirectory/folder "
                      "in the Mantid installation",
                      false);
+  systemSettingsEdited();
 }
 
 void TomographyIfaceViewQtGUI::browseLocalExternalInterpreterClicked() {
   checkUserBrowseFile(m_uiTabSystemSettings.lineEdit_local_external_interpreter,
                       "Select interpreter executable", false);
+  systemSettingsEdited();
 }
 
 /**
@@ -1396,123 +1366,6 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
 
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   }
-}
-
-void TomographyIfaceViewQtGUI::showImage(const std::string &path) {
-  QString qpath = QString::fromStdString(path);
-  QImage rawImg(qpath);
-  QPainter painter;
-  QPixmap pix(rawImg.width(), rawImg.height());
-  painter.begin(&pix);
-  painter.drawImage(0, 0, rawImg);
-  painter.end();
-  m_uiTabRun.label_image->setPixmap(pix);
-  m_uiTabRun.label_image->show();
-
-  m_uiTabRun.label_image_name->setText(qpath);
-}
-
-void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
-  // This draw an image on screen using Qt's QPixmap and QImage.
-  // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
-  const size_t MAXDIM = 2048 * 16;
-  size_t width;
-  try {
-    width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
-    // TODOVIEW: add a settings option for this (like max mem allocation for
-    // images)?
-    if (width >= MAXDIM)
-      width = MAXDIM;
-  } catch (std::exception &e) {
-    userError("Cannot load image", "There was a problem while trying to "
-                                   "find the width of the image: " +
-                                       std::string(e.what()));
-    return;
-  }
-
-  size_t height;
-  try {
-    height =
-        boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
-    if (height >= MAXDIM)
-      height = MAXDIM;
-  } catch (std::exception &e) {
-    userError("Cannot load image", "There was a problem while trying to "
-                                   "find the height of the image: " +
-                                       std::string(e.what()));
-    return;
-  }
-
-  std::string name;
-  try {
-    name = ws->run().getLogData("run_title")->value();
-    m_logMsgs.emplace_back(" Visualizing image: " + name);
-    m_presenter->notify(ITomographyIfacePresenter::LogMsg);
-    m_logMsgs.clear();
-  } catch (std::exception &e) {
-    userWarning("Cannot load image information",
-                "There was a problem while "
-                " trying to find the name of the image: " +
-                    std::string(e.what()));
-  }
-
-  // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
-  if (height != ws->getNumberHistograms() || width != ws->blocksize()) {
-    userError("Image dimensions do not match in the input image workspace",
-              "Could not load the expected "
-              "number of rows and columns.");
-    return;
-  }
-  // find min and max to scale pixel values
-  double min = std::numeric_limits<double>::max(),
-         max = std::numeric_limits<double>::min();
-  for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
-      const double &v = ws->readY(i)[j];
-      if (v < min)
-        min = v;
-      if (v > max)
-        max = v;
-    }
-  }
-  if (min >= max) {
-    userWarning("Empty image!",
-                "The image could be loaded but it contains "
-                "effectively no information, all pixels have the same value.");
-    // black picture
-    QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-    pix.fill(QColor(0, 0, 0));
-    m_uiTabRun.label_image->setPixmap(pix);
-    m_uiTabRun.label_image->show();
-    return;
-  }
-
-  // load / transfer image into a QImage
-  QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
-                QImage::Format_RGB32);
-  const double max_min = max - min;
-  const double scaleFactor = 255.0 / max_min;
-  for (size_t yi = 0; yi < width; ++yi) {
-    for (size_t xi = 0; xi < width; ++xi) {
-      const double &v = ws->readY(yi)[xi];
-      // color the range min-max in gray scale. To apply different color
-      // maps you'd need to use rawImg.setColorTable() or similar.
-      const int scaled = static_cast<int>(scaleFactor * (v - min));
-      QRgb vRgb = qRgb(scaled, scaled, scaled);
-      rawImg.setPixel(static_cast<int>(xi), static_cast<int>(yi), vRgb);
-    }
-  }
-
-  // paint and show image
-  QPainter painter;
-  QPixmap pix(static_cast<int>(width), static_cast<int>(height));
-  painter.begin(&pix);
-  painter.drawImage(0, 0, rawImg);
-  painter.end();
-  m_uiTabRun.label_image->setPixmap(pix);
-  m_uiTabRun.label_image->show();
-
-  m_uiTabRun.label_image_name->setText(QString::fromStdString(name));
 }
 
 TomoReconFiltersSettings TomographyIfaceViewQtGUI::prePostProcSettings() const {
@@ -1659,8 +1512,13 @@ TomographyIfaceViewQtGUI::grabSystemSettingsFromUser() const {
   setts.m_local.m_reconScriptsPath =
       m_uiTabSystemSettings.lineEdit_local_recon_scripts->text().toStdString();
 
+  setts.m_local.m_externalInterpreterPath =
+      m_uiTabSystemSettings.lineEdit_local_external_interpreter->text()
+          .toStdString();
+
   setts.m_experimentReference =
       m_uiTabRun.lineEdit_experiment_reference->text().toStdString();
+
   return setts;
 }
 
@@ -1912,17 +1770,31 @@ void TomographyIfaceViewQtGUI::systemSettingsNumericEdited() {
 }
 
 void TomographyIfaceViewQtGUI::resetSystemSettings() {
-  auto reply = QMessageBox::question(
-      this, "Reset Confirmation", "Are you sure you want to <br><strong>RESET "
-                                  "ALL</strong> System settings?<br>This "
-                                  "action cannot be undone!",
-      QMessageBox::Yes | QMessageBox::No);
+  const auto title = "Reset Confirmation";
+  const auto body = "Are you sure you want to <br><strong>RESET "
+                    "ALL</strong> System settings?<br>This "
+                    "action cannot be undone!";
   // default constructors with factory defaults
-  if (reply == QMessageBox::Yes) {
+  if (userConfirmation(title, body)) {
     // From factory defaults
     TomoSystemSettings defaults;
     updateSystemSettingsTabFields(defaults);
   }
+}
+
+/**
+ * Prompts the user for confirmation with a yes/no dialogue.
+ * The body can use HTML formatting.
+ *
+ * @param title The title that the message has
+ * @param body The body that the message has. This CAN use HTML formatting
+ */
+bool TomographyIfaceViewQtGUI::userConfirmation(const std::string &title,
+                                                const std::string &body) {
+  auto reply = QMessageBox::question(this, QString::fromStdString(title),
+                                     QString::fromStdString(body),
+                                     QMessageBox::Yes | QMessageBox::No);
+  return reply == QMessageBox::Yes;
 }
 
 /**
@@ -2013,6 +1885,10 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
 void TomographyIfaceViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
+}
+
+void TomographyIfaceViewQtGUI::emitExternalProcessFinished(const QString &str) {
+  emit externalProcessFinished(str);
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt

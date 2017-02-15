@@ -43,9 +43,9 @@ Usage
   maxIt = 500
   
   # Build resolution workspace (normally done by the Convfit tab when files load)
-  AppendSpectra(InputWorkspace1=resolution.getName(), InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")
+  AppendSpectra(InputWorkspace1=resolution.name(), InputWorkspace2=resolution.name(), OutputWorkspace="__ConvFit_Resolution")
   for i in range(1, sample.getNumberHistograms()):
-    AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")  
+    AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=resolution.name(), OutputWorkspace="__ConvFit_Resolution")  
   
   # Run algorithm
   result_ws = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
@@ -68,21 +68,21 @@ Output:
   
 .. testoutput:: ConvolutionFitSequentialExample
   :options: +NORMALIZE_WHITESPACE
-  
+
   Result has 2 Spectra
   
-  Amplitude 0: 4.293
+  Amplitude 0: 4.314
   Amplitude 1: 4.179
   Amplitude 2: 3.979
 
   X axis at 0: 0.52531
   X axis at 1: 0.72917
   X axis at 2: 0.92340
-
-  Amplitude Err 0: 0.00465
+  
+  Amplitude Err 0: 0.00460
   Amplitude Err 1: 0.00464
   Amplitude Err 2: 0.00504
-
+  
 .. categories::
 
 .. sourcelink::

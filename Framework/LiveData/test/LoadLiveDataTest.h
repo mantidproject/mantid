@@ -322,7 +322,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -342,7 +342,7 @@ public:
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -362,7 +362,7 @@ public:
         ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -385,7 +385,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -407,7 +407,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -429,7 +429,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -452,7 +452,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -474,7 +474,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);
@@ -496,7 +496,7 @@ public:
                                ILiveListener_sptr(new TestGroupDataListener));
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberOfEntries(), 3);
-    TS_ASSERT_EQUALS(ws->name(), "fake");
+    TS_ASSERT_EQUALS(ws->getName(), "fake");
     MatrixWorkspace_sptr mws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("fake_2");
     TS_ASSERT(mws);

@@ -7,8 +7,6 @@
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
-Mantid::DataHandling::LoadHelper loadHelper;
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -61,7 +59,7 @@ private:
   void exec() override;
 
   void initWorkspace(NeXus::NXEntry &entry,
-                     std::vector<std::vector<int>> monitorsData, std::string &filename);
+                     std::vector<std::vector<int>> monitorsData, const std::string &filename);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
@@ -85,7 +83,7 @@ private:
   double m_wavelength{0};
   double m_channelWidth{0};
   std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro"};
-  LoadHelper m_loader;
+  Mantid::DataHandling::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

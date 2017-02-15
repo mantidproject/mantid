@@ -200,6 +200,12 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_applyToView->setToolTip("Apply current mask to the view.");
   connect(m_applyToView, SIGNAL(clicked()), this, SLOT(applyMaskToView()));
 
+  m_saveShapesToTable = new QPushButton("Save Shapes to Table");
+  m_saveShapesToTable->setToolTip(
+      "Store the current Mask/ROI/Group shapes as a table");
+  connect(m_saveShapesToTable, SIGNAL(clicked()), this,
+          SLOT(saveShapesToTable()));
+
   m_clearAll = new QPushButton("Clear All");
   m_clearAll->setToolTip(
       "Clear all masking that have not been applied to the data.");
@@ -313,8 +319,9 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   QGroupBox *box = new QGroupBox("View");
   QGridLayout *buttons = new QGridLayout();
   buttons->addWidget(m_applyToView, 0, 0, 1, 2);
-  buttons->addWidget(m_saveButton, 1, 0);
-  buttons->addWidget(m_clearAll, 1, 1);
+  buttons->addWidget(m_saveShapesToTable, 1, 0, 1, 2);
+  buttons->addWidget(m_saveButton, 2, 0);
+  buttons->addWidget(m_clearAll, 2, 1);
 
   box->setLayout(buttons);
   layout->addWidget(box);
@@ -324,6 +331,9 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   buttons->addWidget(m_applyToData, 0, 0);
   box->setLayout(buttons);
   layout->addWidget(box);
+
+  connect(m_instrWidget, SIGNAL(maskedWorkspaceOverlayed()), this,
+          SLOT(enableApplyButtons()));
 }
 
 /**
@@ -576,6 +586,13 @@ void InstrumentWidgetMaskTab::setProperties() {
   }
 
   shapeChanged();
+}
+
+/**
+ * Save shapes to a table workspace
+ */
+void InstrumentWidgetMaskTab::saveShapesToTable() const {
+  m_instrWidget->getSurface()->saveShapesToTableWorkspace();
 }
 
 void InstrumentWidgetMaskTab::doubleChanged(QtProperty *prop) {
@@ -858,7 +875,7 @@ void InstrumentWidgetMaskTab::saveMaskingToFile(bool invertMask) {
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -886,12 +903,12 @@ void InstrumentWidgetMaskTab::saveMaskingToCalFile(bool invertMask) {
       Mantid::API::IAlgorithm_sptr alg =
           Mantid::API::AlgorithmManager::Instance().create(
               "MaskWorkspaceToCalFile", -1);
-      alg->setPropertyValue("InputWorkspace", outputWS->name());
+      alg->setPropertyValue("InputWorkspace", outputWS->getName());
       alg->setPropertyValue("OutputFile", fileName.toStdString());
       alg->setProperty("Invert", false);
       alg->execute();
     }
-    Mantid::API::AnalysisDataService::Instance().remove(outputWS->name());
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
@@ -915,22 +932,6 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   // Apply the view (no workspace) to a buffered mask workspace
   Mantid::API::MatrixWorkspace_sptr inputWS =
       m_instrWidget->getInstrumentActor()->getMaskMatrixWorkspace();
-
-  /*
-  Mantid::Geometry::Instrument_const_sptr instrument =
-  outputMaskWS->getInstrument();
-  std::vector<int> detids = instrument->getDetectorIDs();
-  size_t maskedcount = 0;
-  for (size_t i = 0; i < detids.size(); ++i)
-  {
-  int detid = detids[i];
-  Mantid::Geometry::IDetector_const_sptr det = instrument->getDetector(detid);
-  if (det->isMasked())
-  ++ maskedcount;
-  }
-  std::cout << "There are " << maskedcount << " detectors out of total " <<
-  detids.size() << " detectors.\n";
-  */
 
   // Extract from MaskWorkspace to a TableWorkspace
   double xmin = m_instrWidget->getInstrumentActor()->minBinValue();
@@ -1045,6 +1046,7 @@ void InstrumentWidgetMaskTab::enableApplyButtons() {
     m_applyToData->setEnabled(false);
     m_applyToView->setEnabled(false);
   }
+  m_saveShapesToTable->setEnabled(hasMaskShapes);
   m_saveButton->setEnabled(hasDetectorMask && (!enableBinMasking));
   m_clearAll->setEnabled(hasMask);
   setActivity();
@@ -1268,7 +1270,7 @@ InstrumentWidgetMaskTab::loadMask(const std::string &fileName) {
   auto workspace = actor->getWorkspace();
   auto instrument = workspace->getInstrument();
   auto instrumentName = instrument->getName();
-  auto tempName = "__" + workspace->name() + "MaskView";
+  auto tempName = "__" + workspace->getName() + "MaskView";
 
   // load the mask from the project folder
   try {

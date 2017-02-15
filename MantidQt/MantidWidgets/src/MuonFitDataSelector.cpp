@@ -26,7 +26,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent)
   // Disable "Browse" button - use case is that first run will always be the one
   // selected on front tab. User will type in the runs they want rather than
   // using the Browse button. (If they want to "Browse" they can use front tab).
-  m_ui.runs->doButtonOpt(MWRunFiles::ButtonOpts::None);
+  m_ui.runs->doButtonOpt(API::MWRunFiles::ButtonOpts::None);
 }
 
 /**
@@ -42,7 +42,8 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber,
                                          size_t numPeriods,
                                          const QStringList &groups)
     : MuonFitDataSelector(parent) {
-  this->setWorkspaceDetails(QString::number(runNumber), instName);
+  this->setWorkspaceDetails(QString::number(runNumber), instName,
+                            boost::optional<QString>{});
   this->setNumPeriods(numPeriods);
   this->setAvailableGroups(groups);
 }
@@ -206,9 +207,13 @@ void MuonFitDataSelector::setUpValidators() {
  * Set up run finder with initial run number and instrument
  * @param runNumbers :: [input] Run numbers from loaded workspace
  * @param instName :: [input] Instrument name from loaded workspace
+ * @param filePath :: [input] Optional path to the data file - this is important
+ * in the case of "load current run" when the file may have a special name like
+ * MUSRauto_E.tmp
  */
-void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
-                                              const QString &instName) {
+void MuonFitDataSelector::setWorkspaceDetails(
+    const QString &runNumbers, const QString &instName,
+    const boost::optional<QString> &filePath) {
   // Set the file finder to the correct instrument (not Mantid's default)
   m_ui.runs->setInstrumentOverride(instName);
 
@@ -224,7 +229,12 @@ void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
   // Set initial run to be run number of the workspace loaded in Home tab
   // and search for filenames. Use busy cursor until search finished.
   setBusyState();
-  m_ui.runs->setFileTextWithSearch(runs);
+  if (filePath) { // load current run: use special file path
+    m_ui.runs->setUserInput(filePath.get());
+    m_ui.runs->setText(runs);
+  } else { // default
+    m_ui.runs->setFileTextWithSearch(runs);
+  }
 }
 
 /**
@@ -232,8 +242,9 @@ void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers,
  * Defaults copy those previously used in muon fit property browser
  */
 void MuonFitDataSelector::setDefaultValues() {
-  m_ui.lblStart->setText(QString("Start (%1s)").arg(QChar(0x03BC)));
-  m_ui.lblEnd->setText(QString("End (%1s)").arg(QChar(0x03BC)));
+  const QChar muMicro{0x03BC}; // mu in Unicode
+  m_ui.lblStart->setText(QString("Start (%1s)").arg(muMicro));
+  m_ui.lblEnd->setText(QString("End (%1s)").arg(muMicro));
   this->setStartTime(0.0);
   this->setEndTime(0.0);
   setPeriodCombination(false);

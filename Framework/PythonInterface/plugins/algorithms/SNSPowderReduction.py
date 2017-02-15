@@ -95,6 +95,8 @@ def allEventWorkspaces(*args):
 
 
 def getBasename(filename):
+    if type(filename) == list:
+        filename = filename[0]
     name = os.path.split(filename)[-1]
     for extension in EXTENSIONS_NXS:
         name = name.replace(extension, '')
@@ -267,7 +269,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
 
-        samRuns = self.getProperty("Filename").value
+        samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
 
         preserveEvents = self.getProperty("PreserveEvents").value
@@ -477,6 +479,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.setProperty(propertyName, wksp)
 
         return
+
+    def _getLinearizedFilenames(self, propertyName):
+        runnumbers = self.getProperty(propertyName).value
+        linearizedRuns = []
+        for item in runnumbers:
+            if type(item) == list:
+                linearizedRuns.extend(item)
+            else:
+                linearizedRuns.append(item)
+        return linearizedRuns
 
     def _determineInstrument(self, filename):
         name = getBasename(filename)
@@ -838,7 +850,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Do align and focus
             num_out_wksp = len(output_ws_name_list)
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 # Get workspace name
                 out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
@@ -973,24 +985,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Determine characterization
         if mtd.doesExist("characterizations"):
             # get the correct row of the table if table workspace 'charactersizations' exists
-
-            #pylint: disable=unused-variable
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
-                                                      Characterizations="characterizations",
-                                                      ReductionProperties="__snspowderreduction",
-                                                      BackRun=self.getProperty("BackgroundNumber").value,
-                                                      NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
+            api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
+                                             Characterizations="characterizations",
+                                             ReductionProperties="__snspowderreduction",
+                                             BackRun=self.getProperty("BackgroundNumber").value,
+                                             NormRun=self.getProperty("VanadiumNumber").value,
+                                             NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
         else:
-            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
-                                                      ReductionProperties="__snspowderreduction",
-                                                      BackRun=self.getProperty("BackgroundNumber").value,
-                                                      NormRun=self.getProperty("VanadiumNumber").value,
-                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
-                                                      FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
-                                                      WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
+            api.PDDetermineCharacterizations(InputWorkspace=wksp_name,
+                                             ReductionProperties="__snspowderreduction",
+                                             BackRun=self.getProperty("BackgroundNumber").value,
+                                             NormRun=self.getProperty("VanadiumNumber").value,
+                                             NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                             FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
+                                             WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value)
 
         # convert the result into a dict
         return PropertyManagerDataService.retrieve("__snspowderreduction")

@@ -24,7 +24,7 @@ public:
   DetectorInfoTest() {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -32,17 +32,18 @@ public:
         m_workspace, includeMonitors, startYNegative, instrumentName);
 
     std::set<int64_t> toMask{0, 3};
-    ParameterMap &pmap = m_workspace.instrumentParameters();
+    auto &detInfo = m_workspace.mutableDetectorInfo();
     for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i) {
       if (toMask.find(i) != toMask.end()) {
-        IDetector_const_sptr det = m_workspace.getDetector(i);
-        pmap.addBool(det.get(), "masked", true);
+        detInfo.setMasked(i, true);
       }
     }
 
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins,
-                                 numberOfBins - 1);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
+                                       numberOfBins);
   }
+
+  void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }
 
   void test_sourcePosition() {
     TS_ASSERT_EQUALS(m_workspace.detectorInfo().sourcePosition(),
@@ -177,6 +178,20 @@ public:
     TS_ASSERT_EQUALS(detectorInfo.rotation(4), Quat(1.0, 0.0, 0.0, 0.0));
   }
 
+  void test_setMasked() {
+    auto &detectorInfo = m_workspace.mutableDetectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    detectorInfo.setMasked(0, false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), false);
+    detectorInfo.setMasked(0, true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(0), true);
+    // Make sure no other detectors are affected
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(1), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(2), false);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(3), true);
+    TS_ASSERT_EQUALS(detectorInfo.isMasked(4), false);
+  }
+
   void test_setRotation() {
     V3D e3{0, 0, 1};
     Quat r3(90.0, e3);
@@ -271,7 +286,7 @@ public:
     WorkspaceTester workspace;
     int32_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     for (int32_t i = 0; i < numberOfHistograms; ++i)
       workspace.getSpectrum(i)
           .setSpectrumNo(static_cast<int32_t>(numberOfHistograms) - i);
@@ -294,6 +309,22 @@ public:
     TS_ASSERT_EQUALS(ids, sorted_ids);
   }
 
+  void test_assignment() {
+    auto ws1 = makeWorkspace(2);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS_NOTHING(ws2->mutableDetectorInfo() = ws1->detectorInfo());
+    // TODO Beamline::DetectorInfo is currently not containing data, so there is
+    // nothing we can check here. Once the class is getting populated add more
+    // checks here.
+  }
+
+  void test_assignment_mismatch() {
+    auto ws1 = makeWorkspace(1);
+    auto ws2 = makeWorkspace(2);
+    TS_ASSERT_THROWS(ws2->mutableDetectorInfo() = ws1->detectorInfo(),
+                     std::runtime_error);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceNoInstrument;
@@ -302,15 +333,17 @@ private:
     auto ws = Kernel::make_unique<WorkspaceTester>();
     ws->initialize(numSpectra, 1, 1);
     auto inst = boost::make_shared<Instrument>("TestInstrument");
-    ws->setInstrument(inst);
-    auto &pmap = ws->instrumentParameters();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       auto det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
+    }
+    ws->setInstrument(inst);
+    auto &detInfo = ws->mutableDetectorInfo();
+    for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
       ws->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
       if (i % 2 == 0)
-        pmap.addBool(det->getComponentID(), "masked", true);
+        detInfo.setMasked(i, true);
     }
     return std::move(ws);
   }
@@ -326,7 +359,7 @@ public:
   DetectorInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

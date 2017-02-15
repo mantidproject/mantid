@@ -148,14 +148,14 @@ public:
     TS_ASSERT_EQUALS(res->cell<std::string>(3, 0), "f0.Intensity");
 
     TS_ASSERT_DELTA(res->cell<double>(0, 1), -3.9865, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1881, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0011, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0218, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1883, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0007, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0200, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(0, 2), 0.1764, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5690, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5968, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.6126, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5684, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.6063, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.6687, 1e-4);
 
     TS_ASSERT_EQUALS(res->cell<std::string>(4, 0), "f1.Centre");
     TS_ASSERT_EQUALS(res->cell<std::string>(5, 0), "f1.Height");
@@ -165,12 +165,12 @@ public:
     TS_ASSERT_DELTA(res->cell<double>(4, 1), 3.0064, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 1), 2.1327, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(6, 1), 2.9908, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0196, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0188, 1e-4);
 
-    TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3234, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4756, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(6, 2), 1.2002, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 2), 3.7937, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3232, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4771, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(6, 2), 1.2008, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 2), 3.8074, 1e-4);
 
     AnalysisDataService::Instance().clear();
   }
@@ -206,13 +206,13 @@ public:
 
     TS_ASSERT_DELTA(res->cell<double>(0, 1), -4.0000, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(1, 1), 3.1878, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0012, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0207, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(2, 1), 2.0006, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 1), 10.0181, 1e-4);
 
     TS_ASSERT_DELTA(res->cell<double>(0, 2), 0.0000, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5609, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5797, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.4090, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(1, 2), 0.5605, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(2, 2), 0.5872, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(3, 2), 2.4510, 1e-4);
 
     TS_ASSERT_EQUALS(res->cell<std::string>(4, 0), "f1.Centre");
     TS_ASSERT_EQUALS(res->cell<std::string>(5, 0), "f1.Height");
@@ -221,12 +221,12 @@ public:
 
     TS_ASSERT_DELTA(res->cell<double>(4, 1), 3.0056, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(5, 1), 2.1320, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(6, 1), 2.9921, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0207, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(6, 1), 2.9915, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(7, 1), 10.0181, 1e-4);
 
-    TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3231, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4668, 1e-4);
-    TS_ASSERT_DELTA(res->cell<double>(6, 2), 0.6551, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(4, 2), 0.3229, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(5, 2), 0.4677, 1e-4);
+    TS_ASSERT_DELTA(res->cell<double>(6, 2), 0.6563, 1e-4);
     TS_ASSERT_DELTA(res->cell<double>(7, 2), 0.0000, 1e-4);
 
     AnalysisDataService::Instance().clear();

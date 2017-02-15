@@ -1,16 +1,17 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
@@ -112,7 +113,7 @@ void GroupDetectors2::exec() {
   const size_t numInHists = inputWS->getNumberHistograms();
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(
@@ -219,7 +220,7 @@ void GroupDetectors2::execEvent() {
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, true);
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by
@@ -271,11 +272,11 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
             groupingWS_sptr);
     if (groupWS) {
       g_log.debug() << "Extracting grouping from GroupingWorkspace ("
-                    << groupWS->name() << ")\n";
+                    << groupWS->getName() << ")\n";
       processGroupingWorkspace(groupWS, workspace, unUsedSpec);
     } else {
       g_log.debug() << "Extracting grouping from MatrixWorkspace ("
-                    << groupingWS_sptr->name() << ")\n";
+                    << groupingWS_sptr->getName() << ")\n";
       processMatrixWorkspace(groupingWS_sptr, workspace, unUsedSpec);
     }
     return;
@@ -586,8 +587,9 @@ void GroupDetectors2::processGroupingWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
@@ -599,30 +601,16 @@ void GroupDetectors2::processGroupingWorkspace(
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
-      // translate to detectors
-      std::vector<detid_t> det_ids;
-      try {
-        const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-        Geometry::DetectorGroup_const_sptr detGroup =
-            boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-        if (detGroup) {
-          det_ids = detGroup->getDetectorIDs();
-
-        } else {
-          det_ids.push_back(det->getID());
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
-        }
-      } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-        // the detector was not found - don't add it
       }
     }
   }
@@ -654,8 +642,9 @@ void GroupDetectors2::processMatrixWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
 
@@ -666,29 +655,19 @@ void GroupDetectors2::processMatrixWorkspace(
     // get a reference to the set
     std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
-    // translate to detectors
-    std::vector<detid_t> det_ids;
-    try {
-      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-
-      Geometry::DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-
-      if (detGroup) {
-        det_ids = detGroup->getDetectorIDs();
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
+    // If the detector was not found or was not in a group, then ignore it.
+    if (spectrumInfo.spectrumDefinition(i).size() > 1) {
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
       }
-    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-      // the detector was not found - don't add it
     }
   }
 
@@ -925,6 +904,7 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -942,7 +922,6 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
 
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    const auto &spectrumInfo = inputWS->spectrumInfo();
 
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
@@ -1021,6 +1000,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -1044,12 +1024,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
 
       // detectors to add to the output spectrum
       outEL.addDetectorIDs(fromEL.getDetectorIDs());
-      try {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
-        if (!det->isMasked())
-          ++nonMaskedSpectra;
-      } catch (Exception::NotFoundError &) {
-        // If a detector cannot be found, it cannot be masked
+      if (!isMaskedDetector(spectrumInfo, originalWI)) {
         ++nonMaskedSpectra;
       }
     }

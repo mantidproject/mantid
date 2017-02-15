@@ -20,7 +20,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="maskFileFinder">
+      <widget class="MantidQt::API::MWRunFiles" name="maskFileFinder">
        <property name="toolTip">
         <string>A file containing a list of spectra numbers which we aleady know should be masked</string>
        </property>
@@ -158,7 +158,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file">
+       <widget class="MantidQt::API::MWRunFiles" name="white_file">
         <property name="label" stdset="0">
          <string>Detector Van 1</string>
         </property>
@@ -228,7 +228,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file_2">
+       <widget class="MantidQt::API::MWRunFiles" name="white_file_2">
         <property name="label" stdset="0">
          <string>Detector Van 2</string>
         </property>
@@ -421,9 +421,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

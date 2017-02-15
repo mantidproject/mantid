@@ -5,11 +5,12 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <algorithm>
-#include <nexus/napi.h>
+//#include <algorithm>
+//#include <nexus/napi.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -46,18 +47,22 @@ int LoadILLReflectometry::confidence(
 
 //----------------------------------------------------------------------------------------------
 /** Validate inputs
- * please note, that this validation cannot be part of the confidence checking,
- * where it would
- * also make sense.
  * @returns a string map containing the error messages
   */
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
-
-  const std::string fileName = getProperty("Filename");
+  // check input file
+  const std::string fileName =
+      getProperty("Filename"); // might be property value
   if (!fileName.empty() &&
       (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
     result["Filename"] = "Instrument not supported.";
+  // check user defined angle
+  const double thetaUserDefined = getProperty("ThetaUserDefined");
+  const std::string angleOption = getProperty("Theta");
+  if (angleOption == "theta" && !thetaUserDefined)
+    result["ThetaUserDefined"] =
+        "User defined theta option requires an input value";
 
   return result;
 }
@@ -66,27 +71,38 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
-  declareProperty(Kernel::make_unique<FileProperty>("Filename", "", FileProperty::Load,
-                                            ".nxs", Direction::Input),
+  declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
+                                                    FileProperty::Load, ".nxs",
+                                                    Direction::Input),
                   "File path of the data file to load");
 
-  declareProperty(Kernel::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
+  declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  const std::vector<std::string> theta = {"san", "dan", "theta"};
+  const std::vector<std::string> theta{"san", "dan", "theta"};
   declareProperty(
-      "Theta", Kernel::make_unique<StringListValidator>(theta),
+      "Theta", "san", boost::make_shared<StringListValidator>(theta),
       "Optional angle for calculating the scattering angle.\n"
       "San (sample angle), dan (detector angle), theta (user defined angle)");
 
-  const std::vector<std::string> scattering = {"coherent", "incoherent"};
-  declareProperty("ScatteringType",
-                  Kernel::make_unique<StringListValidator>(scattering));
+  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  positiveDouble->setLower(1.0);
+  declareProperty(
+      "ThetaUserDefined", EMPTY_DBL(), positiveDouble,
+      "If theta was selected, the user must provide an angle in degree");
+
+  const std::vector<std::string> unit{"Wavelength", "TimeOfFlight"};
+  declareProperty("XUnit", "Wavelength",
+                  boost::make_shared<StringListValidator>(unit));
+
+  const std::vector<std::string> scattering{"coherent", "incoherent"};
+  declareProperty("ScatteringType", "incoherent",
+                  boost::make_shared<StringListValidator>(scattering));
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", "",
-                                            FileProperty::OptionalLoad, ".nxs",
-                                            Direction::Input),
+                                                    FileProperty::OptionalLoad,
+                                                    ".nxs", Direction::Input),
                   "File path of the direct beam file to load");
 }
 
@@ -119,14 +135,14 @@ void LoadILLReflectometry::runLoadInstrument() {
  */
 void LoadILLReflectometry::exec() {
   // retrieve filename
-  std::string filenameData = getPropertyValue("Filename");
+  const std::string filenameData{getPropertyValue("Filename")};
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
-  NXEntry firstEntry = dataRoot.openFirstEntry();
+  NXEntry firstEntry{dataRoot.openFirstEntry()};
 
   // load Monitor details: n. monitors x monitor contents
-  std::vector<std::vector<int>> monitorsData = loadMonitors(firstEntry);
+  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
 
   // load Data details (number of tubes, channels, etc)
   loadDataDetails(firstEntry);
@@ -170,12 +186,11 @@ void LoadILLReflectometry::exec() {
     }
   }
   g_log.debug() << "Channel width: " << m_channelWidth << '\n';
-
   g_log.debug("Loading data...");
   loadData(firstEntry, monitorsData, xVals);
-
-  // convert to wavelength using algorithm ConvertUnits
-  if (descriptor.pathExists("/entry0/monitor1/time_of_flight")) {
+  const std::string unit{getPropertyValue("XUnit")};
+  if (descriptor.pathExists("/entry0/monitor1/time_of_flight") &&
+      (unit == "Wavelength")) {
     auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
     convertToWavelength->initialize();
     convertToWavelength->setLogging(true);
@@ -184,13 +199,8 @@ void LoadILLReflectometry::exec() {
                                                            m_localWorkspace);
     convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
                                                            m_localWorkspace);
-    convertToWavelength->setPropertyValue("Target", "Wavelength");
-    convertToWavelength->setPropertyValue("EMode", "Elastic");
-    // convertToWavelength->execute();
+    convertToWavelength->execute();
   }
-
-  // eventually transpose workspace (histogram)
-
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
 }
@@ -222,7 +232,7 @@ void LoadILLReflectometry::setInstrumentName(
  */
 void LoadILLReflectometry::initWorkspace(
     NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData,
-    std::string &filename) {
+    const std::string &filename) {
 
   g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
   for (size_t i = 0; i < monitorsData.size(); ++i)
@@ -249,8 +259,8 @@ void LoadILLReflectometry::initWorkspace(
  */
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // read in the data
-  NXData dataGroup = entry.openNXData("data");
-  NXInt data = dataGroup.openIntData();
+  NXData dataGroup{entry.openNXData("data")};
+  NXInt data{dataGroup.openIntData()};
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
   g_log.debug() << "Number of tubes: " << m_numberOfTubes << '\n';
@@ -492,11 +502,11 @@ void LoadILLReflectometry::placeDetector() {
   g_log.debug() << "Move detector \n";
 
   double angle =
-      loadHelper.getPropertyFromRun<double>(m_localWorkspace, "dan.value");
+      m_loader.getPropertyFromRun<double>(m_localWorkspace, "dan.value");
   g_log.debug() << "Detector angle in degree " << angle << '\n';
 
   double sample_angle =
-      loadHelper.getPropertyFromRun<double>(m_localWorkspace, "san.value");
+      m_loader.getPropertyFromRun<double>(m_localWorkspace, "san.value");
   g_log.debug() << "Sample angle in degree " << sample_angle << '\n';
 
   auto dist = dynamic_cast<PropertyWithValue<double> *>(

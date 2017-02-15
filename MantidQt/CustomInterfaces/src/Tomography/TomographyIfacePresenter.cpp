@@ -1,4 +1,3 @@
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -6,7 +5,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -18,8 +21,6 @@
 #include <QString>
 #include <QThread>
 #include <QTimer>
-
-#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -42,21 +43,17 @@ const std::string TomographyIfacePresenter::g_defOutPathRemote =
 #endif
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
-    : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
-      m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
+    : m_view(view), m_model(new TomographyIfaceModel()),
+      m_statusMutex(new QMutex()), m_keepAliveTimer(nullptr) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
                              "Cannot continue.");
   }
-  m_statusMutex = new QMutex();
 }
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
   cleanup();
-
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
 
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
@@ -119,6 +116,10 @@ void TomographyIfacePresenter::notify(
     processRunRecon();
     break;
 
+  case ITomographyIfacePresenter::RunExternalProcess:
+    processRunExternalProcess();
+    break;
+
   case ITomographyIfacePresenter::RefreshJobs:
     processRefreshJobs();
     break;
@@ -129,10 +130,6 @@ void TomographyIfacePresenter::notify(
 
   case ITomographyIfacePresenter::VisualizeJobFromTable:
     processVisualizeJobs();
-    break;
-
-  case ITomographyIfacePresenter::ViewImg:
-    processViewImg();
     break;
 
   case ITomographyIfacePresenter::AggregateEnergyBands:
@@ -147,6 +144,76 @@ void TomographyIfacePresenter::notify(
     processShutDown();
     break;
   }
+}
+
+void TomographyIfacePresenter::processRunExternalProcess() {
+  // TODO unify with processRunRecon()
+  // read the cached variables in view
+  const std::string &cachedExec = m_view->getCachedExecutable();
+  const std::vector<std::string> &cachedArgs = m_view->getCachedArguments();
+
+  std::string runnable;
+  std::vector<std::string> args;
+  std::string allOpts;
+  // still prepare submission arguments to get the defaults
+  const bool local = true;
+  prepareSubmissionArguments(local, runnable, args, allOpts);
+
+  // if custom external is provided, overwrite the default one
+  runnable = !cachedExec.empty() ? cachedExec : runnable;
+
+  // append the additional args for now
+  for (const auto &arg : cachedArgs) {
+    args.emplace_back(arg);
+    allOpts += arg;
+  }
+
+  setupAndRunLocalExternalProcess(runnable, args, allOpts);
+}
+
+void TomographyIfacePresenter::setupAndRunLocalExternalProcess(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+
+  if (m_reconRunning) {
+    const auto result = m_view->userConfirmation(
+        "Reconstruction is RUNNING",
+        "Are you sure you want to<br>cancel the running reconstruction?");
+
+    if (!result) {
+      // user clicked NO, so we don't terminate the running reconstruction and
+      // simply return
+      return;
+    }
+  }
+
+  // this kills the previous thread forcefully
+  m_workerThread.reset();
+  auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
+  m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
+
+  // Specific connections for this presenter
+  // we do this so the thread can independently read the process' output and
+  // only signal the presenter after it's done reading and has something to
+  // share so it doesn't block the presenter
+  connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+          SLOT(readWorkerStdOut(QString)));
+  connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+          SLOT(readWorkerStdErr(QString)));
+
+  // remove the user confirmation for running recon, if the recon has finished
+  connect(m_workerThread.get(), SIGNAL(workerFinished(qint64, int)), this,
+          SLOT(emitExternalProcessOutput(qint64, int)));
+
+  connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+  m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
+                                       *worker, "Auto COR");
+}
+
+void TomographyIfacePresenter::emitExternalProcessOutput(const qint64 pid,
+                                                         const int exitCode) {
+  workerFinished(pid, exitCode);
+  m_view->emitExternalProcessFinished(m_workerOutputCache);
 }
 
 void TomographyIfacePresenter::processSystemSettingsUpdated() {
@@ -549,17 +616,123 @@ void TomographyIfacePresenter::processRunRecon() {
     return;
   }
 
-  // pre-/post processing steps and filters
-  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
-  // center of rotation and regions
-  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
+  // we have to branch out to handle local and remote somewhere
+  const bool local = isLocalResourceSelected();
 
+  std::string runnable;
+  std::vector<std::string> args;
+  std::string allOpts;
+
+  prepareSubmissionArguments(local, runnable, args, allOpts);
   try {
-    m_model->doSubmitReconstructionJob(m_view->currentComputeResource());
+    if (local) {
+      setupAndRunLocalReconstruction(runnable, args, allOpts);
+
+      // start the refresh jobs timer if not running
+      startKeepAliveMechanism(m_view->keepAlivePeriod());
+    } else {
+      // get the actual compute resource name
+      const std::string computingResouce = m_view->currentComputeResource();
+      m_model->doRemoteRunReconstructionJob(computingResouce, runnable,
+                                            allOpts);
+    }
   } catch (std::exception &e) {
     m_view->userWarning("Issue when trying to start a job", e.what());
   }
+
   processRefreshJobs();
+}
+
+bool TomographyIfacePresenter::userConfirmationToCancelRecon() {
+  if (m_reconRunning) {
+    const bool result = m_view->userConfirmation(
+        "Reconstruction is RUNNING",
+        "Are you sure you want to<br>cancel the running reconstruction?");
+
+    if (!result) {
+      // user clicked NO, so we don't terminate the running reconstruction and
+      // simply return
+      return false;
+    }
+    m_reconRunning = false;
+  }
+  return true;
+}
+
+void TomographyIfacePresenter::setupAndRunLocalReconstruction(
+    const std::string &runnable, const std::vector<std::string> &args,
+    const std::string &allOpts) {
+
+  if (!userConfirmationToCancelRecon()) {
+    // user didnt confirm
+    return;
+  }
+
+  // this kills the previous thread forcefully
+  m_workerThread.reset();
+  auto *worker = new MantidQt::CustomInterfaces::TomographyProcess();
+  m_workerThread = Mantid::Kernel::make_unique<TomographyThread>(this, worker);
+
+  // Specific connections for this presenter
+  // we do this so the thread can independently read the process' output and
+  // only signal the presenter after it's done reading and has something to
+  // share so it doesn't block the presenter
+  connect(m_workerThread.get(), SIGNAL(stdOutReady(QString)), this,
+          SLOT(readWorkerStdOut(QString)));
+  connect(m_workerThread.get(), SIGNAL(stdErrReady(QString)), this,
+          SLOT(readWorkerStdErr(QString)));
+
+  // remove the user confirmation for running recon, if the recon has finished
+  connect(m_workerThread.get(), SIGNAL(workerFinished(qint64, int)), this,
+          SLOT(workerFinished(qint64, int)));
+
+  connect(worker, SIGNAL(started()), this, SLOT(addProcessToJobList()));
+
+  m_model->doLocalRunReconstructionJob(runnable, args, allOpts, *m_workerThread,
+                                       *worker, "Reconstruction");
+}
+
+/** Simply reset the switch that tracks if a recon is running and
+ * update the process job in the reconstruction list
+ */
+void TomographyIfacePresenter::workerFinished(const qint64 pid,
+                                              const int exitCode) {
+  m_reconRunning = false;
+  m_model->updateProcessInJobList(pid, exitCode);
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::reconProcessFailedToStart() {
+  m_view->userError("Reconstruction failed to start",
+                    "The reconstruction process has encountered an error and "
+                    "has failed to start.");
+}
+
+void TomographyIfacePresenter::addProcessToJobList() {
+  auto *worker = qobject_cast<TomographyProcess *>(sender());
+  const qint64 pid = worker->getPID();
+  const auto runnable = worker->getRunnable();
+  const auto args = worker->getArgs();
+  const auto workerName = worker->getName();
+
+  m_workerThread->setProcessPID(pid);
+
+  m_model->addJobToStatus(pid, runnable, args, workerName);
+
+  // update here that the reconstruction is running
+  m_reconRunning = true;
+
+  processRefreshJobs();
+}
+
+void TomographyIfacePresenter::readWorkerStdOut(const QString &workerString) {
+  m_workerOutputCache.append(workerString);
+  m_model->logMsg(workerString.toStdString());
+}
+
+void TomographyIfacePresenter::readWorkerStdErr(const QString &workerString) {
+  m_workerErrorCache.append(workerString);
+  m_model->logErrMsg(workerString.toStdString());
 }
 
 bool TomographyIfacePresenter::isLocalResourceSelected() const {
@@ -567,25 +740,9 @@ bool TomographyIfacePresenter::isLocalResourceSelected() const {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
-  // No need to be logged in, there can be local processes
-  if (m_model->loggedIn().empty()) {
-    m_model->doRefreshJobsInfo("Local");
-    m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
-                                  m_model->jobsStatusLocal());
-    return;
-  }
-
-  // TODOPRES is this necessary? if we're logged in, we will never refresh the
-  // jobs for 'Local', also will need to be removed if more remote resources are
-  // added
-  std::string comp = m_view->currentComputeResource();
-  if (isLocalResourceSelected()) {
-    comp = "SCARF@STFC";
-  }
-  m_model->doRefreshJobsInfo(comp);
+  m_model->doRefreshJobsInfo(m_view->currentComputeResource());
 
   {
-    // update widgets from that info
     QMutexLocker lockit(m_statusMutex);
 
     m_view->updateJobsInfoDisplay(m_model->jobsStatus(),
@@ -594,11 +751,11 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
-  if (m_model->loggedIn().empty())
-    return;
-
   const std::string &resource = m_view->currentComputeResource();
-  if (!isLocalResourceSelected()) {
+  if (isLocalResourceSelected() && userConfirmationToCancelRecon()) {
+    // if local and user confirmed
+    m_workerThread.reset();
+  } else {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
   }
 }
@@ -713,45 +870,17 @@ void TomographyIfacePresenter::processShutDown() {
   cleanup();
 }
 
-void TomographyIfacePresenter::processViewImg() {
-  std::string ip = m_view->showImagePath();
-  QString suf = QFileInfo(QString::fromStdString(ip)).suffix();
-  // This is not so great, as we check extensions and not really file
-  // content/headers, as it should be.
-  if ((0 == QString::compare(suf, "fit", Qt::CaseInsensitive)) ||
-      (0 == QString::compare(suf, "fits", Qt::CaseInsensitive))) {
-    WorkspaceGroup_sptr wsg = m_model->loadFITSImage(ip);
-    if (!wsg)
-      return;
-    MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
-    if (!ws)
-      return;
-
-    m_view->showImage(ws);
-
-    // clean-up container group workspace
-    if (wsg)
-      AnalysisDataService::Instance().remove(wsg->getName());
-  } else if ((0 == QString::compare(suf, "tif", Qt::CaseInsensitive)) ||
-             (0 == QString::compare(suf, "tiff", Qt::CaseInsensitive)) ||
-             (0 == QString::compare(suf, "png", Qt::CaseInsensitive))) {
-    m_view->showImage(ip);
-  } else {
-    m_view->userWarning(
-        "Failed to load image - format issue",
-        "Could not load image because the extension of the file " + ip +
-            ", suffix: " + suf.toStdString() +
-            " does not correspond to FITS or TIFF files.");
-  }
-}
-
 void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
   if (period <= 0) {
     m_model->logMsg("Tomography GUI: not starting the keep-alive mechanism. "
                     "You might be logged out by the remote compute resource "
                     "after some minutes "
                     "depending on system configuration.");
+    return;
+  }
+
+  // timer is already running, so return
+  if (m_keepAliveTimer) {
     return;
   }
 
@@ -764,22 +893,19 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
       "also expected to keep sessions on remote compute resources "
       "alive after logging in.");
 
-  if (m_keepAliveThread)
-    delete m_keepAliveThread;
-  QThread *m_keepAliveThread = new QThread();
-
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
-  m_keepAliveTimer = new QTimer(NULL); // no-parent so it can be moveToThread
+  m_keepAliveTimer = new QTimer(this); // no-parent so it can be moveToThread
 
   m_keepAliveTimer->setInterval(1000 * period); // interval in ms
-  m_keepAliveTimer->moveToThread(m_keepAliveThread);
-  // direct connection from the thread
-  connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(processRefreshJobs()),
-          Qt::DirectConnection);
-  QObject::connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
-                   SLOT(start()));
-  m_keepAliveThread->start();
+
+  // remove previous connections
+  m_keepAliveTimer->disconnect();
+
+  connect(m_keepAliveTimer, SIGNAL(timeout()), this,
+          SLOT(processRefreshJobs()));
+
+  m_keepAliveTimer->start();
 }
 
 void TomographyIfacePresenter::killKeepAliveMechanism() {
@@ -787,5 +913,17 @@ void TomographyIfacePresenter::killKeepAliveMechanism() {
     m_keepAliveTimer->stop();
 }
 
+void TomographyIfacePresenter::prepareSubmissionArguments(
+    const bool local, std::string &runnable, std::vector<std::string> &args,
+    std::string &allOpts) {
+  // update the filters and ROI settings
+  // pre-/post processing steps and filters
+  m_model->setPrePostProcSettings(m_view->prePostProcSettings());
+  // center of rotation and regions
+  m_model->setImageStackPreParams(m_view->currentROIEtcParams());
+
+  // we have to branch out to handle local and remote somewhere
+  m_model->prepareSubmissionArguments(local, runnable, args, allOpts);
+}
 } // namespace CustomInterfaces
 } // namespace MantidQt

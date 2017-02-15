@@ -306,10 +306,11 @@ void SCDCalibratePanels::exec() {
                              parameter_workspaces.end());
 
   // Try again to optimize L1
-  if (changeL1)
+  if (changeL1) {
     findL1(nPeaks, peaksWs);
-  parameter_workspaces.push_back("params_L1");
-  fit_workspaces.push_back("fit_L1");
+    parameter_workspaces.push_back("params_L1");
+    fit_workspaces.push_back("fit_L1");
+  }
   std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
 
@@ -369,7 +370,7 @@ void SCDCalibratePanels::exec() {
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
   TofWksp->setInstrument(inst);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
-  DblMatrix UB = lattice.getUB();
+  const DblMatrix &UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
   peaksWs->sort(criteria);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ColWksp, *RowWksp, *TofWksp))

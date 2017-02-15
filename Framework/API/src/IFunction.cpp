@@ -1,26 +1,30 @@
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/Jacobian.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/Expression.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -107,12 +111,16 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  * with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
-ParameterTie *IFunction::tie(const std::string &parName,
-                             const std::string &expr, bool isDefault) {
-  auto ti = new ParameterTie(this, parName, expr, isDefault);
-  addTie(ti);
+void IFunction::tie(const std::string &parName, const std::string &expr,
+                    bool isDefault) {
+  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
   this->fix(getParameterIndex(*ti));
-  return ti;
+  if (!isDefault && ti->isConstant()) {
+    setParameter(parName, ti->eval());
+  } else {
+    addTie(std::move(ti));
+  }
+  //  return ti.get();
 }
 
 /**
@@ -138,6 +146,7 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
       }
     }
   }
+  applyTies();
 }
 
 /** Removes the tie off a parameter. The parameter becomes active
@@ -149,48 +158,34 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
-/// Write the list of ties to a stream
-void IFunction::writeTies(std::ostringstream &ostr) const {
-  // collect the non-default ties
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie && !tie->isDefault()) {
-      std::string tmp = tie->asString(this);
-      if (!tmp.empty()) {
-        if (!ties.empty()) {
-          ties += ",";
-        }
-        ties += tmp;
-      }
+/// Write a parameter tie to a string
+/// @param iParam :: An index of a parameter.
+/// @return A tie string for the parameter.
+std::string IFunction::writeTie(size_t iParam) const {
+  std::ostringstream tieStream;
+  const ParameterTie *tie = getTie(iParam);
+  if (tie) {
+    if (!tie->isDefault()) {
+      tieStream << tie->asString(this);
     }
+  } else if (isFixed(iParam)) {
+    tieStream << parameterName(iParam) << "=" << getParameter(iParam);
   }
-  // print the ties
-  if (!ties.empty()) {
-    ostr << ",ties=(" << ties << ")";
-  }
+  return tieStream.str();
 }
 
-/// Write the list of constraints to a stream
-void IFunction::writeConstraints(std::ostringstream &ostr) const {
-  // collect non-default constraints
-  std::string constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    const IConstraint *c = getConstraint(i);
-    if (c && !c->isDefault()) {
-      std::string tmp = c->asString();
-      if (!tmp.empty()) {
-        if (!constraints.empty()) {
-          constraints += ",";
-        }
-        constraints += tmp;
-      }
+/// Write a parameter constraint to a string
+/// @param iParam :: An index of a parameter.
+/// @return A constraint string for the parameter.
+std::string IFunction::writeConstraint(size_t iParam) const {
+  const IConstraint *c = getConstraint(iParam);
+  if (c && !c->isDefault()) {
+    std::string constraint = c->asString();
+    if (!constraint.empty()) {
+      return constraint;
     }
   }
-  // print constraints
-  if (!constraints.empty()) {
-    ostr << ",constraints=(" << constraints << ")";
-  }
+  return "";
 }
 
 /**
@@ -211,13 +206,39 @@ std::string IFunction::asString() const {
   }
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (!tie || !tie->isDefault()) {
+    if (!isFixed(i)) {
       ostr << ',' << parameterName(i) << '=' << getParameter(i);
     }
   }
-  writeConstraints(ostr);
-  writeTies(ostr);
+
+  // collect non-default constraints
+  std::vector<std::string> constraints;
+  for (size_t i = 0; i < nParams(); i++) {
+    auto constraint = writeConstraint(i);
+    if (!constraint.empty()) {
+      constraints.push_back(constraint);
+    }
+  }
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ",constraints=("
+         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
+         << ")";
+  }
+
+  // collect the non-default ties
+  std::vector<std::string> ties;
+  for (size_t i = 0; i < nParams(); i++) {
+    auto tie = writeTie(i);
+    if (!tie.empty()) {
+      ties.push_back(tie);
+    }
+  }
+  // print the ties
+  if (!ties.empty()) {
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
+         << ")";
+  }
   return ostr.str();
 }
 
@@ -232,9 +253,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   list.parse(str);
   list.toList();
   for (const auto &expr : list) {
-    IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
-    this->addConstraint(c);
+    auto c = std::unique_ptr<IConstraint>(
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
+    this->addConstraint(std::move(c));
   }
 }
 
@@ -573,7 +594,7 @@ protected:
   }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
-    if (m_value.empty()) {
+    if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
@@ -727,25 +748,31 @@ void IFunction::setMatrixWorkspace(
 
     const auto &paramMap = workspace->constInstrumentParameters();
 
-    Geometry::IDetector_const_sptr det;
+    Geometry::IDetector const *detectorPtr = nullptr;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      Instrument_const_sptr inst = workspace->getInstrument();
-      det = inst->getDetector(
-          *workspace->getSpectrum(wi).getDetectorIDs().begin());
-    } else
+      auto firstDetectorId =
+          *workspace->getSpectrum(wi).getDetectorIDs().begin();
+
+      const auto &detectorInfo = workspace->detectorInfo();
+      const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
+      const auto &detector = detectorInfo.detector(detectorIndex);
+      detectorPtr = &detector;
+    } else {
       // Get the detector (single) at this workspace index
-      det = workspace->getDetector(wi);
-    ;
+      const auto &spectrumInfo = workspace->spectrumInfo();
+      const auto &detector = spectrumInfo.detector(wi);
+      detectorPtr = &detector;
+    }
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
         Geometry::Parameter_sptr param =
-            paramMap.getRecursive(&(*det), parameterName(i), "fitting");
+            paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const Geometry::FitParameter &fitParam =
@@ -883,7 +910,7 @@ void IFunction::setMatrixWorkspace(
                       << "Can't set penalty factor for constraint\n";
                 }
               }
-              addConstraint(constraint);
+              addConstraint(std::unique_ptr<IConstraint>(constraint));
             }
           }
         }
@@ -954,22 +981,18 @@ void IFunction::convertValue(std::vector<double> &values,
           << "Ignore convertion.";
       return;
     }
-    double l1 = instrument->getSource()->getDistance(*sample);
-    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-    double l2(-1.0), twoTheta(0.0);
-    if (!det->isMonitor()) {
-      l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(*det);
-    } else // If this is a monitor then make l1+l2 = source-detector distance
-           // and twoTheta=0
-    {
-      l2 = det->getDistance(*(instrument->getSource()));
-      l2 = l2 - l1;
-      twoTheta = 0.0;
-    }
+    const auto &spectrumInfo = ws->spectrumInfo();
+    double l1 = spectrumInfo.l1();
+    // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
+    double l2 = spectrumInfo.l2(wsIndex);
+    double twoTheta(0.0);
+    if (!spectrumInfo.isMonitor(wsIndex))
+      twoTheta = spectrumInfo.twoTheta(wsIndex);
     int emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
+      boost::shared_ptr<const Geometry::IDetector> det(
+          &spectrumInfo.detector(wsIndex), NoDeleting());
       efixed = ws->getEFixed(det);
     } catch (std::exception &) {
       // assume elastic
@@ -1148,11 +1171,7 @@ void IFunction::fixAll() {
 }
 
 /// Free all parameters
-void IFunction::unfixAll() {
-  for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
-  }
-}
+void IFunction::unfixAll() { clearTies(); }
 
 /// Get number of domains required by this function.
 /// If it returns a number greater than 1 then the domain

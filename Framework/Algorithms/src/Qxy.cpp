@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -121,6 +122,7 @@ void Qxy::exec() {
   Progress prog(this, 0.05, 1.0, numSpec);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
+  const auto &detectorInfo = inputWorkspace->detectorInfo();
 
   // the samplePos is often not (0, 0, 0) because the instruments components are
   // moved to account for the beam centre
@@ -140,7 +142,8 @@ void Qxy::exec() {
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     const size_t wavStart = helper.waveLengthCutOff(
-        inputWorkspace, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+        inputWorkspace, spectrumInfo, getProperty("RadiusCut"),
+        getProperty("WaveCut"), i);
     if (wavStart >= inputWorkspace->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;
@@ -164,7 +167,12 @@ void Qxy::exec() {
 
     // the solid angle of the detector as seen by the sample is used for
     // normalisation later on
-    double angle = spectrumInfo.detector(i).solidAngle(samplePos);
+    double angle = 0.0;
+    for (const auto detID : inputWorkspace->getSpectrum(i).getDetectorIDs()) {
+      const auto index = detectorInfo.indexOf(detID);
+      if (!detectorInfo.isMasked(index))
+        angle += detectorInfo.detector(index).solidAngle(samplePos);
+    }
 
     // some bins are masked completely or partially, the following vector will
     // contain the fractions
@@ -362,10 +370,8 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, bins - 1, bins, bins - 1);
   // ... but clear the masking from the parameter map as we don't want to carry
-  // that over since this is essentially
-  // a 2D rebin
-  ParameterMap &pmap = outputWorkspace->instrumentParameters();
-  pmap.clearParametersByName("masked");
+  // that over since this is essentially a 2D rebin
+  outputWorkspace->mutableDetectorInfo().clearMaskFlags();
 
   // Create a numeric axis to replace the vertical one
   Axis *verticalAxis = new BinEdgeAxis(bins);

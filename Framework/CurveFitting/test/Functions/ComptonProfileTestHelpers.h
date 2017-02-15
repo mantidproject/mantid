@@ -2,8 +2,10 @@
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -85,13 +87,10 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
   }
 
   // Link workspace with detector
-  for (size_t i = 0; i < nhist; ++i) {
-    const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto &spec = ws2d->getSpectrum(i);
-    spec.setSpectrumNo(specID);
-    spec.clearDetectorIDs();
-    spec.addDetectorID(id);
-  }
+  Mantid::Indexing::IndexInfo indexInfo(nhist);
+  indexInfo.setDetectorIDs(std::vector<Mantid::detid_t>(nhist, id));
+  ws2d->setIndexInfo(indexInfo);
+
   return ws2d;
 }
 
@@ -166,8 +165,9 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
                                     const Mantid::detid_t detID) {
   // Parameters
   auto &pmap = ws->instrumentParameters();
-  auto det0 = ws->getInstrument()->getDetector(detID);
-  auto compID = det0->getComponentID();
+  const auto &detectorInfo = ws->detectorInfo();
+  const auto detIndex = detectorInfo.indexOf(detID);
+  const auto compID = detectorInfo.detector(detIndex).getComponentID();
 
   pmap.addDouble(compID, "sigma_l1", 0.021);
   pmap.addDouble(compID, "sigma_l2", 0.023);

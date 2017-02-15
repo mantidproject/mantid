@@ -9,6 +9,11 @@
 Description
 -----------
 
+This algorithm transforms an input workspace in wavelength to Q or momentum space for
+reflectometry workspaces. Prior to the transformation, the algorithm corrects the
+detector position to an angle :math:`\theta_f`, where :math:`\theta_f` is extracted
+from the log value :literal:`stheta`.
+
 Prerequisites
 #############
 
@@ -17,11 +22,11 @@ The workspace spectrum axis should be converted to signed\_theta using
 converted to Wavelength using :ref:`algm-ConvertUnits` before
 running this algorithm. Histogram input workspaces are expected.
 
-The algorithm will looks for a specific log value called *stheta*, which
-contains the incident theta angle :math:`theta_i`. If the input
+The algorithm will look for a specific log value called :literal:`stheta`, which
+contains the incident theta angle :math:`\theta_i`. If the input
 workspace does not contain this value, or if you wish to override this
-value you can do so by providing your own *IncidentTheta* property and
-enabling *OverrideIncidentTheta*.
+value you can do so by providing your own :literal:`IncidentTheta` property and
+enabling :literal:`OverrideIncidentTheta`.
 
 The algorithm also has the ability to produce additional debugging information from the Tableworkspace
 that can be used to create a patch plot of results before any 2D fractional rebinning has happened.
@@ -117,9 +122,9 @@ Normalised Polygon Transformation
     
     pipf, vertexes_pipf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
-    print qxqy.getDimension(0).getName(), qxqy.getDimension(1).getName()
-    print kikf.getDimension(0).getName(), kikf.getDimension(1).getName()
-    print pipf.getDimension(0).getName(), pipf.getDimension(1).getName()
+    print qxqy.getDimension(0).name, qxqy.getDimension(1).name
+    print kikf.getDimension(0).name, kikf.getDimension(1).name
+    print pipf.getDimension(0).name, pipf.getDimension(1).name
 
 
 Output:

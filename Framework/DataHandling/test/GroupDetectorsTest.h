@@ -7,6 +7,7 @@
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -141,15 +142,23 @@ public:
     TS_ASSERT_EQUALS(outputWS->e(4), eOnes);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 4);
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(1));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS(outputWS->getDetector(2), Exception::NotFoundError);
-    TS_ASSERT_THROWS(outputWS->getDetector(3), Exception::NotFoundError);
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(4));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    const auto &det0 = spectrumInfo.detector(0);
+    // (void) avoids a compiler warning for unused variable
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const DetectorGroup &>(det0));
+
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+    const auto &det1 = spectrumInfo.detector(1);
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det1));
+
+    TS_ASSERT(!spectrumInfo.hasDetectors(2));
+    TS_ASSERT(!spectrumInfo.hasDetectors(3));
+
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
+    const auto &det4 = spectrumInfo.detector(4);
+    TS_ASSERT_THROWS_NOTHING((void)dynamic_cast<const Detector &>(det4));
+
     AnalysisDataService::Instance().remove("GroupTestWS");
   }
 

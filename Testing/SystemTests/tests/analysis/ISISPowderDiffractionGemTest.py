@@ -1,4 +1,4 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace
@@ -103,19 +103,19 @@ class LoadTests(unittest.TestCase):
             self.assertTrue(isinstance(data1[i], MatrixWorkspace))
         self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
-        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
-        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
-        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+        self.assertTrue("CalWorkspace1_group" in data1[0].name())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].name())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].name())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].name())
 
         for i in range(0, 3):
             self.assertTrue(isinstance(data2[i], MatrixWorkspace))
             self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
-        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
-        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
-        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+        self.assertTrue("CalWorkspace2_group" in data2[0].name())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].name())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].name())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].name())
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
@@ -127,7 +127,7 @@ class LoadTests(unittest.TestCase):
 
         for i in range(1, 7):
             self.assertTrue(isinstance(data[i], MatrixWorkspace))
-            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
+            self.assertTrue("ResultTOF-" + str(i) in data[i].name())
 
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
@@ -155,7 +155,7 @@ class LoadTests(unittest.TestCase):
             self.assertTrue(isinstance(_file, MatrixWorkspace))
 
         for i in range(0, len(dat_data)):
-            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].getName())
+            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].name())
 
         for _file in dat_data:
             self.assertEquals(1, _file.getNumberHistograms())
@@ -277,19 +277,19 @@ class LoadTests2(unittest.TestCase):
             self.assertTrue(isinstance(data1[i], MatrixWorkspace))
         self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace1_group" in data1[0].getName())
-        self.assertTrue("CalWorkspace1_offsets" in data1[1].getName())
-        self.assertTrue("CalWorkspace1_mask" in data1[2].getName())
-        self.assertTrue("CalWorkspace1_cal" in data1[3].getName())
+        self.assertTrue("CalWorkspace1_group" in data1[0].name())
+        self.assertTrue("CalWorkspace1_offsets" in data1[1].name())
+        self.assertTrue("CalWorkspace1_mask" in data1[2].name())
+        self.assertTrue("CalWorkspace1_cal" in data1[3].name())
 
         for i in range(0, 3):
             self.assertTrue(isinstance(data2[i], MatrixWorkspace))
             self.assertTrue(isinstance(data1[3], ITableWorkspace))
 
-        self.assertTrue("CalWorkspace2_group" in data2[0].getName())
-        self.assertTrue("CalWorkspace2_offsets" in data2[1].getName())
-        self.assertTrue("CalWorkspace2_mask" in data2[2].getName())
-        self.assertTrue("CalWorkspace2_cal" in data2[3].getName())
+        self.assertTrue("CalWorkspace2_group" in data2[0].name())
+        self.assertTrue("CalWorkspace2_offsets" in data2[1].name())
+        self.assertTrue("CalWorkspace2_mask" in data2[2].name())
+        self.assertTrue("CalWorkspace2_cal" in data2[3].name())
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
@@ -301,7 +301,7 @@ class LoadTests2(unittest.TestCase):
 
         for i in range(1, 7):
             self.assertTrue(isinstance(data[i], MatrixWorkspace))
-            self.assertTrue("ResultTOF-" + str(i) in data[i].getName())
+            self.assertTrue("ResultTOF-" + str(i) in data[i].name())
 
     def test_gssfile_with_workspace(self):
         gssfile = (DIRS[0] + "GEM/test/Cycle_09_5_No_ExtV/mantid_tester/GEM48436.gss")
@@ -327,7 +327,7 @@ class LoadTests2(unittest.TestCase):
             self.assertTrue(isinstance(_file, MatrixWorkspace))
 
         for i in range(0, len(dat_data)):
-            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].getName())
+            self.assertTrue(("datWorkspace" + str(i + 1)) in dat_data[i].name())
 
         for _file in dat_data:
             self.assertEquals(1, _file.getNumberHistograms())

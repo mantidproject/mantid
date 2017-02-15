@@ -21,6 +21,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 
 #include <map>
+#include <boost/optional/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -199,7 +200,11 @@ private slots:
   /// Checks if the plot for the workspace does exist.
   bool plotExists(const QString &wsName);
 
-  /// Enable PP tool for the plot of the given WS
+  /// Enable PP tool for the plot of the given WS and optional filepath
+  void selectMultiPeak(const QString &wsName,
+                       const boost::optional<QString> &filePath);
+
+  /// Enable PP tool for the plot of the given WS overload to take just a ws
   void selectMultiPeak(const QString &wsName);
 
   /// Disable tools for all the graphs within MantidPlot
@@ -454,6 +459,9 @@ private:
   /// Include the 0's fromt eh beginning of the file that were lost in
   /// conversion from QString to int
   void getFullCode(int originalSize, QString &run);
+
+  /// Sets the fitting ranges
+  void setFittingRanges(double xmin, double xmax);
 
   /// Setup the signals for updating
   void connectAutoUpdate();

@@ -64,15 +64,27 @@ endif ()
 add_custom_target ( FrameworkTests ) # target for all framework tests
 add_dependencies ( check FrameworkTests )
 
+include_directories (Types/inc)
+add_subdirectory (Types)
+
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
+include_directories (Indexing/inc)
+add_subdirectory (Indexing)
+
+include_directories (Beamline/inc)
+add_subdirectory (Beamline)
+
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
 set ( MANTIDLIBS ${MANTIDLIBS} HistogramData )
+# Indexing has header-only dependency on Kernel, so Kernel comes after.
+set ( MANTIDLIBS ${MANTIDLIBS} Indexing )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
+set ( MANTIDLIBS ${MANTIDLIBS} Beamline )
 
 include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages
@@ -121,11 +133,6 @@ if ( OPENCL_BUILD )
   add_subdirectory ( GPUAlgorithms )
 endif ()
 
-# Unit test helper packages
-if ( CXXTEST_FOUND )
-  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
-endif ()
-
 add_subdirectory (MDAlgorithms)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
@@ -134,7 +141,7 @@ add_subdirectory (ScriptRepository)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel HistogramData Geometry API DataObjects
+set ( FRAMEWORK_LIBS Kernel HistogramData Indexing Beamline Geometry API DataObjects
                      PythonKernelModule PythonGeometryModule PythonAPIModule
                      PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat

@@ -3,6 +3,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -27,25 +28,13 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLTOF)
  * be used
  */
 int LoadILLTOF::confidence(Kernel::NexusDescriptor &descriptor) const {
-
-  // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength") &&
-      descriptor.pathExists("/entry0/experiment_identifier") &&
-      descriptor.pathExists("/entry0/mode") &&
-      !descriptor.pathExists(
-          "/entry0/dataSD") // This one is for LoadILLIndirect
-      &&
-      !descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // This one is for
-                                               // LoadILLReflectometry
-      ) {
-    return 80;
-  } else {
-    return 0;
-  }
+  UNUSED_ARG(descriptor)
+  // This loader is deprecated.
+  return 0;
 }
 
 LoadILLTOF::LoadILLTOF() : API::IFileLoader<Kernel::NexusDescriptor>() {
+  useAlgorithm("LoadILLTOF", 2);
   m_instrumentName = "";
   m_wavelength = 0;
   m_channelWidth = 0;
@@ -265,12 +254,12 @@ void LoadILLTOF::initWorkSpace(NeXus::NXEntry &entry,
  *
  */
 void LoadILLTOF::initInstrumentSpecific() {
-  m_l1 = m_loader.getL1(m_localWorkspace);
+  m_l1 = m_localWorkspace->spectrumInfo().l1();
   // this will be mainly for IN5 (flat PSD detector)
   m_l2 = m_loader.getInstrumentProperty(m_localWorkspace, "l2");
   if (m_l2 == EMPTY_DBL()) {
     g_log.debug("Calculating L2 from the IDF.");
-    m_l2 = m_loader.getL2(m_localWorkspace);
+    m_l2 = m_localWorkspace->spectrumInfo().l2(1);
   }
 }
 

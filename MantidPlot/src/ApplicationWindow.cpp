@@ -3630,7 +3630,7 @@ MdiSubWindow *ApplicationWindow::window(const QString &name) {
 }
 
 Table *ApplicationWindow::table(const QString &name) {
-  int pos = name.lastIndexOf("_");
+  int pos = name.indexOf("_");
   QString caption = name.left(pos);
 
   Folder *f = projectFolder();
@@ -5322,6 +5322,22 @@ void ApplicationWindow::readSettings() {
     g_log.warning() << tr(mess.toAscii()).toStdString() << "\n";
     settings.setValue("/DuplicationDialogShown", true);
   }
+
+  // Mantid Muon interface one time only change
+  settings.beginGroup("/CustomInterfaces");
+  settings.beginGroup("/MuonAnalysis");
+  if (!settings.contains("/UpdateForPlotPolicy1")) {
+    settings.setValue("/UpdateForPlotPolicy1", "true");
+    settings.beginGroup("/GeneralOptions");
+    if (settings.value("/newPlotPolicy", 0).toInt() == 0) {
+      settings.setValue("/newPlotPolicy", 1);
+      settings.setValue("/fitsToKeep", 0);
+    }
+    settings.endGroup();
+  }
+  settings.endGroup();
+  settings.endGroup();
+  // END Mantid Muon interface one time only change
 }
 
 void ApplicationWindow::saveSettings() {
@@ -6014,7 +6030,7 @@ bool ApplicationWindow::saveProject(bool compress) {
   }
 
   ProjectSerialiser serialiser(this);
-  serialiser.save(projectFolder(), projectname, compress);
+  serialiser.save(projectname, compress);
 
   setWindowTitle("MantidPlot - " + projectname);
   savedProject();
@@ -6031,6 +6047,62 @@ bool ApplicationWindow::saveProject(bool compress) {
 
   QApplication::restoreOverrideCursor();
   return true;
+}
+
+void ApplicationWindow::prepareSaveProject() {
+  std::vector<IProjectSerialisable *> windows;
+
+  for (auto window : getSerialisableWindows()) {
+    auto win = dynamic_cast<IProjectSerialisable *>(window);
+    if (win)
+      windows.push_back(win);
+  }
+
+  for (auto window : windowsList()) {
+    auto win = dynamic_cast<IProjectSerialisable *>(window);
+    if (win)
+      windows.push_back(win);
+  }
+
+  auto serialiser = new ProjectSerialiser(this, currentFolder());
+  m_projectSaveView = new MantidQt::MantidWidgets::ProjectSaveView(
+      projectname, *serialiser, windows, this);
+  connect(m_projectSaveView, SIGNAL(projectSaved()), this,
+          SLOT(postSaveProject()));
+  m_projectSaveView->show();
+}
+
+/**
+ * The project was just saved. Update the main window.
+ */
+void ApplicationWindow::postSaveProject() {
+  setWindowTitle("MantidPlot - " + projectname);
+
+  if (autoSave) {
+    if (savingTimerId)
+      killTimer(savingTimerId);
+    savingTimerId = startTimer(autoSaveTime * 60000);
+  } else
+    savingTimerId = 0;
+
+  // Back-up file to be removed because file has successfully saved.
+  QFile::remove(projectname + "~");
+
+  QApplication::restoreOverrideCursor();
+
+  recentProjects.removeAll(projectname);
+  recentProjects.push_front(projectname);
+  updateRecentProjectsList();
+
+  QFileInfo fi(projectname);
+  QString baseName = fi.baseName();
+  FolderListItem *item = dynamic_cast<FolderListItem *>(folders->firstChild());
+  if (item) {
+    item->setText(0, baseName);
+    item->folder()->setObjectName(baseName);
+  }
+
+  savedProject();
 }
 
 void ApplicationWindow::savetoNexusFile() {
@@ -6086,6 +6158,9 @@ void ApplicationWindow::loadDataFileByName(QString fn) {
   if (fnInfo.suffix() == "py") {
     // We have a python file, just load it into script window
     loadScript(fn, true);
+  } else if (fnInfo.suffix() == "mantid") {
+    // We have a mantid project file, pass on to project loading
+    open(fn);
   } else if (mantidUI) {
     // Run Load algorithm on file
     QHash<QString, QString> params;
@@ -8913,7 +8988,11 @@ void ApplicationWindow::activateWindow(MdiSubWindow *w,
   FloatingWindow *fw = w->getFloatingWindow();
   if (fw) {
     if (activateOuterWindow) {
-      w->setNormal();
+      if (fw->isMaximized()) {
+        w->setMaximized();
+      } else {
+        w->setNormal();
+      }
     }
   } else {
     QMainWindow::activateWindow();
@@ -8995,6 +9074,26 @@ void ApplicationWindow::closeActiveWindow() {
     w->close();
 }
 
+void ApplicationWindow::closeSimilarWindows() {
+  std::string windowType = activeWindow()->getWindowType();
+
+  QMessageBox::StandardButton pressed = QMessageBox::question(
+      this, "MantidPlot",
+      QString::fromStdString("All " + windowType +
+                             " windows will be removed. Are you sure?"),
+      QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+
+  if (pressed != QMessageBox::Ok)
+    return;
+
+  QList<MdiSubWindow *> windows = currentFolder()->windowsList();
+  for (auto win : windows) {
+    if (win->getWindowType() == windowType) {
+      win->close();
+    }
+  }
+}
+
 void ApplicationWindow::removeWindowFromLists(MdiSubWindow *w) {
   if (!w)
     return;
@@ -9072,6 +9171,32 @@ void ApplicationWindow::closeWindow(MdiSubWindow *window) {
     }
   }
   emit modified();
+}
+
+/**
+ * Called when the user choses to close the program
+ */
+void ApplicationWindow::prepareToCloseMantid() {
+  if (!saved) {
+    QString savemsg =
+        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
+    int result =
+        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
+                                 tr("No"), tr("Cancel"), 0, 2);
+    if (result == 0) {
+      prepareSaveProject();
+      // When we're finished saving trigger the close event
+      connect(m_projectSaveView, SIGNAL(finished(int)), qApp,
+              SLOT(closeAllWindows()));
+      return;
+    } else if (result == 2) {
+      // User wanted to cancel, do nothing
+      return;
+    }
+  }
+
+  // Call to close all the windows and shutdown Mantid
+  QApplication::closeAllWindows();
 }
 
 /** Add a serialisable window to the application
@@ -9358,7 +9483,7 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   }
   windowsMenu->addAction(tr("&Hide Window"), this, SLOT(hideActiveWindow()));
 
-// Having the shorcut set here is neccessary on Windows, but
+// Having the shortcut set here is necessary on Windows, but
 // leads to an error message elsewhere. Don't know why and don't
 // have a better solution than this right now.
 #ifdef _WIN32
@@ -9368,6 +9493,29 @@ void ApplicationWindow::windowsMenuAboutToShow() {
   windowsMenu->addAction(getQPixmap("close_xpm"), tr("Close &Window"), this,
                          SLOT(closeActiveWindow()));
 #endif
+
+  // Add an option to close all windows of a similar type
+  std::string windowType = activeWin->getWindowType();
+  // count the number of similar windows
+  int winTypeCount = 0;
+  for (auto win : windows) {
+    if (win->getWindowType() == windowType) {
+      winTypeCount++;
+    }
+  }
+  if (winTypeCount > 1) {
+#ifdef _WIN32
+    windowsMenu->addAction(
+        getQPixmap("close_xpm"),
+        QString::fromStdString("Close All " + windowType + " Windows"), this,
+        SLOT(closeSimilarWindows()), Qt::CTRL + Qt::SHIFT + Qt::Key_W);
+#else
+    windowsMenu->addAction(
+        getQPixmap("close_xpm"),
+        QString::fromStdString("Close All " + windowType + " Windows"), this,
+        SLOT(closeSimilarWindows()));
+#endif
+  }
 
   if (n > 0 && n < 10) {
     windowsMenu->addSeparator();
@@ -9574,7 +9722,6 @@ void ApplicationWindow::newProject(const bool doNotSave) {
   folders->blockSignals(false);
 
   // Reset everything else
-  resultsLog->clear();
   setWindowTitle(tr("MantidPlot - untitled")); // Mantid
   projectname = "untitled";
 
@@ -9658,18 +9805,6 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
     // happens in MantidUI::shutdown (called below) because we want it
     // regardless of whether a
     // script is running.
-  }
-
-  if (!saved) {
-    QString savemsg =
-        tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
-    int result =
-        QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
-                                 tr("No"), tr("Cancel"), 0, 2);
-    if (result == 2 || (result == 0 && !saveProject())) {
-      ce->ignore();
-      return;
-    }
   }
 
   // Close the remaining MDI windows. The Python API is required to be active
@@ -11493,7 +11628,8 @@ void ApplicationWindow::createActions() {
   actionSaveProject = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(":/SaveProject16x16.png"), tr("Save &Project"), this);
   actionSaveProject->setShortcut(tr("Ctrl+Shift+S"));
-  connect(actionSaveProject, SIGNAL(triggered()), this, SLOT(saveProject()));
+  connect(actionSaveProject, SIGNAL(triggered()), this,
+          SLOT(prepareSaveProject()));
 
   actionSaveFile = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("filesave_nexus_xpm")), tr("Save Nexus &File"), this);
@@ -11562,7 +11698,7 @@ void ApplicationWindow::createActions() {
   actionSaveProjectAs = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(":/SaveProject16x16.png"), tr("Save Project &As..."), this);
   connect(actionSaveProjectAs, SIGNAL(triggered()), this,
-          SLOT(saveProjectAs()));
+          SLOT(prepareSaveProject()));
   actionSaveProjectAs->setEnabled(false);
 
   actionSaveNote =
@@ -11683,8 +11819,8 @@ void ApplicationWindow::createActions() {
   actionCloseAllWindows = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("quit_xpm")), tr("&Quit"), this);
   actionCloseAllWindows->setShortcut(tr("Ctrl+Q"));
-  connect(actionCloseAllWindows, SIGNAL(triggered()), qApp,
-          SLOT(closeAllWindows()));
+  connect(actionCloseAllWindows, SIGNAL(triggered()), this,
+          SLOT(prepareToCloseMantid()));
 
   actionDeleteFitTables = new MantidQt::MantidWidgets::TrackedAction(
       QIcon(getQPixmap("close_xpm")), tr("Delete &Fit Tables"), this);
@@ -13976,10 +14112,6 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
 }
 
 void ApplicationWindow::saveAsProject() {
-  saveFolderAsProject(currentFolder());
-}
-
-void ApplicationWindow::saveFolderAsProject(Folder *f) {
   QString filter = tr("MantidPlot project") + " (*.qti);;"; // Mantid
   filter += tr("Compressed MantidPlot project") + " (*.qti.gz)";
 
@@ -13994,7 +14126,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f) {
       fn.append(".qti");
 
     ProjectSerialiser serialiser(this);
-    serialiser.save(f, fn, selectedFilter.contains(".gz"));
+    serialiser.save(fn, selectedFilter.contains(".gz"));
   }
 }
 
@@ -14021,7 +14153,7 @@ void ApplicationWindow::showFolderPopupMenu(QTreeWidgetItem *it,
   if (fli->folder()->parent())
     cm.addAction(tr("Save &As Project..."), this, SLOT(saveAsProject()));
   else
-    cm.addAction(tr("Save Project &As..."), this, SLOT(saveProjectAs()));
+    cm.addAction(tr("Save Project &As..."), this, SLOT(prepareSaveProject()));
   cm.addSeparator();
 
   if (fromFolders && show_windows_policy != HideAll) {
@@ -14368,7 +14500,6 @@ bool ApplicationWindow::changeFolder(Folder *newFolder, bool force) {
 
   d_current_folder = newFolder;
 
-  resultsLog->clear();
   resultsLog->appendInformation(currentFolder()->logInfo());
 
   lv->clear();

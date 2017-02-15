@@ -1,4 +1,3 @@
-#pylint: disable=no-init, too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
@@ -9,7 +8,6 @@ import os
 
 
 class VesuvioDiffractionReduction(DataProcessorAlgorithm):
-
     _workspace_names = None
     _chopped_data = None
     _output_ws = None
@@ -94,10 +92,21 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         load_opts = dict()
         load_opts['Mode'] = 'FoilOut'
         load_opts['InstrumentParFile'] = self._par_filename
+        # Load monitors as True so monitors will not be loaded separately in LoadVesuvio
+        load_opts['LoadMonitors'] = True
 
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=1)
 
         prog_reporter.report("Loading Files")
+
+        # Split up runs as LoadVesuvio sums multiple runs
+        input_files = self._data_files
+        for run in input_files:
+            try:
+                number_generator = IntArrayProperty('array_generator', run)
+                self._data_files = number_generator.value.tolist()
+            except RuntimeError:
+                raise RuntimeError("Could not generate run numbers from this input: " + run)
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
@@ -195,7 +204,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
         if not os.path.exists(self._ipf_filename):
             self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
-        logger.information('IPF filename is: %s' % (self._ipf_filename))
+        logger.information('IPF filename is: %s' % self._ipf_filename)
 
         # Only enable sum files if we actually have more than one file
         sum_files = self.getProperty('SumFiles').value

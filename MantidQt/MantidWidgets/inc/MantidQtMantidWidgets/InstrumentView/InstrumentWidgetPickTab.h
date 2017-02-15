@@ -61,6 +61,7 @@ public:
     AddPeak,
     ErasePeak,
     ComparePeak,
+    AlignPeak,
     SingleDetectorSelection,
     Tube,
     Draw
@@ -72,6 +73,7 @@ public:
     PeakSelect,
     PeakErase,
     PeakCompare,
+    PeakAlign,
     DrawEllipse,
     DrawRectangle,
     DrawFree,
@@ -86,6 +88,7 @@ public:
   bool addToDisplayContextMenu(QMenu &) const override;
   void selectTool(const ToolType tool);
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  const InstrumentWidget *getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
@@ -104,8 +107,11 @@ private slots:
   void removeCurve(const QString &);
   void singleComponentTouched(size_t pickID);
   void singleComponentPicked(size_t pickID);
-  void comparePeaks(const std::pair<Mantid::Geometry::IPeak *,
-                                    Mantid::Geometry::IPeak *> &peaks);
+  void alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                  const Mantid::Geometry::IPeak *peak);
+  void
+  comparePeaks(const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                               std::vector<Mantid::Geometry::IPeak *>> &peaks);
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
@@ -124,6 +130,7 @@ private:
   QPushButton *m_peak; ///< Button switching on peak creation mode
   QPushButton *m_peakSelect;  ///< Button switching on peak selection mode
   QPushButton *m_peakCompare; ///< Button switching on peak comparison mode
+  QPushButton *m_peakAlign;   ///< Button switching on peak alignment mode
   QPushButton *m_rectangle;   ///< Button switching on drawing a rectangular
   /// selection region
   QPushButton *
@@ -185,15 +192,18 @@ public:
 public slots:
   void displayInfo(size_t pickID);
   void displayComparePeaksInfo(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+      const std::pair<std::vector<Mantid::Geometry::IPeak *>,
+                      std::vector<Mantid::Geometry::IPeak *>> &peaks);
+  void displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                             const Mantid::Geometry::IPeak *peak);
   void clear();
 
 private:
   QString displayDetectorInfo(Mantid::detid_t detid);
   QString displayNonDetectorInfo(Mantid::Geometry::ComponentID compID);
   QString displayPeakInfo(Mantid::Geometry::IPeak *peak);
-  QString displayPeakAngles(
-      std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> peaks);
+  QString displayPeakAngles(const std::pair<Mantid::Geometry::IPeak *,
+                                            Mantid::Geometry::IPeak *> &peaks);
   QString getParameterInfo(Mantid::Geometry::IComponent_const_sptr comp);
   QString getPeakOverlayInfo();
 

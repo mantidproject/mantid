@@ -180,22 +180,19 @@ public:
 
     auto i = fun->parameterIndex("f2.FWHM");
     auto tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "f2.FWHM=2.1")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 2.1);
     i = fun->parameterIndex("B60");
     tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "B60=0")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 0);
     i = fun->parameterIndex("BmolY");
     tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "BmolY=0")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 0);
 
     size_t nTies = 0;
     for (size_t i = 0; i < fun->nParams(); ++i) {
@@ -204,7 +201,7 @@ public:
         ++nTies;
       }
     }
-    TS_ASSERT_EQUALS(nTies, 11);
+    TS_ASSERT_EQUALS(nTies, 0);
   }
 
   void test_constraints() {
@@ -650,6 +647,39 @@ public:
     fit->setProperty("InputWorkspace", ws);
     fit->setProperty("Output", "out");
     TS_ASSERT_THROWS_NOTHING(fit->execute());
+  }
+
+  void test_ties_in_composite_function() {
+    std::string funDef =
+        "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,"
+        "ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+        "0.031787,B42=-0.11611;name=CrystalFieldSpectrum,Ion=Pr,Symmetry=C2v,"
+        "Temperature="
+        "44.0,ToleranceEnergy=1e-10,ToleranceIntensity=0.1,FixAllPeaks=False,"
+        "PeakShape=Lorentzian,FWHM=1.1,B44=-0.12544,B20=0.37737,B22=3.977,B40=-"
+        "0.031787,B42=-0.11611;ties=(f1.IntensityScaling=2.0*f0."
+        "IntensityScaling,f0.f1.FWHM=f1.f2.FWHM/2)";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    {
+      auto index = fun->parameterIndex("f1.IntensityScaling");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(),
+                       "f1.IntensityScaling=2.0*f0.IntensityScaling");
+    }
+    {
+      auto index = fun->parameterIndex("f0.f1.FWHM");
+      auto tie = fun->getTie(index);
+      TS_ASSERT(tie);
+      if (!tie) {
+        return;
+      }
+      TS_ASSERT_EQUALS(tie->asString(), "f0.f1.FWHM=f1.f2.FWHM/2");
+    }
   }
 
 private:
