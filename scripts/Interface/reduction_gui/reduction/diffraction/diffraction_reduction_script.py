@@ -321,6 +321,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 if runnumber is not None:
                     propvalue = '%s%s' % (self.instrument_name, str(runnumber))
 
+                    raise NotImplementedError('Run number {0} ... has : is not acceptible.'.format(runnumber)
+                    runnumber = runnumber.replace(':', '-')
+
                 script += "%s%s = '%s',\n" % (DiffractionReductionScripter.WIDTH, 'Filename', str(propvalue))
                 continue
 

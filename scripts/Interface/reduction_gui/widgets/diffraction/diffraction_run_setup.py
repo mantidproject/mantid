@@ -252,7 +252,8 @@ class RunSetupWidget(BaseWidget):
         if isvalid is False:
             raise NotImplementedError("Run number error @ %s" % (rtup[1]))
         else:
-            s.runnumbers = rtup[2]
+            # s.runnumbers = rtup[2]
+            pass
 
         s.calibfilename = self._content.calfile_edit.text()
         s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
