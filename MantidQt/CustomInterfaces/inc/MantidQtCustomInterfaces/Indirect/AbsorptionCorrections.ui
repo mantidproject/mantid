@@ -628,12 +628,12 @@
        <widget class="QComboBox" name="cbSampleDensity">
         <item>
          <property name="text">
-          <string>Mass Density (g/cm^3)</string>
+          <string>Mass Density</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Number Density (atoms/Å^3)</string>
+          <string>Number Density</string>
          </property>
         </item>
        </widget>
@@ -762,12 +762,12 @@
        <widget class="QComboBox" name="cbCanDensity">
         <item>
          <property name="text">
-          <string>Mass Density (g/cm^3)</string>
+          <string>Mass Density</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Number Density (atoms/Å^3)</string>
+          <string>Number Density</string>
          </property>
         </item>
        </widget>
