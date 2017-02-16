@@ -368,29 +368,12 @@ bool isScaleParameter(const std::string &name) {
   return (name == "scalex" || name == "scaley");
 }
 
-V3D getRelativePosition(const StringTokenizer &tokens,
-                        const std::string &paramValue) {
-  const auto &type = tokens[1];
-  const std::string name = "dummy";
-  auto param = ParameterFactory::create(type, name);
-  param->fromString(paramValue);
-  return param->value<V3D>();
-}
-
-Quat getRelativeRotation(const std::string &paramType,
-                         const std::string &paramValue) {
+template <class T>
+T getParam(const std::string &paramType, const std::string &paramValue) {
   const std::string name = "dummy";
   auto param = ParameterFactory::create(paramType, name);
   param->fromString(paramValue);
-  return param->value<Quat>();
-}
-
-double getScaleFactor(const std::string &paramType,
-                      const std::string &paramValue) {
-  const std::string name = "dummy";
-  auto param = ParameterFactory::create(paramType, name);
-  param->fromString(paramValue);
-  return param->value<double>();
+  return param->value<T>();
 }
 
 void updatePosition(DetectorInfo &detectorInfo, const Instrument &instrument,
@@ -1618,12 +1601,8 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
 
     const auto &paramType = tokens[1];
     const auto &paramName = tokens[2];
-    ParameterMap axisWiseRotationsParams;
     if (paramName.compare("masked") == 0) {
-      const std::string name = "dummy";
-      auto param = ParameterFactory::create(paramType, name);
-      param->fromString(paramValue);
-      bool value = param->value<bool>();
+      bool value = getParam<bool>(paramType, paramValue);
       if (value) {
         // Do not add masking to ParameterMap, it is stored in DetectorInfo
         const auto det = dynamic_cast<const Detector *const>(comp);
@@ -1638,14 +1617,14 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // contain posx, posy, and posz (in addition to pos). However, when these
       // component wise positions are set, 'pos' is updated accordingly. We are
       // thus ignoring position components here.
-      const auto newRelPos = getRelativePosition(tokens, paramValue);
+      const auto newRelPos = getParam<V3D>(paramType, paramValue);
       updatePosition(detectorInfo, *parInstrument, comp, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
       // thus ignoring rotation components here.
-      const auto newRelRot = getRelativeRotation(paramType, paramValue);
+      const auto newRelRot = getParam<Quat>(paramType, paramValue);
       updateRotation(detectorInfo, *parInstrument, comp, newRelRot);
     } else {
       // Special case RectangularDetector: Parameters scalex and scaley affect
@@ -1653,7 +1632,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       if (isScaleParameter(paramName))
         adjustPositionsFromScaleFactor(detectorInfo, *parInstrument, comp,
                                        paramName,
-                                       getScaleFactor(paramType, paramValue));
+                                       getParam<double>(paramType, paramValue));
       pmap.add(paramType, comp, paramName, paramValue);
     }
   }
