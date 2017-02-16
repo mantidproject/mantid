@@ -32,6 +32,7 @@ DECLARE_ALGORITHM(PoldiPeakSearch)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using HistogramData::HistogramY;
 
 PoldiPeakSearch::PoldiPeakSearch()
     : API::Algorithm(), m_minimumDistance(0), m_doubleMinimumDistance(0),
@@ -48,7 +49,7 @@ PoldiPeakSearch::PoldiPeakSearch()
   * @return Vector with sum of neighboring correlation counts.
   */
 MantidVec
-PoldiPeakSearch::getNeighborSums(const MantidVec &correlationCounts) const {
+PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
   /* Since the first and last element in a list don't have two neighbors, they
    *are excluded from the calculation
    * and the result vector's size is reduced by two. Also, the algorithm does
@@ -589,7 +590,7 @@ void PoldiPeakSearch::exec() {
                       << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
-      findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
+      findPeaks(summedNeighborCounts.cbegin(), summedNeighborCounts.cend());
   g_log.information() << "   Peaks detected in summed spectrum: "
                       << peakPositionsSummed.size() << '\n';
 
@@ -611,7 +612,7 @@ void PoldiPeakSearch::exec() {
    * along with the Q-values.
    */
   std::vector<PoldiPeak_sptr> peakCoordinates =
-      getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
+      getPeaks(correlatedCounts.cbegin(), correlatedCounts.cend(),
                peakPositionsCorrelation, correlationQValues.rawData(), xUnit);
   g_log.information()
       << "   Extracted peak positions in Q and intensity guesses.\n";

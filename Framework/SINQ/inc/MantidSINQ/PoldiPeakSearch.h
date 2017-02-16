@@ -15,6 +15,9 @@
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 namespace Mantid {
+namespace HistogramData {
+class HistogramY;
+}
 namespace Poldi {
 /** PoldiPeakSearch :
 
@@ -60,7 +63,8 @@ public:
   const std::string category() const override { return "SINQ\\Poldi"; }
 
 protected:
-  MantidVec getNeighborSums(const MantidVec &correlationCounts) const;
+  MantidVec
+  getNeighborSums(const HistogramData::HistogramY &correlationCounts) const;
 
   std::list<MantidVec::const_iterator>
   findPeaks(MantidVec::const_iterator begin, MantidVec::const_iterator end);

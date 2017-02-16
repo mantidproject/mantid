@@ -8,16 +8,17 @@
 
 #include "MantidKernel/Matrix.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <numeric>
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::LinearGenerator;
 
 class PoldiFitPeaks2DTest : public CxxTest::TestSuite {
 public:
@@ -61,8 +62,7 @@ public:
 
   void testSetDeltaTFromWorkspace() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    auto &X = ws->mutableX(0);
-    std::iota(X.begin(), X.end(), 0);
+    ws->setBinEdges(0, LinearGenerator(0, 1));
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.setDeltaTFromWorkspace(ws);
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
