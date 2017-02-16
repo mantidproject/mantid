@@ -83,8 +83,6 @@ public:
         .WillOnce(Return("12"));
     auto options = presenter.getTransmissionOptions();
 
-    std::string s;
-    std::getline(std::cin, s);
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
     TS_ASSERT_EQUALS(optionsVec.size(), 11);
