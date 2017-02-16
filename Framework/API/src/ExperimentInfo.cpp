@@ -368,6 +368,13 @@ bool isScaleParameter(const std::string &name) {
   return (name == "scalex" || name == "scaley");
 }
 
+bool isRedundantPosOrRot(const std::string &name) {
+  // Check size first as a small optimization.
+  return (name.size() == 4) &&
+         (name == "posx" || name == "posy" || name == "posz" ||
+          name == "rotx" || name == "roty" || name == "rotz");
+}
+
 template <class T>
 T getParam(const std::string &paramType, const std::string &paramValue) {
   const std::string name = "dummy";
@@ -1585,17 +1592,17 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain posx, posy, and posz (in addition to pos). However, when these
       // component wise positions are set, 'pos' is updated accordingly. We are
-      // thus ignoring position components here.
+      // thus ignoring position components below.
       const auto newRelPos = getParam<V3D>(paramType, paramValue);
       updatePosition(detectorInfo, *parInstrument, comp, newRelPos);
     } else if (isRotationParameter(paramName)) {
       // We are parsing a string obtained from a ParameterMap. The map may
       // contain rotx, roty, and rotz (in addition to rot). However, when these
       // component wise rotations are set, 'rot' is updated accordingly. We are
-      // thus ignoring rotation components here.
+      // thus ignoring rotation components below.
       const auto newRelRot = getParam<Quat>(paramType, paramValue);
       updateRotation(detectorInfo, *parInstrument, comp, newRelRot);
-    } else {
+    } else if (!isRedundantPosOrRot(paramName)) {
       // Special case RectangularDetector: Parameters scalex and scaley affect
       // pixel positions, but we must also add the parameter below.
       if (isScaleParameter(paramName))
