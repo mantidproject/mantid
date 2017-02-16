@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} )
 
   include_directories ( ../../TestHelpers/inc )
   set ( TESTHELPER_SRCS
@@ -15,5 +15,3 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET MPIAlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()
-
-

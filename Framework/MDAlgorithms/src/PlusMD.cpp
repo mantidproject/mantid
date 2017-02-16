@@ -1,11 +1,11 @@
+#include "MantidMDAlgorithms/PlusMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidMDAlgorithms/PlusMD.h"
-#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
@@ -147,7 +147,7 @@ void PlusMD::execHistoHisto(
 void PlusMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->add(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->add(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 //----------------------------------------------------------------------------------------------
