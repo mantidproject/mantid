@@ -2007,7 +2007,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
             new_combine_detector_selection = 'both'
         else:
             raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
-                               "to combinDet.".format(detector_selection))
+                               "to combineDet.".format(detector_selection))
         return new_combine_detector_selection
 
     # If we are dealing with SANS2D, then the correct combineDet selection is
@@ -2022,7 +2022,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
             new_combine_detector_selection = 'both'
         else:
             raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
-                               "to combinDet.".format(detector_selection))
+                               "to combineDet.".format(detector_selection))
         return new_combine_detector_selection
     raise RuntimeError("SANSBatchReduce: Unknown instrument {0}.".format(instrument_name))
 

@@ -140,6 +140,44 @@ def get_transmission_properties(workspace):
     return transmission_properties
 
 
+def get_geometry_properties(reducer):
+    """
+    This extracts geometry properties from the ReductionSingleton. They are saved in the CanSAS1D format.
+
+    @param reducer: a handle to the redcution singleton
+    @return: a dict with geometry properties
+    """
+    def _add_property(key, element, props):
+        if element is None:
+            raise RuntimeError("Could not extract value for {0}.".format(key))
+        props.update({key: element})
+
+    geometry_properties = {}
+    geometry = reducer.get_sample().geometry
+
+    # Get the shape
+    shape = geometry.shape
+    if shape == 'cylinder-axis-up':
+        shape_to_save = "Cylinder"
+    elif shape == 'cuboid':
+        shape_to_save = "Flat plate"
+    elif shape == 'cylinder-axis-along':
+        shape_to_save = 'Disc'
+    else:
+        raise RuntimeError("Unknown shape {0}. Cannot extract property".format(shape))
+    geometry_properties.update({"Geometry": shape_to_save})
+
+    # Get the Height
+    _add_property("SampleHeight", geometry.height, geometry_properties)
+
+    # Get the Width
+    _add_property("SampleWidth", geometry.width, geometry_properties)
+
+    # Get the thickness
+    _add_property("SampleThickness", geometry.thickness, geometry_properties)
+    return geometry_properties
+
+
 def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
@@ -324,6 +362,16 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         # sample logs.
                         _ws = mtd[workspace_name]
                         transmission_properties = get_transmission_properties(_ws)
+
+                        # Get the geometry details from the ReductionSingleton. If there is an issue, then don't
+                        # add them but print a warning
+                        try:
+                            geometry_properties = get_geometry_properties(ReductionSingleton())
+                            transmission_properties.update(geometry_properties)
+                        except RuntimeError as e:
+                            message = "Could not add geometry properties to SaveCanSAS1D: {0}".format(str(e))
+                            sanslog.warning(message)
+
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
                         SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
