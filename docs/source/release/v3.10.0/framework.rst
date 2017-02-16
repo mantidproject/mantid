@@ -31,6 +31,8 @@ CurveFitting
 Improved
 ########
 
+- :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
+
 Python
 ------
 
