@@ -216,6 +216,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, aw);
   m_exploreMantid->init();
+  m_exploreMantid->enableDeletePrompt(
+      appWindow()->isDeleteWorkspacePromptEnabled());
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
   actionCopyRowToTable = new QAction(this);
