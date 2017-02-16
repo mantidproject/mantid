@@ -12,7 +12,6 @@
 #include <MantidTestHelpers/WorkspaceCreationHelper.h>
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 using namespace testing;
@@ -29,37 +28,38 @@ public:
   WorkspacePresenterTest() { FrameworkManager::Instance(); }
 
   void setUp() override {
-    mockView.reset();
-    mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
-    mockView->init();
+    m_mockView.reset();
+    m_mockView = boost::make_shared<NiceMock<MockWorkspaceDockView>>();
+    m_mockView->init();
 
-    presenter = mockView->getPresenterSharedPtr();
+    m_presenter = m_mockView->getPresenterSharedPtr();
   }
 
   void testLoadWorkspaceFromDock() {
-    EXPECT_CALL(*mockView.get(), showLoadDialog()).Times(1);
 
-    presenter->notifyFromView(ViewNotifiable::Flag::LoadWorkspace);
+    EXPECT_CALL(*m_mockView.get(), showLoadDialog()).Times(1);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::LoadWorkspace);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testLoadLiveData() {
-    EXPECT_CALL(*mockView.get(), showLiveDataDialog()).Times(1);
+    EXPECT_CALL(*m_mockView.get(), showLiveDataDialog()).Times(1);
 
-    presenter->notifyFromView(ViewNotifiable::Flag::LoadLiveDataWorkspace);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::LoadLiveDataWorkspace);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testLoadWorkspaceExternal() {
     auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(AtLeast(1));
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     AnalysisDataService::Instance().remove("wksp");
   }
@@ -72,20 +72,22 @@ public:
 
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
-    ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
-    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
-    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), deleteConfirmation())
+        .WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), isFocused()).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), isPromptDelete()).WillByDefault(Return(true));
 
-    EXPECT_CALL(*mockView.get(), isFocused()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
+    EXPECT_CALL(*m_mockView.get(), isFocused()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), isPromptDelete()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), deleteConfirmation()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
   }
@@ -98,17 +100,19 @@ public:
 
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
-    ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
-    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
-    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), deleteConfirmation())
+        .WillByDefault(Return(false));
+    ON_CALL(*m_mockView.get(), isFocused()).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), isPromptDelete()).WillByDefault(Return(true));
 
-    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), isPromptDelete()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), deleteConfirmation()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
   }
@@ -121,17 +125,18 @@ public:
 
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
-    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
-    ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(false));
+    ON_CALL(*m_mockView.get(), isFocused()).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), isPromptDelete()).WillByDefault(Return(false));
 
-    EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
+    EXPECT_CALL(*m_mockView.get(), isPromptDelete()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
   }
@@ -140,26 +145,27 @@ public:
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
 
-    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+    EXPECT_CALL(*m_mockView.get(), showCriticalUserMessage(_, _))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testDeleteWorkspacesNotFocused() {
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
 
-    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(false));
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
+    ON_CALL(*m_mockView.get(), isFocused()).WillByDefault(Return(false));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
         .Times(Exactly(0));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testDeleteWorkspacesExternal() {
@@ -167,11 +173,11 @@ public:
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(Exactly(1));
 
     AnalysisDataService::Instance().remove("wksp");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testADSCleared() {
@@ -179,23 +185,24 @@ public:
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    EXPECT_CALL(*mockView.get(), clearView()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), clearView()).Times(Exactly(1));
 
     AnalysisDataService::Instance().clear();
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testRenameWorkspaceFromDock() {
     // Instruct gmock to return empty StringList
     ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), showRenameDialog(_)).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), showRenameDialog(_)).Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::RenameWorkspace);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::RenameWorkspace);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testRenameWorkspaceExternal() {
@@ -203,11 +210,11 @@ public:
 
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(AtLeast(1));
 
     AnalysisDataService::Instance().rename("wksp", "myWorkspace");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     AnalysisDataService::Instance().remove("myWorkspace");
   }
@@ -219,9 +226,10 @@ public:
     AnalysisDataService::Instance().add("ws2", ws2);
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
@@ -237,19 +245,20 @@ public:
 
     AnalysisDataService::Instance().deepRemoveGroup("NewGroup");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testInvalidGroupFails() {
     ::testing::DefaultValue<StringList>::Set(StringList());
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), showCriticalUserMessage(_, _))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testGroupAlreadyExistsUserConfirm() {
@@ -260,12 +269,13 @@ public:
     AnalysisDataService::Instance().add("ws2", ws2);
 
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
-    ON_CALL(*mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(true));
+    ON_CALL(*m_mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(true));
 
-    EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), askUserYesNo(_, _)).Times(1);
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
         AnalysisDataService::Instance().retrieve("NewGroup"));
@@ -292,7 +302,7 @@ public:
       TS_ASSERT_EQUALS(names[1], "ws2");
     }
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     // Remove group and left over workspaces
     removeGroup("NewGroup");
@@ -304,14 +314,15 @@ public:
     createGroup("NewGroup");
 
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
-    ON_CALL(*mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(false));
+    ON_CALL(*m_mockView.get(), askUserYesNo(_, _)).WillByDefault(Return(false));
 
-    EXPECT_CALL(*mockView.get(), askUserYesNo(_, _)).Times(1);
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), askUserYesNo(_, _)).Times(1);
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::GroupWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     removeGroup("NewGroup");
   }
@@ -320,9 +331,10 @@ public:
     createGroup("group");
     ::testing::DefaultValue<StringList>::Set(StringList(StringList{"group"}));
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
 
     auto names = AnalysisDataService::Instance().getObjectNames();
 
@@ -336,7 +348,7 @@ public:
       return name.compare("wksp2") == 0;
     }));
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     AnalysisDataService::Instance().clear();
   }
@@ -344,31 +356,32 @@ public:
   void testInvalidGroupForUngrouping() {
     ::testing::DefaultValue<StringList>::Set(StringList(StringList()));
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), showCriticalUserMessage(_, _))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::UngroupWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testWorkspacesGroupedExternal() {
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(AtLeast(1));
 
     AnalysisDataService::Instance().notificationCenter.postNotification(
         new WorkspacesGroupedNotification(std::vector<std::string>()));
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testWorkspacesUnGroupedExternal() {
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(AtLeast(1));
 
     AnalysisDataService::Instance().notificationCenter.postNotification(
         new Mantid::API::WorkspaceUnGroupingNotification("", nullptr));
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testWorkspaceGroupUpdated() {
@@ -378,11 +391,11 @@ public:
     auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().add("wksp", wksp);
 
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(AtLeast(1));
 
     AnalysisDataService::Instance().addToGroup(groupName, "wksp");
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
 
     removeGroup(groupName);
   }
@@ -393,15 +406,15 @@ public:
     ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByName);
     ::testing::DefaultValue<SortDir>::Set(SortDir::Ascending);
 
-    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(),
+    EXPECT_CALL(*m_mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(),
                 sortWorkspaces(SortCriteria::ByName, SortDir::Ascending))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSortWorkspacesByNameDescending() {
@@ -410,15 +423,15 @@ public:
     ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByName);
     ::testing::DefaultValue<SortDir>::Set(SortDir::Descending);
 
-    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(),
+    EXPECT_CALL(*m_mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(),
                 sortWorkspaces(SortCriteria::ByName, SortDir::Descending))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSortWorkspacesByLastModifiedAscending() {
@@ -427,15 +440,15 @@ public:
     ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByLastModified);
     ::testing::DefaultValue<SortDir>::Set(SortDir::Ascending);
 
-    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
-                                                SortDir::Ascending))
+    EXPECT_CALL(*m_mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
+                                                  SortDir::Ascending))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSortWorkspacesByLastModifiedDescending() {
@@ -444,206 +457,209 @@ public:
     ::testing::DefaultValue<SortCriteria>::Set(SortCriteria::ByLastModified);
     ::testing::DefaultValue<SortDir>::Set(SortDir::Descending);
 
-    EXPECT_CALL(*mockView.get(), getSortCriteria()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), getSortDirection()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
-                                                SortDir::Descending))
+    EXPECT_CALL(*m_mockView.get(), getSortCriteria()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSortDirection()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), sortWorkspaces(SortCriteria::ByLastModified,
+                                                  SortDir::Descending))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SortWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSaveSingleWorkspaceNexus() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::Nexus);
 
-    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::Nexus))
+    EXPECT_CALL(*m_mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), saveWorkspace(SaveFileType::Nexus))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSaveSingleWorkspaceASCIIv1() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCIIv1);
 
-    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCIIv1))
+    EXPECT_CALL(*m_mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), saveWorkspace(SaveFileType::ASCIIv1))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSaveSingleWorkspaceASCII() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCII);
 
-    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspace(SaveFileType::ASCII))
+    EXPECT_CALL(*m_mockView.get(), getSaveFileType()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), saveWorkspace(SaveFileType::ASCII))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSaveWorkspaceCollection() {
     ::testing::DefaultValue<StringList>::Set(StringList{"ws1", "ws2"});
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), saveWorkspaces(StringList{"ws1", "ws2"}))
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), saveWorkspaces(StringList{"ws1", "ws2"}))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveWorkspaceCollection);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveWorkspaceCollection);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testFilterWorkspaces() {
     ::testing::DefaultValue<std::string>::Set(std::string());
-    EXPECT_CALL(*mockView.get(), getFilterText()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), filterWorkspaces(std::string()))
+    EXPECT_CALL(*m_mockView.get(), getFilterText()).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), filterWorkspaces(std::string()))
         .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::FilterWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testRefreshWorkspaces() {
-    EXPECT_CALL(*mockView.get(), updateTree(_)).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::RefreshWorkspaces);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), updateTree(_)).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::RefreshWorkspaces);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   // Popup Context Menu Tests
   void testShowPopupMenu() {
-    EXPECT_CALL(*mockView.get(), popupContextMenu()).Times(Exactly(1));
-    presenter->notifyFromView(
+    EXPECT_CALL(*m_mockView.get(), popupContextMenu()).Times(Exactly(1));
+    m_presenter->notifyFromView(
         ViewNotifiable::Flag::PopulateAndShowWorkspaceContextMenu);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowWorkspaceData() {
-    EXPECT_CALL(*mockView.get(), showWorkspaceData()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowWorkspaceData);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showWorkspaceData()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowWorkspaceData);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowInstrumentView() {
-    EXPECT_CALL(*mockView.get(), showInstrumentView()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowInstrumentView);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showInstrumentView()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowInstrumentView);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testSaveToProgram() {
-    EXPECT_CALL(*mockView.get(), saveToProgram()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveToProgram);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), saveToProgram()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::SaveToProgram);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testPlotSpectrum() {
-    EXPECT_CALL(*mockView.get(), plotSpectrum(false)).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), plotSpectrum(false)).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrum);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testPlotSpectrumWithErrors() {
-    EXPECT_CALL(*mockView.get(), plotSpectrum(true)).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), plotSpectrum(true)).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowColourFillPlot() {
-    EXPECT_CALL(*mockView.get(), showColourFillPlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showColourFillPlot()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowDetectorsTable() {
-    EXPECT_CALL(*mockView.get(), showDetectorsTable()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showDetectorsTable()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowDetectorsTable);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowBoxDataTable() {
-    EXPECT_CALL(*mockView.get(), showBoxDataTable()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowBoxDataTable);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showBoxDataTable()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowBoxDataTable);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowVatesGUI() {
-    EXPECT_CALL(*mockView.get(), showVatesGUI()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showVatesGUI()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowVatesGUI);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowMDPlot() {
-    EXPECT_CALL(*mockView.get(), showMDPlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowMDPlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showMDPlot()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowMDPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowListData() {
-    EXPECT_CALL(*mockView.get(), showListData()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowListData);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showListData()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowListData);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowSpectrumViewer() {
-    EXPECT_CALL(*mockView.get(), showSpectrumViewer()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSpectrumViewer);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showSpectrumViewer()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSpectrumViewer);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowSliceViewer() {
-    EXPECT_CALL(*mockView.get(), showSliceViewer()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSliceViewer);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showSliceViewer()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSliceViewer);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowLogs() {
-    EXPECT_CALL(*mockView.get(), showLogs()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowLogs);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showLogs()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowLogs);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowSampleMaterialWindow() {
-    EXPECT_CALL(*mockView.get(), showSampleMaterialWindow()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSampleMaterialWindow);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showSampleMaterialWindow())
+        .Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSampleMaterialWindow);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowAlgorithmHistory() {
-    EXPECT_CALL(*mockView.get(), showAlgorithmHistory()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowAlgorithmHistory);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showAlgorithmHistory()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowAlgorithmHistory);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowTransposed() {
-    EXPECT_CALL(*mockView.get(), showTransposed()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowTransposed);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showTransposed()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowTransposed);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testConvertToMatrixWorkspace() {
-    EXPECT_CALL(*mockView.get(), convertToMatrixWorkspace()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ConvertToMatrixWorkspace);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), convertToMatrixWorkspace())
+        .Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ConvertToMatrixWorkspace);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testConvertMDHistoToMatrixWorkspace() {
-    EXPECT_CALL(*mockView.get(), convertMDHistoToMatrixWorkspace())
+    EXPECT_CALL(*m_mockView.get(), convertMDHistoToMatrixWorkspace())
         .Times(Exactly(1));
-    presenter->notifyFromView(
+    m_presenter->notifyFromView(
         ViewNotifiable::Flag::ConvertMDHistoToMatrixWorkspace);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testClearUBMatrix() {
@@ -657,30 +673,32 @@ public:
     setUB->setProperty("Workspace", "ws1");
     setUB->execute();
 
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(), executeAlgorithmAsync(_, _)).Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), getSelectedWorkspaceNames())
+        .Times(Exactly(1));
+    EXPECT_CALL(*m_mockView.get(), executeAlgorithmAsync(_, _))
+        .Times(Exactly(1));
 
-    presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
     AnalysisDataService::Instance().remove("ws1");
   }
 
   void testShowSurfacePlot() {
-    EXPECT_CALL(*mockView.get(), showSurfacePlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showSurfacePlot()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
   void testShowContourPlot() {
-    EXPECT_CALL(*mockView.get(), showContourPlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    EXPECT_CALL(*m_mockView.get(), showContourPlot()).Times(Exactly(1));
+    m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_mockView.get()));
   }
 
 private:
-  boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
-  WorkspacePresenterVN_sptr presenter;
+  boost::shared_ptr<NiceMock<MockWorkspaceDockView>> m_mockView;
+  WorkspacePresenterVN_sptr m_presenter;
 
   void createGroup(std::string groupName) {
     auto group =
