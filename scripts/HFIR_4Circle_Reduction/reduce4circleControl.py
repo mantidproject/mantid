@@ -24,8 +24,9 @@ from mantid.kernel import V3D
 
 DebugMode = True
 
-DET_X_SIZE = 256
-DET_Y_SIZE = 256
+# TODO - changed without configuration
+DET_X_SIZE = 512
+DET_Y_SIZE = 512
 
 MAX_SCAN_NUMBER = 100000
 
@@ -1475,7 +1476,9 @@ class CWSCDReductionControl(object):
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           DetectorGeometry='256,256',
+                                           # FIXME - Need UI input
+                                           DetectorGeometry='512,512',
+                                           InstrumentFilename='/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml',
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
         except RuntimeError as run_err:
