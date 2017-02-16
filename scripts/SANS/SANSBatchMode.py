@@ -200,14 +200,12 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             # When we set a new user file, that means that the combineDet feature could be invalid, 
             # ie if the detector under investigation changed in the user file. We need to change this
             # here too. But only if it is not None.
-            #if combinDet is not None:
-               # new_combineDet = ReductionSingleton().instrument.get_detector_selection()
-               # combineDet = su.get_correct_combinDet_setting(new_combineDet, instrument_name)
-
-
-        except (RunTimeError, ValueError) as e:
+            if combineDet is not None:
+                new_combineDet = ReductionSingleton().instrument.get_detector_selection()
+                combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
+        except (RuntimeError, ValueError) as e:
             sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
-                str(run['user_file']),str(e)))
+                str(run['user_file']), str(e)))
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
@@ -262,34 +260,42 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         final_name = sanitize_name(final_name)
 
         #convert the names from the default one, to the agreement
+        # This caused a renaming with the following logic
+        # | combinDet      |    Name HAB    |   Name LAB   | Name Merged  |
+        # | rear           |    +_rear      |     -        |     -        |
+        # | front          |      -         |    +_front   |     -        |
+        # | both           |    +_rear      |    +_front   |     -        |
+        # | merged         |    +_rear      |    +_front   |     +_merged |
+        # This is not great since it uses SANS2D terminology for all instruments
+
         names = [final_name]
         if combineDet == 'rear':
-            names = [final_name+'_rear']
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_rear')
+            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)
+            names = [new_name]
         elif combineDet == 'front':
-            names = [final_name+'_front']
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name+'_front')
+            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
+            names = [new_name]
         elif combineDet == 'both':
-            names = [final_name+'_front', final_name+'_rear']
             if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('front','rear')
+                rear_reduced = reduced.replace('front', 'rear')
             else: #if ins_name == 'lOQ':
-                rear_reduced = reduced.replace('HAB','main')
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name+'_front')
-            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace=final_name+'_rear')
+                rear_reduced = reduced.replace('HAB', 'main')
+            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
+            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+            names = [new_name_HAB, new_name_LAB]
         elif combineDet == 'merged':
-            names = [final_name + '_merged', final_name + '_rear',  final_name+'_front']
             if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('merged','rear')
-                front_reduced = reduced.replace('merged','front')
+                rear_reduced = reduced.replace('merged', 'rear')
+                front_reduced = reduced.replace('merged', 'front')
             else:
-                rear_reduced = reduced.replace('_merged','')
-                front_reduced = rear_reduced.replace('main','HAB')
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace= final_name + '_merged')
-            RenameWorkspace(InputWorkspace=rear_reduced,OutputWorkspace= final_name + '_rear')
-            RenameWorkspace(InputWorkspace=front_reduced,OutputWorkspace= final_name+'_front')
+                rear_reduced = reduced.replace('_merged', '')
+                front_reduced = rear_reduced.replace('main', 'HAB')
+            new_name_Merged = su.rename_workspace_correctly(ins_name, su.ReducedType.Merged, final_name, reduced)
+            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, front_reduced)
+            names = [new_name_Merged, new_name_LAB, new_name_HAB]
         else:
-            RenameWorkspace(InputWorkspace=reduced,OutputWorkspace=final_name)
+            RenameWorkspace(InputWorkspace=reduced, OutputWorkspace=final_name)
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?

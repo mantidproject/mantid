@@ -1978,6 +1978,96 @@ def get_user_file_name_options_with_txt_extension(user_file_name):
     return user_file_with_extension
 
 
+def get_correct_combinDet_setting(instrument_name, detector_selection):
+    """
+    We want to get the correct combinDet variable for batch reductions from a new detector selection.
+
+    @param instrument_name: the name of the intrument
+    @param detector_selection: a detector selection comes directly from the reducer
+    @return: a combinedet option
+    """
+    if detector_selection is None:
+        return None
+
+    instrument_name = instrument_name.upper()
+    # If we are dealing with LARMOR, then the correct combineDet selection is None
+    if instrument_name == "LARMOR":
+        return None
+
+    detector_selection = detector_selection.upper()
+    # If we are dealing with LOQ, then the correct combineDet selection is
+    if instrument_name == "LOQ":
+        if detector_selection == "MAIN":
+            new_combine_detector_selection = 'rear'
+        elif detector_selection == "HAB":
+            new_combine_detector_selection = 'front'
+        elif detector_selection == "MERGED":
+            new_combine_detector_selection = 'merged'
+        elif detector_selection == "BOTH":
+            new_combine_detector_selection = 'both'
+        else:
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
+                               "to combinDet.".format(detector_selection))
+        return new_combine_detector_selection
+
+    # If we are dealing with SANS2D, then the correct combineDet selection is
+    if instrument_name == "SANS2D":
+        if detector_selection == "REAR":
+            new_combine_detector_selection = 'rear'
+        elif detector_selection == "FRONT":
+            new_combine_detector_selection = 'front'
+        elif detector_selection == "MERGED":
+            new_combine_detector_selection = 'merged'
+        elif detector_selection == "BOTH":
+            new_combine_detector_selection = 'both'
+        else:
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion "
+                               "to combinDet.".format(detector_selection))
+        return new_combine_detector_selection
+    raise RuntimeError("SANSBatchReduce: Unknown instrument {0}.".format(instrument_name))
+
+
+class ReducedType(object):
+    class LAB(object):
+        pass
+
+    class HAB(object):
+        pass
+
+    class Merged(object):
+        pass
+
+
+def rename_workspace_correctly(instrument_name, reduced_type, final_name, workspace):
+    def get_suffix(inst_name, red_type):
+        if inst_name == "SANS2D":
+            if red_type is ReducedType.LAB:
+                suffix = "_rear"
+            elif red_type is ReducedType.HAB:
+                suffix = "_front"
+            elif red_type is ReducedType.Merged:
+                suffix = "_merged"
+            else:
+                raise RuntimeError("Unknown reduction type {0}.".format(red_type))
+            return suffix
+        elif inst_name == "LOQ":
+            if red_type is ReducedType.LAB:
+                suffix = "_main"
+            elif red_type is ReducedType.HAB:
+                suffix = "_hab"
+            elif red_type is ReducedType.Merged:
+                suffix = "_merged"
+            else:
+                raise RuntimeError("Unknown reduction type {0}.".format(red_type))
+            return suffix
+        else:
+            return ""
+    final_suffix = get_suffix(instrument_name, reduced_type)
+    complete_name = final_name + final_suffix
+    RenameWorkspace(InputWorkspace=workspace, OutputWorkspace=complete_name)
+    return complete_name
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
