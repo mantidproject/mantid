@@ -41,6 +41,10 @@ public:
   DataProcessorProcessingAlgorithm(
       const std::string &name, const std::vector<std::string> &prefix,
       const std::set<std::string> &blacklist = std::set<std::string>());
+  // Delegating constructor
+  DataProcessorProcessingAlgorithm(const std::string &name,
+                                   const std::string &prefix,
+                                   const std::string &blacklist = "");
   // Destructor
   virtual ~DataProcessorProcessingAlgorithm();
   // The number of output properties

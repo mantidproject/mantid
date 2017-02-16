@@ -1502,6 +1502,15 @@ public:
 DataProcessorWhiteList();
 void addElement(const std::string &, const std::string &, const std::string &, bool, const std::string &);
 };
+
+class DataProcessorProcessingAlgorithm
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+%End
+public:
+DataProcessorProcessingAlgorithm(const std::string &, const std::string &, const std::string &);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
