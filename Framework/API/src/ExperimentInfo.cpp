@@ -23,6 +23,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
@@ -208,10 +209,8 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
       // In the case of RectangularDetectorPixel the position is also affected
       // by the parameters scalex and scaly, but `getPos()` takes that into
       // account (if no DetectorInfo is set in the ParameterMap).
-      const auto &pos = det->getPos();
-      positions.emplace_back(pos[0], pos[1], pos[2]);
-      const auto &rot = det->getRotation();
-      rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
+      positions.emplace_back(toVector3d(det->getPos()));
+      rotations.emplace_back(toQuaterniond(det->getRotation()));
       pmap->clearParametersByName(ParameterMap::pos(), det.get());
       pmap->clearParametersByName(ParameterMap::posx(), det.get());
       pmap->clearParametersByName(ParameterMap::posy(), det.get());
