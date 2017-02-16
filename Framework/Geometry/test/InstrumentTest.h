@@ -523,6 +523,14 @@ public:
                      Instrument::ContainsState::Partial);
   }
 
+  void test_detectorIndex() {
+    auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
+    TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
+    TS_ASSERT_EQUALS(i->detectorIndex(5), 1);
+    TS_ASSERT_EQUALS(i->detectorIndex(6), 2);
+    TS_ASSERT_EQUALS(i->detectorIndex(7), 3);
+  }
+
   void test_makeLegacyParameterMap() {
     const auto &baseInstrument =
         ComponentCreationHelper::createTestInstrumentCylindrical(3);
