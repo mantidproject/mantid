@@ -706,6 +706,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().warning('[SPECIAL DB] Normalize current to workspace %s' % sample_ws_name)
             # temp_ws = self.get_workspace(sample_ws_name)
             if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
+                mtd[str(sample_ws_name)].run().integrateProtonCharge()
                 api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
                                        OutputWorkspace=sample_ws_name)
                 get_workspace(sample_ws_name).getRun()['gsas_monitor'] = 1
@@ -771,6 +772,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # ENDFOR (processing each)
 
         if self._normalisebycurrent is True:
+            mtd[str(sumRun)].run().integrateProtonCharge()
             api.NormaliseByCurrent(InputWorkspace=sumRun,
                                    OutputWorkspace=sumRun)
             get_workspace(sumRun).getRun()['gsas_monitor'] = 1
@@ -944,6 +946,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                    Tolerance=self.COMPRESS_TOL_TOF) # 100ns
             try:
                 if normalisebycurrent is True:
+                    mtd[str(output_wksp_list[split_index])].run().integrateProtonCharge()
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
                                            OutputWorkspace=output_wksp_list[split_index])
                     get_workspace(output_wksp_list[split_index]).getRun()['gsas_monitor'] = 1
