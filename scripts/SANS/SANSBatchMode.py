@@ -235,7 +235,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_user_file=original_user_file,
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
-            # When we set a new user file, that means that the combineDet feature could be invalid, 
+            # When we set a new user file, that means that the combineDet feature could be invalid,
             # ie if the detector under investigation changed in the user file. We need to change this
             # here too. But only if it is not None.
             if combineDet is not None:
