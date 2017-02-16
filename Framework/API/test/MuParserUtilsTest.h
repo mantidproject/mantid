@@ -23,7 +23,7 @@ public:
 private:
   static bool extraOneVarFunctionsDefined(const mu::Parser &parser) {
     const auto functionMap = parser.GetFunDef();
-    for (const auto pair : MuParserUtils::MUPARSER_CONSTANTS) {
+    for (const auto pair : MuParserUtils::MUPARSER_ONEVAR_FUNCTIONS) {
       const auto iterator = functionMap.find(pair.first);
       if (iterator == functionMap.end()) {
         return false;
