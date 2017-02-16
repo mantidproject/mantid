@@ -515,7 +515,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.protect(mainWS)
         return mainWS
 
-    def _monitorIndex(self)
+    def _monitorIndex(self):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following. 
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
