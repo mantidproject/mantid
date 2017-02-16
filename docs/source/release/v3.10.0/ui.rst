@@ -19,7 +19,7 @@ User Interface
 
 Instrument View
 ###############
- - Fixed a bug preventing the viewport from being correctly set when using a U correction.
+ - Fixed a bug preventing the some of the banks from being visible when using a U correction.
 
 Plotting Improvements
 #####################
