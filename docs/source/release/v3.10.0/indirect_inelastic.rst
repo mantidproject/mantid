@@ -16,6 +16,11 @@ Algorithms
 Data Analysis
 #############
 
+Conv Fit
+~~~~~~~~
+
+* All FABADA minimizer options are now accessible from the function browser.
+
 Jump Fit
 ~~~~~~~~
 
