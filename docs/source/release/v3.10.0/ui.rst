@@ -19,6 +19,7 @@ User Interface
 
 Instrument View
 ###############
+ - Fixed a bug preventing the viewport from being correctly set when using a U correction.
 
 Plotting Improvements
 #####################
