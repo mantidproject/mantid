@@ -87,8 +87,7 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptions,
-                     std::map<std::string, std::string>());
+  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, std::string());
   MOCK_CONST_METHOD0(getProcessingOptions, std::string());
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
 

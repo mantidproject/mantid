@@ -208,7 +208,7 @@ public:
         .Times(Exactly(1))
         .WillOnce(Return(group));
     EXPECT_CALL(mockMainPresenter, getTransmissionOptions(group)).Times(1);
-    presenter.getPreprocessingOptions();
+    presenter.getPreprocessingOptionsAsString();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));
