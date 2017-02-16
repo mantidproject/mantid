@@ -128,6 +128,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.twoTheta(0), 0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.twoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.twoTheta(4), std::logic_error);
   }
 
   // Legacy test via the workspace method detectorTwoTheta(), which might be
@@ -144,6 +147,9 @@ public:
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(0), -0.0199973, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(1), 0.0, 1e-6);
     TS_ASSERT_DELTA(detectorInfo.signedTwoTheta(2), 0.0199973, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(3), std::logic_error);
+    TS_ASSERT_THROWS(detectorInfo.signedTwoTheta(4), std::logic_error);
   }
 
   void test_position() {
