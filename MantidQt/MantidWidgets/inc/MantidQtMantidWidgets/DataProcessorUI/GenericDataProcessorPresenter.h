@@ -5,6 +5,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
@@ -56,8 +57,8 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<std::string, std::string> &postprocessMap =
@@ -71,13 +72,24 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
+  // Delegating constructor: pre-processing, no post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor);
+  // Delegating Constructor: pre-processing and post-processing
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const DataProcessorPreprocessMap &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;

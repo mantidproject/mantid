@@ -13,6 +13,10 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class DataProcessorCommandAdapter;
+class DataProcessorPreprocessMap;
+class DataProcessorProcessingAlgorithm;
+class DataProcessorPostprocessingAlgorithm;
+class DataProcessorWhiteList;
 
 /** QDataProcessorWidget : Provides an interface for processing table
 data.
@@ -47,6 +51,22 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS QDataProcessorWidget
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorProcessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorPreprocessMap &,
+                       const DataProcessorProcessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorProcessingAlgorithm &,
+                       const DataProcessorPostprocessingAlgorithm &,
+                       QWidget *parent);
+  QDataProcessorWidget(const DataProcessorWhiteList &,
+                       const DataProcessorPreprocessMap &,
+                       const DataProcessorProcessingAlgorithm &,
+                       const DataProcessorPostprocessingAlgorithm &,
+                       QWidget *parent);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar

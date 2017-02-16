@@ -1530,6 +1530,32 @@ class DataProcessorPostprocessingAlgorithm
 public:
 DataProcessorPostprocessingAlgorithm(const std::string &, const std::string &, const std::string &);
 };
+
+class QDataProcessorWidget : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
+%End
+public:
+QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
+                     const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+                     QWidget *parent );
+QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
+                     const MantidQt::MantidWidgets::DataProcessorPreprocessMap &,
+                     const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+                     QWidget *parent );
+QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
+                     const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &,
+                     QWidget *parent );
+QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
+                     const MantidQt::MantidWidgets::DataProcessorPreprocessMap &,
+                     const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
+                     const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &,
+                     QWidget *parent );
+private:
+QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
