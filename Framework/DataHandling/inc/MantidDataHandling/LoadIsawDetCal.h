@@ -82,7 +82,13 @@ private:
   Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
   std::vector<std::string> getFilenames();
 
-  void applyScalings(API::ExperimentInfo_sptr &expInfoWS, const std::vector<ComponentScaling> &rectangularDetectorScalings);
+  void doRotation(Kernel::V3D rX, Kernel::V3D rY,
+                  API::DetectorInfo &detectorInfo,
+                  boost::shared_ptr<const Geometry::IComponent> component,
+                  bool doWishCorrection = false);
+  void applyScalings(
+      API::ExperimentInfo_sptr &expInfoWS,
+      const std::vector<ComponentScaling> &rectangularDetectorScalings);
 };
 
 } // namespace DataHandling
