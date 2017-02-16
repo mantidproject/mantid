@@ -7,6 +7,7 @@ SANS Changes
 
 Bug Fixes
 ---------
+- Fixed wrong first spectrum number for LARMOR. The first non-monitor spectrum number is 11, but it had been set to 10.
 - Fixed LOQ Batch mode bug where geometry information was not saved out when using SaveCanSAS1D.
 - Fixed LOQ Batch mode bug where custom user file without a .txt ending was not being picked up.
 - Fixed Batch mode bug where the output name suffix was hardcoded to SANS2D. It now takes the individual instruments into account.
