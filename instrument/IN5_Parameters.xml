@@ -25,6 +25,23 @@
 			<value val="1"/>
 		</parameter>
 
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="Detector.detsum, duration, monitor.monsum, sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0" />
+		</parameter>
+
 	</component-link>
 
 </parameter-file>
