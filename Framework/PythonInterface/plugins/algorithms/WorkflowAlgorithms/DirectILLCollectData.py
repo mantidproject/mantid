@@ -411,7 +411,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if not eiInWS:
                 eiCalibrationDets = self.getProperty(common.PROP_DETS_AT_L2).value
                 eiCalibrationDets = common.convertListToWorkspaceIndices(eiCalibrationDets, mainWS)
-                monIndex = self._monitorIndex()
+                monIndex = self._monitorIndex(monWS)
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, eiCalibrationDets, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:
@@ -515,7 +515,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.protect(mainWS)
         return mainWS
 
-    def _monitorIndex(self):
+    def _monitorIndex(self, monWS):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
             NON_RECURSIVE = False  # Prevent recursive calls in the following. 
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
@@ -535,7 +535,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             if normalisationMethod == common.NORM_METHOD_MON:
                 sigmaMultiplier = \
                     self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-                monIndex = self._monitorIndex()
+                monIndex = self._monitorIndex(monWS)
                 normalizedWS = _normalizeToMonitor(mainWS, monWS, monEPPWS, sigmaMultiplier, monIndex, wsNames, wsCleanup,
                                                    subalgLogging)
             elif normalisationMethod == common.NORM_METHOD_TIME:
