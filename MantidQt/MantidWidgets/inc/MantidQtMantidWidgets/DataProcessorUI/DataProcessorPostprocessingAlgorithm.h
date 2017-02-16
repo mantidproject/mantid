@@ -39,6 +39,10 @@ public:
   DataProcessorPostprocessingAlgorithm(
       const std::string &name, const std::string &prefix = "",
       const std::set<std::string> &blacklist = std::set<std::string>());
+  // Delegating constructor
+  DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
+      const std::string &name, const std::string &prefix,
+      const std::string &blacklist);
   // Default constructor
   DataProcessorPostprocessingAlgorithm();
   // Destructor

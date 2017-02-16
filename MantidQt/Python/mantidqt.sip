@@ -1511,6 +1511,15 @@ class DataProcessorProcessingAlgorithm
 public:
 DataProcessorProcessingAlgorithm(const std::string &, const std::string &, const std::string &);
 };
+
+class DataProcessorPostprocessingAlgorithm
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
+%End
+public:
+DataProcessorPostprocessingAlgorithm(const std::string &, const std::string &, const std::string &);
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 

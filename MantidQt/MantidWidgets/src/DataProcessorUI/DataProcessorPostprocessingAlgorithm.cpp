@@ -30,6 +30,17 @@ DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
   m_outputProp = outputWsProperties.at(0);
 }
 
+/** Delegating constructor
+* @param name : The name of the post-processing algorithm
+* @param prefix : The prefix that will be added to the output workspace name
+* @param blacklist : The list of properties we don't want to show, as a string
+*/
+DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
+    const std::string &name, const std::string &prefix,
+    const std::string &blacklist)
+    : DataProcessorPostprocessingAlgorithm(name, prefix,
+                                           convertStringToSet(blacklist)) {}
+
 /** Default constructor: no algorithm defined */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm()
     : m_prefix(), m_inputProp(), m_outputProp() {}
