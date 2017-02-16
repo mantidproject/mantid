@@ -133,6 +133,9 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsNames = common.NameSource(wsNamePrefix, cleanupMode)
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
+        # The variables 'mainWS' and 'monWS shall hold the current main
+        # data throughout the algorithm.
+
         # Get input workspace.
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
@@ -149,6 +152,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._correctByKiKf(mainWS, wsNames,
                                      wsCleanup, subalgLogging)
 
+        # Rebinning.
+        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
+                                subalgLogging)
+
         # Detector efficiency correction.
         mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
                                                    wsCleanup, subalgLogging)
@@ -156,12 +163,11 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup,
                                       subalgLogging)
 
-        # Rebinning.
-        mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
-                                subalgLogging)
+        self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
+                                       subalgLogging)
 
-        mainWS = self._convertVerticalAxisAxis(mainWS, wsNames, wsCleanup, subalgLogging)
-
+        mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._transpose(mainWS, wsNames, wsCleanup, subalgLogging)
         self._finalize(mainWS, wsCleanup, report)
 
     def PyInit(self):
@@ -217,21 +223,39 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              validator=StringListValidator([
                                  common.REBIN_AUTO_ELASTIC_PEAK,
                                  common.REBIN_AUTO_MEDIAN_BIN_WIDTH,
-                                 common.REBIN_MANUAL_W,
-                                 common.REBIN_W_OFF]),
+                                 common.REBIN_MANUAL_W]),
                              direction=Direction.Input,
                              doc='Energy rebinnin mode.')
         self.setPropertyGroup(common.PROP_REBINNING_MODE_W, common.PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
-        self.declareProperty(name=common.PROP_VERTICAL_AXIS_UNITS,
-                             defaultValue=common.UNITS_SPECTRUM_NUMBER,
+        self.declareProperty(name=common.PROP_BINNING_MODE_Q,
+                             defaultValue=common.REBIN_AUTO_Q,
                              validator=StringListValidator([
-                                 common.UNITS_SPECTRUM_NUMBER,
-                                 common.UNITS_SCATTERING_ANGLE]),
+                                 common.REBIN_AUTO_Q,
+                                 common.REBIN_MANUAL_Q]),
                              direction=Direction.Input,
-                             doc='Unit for the horizontal axis for ' + common.PROP_OUTPUT_WS)
+                             doc='q rebinning mode.')
+        self.setPropertyGroup(common.PROP_BINNING_MODE_Q, common.PROPGROUP_REBINNING)
+        self.declareProperty(FloatArrayProperty(name=common.PROP_BINNING_PARAMS_Q),
+                             doc='Manual q rebinning parameters.')
+        self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, common.PROPGROUP_REBINNING)
+        self.declareProperty(name=common.PROP_TRANSPOSE_SAMPLE_OUTPUT,
+                             defaultValue=common.TRANSPOSING_ON,
+                             validator=StringListValidator([
+                                 common.TRANSPOSING_ON,
+                                 common.TRANSPOSING_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable ' + common.PROP_OUTPUT_WS + ' transposing.')
+        self.declareProperty(WorkspaceProperty(
+            name=common.PROP_OUTPUT_THETA_W_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output workspace for reduced S(theta, DeltaE).')
+        self.setPropertyGroup(common.PROP_OUTPUT_THETA_W_WS,
+                              common.PROPGROUP_OPTIONAL_OUTPUT)
 
     def validateInputs(self):
         """Check for issues with user input."""
@@ -265,20 +289,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                          EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return energyConvertedWS
-
-    def _convertVerticalAxis(self, mainWS, wsNames, wsCleanup, subalgLogging):
-        """If requested, convert the spectrum axis to theta."""
-        verticalUnit = self.getProperty(common.PROP_VERTICAL_AXIS_UNITS).value
-        if verticalUnit == common.UNITS_SPECTRUM_NUMBER:
-            return mainWS
-        thetaWSName = wsNames.withSuffix('in_scattering_angles')
-        thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
-                                      OutputWorkspace=thetaWSName,
-                                      Target='Theta',
-                                      EMode='Direct',
-                                      EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        return thetaWS
 
     def _correctByDetectorEfficiency(self, mainWS, wsNames, wsCleanup,
                                      subalgLogging):
@@ -326,6 +336,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.protect(mainWS)
         return mainWS
 
+
     def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Normalize to vanadium workspace."""
         vanaWS = self.getProperty(common.PROP_VANA_WS).value
@@ -337,6 +348,21 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                   EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return vanaNormalizedWS
+
+    def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,
+                                  subalgLogging):
+        """If requested, convert the spectrum axis to theta and save the result
+        into the proper output property.
+        """
+        thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).valueAsStr
+        if thetaWSName:
+            thetaWSName = self.getProperty(common.PROP_OUTPUT_THETA_W_WS).value
+            thetaWS = ConvertSpectrumAxis(InputWorkspace=mainWS,
+                                          OutputWorkspace=thetaWSName,
+                                          Target='Theta',
+                                          EMode='Direct',
+                                          EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
 
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
                   subalgLogging):
@@ -364,6 +390,44 @@ class DirectILLReduction(DataProcessorAlgorithm):
         rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
         wsCleanup.cleanup(mainWS)
         return rebinnedWS
+
+    def _sOfQW(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Run the SofQWNormalisedPolygon algorithm."""
+        sOfQWWSName = wsNames.withSuffix('sofqw')
+        qRebinningMode = self.getProperty(common.PROP_BINNING_MODE_Q).value
+        if qRebinningMode == common.REBIN_AUTO_Q:
+            qMin, qMax = _minMaxQ(mainWS)
+            dq = _deltaQ(mainWS)
+            qBinning = '{0}, {1}, {2}'.format(qMin, dq, qMax)
+        else:
+            qBinning = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
+        Ei = mainWS.run().getLogData('Ei').value
+        sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
+                                         OutputWorkspace=sOfQWWSName,
+                                         QAxisBinning=qBinning,
+                                         EMode='Direct',
+                                         EFixed=Ei,
+                                         ReplaceNaNs=False,
+                                         EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return sOfQWWS
+
+    def _transpose(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Transpose the final output workspace."""
+        transposing = self.getProperty(common.PROP_TRANSPOSE_SAMPLE_OUTPUT).value
+        if transposing == common.TRANSPOSING_OFF:
+            return mainWS
+        pointDataWSName = wsNames.withSuffix('point_data_converted')
+        pointDataWS = ConvertToPointData(InputWorkspace=mainWS,
+                                         OutputWorkspace=pointDataWSName,
+                                         EnableLogging=subalgLogging)
+        transposedWSName = wsNames.withSuffix('transposed')
+        transposedWS = Transpose(InputWorkspace=pointDataWS,
+                                 OutputWorkspace=transposedWSName,
+                                 EnableLogging=subalgLogging)
+        wsCleanup.cleanup(pointDataWS)
+        wsCleanup.cleanup(mainWS)
+        return transposedWS
 
 
 AlgorithmFactory.subscribe(DirectILLReduction)
