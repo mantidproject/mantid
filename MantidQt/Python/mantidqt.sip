@@ -20,6 +20,7 @@
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 %Include qwttypes.sip
+%Include stdtypes.sip
 
 %ModuleHeaderCode
 #include "MantidQtAPI/PythonSystemHeader.h"
@@ -1443,7 +1444,6 @@ MantidQt::RefDetectorViewer::RefIVConnections* RefMatrixWSImageView::getConnecti
 }; // end namespace
 }; // end namespace
 
-
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -1488,6 +1488,22 @@ public:
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 
+
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+class DataProcessorWhiteList
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
+%End
+public:
+DataProcessorWhiteList();
+void addElement(const std::string &, const std::string &, const std::string &, bool, const std::string &);
+};
+}; // end namespace MantidWidgets
+}; // end namespace MantidQt
 
 namespace MantidQt
 {
