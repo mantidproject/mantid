@@ -1,13 +1,16 @@
-#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+
+
 def reportUnitCell(peaks_ws):
     latt = peaks_ws.sample().getOrientedLattice()
-    print "-- Unit Cell --"
-    print latt.a()
-    print latt.b()
-    print latt.c()
-    print latt.alpha()
-    print latt.beta()
-    print latt.gamma()
+    print("-- Unit Cell --")
+    print(latt.a())
+    print(latt.b())
+    print(latt.c())
+    print(latt.alpha())
+    print(latt.beta())
+    print(latt.gamma())
+
 
 #
 # Exclude the monitors when loading the raw SXD file.  This avoids
@@ -43,17 +46,17 @@ use_Niggli_lat_par = False
 #
 if  use_fft:
     FindUBUsingFFT(PeaksWorkspace=peaks_qLab, MinD='3', MaxD='5',Tolerance=0.08)
-    print '\nNiggli cell found from FindUBUsingFFT:'
+    print('\nNiggli cell found from FindUBUsingFFT:')
 
 if use_cubic_lat_par:
     FindUBUsingLatticeParameters(PeaksWorkspace=peaks_qLab, a=5.6402,b=5.6402,c=5.6402,
                                  alpha=90,beta=90,gamma=90,NumInitial=25,Tolerance=0.12)
-    print  '\nCubic cell found directly from FindUBUsingLatticeParameters'
+    print('\nCubic cell found directly from FindUBUsingLatticeParameters')
 
 if use_Niggli_lat_par:
     FindUBUsingLatticeParameters(PeaksWorkspace=peaks_qLab, a=3.9882,b=3.9882,c=3.9882,
                                  alpha=60,beta=60,gamma=60,NumInitial=25,Tolerance=0.12)
-    print '\nNiggli cell found from FindUBUsingLatticeParameters:'
+    print('\nNiggli cell found from FindUBUsingLatticeParameters:')
 
 reportUnitCell(peaks_qLab)
 
@@ -68,5 +71,5 @@ peaks_qLab_Integrated = IntegratePeaksMD(InputWorkspace=QLab, PeaksWorkspace=pea
 
 binned=BinMD(InputWorkspace=QLab,AlignedDim0='Q_lab_x,-15,15,200',AlignedDim1='Q_lab_y,-15,15,200',AlignedDim2='Q_lab_z,-15,15,200')
 
-print 'The final result is:'
+print('The final result is:')
 reportUnitCell(peaks_qLab)
