@@ -11,15 +11,7 @@
 #include <vector>
 
 namespace Mantid {
-
-<<<<<<< 208a5dde8dfafc5b56bfdaa2c35baa69748103b0
-using specnum_t = int32_t;
-using detid_t = int32_t;
-=======
-namespace Beamline {
->>>>>>> Re #18522. Use new type-safe detector IDs in spectrum numbers.
 class SpectrumDefinition;
-
 namespace Indexing {
 class GlobalSpectrumIndex;
 class SpectrumIndexSet;
