@@ -1,7 +1,7 @@
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-// Attention: LoadHelper includes "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -46,28 +46,6 @@ int LoadILLReflectometry::confidence(
 }
 
 //----------------------------------------------------------------------------------------------
-/** Validate inputs
- * @returns a string map containing the error messages
-  */
-std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
-  std::map<std::string, std::string> result;
-  // check input file
-  const std::string fileName =
-      getProperty("Filename"); // might be property value
-  if (!fileName.empty() &&
-      (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
-    result["Filename"] = "Instrument not supported.";
-  // check user defined angle
-  const double thetaUserDefined = getProperty("ThetaUserDefined");
-  const std::string angleOption = getProperty("Theta");
-  if (angleOption == "theta" && !thetaUserDefined)
-    result["ThetaUserDefined"] =
-        "User defined theta option requires an input value";
-
-  return result;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
@@ -88,22 +66,53 @@ void LoadILLReflectometry::init() {
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(1.0);
-  declareProperty(
-      "ThetaUserDefined", EMPTY_DBL(), positiveDouble,
-      "If theta was selected, the user must provide an angle in degree");
+  declareProperty("ThetaUserDefined", EMPTY_DBL(), positiveDouble,
+                  "For selected Theta equals theta, the user must provide an "
+                  "angle in degree");
 
-  const std::vector<std::string> unit{"Wavelength", "TimeOfFlight"};
+  const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
-                  boost::make_shared<StringListValidator>(unit));
+                  boost::make_shared<StringListValidator>(availableUnits),
+                  "X unit of the OutputWorkspace");
 
   const std::vector<std::string> scattering{"coherent", "incoherent"};
   declareProperty("ScatteringType", "incoherent",
-                  boost::make_shared<StringListValidator>(scattering));
+                  boost::make_shared<StringListValidator>(scattering),
+                  "Scattering type used to calculate the scattering angle");
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", "",
                                                     FileProperty::OptionalLoad,
                                                     ".nxs", Direction::Input),
                   "File path of the direct beam file to load");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Validate inputs
+ * @returns a string map containing the error messages
+  */
+std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
+  std::map<std::string, std::string> result;
+  // check input file
+  const std::string fileName = getProperty("Filename");
+  if (!fileName.empty() &&
+      (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
+    result["Filename"] = "Instrument not supported.";
+  // check user defined angle
+  const double thetaUserDefined{getProperty("ThetaUserDefined")};
+  const std::string angleOption = getProperty("Theta");
+  if ((angleOption == "theta") && (thetaUserDefined == EMPTY_DBL()))
+    result["ThetaUserDefined"] =
+        "User defined theta option requires an input value";
+  if ((angleOption != "theta") && (thetaUserDefined != EMPTY_DBL()))
+    result["ThetaUserDefined"] =
+        "No input value required for user defined theta option";
+  // check direct beam file
+  const std::string directBeam = getProperty("DirectBeam");
+  if (!directBeam.empty() &&
+      (m_supportedInstruments.find(directBeam) != m_supportedInstruments.end()))
+    result["DirectBeam"] = "Instrument not supported.";
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -188,7 +197,7 @@ void LoadILLReflectometry::exec() {
   g_log.debug() << "Channel width: " << m_channelWidth << '\n';
   g_log.debug("Loading data...");
   loadData(firstEntry, monitorsData, xVals);
-  const std::string unit{getPropertyValue("XUnit")};
+  const std::string unit = getPropertyValue("XUnit");
   if (descriptor.pathExists("/entry0/monitor1/time_of_flight") &&
       (unit == "Wavelength")) {
     auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
@@ -199,6 +208,8 @@ void LoadILLReflectometry::exec() {
                                                            m_localWorkspace);
     convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
                                                            m_localWorkspace);
+    convertToWavelength->setPropertyValue("Target", "Wavelength");
+    convertToWavelength->setProperty("AlignBins", true);
     convertToWavelength->execute();
   }
   // Set the output workspace property
@@ -287,14 +298,11 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
 std::vector<int>
 LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
                                         std::string monitor_data) {
-
   NXData dataGroup = entry.openNXData(monitor_data);
   NXInt data = dataGroup.openIntData();
   // load the counts from the file into memory
   data.load();
-
   std::vector<int> monitor(data(), data() + data.size());
-
   return monitor;
 }
 
@@ -309,12 +317,10 @@ std::vector<std::vector<int>>
 LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
   // read in the data
   g_log.debug("Fetching monitor data...");
-
   // vector of monitors with one entry
   std::vector<std::vector<int>> monitors{
       loadSingleMonitor(entry, "monitor1/data"),
       loadSingleMonitor(entry, "monitor2/data")};
-
   return monitors;
 }
 
@@ -331,28 +337,25 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
         m_localWorkspace->run().getProperty("Chopper1.phase"));
 
     auto tof_1 = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "monitor1.time_of_flight_2")); /* PAR1[96] */
+        m_localWorkspace->run().getProperty("monitor1.time_of_flight_2"));
 
     auto POFF = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "VirtualChopper.poff")); /* par1[54] */
+        m_localWorkspace->run().getProperty("VirtualChopper.poff"));
 
     auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "VirtualChopper.open_offset")); /* par1[56] */
+        m_localWorkspace->run().getProperty("VirtualChopper.open_offset"));
 
     auto chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper1_speed_average")); /* PAR2[109] */
+            "VirtualChopper.chopper1_speed_average"));
 
     auto chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper2_speed_average")); /* PAR2[109] */
+            "VirtualChopper.chopper2_speed_average"));
 
     auto chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper2_phase_average")); /* PAR2[114] */
+            "VirtualChopper.chopper2_phase_average"));
 
     std::string chopper;
 
@@ -363,12 +366,10 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
       // use Chopper values instead
 
       chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty(
-              "Chopper1.rotation_speed")); /* PAR2[109] */
+          m_localWorkspace->run().getProperty("Chopper1.rotation_speed"));
 
       chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty(
-              "Chopper2.rotation_speed")); /* PAR2[109] */
+          m_localWorkspace->run().getProperty("Chopper2.rotation_speed"));
 
       chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
           m_localWorkspace->run().getProperty("Chopper2.phase"));
@@ -495,19 +496,26 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
 
 /**
  * Utility to place detector in space, according to data file
- *
- * @param entry :: The first entry of the Nexus file
  */
 void LoadILLReflectometry::placeDetector() {
-  g_log.debug() << "Move detector \n";
+  g_log.debug() << "Move the detector bank \n";
 
-  double angle =
-      m_loader.getPropertyFromRun<double>(m_localWorkspace, "dan.value");
-  g_log.debug() << "Detector angle in degree " << angle << '\n';
-
-  double sample_angle =
-      m_loader.getPropertyFromRun<double>(m_localWorkspace, "san.value");
-  g_log.debug() << "Sample angle in degree " << sample_angle << '\n';
+  std::string thetaIn = getPropertyValue("Theta");
+  double theta = getProperty("ThetaUserDefined");
+  if (theta == EMPTY_DBL()) {
+    const std::string name = thetaIn + ".value";
+    if (m_localWorkspace->run().hasProperty(name)) {
+      theta = m_localWorkspace->run().getPropertyValueAsType<double>(name);
+    } else {
+      throw std::runtime_error("Theta is not defined");
+    }
+  }
+  g_log.debug() << "2Theta " << 2. * theta << " degrees\n";
+  double twotheta_rad = (2. * theta) * M_PI / 180.0;
+  // incident theta angle for being able to call the algorithm
+  // ConvertToReflectometryQ
+  m_localWorkspace->mutableRun().addProperty("stheta",
+                                             double(twotheta_rad / 2.));
 
   auto dist = dynamic_cast<PropertyWithValue<double> *>(
       m_localWorkspace->run().getProperty("det.value"));
@@ -602,22 +610,21 @@ void LoadILLReflectometry::placeDetector() {
 
   */
 
-  std::string componentName("uniq_detector");
-  V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-
-  double angle_rad = (2. * sample_angle) * M_PI / 180.0;
-  // incident theta angle for being able to call the algorithm
-  // ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta", double(angle_rad / 2.));
-  g_log.debug() << "2Theta " << 2. * sample_angle << " degrees\n";
-
-  // move to new position
-  V3D newpos(distance * sin(angle_rad), pos.Y(), distance * cos(angle_rad));
-  m_loader.moveComponent(m_localWorkspace, componentName, newpos);
-  // apply a local rotation to stay perpendicular to the beam
-  const V3D axis(0.0, 1.0, 0.0);
-  Quat rotation(sample_angle, axis);
-  m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+  try {
+    const std::string componentName = "bank";
+    V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+    V3D newpos(distance * sin(twotheta_rad), pos.Y(),
+               distance * cos(twotheta_rad));
+    m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+    // apply a local rotation to stay perpendicular to the beam
+    const V3D axis(0.0, 1.0, 0.0);
+    Quat rotation(2. * theta, axis);
+    m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
+  } catch (std::runtime_error &e) {
+    g_log.information()
+        << "Unable to move D17, errors might be due to the instrument definition file "
+        << e.what() << '\n';
+  }
 }
 } // namespace DataHandling
 } // namespace Mantid
