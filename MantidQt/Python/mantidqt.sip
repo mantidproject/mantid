@@ -1503,6 +1503,16 @@ DataProcessorWhiteList();
 void addElement(const std::string &, const std::string &, const std::string &, bool, const std::string &);
 };
 
+class DataProcessorPreprocessMap
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessMap.h"
+%End
+public:
+DataProcessorPreprocessMap();
+void addElement(const std::string &, const std::string &, const std::string &, const std::string &);
+};
+
 class DataProcessorProcessingAlgorithm
 {
 %TypeHeaderCode
