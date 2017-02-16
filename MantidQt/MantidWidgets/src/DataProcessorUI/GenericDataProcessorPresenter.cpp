@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -31,6 +32,28 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
+namespace {
+std::map<std::string, std::string>
+convertStringToMap(const std::string &options) {
+
+  std::vector<std::string> optionsVec;
+  std::map<std::string, std::string> optionsMap;
+
+  boost::split(optionsVec, options, boost::is_any_of(";"));
+
+  for (const auto &option : optionsVec) {
+
+    std::vector<std::string> opt;
+    boost::split(opt, option, boost::is_any_of(","));
+
+	std::vector<std::string> temp(opt.begin() + 1, opt.end());
+
+    optionsMap[opt[0]] = boost::algorithm::join(temp, ",");
+  }
+  return optionsMap;
+}
+}
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -268,7 +291,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
   const std::map<std::string, std::string> preprocessingOptionsMap =
-      m_mainPresenter->getPreprocessingOptions();
+      convertStringToMap(m_mainPresenter->getPreprocessingOptionsAsString());
   // Global processing options as a string
   const std::string processingOptions = m_mainPresenter->getProcessingOptions();
   // Global post-processing options as a string
@@ -590,7 +613,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = m_mainPresenter->getPreprocessingOptions();
+    globalOptions =
+        convertStringToMap(m_mainPresenter->getPreprocessingOptionsAsString());
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {

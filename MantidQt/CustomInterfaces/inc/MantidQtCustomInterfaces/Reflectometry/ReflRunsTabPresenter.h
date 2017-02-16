@@ -74,7 +74,7 @@ public:
   void giveUserCritical(std::string prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
   /// Global options (inherited from DataProcessorMainPresenter)
-  std::map<std::string, std::string> getPreprocessingOptions() const override;
+  std::string getPreprocessingOptionsAsString() const override;
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
   std::string getTimeSlicingOptions() const override;

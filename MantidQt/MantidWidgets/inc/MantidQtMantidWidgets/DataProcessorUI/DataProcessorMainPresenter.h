@@ -53,9 +53,8 @@ public:
   virtual void giveUserCritical(std::string prompt, std::string title) = 0;
   virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
 
-  /// Return global options for pre-processing
-  virtual std::map<std::string, std::string>
-  getPreprocessingOptions() const = 0;
+  /// Return global options for pre-processing as a string
+  virtual std::string getPreprocessingOptionsAsString() const = 0;
   /// Return global options for reduction
   virtual std::string getProcessingOptions() const = 0;
   /// Return global options for post-processing

@@ -1556,6 +1556,29 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
 private:
 QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 };
+
+class DataProcessorMainPresenter
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+%End
+public:
+virtual std::string askUserString(const std::string &prompt, const std::string &title, const std::string &defaultValue) = 0;
+virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
+virtual void giveUserWarning(std::string prompt, std::string title) = 0;
+virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
+
+virtual std::string getPreprocessingOptionsAsString() const = 0;
+virtual std::string getProcessingOptions() const = 0;
+virtual std::string getPostprocessingOptions() const = 0;
+
+virtual ~DataProcessorMainPresenter();
+
+private:
+DataProcessorMainPresenter();
+
+};
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 

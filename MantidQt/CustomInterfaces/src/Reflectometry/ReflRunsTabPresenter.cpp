@@ -356,18 +356,18 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
+/** Requests global pre-processing options as a string. Options are supplied by
+* the main
 * presenter
 * @return :: Global pre-processing options
 */
-std::map<std::string, std::string>
-ReflRunsTabPresenter::getPreprocessingOptions() const {
+std::string ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
-  std::map<std::string, std::string> options;
-  options["Transmission Run(s)"] =
+  std::string optionsStr =
+      "Transmission Run(s), " +
       m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 
-  return options;
+  return optionsStr;
 }
 
 /** Requests global processing options. Options are supplied by the main
