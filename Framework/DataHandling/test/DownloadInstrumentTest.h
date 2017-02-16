@@ -117,14 +117,6 @@ public:
     cleanupDiretory(localInstDir);
   }
 
-  void test_execTwoTimesInARow() {
-    std::string localInstDir =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
-    cleanupDiretory(localInstDir);
-
-    cleanupDiretory(localInstDir);
-  }
-
   void test_execOrphanedFile() {
     std::string localInstDir =
         Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
@@ -147,6 +139,7 @@ public:
                orphanedFile.exists() == false);
 
     deleteFile(orphanedFilePath.toString());
+    cleanupDiretory(localInstDir);
   }
 
   int runDownloadInstrument() {
