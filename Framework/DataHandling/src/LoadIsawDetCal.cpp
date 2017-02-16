@@ -424,6 +424,12 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
   Quat Rot = Q2 * Q1;
 
   // Then find the corresponding relative position
+
+  // TODO: This needs checking. It would be expected that parent->getRot()
+  // should be all that is required to get the absolute rotation. This will
+  // affect WISH, but as there are no tests for this it is difficult to verify.
+  // The absolute rotation, when calling comp->getRotation, is taken as
+  // grandparentRot * parentRot * childrot
   const auto parent = comp->getParent();
   if (parent) {
     Quat rot0 = parent->getRelativeRot();
