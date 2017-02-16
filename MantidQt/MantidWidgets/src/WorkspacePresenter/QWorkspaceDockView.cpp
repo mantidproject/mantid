@@ -328,6 +328,8 @@ void QWorkspaceDockView::enableDeletePrompt(bool enable) {
 
 bool QWorkspaceDockView::isPromptDelete() const { return m_promptDelete; }
 
+bool QWorkspaceDockView::isFocused() const { return m_tree->hasFocus(); }
+
 bool QWorkspaceDockView::deleteConfirmation() const {
   return askUserYesNo(
       "Delete Workspaces",
