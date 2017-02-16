@@ -177,13 +177,13 @@ if ( WIN32 ) # General windows environment
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
               EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
               EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt"
-              EXCLUDE PATTERN "test/*" EXCLUDE )
+              EXCLUDE PATTERN "test" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
               EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
               EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt"
-              EXCLUDE PATTERN "test/*" EXCLUDE )
+              EXCLUDE PATTERN "test" EXCLUDE )
   endif ()
 
   # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
@@ -194,7 +194,7 @@ else ()
   install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc"
             EXCLUDE PATTERN ".svn" EXCLUDE PATTERN ".gitignore"
             EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt"
-            EXCLUDE PATTERN "test/*" EXCLUDE )
+            EXCLUDE PATTERN "test" EXCLUDE )
 endif ()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.
