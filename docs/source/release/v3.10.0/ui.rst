@@ -39,6 +39,10 @@ Bugs Resolved
 SliceViewer Improvements
 ------------------------
 
+VSI Improvments
+---------------
+Update ParaView to v5.3.0-RC1
+
 |
 
 Full list of
