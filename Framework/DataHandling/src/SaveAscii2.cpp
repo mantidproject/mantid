@@ -1,10 +1,10 @@
-#include <set>
 #include <fstream>
+#include <set>
 
-#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -14,8 +14,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,7 +28,7 @@ using namespace API;
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
+      m_writeID(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -123,7 +123,6 @@ void SaveAscii2::exec() {
   m_ws = getProperty("InputWorkspace");
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
-  m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
@@ -159,6 +158,10 @@ void SaveAscii2::exec() {
 
   // Check whether we need to write the fourth column
   m_writeDX = getProperty("WriteXError");
+  if (!m_ws->hasDx(0) && m_writeDX) {
+    throw std::runtime_error(
+        "x data errors have been requested but do not exist.");
+  }
   const std::string choice = getPropertyValue("Separator");
   const std::string custom = getPropertyValue("CustomSeparator");
   // If the custom separator property is not empty, then we use that under any
@@ -294,27 +297,20 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(*spectraItr);
   for (int bin = 0; bin < m_nBins; bin++) {
     if (!m_isCommonBins) // checking for ragged workspace
     {
-      file << (m_ws->readX(*spectraItr)[bin] +
-               m_ws->readX(*spectraItr)[bin + 1]) /
-                  2;
-    }
-
-    else if (m_isHistogram & m_isCommonBins) // bin centres,
-    {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
-    }
-
-    else {
-      file << m_ws->readX(0)[bin];
+      file << pointsSpec[bin];
+    } else {
+      file << points0[bin];
     }
     file << m_sep;
-    file << m_ws->readY(*spectraItr)[bin];
+    file << m_ws->y(*spectraItr)[bin];
 
     file << m_sep;
-    file << m_ws->readE(*spectraItr)[bin];
+    file << m_ws->e(*spectraItr)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];
@@ -340,24 +336,20 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(spectraIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
-    if (m_isHistogram & m_isCommonBins) // bin centres,
+    if (m_isCommonBins) {
+      file << points0[bin];
+    } else // checking for ragged workspace
     {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
-    } else if (!m_isCommonBins) // checking for ragged workspace
-    {
-      file << (m_ws->readX(spectraIndex)[bin] +
-               m_ws->readX(spectraIndex)[bin + 1]) /
-                  2;
-    } else // data points
-    {
-      file << m_ws->readX(0)[bin];
+      file << pointsSpec[bin];
     }
     file << m_sep;
-    file << m_ws->readY(spectraIndex)[bin];
+    file << m_ws->y(spectraIndex)[bin];
 
     file << m_sep;
-    file << m_ws->readE(spectraIndex)[bin];
+    file << m_ws->e(spectraIndex)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];

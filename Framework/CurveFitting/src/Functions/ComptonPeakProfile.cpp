@@ -119,9 +119,10 @@ void ComptonPeakProfile::setWorkspace(
   const double trec = detpar.l1 / v1 + detpar.l2 / v2;
 
   // Compute lorentz width due to in Y due to spread in energy hwhm_lorentz
-  const double dELorentz = ConvertToYSpace::getComponentParameter(
-      workspace->getDetector(m_wsIndex), workspace->constInstrumentParameters(),
-      "hwhm_lorentz");
+  const auto &det = workspace->spectrumInfo().detector(m_wsIndex);
+  const auto &pmap = workspace->constInstrumentParameters();
+  const double dELorentz =
+      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   double yplus(0.0), yminus(0.0), dummy(0.0);
   detpar.efixed += dELorentz;
   ConvertToYSpace::calculateY(yplus, dummy, dummy, m_mass, trec, k1, v1,
