@@ -1553,6 +1553,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &,
                      const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &,
                      QWidget *parent );
+void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
 private:
 QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 };

@@ -13,6 +13,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 class DataProcessorCommandAdapter;
+class DataProcessorMainPresenter;
 class DataProcessorPreprocessMap;
 class DataProcessorProcessingAlgorithm;
 class DataProcessorPostprocessingAlgorithm;
@@ -110,6 +111,9 @@ public:
   std::string getClipboard() const override;
 
   DataProcessorPresenter *getPresenter() const override;
+
+  // Forward a main presenter to this view's presenter
+  void accept(DataProcessorMainPresenter *);
 
 private:
   // initialise the interface

@@ -1,6 +1,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandAdapter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
@@ -446,6 +447,14 @@ std::string QDataProcessorWidget::getClipboard() const {
 * Clear the progress
 */
 void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
+
+/** Forward a main presenter to this view's presenter
+* @param mainPresenter :: the main presenter
+*/
+void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
+
+  m_presenter->accept(mainPresenter);
+}
 
 } // namespace MantidWidgets
 } // namespace Mantid
