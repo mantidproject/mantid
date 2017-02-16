@@ -102,11 +102,9 @@ void CopyInstrumentParameters::exec() {
     // from ParameterMap.
     m_receivingWorkspace->readParameterMap(targMap.asString());
   } else {
-    // unchanged Copy parameters
-    m_receivingWorkspace->replaceInstrumentParameters(
-        m_givingWorkspace->constInstrumentParameters());
-    m_receivingWorkspace->mutableDetectorInfo() =
-        m_givingWorkspace->detectorInfo();
+    // Same base instrument, copying the instrument is equivalent to copying the
+    // parameters in the ParameterMap and the DetectorInfo.
+    m_receivingWorkspace->setInstrument(m_givingWorkspace->getInstrument());
   }
 }
 

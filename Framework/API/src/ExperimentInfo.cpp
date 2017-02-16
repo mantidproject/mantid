@@ -520,22 +520,6 @@ void ExperimentInfo::populateInstrumentParameters() {
 }
 
 /**
- * Replaces current parameter map with a copy of the given map
- * Careful: Parameters that are stored in DetectorInfo are not automatically
- * handled.
- * @ pmap const reference to parameter map whose copy replaces the current
- * parameter map
- */
-void ExperimentInfo::replaceInstrumentParameters(
-    const Geometry::ParameterMap &pmap) {
-  populateIfNotLoaded();
-  m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
-  this->m_parmap.reset(new ParameterMap(pmap));
-  m_parmap->setDetectorInfo(m_detectorInfo);
-}
-
-/**
  * Caches a lookup for the detector IDs of the members that are part of the same
  * group
  * @param mapping :: A map between a detector ID and the other IDs that are part
