@@ -31,7 +31,8 @@ using namespace Mantid::Geometry;
 
 using namespace std;
 
-const int64_t TOLERANCE(1000000);  // splitter time tolerance in nano-second.  this value has resolution to 10000Hz
+const int64_t TOLERANCE(1000000); // splitter time tolerance in nano-second.
+                                  // this value has resolution to 10000Hz
 
 namespace Mantid {
 namespace Algorithms {
@@ -438,8 +439,7 @@ void FilterEvents::processSplittersWorkspace() {
 /** process the input splitters given by a TableWorkspace
  * @brief FilterEvents::processTableSplittersWorkspace
  */
-void FilterEvents::processTableSplittersWorkspace()
-{
+void FilterEvents::processTableSplittersWorkspace() {
   // check input workspace's validity
   assert(m_splitterTableWorkspace);
 
@@ -451,54 +451,49 @@ void FilterEvents::processTableSplittersWorkspace()
   int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
 
   std::map<std::string, int> m_targetIndexMap;
-  int max_target_index = 1;  // start from 1
+  int max_target_index = 1; // start from 1
 
   // convert TableWorkspace's values to vectors
   size_t num_rows = m_splitterTableWorkspace->rowCount();
-  for (size_t irow = 0; irow < num_rows; ++irow)
-  {
+  for (size_t irow = 0; irow < num_rows; ++irow) {
     // get start and stop time
     double start_time = m_splitterTableWorkspace->cell_cast<double>(irow, 0);
     double stop_time = m_splitterTableWorkspace->cell_cast<double>(irow, 1);
     std::string target = m_splitterTableWorkspace->cell<std::string>(irow, 2);
 
-    int64_t start_64 = filter_shift_time + static_cast<int64_t>(start_time * 1.E9);
-    int64_t stop_64 = filter_shift_time + static_cast<int64_t>(stop_time * 1.E9);
+    int64_t start_64 =
+        filter_shift_time + static_cast<int64_t>(start_time * 1.E9);
+    int64_t stop_64 =
+        filter_shift_time + static_cast<int64_t>(stop_time * 1.E9);
 
-    if (m_vecSplitterTime.size() == 0)
-    {
+    if (m_vecSplitterTime.size() == 0) {
       // first splitter: push the start time to vector
       m_vecSplitterTime.push_back(start_64);
-    }
-    else if (start_64 - m_vecSplitterTime.back() > TOLERANCE)
-    {
+    } else if (start_64 - m_vecSplitterTime.back() > TOLERANCE) {
       // the start time is way behind previous splitter's stop time
-      // create a new splitter and set the time interval in the middle to target -1
+      // create a new splitter and set the time interval in the middle to target
+      // -1
       m_vecSplitterTime.push_back(start_64);
       m_vecSplitterGroup.push_back(-1);
-    }
-    else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE)
-    {
-      // new splitter's start time is same (within tolerance) as the stop time of the previous
+    } else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE) {
+      // new splitter's start time is same (within tolerance) as the stop time
+      // of the previous
       ;
-    }
-    else
-    {
+    } else {
       // new splitter's start time is before the stop time of the last splitter.
-      throw std::runtime_error("Input table workspace does not have splitters set up in order.");
+      throw std::runtime_error(
+          "Input table workspace does not have splitters set up in order.");
     }
 
     // convert string-target to integer target
-    std::map<std::string, int>::iterator mapiter = m_targetIndexMap.find(target);
+    std::map<std::string, int>::iterator mapiter =
+        m_targetIndexMap.find(target);
     int int_target(-1);
-    if (mapiter == m_targetIndexMap.end())
-    {
+    if (mapiter == m_targetIndexMap.end()) {
       // target is not in map
       int_target = max_target_index;
-      max_target_index ++;
-    }
-    else
-    {
+      max_target_index++;
+    } else {
       // targt is in the map
       int_target = mapiter->second;
     }
