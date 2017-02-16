@@ -442,6 +442,9 @@ void FilterEvents::processSplittersWorkspace() {
 void FilterEvents::processTableSplittersWorkspace() {
   // check input workspace's validity
   assert(m_splitterTableWorkspace);
+  if (m_splitterTableWorkspace->columnCount() != 3){
+      throw std::runtime_error("Splitters given in TableWorkspace must have 3 columns.");
+  }
 
   // clear vector splitterTime and vector of splitter group
   m_vecSplitterTime.clear();
@@ -486,22 +489,35 @@ void FilterEvents::processTableSplittersWorkspace() {
     }
 
     // convert string-target to integer target
-    std::map<std::string, int>::iterator mapiter =
-        m_targetIndexMap.find(target);
+    bool addnew = false;
     int int_target(-1);
-    if (mapiter == m_targetIndexMap.end()) {
-      // target is not in map
-      int_target = max_target_index;
-      max_target_index++;
-    } else {
-      // targt is in the map
-      int_target = mapiter->second;
+    if (m_targetIndexMap.size() == 0)
+    {
+        addnew = true;
+    }
+    else
+    {
+        std::map<std::string, int>::iterator mapiter =
+            m_targetIndexMap.find(target);
+        if (mapiter == m_targetIndexMap.end())
+            addnew = true;
+        else
+            int_target = mapiter->second;
+    }
+    if (addnew)
+    {
+        // target is not in map
+        int_target = max_target_index;
+        m_targetIndexMap.insert(std::pair<std::string, int>(target, max_target_index));
+        max_target_index++;
     }
 
     // add start time, stop time and 'target
     m_vecSplitterTime.push_back(stop_64);
     m_vecSplitterGroup.push_back(int_target);
   }
+
+  std::cout << "[DB] Size of splitter time and group: " << m_vecSplitterTime.size() << ", " << m_vecSplitterGroup.size() << "\n";
 
   return;
 }
@@ -985,8 +1001,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
-  g_log.debug() << "Number of spectra in input/source EventWorkspace = "
-                << numberOfSpectra << ".\n";
+  g_log.notice() << "Filter by vector splitters: Number of spectra in input/source EventWorkspace = "
+                 << numberOfSpectra << ".\n";
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {

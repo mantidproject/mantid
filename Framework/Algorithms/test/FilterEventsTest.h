@@ -7,6 +7,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -189,7 +190,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void test_FilterWOCorrection2() {
+  void Passed_test_FilterWOCorrection2() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -272,7 +273,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void test_FilterWithCustumizedCorrection() {
+  void Passed_test_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -356,7 +357,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void test_FilterElasticCorrection() {
+  void Passed_test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -414,7 +415,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void test_FilterDGCorrection() {
+  void Passed_test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -465,7 +466,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void test_FilterIndirectGeometryCorrection() {
+  void Passed_test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -525,6 +526,7 @@ public:
 
     return;
   }
+
   //----------------------------------------------------------------------------------------------
   /**  Filter events without any correction and test for splitters in
    *MatrixWorkspace format
@@ -542,7 +544,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void test_FilterRelativeTime() {
+  void Passed_test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -622,6 +624,112 @@ public:
 
     return;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /**  Filter events without any correction and test for splitters in
+   *    TableWorkspace filter format
+   *    and the time given for splitters is relative
+   *
+   *  It is exacly the same as unit test: test_FilterRelativeTime()
+   *
+   *  Event workspace:
+   * (1) 10 detectors
+   * (2) Run starts @ 20000000000 seconds
+   * (3) Pulse length = 100*1000*1000 seconds
+   * (4) Within one pulse, two consecutive events/neutrons is apart for
+   * 10*1000*1000 seconds
+   * (5) "Experiment": 5 pulse times.  10 events in each pulse
+   *
+   * In this test
+   *  (1) Leave correction table workspace empty
+   *  (2) Count events in each output including "-1", the excluded/unselected
+   * events
+   */
+  void test_tableSplitter()
+  {
+      // Create EventWorkspace and SplittersWorkspace
+      int64_t runstart_i64 = 20000000000;
+      int64_t pulsedt = 100 * 1000 * 1000;
+      int64_t tofdt = 10 * 1000 * 1000;
+      size_t numpulses = 5;
+
+      EventWorkspace_sptr inpWS =
+          createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+      AnalysisDataService::Instance().addOrReplace("Test11", inpWS);
+
+      DataObjects::TableWorkspace_sptr splws = createTableSplitters(0, pulsedt, tofdt);
+      AnalysisDataService::Instance().addOrReplace("TableSplitter1", splws);
+
+      FilterEvents filter;
+      filter.initialize();
+
+      // Set properties
+      filter.setProperty("InputWorkspace", "Test11");
+      filter.setProperty("OutputWorkspaceBaseName", "FilteredWS_FromTable");
+      filter.setProperty("SplitterWorkspace", "TableSplitter1");
+      filter.setProperty("RelativeTime", true);
+      filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+
+      // Execute
+      TS_ASSERT_THROWS_NOTHING(filter.execute());
+      TS_ASSERT(filter.isExecuted());
+
+      // Get 3 output workspaces
+      int numsplittedws = filter.getProperty("NumberOutputWS");
+      TS_ASSERT_EQUALS(numsplittedws, 3);
+
+      /**
+      // Workspace 0
+      EventWorkspace_sptr filteredws0 =
+          boost::dynamic_pointer_cast<EventWorkspace>(
+              AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+      TS_ASSERT(filteredws0);
+      TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+      TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+
+      // Workspace 1
+      EventWorkspace_sptr filteredws1 =
+          boost::dynamic_pointer_cast<EventWorkspace>(
+              AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+      TS_ASSERT(filteredws1);
+      TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+
+      // Workspace 2
+      EventWorkspace_sptr filteredws2 =
+          boost::dynamic_pointer_cast<EventWorkspace>(
+              AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
+      TS_ASSERT(filteredws2);
+      TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+
+      // Check spectrum 3 of workspace 2
+      EventList elist3 = filteredws2->getSpectrum(3);
+      elist3.sortPulseTimeTOF();
+
+      TofEvent eventmin = elist3.getEvent(0);
+      TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
+                       runstart_i64 + pulsedt * 2);
+      TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+
+      TofEvent eventmax = elist3.getEvent(26);
+      TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
+                       runstart_i64 + pulsedt * 4);
+      TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
+                      1.0E-4);
+
+      // 5. Clean up
+      AnalysisDataService::Instance().remove("Test02");
+      AnalysisDataService::Instance().remove("Splitter02");
+      std::vector<std::string> outputwsnames =
+          filter.getProperty("OutputWorkspaceNames");
+      for (size_t i = 0; i < outputwsnames.size(); ++i) {
+        AnalysisDataService::Instance().remove(outputwsnames[i]);
+      }
+      **/
+
+      return;
+
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Create an EventWorkspace.  This workspace has
     * @param runstart_i64 : absolute run start time in int64_t format with unit
@@ -903,6 +1011,63 @@ public:
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     return splitterws;
+  }
+
+  /** Create splitters in TableWorkspace for output which is exactly as the Matrix splitters
+   *  Region:
+   * 0: pulse 0: 0 ~ 3+
+   * 1: pulse 0: 3+ ~ pulse 1: 9+
+   * 2: from pulse 2: 0 ~ 6+
+   * -1: from pulse 2: 6+ ~ 9+
+   * @brief createMatrixSplitter
+   * @param runstart_i64 : absolute run start time in int64_t format with unit
+   * nanosecond
+   * @param pulsedt: pulse length in int64_t format with unit nanosecond
+   * @param tofdt: time interval between 2 adjacent event in same pulse in
+   * int64_t format of unit nanosecond
+   * @return
+   */
+  DataObjects::TableWorkspace_sptr createTableSplitters(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt)
+  {
+    // create table workspace
+    DataObjects::TableWorkspace_sptr tablesplitter = boost::make_shared<DataObjects::TableWorkspace>();
+    tablesplitter->addColumn("double", "start");
+    tablesplitter->addColumn("double", "stop");
+    tablesplitter->addColumn("str", "target");
+
+    // generate row by row
+    // Splitter 0: 0 ~ 3+ (first pulse)
+    size_t row_index = 0;
+    int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
+    int itarget = 0;
+    tablesplitter->appendRow();
+    tablesplitter->cell<double>(row_index, 0) = static_cast<double>(runstart_i64) * 1.0E-9;
+    tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t1) * 1.E-9;
+    tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+
+    // Splitter 1: 3+ ~ 9+ (second pulse)
+    ++ row_index;
+    int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
+    itarget = 1;
+    tablesplitter->appendRow();
+    tablesplitter->cell<double>(row_index, 0) = static_cast<double>(t1) * 1.0E-9;
+    tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t2) * 1.E-9;
+    tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+
+    // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
+    int64_t lastT = t2;
+    for (size_t i = 2; i < 5; i++) {
+      ++ row_index;
+      itarget = 2;
+      int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
+      tablesplitter->appendRow();
+      tablesplitter->cell<double>(row_index, 0) = static_cast<double>(lastT) * 1.0E-9;
+      tablesplitter->cell<double>(row_index, 1) = static_cast<double>(newT) * 1.E-9;
+      tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+      lastT = newT;
+    }
+
+    return tablesplitter;
   }
 
   //----------------------------------------------------------------------------------------------

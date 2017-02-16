@@ -173,7 +173,7 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
-        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-:]*'))
 
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
