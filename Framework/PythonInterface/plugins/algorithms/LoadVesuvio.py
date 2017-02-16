@@ -448,7 +448,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         if self._load_common_called:
             return
 
-        isis = config.getFacility("ISIS")
         empty_vesuvio_ws = self._load_empty_evs()
         empty_vesuvio = empty_vesuvio_ws.getInstrument()
 
