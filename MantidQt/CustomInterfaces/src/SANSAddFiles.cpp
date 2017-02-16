@@ -256,7 +256,7 @@ void SANSAddFiles::runPythonAddFiles() {
   add2Runs2Add();
 
   QString code_torun = "import SANSadd2\n";
-  code_torun += "print SANSadd2.add_runs((";
+  code_torun += "print(SANSadd2.add_runs((";
   // there are multiple file list inputs that can be filled in loop through them
   for (int i = 0; i < m_SANSForm->toAdd_List->count(); ++i) {
     QString filename =
@@ -314,7 +314,7 @@ void SANSAddFiles::runPythonAddFiles() {
     break;
   }
 
-  code_torun += ")\n";
+  code_torun += "))\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << '\n';
 

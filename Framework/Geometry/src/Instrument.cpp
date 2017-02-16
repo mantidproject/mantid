@@ -883,73 +883,6 @@ void Instrument::appendPlottable(
 const double CONSTANT = (PhysicalConstants::h * 1e10) /
                         (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing) for a single pixel, i.e.,
- *1/DIFC for that pixel.
- *
- * @param l1 :: Primary flight path.
- * @param beamline: vector = samplePos-sourcePos = a vector pointing from the
- *source to the sample,
- *        the length of the distance between the two.
- * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
- * @param samplePos: position of the sample
- * @param detPos: position of the detector
- * @param offset: value (close to zero) that changes the factor := factor *
- *(1+offset).
- */
-double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
-                                  const double beamline_norm,
-                                  const Kernel::V3D &samplePos,
-                                  const Kernel::V3D &detPos,
-                                  const double offset) {
-  if (offset <=
-      -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset
-        << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
-
-  // Now detPos will be set with respect to samplePos
-  Kernel::V3D relDetPos = detPos - samplePos;
-  // 0.5*cos(2theta)
-  double l2 = relDetPos.norm();
-  double halfcosTwoTheta =
-      relDetPos.scalar_prod(beamline) / (l2 * beamline_norm);
-  // This is sin(theta)
-  double sinTheta = sqrt(0.5 - halfcosTwoTheta);
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-  return (numerator * CONSTANT) / sinTheta;
-}
-
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing)
- * for a LIST of detectors assigned to a single spectrum.
- */
-double Instrument::calcConversion(
-    const double l1, const Kernel::V3D &beamline, const double beamline_norm,
-    const Kernel::V3D &samplePos,
-    const boost::shared_ptr<const Instrument> &instrument,
-    const std::vector<detid_t> &detectors,
-    const std::map<detid_t, double> &offsets) {
-  double factor = 0.;
-  double offset;
-  for (auto detector : detectors) {
-    auto off_iter = offsets.find(detector);
-    if (off_iter != offsets.cend()) {
-      offset = offsets.find(detector)->second;
-    } else {
-      offset = 0.;
-    }
-    factor +=
-        calcConversion(l1, beamline, beamline_norm, samplePos,
-                       instrument->getDetector(detector)->getPos(), offset);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
-
 //------------------------------------------------------------------------------------------------
 /** Get several instrument parameters used in tof to D-space conversion
  *
@@ -1302,10 +1235,64 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  if (m_map_nonconst)
-    m_map_nonconst->setDetectorInfo(detectorInfo);
   m_detectorInfo = std::move(detectorInfo);
 }
+namespace Conversion {
 
+/**
+ * Calculate and return conversion factor from tof to d-spacing.
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param offset
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta, const double offset) {
+  if (offset <=
+      -1.) // not physically possible, means result is negative d-spacing
+  {
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset
+        << " which converts data to negative d-spacing\n";
+    throw std::logic_error(msg.str());
+  }
+
+  auto sinTheta = std::sin(twoTheta / 2);
+
+  const double numerator = (1.0 + offset);
+  sinTheta *= (l1 + l2);
+
+  return (numerator * CONSTANT) / sinTheta;
+}
+
+/** Calculate the conversion factor from tof -> d-spacing
+ * for a LIST of detector ids assigned to a single spectrum.
+ * @brief tofToDSpacingFactor
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param detectors
+ * @param offsets
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta,
+                           const std::vector<detid_t> &detectors,
+                           const std::map<detid_t, double> &offsets) {
+  double factor = 0.;
+  double offset;
+  for (auto detector : detectors) {
+    auto off_iter = offsets.find(detector);
+    if (off_iter != offsets.cend()) {
+      offset = offsets.find(detector)->second;
+    } else {
+      offset = 0.;
+    }
+    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
+  }
+  return factor / static_cast<double>(detectors.size());
+}
+}
 } // namespace Geometry
 } // Namespace Mantid

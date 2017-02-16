@@ -80,7 +80,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
@@ -99,7 +99,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
         inc/MantidQtSliceViewer/DimensionSliceWidget.ui
 	inc/MantidQtSliceViewer/SliceViewer.ui
 	inc/MantidQtSliceViewer/LineViewer.ui
@@ -126,7 +126,7 @@ set ( TEST_FILES
 )
 
 # Python unit tests
-set ( TEST_PY_FILES 
+set ( TEST_PY_FILES
 	test/SliceViewerPythonInterfaceTest.py
 	test/QwtTypesPythonInterfaceTest.py
 )
@@ -144,7 +144,7 @@ qt4_add_resources ( RES_FILES icons/SliceViewerIcons.qrc )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -161,7 +161,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             MantidWidgets
             DataObjects
@@ -176,7 +176,7 @@ target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LI
 ###########################################################################
 
 if ( PYUNITTEST_FOUND )
-  
+
   pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test SliceViewerMantidPlotTest ${TEST_PY_FILES} )
 endif ()
 
@@ -214,5 +214,3 @@ endif ()
 ###########################################################################
 
 install ( TARGETS MantidQtSliceViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-
-

@@ -1,16 +1,16 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTIONTEST_H_
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
+
+#include <cxxtest/TestSuite.h>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using ::testing::Return;
 

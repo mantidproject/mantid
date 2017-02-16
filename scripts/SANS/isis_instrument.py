@@ -337,7 +337,7 @@ class DetectorBank(object):
             @param guess: this name will be searched for in the list
             @return : True if the name was found, otherwise false
         """
-        for name in self._names.values():
+        for name in list(self._names.values()):
             if guess.lower() == name.lower():
                 return True
         return False
@@ -1407,7 +1407,7 @@ class SANS2D(ISISInstrument):
         try:
             log = self.get_detector_log(ws_ref)
             if log == "":
-                raise "Invalid log"
+                raise RuntimeError("Invalid log")
         except:
             if isSample:
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
@@ -1454,7 +1454,7 @@ class LARMOR(ISISInstrument):
         second = self.DETECTORS['high-angle']
 
         first.set_orien('Horizontal')
-        first.set_first_spec_num(10)
+        first.set_first_spec_num(11)
         second.set_orien('Horizontal')
         second.place_after(first)
 
@@ -1749,7 +1749,7 @@ class LARMOR(ISISInstrument):
                 # logger.warning("Trying get_detector_log")
                 log = self.get_detector_log(ws_ref)
                 if log == "":
-                    raise "Invalid log"
+                    raise RuntimeError("Invalid log")
             except:
                 if isSample:
                     run = ws_ref.run()

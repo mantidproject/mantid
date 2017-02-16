@@ -242,6 +242,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ProcessingInstructions", "3:4");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 

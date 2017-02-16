@@ -157,6 +157,12 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
   auto &errOut = outputHistogram.mutableE();
 
   for (size_t i = 0; i < m_histoYSize; ++i) {
+    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
+    if (yin == 0) {
+      // Detector with 0 signal received - skip this bin
+      continue;
+    }
+
     const double sigt = sigmaTotal(flightPath, m_tofVals[i]);
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
@@ -168,7 +174,7 @@ MayersSampleCorrectionStrategy::getCorrectedHisto() {
       corrfact *= (1.0 - beta) / rns;
     }
     // apply correction
-    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
+
     sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
