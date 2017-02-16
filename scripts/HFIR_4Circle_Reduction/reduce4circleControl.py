@@ -1473,12 +1473,14 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
+        new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+        # new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
                                            # FIXME - Need UI input
                                            DetectorGeometry='512,512',
-                                           InstrumentFilename='/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml',
+                                           InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
         except RuntimeError as run_err:
@@ -1695,6 +1697,11 @@ class CWSCDReductionControl(object):
                 # set up the user-defined wave length
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
+                # TODO/FIXME/NOW - Should get a flexible way to define IDF or no IDF
+                new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+                # new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+                alg_args['InstrumentFilename'] = new_idf_name
 
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
