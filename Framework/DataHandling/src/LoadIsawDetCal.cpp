@@ -319,8 +319,8 @@ void LoadIsawDetCal::exec() {
  * @param z :: The shift along the Z-axis
  * @param detname :: The detector name
  * @param ws :: The workspace
+ * @param detectorInfo :: The detector info object for the workspace
  */
-
 void LoadIsawDetCal::center(const double x, const double y, const double z,
                             const std::string &detname, API::Workspace_sptr ws,
                             API::DetectorInfo &detectorInfo) {
@@ -392,6 +392,15 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
   return filenamesFromPropertyUnraveld;
 }
 
+/**
+ * Perform the rotation for the calibration
+ *
+ * @param rX the vector of (base_x, base_y, base_z) from the calibration file
+ * @param rY the vector of (up_x, up_y, up_z) from the calibration file
+ * @param detectorInfo the DetectorInfo object from the workspace
+ * @param comp the component to rotate
+ * @param doWishCorrection if true apply a special correction for WISH
+ */
 void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
                                 boost::shared_ptr<const IComponent> comp,
                                 bool doWishCorrection) {
@@ -446,6 +455,15 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
   detectorInfo.setRotation(*comp.get(), Rot);
 }
 
+/**
+ * Apply the scalings from the calibration file. This is called after doing the
+ *moves and rotations associated with the calibration, to avoid the problem of
+ *invalidation DetectorInfo after writing to the parameter map.
+ *
+ * @param expInfoWS the input workspace
+ * @param rectangularDetectorScalings a vector containing a component ID, and
+ *values for scalex and scaley
+ */
 void LoadIsawDetCal::applyScalings(
     ExperimentInfo_sptr &expInfoWS,
     const std::vector<ComponentScaling> &rectangularDetectorScalings) {
