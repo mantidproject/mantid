@@ -103,17 +103,6 @@ public:
     TS_ASSERT_EQUALS(0, pmap.size());
   }
 
-  void test_swapInstrumentParameters_method_populate_object() {
-    using Mantid::Geometry::ParameterMap;
-
-    auto fileBacked = createTestObject();
-    ParameterMap emptyMap;
-    fileBacked->swapInstrumentParameters(emptyMap);
-
-    const auto &pmap = fileBacked->constInstrumentParameters();
-    TS_ASSERT_EQUALS(0, pmap.size());
-  }
-
   void test_cacheDetectorGroupings() {
     auto fileBacked = createTestObject();
 

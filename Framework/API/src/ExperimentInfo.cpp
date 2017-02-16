@@ -536,21 +536,6 @@ void ExperimentInfo::replaceInstrumentParameters(
 }
 
 /**
- * exchanges contents of current parameter map with contents of other map)
- * Careful: Parameters that are stored in DetectorInfo are not automatically
- * handled.
- * @ pmap reference to parameter map which would exchange its contents with
- * current map
- */
-void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
-  populateIfNotLoaded();
-  m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
-  this->m_parmap->swap(pmap);
-  m_parmap->setDetectorInfo(m_detectorInfo);
-}
-
-/**
  * Caches a lookup for the detector IDs of the members that are part of the same
  * group
  * @param mapping :: A map between a detector ID and the other IDs that are part

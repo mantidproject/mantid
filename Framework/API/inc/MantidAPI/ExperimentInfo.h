@@ -75,7 +75,6 @@ public:
   void populateInstrumentParameters();
 
   void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
