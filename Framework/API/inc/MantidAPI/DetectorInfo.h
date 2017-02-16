@@ -71,6 +71,9 @@ public:
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
+  bool operator==(const DetectorInfo &other) const;
+  bool operator!=(const DetectorInfo &other) const;
+
   size_t size() const;
 
   bool isMonitor(const size_t index) const;

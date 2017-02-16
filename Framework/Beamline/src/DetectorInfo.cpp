@@ -1,6 +1,8 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_cow.h"
 
+#include <algorithm>
+
 namespace Mantid {
 namespace Beamline {
 
@@ -23,6 +25,35 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
     : DetectorInfo(std::move(positions), std::move(rotations)) {
   for (const auto i : monitorIndices)
     m_isMonitor.access().at(i) = true;
+}
+
+/// Returns true if the content of this is equal to the content of other.
+bool DetectorInfo::operator==(const DetectorInfo &other) const {
+  if (this == &other)
+    return true;
+  if (size() != other.size())
+    return false;
+  if (size() == 0)
+    return true;
+  if (!(m_isMonitor == other.m_isMonitor) &&
+      (*m_isMonitor != *other.m_isMonitor))
+    return false;
+  if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
+    return false;
+  if (!(m_positions == other.m_positions) &&
+      (*m_positions != *other.m_positions))
+    return false;
+  if (!(m_rotations == other.m_rotations) &&
+      std::equal(m_rotations->begin(), m_rotations->end(),
+                 other.m_rotations->begin(),
+                 [](const auto &a, const auto &b) { return !a.isApprox(b); }))
+    return false;
+  return true;
+}
+
+/// Returns true if the content of this is different from the content of other.
+bool DetectorInfo::operator!=(const DetectorInfo &other) const {
+  return !operator==(other);
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the

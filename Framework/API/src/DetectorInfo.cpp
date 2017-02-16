@@ -47,6 +47,16 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
   return *this;
 }
 
+/// Returns true if the content of this is equal to the content of other.
+bool DetectorInfo::operator==(const DetectorInfo &other) const {
+  return m_detectorInfo == other.m_detectorInfo;
+}
+
+/// Returns true if the content of this is different from the content of other.
+bool DetectorInfo::operator!=(const DetectorInfo &other) const {
+  return m_detectorInfo != other.m_detectorInfo;
+}
+
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs.size(); }

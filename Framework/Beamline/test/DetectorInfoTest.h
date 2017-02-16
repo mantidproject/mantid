@@ -45,6 +45,57 @@ public:
     TS_ASSERT_THROWS(DetectorInfo(PosVec(3), RotVec(2)), std::runtime_error);
   }
 
+  void test_comparison_length() {
+    const DetectorInfo length0;
+    const DetectorInfo length1(PosVec(1), RotVec(1));
+    TS_ASSERT(length0 == length0);
+    TS_ASSERT(!(length0 != length0));
+    TS_ASSERT(length1 == length1);
+    TS_ASSERT(!(length1 != length1));
+    TS_ASSERT(!(length0 == length1));
+    TS_ASSERT(length0 != length1);
+  }
+
+  void test_comparison_isMonitor() {
+    const DetectorInfo a(PosVec(1), RotVec(1));
+    const DetectorInfo b(PosVec(1), RotVec(1), {0});
+    TS_ASSERT(!(a == b));
+    TS_ASSERT(a != b);
+  }
+
+  void test_comparison_isMasked() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    const auto b(a);
+    a.setMasked(0, true);
+    TS_ASSERT(!(a == b));
+    TS_ASSERT(a != b);
+    a.setMasked(0, false);
+    TS_ASSERT(a == b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_comparison_position() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    const DetectorInfo b(a);
+    a.setPosition(0, {1, 2, 3});
+    TS_ASSERT(!(a == b));
+    TS_ASSERT(a != b);
+    a.setPosition(0, b.position(0));
+    TS_ASSERT(a == b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_comparison_rotation() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    const DetectorInfo b(a);
+    a.setRotation(0, {1, 2, 3, 4});
+    TS_ASSERT(!(a == b));
+    TS_ASSERT(a != b);
+    a.setRotation(0, b.rotation(0));
+    TS_ASSERT(a == b);
+    TS_ASSERT(!(a != b));
+  }
+
   void test_copy() {
     const DetectorInfo source(PosVec(7), RotVec(7));
     const auto copy(source);

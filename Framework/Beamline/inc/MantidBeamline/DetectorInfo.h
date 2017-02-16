@@ -65,6 +65,9 @@ public:
                std::vector<Eigen::Quaterniond> rotations,
                const std::vector<size_t> &monitorIndices);
 
+  bool operator==(const DetectorInfo &other) const;
+  bool operator!=(const DetectorInfo &other) const;
+
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
