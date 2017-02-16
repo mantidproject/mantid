@@ -1,4 +1,5 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from SANSUtility import can_load_as_event_workspace

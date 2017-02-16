@@ -395,7 +395,7 @@ void LineViewer::setThickness(int dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 
@@ -415,7 +415,7 @@ void LineViewer::setThickness(const QString & dim, double width)
     Set the thickness to integrate in a particular dimension.
 
     Integration is performed perpendicular to the XY plane,
-    from -thickness below to +thickness above the center.
+    from -0.5 * thickness below to +0.5 * thickness above the center.
 
     Use setPlanarWidth() to set the width along the XY plane.
 

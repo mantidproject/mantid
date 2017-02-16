@@ -17,6 +17,7 @@
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+from __future__ import (absolute_import, division, print_function)
 
 
 class FittingTestProblem(object):
