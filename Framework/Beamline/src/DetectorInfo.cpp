@@ -41,12 +41,16 @@ bool DetectorInfo::operator==(const DetectorInfo &other) const {
   if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
     return false;
   if (!(m_positions == other.m_positions) &&
-      (*m_positions != *other.m_positions))
+      std::equal(
+          m_positions->begin(), m_positions->end(), other.m_positions->begin(),
+          [](const auto &a, const auto &b) { return !a.isApprox(b, 1e-15); }))
     return false;
   if (!(m_rotations == other.m_rotations) &&
       std::equal(m_rotations->begin(), m_rotations->end(),
-                 other.m_rotations->begin(),
-                 [](const auto &a, const auto &b) { return !a.isApprox(b); }))
+                 other.m_rotations->begin(), [](const auto &a, const auto &b) {
+                   return (a * b.conjugate())
+                       .isApprox(Eigen::Quaterniond::Identity(), 1e-15);
+                 }))
     return false;
   return true;
 }
