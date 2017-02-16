@@ -2,10 +2,13 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
-import sys, math, os.path, numpy as np
+import sys
+import math
+import os.path
+import numpy as np
+
 
 class SampleChanger(DataProcessorAlgorithm):
- 
     _plot = False
     _save = False
     _instrument = 'IRIS'
@@ -44,12 +47,11 @@ class SampleChanger(DataProcessorAlgorithm):
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='ElasticRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(FloatArrayProperty(name='InelasticRange'),
-                             doc='Range of background to subtact from raw data in time of flight.')
+                             doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
                              doc='')
-
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='Individual',
@@ -64,12 +66,12 @@ class SampleChanger(DataProcessorAlgorithm):
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(name='MsdFit', defaultValue=False,
-                             doc = 'Run msd fit')
+                             doc='Run msd fit')
 
         self.declareProperty(name='Save', defaultValue=False,
-                             doc = 'Switch Save result to nxs file Off/On')
+                             doc='Switch Save result to nxs file Off/On')
         self.declareProperty(name='Plot', defaultValue=False,
-                             doc = 'Plot options')
+                             doc='Plot options')
 
     def PyExec(self):
         import mantidplot as mp
@@ -77,46 +79,46 @@ class SampleChanger(DataProcessorAlgorithm):
         self._setup()
 
         q2_workspaces = []
-        msd_plot = list()		
+        msd_plot = list()
         scan_alg = self.createChildAlgorithm("EnergyWindowScan", 0.05, 0.95)
         for numb in range(self._number_samples):
             run_numbers = []
             run_names = []
             first_run = self._run_first + numb
             for idx in range(self._number_runs):
-                run = str(first_run + idx*self._number_samples)
+                run = str(first_run + idx * self._number_samples)
                 run_numbers.append(run)
                 run_names.append(self._instrument + run)
-            q0 = self._instrument.lower() + run_numbers[0] +'_to_'+ run_numbers[len(run_numbers) -1] + '_s'+str(numb)
+            q0 = self._instrument.lower() + run_numbers[0] + '_to_' + run_numbers[-1] + '_s' + str(numb)
             output_ws = q0 + '_red'
             scan_ws = q0 + '_scan'
-            scan_alg.setProperty('InputFiles',run_names)
-            scan_alg.setProperty('LoadLogFiles',self._load_logs)
-            scan_alg.setProperty('CalibrationWorkspace',self._calibration_ws)
-            scan_alg.setProperty('Instrument',self._instrument_name)
-            scan_alg.setProperty('Analyser',self._analyser) 
-            scan_alg.setProperty('Reflection',self._reflection)
-            scan_alg.setProperty('SpectraRange',self._spectra_range)
-            scan_alg.setProperty('ElasticRange',self._elastic_range)
-            scan_alg.setProperty('InelasticRange',self._inelastic_range) 
-            scan_alg.setProperty('DetailedBalance',self._detailed_balance)
-            scan_alg.setProperty('GroupingMethod',self._grouping_method)
-            scan_alg.setProperty('SampleEnvironmentLogName',self._sample_log_name)
-            scan_alg.setProperty('SampleEnvironmentLogValue',self._sample_log_value)
-            scan_alg.setProperty('msdFit',self._msdfit)
-            scan_alg.setProperty('ReducedWorkspace',output_ws) 
-            scan_alg.setProperty('ScanWorkspace',scan_ws)
+            scan_alg.setProperty('InputFiles', run_names)
+            scan_alg.setProperty('LoadLogFiles', self._load_logs)
+            scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
+            scan_alg.setProperty('Instrument', self._instrument_name)
+            scan_alg.setProperty('Analyser', self._analyser)
+            scan_alg.setProperty('Reflection', self._reflection)
+            scan_alg.setProperty('SpectraRange', self._spectra_range)
+            scan_alg.setProperty('ElasticRange', self._elastic_range)
+            scan_alg.setProperty('InelasticRange', self._inelastic_range)
+            scan_alg.setProperty('DetailedBalance', self._detailed_balance)
+            scan_alg.setProperty('GroupingMethod', self._grouping_method)
+            scan_alg.setProperty('SampleEnvironmentLogName', self._sample_log_name)
+            scan_alg.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
+            scan_alg.setProperty('msdFit', self._msdfit)
+            scan_alg.setProperty('ReducedWorkspace', output_ws)
+            scan_alg.setProperty('ScanWorkspace', scan_ws)
             scan_alg.execute()
 
             logger.information('OutputWorkspace : %s' % output_ws)
             logger.information('ScanWorkspace : %s' % scan_ws)
 
-            q1_ws = scan_ws +'_el_eq1'
-            q2_ws = scan_ws +'_el_eq2'
+            q1_ws = scan_ws + '_el_eq1'
+            q2_ws = scan_ws + '_el_eq2'
             q2_workspaces.append(q2_ws)
-            eisf_ws = scan_ws +'_eisf'
-            el_elt_ws = scan_ws +'_el_elt'
-            inel_elt_ws = scan_ws +'_inel_elt'
+            eisf_ws = scan_ws + '_eisf'
+            el_elt_ws = scan_ws + '_el_elt'
+            inel_elt_ws = scan_ws + '_inel_elt'
             output_workspaces = [q1_ws, q2_ws, eisf_ws, el_elt_ws, inel_elt_ws]
 
             if self._msdfit:
@@ -128,7 +130,7 @@ class SampleChanger(DataProcessorAlgorithm):
                 mp.plotSpectrum(q1_ws, 0, error_bars=True)
                 mp.plotSpectrum(q2_ws, 0, error_bars=True)
                 mp.plotSpectrum(eisf_ws, 0, error_bars=True)
-				
+
             if self._save:
                 save_alg = self.createChildAlgorithm("SaveNexusProcessed", enableLogging=False)
                 for ws in output_workspaces:
@@ -152,10 +154,10 @@ class SampleChanger(DataProcessorAlgorithm):
         self._run_first = self.getProperty('FirstRun').value
         self._run_last = self.getProperty('LastRun').value
         self._number_samples = self.getProperty('NumberSamples').value
-        self._number_runs = (self._run_last - self._run_first +1)/self._number_samples
+        self._number_runs = (self._run_last - self._run_first + 1) / self._number_samples
         logger.information('Number of runs : %i' % self._number_runs)
         logger.information('Number of scans : %i' % self._number_samples)
-		
+
         self._sum_files = False
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = ''
@@ -180,17 +182,17 @@ class SampleChanger(DataProcessorAlgorithm):
 
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
- 
+
     def _msd_fit(self, ws, ws_name):
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
         input_params = [ws + ',i%d' % i for i in range(0, self._number_runs)]
         input_params = ';'.join(input_params)
-        x = mtd[ws].readX(0)			
+        x = mtd[ws].readX(0)
         PlotPeakByLogValue(Input=input_params,
                            OutputWorkspace=ws_name,
                            Function=function,
-                           StartX=x[0], EndX=x[len(x)-1],
+                           StartX=x[0], EndX=x[-1],
                            FitType='Sequential',
                            CreateOutput=True)
 
@@ -205,7 +207,7 @@ class SampleChanger(DataProcessorAlgorithm):
         rename_alg.execute()
         mtd.addOrReplace(ws_name + '_Parameters', rename_alg.getProperty("OutputWorkspace").value)
 
-        params_table = mtd[ws_name +'_Parameters']
+        params_table = mtd[ws_name + '_Parameters']
 
         # MSD value should be positive, but the fit output is negative
         msd = params_table.column('A1')
@@ -216,17 +218,17 @@ class SampleChanger(DataProcessorAlgorithm):
         parameter_ws_group = []
 
         # A0 workspace
-        msd_name = ws_name +'_A0'
+        msd_name = ws_name + '_A0'
         parameter_ws_group.append(msd_name)
-        ConvertTableToMatrixWorkspace(ws_name +'_Parameters', OutputWorkspace=msd_name,
+        ConvertTableToMatrixWorkspace(ws_name + '_Parameters', OutputWorkspace=msd_name,
                                       ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
         xunit = mtd[msd_name].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
 
         # A1 workspace
-        msd_name = ws_name +'_A1'
+        msd_name = ws_name + '_A1'
         parameter_ws_group.append(msd_name)
-        ConvertTableToMatrixWorkspace(ws_name +'_Parameters', OutputWorkspace=msd_name,
+        ConvertTableToMatrixWorkspace(ws_name + '_Parameters', OutputWorkspace=msd_name,
                                       ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
         xunit = mtd[msd_name].getAxis(0).setUnit('Label')
         xunit.setLabel('Temperature', 'K')
@@ -243,14 +245,14 @@ class SampleChanger(DataProcessorAlgorithm):
         group_alg.execute()
         mtd.addOrReplace(ws_name, group_alg.getProperty("OutputWorkspace").value)
 
-
         # Add sample logs to output workspace
         copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
         copy_log_alg.setProperty("InputWorkspace", ws)
         copy_log_alg.setProperty("OutputWorkspace", ws_name)
         copy_log_alg.execute()
         copy_log_alg.setProperty("InputWorkspace", ws_name + '_A0')
-        copy_log_alg.setProperty("OutputWorkspace", ws_name +'_Workspaces')
+        copy_log_alg.setProperty("OutputWorkspace", ws_name + '_Workspaces')
         copy_log_alg.execute()
 
-AlgorithmFactory.subscribe(SampleChanger)      # Register algorithm with Mantid
+
+AlgorithmFactory.subscribe(SampleChanger)  # Register algorithm with Mantid
