@@ -266,7 +266,7 @@ void WorkspacePresenter::deleteWorkspaces() {
   }
 
   if (!view->isFocused())
-      return;
+    return;
 
   if (view->isPromptDelete())
     deleteWs = view->deleteConfirmation();
