@@ -23,6 +23,10 @@ void NormaliseByCurrent::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "RecalculatePCharge", false, Kernel::Direction::Input),
+                  "Re-integrates the proton charge. This will modify the "
+                  "gd_prtn_chrg. Does nothing for multi-period data");
 }
 
 /**
@@ -36,7 +40,8 @@ void NormaliseByCurrent::init() {
  * workspace logs or if the values are invalid (0)
  */
 double NormaliseByCurrent::extractCharge(
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const {
+    boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
+    const bool integratePCharge) const {
   // Get the good proton charge and check it's valid
   double charge(-1.0);
   const Run &run = inputWS->run();
@@ -82,6 +87,9 @@ double NormaliseByCurrent::extractCharge(
 
   } else {
     try {
+      if (integratePCharge) {
+        inputWS->run().integrateProtonCharge();
+      }
       charge = inputWS->run().getProtonCharge();
     } catch (Exception::NotFoundError &) {
       g_log.error() << "The proton charge is not set for the run attached to "
@@ -101,9 +109,10 @@ void NormaliseByCurrent::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const bool integratePCharge = getProperty("RecalculatePCharge");
 
   // Get the good proton charge and check it's valid
-  double charge = extractCharge(inputWS);
+  double charge = extractCharge(inputWS, integratePCharge);
 
   g_log.information() << "Normalisation current: " << charge << " uamps\n";
 
