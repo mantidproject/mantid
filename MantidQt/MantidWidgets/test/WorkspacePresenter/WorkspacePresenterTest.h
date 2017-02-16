@@ -73,8 +73,10 @@ public:
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
     ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(true));
+    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
     ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
 
+    EXPECT_CALL(*mockView.get(), isFocused()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), deleteConfirmation()).Times(Exactly(1));
     EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
@@ -83,7 +85,7 @@ public:
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockView.get()));
     AnalysisDataService::Instance().remove("ws1");
     AnalysisDataService::Instance().remove("ws2");
   }
@@ -97,6 +99,7 @@ public:
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
     ON_CALL(*mockView.get(), deleteConfirmation()).WillByDefault(Return(false));
+    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
     ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(true));
 
     EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
@@ -118,6 +121,7 @@ public:
 
     ::testing::DefaultValue<StringList>::Set(
         StringList(StringList{"ws1", "ws2"}));
+    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(true));
     ON_CALL(*mockView.get(), isPromptDelete()).WillByDefault(Return(false));
 
     EXPECT_CALL(*mockView.get(), isPromptDelete()).Times(Exactly(1));
@@ -138,6 +142,20 @@ public:
 
     EXPECT_CALL(*mockView.get(), showCriticalUserMessage(_, _))
         .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void testDeleteWorkspacesNotFocused() {
+    ::testing::DefaultValue<StringList>::Set(
+        StringList(StringList{"ws1", "ws2"}));
+
+    ON_CALL(*mockView.get(), isFocused()).WillByDefault(Return(false));
+    EXPECT_CALL(*mockView.get(), getSelectedWorkspaceNames()).Times(Exactly(1));
+    EXPECT_CALL(*mockView.get(), deleteWorkspaces(StringList{"ws1", "ws2"}))
+        .Times(Exactly(0));
 
     presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
 
