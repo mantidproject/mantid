@@ -31,6 +31,8 @@ using namespace Mantid::Geometry;
 
 using namespace std;
 
+const int64_t TOLERANCE(1000000);  // splitter time tolerance in nano-second.  this value has resolution to 10000Hz
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -48,7 +50,7 @@ FilterEvents::FilterEvents()
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
-      m_filterStartTime(0) {}
+      m_filterStartTime(0), m_runStartTime(0) {}
 
 /** Declare Inputs
  */
@@ -160,6 +162,8 @@ void FilterEvents::exec() {
   progress(m_progress, "Processing SplittersWorkspace.");
   if (m_useTableSplitters)
     processSplittersWorkspace();
+  else if (m_useArbTableSplitters)
+    processTableSplittersWorkspace();
   else
     processMatrixSplitterWorkspace();
 
@@ -310,6 +314,13 @@ void FilterEvents::processAlgorithmProperties() {
   else
     m_useDBSpectrum = true;
 
+  // Get run start time
+  if (m_eventWS->run().hasProperty("run_start")) {
+    Kernel::DateAndTime run_start_time(
+        m_eventWS->run().getProperty("run_start")->value());
+    m_runStartTime = run_start_time;
+  }
+
   // Splitters are given relative time
   m_isSplittersRelativeTime = getProperty("RelativeTime");
   if (m_isSplittersRelativeTime) {
@@ -322,9 +333,7 @@ void FilterEvents::processAlgorithmProperties() {
     } else {
       // Retrieve filter starting time from property run_start as default
       if (m_eventWS->run().hasProperty("run_start")) {
-        Kernel::DateAndTime temp_shift_time(
-            m_eventWS->run().getProperty("run_start")->value());
-        m_filterStartTime = temp_shift_time;
+        m_filterStartTime = m_runStartTime;
       } else {
         throw std::runtime_error(
             "Input event workspace does not have property run_start. "
@@ -332,7 +341,7 @@ void FilterEvents::processAlgorithmProperties() {
             "Splitters cannot be in reltive time.");
       }
     }
-  }
+  } // END-IF: m_isSplitterRelativeTime
 }
 
 /** Examine whether any spectrum does not have detector
@@ -424,6 +433,82 @@ void FilterEvents::processSplittersWorkspace() {
                       << "  Information may not be accurate. \n";
     }
   }
+}
+
+/** process the input splitters given by a TableWorkspace
+ * @brief FilterEvents::processTableSplittersWorkspace
+ */
+void FilterEvents::processTableSplittersWorkspace()
+{
+  // check input workspace's validity
+  assert(m_splitterTableWorkspace);
+
+  // clear vector splitterTime and vector of splitter group
+  m_vecSplitterTime.clear();
+  m_vecSplitterGroup.clear();
+
+  // get the run start time
+  int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
+
+  std::map<std::string, int> m_targetIndexMap;
+  int max_target_index = 1;  // start from 1
+
+  // convert TableWorkspace's values to vectors
+  size_t num_rows = m_splitterTableWorkspace->rowCount();
+  for (size_t irow = 0; irow < num_rows; ++irow)
+  {
+    // get start and stop time
+    double start_time = m_splitterTableWorkspace->cell_cast<double>(irow, 0);
+    double stop_time = m_splitterTableWorkspace->cell_cast<double>(irow, 1);
+    std::string target = m_splitterTableWorkspace->cell<std::string>(irow, 2);
+
+    int64_t start_64 = filter_shift_time + static_cast<int64_t>(start_time * 1.E9);
+    int64_t stop_64 = filter_shift_time + static_cast<int64_t>(stop_time * 1.E9);
+
+    if (m_vecSplitterTime.size() == 0)
+    {
+      // first splitter: push the start time to vector
+      m_vecSplitterTime.push_back(start_64);
+    }
+    else if (start_64 - m_vecSplitterTime.back() > TOLERANCE)
+    {
+      // the start time is way behind previous splitter's stop time
+      // create a new splitter and set the time interval in the middle to target -1
+      m_vecSplitterTime.push_back(start_64);
+      m_vecSplitterGroup.push_back(-1);
+    }
+    else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE)
+    {
+      // new splitter's start time is same (within tolerance) as the stop time of the previous
+      ;
+    }
+    else
+    {
+      // new splitter's start time is before the stop time of the last splitter.
+      throw std::runtime_error("Input table workspace does not have splitters set up in order.");
+    }
+
+    // convert string-target to integer target
+    std::map<std::string, int>::iterator mapiter = m_targetIndexMap.find(target);
+    int int_target(-1);
+    if (mapiter == m_targetIndexMap.end())
+    {
+      // target is not in map
+      int_target = max_target_index;
+      max_target_index ++;
+    }
+    else
+    {
+      // targt is in the map
+      int_target = mapiter->second;
+    }
+
+    // add start time, stop time and 'target
+    m_vecSplitterTime.push_back(stop_64);
+    m_vecSplitterGroup.push_back(int_target);
+  }
+
+  return;
 }
 
 /**

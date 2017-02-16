@@ -82,9 +82,12 @@ private:
   /// Process user input properties
   void processAlgorithmProperties();
 
+  /// process splitters given by a SplittersWorkspace
   void processSplittersWorkspace();
 
-  ///
+  void processTableSplittersWorkspace();
+
+  /// process splitters given by a MatrixWorkspace
   void processMatrixSplitterWorkspace();
 
   void createOutputWorkspaces();
@@ -154,6 +157,7 @@ private:
   bool m_toGroupWS;
 
   /// Vector for splitting time
+  /// FIXME - shall we convert this to DateAndTime???.  Need to do speed test!
   std::vector<int64_t> m_vecSplitterTime;
   /// Vector for splitting grouip
   std::vector<int> m_vecSplitterGroup;
@@ -177,6 +181,8 @@ private:
   bool m_isSplittersRelativeTime;
   // Starting time for starting time of event filters
   Kernel::DateAndTime m_filterStartTime;
+  // EventWorkspace (aka. run)'s starting time
+  Kernel::DateAndTime m_runStartTime;
 };
 
 } // namespace Algorithms
