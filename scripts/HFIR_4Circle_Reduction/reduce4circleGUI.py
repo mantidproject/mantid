@@ -222,7 +222,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
                      self.do_show_workspaces)
         self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_integratoin_details)
+                     self.do_show_integration_details)
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -1326,24 +1326,29 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
             self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
             self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
+            self.ui.tableWidget_covariance.set_matrix(int_peak_dict['covariance matrix'])
 
             # plot fitted Gaussian
             fit_gauss_dict = int_peak_dict['gauss parameters']
         except KeyError as key_err:
             raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
                                ''.format(int_peak_dict.keys(), key_err))
-        # plot model
-        self.ui.graphicsView_integratedPeakView.plot_model(motor_pos_vec, fit_gauss_dict)
+
+        self.plot_model_data(motor_pos_vec, fit_gauss_dict)
 
         return
 
     def plot_model_data(self, vec_x, params):
         """
-
+        calculate the Y value by the model and plot them.
+        the sparse X values will be expanded
         :return:
         """
         # check inputs
-        assert isinstance(vec_x, numpy.ndarray), 'blabla'
+        assert isinstance(vec_x, numpy.ndarray), 'vec X {0} must be a numpy.ndarray but not a {1}.' \
+                                                 ''.format(vec_x, type(vec_x))
+        assert isinstance(params, dict), 'Model parameters {0} must be given by a dictionary but not by a {1}.' \
+                                         ''.format(params, type(params))
 
         # get parameters
         x0 = params['x0']
@@ -1360,6 +1365,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot the model
         self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
+
+        return
 
     def do_integrate_per_pt(self):
         """
@@ -2706,7 +2713,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_show_integratoin_details(self):
+    def do_show_integration_details(self):
         """
         show the details (in table) about the integration of scans
         :return:

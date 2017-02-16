@@ -217,7 +217,7 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     construct a data as motor position vs counts, and do the fit with Gaussian + flat background
     :param motor_pos_dict:
     :param integrated_pt_dict:
-    :return:
+    :return: 3-tuple: dictionary for fitted parameter, dictionary for fitting error, covariance matrix
     """
     # check inputs
     assert isinstance(motor_pos_dict, dict), 'Input motor position {0} must be a dictionary but not a {1}.' \
@@ -274,7 +274,7 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     gauss_error_dict['s_A'] = cov_matrix[1, 2]
     gauss_error_dict['A_s'] = cov_matrix[2, 1]
 
-    return gauss_parameter_dict, gauss_error_dict
+    return gauss_parameter_dict, gauss_error_dict, cov_matrix
 
 
 def gaussian_peak_intensity(parameter_dict, error_dict):
@@ -509,7 +509,8 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
                      'gauss parameters': None,
                      'gauss errors': None,
                      'motor positions': None,
-                     'pt intensities': None
+                     'pt intensities': None,
+                     'covariance matrix': None
                      }
 
         return info_dict
@@ -555,9 +556,10 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['simple background'] = averaged_background
 
     # fit gaussian + flat background
-    parameters, errors = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
+    parameters, errors, covariance_matrix = fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict)
     peak_int_dict['gauss parameters'] = parameters
     peak_int_dict['gauss errors'] = errors
+    peak_int_dict['covariance matrix'] = covariance_matrix
 
     # calculate intensity with method 2
     intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
@@ -574,8 +576,9 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
 
 def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     """
-
-    :param pt_motor_dict:
+    calculate the motor steps
+    :param motor_step_tolerance:
+    :param motor_pos_array:
     :return:
     """
     assert isinstance(motor_pos_array, numpy.ndarray), 'Motor positions {0} must be given as a numpy array but not ' \

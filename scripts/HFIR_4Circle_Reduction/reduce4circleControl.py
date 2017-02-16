@@ -1156,8 +1156,6 @@ class CWSCDReductionControl(object):
         :param background_pt_tuple:
         :return:
         """
-        # TODO/ISSUE/NOW - Test
-
         # check inputs
         assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
                                             ''.format(exp_number, type(exp_number))
