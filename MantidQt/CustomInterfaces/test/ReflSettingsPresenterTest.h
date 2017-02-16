@@ -241,13 +241,11 @@ public:
     presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
-        "PointDetectorAnalysis",
-        "None",
+        "PointDetectorAnalysis", "None",
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0",
-        "VerticalShift"};
+        "0.972762,0.001828,-0.000261,0.0", "VerticalShift"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
