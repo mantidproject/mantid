@@ -18,6 +18,7 @@ using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
 
 class PoldiFitPeaks2DTest : public CxxTest::TestSuite {
@@ -62,7 +63,7 @@ public:
 
   void testSetDeltaTFromWorkspace() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    ws->setBinEdges(0, LinearGenerator(0, 1));
+    ws->setBinEdges(0, BinEdges(ws->x(0).size(), LinearGenerator(0, 1)));
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.setDeltaTFromWorkspace(ws);
     TS_ASSERT_EQUALS(spectrumCalculator.m_deltaT, 1.0);
