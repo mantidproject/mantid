@@ -34,7 +34,8 @@ void NormaliseByCurrent::init() {
  * single period or multi-period data.
  *
  * @param inputWS :: The input workspace to extract the log details from.
- *
+ * @param integratePCharge :: recalculate the integrated proton charge if true
+
  * @throws Exception::NotFoundError, std::domain_error or
  * std::runtime_error if the charge value(s) are not set in the
  * workspace logs or if the values are invalid (0)
