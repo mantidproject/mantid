@@ -26,6 +26,7 @@ Changes in this version
 
 * `18891 <https://www.github.com/mantidproject/mantid/pull/18891>`_ Fix bug in gd_prtn_chrg for chunked data
 * `18907 <https://www.github.com/mantidproject/mantid/pull/18907>`_ Fix zeropadding for IMAT in Facilities.XML
+* `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
 
 
@@ -39,6 +40,8 @@ Summary of impact
 | 18891 | Fixes bug in gd_prtn_chrg for chunked data                                        | Recalculate proton charge just prior to use | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18907 | Allows IMAT to use general file finding mechanism                                 | Facilities file update                      | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18914 | Avoids crash when mass deleting hundreds of workspaces in MantidPlot              | Call single algorithm in separate thread    | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpreation of list indices in GUI    | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
