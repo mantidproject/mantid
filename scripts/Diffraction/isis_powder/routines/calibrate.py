@@ -52,6 +52,7 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
     for ws in splined_ws_list:
         mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=ws, Append=append)
         append = True
+    # Group for user convenience
     mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace="Van_spline_data")
 
 

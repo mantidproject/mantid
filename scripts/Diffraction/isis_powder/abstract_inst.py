@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from isis_powder.routines import calibrate, focus, common, common_enums
+from isis_powder.routines import calibrate, focus, common, common_enums, common_output
 
 
 # This class provides common hooks for instruments to override
@@ -193,7 +193,14 @@ class AbstractInst(object):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        return None
+        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                                   processed_spectra=processed_spectra)
+        output_paths = self._generate_out_file_paths(run_details=run_details)
+
+        common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
+                                        output_paths=output_paths, inst_prefix="POL",
+                                        run_number_string=run_details.user_input_run_number)
+        return d_spacing_group
 
     # Steps applicable to all instruments
 

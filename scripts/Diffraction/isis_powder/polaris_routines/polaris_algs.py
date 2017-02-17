@@ -47,10 +47,11 @@ def get_run_details(run_number_string, inst_settings):
 
     in_calib_dir = os.path.join(inst_settings.calibration_dir, label)
     offsets_file_full_path = os.path.join(in_calib_dir, offset_file_name)
+
     # Generate the name of the splined file we will either be loading or saving
-    splined_vanadium_name = _generate_splined_van_filename(chopper_on=inst_settings.chopper_on,
-                                                           vanadium_run_string=vanadium_runs,
-                                                           offset_file_name=offset_file_name)
+    chopper_status = "On" if inst_settings.chopper_on else "Off"
+    splined_vanadium_name = common.generate_splined_name(vanadium_runs, chopper_status, offset_file_name)
+
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
 
     run_details = RunDetails(run_number=run_number)
@@ -64,27 +65,6 @@ def get_run_details(run_number_string, inst_settings):
     run_details.splined_vanadium_file_path = splined_vanadium
 
     return run_details
-
-
-def split_into_tof_d_spacing_groups(run_details, processed_spectra):
-    d_spacing_output = []
-    tof_output = []
-    run_number = str(run_details.user_input_run_number)
-    for name_index, ws in enumerate(processed_spectra):
-        d_spacing_out_name = run_number + "-ResultD-" + str(name_index + 1)
-        tof_out_name = run_number + "-ResultTOF-" + str(name_index + 1)
-
-        d_spacing_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=d_spacing_out_name,
-                                                    Target="dSpacing"))
-        tof_output.append(mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=tof_out_name, Target="TOF"))
-
-    # Group the outputs
-    d_spacing_group_name = run_number + "-Results-D-Grp"
-    d_spacing_group = mantid.GroupWorkspaces(InputWorkspaces=d_spacing_output, OutputWorkspace=d_spacing_group_name)
-    tof_group_name = run_number + "-Results-TOF-Grp"
-    tof_group = mantid.GroupWorkspaces(InputWorkspaces=tof_output, OutputWorkspace=tof_group_name)
-
-    return d_spacing_group, tof_group
 
 
 def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
@@ -106,14 +86,6 @@ def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
                                                           OutputWorkspace=output_name,
                                                           XMin=mask_params[0], XMax=mask_params[1])
     return output_workspaces
-
-
-def _generate_splined_van_filename(chopper_on, vanadium_run_string, offset_file_name):
-    output_string = "SplinedVan_" + str(vanadium_run_string) + "_chopper"
-    output_string += "On" if chopper_on else "Off"
-    output_string += '_' + offset_file_name
-    output_string += ".nxs"
-    return output_string
 
 
 def _read_masking_file(masking_file_path):

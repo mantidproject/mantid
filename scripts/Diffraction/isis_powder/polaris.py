@@ -2,12 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-import mantid.simpleapi as mantid
-
-import isis_powder.routines.common as common
-from isis_powder.routines import yaml_parser, InstrumentSettings
+from isis_powder.routines import common, common_output, InstrumentSettings, yaml_parser
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_output, polaris_param_mapping
+from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
 
 class Polaris(AbstractInst):
@@ -41,7 +38,6 @@ class Polaris(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     # Overrides
-
     def _apply_absorb_corrections(self, run_details, van_ws):
         return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
                                                          multiple_scattering=self._inst_settings.multiple_scattering)
@@ -117,14 +113,3 @@ class Polaris(AbstractInst):
                                                             spline_number=spline_coeff,
                                                             mask_path=masking_file_path)
         return output
-
-    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
-        d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(run_details=run_details,
-                                                                                  processed_spectra=processed_spectra)
-        output_paths = self._generate_out_file_paths(run_details=run_details)
-
-        polaris_output.save_polaris_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                                                 output_paths=output_paths,
-                                                 run_number_string=run_details.user_input_run_number)
-        return d_spacing_group
-

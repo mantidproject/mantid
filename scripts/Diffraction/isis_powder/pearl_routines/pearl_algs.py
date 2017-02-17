@@ -79,10 +79,11 @@ def get_run_details(run_number_string, inst_settings):
     label = common.cal_map_dictionary_key_helper(mapping_dict, "label")
     vanadium_run_numbers = common.cal_map_dictionary_key_helper(mapping_dict, "vanadium_run_numbers")
 
-    splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
-                                                       vanadium_run_string=vanadium_run_numbers,
-                                                       long_mode_on=inst_settings.long_mode,
-                                                       tt_mode=inst_settings.tt_mode)
+    # Use generate out name to provide the unique fingerprint for this file
+    splined_vanadium_name = common.generate_splined_name(
+        generate_out_name(run_number_string=vanadium_run_numbers,
+                          absorb_on=inst_settings.absorb_corrections,
+                          long_mode_on=inst_settings.long_mode, tt_mode=inst_settings.tt_mode))
 
     calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
@@ -158,10 +159,3 @@ def strip_bragg_peaks(ws_list_to_correct):
                                                    OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10)
 
     return ws_list_to_correct
-
-
-def _generate_splined_van_name(vanadium_run_string, absorb_on, long_mode_on, tt_mode):
-    generated_out_name = generate_out_name(run_number_string=vanadium_run_string, absorb_on=absorb_on,
-                                           long_mode_on=long_mode_on, tt_mode=tt_mode)
-    output_string = "SplinedVan_" + generated_out_name + ".nxs"
-    return output_string

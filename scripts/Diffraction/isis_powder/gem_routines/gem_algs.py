@@ -21,7 +21,10 @@ def get_run_details(run_number_string, inst_settings):
     calibration_folder = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     label_calibration_folder = os.path.join(calibration_folder, label)
 
+    splined_vanadium_name = common.generate_splined_name(vanadium_runs, offset_file_name)
+
     offset_file_path = os.path.join(label_calibration_folder, offset_file_name)
+    splined_file_path = os.path.join(label_calibration_folder, splined_vanadium_name)
 
     # TODO generate splined vanadium name from common
 
@@ -33,5 +36,7 @@ def get_run_details(run_number_string, inst_settings):
 
     run_details.grouping_file_path = offset_file_path
     run_details.offset_file_path = offset_file_path
+
+    run_details.splined_vanadium_file_path = splined_file_path
 
     return run_details

@@ -42,7 +42,7 @@ class Gem(AbstractInst):
         raise NotImplementedError()
 
     def _generate_output_file_name(self, run_number_string):
-        raise NotImplementedError()
+        return self._generate_input_file_name(run_number_string)
 
     @staticmethod
     def _generate_input_file_name(run_number):
