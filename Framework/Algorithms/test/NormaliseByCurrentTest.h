@@ -455,30 +455,34 @@ public:
   }
 
   void test_execPerformance() {
-    doTest(execWSIn, execWSOut, 1.0, 0.5 * M_SQRT2, performance);
+    doTest(execWSIn, execWSOut, 1.0, 0.5 * M_SQRT2, false, performance);
   }
   void test_execInPlacePerformance() {
-    doTest(execInPlaceWSIn, execInPlaceWSIn, 1.0, 0.5 * M_SQRT2, performance);
+    doTest(execInPlaceWSIn, execInPlaceWSIn, 1.0, 0.5 * M_SQRT2, false,
+           performance);
   }
 
   void test_execEventPerformance() {
     EventWorkspace_const_sptr outputEvent;
-    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
-        doTest(execEventWSIn, execEventWSOut, 1.0, 0.5 * M_SQRT2, performance));
+    outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(doTest(
+        execEventWSIn, execEventWSOut, 1.0, 0.5 * M_SQRT2, false, performance));
   }
   void test_execEventInPlacePerformance() {
     EventWorkspace_const_sptr outputEvent;
     outputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(
         doTest(execEventInPlaceWSIn, execEventInPlaceWSIn, 1.0, 0.5 * M_SQRT2,
-               performance));
+               false, performance));
   }
   void test_multiPeriodDataPerformance() {
 
     // Check that normalisation has used the protonChargeByPeriod data. i.e Yout
     // = Yin/2.0, Yout = Yin/4.0, ... for each period workspace.
-    doTest(multiPeriodWS1, "period1", 1.00, 1.500, performance); // 2/2, 3/2
-    doTest(multiPeriodWS2, "period2", 0.50, 0.750, performance); // 2/4, 3/4
-    doTest(multiPeriodWS3, "period3", 0.25, 0.375, performance); // 2/8, 3/8
+    doTest(multiPeriodWS1, "period1", 1.00, 1.500, false,
+           performance); // 2/2, 3/2
+    doTest(multiPeriodWS2, "period2", 0.50, 0.750, false,
+           performance); // 2/4, 3/4
+    doTest(multiPeriodWS3, "period3", 0.25, 0.375, false,
+           performance); // 2/8, 3/8
   }
 
 private:
