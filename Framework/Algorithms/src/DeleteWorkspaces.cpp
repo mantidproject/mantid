@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/DeleteWorkspaces.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -18,9 +17,6 @@ void DeleteWorkspaces::init() {
 
 /// Execute the algorithm
 void DeleteWorkspaces::exec() {
-  using API::AnalysisDataService;
-  using API::AnalysisDataServiceImpl;
-  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
 
   // Set up progress reporting
