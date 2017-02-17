@@ -69,11 +69,11 @@ public:
   }
 
   void test_comparison_position() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    const DetectorInfo b(a);
-    a.setPosition(0, {1, 2, 3});
+    DetectorInfo a(PosVec(2, {0, 0, 0}), RotVec(2));
+    DetectorInfo b(a);
+    a.setPosition(1, {1, 2, 3});
     TS_ASSERT(!a.isEquivalent(b));
-    a.setPosition(0, b.position(0));
+    b.setPosition(1, a.position(1));
     TS_ASSERT(a.isEquivalent(b));
   }
 
@@ -97,13 +97,13 @@ public:
 
   void test_comparison_rotation() {
     DetectorInfo a(
-        PosVec(1),
-        RotVec(1, Eigen::Quaterniond(Eigen::AngleAxisd(
+        PosVec(2),
+        RotVec(2, Eigen::Quaterniond(Eigen::AngleAxisd(
                       30.0, Eigen::Vector3d{1, 2, 3}.normalized()))));
-    const DetectorInfo b(a);
-    a.setRotation(0, {1, 2, 3, 4});
+    DetectorInfo b(a);
+    a.setRotation(1, {1, 2, 3, 4});
     TS_ASSERT(!a.isEquivalent(b));
-    a.setRotation(0, b.rotation(0));
+    b.setRotation(1, a.rotation(1));
     TS_ASSERT(a.isEquivalent(b));
   }
 

@@ -51,11 +51,9 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   // Positions: Absolute difference matter, so comparison is not relative.
   // Changes below 1 nm = 1e-9 m are allowed.
   if (!(m_positions == other.m_positions) &&
-      std::mismatch(m_positions->begin(), m_positions->end(),
-                    other.m_positions->begin(),
-                    [](const auto &a, const auto &b) {
-                      return (a - b).norm() < 1e-9;
-                    }).first != m_positions->end())
+      !std::equal(
+          m_positions->begin(), m_positions->end(), other.m_positions->begin(),
+          [](const auto &a, const auto &b) { return (a - b).norm() < 1e-9; }))
     return false;
   // At a distance of L = 1000 m (a reasonable upper limit for instrument sizes)
   // from the rotation center we want a difference of less than d = 1 um = 1e-6
@@ -64,16 +62,15 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   // The norm of the imaginary part of the quaternion can give the angle:
   // x^2 + y^2 + z^2 = (sin(theta/2))^2.
   if (!(m_rotations == other.m_rotations) &&
-      std::mismatch(m_rotations->begin(), m_rotations->end(),
-                    other.m_rotations->begin(),
-                    [](const auto &a, const auto &b) {
-                      constexpr double d_max = 1e-6;
-                      constexpr double L = 1000.0;
-                      constexpr double safety_factor = 2.0;
-                      constexpr double imag_norm_max =
-                          sin(d_max / (2.0 * L * safety_factor));
-                      return (a * b.conjugate()).vec().norm() < imag_norm_max;
-                    }).first != m_rotations->end())
+      !std::equal(m_rotations->begin(), m_rotations->end(),
+                  other.m_rotations->begin(), [](const auto &a, const auto &b) {
+                    constexpr double d_max = 1e-6;
+                    constexpr double L = 1000.0;
+                    constexpr double safety_factor = 2.0;
+                    constexpr double imag_norm_max =
+                        sin(d_max / (2.0 * L * safety_factor));
+                    return (a * b.conjugate()).vec().norm() < imag_norm_max;
+                  }))
     return false;
   return true;
 }
