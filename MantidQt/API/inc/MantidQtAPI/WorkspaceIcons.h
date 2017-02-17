@@ -17,6 +17,8 @@ public:
 
   /// Returns an icon for the given ID
   QPixmap getIcon(const std::string &workspaceID) const;
+  /// Returns an icon ID for the given workspace ID
+  std::string getIconID(const std::string &workspaceID) const;
 
 private:
   /// Defines the mapping between ID & pixmap name

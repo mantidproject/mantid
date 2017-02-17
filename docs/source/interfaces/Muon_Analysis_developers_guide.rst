@@ -247,6 +247,16 @@ When a fit is finished, the data presenter is notified so that it can process th
 This is only relevant in the case of a simultaneous fit, because the :ref:`algm-Fit` algorithm produces output in a very different form to its regular output format.
 The presenter reorganises the output workspaces so that they are in the same format as they would have been for a regular fit - and then they can be easily read by the "Results table" tab.
 
+Sequence of events when "Fit" clicked
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The "Fit" button is part of the *MuonFitPropertyBrowser*, i.e. the model. This doesn't fit with the MVP pattern but is this way for historical reasons, as the button was always part of this widget.
+
+When the user clicks "Fit", the model emits a signal ``preFitChecksRequested``. This is caught by the data presenter, which performs some checks that the data is valid before the fit starts. Extra checks could be easily added at this point. 
+
+If everything is OK, the data presenter tells the model to continue, and the model emits ``functionUpdateAndFitRequested``.
+This signal is caught by the function presenter, which updates the fit function in the model from that in the view, to ensure they are in sync before the fit. It then tells the model to start the fit.
+
 Sequential fit dialog
 ^^^^^^^^^^^^^^^^^^^^^
 

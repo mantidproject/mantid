@@ -12,8 +12,6 @@
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -548,9 +546,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng0.first;
     descr.thetaMax = thetaRng0.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "sigma_gauss");
     m_foils0[i] = descr; // copy
 
     const auto &foil1 = foils1[i];
@@ -559,9 +557,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng1.first;
     descr.thetaMax = thetaRng1.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "sigma_gauss");
     m_foils1[i] = descr; // copy
   }
 

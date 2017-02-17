@@ -4,15 +4,18 @@
 #include "MantidKernel/ICatalogInfo.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabView.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflSearchModel.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include <gmock/gmock.h>
@@ -69,6 +72,8 @@ class MockSettingsView : public IReflSettingsView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getStartOverlap, std::string());
+  MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
@@ -99,6 +104,15 @@ public:
     UNUSED_ARG(hints);
   };
   IReflSettingsPresenter *getPresenter() const override { return nullptr; }
+};
+
+class MockEventView : public IReflEventView {
+public:
+  // Global options
+  MOCK_CONST_METHOD0(getTimeSlices, std::string());
+
+  // Calls we don't care about
+  IReflEventPresenter *getPresenter() const override { return nullptr; }
 };
 
 class MockSaveTabView : public IReflSaveTabView {
@@ -149,6 +163,21 @@ public:
   ~MockRunsTabPresenter() override{};
 };
 
+class MockEventPresenter : public IReflEventPresenter {
+public:
+  MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+  ~MockEventPresenter() override{};
+};
+
+class MockEventTabPresenter : public IReflEventTabPresenter {
+public:
+  std::string getTimeSlicingOptions(int group) const override {
+    UNUSED_ARG(group)
+    return std::string();
+  };
+  ~MockEventTabPresenter() override{};
+};
+
 class MockSettingsPresenter : public IReflSettingsPresenter {
 public:
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
@@ -184,6 +213,7 @@ public:
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
+  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
@@ -195,9 +225,11 @@ public:
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   // Other calls we don't care about
-  void setInstrumentName(const std::string &instName) const override {
-    UNUSED_ARG(instName);
-  }
+  std::string getTimeSlicingOptions(int group) const override {
+    UNUSED_ARG(group);
+    return std::string();
+  };
+
   ~MockMainWindowPresenter() override{};
 };
 

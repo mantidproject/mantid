@@ -173,7 +173,7 @@ IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bi
         self.assertTrue( wsname in mtd )
         self.assertTrue( wsname_box in mtd )
         
-        self.assertTrue( type(query) == tuple )
+        self.assertTrue( isinstance(query, tuple) )
         self.assertEquals( 2, len(query) )
         
         self.assertTrue( isinstance(query[0], ITableWorkspace) )
@@ -202,10 +202,10 @@ IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bi
         ws2 = simpleapi.Rebin(ws1,Params=[1.5,1.5,3])
         ws3 = ws1.rebin(Params=[1.5,1.5,3])
         ws4 = ws1.rebin([1.5,1.5,3])
-        result = simpleapi.CheckWorkspacesMatch(ws2,ws3)
-        self.assertEquals("Success!",result)
-        result = simpleapi.CheckWorkspacesMatch(ws2,ws4)
-        self.assertEquals("Success!",result)
+        result = simpleapi.CompareWorkspaces(ws2,ws3)
+        self.assertTrue(result[0])
+        result = simpleapi.CompareWorkspaces(ws2,ws4)
+        self.assertTrue(result[0])
 
         simpleapi.DeleteWorkspace(ws1)
         simpleapi.DeleteWorkspace(ws2)

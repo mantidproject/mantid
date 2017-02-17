@@ -4,7 +4,7 @@
 
 using MantidQt::CustomInterfaces::MDF::EditLocalParameterDialog;
 using MantidQt::MantidWidgets::IFunctionBrowser;
-using MantidQt::MantidWidgets::IMuonFitFunctionControl;
+using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -16,7 +16,7 @@ namespace CustomInterfaces {
  * @param funcBrowser :: [input] Non-owning pointer to function browser
  */
 MuonAnalysisFitFunctionPresenter::MuonAnalysisFitFunctionPresenter(
-    QObject *parent, IMuonFitFunctionControl *fitBrowser,
+    QObject *parent, IMuonFitFunctionModel *fitBrowser,
     IFunctionBrowser *funcBrowser)
     : QObject(parent), m_fitBrowser(fitBrowser), m_funcBrowser(funcBrowser),
       m_multiFitState(Muon::MultiFitState::Disabled) {
