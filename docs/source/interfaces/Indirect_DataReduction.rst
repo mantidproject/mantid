@@ -198,7 +198,7 @@ Common Options
 ~~~~~~~~~~~~~~
 
 Input File
-  Used to select the raw data in ``.nxs`` format. Note that multiple files can be specified following :ref:`MultiFileLoading` instructions.
+  Used to select the raw data in ``.nxs`` format. Note that multiple files can be specified following :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>` instructions.
 
 Detector Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a

@@ -16,11 +16,11 @@ Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The algorithm is capable of running over multiple files.  Run property
-needs to be specified following the syntax in :ref:`MultiFileLoading`.
+needs to be specified following the syntax in :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 When ``SumRuns=True``, all the runs will be merged while loading.
 Note, for **Range** and **Stepped Range**, ``SumRuns`` will be
 ignored.  Use **Added Range** and **Added Stepped Range** instead (see
-:ref:`MultiFileLoading`).  For ``BackgroundRun``, ``CalibrationRun``
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``, ``CalibrationRun``
 and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options

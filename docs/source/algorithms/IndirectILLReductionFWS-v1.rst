@@ -14,7 +14,9 @@ It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTr
 
 Input
 -----
-Multiple files following the syntax given in :ref:`MultiFileLoading`.
+
+Multiple files following the syntax given in
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 
 Output
 ------
