@@ -707,7 +707,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # temp_ws = self.get_workspace(sample_ws_name)
             if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
                 api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
-                                       OutputWorkspace=sample_ws_name)
+                                       OutputWorkspace=sample_ws_name,
+                                       RecalculatePCharge=True)
                 get_workspace(sample_ws_name).getRun()['gsas_monitor'] = 1
             # END-IF
         # ENDI-IF
@@ -772,7 +773,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self._normalisebycurrent is True:
             api.NormaliseByCurrent(InputWorkspace=sumRun,
-                                   OutputWorkspace=sumRun)
+                                   OutputWorkspace=sumRun,
+                                   RecalculatePCharge=True)
             get_workspace(sumRun).getRun()['gsas_monitor'] = 1
 
         return sumRun
@@ -945,7 +947,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             try:
                 if normalisebycurrent is True:
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
-                                           OutputWorkspace=output_wksp_list[split_index])
+                                           OutputWorkspace=output_wksp_list[split_index],
+                                           RecalculatePCharge=True)
                     get_workspace(output_wksp_list[split_index]).getRun()['gsas_monitor'] = 1
             except RuntimeError as e:
                 self.log().warning(str(e))

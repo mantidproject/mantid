@@ -14,6 +14,7 @@
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -308,10 +309,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
+  std::string polarizationTranslation(polarization);
+  std::replace(polarizationTranslation.begin(), polarizationTranslation.end(),
+               '-', '_');
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      "OutputWorkspace_jc_" + polarizationTranslation, "Lambda_" + polarization,
       Direction::Output));
-  setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
+  setProperty("OutputWorkspace_jc_" + polarizationTranslation, outputWS2);
 
   // Conversion to Q
   IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
@@ -352,12 +356,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace_" + polarization, wsName, Direction::Output));
-    setProperty("OutputWorkspace_" + polarization, outputWS);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace2D_" + polarization, "2D_" + wsName,
+        "OutputWorkspace_" + polarizationTranslation, wsName,
         Direction::Output));
-    setProperty("OutputWorkspace2D_" + polarization, output2DWS);
+    setProperty("OutputWorkspace_" + polarizationTranslation, outputWS);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D_" + polarizationTranslation, "2D_" + wsName,
+        Direction::Output));
+    setProperty("OutputWorkspace2D_" + polarizationTranslation, output2DWS);
   }
   m_output_message += "Reflectivity calculation completed\n";
   return outputWS;
