@@ -109,7 +109,33 @@ class SortXAxisTest(unittest.TestCase):
         DeleteWorkspace(unsortedws)
         DeleteWorkspace(sortedws)
 
-
+    def test_sort_x_works_child(self):
+        # Create unsorted workspace
+        parent = AlgorithmManager.createUnmanaged('Load')
+        create_ws_alg = parent.createChildAlgorithm("CreateWorkspace")
+        dataX = [4, 3, 2, 1]
+        dataY = [1, 2, 3]
+        dataE = [1, 2, 3]
+        create_ws_alg.setProperty("DataX", dataX)
+        create_ws_alg.setProperty("DataY", dataY)
+        create_ws_alg.setProperty("DataE", dataE)
+        create_ws_alg.setProperty("UnitX",'TOF')
+        create_ws_alg.setProperty("Distribution", False)
+        create_ws_alg.execute()
+        # Run the algorithm
+        sort_alg = parent.createChildAlgorithm("SortXAxis")
+        sort_alg.setProperty("InputWorkspace", create_ws_alg.getProperty("OutputWorkspace").value)
+        sort_alg.execute()
+        # Check the resulting data values. Sorting operation should have resulted in no changes
+        sortedws = sort_alg.getProperty("OutputWorkspace").value
+        sortedX = sortedws.readX(0)
+        sortedY = sortedws.readY(0)
+        sortedE = sortedws.readE(0)
+        self.assertEqual(sorted(dataX), sortedX.tolist())
+        dataY.reverse()
+        dataE.reverse()
+        self.assertEqual(dataY, sortedY.tolist())
+        self.assertEqual(dataE, sortedE.tolist())
 
 if __name__ == '__main__':
     unittest.main()

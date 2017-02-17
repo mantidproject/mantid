@@ -89,11 +89,15 @@ private:
   std::string m_maxSizePropertyName;
   /// Store Normalise property name
   std::string m_normalisePropertyName;
+  /// Store the Exclude property name
+  std::string m_excludePropertyName;
 
   /// Max size for seq domain
   mutable size_t m_maxSize;
   /// Option to normalise the data
   mutable bool m_normalise;
+  /// Ranges that must be excluded from fit
+  mutable std::vector<double> m_exclude;
 };
 
 } // namespace CurveFitting

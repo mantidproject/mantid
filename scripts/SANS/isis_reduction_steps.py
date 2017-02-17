@@ -58,6 +58,17 @@ def _issueInfo(msg):
     sanslog.notice(msg)
 
 
+def is_prompt_peak_instrument(reducer):
+    if reducer.instrument.name() == 'LOQ' or reducer.instrument.name() == 'LARMOR':
+        return True
+    else:
+        return False
+
+
+def get_wavelength_min_and_max(reducer):
+    return reducer.to_wavelen.wav_low, reducer.to_wavelen.wav_high
+
+
 class LoadRun(object):
     UNSET_PERIOD = -1
 
@@ -1057,7 +1068,7 @@ class Mask_ISIS(ReductionStep):
                 det_Z = det.getPos().getZ()
                 start_point = [self.arm_x, self.arm_y, det_Z]
                 MaskDetectorsInShape(Workspace=workspace, ShapeXML=
-                                     self._mask_line(start_point, 1e6, self.arm_width, self.arm_angle))
+                                     self._mask_line(start_point, 100.0, self.arm_width, self.arm_angle))
 
         _output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
         _issueInfo("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
@@ -1935,16 +1946,25 @@ class NormalizeToMonitor(ReductionStep):
 
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
+
+        # Unwrap the monitors of the scatter workspace
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+            DeleteWorkspace(mon)
+            mon = temp_mon
+
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale
 
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
 
-        if reducer.instrument.name() == 'LOQ':
+        if (is_prompt_peak_instrument(reducer) and reducer.transmission_calculator.removePromptPeakMin is not None
+            and reducer.transmission_calculator.removePromptPeakMax is not None):  # noqa
             RemoveBins(InputWorkspace=self.output_wksp, OutputWorkspace=self.output_wksp,
-                       XMin=reducer.transmission_calculator.loq_removePromptPeakMin, XMax=
-                       reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
+                       XMin=reducer.transmission_calculator.removePromptPeakMin, XMax=
+                       reducer.transmission_calculator.removePromptPeakMax, Interpolation="Linear")
 
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
@@ -2019,9 +2039,9 @@ class TransmissionCalc(ReductionStep):
         self.calculated_can = None
         # the result of this calculation that will be used by CalculateNorm() and the ConvertToQ
         self.output_wksp = None
-        # Use for removing LOQ prompt peak from monitors. Units of micro-seconds
-        self.loq_removePromptPeakMin = 19000.0
-        self.loq_removePromptPeakMax = 20500.0
+        # Use for removing LOQ/LARMOR prompt peak from monitors. Units of micro-seconds
+        self.removePromptPeakMin = None
+        self.removePromptPeakMax = None
 
     def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
@@ -2057,7 +2077,7 @@ class TransmissionCalc(ReductionStep):
             order_str = fit_method[10:]
             fit_method = 'POLYNOMIAL'
             self.fit_settings[select + ORDER] = int(order_str)
-        if fit_method not in self.TRANS_FIT_OPTIONS.keys():
+        if fit_method not in list(self.TRANS_FIT_OPTIONS.keys()):
             _issueWarning(
                 'ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
             fit_method = self.DEFAULT_FIT
@@ -2116,12 +2136,19 @@ class TransmissionCalc(ReductionStep):
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
+        # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
+        if reducer.unwrap_monitors:
+            wavelength_min, wavelength_max = get_wavelength_min_and_max(reducer)
+            UnwrapMonitorsInTOF(InputWorkspace=tmpWS, OutputWorkspace=tmpWS,
+                                WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
+
         # Perform the a dark run background correction if one was specified
         self._correct_dark_run_background(reducer, tmpWS, trans_det_ids)
 
-        if inst.name() == 'LOQ':
-            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.loq_removePromptPeakMin,
-                       XMax=self.loq_removePromptPeakMax,
+        if is_prompt_peak_instrument(reducer) and self.removePromptPeakMin is not None and \
+                        self.removePromptPeakMax is not None:  # noqa
+            RemoveBins(InputWorkspace=tmpWS, OutputWorkspace=tmpWS, XMin=self.removePromptPeakMin,
+                       XMax=self.removePromptPeakMax,
                        Interpolation='Linear')
 
         tmp = mtd[tmpWS]
@@ -2222,6 +2249,9 @@ class TransmissionCalc(ReductionStep):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
+        # Set the prompt peak default values
+        self.set_prompt_parameter_if_not_set(reducer)
+
         self.output_wksp = None
 
         # look for run files that contain transmission data
@@ -2247,7 +2277,7 @@ class TransmissionCalc(ReductionStep):
         """
         return reducer.get_transmissions()
 
-    def calculate(self, reducer):
+    def calculate(self, reducer):  # noqa
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
         FITMETHOD = 'fit_method'
@@ -2345,7 +2375,7 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.setProperty("IncidentBeamMonitor", pre_sample)
         calc_trans_alg.setProperty("RebinParams", reducer.to_wavelen.get_rebin())
         calc_trans_alg.setProperty("OutputUnfittedData", True)
-        for name, value in options.items():
+        for name, value in list(options.items()):
             calc_trans_alg.setProperty(name, value)
 
         if self.trans_mon:
@@ -2358,8 +2388,14 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.execute()
 
         # Set the y axis label correctly for the transmission ratio data
-        fitted_trans_ws = mtd[fittedtransws]
-        unfitted_trans_ws = mtd[unfittedtransws]
+        try:
+            fitted_trans_ws = mtd[fittedtransws]
+            unfitted_trans_ws = mtd[unfittedtransws]
+        except KeyError as err:
+            message = "Something went wrong during the transmission calculation. The error message is " \
+                      "{0}. Check if you have any signal in the monitors which are used to record the " \
+                      "transmission and normalisation signal.".format(str(err))
+            raise RuntimeError(message)
         if fitted_trans_ws:
             fitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
         if unfitted_trans_ws:
@@ -2425,6 +2461,17 @@ class TransmissionCalc(ReductionStep):
             trans_ws = mtd[workspace_name]
             trans_ws = reducer.dark_run_subtraction.execute_transmission(trans_ws, trans_det_ids)
             mtd.addOrReplace(workspace_name, trans_ws)
+
+    def set_prompt_parameter_if_not_set(self, reducer):
+        """
+        This method sets default prompt peak values in case the user has not provided some. Currently
+        we only use default values for LOQ.
+        """
+        is_prompt_peak_not_set = self.removePromptPeakMin is None and self.removePromptPeakMax is None
+        if is_prompt_peak_not_set:
+            if reducer.instrument.name() == "LOQ":
+                self.removePromptPeakMin = 19000.0 # Units of micro-seconds
+                self.removePromptPeakMax = 20500.0 # Units of micro-seconds
 
 
 class AbsoluteUnitsISIS(ReductionStep):
@@ -3192,7 +3239,8 @@ class UserFile(ReductionStep):
             'MON/': self._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line}
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested
@@ -3206,7 +3254,8 @@ class UserFile(ReductionStep):
             'MON/': fresh._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
             'MASKFILE': self._read_maskfile_line,
-            'QRESOL/': self._read_q_resolution_line
+            'QRESOL/': self._read_q_resolution_line,
+            'UNWRAP': self._read_unwrap_monitors_line
         }
         return fresh
 
@@ -3258,7 +3307,7 @@ class UserFile(ReductionStep):
         upper_line = line.upper()
 
         # check for a recognised command
-        for keyword in self.key_functions.keys():
+        for keyword in list(self.key_functions.keys()):
             if upper_line.startswith(keyword):
                 # remove the keyword as it has already been parsed
                 params = line[len(keyword):]
@@ -3382,9 +3431,9 @@ class UserFile(ReductionStep):
         elif upper_line.startswith('FIT/MONITOR'):
             params = upper_line.split()
             nparams = len(params)
-            if nparams == 3 and reducer.instrument.name() == 'LOQ':
-                reducer.transmission_calculator.loq_removePromptPeakMin = float(params[1])
-                reducer.transmission_calculator.loq_removePromptPeakMax = float(params[2])
+            if nparams == 3 and is_prompt_peak_instrument(reducer):
+                reducer.transmission_calculator.removePromptPeakMin = float(params[1])
+                reducer.transmission_calculator.removePromptPeakMax = float(params[2])
             else:
                 if reducer.instrument.name() == 'LOQ':
                     _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
@@ -3922,7 +3971,7 @@ class UserFile(ReductionStep):
     def _read_q_resolution_line_on_off(self, arguments, reducer):
         '''
         Handles the ON/OFF setting for QResolution
-        @param arguements: the line arguments
+        @param arguments: the line arguments
         @param reducer: a reducer object
         '''
         # Remove white space
@@ -3981,6 +4030,28 @@ class UserFile(ReductionStep):
             return "Invalid input: \"%s\".  Expected \"MASKFILE = path to file\"." % line
 
         reducer.settings["MaskFiles"] = value
+
+    def _read_unwrap_monitors_line(self, arguments, reducer):
+        """
+        Checks if the montiors should be unwrapped. The arguments can be either ON or OFF. We don't care here about
+        any preceeding slash
+        Args:
+            arguments: the arguments string
+            reducer: a handle to the reducer (is not used)
+        """
+        # Remove the slash if
+        if arguments.find('/') == -1:
+            arguments.replace('/', "")
+        # Remove white space
+        on_off = "".join(arguments.split())
+        if on_off == "ON":
+            reducer.unwrap_monitors = True
+        elif on_off == "OFF":
+            reducer.unwrap_monitors = False
+        else:
+            reducer.unwrap_monitors = False
+            return 'Unknown setting {0} UNWRAP command in line: '.format(on_off)
+        return ''
 
 
 class GetOutputName(ReductionStep):
@@ -4217,6 +4288,7 @@ class GetSampleGeom(ReductionStep):
             Reads the geometry information stored in the workspace
             but doesn't replace values that have been previously set
         """
+        _ = reducer  # noqa
         wksp = mtd[workspace]
         if isinstance(wksp, WorkspaceGroup):
             wksp = wksp[0]

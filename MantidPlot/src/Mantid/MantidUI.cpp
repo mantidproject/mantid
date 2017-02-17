@@ -1225,10 +1225,18 @@ Table *MantidUI::createDetectorTable(
 
   // check if efixed value is available
   bool calcQ(true);
-  try {
-    auto detector = ws->getDetector(0);
-    ws->getEFixed(detector);
-  } catch (std::runtime_error &) {
+
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (spectrumInfo.hasDetectors(0)) {
+    try {
+      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
+                                                  Mantid::NoDeleting());
+      ws->getEFixed(detector);
+    } catch (std::runtime_error &) {
+      calcQ = false;
+    }
+  } else {
+    // No detectors available
     calcQ = false;
   }
 
@@ -1274,7 +1282,6 @@ Table *MantidUI::createDetectorTable(
                                  // value should be displayed
   QVector<QList<QVariant>> tableColValues;
   tableColValues.resize(nrows);
-  const auto &spectrumInfo = ws->spectrumInfo();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like
@@ -1336,18 +1343,22 @@ Table *MantidUI::createDetectorTable(
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
       // R is actually L2 (same as R if sample is at (0,0,0))
       R = spectrumInfo.l2(wsIndex);
-      // Theta is actually 'twoTheta' (twice the scattering angle), if Z is the
-      // beam direction this corresponds to theta in spherical coordinates.
-      try {
-        theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
-                                   : spectrumInfo.twoTheta(wsIndex);
-        theta *= 180.0 / M_PI; // To degrees
-      } catch (const Mantid::Kernel::Exception::InstrumentDefinitionError &ex) {
-        // Log the error and leave theta as it is
-        g_log.error(ex.what());
+      // Theta is actually 'twoTheta' for detectors (twice the scattering
+      // angle), if Z is the beam direction this corresponds to theta in
+      // spherical coordinates.
+      // For monitors we follow historic behaviour and display theta
+      const bool isMonitor = spectrumInfo.isMonitor(wsIndex);
+      if (!isMonitor) {
+        try {
+          theta = showSignedTwoTheta ? spectrumInfo.signedTwoTheta(wsIndex)
+                                     : spectrumInfo.twoTheta(wsIndex);
+          theta *= 180.0 / M_PI; // To degrees
+        } catch (const std::exception &ex) {
+          // Log the error and leave theta as it is
+          g_log.error(ex.what());
+        }
       }
-      QString isMonitor = spectrumInfo.isMonitor(wsIndex) ? "yes" : "no";
-
+      const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
       // Y/E
       if (include_data) {
@@ -1371,8 +1382,8 @@ Table *MantidUI::createDetectorTable(
         }
       }
 
-      colValues << QVariant(phi)        // rtp
-                << QVariant(isMonitor); // monitor
+      colValues << QVariant(phi)               // rtp
+                << QVariant(isMonitorDisplay); // monitor
     } catch (...) {
       // spectrumNo=-1, detID=0
       colValues << QVariant(-1) << QVariant("0");
@@ -2332,6 +2343,7 @@ void MantidUI::importString(const QString &logName, const QString &data,
 
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
   t->setColName(0, "Log entry");
+  t->setColumnType(0, Table::Text);
   t->setReadOnlyColumn(0, true); // Read-only
 
   for (int i = 0; i < loglines.size(); ++i) {
@@ -2343,11 +2355,12 @@ void MantidUI::importString(const QString &logName, const QString &data,
             (qMin(10, 1) + 1) * t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 /** Displays a string in a Qtiplot table
 *  @param logName :: the title of the table is based on this
-*  @param data :: a formated string with the time series data to display
+*  @param data :: a formatted string with the time series data to display
 *  @param wsName :: add workspace name to the table window title bar, defaults
 * to logname if left blank
 */
@@ -2369,6 +2382,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
   t->setColumnType(0, Table::Time);
   t->setTimeFormat("HH:mm:ss", 0, false);
   t->setColName(1, label.section("-", 1));
+  t->setColumnType(1, Table::Text);
 
   // Make both columns read-only
   t->setReadOnlyColumn(0, true);
@@ -2384,6 +2398,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
     ds.removeFirst(); // remove date
     ds.removeFirst(); // and time
     t->setText(row, 1, ds.join(" "));
+    t->setTextAlignment(row, 1, Qt::AlignLeft | Qt::AlignVCenter);
   }
 
   // Show table
@@ -2392,6 +2407,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data,
                     t->table()->verticalHeader()->sectionSize(0) +
                 100);
   t->setAttribute(Qt::WA_DeleteOnClose);
+  t->resizeColumnsToContents();
   t->showNormal();
 }
 

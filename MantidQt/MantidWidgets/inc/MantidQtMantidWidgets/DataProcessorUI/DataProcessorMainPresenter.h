@@ -60,6 +60,8 @@ public:
   virtual std::string getProcessingOptions() const = 0;
   /// Return global options for post-processing
   virtual std::string getPostprocessingOptions() const = 0;
+  /// Return global options for time-slicing
+  virtual std::string getTimeSlicingOptions() const = 0;
 };
 }
 }

@@ -283,7 +283,7 @@ public:
     ws->sortAll(TOF_SORT, NULL);
 
     IAlgorithm_sptr alg2 =
-        AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     alg2->initialize();
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace1", origWS);
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace2", ws);
@@ -291,7 +291,7 @@ public:
     alg2->setProperty<bool>("CheckAxes", false);
     alg2->execute();
     if (alg2->isExecuted()) {
-      TS_ASSERT(alg2->getPropertyValue("Result") == "Success!");
+      TS_ASSERT(alg2->getProperty("Result"));
     } else {
       TS_ASSERT(false);
     }
@@ -964,7 +964,7 @@ public:
     for (size_t index = 0; index < 2; ++index) {
       // Create a sample workspace and add it to the ADS, so it gets a name.
       auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
-          3, static_cast<double>(index), static_cast<double>(index));
+          3, static_cast<double>(index), static_cast<double>(index), true);
       AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
       alg.setProperty("InputWorkspace",
                       boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
