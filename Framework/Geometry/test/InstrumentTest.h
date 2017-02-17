@@ -18,25 +18,26 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace {
-  boost::shared_ptr<Beamline::DetectorInfo> makeDetectorInfo(const Instrument &instrument) {
-    const auto numDets = instrument.getNumberDetectors();
-    std::vector<size_t> monitors;
-    for (size_t i = 0; i < numDets; ++i)
-      if (instrument.isMonitorViaIndex(i))
-        monitors.push_back(i);
-    std::vector<Eigen::Vector3d> positions;
-    std::vector<Eigen::Quaterniond> rotations;
-    const auto &detIDs = instrument.getDetectorIDs();
-    for (const auto &id : detIDs) {
-      const auto &det = instrument.getDetector(id);
-      const auto &pos = det->getPos();
-      positions.emplace_back(pos[0], pos[1], pos[2]);
-      const auto &rot = det->getRotation();
-      rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
-    }
-    return boost::make_shared<Beamline::DetectorInfo>(
-        std::move(positions), std::move(rotations), monitors);
+boost::shared_ptr<Beamline::DetectorInfo>
+makeDetectorInfo(const Instrument &instrument) {
+  const auto numDets = instrument.getNumberDetectors();
+  std::vector<size_t> monitors;
+  for (size_t i = 0; i < numDets; ++i)
+    if (instrument.isMonitorViaIndex(i))
+      monitors.push_back(i);
+  std::vector<Eigen::Vector3d> positions;
+  std::vector<Eigen::Quaterniond> rotations;
+  const auto &detIDs = instrument.getDetectorIDs();
+  for (const auto &id : detIDs) {
+    const auto &det = instrument.getDetector(id);
+    const auto &pos = det->getPos();
+    positions.emplace_back(pos[0], pos[1], pos[2]);
+    const auto &rot = det->getRotation();
+    rotations.emplace_back(rot.real(), rot.imagI(), rot.imagJ(), rot.imagK());
   }
+  return boost::make_shared<Beamline::DetectorInfo>(
+      std::move(positions), std::move(rotations), monitors);
+}
 }
 
 class InstrumentTest : public CxxTest::TestSuite {
@@ -560,8 +561,8 @@ public:
     TS_ASSERT(detInfo->position(9).isApprox(
         toVector3d(bankEpsilon + V3D{-0.008, -0.0002, 0.0}), 1e-12));
     // bank 3
-    TS_ASSERT(detInfo->position(18).isApprox(
-        Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
+    TS_ASSERT(detInfo->position(18)
+                  .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-7, 5e-7, 5e-7};
@@ -587,7 +588,8 @@ public:
 
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(1)->getPos(),
                      bankOffset + V3D(-0.008, -0.0002, 0.0) + detOffset);
-    // Was shifted by something less than epsilon so this is the default position.
+    // Was shifted by something less than epsilon so this is the default
+    // position.
     TS_ASSERT_EQUALS(legacyInstrument.getDetector(3)->getPos(),
                      bankOffset + V3D(0.008, -0.0002, 0.0));
     // Epsilon in parent is preserved, but not epsilon relative to parent.
@@ -601,7 +603,7 @@ public:
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {
     const auto &baseInstrument =
-        ComponentCreationHelper::createTestInstrumentRectangular(1 ,2);
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     const auto bank1 = baseInstrument->getComponentByName("bank1");
     auto pmap = boost::make_shared<ParameterMap>();
     double scalex = 1.7;
