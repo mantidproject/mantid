@@ -6,6 +6,7 @@ Contains the ISISDisk class which calculates resolution and flux for ISIS Disk c
 spectrometer (LET) - using the functions in MulpyRep and additional tables of instrument parameters
 """
 
+from __future__ import absolute_import, division
 import numpy as np
 from . import MulpyRep
 from .ISISFermi import ISISFermi
@@ -130,14 +131,14 @@ class ISISDisk:
                         raise ValueError('Frequency must be a 1-, 2- or 5-element list/array')
                 else:
                     self.freq = [frequency/4., 10., frequency/2., frequency/2., frequency]
-            if 'Chopper2Phase' in kwargs.keys():
+            if 'Chopper2Phase' in list(kwargs.keys()):
                 self.Chop2Phase = kwargs['Chopper2Phase']
         elif 'MERLIN' in self.instname:
             if hasattr(frequency, "__len__"):
                 self.freq = [50., frequency[0]]
             else:
                 self.freq = [50., frequency]
-            if 'Chopper2Phase' in kwargs.keys():
+            if 'Chopper2Phase' in list(kwargs.keys()):
                 self.Chop2Phase = kwargs['Chopper2Phase']
         else:
             raise RuntimeError('Instrument name has not been set')
@@ -178,7 +179,7 @@ class ISISDisk:
             ie_list = np.where(np.abs(np.array(Eis)-Ei) == np.min(np.abs(np.array(Eis)-Ei)))[0]
             Et = np.linspace(0.05, 0.95*Ei, 19, endpoint=True) if (Etrans is None) else Etrans
         else:
-            ie_list = range(len(Eis))
+            ie_list = list(range(len(Eis)))
             # This is the relative energy transfer
             Et = np.linspace(0.05, 0.95, 19, endpoint=True) if (Etrans is None) else Etrans
         res_list = []

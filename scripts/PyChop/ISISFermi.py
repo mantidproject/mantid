@@ -7,6 +7,7 @@ Contains the ISISFermi class which calculates the resolution and flux for ISIS F
 spectrometers (MAPS, MARI, MERLIN) - using the functions in Chop.py and addition lookup tables.
 """
 
+from __future__ import absolute_import, division
 import numpy as np
 from . import Chop
 from scipy.interpolate import interp1d
@@ -96,7 +97,7 @@ class ISISFermi:
         Chopper type and frequency must also be given
         """
         instname = instname.upper()
-        if instname not in self.__Instruments.keys():
+        if instname not in list(self.__Instruments.keys()):
             raise ValueError('Instrument %s not recognised' % (instname))
         self.instname = instname
         if choppername:
@@ -113,7 +114,7 @@ class ISISFermi:
         """
         choppername = choppername.upper()
         self.freq = freq
-        if choppername not in self.__chopperParameters[self.instname].keys():
+        if choppername not in list(self.__chopperParameters[self.instname].keys()):
             raise ValueError('Chopper %s of %s not recognised' % (choppername, self.instname))
         self.choppername = choppername
         self.freq = freq[0] if np.shape(freq) else freq
@@ -137,9 +138,9 @@ class ISISFermi:
         mychop = ISISFermi('Mari', 'G', 300)
         mychop.setFrequency(250)
         """
-        if 'Chopper2Phase' in kwargs.keys():
+        if 'Chopper2Phase' in list(kwargs.keys()):
             diskchopper_phase = kwargs['Chopper2Phase']
-        elif 'diskchopper_phase' in kwargs.keys():
+        elif 'diskchopper_phase' in list(kwargs.keys()):
             diskchopper_phase = kwargs['diskchopper_phase']
         else:
             diskchopper_phase = None

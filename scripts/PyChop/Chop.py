@@ -17,6 +17,7 @@ technical reports:
     http://www.neutronresearch.com/parch/1993/01/199301013280.pdf
 """
 
+from __future__ import division
 import numpy as np
 
 # ------------------------------------------------------------------------------------------------- #
@@ -141,7 +142,7 @@ def flux_norm(ch_mod):
     ! Returns an empirically determined flux normalisation factor for different ISIS moderators
     """
     phi0 = {'A':1., 'AP':2.8, 'H2':1.8, 'CH4':2.6}
-    if ch_mod not in phi0.keys():
+    if ch_mod not in list(phi0.keys()):
         raise ValueError('Moderator %s is not supported in PyChop' % (ch_mod))
     return phi0[ch_mod]
 
