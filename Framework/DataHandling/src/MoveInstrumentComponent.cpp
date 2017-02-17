@@ -3,6 +3,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -102,6 +103,14 @@ void MoveInstrumentComponent::exec() {
   } else {
     g_log.error("DetectorID or ComponentName must be given.");
     throw std::invalid_argument("DetectorID or ComponentName must be given.");
+  }
+
+  if (dynamic_cast<const Geometry::RectangularDetectorPixel *>(comp.get())) {
+    // DetectorInfo makes changing positions possible but we keep the old
+    // behavior of ignoring position changes for RectangularDetectorPixel.
+    g_log.warning("Component is a RectangularDetectorPixel, moving is not "
+                  "possible, doing nothing.");
+    return;
   }
 
   // Do the move
