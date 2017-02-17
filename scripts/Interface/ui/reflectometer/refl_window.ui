@@ -14,7 +14,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>ISIS Reflectometry</string>
+   <string>ISIS Reflectometry (Old)</string>
   </property>
   <widget class="QWidget" name="widgetMainRow">
    <layout class="QVBoxLayout" name="layoutBase">

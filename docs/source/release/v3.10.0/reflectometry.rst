@@ -12,11 +12,15 @@ ConvertToReflectometryQ
 Reflectometry Reduction Interface
 ---------------------------------
 
-ISIS Reflectometry (Polref)
-###########################
-
 ISIS Reflectometry
 ##################
+
+- Interface `ISIS Reflectometry (Polref)` has been renamed to `ISIS Reflectometry`.
+
+ISIS Reflectometry (Old)
+########################
+
+- Interface `ISIS Reflectometry` has been renamed to `ISIS Reflectometry (Old)`.
 
 |
 
