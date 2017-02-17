@@ -39,7 +39,7 @@ IReflEventPresenter *QtReflEventView::getPresenter() const {
 */
 std::string QtReflEventView::getTimeSlices() const {
 
-  return m_ui.evenTimeSlicesEdit->text().toStdString();
+  return m_ui.customTimeSlicesEdit->text().toStdString();
 }
 
 } // namespace CustomInterfaces
