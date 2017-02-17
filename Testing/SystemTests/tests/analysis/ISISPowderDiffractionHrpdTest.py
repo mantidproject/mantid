@@ -1,4 +1,4 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods,too-many-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods,too-many-public-methods
 
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup

@@ -5,12 +5,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include <QFileInfo>
-
 #include <qwt_plot.h>
-#include <boost/lexical_cast.hpp>
-
-#include <cmath>
 
 namespace {
 Mantid::Kernel::Logger g_log("Iqt");
@@ -154,7 +149,7 @@ void Iqt::PlotTiled() {
 
   // Find x value where y > 1 in 0th spectra
   const auto tiledPlotWsName = outWs->getName() + "_tiled";
-  const auto y_data = outWs->dataY(0);
+  const auto y_data = outWs->y(0);
   const auto y_data_length = y_data.size();
   auto crop_index = y_data.size();
   for (size_t i = 0; i < y_data_length; i++) {
@@ -163,7 +158,7 @@ void Iqt::PlotTiled() {
       break;
     }
   }
-  const auto crop_value = outWs->dataX(0)[crop_index];
+  const auto crop_value = outWs->x(0)[crop_index];
 
   // Clone workspace before cropping to keep in ADS
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");

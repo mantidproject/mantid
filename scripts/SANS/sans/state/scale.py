@@ -1,4 +1,6 @@
 """ Defines the state of the geometry and unit scaling."""
+
+from __future__ import (absolute_import, division, print_function)
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveFloatParameter, ClassTypeParameter)
 from sans.common.enums import (SampleShape, SANSInstrument)
