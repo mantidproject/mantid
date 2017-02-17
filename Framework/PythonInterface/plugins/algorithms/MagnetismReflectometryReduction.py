@@ -73,6 +73,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("TimeAxisRange", [0., 340000.],
                                                 FloatArrayLengthValidator(2), direction=Direction.Input),
                              "TOF/wavelength range to use with detector binning")
+        self.declareProperty("UseWLTimeAxis", False,
+                             doc="For const-Q, if true, wavelength will be used as the time axis, otherwise TOF is used")
         self.declareProperty("CutTimeAxis", True,
                              doc="If true, the TOF/wavelength dimension will be cropped according to the TimeAxisRange property")
         self.declareProperty("RoundUpPixel", True, doc="If True, round up pixel position of the specular reflectivity")
@@ -146,7 +148,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             AnalysisDataService.remove(str(ws_event_norm))
 
             # Sum up the normalization peak
-            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)            
             norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
                                            WorkspaceToMatch=data_cropped,
                                            OutputWorkspace=str(norm_summed))
@@ -188,21 +190,20 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         signal_err = workspace.extractE()
         signal=np.flipud(signal)
         signal_err=np.flipud(signal_err)
-        
+
         theta = self.calculate_scattering_angle(workspace)
 
         # Get an array with the center wavelength value for each bin
         wl_values = workspace.readX(0)
-        
+
         AddSampleLog(Workspace=workspace, LogName='lambda_min', LogText=str(wl_values[0]),
                      LogType='Number', LogUnit='Angstrom')
         AddSampleLog(Workspace=workspace, LogName='lambda_max', LogText=str(wl_values[-1]),
                      LogType='Number', LogUnit='Angstrom')
 
-        #x_pixel_map = np.mgrid[0:self.number_of_pixels_x,0:len(wl_values)]    
-        x_pixel_map = np.mgrid[peak[0]:peak[1]+1, 0:len(wl_values)]    
+        x_pixel_map = np.mgrid[peak[0]:peak[1]+1, 0:len(wl_values)]
         x_pixel_map = x_pixel_map[0,:,:]
-        
+
         pixel_width = float(workspace.getInstrument().getNumberParameter("pixel-width")[0]) / 1000.0
         det_distance = workspace.getRun()['SampleDetDis'].getStatistics().mean / 1000.0
         round_up = self.getProperty("RoundUpPixel").value
@@ -211,12 +212,12 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             x_distance=(x_pixel_map-np.round(ref_pix)) * pixel_width
         else:
             # We offset by 0.5 pixels because the reference pixel is given as
-            # a fractional position relative to the start of a pixel, whereas the pixel map 
+            # a fractional position relative to the start of a pixel, whereas the pixel map
             # assumes the center of each pixel.
             x_distance=(x_pixel_map-ref_pix-0.5) * pixel_width
 
         theta_f = np.arcsin(x_distance/det_distance)/2.0
-        
+
         # Calculate Qx, Qz for each pixel
         LL,TT = np.meshgrid(wl_values, theta_f[:,0])
 
@@ -240,23 +241,23 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             axis_z = np.linspace(q_min_input, np.max(qz), n_q_values)
         else:
             n_q_values = int((np.log10(np.max(qz))-np.log10(q_min_input)) / np.log10(1.0-q_step))
-            axis_z = np.array([q_min_input * (1.0-q_step)**i for i in range(n_q_values)])            
+            axis_z = np.array([q_min_input * (1.0-q_step)**i for i in range(n_q_values)])
 
         refl = np.zeros(len(axis_z)-1)
         refl_err = np.zeros(len(axis_z)-1)
         signal_n = np.zeros(len(axis_z)-1)
-        
+
         err_count = 0
         for tof in range(qz.shape[0]):
             z_inds = np.digitize(qz[tof], axis_z)
-            
+
             # Move the indices so the valid bin numbers start at zero,
             # since this is how we are going to address the output array
             z_inds -= 1
 
             for ix in range(signal.shape[0]):
                 if z_inds[ix]<len(axis_z)-1 and z_inds[ix]>=0 \
-                and not np.isnan(signal[ix][tof]):
+                    and not np.isnan(signal[ix][tof]):
                     refl[z_inds[ix]] += signal[ix][tof]
                     refl_err[z_inds[ix]] += signal_err[ix][tof] * signal_err[ix][tof]
                     signal_n[z_inds[ix]] += 1.0
@@ -411,7 +412,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
         # Get pixel size from instrument properties
         if ws_event_data.getInstrument().hasParameter("pixel_width"):
-            pixel_width = float(ws_event_data.getInstrument().getNumberParameter("pixel_width")[0])
+            pixel_width = float(ws_event_data.getInstrument().getNumberParameter("pixel_width")[0]) / 1000.0
         else:
             pixel_width = 0.0007
 
@@ -445,17 +446,21 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             tof_max = ws_event_data.getTofMax()
             self._tof_range = [tof_min, tof_max]
             logger.notice("Determining range: %g %g" % (tof_min, tof_max))
-            
+
         return self._tof_range
-            
+
     #pylint: disable=too-many-arguments
     def process_data(self, workspace, crop_low_res, low_res_range,
                      peak_range, subtract_background, background_range):
         """
             Common processing for both sample data and normalization.
         """
+        use_wl_cut = self.getProperty("UseWLTimeAxis").value
         constant_q_binning = self.getProperty("ConstantQBinning").value
-        if constant_q_binning:
+
+        # With constant-Q binning, convert to wavelength before or after
+        # cutting the time axis depending on how the user wanted it.
+        if constant_q_binning and use_wl_cut:
             # Convert to wavelength
             workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
                                      AlignBins=True, ConvertFromPointData=False,
@@ -465,15 +470,21 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         tof_max = workspace.getTofMax()
         tof_min = workspace.getTofMin()
         if tof_min > tof_range[1] or tof_max < tof_range[0]:
-            error_msg = "Requested TOF range does not match data for %s: " % str(workspace)
+            error_msg = "Requested range does not match data for %s: " % str(workspace)
             error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
                                                       tof_min, tof_max)
             raise RuntimeError(error_msg)
 
         tof_step = self.getProperty("TimeAxisStep").value
-        logger.notice("Wavelength range: %s %s %s [%s %s]" % (tof_range[0], tof_step, tof_range[1], tof_min, tof_max))
+        logger.notice("Time axis range: %s %s %s [%s %s]" % (tof_range[0], tof_step, tof_range[1], tof_min, tof_max))
         workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
                           OutputWorkspace="%s_histo" % str(workspace))
+
+        if constant_q_binning and not use_wl_cut:
+            # Convert to wavelength
+            workspace = ConvertUnits(InputWorkspace=workspace, Target="Wavelength",
+                                     AlignBins=True, ConvertFromPointData=False,
+                                     OutputWorkspace="%s_histo" % str(workspace))
 
         # Integrate over low resolution range
         low_res_min = 0
@@ -530,5 +541,6 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(workspace))
         AnalysisDataService.remove(str(subtracted))
         return cropped
+
 
 AlgorithmFactory.subscribe(MagnetismReflectometryReduction)
