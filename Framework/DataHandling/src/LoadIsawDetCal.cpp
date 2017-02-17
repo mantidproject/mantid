@@ -454,7 +454,7 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
  *moves and rotations associated with the calibration, to avoid the problem of
  *invalidation DetectorInfo after writing to the parameter map.
  *
- * @param expInfoWS the input workspace
+ * @param ws the input workspace
  * @param rectangularDetectorScalings a vector containing a component ID, and
  *values for scalex and scaley
  */
