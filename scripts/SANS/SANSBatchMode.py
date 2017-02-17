@@ -249,6 +249,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
 
         raw_workspaces = []
+        geometry_properties = {}
         try:
             # Load in the sample runs specified in the csv file
             raw_workspaces.append(read_run(run, 'sample_sans', format))
@@ -265,6 +266,12 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             if centreit == 1:
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
+
+            try:
+                geometry_properties = get_geometry_properties(ReductionSingleton())
+            except RuntimeError as e:
+                message = "Could not extract geometry properties from the reducer: {0}".format(str(e))
+                sanslog.warning(message)
 
             # WavRangeReduction runs the reduction for the specified
             # wavelength range where the final argument can either be
@@ -363,14 +370,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                         _ws = mtd[workspace_name]
                         transmission_properties = get_transmission_properties(_ws)
 
-                        # Get the geometry details from the ReductionSingleton. If there is an issue, then don't
-                        # add them but print a warning
-                        try:
-                            geometry_properties = get_geometry_properties(ReductionSingleton())
+                        # Add the geometry properties if they exist
+                        if geometry_properties:
                             transmission_properties.update(geometry_properties)
-                        except RuntimeError as e:
-                            message = "Could not add geometry properties to SaveCanSAS1D: {0}".format(str(e))
-                            sanslog.warning(message)
 
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
