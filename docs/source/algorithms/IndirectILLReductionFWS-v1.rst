@@ -14,7 +14,7 @@ It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTr
 
 Input
 -----
-Multiple files following the syntax given in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
+Multiple files following the syntax given in :ref:`MultiFileLoading`.
 
 Output
 ------
