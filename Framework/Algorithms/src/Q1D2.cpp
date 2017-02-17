@@ -76,14 +76,23 @@ void Q1D2::init() {
                   Direction::Input);
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("RadiusCut", 0.0, mustBePositive,
-                  "To increase resolution some wavelengths are excluded within "
-                  "this distance from\n"
-                  "the beam center (mm)");
+
+  declareProperty(
+      "RadiusCut", 0.0, mustBePositive,
+      "To increase resolution some wavelengths are excluded within "
+      "this distance from the beam center (mm). Note that RadiusCut\n"
+      " and WaveCut both need to be larger than 0 to affect \n"
+      "the effective cutoff. See the algorithm description for\n"
+      " a detailed explanation of the cutoff.");
+
   declareProperty(
       "WaveCut", 0.0, mustBePositive,
       "To increase resolution by starting to remove some wavelengths below this"
-      "freshold (angstrom)");
+      " threshold (angstrom).  Note that WaveCut\n"
+      " and RadiusCut both need to be larger than 0 to affect \n"
+      "on the effective cutoff. See the algorithm description for\n"
+      " a detailed explanation of the cutoff.");
+
   declareProperty("OutputParts", false,
                   "Set to true to output two additional workspaces which will "
                   "have the names OutputWorkspace_sumOfCounts "

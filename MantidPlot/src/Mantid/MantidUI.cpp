@@ -1225,10 +1225,18 @@ Table *MantidUI::createDetectorTable(
 
   // check if efixed value is available
   bool calcQ(true);
-  try {
-    auto detector = ws->getDetector(0);
-    ws->getEFixed(detector);
-  } catch (std::runtime_error &) {
+
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (spectrumInfo.hasDetectors(0)) {
+    try {
+      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
+                                                  Mantid::NoDeleting());
+      ws->getEFixed(detector);
+    } catch (std::runtime_error &) {
+      calcQ = false;
+    }
+  } else {
+    // No detectors available
     calcQ = false;
   }
 
@@ -1274,7 +1282,6 @@ Table *MantidUI::createDetectorTable(
                                  // value should be displayed
   QVector<QList<QVariant>> tableColValues;
   tableColValues.resize(nrows);
-  const auto &spectrumInfo = ws->spectrumInfo();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like

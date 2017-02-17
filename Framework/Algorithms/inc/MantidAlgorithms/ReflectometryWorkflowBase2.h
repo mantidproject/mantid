@@ -66,6 +66,10 @@ protected:
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
                 bool integratedMonitors);
+  // Rebin detectors to monitors
+  Mantid::API::MatrixWorkspace_sptr
+  rebinDetectorsToMonitors(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                           Mantid::API::MatrixWorkspace_sptr monitorWS);
   // Read monitor properties from instrument
   void
   populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,

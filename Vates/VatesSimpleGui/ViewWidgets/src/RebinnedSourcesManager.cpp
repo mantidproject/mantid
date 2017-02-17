@@ -460,6 +460,14 @@ void RebinnedSourcesManager::rebuildPipeline(pqPipelineSource *source1,
     } else if (QString(proxy1->GetXMLName()).contains("Cut")) {
       newPipelineElement =
           builder->createFilter("filters", "Cut", endOfSource2Pipeline);
+    } else if (QString(proxy1->GetXMLName()).contains("Threshold")) {
+      newPipelineElement =
+          builder->createFilter("filters", "Threshold", endOfSource2Pipeline);
+    } else {
+      QString message = QString("The filter ") + QString(proxy1->GetXMLName()) +
+                        QString(" is not known. You need to add it to the list "
+                                "of filters in the RebinnedSourcesManager");
+      throw std::runtime_error(message.toStdString());
     }
 
     newFilter = qobject_cast<pqPipelineFilter *>(newPipelineElement);
