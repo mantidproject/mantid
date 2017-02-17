@@ -22,7 +22,7 @@ Usage
    sample_ws = CreateSingleValuedWorkspace(5.0)
    sample_ws2 = CreateSingleValuedWorkspace(5.0)
 
-   DeleteWorkspaces([sample_ws,sample_ws2)
+   DeleteWorkspaces([sample_ws,sample_ws2])
 
    print "sample_ws exists in mantid:",("sample_ws" in mtd)
    print "sample_ws2 exists in mantid:",("sample_ws2" in mtd)
