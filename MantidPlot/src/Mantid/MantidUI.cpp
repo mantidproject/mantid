@@ -459,7 +459,7 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
       alg->setLogging(false);
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
-      foreach(auto wsName, wsNames) {
+      foreach (auto wsName, wsNames) {
         vecWsNames.push_back(wsName.toStdString());
       }
       alg->setProperty("WorkspaceList", vecWsNames);

@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace Algorithms {
 /**
-  A simple algorithm to remove multiple workspaces from the ADS. 
+  A simple algorithm to remove multiple workspaces from the ADS.
 
   @author Nick Draper, Tessella plc
   @date 2017-02-17
@@ -54,8 +54,6 @@ private:
   void init() override;
   /// Overridden exec
   void exec() override;
-
-
 };
 
 } // namespace Algorithm
