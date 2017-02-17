@@ -148,7 +148,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             AnalysisDataService.remove(str(ws_event_norm))
 
             # Sum up the normalization peak
-            norm_summed = SumSpectra(InputWorkspace = norm_cropped)            
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
             norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
                                            WorkspaceToMatch=data_cropped,
                                            OutputWorkspace=str(norm_summed))
@@ -256,8 +256,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             z_inds -= 1
 
             for ix in range(signal.shape[0]):
-                if z_inds[ix]<len(axis_z)-1 and z_inds[ix]>=0 \
-                    and not np.isnan(signal[ix][tof]):
+                if z_inds[ix]<len(axis_z)-1 and z_inds[ix]>=0 and not np.isnan(signal[ix][tof]):
                     refl[z_inds[ix]] += signal[ix][tof]
                     refl_err[z_inds[ix]] += signal_err[ix][tof] * signal_err[ix][tof]
                     signal_n[z_inds[ix]] += 1.0
