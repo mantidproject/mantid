@@ -1,0 +1,548 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+AbstractTool	recon/tools/abstract_tool.py	/^class AbstractTool:$/;"	kind:class	line:4
+AggregateTest	tests/aggregate_test.py	/^class AggregateTest(unittest.TestCase):$/;"	kind:class	line:7
+Annotate	imopr/visualiser.py	/^class Annotate(object):$/;"	kind:class	line:81
+AstraTool	recon/tools/astra_tool.py	/^class AstraTool(AbstractTool):$/;"	kind:class	line:5
+CircularMaskTest	tests/filters_test/circular_mask_test.py	/^class CircularMaskTest(unittest.TestCase):$/;"	kind:class	line:7
+Class	tests/filters_test/adjust_range_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+Class	tests/filters_test/line_projection_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+Class	tests/filters_test/mcp_corrections_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+Class	tests/filters_test/remove_sino_stripes_rings_wf_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+Class	tests/filters_test/remove_stripes_ring_artifacts_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+Class	tests/filters_test/stripe_removal_test.py	/^class Class(unittest.TestCase):$/;"	kind:class	line:4
+ConfigsTest	tests/recon/configs_test.py	/^class ConfigsTest(unittest.TestCase):$/;"	kind:class	line:6
+ConvertTest	tests/convert_test.py	/^class ConvertTest(unittest.TestCase):$/;"	kind:class	line:7
+CropCoordsTest	tests/filters_test/crop_coords_test.py	/^class CropCoordsTest(unittest.TestCase):$/;"	kind:class	line:7
+CustomTimer	recon/custom_timer.py	/^class CustomTimer(object):$/;"	kind:class	line:6
+DataTest	tests/imgdata_test.py	/^class DataTest(unittest.TestCase):$/;"	kind:class	line:7
+ExclusiveMemTest	tests/parallel_test/exclusive_mem_test.py	/^class ExclusiveMemTest(unittest.TestCase):$/;"	kind:class	line:11
+Fits_Reader.py	pyreader/Fits_Reader.py	1;"	kind:file	line:1
+FunctionalConfig	recon/configs/functional_config.py	/^class FunctionalConfig(object):$/;"	kind:class	line:1
+GaussianTest	tests/filters_test/gaussian_test.py	/^class GaussianTest(unittest.TestCase):$/;"	kind:class	line:7
+Helper	helper.py	/^class Helper(object):$/;"	kind:class	line:15
+HelperTest	tests/helper_test.py	/^class HelperTest(unittest.TestCase):$/;"	kind:class	line:7
+MedianTest	tests/filters_test/median_filter_test.py	/^class MedianTest(unittest.TestCase):$/;"	kind:class	line:7
+NormaliseByAirRegionTest	tests/filters_test/normalise_by_air_region_test.py	/^class NormaliseByAirRegionTest(unittest.TestCase):$/;"	kind:class	line:7
+NormaliseByFlatDarkTest	tests/filters_test/normalise_by_flat_dark_test.py	/^class NormaliseByFlatDarkTest(unittest.TestCase):$/;"	kind:class	line:7
+OutliersTest	tests/filters_test/outliers_test.py	/^class OutliersTest(unittest.TestCase):$/;"	kind:class	line:7
+ParallelTest	recon/memory_debugger.py	/^class ParallelTest(unittest.TestCase):$/;"	kind:class	line:12
+PostProcConfig	recon/configs/postproc_config.py	/^class PostProcConfig(object):$/;"	kind:class	line:1
+PreProcConfig	recon/configs/preproc_config.py	/^class PreProcConfig(object):$/;"	kind:class	line:1
+Readme	imgdata/readme.py	/^class Readme(object):$/;"	kind:class	line:4
+RebinTest	tests/filters_test/rebin_test.py	/^class RebinTest(unittest.TestCase):$/;"	kind:class	line:7
+ReconstructionConfig	recon/configs/recon_config.py	/^class ReconstructionConfig(object):$/;"	kind:class	line:6
+RotateStackTest	tests/filters_test/rotate_stack_test.py	/^class RotateStackTest(unittest.TestCase):$/;"	kind:class	line:7
+Saver	imgdata/saver.py	/^class Saver(object):$/;"	kind:class	line:62
+SharedMemTest	tests/parallel_test/shared_mem_test.py	/^class SharedMemTest(unittest.TestCase):$/;"	kind:class	line:15
+TestClass	tests/sample.py	/^class TestClass(unittest.TestCase):$/;"	kind:class	line:7
+TomoPyTool	recon/tools/tomopy_tool.py	/^class TomoPyTool(AbstractTool):$/;"	kind:class	line:5
+TwoSharedMemTest	tests/parallel_test/two_shared_mem_test.py	/^class TwoSharedMemTest(unittest.TestCase):$/;"	kind:class	line:18
+__init__	helper.py	/^    def __init__(self, config=None):$/;"	kind:member	line:20
+__init__	imgdata/readme.py	/^    def __init__(self, config, saver, h):$/;"	kind:member	line:5
+__init__	imgdata/saver.py	/^    def __init__(self, config, h=None):$/;"	kind:member	line:83
+__init__	imopr/visualiser.py	/^    def __init__(self, fig):$/;"	kind:member	line:82
+__init__	recon/configs/functional_config.py	/^    def __init__(self):$/;"	kind:member	line:6
+__init__	recon/configs/postproc_config.py	/^    def __init__(self):$/;"	kind:member	line:6
+__init__	recon/configs/preproc_config.py	/^    def __init__(self):$/;"	kind:member	line:10
+__init__	recon/configs/recon_config.py	/^    def __init__(self, functional_config, preproc_config, postproc_config):$/;"	kind:member	line:11
+__init__	recon/custom_timer.py	/^    def __init__(self, total, prefix=''):$/;"	kind:member	line:12
+__init__	recon/tools/abstract_tool.py	/^    def __init__(self):$/;"	kind:member	line:10
+__init__	recon/tools/astra_tool.py	/^    def __init__(self):$/;"	kind:member	line:15
+__init__	recon/tools/tomopy_tool.py	/^    def __init__(self):$/;"	kind:member	line:12
+__init__	tests/aggregate_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/convert_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:13
+__init__	tests/filters_test/circular_mask_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/crop_coords_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/gaussian_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:13
+__init__	tests/filters_test/median_filter_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/normalise_by_air_region_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/normalise_by_flat_dark_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/outliers_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/rebin_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/filters_test/rotate_stack_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/helper_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/imgdata_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__	tests/parallel_test/exclusive_mem_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:12
+__init__	tests/parallel_test/shared_mem_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:16
+__init__	tests/parallel_test/two_shared_mem_test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:19
+__init__	tests/sample.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
+__init__.py	__init__.py	1;"	kind:file	line:1
+__init__.py	aggregate/__init__.py	1;"	kind:file	line:1
+__init__.py	convert/__init__.py	1;"	kind:file	line:1
+__init__.py	filters/__init__.py	1;"	kind:file	line:1
+__init__.py	imgdata/__init__.py	1;"	kind:file	line:1
+__init__.py	imopr/__init__.py	1;"	kind:file	line:1
+__init__.py	parallel/__init__.py	1;"	kind:file	line:1
+__init__.py	recon/__init__.py	1;"	kind:file	line:1
+__init__.py	recon/configs/__init__.py	1;"	kind:file	line:1
+__init__.py	recon/tools/__init__.py	1;"	kind:file	line:1
+__init__.py	tests/__init__.py	1;"	kind:file	line:1
+__init__.py	tests/filters_test/__init__.py	1;"	kind:file	line:1
+__init__.py	tests/recon/__init__.py	1;"	kind:file	line:1
+__str__	recon/configs/functional_config.py	/^    def __str__(self):$/;"	kind:member	line:78
+__str__	recon/configs/postproc_config.py	/^    def __str__(self):$/;"	kind:member	line:25
+__str__	recon/configs/preproc_config.py	/^    def __str__(self):$/;"	kind:member	line:53
+__str__	recon/configs/recon_config.py	/^    def __str__(self):$/;"	kind:member	line:29
+_alphanum_key_split	imgdata/loader.py	/^def _alphanum_key_split(path_str):$/;"	kind:function	line:226
+_apply_normalise	filters/normalise_by_flat_dark.py	/^def _apply_normalise(data, dark=None, norm_divide=None, clip_min=None, clip_max=None):$/;"	kind:function	line:11
+_apply_normalise_inplace	filters/normalise_by_flat_dark.py	/^def _apply_normalise_inplace(data, norm_divide, clip_min=None, clip_max=None):$/;"	kind:function	line:6
+_avail_modules	run_tests.py	/^_avail_modules = {$/;"	kind:variable	line:3
+_available_operators	imopr/opr.py	/^_available_operators = {$/;"	kind:variable	line:2
+_calc_air_sum	filters/normalise_by_air_region.py	/^def _calc_air_sum(data,$/;"	kind:function	line:35
+_calc_mask	filters/circular_mask.py	/^def _calc_mask(ydim, xdim, ratio):$/;"	kind:function	line:48
+_check_air_region_in_bounds	filters/normalise_by_air_region.py	/^def _check_air_region_in_bounds(air_bottom, air_left, air_right, air_top,$/;"	kind:function	line:200
+_compare_dict_to_str	tests/recon/configs_test.py	/^    def _compare_dict_to_str(self, class_dict, class_str):$/;"	kind:member	line:38
+_create_reshaped_array	filters/rebin.py	/^def _create_reshaped_array(old_shape, rebin_param):$/;"	kind:function	line:67
+_create_test_helper	recon/memory_debugger.py	/^def _create_test_helper():$/;"	kind:function	line:173
+_create_testing_array	recon/memory_debugger.py	/^def _create_testing_array():$/;"	kind:function	line:179
+_crop_coords_sanity_checks	filters/crop_coords.py	/^def _crop_coords_sanity_checks(coords, data_image, expected_data_shape=3):$/;"	kind:function	line:15
+_crop_image	filters/crop_coords.py	/^def _crop_image(data_image, coords):$/;"	kind:function	line:60
+_crop_volume	filters/crop_coords.py	/^def _crop_volume(data_vol, coords):$/;"	kind:function	line:114
+_debug_save_out_data	recon/runner.py	/^def _debug_save_out_data(data,$/;"	kind:function	line:185
+_divide_by_air_sum	filters/normalise_by_air_region.py	/^def _divide_by_air_sum(data=None, air_sums=None):$/;"	kind:function	line:44
+_do_files_load_par	imgdata/img_loader.py	/^def _do_files_load_par(data, load_func, files, cores, chunksize, name, h):$/;"	kind:function	line:139
+_do_files_load_seq	imgdata/img_loader.py	/^def _do_files_load_seq(data, load_func, files, img_shape, name, h):$/;"	kind:function	line:116
+_do_img_load	imgdata/img_loader.py	/^def _do_img_load(load_func, input_file_names, input_path_flat, input_path_dark,$/;"	kind:function	line:20
+_do_nxs_load	imgdata/nxs_loader.py	/^def _do_nxs_load(input_data_file, img_format, data_dtype, cores, chunksize,$/;"	kind:function	line:15
+_do_stack_move_par	imgdata/nxs_loader.py	/^def _do_stack_move_par(data, new_data, cores, chunksize, name, h):$/;"	kind:function	line:60
+_do_stack_move_seq	imgdata/nxs_loader.py	/^def _do_stack_move_seq(data, new_data, img_shape, name, h):$/;"	kind:function	line:38
+_execute_custom	filters/rebin.py	/^def _execute_custom(data, config):$/;"	kind:function	line:81
+_execute_par	filters/gaussian.py	/^def _execute_par(data, size, mode, order, cores=None, chunksize=None, h=None):$/;"	kind:function	line:58
+_execute_par	filters/median_filter.py	/^def _execute_par(data, size, mode, cores=None, chunksize=None, h=None):$/;"	kind:function	line:69
+_execute_par	filters/normalise_by_air_region.py	/^def _execute_par(data,$/;"	kind:function	line:48
+_execute_par	filters/normalise_by_flat_dark.py	/^def _execute_par(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=None, chunksize=None, h=None):$/;"	kind:function	line:44
+_execute_par	filters/rebin.py	/^def _execute_par(data, rebin_param, mode, cores=None, chunksize=None, h=None):$/;"	kind:function	line:27
+_execute_par	filters/rotate_stack.py	/^def _execute_par(data, rotation, cores=None, chunksize=None, h=None):$/;"	kind:function	line:91
+_execute_seq	filters/gaussian.py	/^def _execute_seq(data, size, mode, order, h=None):$/;"	kind:function	line:23
+_execute_seq	filters/median_filter.py	/^def _execute_seq(data, size, mode, h=None):$/;"	kind:function	line:39
+_execute_seq	filters/normalise_by_air_region.py	/^def _execute_seq(data,$/;"	kind:function	line:115
+_execute_seq	filters/normalise_by_flat_dark.py	/^def _execute_seq(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, h=None):$/;"	kind:function	line:87
+_execute_seq	filters/rebin.py	/^def _execute_seq(data, rebin_param, mode, h=None):$/;"	kind:function	line:46
+_execute_seq	filters/rotate_stack.py	/^def _execute_seq(data, rotation, h=None):$/;"	kind:function	line:58
+_ft_horizontal_bands	filters/remove_sino_stripes_rings_wf.py	/^def _ft_horizontal_bands(c_V, wv_levels, sigma):$/;"	kind:function	line:105
+_import_astra	recon/tools/astra_tool.py	/^    def _import_astra():$/;"	kind:member	line:36
+_load_and_avg_data	imgdata/img_loader.py	/^def _load_and_avg_data(load_func,$/;"	kind:function	line:97
+_load_files	imgdata/img_loader.py	/^def _load_files(load_func,$/;"	kind:function	line:147
+_load_sample_data	imgdata/img_loader.py	/^def _load_sample_data(load_func,$/;"	kind:function	line:75
+_par_inplace_load_fwd_func	imgdata/img_loader.py	/^def _par_inplace_load_fwd_func(data, filename, load_func=None):$/;"	kind:function	line:135
+_remove_sino_stripes_rings_wf	filters/remove_sino_stripes_rings_wf.py	/^def _remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):$/;"	kind:function	line:59
+_rotate_image	filters/rotate_stack.py	/^def _rotate_image(data, rotation=None):$/;"	kind:function	line:11
+_rotate_image_inplace	filters/rotate_stack.py	/^def _rotate_image_inplace(data, rotation=None):$/;"	kind:function	line:6
+_run_tests	run_tests.py	/^def _run_tests(args):$/;"	kind:function	line:14
+_save_out_individual_files	imgdata/saver.py	/^    def _save_out_individual_files(self,$/;"	kind:member	line:261
+_save_out_stack	imgdata/saver.py	/^    def _save_out_stack(self,$/;"	kind:member	line:285
+abstract_tool.py	recon/tools/abstract_tool.py	1;"	kind:file	line:1
+add_inplace	tests/parallel_test/shared_mem_test.py	/^def add_inplace(first_shared, add_arg=3):$/;"	kind:function	line:7
+add_inplace	tests/parallel_test/two_shared_mem_test.py	/^def add_inplace(first_shared, second_shared, add_arg):$/;"	kind:function	line:7
+adjust_range.py	filters/adjust_range.py	1;"	kind:file	line:1
+adjust_range_test.py	tests/filters_test/adjust_range_test.py	1;"	kind:file	line:1
+aggregate_test.py	tests/aggregate_test.py	1;"	kind:file	line:1
+append	imgdata/readme.py	/^    def append(self, string):$/;"	kind:member	line:18
+apply_filter	filters/adjust_range.py	/^def apply_filter(tool, preproc_data, cfg):$/;"	kind:function	line:7
+args	pyreader/fits_to_nexus.py	/^	args = parser.parse_args()$/;"	kind:variable	line:52
+args	pyreader/tif_to_nexus.py	/^	args = parser.parse_args()$/;"	kind:variable	line:52
+assert_equals	tests/test_helper.py	/^def assert_equals(thing1, thing2):$/;"	kind:function	line:31
+assert_files_exist	tests/aggregate_test.py	/^    def assert_files_exist(self,$/;"	kind:member	line:65
+assert_files_exist	tests/convert_test.py	/^    def assert_files_exist(self,$/;"	kind:member	line:58
+assert_files_exist	tests/imgdata_test.py	/^    def assert_files_exist(self,$/;"	kind:member	line:23
+assert_not_equals	tests/test_helper.py	/^def assert_not_equals(thing1, thing2):$/;"	kind:function	line:35
+astra_reconstruct	recon/tools/astra_tool.py	/^    def astra_reconstruct(self, data, config):$/;"	kind:member	line:116
+astra_tool.py	recon/tools/astra_tool.py	1;"	kind:file	line:1
+backup_mp_avail	tests/test_helper.py	/^backup_mp_avail = None$/;"	kind:variable	line:5
+begin	imgdata/readme.py	/^    def begin(self, cmd_line, config):$/;"	kind:member	line:26
+calculate_chunksize	parallel/utility.py	/^def calculate_chunksize(cores):$/;"	kind:function	line:41
+calculate_indices	other/python_multithreading_attempts.py	/^def calculate_indices(c, n):$/;"	kind:function	line:19
+check_algorithm_compatibility	recon/tools/abstract_tool.py	/^    def check_algorithm_compatibility(self, config):$/;"	kind:member	line:27
+check_algorithm_compatibility	recon/tools/astra_tool.py	/^    def check_algorithm_compatibility(self, config):$/;"	kind:member	line:28
+check_algorithm_compatibility	recon/tools/tomopy_tool.py	/^    def check_algorithm_compatibility(self, config):$/;"	kind:member	line:16
+check_config_class	helper.py	/^    def check_config_class(config):$/;"	kind:member	line:55
+check_config_integrity	helper.py	/^    def check_config_integrity(self, config):$/;"	kind:member	line:60
+check_data_stack	helper.py	/^    def check_data_stack(data):$/;"	kind:member	line:72
+check_version_info	main.py	/^def check_version_info():$/;"	kind:function	line:41
+circ_mask	recon/tools/tomopy_tool.py	/^    def circ_mask(self, **kwargs):$/;"	kind:member	line:30
+circular_mask.py	filters/circular_mask.py	1;"	kind:file	line:1
+circular_mask_test.py	tests/filters_test/circular_mask_test.py	1;"	kind:file	line:1
+close	recon/custom_timer.py	/^    def close(self):$/;"	kind:member	line:38
+configs_test.py	tests/recon/configs_test.py	1;"	kind:file	line:1
+convert_test.py	tests/convert_test.py	1;"	kind:file	line:1
+cor.py	imopr/cor.py	1;"	kind:file	line:1
+corpc.py	imopr/corpc.py	1;"	kind:file	line:1
+corvo.py	imopr/corvo.py	1;"	kind:file	line:1
+corwrite.py	imopr/corwrite.py	1;"	kind:file	line:1
+create_image_name	imgdata/saver.py	/^def create_image_name(custom_idx, idx, name_prefix, zfill_len, name_postfix,$/;"	kind:function	line:52
+create_partial	parallel/exclusive_mem.py	/^def create_partial(func, **kwargs):$/;"	kind:function	line:9
+create_partial	parallel/shared_mem.py	/^def create_partial(func, fwd_function=fwd_func, **kwargs):$/;"	kind:function	line:58
+create_partial	parallel/two_shared_mem.py	/^def create_partial(func, fwd_function=inplace_fwd_func, **kwargs):$/;"	kind:function	line:123
+create_saver	tests/aggregate_test.py	/^    def create_saver(self):$/;"	kind:member	line:19
+create_saver	tests/convert_test.py	/^    def create_saver(self):$/;"	kind:member	line:24
+create_saver	tests/imgdata_test.py	/^    def create_saver(self):$/;"	kind:member	line:19
+create_shared_array	parallel/utility.py	/^def create_shared_array(shape, dtype=np.float32):$/;"	kind:function	line:7
+crop_coords.py	filters/crop_coords.py	1;"	kind:file	line:1
+crop_coords_test.py	tests/filters_test/crop_coords_test.py	1;"	kind:file	line:1
+custom_timer.py	recon/custom_timer.py	1;"	kind:file	line:1
+cut_off.py	filters/cut_off.py	1;"	kind:file	line:1
+data	other/python_multithreading_attempts.py	/^data = np.full((30, 1000, 1000), 1.)$/;"	kind:variable	line:107
+debug	tests/test_helper.py	/^def debug(switch=True):$/;"	kind:function	line:48
+debug_print_memory_usage_linux	helper.py	/^    def debug_print_memory_usage_linux(message=""):$/;"	kind:member	line:86
+deepcopy	tests/test_helper.py	/^def deepcopy(source):$/;"	kind:function	line:39
+delete_files	tests/aggregate_test.py	/^    def delete_files(self, prefix=''):$/;"	kind:member	line:23
+delete_files	tests/convert_test.py	/^    def delete_files(self, prefix=''):$/;"	kind:member	line:28
+delete_files	tests/imgdata_test.py	/^    def delete_files(self, prefix=''):$/;"	kind:member	line:44
+do_aggregate_not_single_folder	tests/aggregate_test.py	/^    def do_aggregate_not_single_folder(self,$/;"	kind:member	line:164
+do_aggregate_single_folder	tests/aggregate_test.py	/^    def do_aggregate_single_folder(self,$/;"	kind:member	line:91
+do_aggregating	aggregate/runner.py	/^def do_aggregating(angle_image_paths, img_format, agg_method, energies_label,$/;"	kind:function	line:51
+do_convert	tests/convert_test.py	/^    def do_convert(self, img_format, convert_format, stack, parallel=False):$/;"	kind:member	line:105
+do_convert_from_nxs	tests/convert_test.py	/^    def do_convert_from_nxs(self, img_format, convert_format, stack):$/;"	kind:member	line:239
+do_convert_to_nxs	tests/convert_test.py	/^    def do_convert_to_nxs(self, img_format, convert_format, stack):$/;"	kind:member	line:167
+do_execute	tests/filters_test/normalise_by_air_region_test.py	/^    def do_execute(self, helper):$/;"	kind:member	line:108
+do_execute	tests/filters_test/normalise_by_flat_dark_test.py	/^    def do_execute(self, helper):$/;"	kind:member	line:62
+do_execute	tests/filters_test/rebin_test.py	/^    def do_execute(self, helper):$/;"	kind:member	line:59
+do_execute	tests/filters_test/rotate_stack_test.py	/^    def do_execute(self, helper):$/;"	kind:member	line:47
+do_importing	recon/tools/tool_importer.py	/^def do_importing(tool):$/;"	kind:function	line:24
+do_preproc	tests/imgdata_test.py	/^    def do_preproc(self, img_format, stack, parallel=False):$/;"	kind:member	line:92
+do_preproc_nxs	tests/imgdata_test.py	/^    def do_preproc_nxs(self, img_format='nxs', stack=True, parallel=False):$/;"	kind:member	line:133
+do_real_result	tests/filters_test/normalise_by_flat_dark_test.py	/^    def do_real_result(self, helper):$/;"	kind:member	line:87
+do_recon	tests/imgdata_test.py	/^    def do_recon(self, img_format, stack, horiz_slices=False):$/;"	kind:member	line:183
+do_sanity_checks	aggregate/runner.py	/^def do_sanity_checks(output_path, agg_method, commands):$/;"	kind:function	line:96
+do_stack_load_par	imgdata/loader.py	/^def do_stack_load_par(data, new_data, cores, chunksize, name, h):$/;"	kind:function	line:278
+do_stack_load_seq	imgdata/loader.py	/^def do_stack_load_seq(data, new_data, img_shape, name, h):$/;"	kind:function	line:258
+empty_init	helper.py	/^    def empty_init():$/;"	kind:member	line:68
+empty_init	recon/configs/recon_config.py	/^    def empty_init():$/;"	kind:member	line:33
+end	imgdata/readme.py	/^    def end(self):$/;"	kind:member	line:84
+exclusive_mem.py	parallel/exclusive_mem.py	1;"	kind:file	line:1
+exclusive_mem_test.py	tests/parallel_test/exclusive_mem_test.py	1;"	kind:file	line:1
+execute	aggregate/runner.py	/^def execute(config):$/;"	kind:function	line:5
+execute	convert/runner.py	/^def execute(config):$/;"	kind:function	line:5
+execute	filters/circular_mask.py	/^def execute(data, circular_mask_ratio, h=None):$/;"	kind:function	line:6
+execute	filters/crop_coords.py	/^def execute(sample, region_of_interest, flat, dark, h=None):$/;"	kind:function	line:6
+execute	filters/cut_off.py	/^def execute(data, cut_off_level, h=None):$/;"	kind:function	line:5
+execute	filters/gaussian.py	/^def execute(data, size, mode, order, cores=None, chunksize=None, h=None):$/;"	kind:function	line:5
+execute	filters/line_projection.py	/^def execute(imgs_angles, config):$/;"	kind:function	line:4
+execute	filters/mcp_corrections.py	/^def execute(data,config):$/;"	kind:function	line:1
+execute	filters/median_filter.py	/^def execute(data, size, mode, cores=None, chunksize=None, h=None):$/;"	kind:function	line:21
+execute	filters/normalise_by_air_region.py	/^def execute(data,$/;"	kind:function	line:7
+execute	filters/normalise_by_flat_dark.py	/^def execute(data, norm_flat_img=None, norm_dark_img=None, clip_min=0, clip_max=1.5, cores=None, chunksize=None, h=None):$/;"	kind:function	line:16
+execute	filters/outliers.py	/^def execute(data, outliers_threshold, outliers_mode, h=None):$/;"	kind:function	line:5
+execute	filters/rebin.py	/^def execute(data, rebin_param, mode, cores=None, chunksize=None, h=None):$/;"	kind:function	line:10
+execute	filters/remove_stripes_ring_artifacts.py	/^def execute(data_vol, method='wavelet-fourier'):$/;"	kind:function	line:1
+execute	filters/rotate_stack.py	/^def execute(data, rotation, flat=None, dark=None, cores=None, chunksize=None, h=None):$/;"	kind:function	line:16
+execute	filters/stripe_removal.py	/^def execute(data, config):$/;"	kind:function	line:2
+execute	imgdata/img_loader.py	/^def execute(load_func, input_file_names, input_path_flat, input_path_dark,$/;"	kind:function	line:11
+execute	imgdata/nxs_loader.py	/^def execute(input_data_file, img_format, data_dtype, cores, chunksize,$/;"	kind:function	line:7
+execute	imopr/cor.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:6
+execute	imopr/corpc.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:6
+execute	imopr/corvo.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:6
+execute	imopr/corwrite.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:6
+execute	imopr/recon.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:5
+execute	imopr/runner.py	/^def execute(config):$/;"	kind:function	line:5
+execute	imopr/sinogram.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:6
+execute	imopr/visualiser.py	/^def execute(sample, flat, dark, config, indices):$/;"	kind:function	line:4
+execute	parallel/exclusive_mem.py	/^def execute(data=None,$/;"	kind:function	line:23
+execute	parallel/shared_mem.py	/^def execute(data=None,$/;"	kind:function	line:74
+execute	parallel/two_shared_mem.py	/^def execute(data=None,$/;"	kind:function	line:139
+execute	recon/find_cor.py	/^def execute(config):$/;"	kind:function	line:5
+execute	recon/runner.py	/^def execute(config, cmd_line):$/;"	kind:function	line:4
+execute_custom	filters/circular_mask.py	/^def execute_custom(data_vol, ratio=1.0, mask_out_val=0.0):$/;"	kind:function	line:23
+execute_image	filters/crop_coords.py	/^def execute_image(data, region_of_interest, h=None):$/;"	kind:function	line:32
+execute_volume	filters/crop_coords.py	/^def execute_volume(data, crop_coords, h=None):$/;"	kind:function	line:83
+expand_index_range	aggregate/runner.py	/^def expand_index_range(_list):$/;"	kind:function	line:169
+find_center	recon/tools/tomopy_tool.py	/^    def find_center(self, **kwargs):$/;"	kind:member	line:22
+find_center_vo	recon/tools/tomopy_tool.py	/^    def find_center_vo(self, **kwargs):$/;"	kind:member	line:26
+find_cor.py	recon/find_cor.py	1;"	kind:file	line:1
+fits_reader	pyreader/Fits_Reader.py	/^def fits_reader(data_file_path,data_file_prefix,white_file_name=None, dark_file_name=None, projection_file_name=None,start=0,end=-1):$/;"	kind:function	line:9
+fits_to_nexus	pyreader/fits_to_nexus.py	/^def fits_to_nexus(input_dir,prefix,white,dark,output_file):$/;"	kind:function	line:7
+fits_to_nexus.py	pyreader/fits_to_nexus.py	1;"	kind:file	line:1
+fitsread	imgdata/loader.py	/^def fitsread(filename):$/;"	kind:function	line:122
+functional_config.py	recon/configs/functional_config.py	1;"	kind:file	line:1
+fwd_func	parallel/shared_mem.py	/^def fwd_func(func, i, **kwargs):$/;"	kind:function	line:39
+fwd_func_return_to_first	parallel/two_shared_mem.py	/^def fwd_func_return_to_first(func, i, **kwargs):$/;"	kind:function	line:68
+fwd_func_return_to_second	parallel/two_shared_mem.py	/^def fwd_func_return_to_second(func, i, **kwargs):$/;"	kind:function	line:95
+gaussian.py	filters/gaussian.py	1;"	kind:file	line:1
+gaussian_test.py	tests/filters_test/gaussian_test.py	1;"	kind:file	line:1
+gen_img_numpy_rand	tests/test_helper.py	/^def gen_img_numpy_rand():$/;"	kind:function	line:8
+gen_img_shared_array	tests/test_helper.py	/^def gen_img_shared_array(shape=(10, 10, 10)):$/;"	kind:function	line:19
+gen_img_shared_array_and_copy	tests/test_helper.py	/^def gen_img_shared_array_and_copy(shape=(10, 10, 10)):$/;"	kind:function	line:13
+generate_indices	parallel/utility.py	/^def generate_indices(num_images):$/;"	kind:function	line:37
+get_angle_folders	aggregate/runner.py	/^def get_angle_folders(input_path, img_format, selected_angles):$/;"	kind:function	line:149
+get_available_operations	imopr/opr.py	/^def get_available_operations():$/;"	kind:function	line:13
+get_data_average	imgdata/img_loader.py	/^def get_data_average(data):$/;"	kind:function	line:192
+get_file_names	imgdata/loader.py	/^def get_file_names(path, img_format, prefix=''):$/;"	kind:function	line:187
+get_folder_names	imgdata/loader.py	/^def get_folder_names(path, prefix=''):$/;"	kind:function	line:208
+get_function	imopr/runner.py	/^def get_function(string):$/;"	kind:function	line:31
+get_image_files_paths	aggregate/runner.py	/^def get_image_files_paths(input_path, angle_folders, img_format,$/;"	kind:function	line:114
+get_indices_for_energy_levels	aggregate/runner.py	/^def get_indices_for_energy_levels(energy_levels):$/;"	kind:function	line:136
+get_memory_usage_linux	helper.py	/^    def get_memory_usage_linux(self):$/;"	kind:member	line:117
+get_output_path	imgdata/saver.py	/^    def get_output_path(self):$/;"	kind:member	line:105
+get_verbosity	helper.py	/^    def get_verbosity(self):$/;"	kind:member	line:51
+gimme_helper	tests/test_helper.py	/^def gimme_helper():$/;"	kind:function	line:44
+grab_full_config	tomo_argparser.py	/^def grab_full_config():$/;"	kind:function	line:30
+handle_indices	imopr/helper.py	/^def handle_indices(indices):$/;"	kind:function	line:11
+handle_special_arguments	recon/configs/functional_config.py	/^    def handle_special_arguments(self):$/;"	kind:member	line:479
+has_files	pyreader/reader.py	/^def has_files(input_dir, suffix):$/;"	kind:function	line:40
+helper.py	helper.py	1;"	kind:file	line:1
+helper.py	imopr/helper.py	1;"	kind:file	line:1
+helper_test.py	tests/helper_test.py	1;"	kind:file	line:1
+img_loader.py	imgdata/img_loader.py	1;"	kind:file	line:1
+imgdata_test.py	tests/imgdata_test.py	1;"	kind:file	line:1
+import_pyfits	imgdata/loader.py	/^def import_pyfits():$/;"	kind:function	line:152
+import_scipy_ndimage	filters/median_filter.py	/^def import_scipy_ndimage():$/;"	kind:function	line:5
+import_self	recon/tools/abstract_tool.py	/^    def import_self(self):$/;"	kind:member	line:23
+import_self	recon/tools/astra_tool.py	/^    def import_self(self):$/;"	kind:member	line:22
+import_self	recon/tools/tomopy_tool.py	/^    def import_self(self):$/;"	kind:member	line:34
+import_skimage_io	imgdata/loader.py	/^def import_skimage_io():$/;"	kind:function	line:171
+imread	imgdata/loader.py	/^def imread(filename):$/;"	kind:function	line:147
+inplace_fwd_func	parallel/shared_mem.py	/^def inplace_fwd_func(func, i, **kwargs):$/;"	kind:function	line:12
+inplace_fwd_func	parallel/two_shared_mem.py	/^def inplace_fwd_func(func, i, **kwargs):$/;"	kind:function	line:13
+inplace_fwd_func_second_2d	parallel/two_shared_mem.py	/^def inplace_fwd_func_second_2d(func, i, **kwargs):$/;"	kind:function	line:40
+inplace_in_func	recon/memory_debugger.py	/^def inplace_in_func(func_data, size=3):$/;"	kind:function	line:190
+line_projection.py	filters/line_projection.py	1;"	kind:file	line:1
+line_projection_test.py	tests/filters_test/line_projection_test.py	1;"	kind:file	line:1
+load	imgdata/loader.py	/^def load(input_path=None,$/;"	kind:function	line:64
+load_data	imgdata/loader.py	/^def load_data(config, h):$/;"	kind:function	line:41
+load_stack	imgdata/loader.py	/^def load_stack(load_func,$/;"	kind:function	line:286
+load_tool	recon/runner.py	/^def load_tool(config, h):$/;"	kind:function	line:269
+loader.py	imgdata/loader.py	1;"	kind:file	line:1
+main	main.py	/^def main():$/;"	kind:function	line:50
+main	other/python_multithreading_attempts.py	/^def main():$/;"	kind:function	line:85
+main.py	main.py	1;"	kind:file	line:1
+make_dirs_if_needed	imgdata/saver.py	/^    def make_dirs_if_needed(self, dirname=None):$/;"	kind:member	line:318
+make_sinogram	imopr/sinogram.py	/^def make_sinogram(sample):$/;"	kind:function	line:22
+mcp_corrections.py	filters/mcp_corrections.py	1;"	kind:file	line:1
+mcp_corrections_test.py	tests/filters_test/mcp_corrections_test.py	1;"	kind:file	line:1
+median_filter	other/python_multithreading_attempts.py	/^def median_filter(data, size=3, mode='dd'):$/;"	kind:function	line:7
+median_filter.py	filters/median_filter.py	1;"	kind:file	line:1
+median_filter1	other/python_multithreading_attempts.py	/^def median_filter1(data, size=3, mode='dd'):$/;"	kind:function	line:13
+median_filter_test.py	tests/filters_test/median_filter_test.py	1;"	kind:file	line:1
+memory_debugger.py	recon/memory_debugger.py	1;"	kind:file	line:1
+muhrec.py	recon/tools/muhrec.py	1;"	kind:file	line:1
+multiprocessing_available	parallel/utility.py	/^def multiprocessing_available():$/;"	kind:function	line:29
+normalise_by_air_region.py	filters/normalise_by_air_region.py	1;"	kind:file	line:1
+normalise_by_air_region_test.py	tests/filters_test/normalise_by_air_region_test.py	1;"	kind:file	line:1
+normalise_by_flat_dark.py	filters/normalise_by_flat_dark.py	1;"	kind:file	line:1
+normalise_by_flat_dark_test.py	tests/filters_test/normalise_by_flat_dark_test.py	1;"	kind:file	line:1
+nxs_loader.py	imgdata/nxs_loader.py	1;"	kind:file	line:1
+nxsread	imgdata/loader.py	/^def nxsread(filename):$/;"	kind:function	line:140
+on_press	imopr/visualiser.py	/^    def on_press(self, event):$/;"	kind:member	line:93
+on_release	imopr/visualiser.py	/^    def on_release(self, event):$/;"	kind:member	line:98
+opr.py	imopr/opr.py	1;"	kind:file	line:1
+outliers.py	filters/outliers.py	1;"	kind:file	line:1
+outliers_test.py	tests/filters_test/outliers_test.py	1;"	kind:file	line:1
+parallel_move_data	imgdata/loader.py	/^def parallel_move_data(input_data, output_data):$/;"	kind:function	line:249
+parser	pyreader/fits_to_nexus.py	/^	parser = argparse.ArgumentParser()$/;"	kind:variable	line:46
+parser	pyreader/tif_to_nexus.py	/^	parser = argparse.ArgumentParser()$/;"	kind:variable	line:46
+post_processing	recon/runner.py	/^def post_processing(recon_data, config):$/;"	kind:function	line:207
+postproc_config.py	recon/configs/postproc_config.py	1;"	kind:file	line:1
+pre_processing	recon/runner.py	/^def pre_processing(config, sample, flat, dark):$/;"	kind:function	line:60
+preproc_config.py	recon/configs/preproc_config.py	1;"	kind:file	line:1
+print_proper_message	recon/find_cor.py	/^def print_proper_message(cor, h, pixels_from_left_side, slice_idx):$/;"	kind:function	line:112
+print_start	imopr/helper.py	/^def print_start(action_name):$/;"	kind:function	line:6
+prog_close	helper.py	/^    def prog_close(self):$/;"	kind:member	line:298
+prog_init	helper.py	/^    def prog_init(self, total, desc="Progress", ascii=False, unit='images'):$/;"	kind:member	line:264
+prog_update	helper.py	/^    def prog_update(self, value=1):$/;"	kind:member	line:291
+progress_available	helper.py	/^    def progress_available(self):$/;"	kind:member	line:98
+pstart	helper.py	/^    def pstart(self, message, verbosity=2):$/;"	kind:member	line:196
+pstop	helper.py	/^    def pstop(self, message, verbosity=2):$/;"	kind:member	line:220
+python_multithreading_attempts.py	other/python_multithreading_attempts.py	1;"	kind:file	line:1
+read_data	pyreader/reader.py	/^def read_data(input_dir,prefix,white,dark,start_slice=None,end_slice=None,start_angle=0.0,end_angle=180.0):$/;"	kind:function	line:9
+reader.py	pyreader/reader.py	1;"	kind:file	line:1
+readme.py	imgdata/readme.py	1;"	kind:file	line:1
+rebin.py	filters/rebin.py	1;"	kind:file	line:1
+rebin_test.py	tests/filters_test/rebin_test.py	1;"	kind:file	line:1
+recon.py	imopr/recon.py	1;"	kind:file	line:1
+recon_config.py	recon/configs/recon_config.py	1;"	kind:file	line:1
+remove_sino_stripes_rings_wf	filters/remove_sino_stripes_rings_wf.py	/^def remove_sino_stripes_rings_wf(data_vol, wv_levels=None):$/;"	kind:function	line:4
+remove_sino_stripes_rings_wf.py	filters/remove_sino_stripes_rings_wf.py	1;"	kind:file	line:1
+remove_sino_stripes_rings_wf_test.py	tests/filters_test/remove_sino_stripes_rings_wf_test.py	1;"	kind:file	line:1
+remove_stripes_ring_artifacts.py	filters/remove_stripes_ring_artifacts.py	1;"	kind:file	line:1
+remove_stripes_ring_artifacts_test.py	tests/filters_test/remove_stripes_ring_artifacts_test.py	1;"	kind:file	line:1
+return_from_func	tests/parallel_test/exclusive_mem_test.py	/^def return_from_func(first_shared, add_arg):$/;"	kind:function	line:7
+return_from_func	tests/parallel_test/shared_mem_test.py	/^def return_from_func(first_shared, add_arg):$/;"	kind:function	line:11
+return_from_func	tests/parallel_test/two_shared_mem_test.py	/^def return_from_func(first_shared, second_shared, add_arg):$/;"	kind:function	line:14
+return_from_func_but_data_changed_inside	recon/memory_debugger.py	/^def return_from_func_but_data_changed_inside(func_data, size=3):$/;"	kind:function	line:194
+return_from_func_no_data_change_inside	recon/memory_debugger.py	/^def return_from_func_no_data_change_inside(func_data, size=3):$/;"	kind:function	line:199
+rotate_stack.py	filters/rotate_stack.py	1;"	kind:file	line:1
+rotate_stack_test.py	tests/filters_test/rotate_stack_test.py	1;"	kind:file	line:1
+run	other/python_multithreading_attempts.py	/^def run(cores, data, f, *args, **kwargs):$/;"	kind:function	line:46
+run_import_checks	helper.py	/^    def run_import_checks(self):$/;"	kind:member	line:107
+run_parallel	other/python_multithreading_attempts.py	/^def run_parallel(cores, data, f, *args, **kwargs):$/;"	kind:function	line:63
+run_parallel_apply	other/python_multithreading_attempts.py	/^def run_parallel_apply(cores, data, f, *args, **kwargs):$/;"	kind:function	line:74
+run_reconstruct	recon/tools/abstract_tool.py	/^    def run_reconstruct(self, data, config, h, proj_angles=None, **kwargs):$/;"	kind:member	line:19
+run_reconstruct	recon/tools/astra_tool.py	/^    def run_reconstruct(self, data, config, h, proj_angles=None, **kwargs):$/;"	kind:member	line:55
+run_reconstruct	recon/tools/tomopy_tool.py	/^    def run_reconstruct(self, data, config, h, proj_angles=None, **kwargs):$/;"	kind:member	line:48
+run_tests.py	run_tests.py	1;"	kind:file	line:1
+runner.py	aggregate/runner.py	1;"	kind:file	line:1
+runner.py	convert/runner.py	1;"	kind:file	line:1
+runner.py	imopr/runner.py	1;"	kind:file	line:1
+runner.py	recon/runner.py	1;"	kind:file	line:1
+sample.py	tests/sample.py	1;"	kind:file	line:1
+save	imgdata/saver.py	/^    def save(self,$/;"	kind:member	line:231
+save_debug	helper.py	/^    def save_debug(self, sample, config, flat, dark, path_append, *args):$/;"	kind:member	line:311
+save_netcdf_volume	recon/runner.py	/^def save_netcdf_volume():$/;"	kind:function	line:256
+save_preproc_images	imgdata/saver.py	/^    def save_preproc_images(self, data, flat=None, dark=None):$/;"	kind:member	line:209
+save_recon_output	imgdata/saver.py	/^    def save_recon_output(self, data):$/;"	kind:member	line:162
+save_single_image	imgdata/saver.py	/^    def save_single_image(self,$/;"	kind:member	line:108
+saver.py	imgdata/saver.py	1;"	kind:file	line:1
+savu.py	recon/tools/savu.py	1;"	kind:file	line:1
+second_shared_data	parallel/two_shared_mem.py	/^second_shared_data = None$/;"	kind:variable	line:10
+set_readme	helper.py	/^    def set_readme(self, readme):$/;"	kind:member	line:308
+setup_parser	recon/configs/functional_config.py	/^    def setup_parser(self, parser):$/;"	kind:member	line:115
+setup_parser	recon/configs/postproc_config.py	/^    def setup_parser(self, parser):$/;"	kind:member	line:35
+setup_parser	recon/configs/preproc_config.py	/^    def setup_parser(self, parser):$/;"	kind:member	line:73
+shared_data	parallel/shared_mem.py	/^shared_data = None$/;"	kind:variable	line:9
+shared_data	parallel/two_shared_mem.py	/^shared_data = None$/;"	kind:variable	line:9
+shared_mem.py	parallel/shared_mem.py	1;"	kind:file	line:1
+shared_mem_test.py	tests/parallel_test/shared_mem_test.py	1;"	kind:file	line:1
+show_3d	imopr/visualiser.py	/^def show_3d(cube, axis=0, cmap='Greys_r', block=False, **kwargs):$/;"	kind:function	line:18
+show_image	imopr/visualiser.py	/^def show_image(image, cmap='Greys_r', block=False):$/;"	kind:function	line:70
+simple_return_false	tests/test_helper.py	/^    def simple_return_false():$/;"	kind:function	line:65
+sinogram.py	imopr/sinogram.py	1;"	kind:file	line:1
+stop_python_exit	imopr/visualiser.py	/^def stop_python_exit():$/;"	kind:function	line:76
+stripe_removal.py	filters/stripe_removal.py	1;"	kind:file	line:1
+stripe_removal_test.py	tests/filters_test/stripe_removal_test.py	1;"	kind:file	line:1
+supported_formats	imgdata/loader.py	/^def supported_formats():$/;"	kind:function	line:7
+supported_formats	imgdata/saver.py	/^    def supported_formats():$/;"	kind:member	line:78
+switch_mp_off	tests/test_helper.py	/^def switch_mp_off():$/;"	kind:function	line:55
+switch_mp_on	tests/test_helper.py	/^def switch_mp_on():$/;"	kind:function	line:71
+tearDown	tests/aggregate_test.py	/^    def tearDown(self):$/;"	kind:member	line:32
+tearDown	tests/convert_test.py	/^    def tearDown(self):$/;"	kind:member	line:37
+tearDown	tests/imgdata_test.py	/^    def tearDown(self):$/;"	kind:member	line:53
+test_aggregate_not_single_folder_avg	tests/aggregate_test.py	/^    def test_aggregate_not_single_folder_avg(self):$/;"	kind:member	line:161
+test_aggregate_not_single_folder_sum	tests/aggregate_test.py	/^    def test_aggregate_not_single_folder_sum(self):$/;"	kind:member	line:158
+test_aggregate_single_folder_avg	tests/aggregate_test.py	/^    def test_aggregate_single_folder_avg(self):$/;"	kind:member	line:88
+test_aggregate_single_folder_sum	tests/aggregate_test.py	/^    def test_aggregate_single_folder_sum(self):$/;"	kind:member	line:85
+test_convert_fits_fits_nostack	tests/convert_test.py	/^    def test_convert_fits_fits_nostack(self):$/;"	kind:member	line:77
+test_convert_fits_fits_stack	tests/convert_test.py	/^    def test_convert_fits_fits_stack(self):$/;"	kind:member	line:84
+test_convert_fits_nxs_stack	tests/convert_test.py	/^    def test_convert_fits_nxs_stack(self):$/;"	kind:member	line:157
+test_convert_fits_tiff_nostack	tests/convert_test.py	/^    def test_convert_fits_tiff_nostack(self):$/;"	kind:member	line:91
+test_convert_fits_tiff_stack	tests/convert_test.py	/^    def test_convert_fits_tiff_stack(self):$/;"	kind:member	line:98
+test_convert_nxs_fits_nostack	tests/convert_test.py	/^    def test_convert_nxs_fits_nostack(self):$/;"	kind:member	line:231
+test_convert_nxs_fits_stack	tests/convert_test.py	/^    def test_convert_nxs_fits_stack(self):$/;"	kind:member	line:223
+test_convert_nxs_tiff_nostack	tests/convert_test.py	/^    def test_convert_nxs_tiff_nostack(self):$/;"	kind:member	line:235
+test_convert_nxs_tiff_stack	tests/convert_test.py	/^    def test_convert_nxs_tiff_stack(self):$/;"	kind:member	line:227
+test_convert_tiff_nxs_stack	tests/convert_test.py	/^    def test_convert_tiff_nxs_stack(self):$/;"	kind:member	line:162
+test_do_recon_fits	tests/imgdata_test.py	/^    def test_do_recon_fits(self):$/;"	kind:member	line:171
+test_do_recon_fits_horiz	tests/imgdata_test.py	/^    def test_do_recon_fits_horiz(self):$/;"	kind:member	line:177
+test_do_recon_tiff	tests/imgdata_test.py	/^    def test_do_recon_tiff(self):$/;"	kind:member	line:174
+test_do_recon_tiff_horiz	tests/imgdata_test.py	/^    def test_do_recon_tiff_horiz(self):$/;"	kind:member	line:180
+test_exec	tests/parallel_test/exclusive_mem_test.py	/^    def test_exec(self):$/;"	kind:member	line:23
+test_executed	tests/filters_test/circular_mask_test.py	/^    def test_executed(self):$/;"	kind:member	line:44
+test_executed	tests/filters_test/outliers_test.py	/^    def test_executed(self):$/;"	kind:member	line:45
+test_executed_image	tests/filters_test/crop_coords_test.py	/^    def test_executed_image(self):$/;"	kind:member	line:102
+test_executed_image_no_helper	tests/filters_test/crop_coords_test.py	/^    def test_executed_image_no_helper(self):$/;"	kind:member	line:120
+test_executed_no_helper	tests/filters_test/circular_mask_test.py	/^    def test_executed_no_helper(self):$/;"	kind:member	line:59
+test_executed_no_helper	tests/filters_test/outliers_test.py	/^    def test_executed_no_helper(self):$/;"	kind:member	line:63
+test_executed_no_helper_par	tests/filters_test/normalise_by_air_region_test.py	/^    def test_executed_no_helper_par(self):$/;"	kind:member	line:95
+test_executed_no_helper_par	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_executed_no_helper_par(self):$/;"	kind:member	line:49
+test_executed_no_helper_par	tests/filters_test/rebin_test.py	/^    def test_executed_no_helper_par(self):$/;"	kind:member	line:46
+test_executed_no_helper_par	tests/filters_test/rotate_stack_test.py	/^    def test_executed_no_helper_par(self):$/;"	kind:member	line:34
+test_executed_no_helper_parallel	tests/filters_test/gaussian_test.py	/^    def test_executed_no_helper_parallel(self):$/;"	kind:member	line:48
+test_executed_no_helper_parallel	tests/filters_test/median_filter_test.py	/^    def test_executed_no_helper_parallel(self):$/;"	kind:member	line:40
+test_executed_no_helper_seq	tests/filters_test/gaussian_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:70
+test_executed_no_helper_seq	tests/filters_test/median_filter_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:58
+test_executed_no_helper_seq	tests/filters_test/normalise_by_air_region_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:103
+test_executed_no_helper_seq	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:57
+test_executed_no_helper_seq	tests/filters_test/rebin_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:54
+test_executed_no_helper_seq	tests/filters_test/rotate_stack_test.py	/^    def test_executed_no_helper_seq(self):$/;"	kind:member	line:42
+test_executed_par	tests/filters_test/normalise_by_air_region_test.py	/^    def test_executed_par(self):$/;"	kind:member	line:92
+test_executed_par	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_executed_par(self):$/;"	kind:member	line:46
+test_executed_par	tests/filters_test/rebin_test.py	/^    def test_executed_par(self):$/;"	kind:member	line:43
+test_executed_par	tests/filters_test/rotate_stack_test.py	/^    def test_executed_par(self):$/;"	kind:member	line:31
+test_executed_parallel	tests/filters_test/gaussian_test.py	/^    def test_executed_parallel(self):$/;"	kind:member	line:39
+test_executed_parallel	tests/filters_test/median_filter_test.py	/^    def test_executed_parallel(self):$/;"	kind:member	line:32
+test_executed_seq	tests/filters_test/gaussian_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:57
+test_executed_seq	tests/filters_test/median_filter_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:48
+test_executed_seq	tests/filters_test/normalise_by_air_region_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:98
+test_executed_seq	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:52
+test_executed_seq	tests/filters_test/rebin_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:49
+test_executed_seq	tests/filters_test/rotate_stack_test.py	/^    def test_executed_seq(self):$/;"	kind:member	line:37
+test_executed_volume	tests/filters_test/crop_coords_test.py	/^    def test_executed_volume(self):$/;"	kind:member	line:48
+test_fail_with_normal_array_fwd_func	tests/parallel_test/shared_mem_test.py	/^    def test_fail_with_normal_array_fwd_func(self):$/;"	kind:member	line:90
+test_fail_with_normal_array_fwd_func_inplace	tests/parallel_test/shared_mem_test.py	/^    def test_fail_with_normal_array_fwd_func_inplace(self):$/;"	kind:member	line:67
+test_fail_with_normal_array_fwd_func_inplace	tests/parallel_test/two_shared_mem_test.py	/^    def test_fail_with_normal_array_fwd_func_inplace(self):$/;"	kind:member	line:127
+test_fail_with_normal_array_fwd_func_second_2d	tests/parallel_test/two_shared_mem_test.py	/^    def test_fail_with_normal_array_fwd_func_second_2d(self):$/;"	kind:member	line:154
+test_fail_with_normal_array_return_to_first	tests/parallel_test/two_shared_mem_test.py	/^    def test_fail_with_normal_array_return_to_first(self):$/;"	kind:member	line:186
+test_fail_with_normal_array_return_to_second	tests/parallel_test/two_shared_mem_test.py	/^    def test_fail_with_normal_array_return_to_second(self):$/;"	kind:member	line:215
+test_functional	tests/recon/configs_test.py	/^    def test_functional(self):$/;"	kind:member	line:21
+test_fwd_func	tests/parallel_test/shared_mem_test.py	/^    def test_fwd_func(self):$/;"	kind:member	line:46
+test_fwd_func_inplace	tests/parallel_test/shared_mem_test.py	/^    def test_fwd_func_inplace(self):$/;"	kind:member	line:27
+test_fwd_func_inplace	tests/parallel_test/two_shared_mem_test.py	/^    def test_fwd_func_inplace(self):$/;"	kind:member	line:30
+test_fwd_func_processing_inplace	recon/memory_debugger.py	/^    def test_fwd_func_processing_inplace(self):$/;"	kind:member	line:40
+test_fwd_func_processing_not_inplace	recon/memory_debugger.py	/^    def test_fwd_func_processing_not_inplace(self):$/;"	kind:member	line:62
+test_fwd_func_processing_not_inplace2	recon/memory_debugger.py	/^    def test_fwd_func_processing_not_inplace2(self):$/;"	kind:member	line:84
+test_fwd_func_return_to_first	tests/parallel_test/two_shared_mem_test.py	/^    def test_fwd_func_return_to_first(self):$/;"	kind:member	line:79
+test_fwd_func_return_to_second	tests/parallel_test/two_shared_mem_test.py	/^    def test_fwd_func_return_to_second(self):$/;"	kind:member	line:102
+test_fwd_func_second_2d	tests/parallel_test/two_shared_mem_test.py	/^    def test_fwd_func_second_2d(self):$/;"	kind:member	line:54
+test_helper.py	tests/test_helper.py	1;"	kind:file	line:1
+test_inplace_fwd_func_processing_inplace	recon/memory_debugger.py	/^    def test_inplace_fwd_func_processing_inplace(self):$/;"	kind:member	line:106
+test_inplace_fwd_func_processing_not_inplace	recon/memory_debugger.py	/^    def test_inplace_fwd_func_processing_not_inplace(self):$/;"	kind:member	line:126
+test_inplace_fwd_func_processing_not_inplace2	recon/memory_debugger.py	/^    def test_inplace_fwd_func_processing_not_inplace2(self):$/;"	kind:member	line:148
+test_not_executed	tests/filters_test/circular_mask_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed	tests/filters_test/gaussian_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:27
+test_not_executed	tests/filters_test/median_filter_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed	tests/filters_test/outliers_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed	tests/filters_test/rebin_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed	tests/filters_test/rotate_stack_test.py	/^    def test_not_executed(self):$/;"	kind:member	line:22
+test_not_executed_image	tests/filters_test/crop_coords_test.py	/^    def test_not_executed_image(self):$/;"	kind:member	line:74
+test_not_executed_no_crop_before_norm	tests/filters_test/normalise_by_air_region_test.py	/^    def test_not_executed_no_crop_before_norm(self):$/;"	kind:member	line:22
+test_not_executed_volume	tests/filters_test/crop_coords_test.py	/^    def test_not_executed_volume(self):$/;"	kind:member	line:22
+test_not_executed_with_crop_before_norm	tests/filters_test/normalise_by_air_region_test.py	/^    def test_not_executed_with_crop_before_norm(self):$/;"	kind:member	line:55
+test_not_shared_performance	recon/memory_debugger.py	/^    def test_not_shared_performance(self, runs=10, cores='8', chunksize='8'):$/;"	kind:member	line:27
+test_postproc	tests/recon/configs_test.py	/^    def test_postproc(self):$/;"	kind:member	line:16
+test_preproc	tests/recon/configs_test.py	/^    def test_preproc(self):$/;"	kind:member	line:11
+test_preproc_fits_par	tests/imgdata_test.py	/^    def test_preproc_fits_par(self):$/;"	kind:member	line:68
+test_preproc_fits_seq	tests/imgdata_test.py	/^    def test_preproc_fits_seq(self):$/;"	kind:member	line:71
+test_preproc_fits_stack_par	tests/imgdata_test.py	/^    def test_preproc_fits_stack_par(self):$/;"	kind:member	line:74
+test_preproc_fits_stack_seq	tests/imgdata_test.py	/^    def test_preproc_fits_stack_seq(self):$/;"	kind:member	line:77
+test_preproc_tiff_par	tests/imgdata_test.py	/^    def test_preproc_tiff_par(self):$/;"	kind:member	line:80
+test_preproc_tiff_seq	tests/imgdata_test.py	/^    def test_preproc_tiff_seq(self):$/;"	kind:member	line:83
+test_preproc_tiff_stack_par	tests/imgdata_test.py	/^    def test_preproc_tiff_stack_par(self):$/;"	kind:member	line:86
+test_preproc_tiff_stack_seq	tests/imgdata_test.py	/^    def test_preproc_tiff_stack_seq(self):$/;"	kind:member	line:89
+test_pstop_raises_if_no_pstart	tests/helper_test.py	/^    def test_pstop_raises_if_no_pstart(self):$/;"	kind:member	line:26
+test_readme_caching	tests/helper_test.py	/^    def test_readme_caching(self):$/;"	kind:member	line:19
+test_real_result	tests/filters_test/normalise_by_flat_dark_test.py	/^    def test_real_result(self):$/;"	kind:member	line:82
+test_sample	tests/filters_test/adjust_range_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/filters_test/line_projection_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/filters_test/mcp_corrections_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/filters_test/remove_sino_stripes_rings_wf_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/filters_test/remove_stripes_ring_artifacts_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/filters_test/stripe_removal_test.py	/^    def test_sample(self):$/;"	kind:member	line:6
+test_sample	tests/sample.py	/^    def test_sample(self):$/;"	kind:member	line:19
+test_save_nxs_par	tests/imgdata_test.py	/^    def test_save_nxs_par(self):$/;"	kind:member	line:127
+test_save_nxs_seq	tests/imgdata_test.py	/^    def test_save_nxs_seq(self):$/;"	kind:member	line:130
+test_shared_performance	recon/memory_debugger.py	/^    def test_shared_performance(self, runs=10, cores='8', chunksize='8'):$/;"	kind:member	line:14
+tif_reader	pyreader/tif_reader.py	/^def tif_reader(data_file_path,data_file_prefix,white_file_name=None, dark_file_name=None, projection_file_name=None,start=0,end=-1):$/;"	kind:function	line:9
+tif_reader.py	pyreader/tif_reader.py	1;"	kind:file	line:1
+tif_to_nexus	pyreader/tif_to_nexus.py	/^def tif_to_nexus(input_dir,prefix,white,dark,output_file):$/;"	kind:function	line:7
+tif_to_nexus.py	pyreader/tif_to_nexus.py	1;"	kind:file	line:1
+tomo_argparser.py	tomo_argparser.py	1;"	kind:file	line:1
+tomo_argparser_test.py	tests/tomo_argparser_test.py	1;"	kind:file	line:1
+tomo_print	helper.py	/^    def tomo_print(self, message, verbosity=2):$/;"	kind:member	line:159
+tomo_print_error	helper.py	/^    def tomo_print_error(self, message, verbosity=1):$/;"	kind:member	line:193
+tomo_print_note	helper.py	/^    def tomo_print_note(self, message, verbosity=2):$/;"	kind:member	line:187
+tomo_print_same_line	helper.py	/^    def tomo_print_same_line(self, message, verbosity=2):$/;"	kind:member	line:147
+tomo_print_warning	helper.py	/^    def tomo_print_warning(self, message, verbosity=2):$/;"	kind:member	line:190
+tomopy_tool.py	recon/tools/tomopy_tool.py	1;"	kind:file	line:1
+tool_importer.py	recon/tools/tool_importer.py	1;"	kind:file	line:1
+tool_supported_methods	recon/tools/abstract_tool.py	/^    def tool_supported_methods():$/;"	kind:member	line:15
+tool_supported_methods	recon/tools/astra_tool.py	/^    def tool_supported_methods():$/;"	kind:member	line:11
+tool_supported_methods	recon/tools/tomopy_tool.py	/^    def tool_supported_methods():$/;"	kind:member	line:8
+total_execution_timer	helper.py	/^    def total_execution_timer(self, message="Total execution time was "):$/;"	kind:member	line:245
+translate_coords_onto_cropped_picture	filters/normalise_by_air_region.py	/^def translate_coords_onto_cropped_picture(crop_coords, air_region,$/;"	kind:function	line:171
+two_shared_mem.py	parallel/two_shared_mem.py	1;"	kind:file	line:1
+two_shared_mem_test.py	tests/parallel_test/two_shared_mem_test.py	1;"	kind:file	line:1
+update	imopr/visualiser.py	/^    def update(val):$/;"	kind:function	line:56
+update	recon/configs/functional_config.py	/^    def update(self, args):$/;"	kind:member	line:414
+update	recon/configs/postproc_config.py	/^    def update(self, args):$/;"	kind:member	line:115
+update	recon/configs/preproc_config.py	/^    def update(self, args):$/;"	kind:member	line:234
+update	recon/custom_timer.py	/^    def update(self, iterations):$/;"	kind:member	line:18
+utility.py	parallel/utility.py	1;"	kind:file	line:1
+visualiser.py	imopr/visualiser.py	1;"	kind:file	line:1
+write_fits	imgdata/saver.py	/^def write_fits(data, filename, overwrite=False):$/;"	kind:function	line:5
+write_img	imgdata/saver.py	/^def write_img(data, filename, overwrite=False):$/;"	kind:function	line:46
+write_nxs	imgdata/saver.py	/^def write_nxs(data,$/;"	kind:function	line:13
