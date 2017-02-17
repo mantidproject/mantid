@@ -1256,7 +1256,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   if (!hasDetectorInfo())
     return pmap;
 
-  const auto &detIDs = getDetectorIDs();
   const auto &baseInstr = m_map ? *m_instr : *this;
   for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
     const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
