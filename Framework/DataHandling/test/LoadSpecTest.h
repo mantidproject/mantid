@@ -1,26 +1,16 @@
 #ifndef LOADSNSSPECTEST_H_
 #define LOADSNSSPECTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadSNSspec.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadSpec.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 
-class LoadSNSspecTest : public CxxTest::TestSuite {
+class LoadSpecTest : public CxxTest::TestSuite {
 public:
-  void testConfidence() {
-    Mantid::DataHandling::LoadSNSspec loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "LoadSNSspec.txt");
-
-    Mantid::Kernel::FileDescriptor descriptor(
-        loader.getPropertyValue("Filename"));
-    TS_ASSERT_EQUALS(80, loader.confidence(descriptor));
-  }
-
-  void testName() { TS_ASSERT_EQUALS(loader.name(), "LoadSNSspec"); }
+  void testName() { TS_ASSERT_EQUALS(loader.name(), "LoadSpec"); }
 
   void testVersion() { TS_ASSERT_EQUALS(loader.version(), 1); }
 
@@ -106,7 +96,7 @@ public:
   }
 
 private:
-  Mantid::DataHandling::LoadSNSspec loader;
+  Mantid::DataHandling::LoadSpec loader;
 };
 
 #endif /*LoadSNSSPECTEST_H_*/
