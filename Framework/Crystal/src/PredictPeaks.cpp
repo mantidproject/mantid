@@ -102,6 +102,12 @@ void PredictPeaks::init() {
                   "values in the HKLPeaksWorkspace to the nearest integers if "
                   "checked.\n"
                   "Keep unchecked to use the original values");
+
+  declareProperty("UseExtendedDetectorSpace", false,
+                  "Use the extended detector space (if defined for the"
+                  " instrument) to predict peaks which do not fall onto any" 
+                  "detector. This may produce a very high number of results.");
+
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
@@ -427,37 +433,29 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
   /* The constructor calls setQLabFrame, which already calls findDetector, which
      is expensive. It's not necessary to call it again, instead it's enough to
-     check whether a detector has already been set. */
-  if (p.getDetector()) {
-    // Only add peaks that hit the detector
-    p.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    p.setRunNumber(m_runNumber);
-    p.setHKL(hkl * m_qConventionFactor);
+     check whether a detector has already been set. 
 
-    if (m_sfCalculator) {
+     Peaks are added if they fall on a detector OR is the extended detector 
+     space component is defined which can be used to approximate a peak's 
+     position in detector space.
+     */
+  bool useExtendedDetectorSpace = getProperty("UseExtendedDetectorSpace");
+  if (!p.getDetector() && !(useExtendedDetectorSpace && 
+              m_inst->getComponentByName("extended-detector-space")))
+      return;
+
+  // Only add peaks that hit the detector
+  p.setGoniometerMatrix(goniometerMatrix);
+  // Save the run number found before.
+  p.setRunNumber(m_runNumber);
+  p.setHKL(hkl * m_qConventionFactor);
+
+  if (m_sfCalculator) {
       p.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
-
-    // Add it to the workspace
-    m_pw->addPeak(p);
-  } else {
-    auto space = m_inst->getComponentByName("extended-detector-space");
-    VirtualPeak vp(m_inst, q);
-    // Only add peaks that hit the detector
-    vp.setGoniometerMatrix(goniometerMatrix);
-    // Save the run number found before.
-    vp.setRunNumber(m_runNumber);
-    vp.setHKL(hkl * m_qConventionFactor);
-
-    if (m_sfCalculator) {
-      vp.setIntensity(m_sfCalculator->getFSquared(hkl));
-    }
-
-    // Add it to the workspace
-    m_pw->addPeak(vp);
-
   }
+
+  // Add it to the workspace
+  m_pw->addPeak(p);
 }
 
 } // namespace Mantid
