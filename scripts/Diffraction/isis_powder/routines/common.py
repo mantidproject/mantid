@@ -124,7 +124,7 @@ def generate_run_numbers(run_number_string):
     :return: A list of run numbers generated from the string
     """
     # Check its not a single run
-    if isinstance(run_number_string, int) or run_number_string.isdigit():
+    if isinstance(run_number_string, int) and run_number_string.isdigit():
         return [int(run_number_string)]  # Cast into a list and return
 
     # If its a string we must parse it
@@ -144,7 +144,8 @@ def get_first_run_number(run_number_string):
     if isinstance(run_numbers, list):
         run_numbers = run_numbers[0]
 
-    return  run_numbers
+    return run_numbers
+
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
     """
@@ -207,7 +208,33 @@ def remove_intermediate_workspace(workspaces):
         mantid.DeleteWorkspace(workspaces)
 
 
-def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
+def run_normalise_by_current(ws):
+    """
+    Runs the Normalise By Current algorithm on the input workspace
+    :param ws: The workspace to run normalise by current on
+    :return: The current normalised workspace
+    """
+    ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    return ws
+
+
+def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
+    """
+    Returns a splined vanadium workspace from the focused vanadium bank list.
+    This runs both StripVanadiumPeaks and SplineBackgrounds on the input
+    workspace list and returns a list of the stripped and splined workspaces
+    :param focused_vanadium_spectra: The vanadium workspaces to process
+    :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
+    :return: The splined vanadium workspace
+    """
+    stripped_ws_list = _strip_vanadium_peaks(workspaces_to_strip=focused_vanadium_spectra)
+    splined_workspaces = spline_workspaces(stripped_ws_list, num_splines=spline_coefficient)
+
+    remove_intermediate_workspace(stripped_ws_list)
+    return splined_workspaces
+
+
+def spline_workspaces(focused_vanadium_spectra, num_splines):
     """
     Splines a list of workspaces in TOF and returns the splines in new workspaces in a
     list of said splined workspaces. The input workspaces should have any Bragg peaks
@@ -325,6 +352,14 @@ def _load_list_of_files(run_numbers_list, instrument):
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
     return read_ws_list
+
+
+def _strip_vanadium_peaks(workspaces_to_strip):
+    out_list = []
+    for i, ws in enumerate(workspaces_to_strip):
+        out_name = ws.getName() + "_splined-" + str(i+1)
+        out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
+    return out_list
 
 
 def _sum_ws_range(ws_list):

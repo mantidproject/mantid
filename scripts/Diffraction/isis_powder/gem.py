@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import InstrumentSettings, yaml_parser
+from isis_powder.routines import common, InstrumentSettings, yaml_parser
 
 
 class Gem(AbstractInst):
@@ -46,11 +46,25 @@ class Gem(AbstractInst):
 
     @staticmethod
     def _generate_input_file_name(run_number):
-        raise NotImplementedError()
+        return _gem_generate_inst_name(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, van_ws):
         raise NotImplementedError()
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
-        raise NotImplementedError()
+        return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
+                                                 spline_coefficient=self._inst_settings.spline_coeff)
+
+
+def _gem_generate_inst_name(run_number):
+    if isinstance(run_number, list):
+        # Use recursion on lists
+        updated_list = []
+        for run in run_number:
+            updated_list.append(_gem_generate_inst_name(run))
+        return updated_list
+    else:
+        # Individual entry
+        return "GEM" + str(run_number)
+
 

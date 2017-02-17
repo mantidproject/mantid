@@ -93,8 +93,8 @@ class Pearl(AbstractInst):
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra):
         focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)
-        return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
-                                                   num_splines=self._inst_settings.spline_coefficient)
+        return common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_spectra,
+                                        num_splines=self._inst_settings.spline_coefficient)
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:

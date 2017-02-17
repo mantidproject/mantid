@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from isis_powder.routines import calibrate, focus, common_enums
+from isis_powder.routines import calibrate, focus, common, common_enums
 
 
 # This class provides common hooks for instruments to override
@@ -176,12 +176,14 @@ class AbstractInst(object):
 
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
         """
-        Normalises the workspace by the beam current at the time it was taken
+        Normalises the workspace by the beam current at the time it was taken using
+        normalise by current unless the instrument overrides it with its own custom
+        method of normalising by current.
         :param ws_to_correct: The workspace to normalise the current of
         :param run_details: The run details associated to the run
         :return: The normalised workspace
         """
-        return None
+        return common.run_normalise_by_current(ws_to_correct)
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         """

@@ -29,7 +29,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
 
     # Align / Focus
     aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.calibration_file_path)
+                                       CalibrationFile=run_details.offset_file_path)
 
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)

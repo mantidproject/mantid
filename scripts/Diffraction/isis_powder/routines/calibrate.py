@@ -8,19 +8,19 @@ from isis_powder.routines.common_enums import InputBatchingEnum
 
 def create_van(instrument, run_details, absorb):
     van = run_details.vanadium_run_numbers
-    run_details = instrument._get_run_details(run_number_string=van)
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
                                                                input_batching=InputBatchingEnum.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
-    corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws, empty_sample_ws_string=empty,
+    corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws,
+                                                    empty_sample_ws_string=run_details.empty_runs,
                                                     instrument=instrument)
 
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
-                                             CalibrationFile=run_details.calibration_file_path)
+                                       CalibrationFile=run_details.offset_file_path)
 
     if absorb:
         aligned_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,

@@ -90,8 +90,8 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
 def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
     bragg_masking_list = _read_masking_file(mask_path)
     masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
-    output = common.spline_vanadium_for_focusing(focused_vanadium_spectra=masked_workspace_list,
-                                                 num_splines=spline_number)
+    output = common.spline_workspaces(focused_vanadium_spectra=masked_workspace_list,
+                                      num_splines=spline_number)
     common.remove_intermediate_workspace(masked_workspace_list)
     return output
 

@@ -109,10 +109,6 @@ class Polaris(AbstractInst):
 
         return run_details
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
-        normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
-        return normalised_ws
-
     def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = self._inst_settings.masking_file_name
         spline_coeff = self._inst_settings.spline_coeff

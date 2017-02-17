@@ -26,7 +26,7 @@ def get_run_details(run_number_string, inst_settings):
     # TODO generate splined vanadium name from common
 
     run_details = RunDetails.RunDetails(run_number=run_number)
-    run_details.empty_runs = empty_runs,
+    run_details.empty_runs = empty_runs
     run_details.user_input_run_number = run_number_string
     run_details.label = label
     run_details.vanadium_run_numbers = vanadium_runs
