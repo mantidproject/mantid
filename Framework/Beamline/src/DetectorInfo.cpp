@@ -27,8 +27,16 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
     m_isMonitor.access().at(i) = true;
 }
 
-/// Returns true if the content of this is equal to the content of other.
-bool DetectorInfo::operator==(const DetectorInfo &other) const {
+/** Returns true if the content of this is equivalent to the content of other.
+ *
+ * Here "equivalent" implies equality of all member, except for positions and
+ * rotations, which are treated specially:
+ * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
+ * - Rotations that imply relative position changes of less than 1 um = 1e-6 m
+ *   with a rotation center that is 1000 m away are considered equivalent.
+ * Note that in both cases the actual limit may be lower, but it is guarenteed
+ * that any LARGER differences are NOT considered equivalent. */
+bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   if (this == &other)
     return true;
   if (size() != other.size())
@@ -41,27 +49,33 @@ bool DetectorInfo::operator==(const DetectorInfo &other) const {
   if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
     return false;
   // Positions: Absolute difference matter, so comparison is not relative.
+  // Changes below 1 nm = 1e-9 m are allowed.
   if (!(m_positions == other.m_positions) &&
       std::mismatch(m_positions->begin(), m_positions->end(),
                     other.m_positions->begin(),
                     [](const auto &a, const auto &b) {
-                      return (a - b).norm() < 1e-15;
+                      return (a - b).norm() < 1e-9;
                     }).first != m_positions->end())
     return false;
+  // At a distance of L = 1000 m (a reasonable upper limit for instrument sizes)
+  // from the rotation center we want a difference of less than d = 1 um = 1e-6
+  // m). We have, using small angle approximation,
+  // d \approx theta * L.
+  // The norm of the imaginary part of the quaternion can give the angle:
+  // x^2 + y^2 + z^2 = (sin(theta/2))^2.
   if (!(m_rotations == other.m_rotations) &&
       std::mismatch(m_rotations->begin(), m_rotations->end(),
                     other.m_rotations->begin(),
                     [](const auto &a, const auto &b) {
-                      return (a.normalized() * b.normalized().conjugate())
-                          .isApprox(Eigen::Quaterniond::Identity(), 1e-15);
+                      constexpr double d_max = 1e-6;
+                      constexpr double L = 1000.0;
+                      constexpr double safety_factor = 2.0;
+                      constexpr double imag_norm_max =
+                          sin(d_max / (2.0 * L * safety_factor));
+                      return (a * b.conjugate()).vec().norm() < imag_norm_max;
                     }).first != m_rotations->end())
     return false;
   return true;
-}
-
-/// Returns true if the content of this is different from the content of other.
-bool DetectorInfo::operator!=(const DetectorInfo &other) const {
-  return !operator==(other);
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
@@ -106,7 +120,7 @@ void DetectorInfo::setPosition(const size_t index,
 /// Set the rotation of the detector with given index.
 void DetectorInfo::setRotation(const size_t index,
                                const Eigen::Quaterniond &rotation) {
-  m_rotations.access()[index] = rotation;
+  m_rotations.access()[index] = rotation.normalized();
 }
 
 } // namespace Beamline

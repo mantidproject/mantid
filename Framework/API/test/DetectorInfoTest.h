@@ -45,8 +45,8 @@ public:
   }
 
   void test_comparison() {
-    TS_ASSERT(m_workspace.detectorInfo() == m_workspace.detectorInfo());
-    TS_ASSERT(!(m_workspace.detectorInfo() != m_workspace.detectorInfo()));
+    TS_ASSERT(
+        m_workspace.detectorInfo().isEquivalent(m_workspace.detectorInfo()));
   }
 
   void test_size() { TS_ASSERT_EQUALS(m_workspace.detectorInfo().size(), 5); }

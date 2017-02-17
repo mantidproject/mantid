@@ -71,8 +71,7 @@ public:
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
-  bool operator==(const DetectorInfo &other) const;
-  bool operator!=(const DetectorInfo &other) const;
+  bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
 

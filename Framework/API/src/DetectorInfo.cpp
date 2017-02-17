@@ -47,14 +47,17 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
   return *this;
 }
 
-/// Returns true if the content of this is equal to the content of other.
-bool DetectorInfo::operator==(const DetectorInfo &other) const {
-  return m_detectorInfo == other.m_detectorInfo;
-}
-
-/// Returns true if the content of this is different from the content of other.
-bool DetectorInfo::operator!=(const DetectorInfo &other) const {
-  return m_detectorInfo != other.m_detectorInfo;
+/** Returns true if the content of this is equivalent to the content of other.
+ *
+ * Here "equivalent" implies equality of all member, except for positions and
+ * rotations, which are treated specially:
+ * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
+ * - Rotations that imply relative position changes of less than 1 um = 1e-6 m
+ *   with a rotation center that is 1000 m away are considered equivalent.
+ * Note that in both cases the actual limit may be lower, but it is guarenteed
+ * that any LARGER differences are NOT considered equivalent. */
+bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
+  return m_detectorInfo.isEquivalent(other.m_detectorInfo);
 }
 
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the

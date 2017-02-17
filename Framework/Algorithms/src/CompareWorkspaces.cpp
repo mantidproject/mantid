@@ -763,7 +763,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
     return false;
   }
 
-  if (ws1->detectorInfo() != ws2->detectorInfo()) {
+  if (!ws1->detectorInfo().isEquivalent(ws2->detectorInfo())) {
     recordMismatch("DetectorInfo mismatch");
     return false;
   }
