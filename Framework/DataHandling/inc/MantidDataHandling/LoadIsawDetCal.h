@@ -65,7 +65,7 @@ private:
   const double CM_TO_M = 0.01;
 
   struct ComponentScaling {
-    Geometry::IComponent *compID;
+    std::string componentName;
     double scaleX;
     double scaleY;
   };
@@ -87,7 +87,7 @@ private:
                   boost::shared_ptr<const Geometry::IComponent> component,
                   bool doWishCorrection = false);
   void applyScalings(
-      API::ExperimentInfo_sptr &expInfoWS,
+      API::Workspace_sptr &ws,
       const std::vector<ComponentScaling> &rectangularDetectorScalings);
 };
 

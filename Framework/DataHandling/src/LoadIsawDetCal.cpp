@@ -12,7 +12,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
@@ -271,11 +270,10 @@ void LoadIsawDetCal::exec() {
       ComponentScaling detScaling;
       detScaling.scaleX = CM_TO_M * width / det->xsize();
       detScaling.scaleY = CM_TO_M * height / det->ysize();
-      detScaling.compID = det->getComponentID();
+      detScaling.componentName = det->getFullName();
       rectangularDetectorScalings.push_back(detScaling);
 
-      auto comp = inst->getComponentByName(detname);
-      doRotation(rX, rY, detectorInfo, comp);
+      doRotation(rX, rY, detectorInfo, det);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
@@ -306,7 +304,7 @@ void LoadIsawDetCal::exec() {
   }
 
   // Do this last, to avoid the issue of invalidating DetectorInfo
-  applyScalings(expInfoWS, rectangularDetectorScalings);
+  applyScalings(ws, rectangularDetectorScalings);
 
   setProperty("InputWorkspace", ws);
 }
@@ -434,11 +432,7 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
 
   // Then find the corresponding relative position
 
-  // TODO: This needs checking. It would be expected that parent->getRot()
-  // should be all that is required to get the absolute rotation. This will
-  // affect WISH, but as there are no tests for this it is difficult to verify.
-  // The absolute rotation, when calling comp->getRotation, is taken as
-  // grandparentRot * parentRot * childrot
+  // TODO: This needs checking.
   const auto parent = comp->getParent();
   if (parent) {
     Quat rot0 = parent->getRelativeRot();
@@ -465,13 +459,17 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
  *values for scalex and scaley
  */
 void LoadIsawDetCal::applyScalings(
-    ExperimentInfo_sptr &expInfoWS,
+    Workspace_sptr &ws,
     const std::vector<ComponentScaling> &rectangularDetectorScalings) {
-  auto &pmap = expInfoWS->instrumentParameters();
 
   for (const auto &scaling : rectangularDetectorScalings) {
-    pmap.addDouble(scaling.compID, "scalex", scaling.scaleX);
-    pmap.addDouble(scaling.compID, "scaley", scaling.scaleY);
+    IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
+    alg1->setProperty<Workspace_sptr>("Workspace", ws);
+    alg1->setProperty("ComponentName", scaling.componentName);
+    // Convert from cm to m
+    alg1->setProperty("ScaleX", scaling.scaleX);
+    alg1->setProperty("ScaleY", scaling.scaleY);
+    alg1->executeAsChildAlg();
   }
 }
 
