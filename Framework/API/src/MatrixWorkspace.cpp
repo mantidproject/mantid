@@ -72,11 +72,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
   // TODO: Do we need to init m_monitorWorkspace?
-
-  // This call causes copying of m_parmap (ParameterMap). The constructor of
-  // ExperimentInfo just kept a shared_ptr to the same map as in other, which
-  // is not enough as soon as the maps in one of the workspaces it edited.
-  instrumentParameters();
 }
 
 /// Destructor
