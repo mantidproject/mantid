@@ -1022,7 +1022,8 @@ public:
     return splitterws;
   }
 
-  /** Create splitters in TableWorkspace for output which is exactly as the Matrix splitters
+  /** Create splitters in TableWorkspace for output which is exactly as the
+   * Matrix splitters
    *  Region:
    * 0: pulse 0: 0 ~ 3+
    * 1: pulse 0: 3+ ~ pulse 1: 9+
@@ -1036,10 +1037,11 @@ public:
    * int64_t format of unit nanosecond
    * @return
    */
-  DataObjects::TableWorkspace_sptr createTableSplitters(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt)
-  {
+  DataObjects::TableWorkspace_sptr
+  createTableSplitters(int64_t runstart_i64, int64_t pulsedt, int64_t tofdt) {
     // create table workspace
-    DataObjects::TableWorkspace_sptr tablesplitter = boost::make_shared<DataObjects::TableWorkspace>();
+    DataObjects::TableWorkspace_sptr tablesplitter =
+        boost::make_shared<DataObjects::TableWorkspace>();
     tablesplitter->addColumn("double", "start");
     tablesplitter->addColumn("double", "stop");
     tablesplitter->addColumn("str", "target");
@@ -1050,28 +1052,32 @@ public:
     int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
     std::string itarget = "A";
     tablesplitter->appendRow();
-    tablesplitter->cell<double>(row_index, 0) = static_cast<double>(runstart_i64) * 1.0E-9;
+    tablesplitter->cell<double>(row_index, 0) =
+        static_cast<double>(runstart_i64) * 1.0E-9;
     tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t1) * 1.E-9;
     tablesplitter->cell<std::string>(row_index, 2) = itarget;
 
     // Splitter 1: 3+ ~ 9+ (second pulse)
-    ++ row_index;
+    ++row_index;
     int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
     itarget = "B";
     tablesplitter->appendRow();
-    tablesplitter->cell<double>(row_index, 0) = static_cast<double>(t1) * 1.0E-9;
+    tablesplitter->cell<double>(row_index, 0) =
+        static_cast<double>(t1) * 1.0E-9;
     tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t2) * 1.E-9;
     tablesplitter->cell<std::string>(row_index, 2) = itarget;
 
     // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
     int64_t lastT = t2;
     for (size_t i = 2; i < 5; i++) {
-      ++ row_index;
+      ++row_index;
       itarget = "C";
       int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       tablesplitter->appendRow();
-      tablesplitter->cell<double>(row_index, 0) = static_cast<double>(lastT) * 1.0E-9;
-      tablesplitter->cell<double>(row_index, 1) = static_cast<double>(newT) * 1.E-9;
+      tablesplitter->cell<double>(row_index, 0) =
+          static_cast<double>(lastT) * 1.0E-9;
+      tablesplitter->cell<double>(row_index, 1) =
+          static_cast<double>(newT) * 1.E-9;
       tablesplitter->cell<std::string>(row_index, 2) = itarget;
       lastT = newT;
     }

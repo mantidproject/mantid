@@ -448,8 +448,9 @@ void FilterEvents::processSplittersWorkspace() {
 void FilterEvents::processTableSplittersWorkspace() {
   // check input workspace's validity
   assert(m_splitterTableWorkspace);
-  if (m_splitterTableWorkspace->columnCount() != 3){
-      throw std::runtime_error("Splitters given in TableWorkspace must have 3 columns.");
+  if (m_splitterTableWorkspace->columnCount() != 3) {
+    throw std::runtime_error(
+        "Splitters given in TableWorkspace must have 3 columns.");
   }
 
   // clear vector splitterTime and vector of splitter group
@@ -499,27 +500,24 @@ void FilterEvents::processTableSplittersWorkspace() {
     // convert string-target to integer target
     bool addnew = false;
     int int_target(-1);
-    if (m_targetIndexMap.size() == 0)
-    {
+    if (m_targetIndexMap.size() == 0) {
+      addnew = true;
+    } else {
+      std::map<std::string, int>::iterator mapiter =
+          m_targetIndexMap.find(target);
+      if (mapiter == m_targetIndexMap.end())
         addnew = true;
+      else
+        int_target = mapiter->second;
     }
-    else
-    {
-        std::map<std::string, int>::iterator mapiter =
-            m_targetIndexMap.find(target);
-        if (mapiter == m_targetIndexMap.end())
-            addnew = true;
-        else
-            int_target = mapiter->second;
-    }
-    if (addnew)
-    {
-        // target is not in map
-        int_target = max_target_index;
-        m_targetIndexMap.insert(std::pair<std::string, int>(target, max_target_index));
-        m_wsGroupIndexTargetMap.emplace(int_target, target);
-        this->m_targetWorkspaceIndexSet.insert(int_target);
-        max_target_index++;
+    if (addnew) {
+      // target is not in map
+      int_target = max_target_index;
+      m_targetIndexMap.insert(
+          std::pair<std::string, int>(target, max_target_index));
+      m_wsGroupIndexTargetMap.emplace(int_target, target);
+      this->m_targetWorkspaceIndexSet.insert(int_target);
+      max_target_index++;
     }
 
     // add start time, stop time and 'target
@@ -1189,8 +1187,9 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   // Loop over the histograms (detector spectra) to do split from 1 event list
   // to N event list
-  g_log.notice() << "Filter by vector splitters: Number of spectra in input/source EventWorkspace = "
-                 << numberOfSpectra << ".\n";
+  g_log.notice() << "Filter by vector splitters: Number of spectra in "
+                    "input/source EventWorkspace = " << numberOfSpectra
+                 << ".\n";
 
   for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
     std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
