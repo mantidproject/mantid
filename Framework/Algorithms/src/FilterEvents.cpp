@@ -43,11 +43,12 @@ DECLARE_ALGORITHM(FilterEvents)
  */
 FilterEvents::FilterEvents()
     : m_eventWS(), m_splittersWorkspace(), m_splitterTableWorkspace(),
-      m_matrixSplitterWS(), m_detCorrectWorkspace(), m_useTableSplitters(false),
-      m_useArbTableSplitters(false), m_workGroupIndexes(), m_splitters(),
-      m_outputWorkspacesMap(), m_wsNames(), m_detTofOffsets(),
-      m_detTofFactors(), m_FilterByPulseTime(false), m_informationWS(),
-      m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
+      m_matrixSplitterWS(), m_detCorrectWorkspace(),
+      m_useSplittersWorkspace(false), m_useArbTableSplitters(false),
+      m_targetWorkspaceIndexSet(), m_splitters(), m_outputWorkspacesMap(),
+      m_wsNames(), m_detTofOffsets(), m_detTofFactors(),
+      m_FilterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
+      m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
       m_specSkipType(), m_vecSkip(), m_isSplittersRelativeTime(false),
@@ -161,7 +162,7 @@ void FilterEvents::exec() {
   // Parse splitters
   m_progress = 0.0;
   progress(m_progress, "Processing SplittersWorkspace.");
-  if (m_useTableSplitters)
+  if (m_useSplittersWorkspace)
     processSplittersWorkspace();
   else if (m_useArbTableSplitters)
     processTableSplittersWorkspace();
@@ -186,7 +187,7 @@ void FilterEvents::exec() {
     progressamount = 0.6;
   else
     progressamount = 0.7;
-  if (m_useTableSplitters)
+  if (m_useSplittersWorkspace)
     filterEventsBySplitters(progressamount);
   else
     filterEventsByVectorSplitters(progressamount);
@@ -244,13 +245,13 @@ void FilterEvents::processAlgorithmProperties() {
   m_splitterTableWorkspace =
       boost::dynamic_pointer_cast<TableWorkspace>(tempws);
   if (m_splittersWorkspace) {
-    m_useTableSplitters = true;
+    m_useSplittersWorkspace = true;
   } else if (m_splitterTableWorkspace)
     m_useArbTableSplitters = true;
   else {
     m_matrixSplitterWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tempws);
     if (m_matrixSplitterWS) {
-      m_useTableSplitters = false;
+      m_useSplittersWorkspace = false;
     } else {
       throw runtime_error("Invalid type of input workspace, neither "
                           "SplittersWorkspace nor MatrixWorkspace.");
@@ -409,7 +410,7 @@ void FilterEvents::processSplittersWorkspace() {
   bool inorder = true;
   for (size_t i = 0; i < numsplitters; i++) {
     m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
-    m_workGroupIndexes.insert(m_splitters.back().index());
+    m_targetWorkspaceIndexSet.insert(m_splitters.back().index());
     if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
       inorder = false;
   }
@@ -422,13 +423,13 @@ void FilterEvents::processSplittersWorkspace() {
   }
 
   // 4. Add extra workgroup index for unfiltered events
-  m_workGroupIndexes.insert(-1);
+  m_targetWorkspaceIndexSet.insert(-1);
 
   // 5. Add information
   if (m_hasInfoWS) {
-    if (m_workGroupIndexes.size() > m_informationWS->rowCount() + 1) {
+    if (m_targetWorkspaceIndexSet.size() > m_informationWS->rowCount() + 1) {
       g_log.warning() << "Input Splitters Workspace has different entries ("
-                      << m_workGroupIndexes.size() - 1
+                      << m_targetWorkspaceIndexSet.size() - 1
                       << ") than input information workspaces ("
                       << m_informationWS->rowCount() << "). "
                       << "  Information may not be accurate. \n";
@@ -453,7 +454,6 @@ void FilterEvents::processTableSplittersWorkspace() {
   // get the run start time
   int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
 
-  std::map<std::string, int> m_targetIndexMap;
   int max_target_index = 1; // start from 1
 
   // convert TableWorkspace's values to vectors
@@ -509,6 +509,8 @@ void FilterEvents::processTableSplittersWorkspace() {
         // target is not in map
         int_target = max_target_index;
         m_targetIndexMap.insert(std::pair<std::string, int>(target, max_target_index));
+        m_wsGroupIndexTargetMap.emplace(int_target, target);
+        this->m_targetWorkspaceIndexSet.insert(int_target);
         max_target_index++;
     }
 
@@ -559,7 +561,34 @@ void FilterEvents::processMatrixSplitterWorkspace() {
 
   for (size_t i = 0; i < sizey; ++i) {
     m_vecSplitterGroup[i] = static_cast<int>(Y[i]);
-    m_workGroupIndexes.insert(m_vecSplitterGroup[i]);
+    m_targetWorkspaceIndexSet.insert(m_vecSplitterGroup[i]);
+  }
+}
+
+void FilterEvents::createOutputWorkspacesTableSplitterCase() {
+  // check condition
+  if (!m_useArbTableSplitters) {
+    g_log.error("createOutputWorkspacesTableSplitterCase() is applied to "
+                "TableWorkspace splitters only!");
+    throw std::runtime_error("Wrong call!");
+  }
+
+  // set up new workspaces
+  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
+    std::stringstream wsname;
+
+    // workspace name
+    if (wsgroup >= 0) {
+      std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+      wsname << m_outputWSNameBase << "_" << target_name;
+    } else {
+      wsname << m_outputWSNameBase << "_unfiltered";
+    }
+
+    // create new workspace
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
+    m_outputWorkspacesMap.emplace(wsgroup, optws);
   }
 }
 
@@ -578,7 +607,7 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Determine the minimum group index number
   int minwsgroup = INT_MAX;
-  for (auto wsgroup : m_workGroupIndexes) {
+  for (auto wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < minwsgroup && wsgroup >= 0)
       minwsgroup = wsgroup;
   }
@@ -592,10 +621,10 @@ void FilterEvents::createOutputWorkspaces() {
 
   // Set up new workspaces
   int numoutputws = 0;
-  double numnewws = static_cast<double>(m_workGroupIndexes.size());
+  double numnewws = static_cast<double>(m_targetWorkspaceIndexSet.size());
   double wsgindex = 0.;
 
-  for (auto const wsgroup : m_workGroupIndexes) {
+  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     // Generate new workspace name
     bool add2output = true;
     std::stringstream wsname;
@@ -627,7 +656,7 @@ void FilterEvents::createOutputWorkspaces() {
       }
       optws->setComment(info);
       optws->setTitle(info);
-    }
+    } // END-IF infor WS
 
     // Add to output properties.  There shouldn't be any workspace
     // (non-unfiltered) skipped from group index
@@ -1003,6 +1032,10 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   // to N event list
   g_log.notice() << "Filter by vector splitters: Number of spectra in input/source EventWorkspace = "
                  << numberOfSpectra << ".\n";
+
+  for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
+    std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
+              << m_vecSplitterGroup[i] << "\n";
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {

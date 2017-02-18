@@ -544,7 +544,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Passed_test_FilterRelativeTime() {
+  void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -575,6 +575,8 @@ public:
     // Get 3 output workspaces
     int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 3);
+
+    TS_ASSERT(false);
 
     // Workspace 0
     EventWorkspace_sptr filteredws0 =
@@ -645,89 +647,88 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void test_tableSplitter()
-  {
-      // Create EventWorkspace and SplittersWorkspace
-      int64_t runstart_i64 = 20000000000;
-      int64_t pulsedt = 100 * 1000 * 1000;
-      int64_t tofdt = 10 * 1000 * 1000;
-      size_t numpulses = 5;
+  void Xtest_tableSplitter() {
+    // Create EventWorkspace and SplittersWorkspace
+    int64_t runstart_i64 = 20000000000;
+    int64_t pulsedt = 100 * 1000 * 1000;
+    int64_t tofdt = 10 * 1000 * 1000;
+    size_t numpulses = 5;
 
-      EventWorkspace_sptr inpWS =
-          createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
-      AnalysisDataService::Instance().addOrReplace("Test11", inpWS);
+    EventWorkspace_sptr inpWS =
+        createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
+    AnalysisDataService::Instance().addOrReplace("Test11", inpWS);
 
-      DataObjects::TableWorkspace_sptr splws = createTableSplitters(0, pulsedt, tofdt);
-      AnalysisDataService::Instance().addOrReplace("TableSplitter1", splws);
+    DataObjects::TableWorkspace_sptr splws =
+        createTableSplitters(0, pulsedt, tofdt);
+    AnalysisDataService::Instance().addOrReplace("TableSplitter1", splws);
 
-      FilterEvents filter;
-      filter.initialize();
+    FilterEvents filter;
+    filter.initialize();
 
-      // Set properties
-      filter.setProperty("InputWorkspace", "Test11");
-      filter.setProperty("OutputWorkspaceBaseName", "FilteredWS_FromTable");
-      filter.setProperty("SplitterWorkspace", "TableSplitter1");
-      filter.setProperty("RelativeTime", true);
-      filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    // Set properties
+    filter.setProperty("InputWorkspace", "Test11");
+    filter.setProperty("OutputWorkspaceBaseName", "FilteredWS_FromTable");
+    filter.setProperty("SplitterWorkspace", "TableSplitter1");
+    filter.setProperty("RelativeTime", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
 
-      // Execute
-      TS_ASSERT_THROWS_NOTHING(filter.execute());
-      TS_ASSERT(filter.isExecuted());
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(filter.execute());
+    TS_ASSERT(filter.isExecuted());
 
-      // Get 3 output workspaces
-      int numsplittedws = filter.getProperty("NumberOutputWS");
-      TS_ASSERT_EQUALS(numsplittedws, 3);
+    // Get 3 output workspaces
+    int numsplittedws = filter.getProperty("NumberOutputWS");
+    TS_ASSERT_EQUALS(numsplittedws, 3);
 
-      /**
-      // Workspace 0
-      EventWorkspace_sptr filteredws0 =
-          boost::dynamic_pointer_cast<EventWorkspace>(
-              AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
-      TS_ASSERT(filteredws0);
-      TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-      TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+    /**
+    // Workspace 0
+    EventWorkspace_sptr filteredws0 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+    TS_ASSERT(filteredws0);
+    TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
-      // Workspace 1
-      EventWorkspace_sptr filteredws1 =
-          boost::dynamic_pointer_cast<EventWorkspace>(
-              AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
-      TS_ASSERT(filteredws1);
-      TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+    // Workspace 1
+    EventWorkspace_sptr filteredws1 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+    TS_ASSERT(filteredws1);
+    TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
-      // Workspace 2
-      EventWorkspace_sptr filteredws2 =
-          boost::dynamic_pointer_cast<EventWorkspace>(
-              AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
-      TS_ASSERT(filteredws2);
-      TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+    // Workspace 2
+    EventWorkspace_sptr filteredws2 =
+        boost::dynamic_pointer_cast<EventWorkspace>(
+            AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
+    TS_ASSERT(filteredws2);
+    TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
-      // Check spectrum 3 of workspace 2
-      EventList elist3 = filteredws2->getSpectrum(3);
-      elist3.sortPulseTimeTOF();
+    // Check spectrum 3 of workspace 2
+    EventList elist3 = filteredws2->getSpectrum(3);
+    elist3.sortPulseTimeTOF();
 
-      TofEvent eventmin = elist3.getEvent(0);
-      TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
-                       runstart_i64 + pulsedt * 2);
-      TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
+    TofEvent eventmin = elist3.getEvent(0);
+    TS_ASSERT_EQUALS(eventmin.pulseTime().totalNanoseconds(),
+                     runstart_i64 + pulsedt * 2);
+    TS_ASSERT_DELTA(eventmin.tof(), 0, 1.0E-4);
 
-      TofEvent eventmax = elist3.getEvent(26);
-      TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
-                       runstart_i64 + pulsedt * 4);
-      TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
-                      1.0E-4);
+    TofEvent eventmax = elist3.getEvent(26);
+    TS_ASSERT_EQUALS(eventmax.pulseTime().totalNanoseconds(),
+                     runstart_i64 + pulsedt * 4);
+    TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
+                    1.0E-4);
 
-      // 5. Clean up
-      AnalysisDataService::Instance().remove("Test02");
-      AnalysisDataService::Instance().remove("Splitter02");
-      std::vector<std::string> outputwsnames =
-          filter.getProperty("OutputWorkspaceNames");
-      for (size_t i = 0; i < outputwsnames.size(); ++i) {
-        AnalysisDataService::Instance().remove(outputwsnames[i]);
-      }
-      **/
+    // 5. Clean up
+    AnalysisDataService::Instance().remove("Test02");
+    AnalysisDataService::Instance().remove("Splitter02");
+    std::vector<std::string> outputwsnames =
+        filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+      AnalysisDataService::Instance().remove(outputwsnames[i]);
+    }
+    **/
 
-      return;
-
+    return;
   }
 
   //----------------------------------------------------------------------------------------------

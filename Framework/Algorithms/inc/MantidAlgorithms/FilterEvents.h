@@ -91,6 +91,8 @@ private:
   void processMatrixSplitterWorkspace();
 
   void createOutputWorkspaces();
+  /// create output workspaces in the case of using TableWorlspace for splitters
+  void createOutputWorkspacesTableSplitterCase();
 
   /// Set up detector calibration parameters
   void setupDetectorTOFCalibration();
@@ -125,10 +127,10 @@ private:
   DataObjects::TableWorkspace_sptr m_detCorrectWorkspace;
 
   /// Flag to use matrix splitters or table splitters
-  bool m_useTableSplitters;
+  bool m_useSplittersWorkspace;
   bool m_useArbTableSplitters;
 
-  std::set<int> m_workGroupIndexes;
+  std::set<int> m_targetWorkspaceIndexSet;
   Kernel::TimeSplitterType m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
@@ -152,6 +154,11 @@ private:
 
   /// Base of output workspace's name
   std::string m_outputWSNameBase;
+
+  /// TableWorkspace splitters: from target map to vector workspace group-index
+  /// These 2 maps are complimentary to each other
+  std::map<std::string, int> m_targetIndexMap;
+  std::map<int, std::string> m_wsGroupIndexTargetMap;
 
   /// Flag to group workspace
   bool m_toGroupWS;
