@@ -93,6 +93,9 @@ private:
   void createOutputWorkspaces();
   /// create output workspaces in the case of using TableWorlspace for splitters
   void createOutputWorkspacesTableSplitterCase();
+  /// create output workspaces in the case of using MatrixWorkspace for
+  /// splitters
+  void createOutputWorkspacesMatrixCase();
 
   /// Set up detector calibration parameters
   void setupDetectorTOFCalibration();
@@ -159,6 +162,10 @@ private:
   /// These 2 maps are complimentary to each other
   std::map<std::string, int> m_targetIndexMap;
   std::map<int, std::string> m_wsGroupIndexTargetMap;
+
+  /// MatrixWorkspace splitters:
+  std::map<int, uint32_t> m_yIndexMap;
+  std::map<uint32_t, int> m_wsGroupdYMap;
 
   /// Flag to group workspace
   bool m_toGroupWS;

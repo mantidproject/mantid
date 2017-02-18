@@ -172,7 +172,12 @@ void FilterEvents::exec() {
   // Create output workspaces
   m_progress = 0.1;
   progress(m_progress, "Create Output Workspaces.");
-  createOutputWorkspaces();
+  if (m_useArbTableSplitters)
+    createOutputWorkspacesTableSplitterCase();
+  else if (m_useSplittersWorkspace)
+    createOutputWorkspaces();
+  else
+    createOutputWorkspacesMatrixCase();
 
   // Optionall import corrections
   m_progress = 0.20;
@@ -450,11 +455,12 @@ void FilterEvents::processTableSplittersWorkspace() {
   // clear vector splitterTime and vector of splitter group
   m_vecSplitterTime.clear();
   m_vecSplitterGroup.clear();
+  bool found_undefined_splitter = false;
 
   // get the run start time
   int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
 
-  int max_target_index = 1; // start from 1
+  int max_target_index = 1;
 
   // convert TableWorkspace's values to vectors
   size_t num_rows = m_splitterTableWorkspace->rowCount();
@@ -477,7 +483,9 @@ void FilterEvents::processTableSplittersWorkspace() {
       // create a new splitter and set the time interval in the middle to target
       // -1
       m_vecSplitterTime.push_back(start_64);
-      m_vecSplitterGroup.push_back(-1);
+      // NOTE: use index = 0 for un-defined slot
+      m_vecSplitterGroup.push_back(0);
+      found_undefined_splitter = true;
     } else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE) {
       // new splitter's start time is same (within tolerance) as the stop time
       // of the previous
@@ -517,9 +525,18 @@ void FilterEvents::processTableSplittersWorkspace() {
     // add start time, stop time and 'target
     m_vecSplitterTime.push_back(stop_64);
     m_vecSplitterGroup.push_back(int_target);
+  } // END-FOR (irow)
+
+  // add un-defined splitter to map
+  if (found_undefined_splitter) {
+    m_targetIndexMap.emplace("undefined", 0);
+    m_wsGroupIndexTargetMap.emplace(0, "undefined");
+    m_targetWorkspaceIndexSet.insert(0);
   }
 
-  std::cout << "[DB] Size of splitter time and group: " << m_vecSplitterTime.size() << ", " << m_vecSplitterGroup.size() << "\n";
+  g_log.notice() << "[DB] Size of splitter time and group: "
+                 << m_vecSplitterTime.size() << ", "
+                 << m_vecSplitterGroup.size() << "\n";
 
   return;
 }
@@ -559,10 +576,110 @@ void FilterEvents::processMatrixSplitterWorkspace() {
       m_vecSplitterTime[i] += time_shift_ns;
   }
 
+  // process the group
+  uint32_t max_target_index = 1;
+
   for (size_t i = 0; i < sizey; ++i) {
-    m_vecSplitterGroup[i] = static_cast<int>(Y[i]);
-    m_targetWorkspaceIndexSet.insert(m_vecSplitterGroup[i]);
+
+    int y_index = static_cast<int>(Y[i]);
+
+    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
+
+    if (mapiter == m_yIndexMap.end()) {
+      uint32_t target_index = 0;
+      // default to 0 as undefined slot.  if well-defined, then use the current
+      // unused max_target_index
+      if (y_index >= 0) {
+        target_index = max_target_index;
+        ++max_target_index;
+      }
+
+      // un-defined or un-filtered
+      m_vecSplitterGroup[i] = target_index;
+
+      m_yIndexMap.emplace(y_index, target_index);
+      m_wsGroupdYMap.emplace(target_index, y_index);
+      m_targetWorkspaceIndexSet.insert(target_index);
+    } else {
+      // this target Y-index has been registered
+      uint32_t target_index = mapiter->second;
+      m_vecSplitterGroup[i] = target_index;
+    }
   }
+
+  return;
+}
+
+void FilterEvents::createOutputWorkspacesMatrixCase() {
+  // check condition
+  if (!m_matrixSplitterWS) {
+    g_log.error("createOutputWorkspacesMatrixCase() is applied to "
+                "MatrixWorkspace splitters only!");
+    throw std::runtime_error("Wrong call!");
+  }
+
+  // set up new workspaces
+  // Note: m_targetWorkspaceIndexSet is used in different manner among
+  // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
+  size_t numoutputws = m_targetWorkspaceIndexSet.size();
+  size_t wsgindex = 0;
+
+  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
+    std::stringstream wsname;
+
+    // workspace name
+    if (wsgroup >= 0) {
+      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+      int target_name = m_wsGroupdYMap[wsgroup];
+      wsname << m_outputWSNameBase << "_" << target_name;
+    } else {
+      wsname << m_outputWSNameBase << "_unfiltered";
+    }
+
+    // create new workspace
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
+    m_outputWorkspacesMap.emplace(wsgroup, optws);
+
+    // add to output workspace property
+    std::stringstream propertynamess;
+    if (wsgroup == 0) {
+      propertynamess << "OutputWorkspace_unfiltered";
+    } else {
+      propertynamess << "OutputWorkspace_" << wsgroup;
+    }
+
+    // Inserted this pair to map
+    m_wsNames.push_back(wsname.str());
+
+    // Set (property) to output workspace and set to ADS
+    declareProperty(Kernel::make_unique<
+                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                        propertynamess.str(), wsname.str(), Direction::Output),
+                    "Output");
+    setProperty(propertynamess.str(), optws);
+    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+
+    g_log.debug() << "Created output Workspace of group = " << wsgroup
+                  << "  Property Name = " << propertynamess.str()
+                  << " Workspace name = " << wsname.str()
+                  << " with Number of events = " << optws->getNumberEvents()
+                  << "\n";
+
+    // Update progress report
+    m_progress =
+        0.1 +
+        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    progress(m_progress, "Creating output workspace");
+    wsgindex += 1;
+  } // END-FOR (wsgroup)
+
+  // Set output and do debug report
+  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
+                 << numoutputws << "\n";
+  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
+
+  return;
 }
 
 void FilterEvents::createOutputWorkspacesTableSplitterCase() {
@@ -574,6 +691,9 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
   }
 
   // set up new workspaces
+  size_t numoutputws = m_targetWorkspaceIndexSet.size();
+  size_t wsgindex = 0;
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     std::stringstream wsname;
 
@@ -589,7 +709,46 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     boost::shared_ptr<EventWorkspace> optws =
         create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
-  }
+
+    // add to output workspace property
+    std::stringstream propertynamess;
+    if (wsgroup < 0) {
+      propertynamess << "OutputWorkspace_unfiltered";
+    } else {
+      propertynamess << "OutputWorkspace_" << wsgroup;
+    }
+
+    // Inserted this pair to map
+    m_wsNames.push_back(wsname.str());
+
+    // Set (property) to output workspace and set to ADS
+    declareProperty(Kernel::make_unique<
+                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                        propertynamess.str(), wsname.str(), Direction::Output),
+                    "Output");
+    setProperty(propertynamess.str(), optws);
+    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+
+    g_log.debug() << "Created output Workspace of group = " << wsgroup
+                  << "  Property Name = " << propertynamess.str()
+                  << " Workspace name = " << wsname.str()
+                  << " with Number of events = " << optws->getNumberEvents()
+                  << "\n";
+
+    // Update progress report
+    m_progress =
+        0.1 +
+        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    progress(m_progress, "Creating output workspace");
+    wsgindex += 1;
+  } // END-FOR (wsgroup)
+
+  // Set output and do debug report
+  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
+                 << numoutputws << "\n";
+  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
+
+  return;
 }
 
 /** Create a list of EventWorkspace for output

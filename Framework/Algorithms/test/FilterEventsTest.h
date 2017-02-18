@@ -566,7 +566,7 @@ public:
     filter.setProperty("OutputWorkspaceBaseName", "FilteredWS10");
     filter.setProperty("SplitterWorkspace", "Splitter10");
     filter.setProperty("RelativeTime", true);
-    filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("OutputWorkspaceIndexedFrom1", false);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -576,12 +576,16 @@ public:
     int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
-    TS_ASSERT(false);
+    std::vector<std::string> output_ws_vector =
+        filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < output_ws_vector.size(); ++i)
+      std::cout << "Output workspace " << i << ": " << output_ws_vector[i]
+                << "\n";
 
     // Workspace 0
     EventWorkspace_sptr filteredws0 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+            AnalysisDataService::Instance().retrieve("FilteredWS10_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
@@ -589,14 +593,14 @@ public:
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
+            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
@@ -616,8 +620,8 @@ public:
                     1.0E-4);
 
     // 5. Clean up
-    AnalysisDataService::Instance().remove("Test02");
-    AnalysisDataService::Instance().remove("Splitter02");
+    AnalysisDataService::Instance().remove("Test10");
+    AnalysisDataService::Instance().remove("Splitter10");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
@@ -647,7 +651,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void Xtest_tableSplitter() {
+  void Passed_test_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -680,11 +684,16 @@ public:
     int numsplittedws = filter.getProperty("NumberOutputWS");
     TS_ASSERT_EQUALS(numsplittedws, 3);
 
-    /**
+    std::vector<std::string> output_ws_vector =
+        filter.getProperty("OutputWorkspaceNames");
+    for (size_t i = 0; i < output_ws_vector.size(); ++i)
+      std::cout << "Output workspace " << i << ": " << output_ws_vector[i]
+                << "\n";
+
     // Workspace 0
     EventWorkspace_sptr filteredws0 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_1"));
+            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_A"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
@@ -692,14 +701,14 @@ public:
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
+            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_B"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<EventWorkspace>(
-            AnalysisDataService::Instance().retrieve("FilteredWS10_3"));
+            AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_C"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
 
@@ -719,14 +728,13 @@ public:
                     1.0E-4);
 
     // 5. Clean up
-    AnalysisDataService::Instance().remove("Test02");
-    AnalysisDataService::Instance().remove("Splitter02");
+    AnalysisDataService::Instance().remove("Test11");
+    AnalysisDataService::Instance().remove("TableSplitter1");
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
     for (size_t i = 0; i < outputwsnames.size(); ++i) {
       AnalysisDataService::Instance().remove(outputwsnames[i]);
     }
-    **/
 
     return;
   }
@@ -1040,31 +1048,31 @@ public:
     // Splitter 0: 0 ~ 3+ (first pulse)
     size_t row_index = 0;
     int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
-    int itarget = 0;
+    std::string itarget = "A";
     tablesplitter->appendRow();
     tablesplitter->cell<double>(row_index, 0) = static_cast<double>(runstart_i64) * 1.0E-9;
     tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t1) * 1.E-9;
-    tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+    tablesplitter->cell<std::string>(row_index, 2) = itarget;
 
     // Splitter 1: 3+ ~ 9+ (second pulse)
     ++ row_index;
     int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
-    itarget = 1;
+    itarget = "B";
     tablesplitter->appendRow();
     tablesplitter->cell<double>(row_index, 0) = static_cast<double>(t1) * 1.0E-9;
     tablesplitter->cell<double>(row_index, 1) = static_cast<double>(t2) * 1.E-9;
-    tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+    tablesplitter->cell<std::string>(row_index, 2) = itarget;
 
     // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
     int64_t lastT = t2;
     for (size_t i = 2; i < 5; i++) {
       ++ row_index;
-      itarget = 2;
+      itarget = "C";
       int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       tablesplitter->appendRow();
       tablesplitter->cell<double>(row_index, 0) = static_cast<double>(lastT) * 1.0E-9;
       tablesplitter->cell<double>(row_index, 1) = static_cast<double>(newT) * 1.E-9;
-      tablesplitter->cell<std::string>(row_index, 2) = std::to_string(itarget);
+      tablesplitter->cell<std::string>(row_index, 2) = itarget;
       lastT = newT;
     }
 
