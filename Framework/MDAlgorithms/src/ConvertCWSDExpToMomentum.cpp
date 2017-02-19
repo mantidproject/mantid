@@ -39,10 +39,8 @@ void ConvertCWSDExpToMomentum::init() {
                                                       Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
-  declareProperty(
-      make_unique<FileProperty>("InstrumentFilename", "",
-                                FileProperty::OptionalLoad, ".xml"));
- 
+  declareProperty(make_unique<FileProperty>(
+      "InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"));
 
   declareProperty(
       "DetectorSampleDistanceShift", 0.0,
@@ -625,7 +623,7 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
 
     // TODO/FIXME - This is not a nice solution for detector geometry
     std::string idffile = getPropertyValue("InstrumentFilename");
-    if (idffile.size() > 0){
+    if (idffile.size() > 0) {
       loader->setProperty("InstrumentFilename", idffile);
       loader->setProperty("DetectorGeometry", "512, 512");
     }
