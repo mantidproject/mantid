@@ -129,7 +129,7 @@ required for Mantid development.
 %files
 
 %changelog
-* Sat Feb 18 2017 Sturt Campbell <scampbell@bnl.gov>
+* Sat Feb 18 2017 Stuart Campbell <scampbell@bnl.gov>
 - Updated to use upstream sphinx-bootstrap-theme 
 
 * Wed Dec 21 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
