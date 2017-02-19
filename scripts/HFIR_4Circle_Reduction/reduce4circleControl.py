@@ -749,6 +749,7 @@ class CWSCDReductionControl(object):
         raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
+        print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
         array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
