@@ -100,19 +100,15 @@ public:
   }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
-  void createDirectory(Poco::Path path)
-  {
+  void createDirectory(Poco::Path path) {
     Poco::File file(path);
-    if (file.createDirectory())
-    {
+    if (file.createDirectory()) {
       m_directoriesToRemove.push_back(file);
     }
   }
 
-  void removeDirectories()
-  {
-    for (auto directory : m_directoriesToRemove)
-    {
+  void removeDirectories() {
+    for (auto directory : m_directoriesToRemove) {
       try {
         directory.remove(true);
       } catch (Poco::FileException &fe) {
@@ -125,7 +121,7 @@ public:
   void setUp() override {
     const std::string TEST_SUFFIX = "TEMPORARY_unitTest";
     m_originalInstDir =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
 
     // change the local download directory by adding a unittest subdirectory
     auto testDirectories = m_originalInstDir;
@@ -143,17 +139,20 @@ public:
       createDirectory(installInstrumentPath);
       testDirectories.back() = installInstrumentPath.toString();
     } catch (Poco::FileException &) {
-      std::cout << "Failed to change instrument directory continuing without, fine, just slower\n";
+      std::cout << "Failed to change instrument directory continuing without, "
+                   "fine, just slower\n";
     }
 
-    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(testDirectories);
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        testDirectories);
 
     auto test =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   }
 
   void tearDown() override {
-    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(m_originalInstDir);
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        m_originalInstDir);
     removeDirectories();
   }
 
@@ -163,7 +162,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  // These tests create some files, but they entire directories are created and 
+  // These tests create some files, but they entire directories are created and
   // removed in setup and teardown
   void test_exec() {
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.",
@@ -179,14 +178,13 @@ public:
     std::ofstream file;
     file.open(orphanedFilePath.toString().c_str());
     file.close();
-    
+
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.",
                       runDownloadInstrument(), 2);
 
     Poco::File orphanedFile(orphanedFilePath);
     TSM_ASSERT("The orphaned file was not deleted",
                orphanedFile.exists() == false);
-
   }
 
   int runDownloadInstrument() {

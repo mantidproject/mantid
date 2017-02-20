@@ -360,11 +360,12 @@ public:
 
   void TestSetInstrumentDirectory() {
 
-    auto originalDirectories = ConfigService::Instance().getInstrumentDirectories();
+    auto originalDirectories =
+        ConfigService::Instance().getInstrumentDirectories();
     std::vector<std::string> testDirectories;
     testDirectories.push_back("Test Directory 1");
     testDirectories.push_back("Test Directory 2");
-    ConfigService::Instance().setInstrumentDirectories(testDirectories); 
+    ConfigService::Instance().setInstrumentDirectories(testDirectories);
     auto readDirectories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_EQUALS(readDirectories.size(), testDirectories.size());
     TS_ASSERT_EQUALS(readDirectories[0], testDirectories[0]);

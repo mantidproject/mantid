@@ -208,7 +208,7 @@ public:
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
   /// Sets instrument directories
-  void setInstrumentDirectories(const std::vector<std::string>& directories);
+  void setInstrumentDirectories(const std::vector<std::string> &directories);
   /// Get instrument search directory
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
