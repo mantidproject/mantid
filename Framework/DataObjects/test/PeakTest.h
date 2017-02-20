@@ -265,15 +265,15 @@ public:
   }
 
   void test_getQLabFrame() {
-      Instrument_sptr inst =
-          ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-      Peak p(inst, 0, 1.5);
-      p.setQLabFrame(V3D(1, 1, 1));
-      auto q = p.getQLabFrame();
-      // should be the same
-      TS_ASSERT_DELTA(q[0], 1, 1e-5);
-      TS_ASSERT_DELTA(q[1], 1, 1e-5);
-      TS_ASSERT_DELTA(q[2], 1, 1e-5);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Peak p(inst, 0, 1.5);
+    p.setQLabFrame(V3D(1, 1, 1));
+    auto q = p.getQLabFrame();
+    // should be the same
+    TS_ASSERT_DELTA(q[0], 1, 1e-5);
+    TS_ASSERT_DELTA(q[1], 1, 1e-5);
+    TS_ASSERT_DELTA(q[2], 1, 1e-5);
   }
 
   //------------------------------------------------------------------------------------
@@ -391,7 +391,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const V3D& q) {
+    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const V3D &q) {
       // Compute expected direction
       const auto qBeam = q.scalar_prod(refBeamDir);
       const double norm_q = q.norm();
