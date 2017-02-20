@@ -230,8 +230,8 @@ class MainWindow(QtGui.QMainWindow):
                      # self.do_integrate_per_pt)  # integrate single peak
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_normalization)  # calculate the normalized data again
-        self.connect(self.ui.pushButton_fitGaussian, QtCore.SIGNAL('clicked()'),
-                     self.do_correct_peak_intensity)
+        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
+                     self.do_show_single_peak_integration)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -337,7 +337,6 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.tableWidget_peaksCalUB.setup()
         self.ui.tableWidget_ubMatrix.setup()
         self.ui.tableWidget_surveyTable.setup()
-        self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
         self.ui.tableWidget_ubInUse.setup()
         self.ui.tableWidget_kShift.setup()
@@ -1093,9 +1092,9 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_correct_peak_intensity(self):
-        """ Fit the each Pt's counts versus counts to calculate peak intensity
-        The assumption is that for each scan, from Pt 1 to last Pt, it measures a complete peak
+    def do_show_single_peak_integration(self):
+        """ show the details of integrating a single peak
+        by popping up a read-only dialog box
         :return:
         """
         # TODO/ISSUE/NOW - Consider to replace the following part by method plot_model_data
@@ -1365,140 +1364,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot the model
         self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
-
-        return
-
-    def do_integrate_per_pt(self):
-        """
-        Integrate and plot per Pt.
-        :return:
-        """
-        # VZ-FUTURE: consider to compare and merge with method do_plot_pt_peak()
-        # get experiment and scan number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanIntegratePeak])
-        if not status:
-            self.pop_one_button_dialog('Unable to integrate peak due to %s.' % ret_obj)
-            return
-        else:
-            exp_number, scan_number = ret_obj
-
-        normalization = str(self.ui.comboBox_ptCountType.currentText())
-        if normalization.count('Time') > 0:
-            norm_type = 'time'
-        elif normalization.count('Monitor') > 0:
-            norm_type = 'monitor'
-        else:
-            norm_type = ''
-
-        # get peak center (weighted)
-        status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
-        if status is False:
-            error_message = ret_obj
-            self.pop_one_button_dialog(error_message)
-            return
-        else:
-            this_peak_centre = ret_obj
-
-        # scale factor
-        try:
-            intensity_scale_factor = float(self.ui.lineEdit_scaleFactor.text())
-        except ValueError:
-            intensity_scale_factor = 1.
-
-        # calculate the raw/unmasked
-        status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
-                                                               scan=scan_number,
-                                                               peak_radius=1.0,
-                                                               peak_centre=this_peak_centre,
-                                                               merge_peaks=False,
-                                                               use_mask=False,
-                                                               normalization=norm_type,
-                                                               scale_factor=intensity_scale_factor)
-        # result due to error
-        if status is False:
-            error_message = ret_obj
-            self.pop_one_button_dialog(error_message)
-            return
-        else:
-            # unmasked process result
-            raw_pt_dict = ret_obj
-            assert isinstance(raw_pt_dict, dict), 'Returned Pt dict must be a dictionary'
-        # END-IF-ELSE
-
-        # get masked workspace
-        mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        if not mask_name.startswith('No Mask'):
-            status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
-                                                                   scan=scan_number,
-                                                                   peak_radius=1.0,
-                                                                   peak_centre=this_peak_centre,
-                                                                   merge_peaks=False,
-                                                                   use_mask=True,
-                                                                   mask_ws_name=mask_name,
-                                                                   normalization=norm_type,
-                                                                   scale_factor=intensity_scale_factor)
-
-            # result due to error
-            if status is False:
-                error_message = ret_obj
-                self.pop_one_button_dialog(error_message)
-                return
-            else:
-                # process result
-                masked_pt_dict = ret_obj
-                assert isinstance(masked_pt_dict, dict), 'Returned masked Pt dict must be a dictionary'
-        else:
-            masked_pt_dict = None
-
-        # clear table
-        if self.ui.tableWidget_peakIntegration.rowCount() > 0:
-            self.ui.tableWidget_peakIntegration.remove_all_rows()
-
-        # Append new lines
-        pt_list = sorted(raw_pt_dict.keys())
-        intensity_list = list()
-        for pt in pt_list:
-            raw_pt_intensity = raw_pt_dict[pt]
-            if masked_pt_dict is not None:
-                masked_pt_intensity = masked_pt_dict[pt]
-            else:
-                masked_pt_intensity = None
-            # END-IF
-
-            # plot masked intensity if it is defined
-            if masked_pt_intensity is None:
-                intensity_list.append(raw_pt_intensity)
-            else:
-                intensity_list.append(masked_pt_intensity)
-            # intensity_list.append((raw_pt_intensity, masked_pt_intensity))
-            status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, raw_pt_intensity, masked_pt_intensity)
-            if not status:
-                error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
-                self.pop_one_button_dialog(error_msg)
-        # END-FOR: pt
-
-        # Set up the experiment information to table
-        self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
-
-        # calculate the intensity with masked or raw (if mask is not defined)
-        info_text = ''
-        if masked_pt_dict is None:
-            simple_peak_intensity = self.ui.tableWidget_peakIntegration.sum_raw_intensity()
-            info_text += 'Simple summation of raw counts'
-        else:
-            simple_peak_intensity = self.ui.tableWidget_peakIntegration.sum_masked_intensity()
-            info_text += 'Simple summation of counts masked by {0}'.format(mask_name)
-        self.ui.lineEdit_rawSinglePeakIntensity.setText(str(simple_peak_intensity))
-
-        info_text += ';\nNormalized by {0}'.format(norm_type)
-        self.ui.label_integrationInformation.setText(info_text)
-
-        # Clear previous line and plot the Pt.
-        self.ui.graphicsView_integratedPeakView.reset()
-        x_array = numpy.array(pt_list)
-        y_array = numpy.array(intensity_list)
-        self.ui.graphicsView_integratedPeakView.plot_raw_data(x_array, y_array)
 
         return
 
