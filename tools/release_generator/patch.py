@@ -80,7 +80,7 @@ def getInfo(number, oauth):
 
         return dict(
             number = int(json['number']),
-            url = json['url'],
+            url = json['html_url'],
             title = json['title'].strip()
         )
 
