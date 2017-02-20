@@ -10,7 +10,6 @@
 
 namespace Mantid {
 namespace API {
-class ExperimentInfo;
 
 /** A "spectrum" is an object that holds the data for a particular spectrum,
  * in particular:
@@ -86,6 +85,7 @@ public:
   void setDetectorIDs(std::set<detid_t> &&detIDs);
 
   bool hasDetectorID(const detid_t detID) const;
+  std::set<detid_t> &getDetectorIDs();
   const std::set<detid_t> &getDetectorIDs() const;
 
   void clearDetectorIDs();
@@ -240,8 +240,6 @@ public:
     mutableHistogramRef().setSharedE(e);
   }
 
-  void setExperimentInfo(ExperimentInfo *experimentInfo, const size_t index);
-
 protected:
   virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
   virtual void checkWorksWithPoints() const {}
@@ -249,19 +247,14 @@ protected:
 
   // Copy and move are not public since this is an abstract class, but protected
   // such that derived classes can implement copy and move.
-  ISpectrum(const ISpectrum &other);
-  ISpectrum(ISpectrum &&other);
-  ISpectrum &operator=(const ISpectrum &other);
-  ISpectrum &operator=(ISpectrum &&other);
+  ISpectrum(const ISpectrum &) = default;
+  ISpectrum(ISpectrum &&) = default;
+  ISpectrum &operator=(const ISpectrum &) = default;
+  ISpectrum &operator=(ISpectrum &&) = default;
 
 private:
   virtual const HistogramData::Histogram &histogramRef() const = 0;
   virtual HistogramData::Histogram &mutableHistogramRef() = 0;
-
-  void updateExperimentInfo() const;
-  ExperimentInfo *m_experimentInfo{nullptr};
-  // The default value is meaningless. This will always be set before use.
-  size_t m_index{0};
 
   /// The spectrum number of this spectrum
   specnum_t m_specNo{0};

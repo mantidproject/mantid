@@ -1,4 +1,3 @@
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -25,7 +24,7 @@ class StateConvertToQTest(unittest.TestCase):
                            "q_resolution_a2": 2., "q_resolution_h1": 1., "q_resolution_h2": 2., "q_resolution_w1": 1.,
                            "q_resolution_w2": 2.}
 
-        for key, value in list(default_entries.items()):
+        for key, value in default_entries.items():
             if key in convert_to_q_entries:
                 value = convert_to_q_entries[key]
             if value is not None:  # If the value is None, then don't set it

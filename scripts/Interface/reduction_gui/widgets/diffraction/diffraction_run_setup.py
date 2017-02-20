@@ -173,7 +173,7 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
-        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-:]*'))
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
 
         self._content.calfile_edit.setText(state.calibfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
@@ -246,14 +246,11 @@ class RunSetupWidget(BaseWidget):
         """
         s = RunSetupScript(self._instrument_name)
 
-        s.runnumbers = str(self._content.runnumbers_edit.text())
+        s.runnumbers = self._content.runnumbers_edit.text()
         rtup = self.validateIntegerList(s.runnumbers)
         isvalid = rtup[0]
         if isvalid is False:
             raise NotImplementedError("Run number error @ %s" % (rtup[1]))
-        else:
-            # s.runnumbers = rtup[2]
-            pass
 
         s.calibfilename = self._content.calfile_edit.text()
         s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
@@ -377,16 +374,11 @@ class RunSetupWidget(BaseWidget):
 
     def validateIntegerList(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
-        Allowed: a, b, c-d, e, f, g:h
-        and replace ':' by ':'
-        :return: 3-tuple: state/error message/new integer list string
+        Allowed: a, b, c-d, e, f
         """
         intliststring = str(intliststring)
         if intliststring == "":
-            return True, "", intliststring
-
-        # replace ':' by '-'
-        intliststring = intliststring.replace(':', '-')
+            return (True, "")
 
         # 1. Split by ","
         termlevel0s = intliststring.split(",")
@@ -400,11 +392,9 @@ class RunSetupWidget(BaseWidget):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        err_msg = 'String {0} cannot be converted to an integer properly.'.format(valuestr)
-                        return False, err_msg, ''
+                        return (False, valuestr)
                 except ValueError:
-                    err_msg = 'String {0} cannot be converted to an integer.'.format(valuestr)
-                    return False, err_msg, ''
+                    return (False, valuestr)
 
             elif numdashes == 1:
                 # Integer range
@@ -419,10 +409,10 @@ class RunSetupWidget(BaseWidget):
                 # ENDFOR
 
             else:
-                return False, level0term, intliststring
+                return (False, level0term)
         # ENDFOR
 
-        return True, '', intliststring
+        return (True, "")
 
     def _overrideemptyrun_clicked(self):
         """ Handling event if overriding emptry run

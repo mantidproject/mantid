@@ -2,10 +2,9 @@
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -148,7 +147,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
 
   // Perform Sanity Validation before creating workspace
   size_t checkIndex = 0;
-  int checkSpecNo = inputWS->getSpectrum(checkIndex).getSpectrumNo();
+  int checkSpecNo = inputWS->getDetector(checkIndex)->getID();
   auto checkSpecIter =
       std::find(spectraColumn.begin(), spectraColumn.end(), checkSpecNo);
   if (checkSpecIter != spectraColumn.end()) {

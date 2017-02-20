@@ -1,12 +1,13 @@
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
+#include "MantidKernel/VectorHelper.h"
 
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */
@@ -58,8 +59,9 @@ void NormaliseVanadium::exec() {
   const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If sample not at origin, shift cached positions.
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  double L1 = spectrumInfo.l1();
+  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
+  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
+  double L1 = pos.norm();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -77,15 +79,28 @@ void NormaliseVanadium::exec() {
     const auto &Yin = inSpec.y();
     const auto &Ein = inSpec.e();
 
-    // If no detector is found, skip onto the next spectrum
-    if (!spectrumInfo.hasDetectors(i))
+    // Get detector position
+    IDetector_const_sptr det;
+    try {
+      det = m_inputWS->getDetector(i);
+    } catch (Exception::NotFoundError &) {
+      // Catch if no detector. Next line tests whether this happened - test
+      // placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a
+      // catch
+      // in an openmp block.
+    }
+    // If no detector found, skip onto the next spectrum
+    if (!det)
       continue;
 
     // This is the scattered beam direction
-    double L2 = spectrumInfo.l2(i);
+    Instrument_const_sptr inst = m_inputWS->getInstrument();
+    V3D dir = det->getPos() - samplePos;
+    double L2 = dir.norm();
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = spectrumInfo.twoTheta(i);
+    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
 
     Mantid::Kernel::Units::Wavelength wl;
     auto timeflight = inSpec.points();

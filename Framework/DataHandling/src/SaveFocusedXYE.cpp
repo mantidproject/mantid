@@ -82,19 +82,20 @@ void SaveFocusedXYE::exec() {
   const bool append = getProperty("Append");
   const bool headers = getProperty("IncludeHeader");
 
-  const int startingbank = getProperty("StartAtBankNumber");
+  int startingbank = getProperty("StartAtBankNumber");
   if (startingbank < 0) {
     g_log.error() << "Starting bank number cannot be less than 0. \n";
     throw std::invalid_argument("Incorrect starting bank number");
   }
-  const bool split = getProperty("SplitFiles");
+  bool split = getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-  std::ios_base::openmode mode =
-      (append ? (std::ios_base::out | std::ios_base::app) : std::ios_base::out);
+  using std::ios_base;
+  ios_base::openmode mode =
+      (append ? (ios_base::out | ios_base::app) : ios_base::out);
 
   m_comment = "#";
-  const std::string headerType = getProperty("Format");
+  std::string headerType = getProperty("Format");
   if (headerType == "XYE") {
     m_headerType = XYE;
   } else if (headerType == "MAUD") {
@@ -110,9 +111,9 @@ void SaveFocusedXYE::exec() {
 
   Progress progress(this, 0.0, 1.0, nHist);
   for (size_t i = 0; i < nHist; i++) {
-    const auto &X = inputWS->x(i);
-    const auto &Y = inputWS->y(i);
-    const auto &E = inputWS->e(i);
+    const MantidVec &X = inputWS->readX(i);
+    const MantidVec &Y = inputWS->readY(i);
+    const MantidVec &E = inputWS->readE(i);
 
     double l1 = 0;
     double l2 = 0;

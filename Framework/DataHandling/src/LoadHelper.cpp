@@ -4,7 +4,6 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -103,6 +102,25 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
                                             wavelength * 1e-10); // m/s
 
   return distance / velocity;
+}
+
+double LoadHelper::getL1(const API::MatrixWorkspace_sptr &workspace) {
+  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
+  Geometry::IComponent_const_sptr sample = instrument->getSample();
+  double l1 = instrument->getSource()->getDistance(*sample);
+  return l1;
+}
+
+double LoadHelper::getL2(const API::MatrixWorkspace_sptr &workspace,
+                         int detId) {
+  // Get a pointer to the instrument contained in the workspace
+  Geometry::Instrument_const_sptr instrument = workspace->getInstrument();
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IComponent_const_sptr sample = instrument->getSample();
+  // Get the sample-detector distance for this detector (in metres)
+  double l2 =
+      workspace->getDetector(detId)->getPos().distance(sample->getPos());
+  return l2;
 }
 
 /*
@@ -490,11 +508,16 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
                                const V3D &newPos) {
 
   try {
+
     Geometry::Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    ws->mutableDetectorInfo().setPosition(*component, newPos);
+    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
+    // newTheta << "\n";
+    Geometry::ParameterMap &pmap = ws->instrumentParameters();
+    Geometry::ComponentHelper::moveComponent(
+        *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +
@@ -510,11 +533,16 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
                                  const Kernel::Quat &rot) {
 
   try {
+
     Geometry::Instrument_const_sptr instrument = ws->getInstrument();
     Geometry::IComponent_const_sptr component =
         instrument->getComponentByName(componentName);
 
-    ws->mutableDetectorInfo().setRotation(*component, rot);
+    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
+    // newTheta << "\n";
+    Geometry::ParameterMap &pmap = ws->instrumentParameters();
+    Geometry::ComponentHelper::rotateComponent(
+        *component, pmap, rot, Geometry::ComponentHelper::Absolute);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

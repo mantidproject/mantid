@@ -119,7 +119,7 @@ def addRunToStore(parts, run_store):
     #move through the file like sample_sans,99630,output_as,99630, ...
     for i in range(0, nparts, 2):
         role = parts[i]
-        if role in list(inputdata.keys()):
+        if role in inputdata.keys():
             inputdata[parts[i]] = parts[i+1]
         else:
             issueWarning('You seem to have specified an invalid key in the SANSBatch file. The key was ' + str(role))

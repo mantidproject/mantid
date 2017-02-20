@@ -38,7 +38,7 @@ public:
     fout.close();
     testerDSP.setPropertyValue("Filename", dspaceFile);
     testerDSP.setPropertyValue("OutputWorkspace", "ines_offsets");
-    testerDSP.execute();
+    TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
     TS_ASSERT(testerDSP.isExecuted());
 
     // Get the offsets out

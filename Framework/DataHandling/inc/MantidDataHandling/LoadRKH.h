@@ -5,7 +5,6 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
@@ -93,13 +92,6 @@ private:
 
   /// Check if we the data set stores an X-Error values
   bool hasXerror(std::ifstream &stream);
-
-  /// Read data from the RKH file
-  void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
-                         HistogramData::Points &x, HistogramData::Counts &y,
-                         HistogramData::CountStandardDeviations &ye,
-                         HistogramData::PointStandardDeviations &xe,
-                         API::Progress &prog, bool readXError = false);
 };
 }
 }

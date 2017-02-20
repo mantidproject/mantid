@@ -1,21 +1,30 @@
 #ifndef WBVMEDIANTESTTEST_H_
 #define WBVMEDIANTESTTEST_H_
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidAlgorithms/MedianDetectorTest.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/MedianDetectorTest.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <cmath>
+#include <sstream>
+#include <fstream>
+#include <ios>
+#include <string>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
@@ -99,10 +108,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             5, 10, 1);
 
-    const auto &spectrumInfo = ws->spectrumInfo();
-
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      ws->dataY(i)[0] = 1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0));
+      ws->dataY(i)[0] =
+          std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTSolidAngle", ws);
 
@@ -134,11 +142,9 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
             5, 10, 1);
 
-    const auto &spectrumInfo = ws->spectrumInfo();
-
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
       ws->dataY(i)[0] =
-          std::floor(1e9 * spectrumInfo.detector(i).solidAngle(V3D(0, 0, 0)));
+          std::floor(1e9 * ws->getDetector(i)->solidAngle(V3D(0, 0, 0)));
     }
     AnalysisDataService::Instance().addOrReplace("MDTLevelsUp", ws);
 

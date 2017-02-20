@@ -75,17 +75,10 @@ public:
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
     auto options = presenter.getTransmissionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 11);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "MonitorIntegrationWavelengthMin=4");
     TS_ASSERT_EQUALS(optionsVec[2], "MonitorIntegrationWavelengthMax=10");
@@ -95,8 +88,6 @@ public:
     TS_ASSERT_EQUALS(optionsVec[6], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[7], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[8], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[9], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[10], "EndOverlap=12");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
@@ -162,17 +153,10 @@ public:
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));
-    EXPECT_CALL(mockView, getStartOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("10"));
-    EXPECT_CALL(mockView, getEndOverlap())
-        .Times(Exactly(1))
-        .WillOnce(Return("12"));
     auto options = presenter.getReductionOptions();
 
     std::vector<std::string> optionsVec;
     boost::split(optionsVec, options, split_q());
-    TS_ASSERT_EQUALS(optionsVec.size(), 22);
     TS_ASSERT_EQUALS(optionsVec[0], "AnalysisMode=MultiDetectorAnalysis");
     TS_ASSERT_EQUALS(optionsVec[1], "CRho=\"2.5,0.4,1.1\"");
     TS_ASSERT_EQUALS(optionsVec[2], "CAlpha=\"0.6,0.9,1.2\"");
@@ -191,11 +175,9 @@ public:
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
     TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
-    TS_ASSERT_EQUALS(optionsVec[18], "StartOverlap=10");
-    TS_ASSERT_EQUALS(optionsVec[19], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[20],
+    TS_ASSERT_EQUALS(optionsVec[18],
                      "FirstTransmissionRun=TRANS_INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[21],
+    TS_ASSERT_EQUALS(optionsVec[19],
                      "SecondTransmissionRun=TRANS_INTER00013464");
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_INTER00013463"));
@@ -258,7 +240,7 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
 
-    std::vector<double> defaults = {1., 4.0, 10., 17., 18., 1.5, 17., 2.0};
+    std::vector<double> defaults = {1., 4.0, 10., 15., 17., 1.0, 17., 2.0};
 
     EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);

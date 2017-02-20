@@ -26,12 +26,6 @@ void ColorMapEditorPanel::setUpPanel() {
 
   QObject::connect(this, SIGNAL(hidePopUpWindow()), this,
                    SLOT(onHidePopUpWindow()), Qt::QueuedConnection);
-
-#ifdef __APPLE__
-  // On macOS the dialogs appear behind everything by default. Need to find
-  // a better fix that this...
-  setModal(true);
-#endif
 }
 
 /**

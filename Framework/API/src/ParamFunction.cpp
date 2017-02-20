@@ -324,7 +324,6 @@ bool ParamFunction::removeTie(size_t i) {
     unfix(i);
     return true;
   }
-  unfix(i);
   return false;
 }
 
@@ -346,7 +345,8 @@ ParameterTie *ParamFunction::getTie(size_t i) const {
 /** Remove all ties
  */
 void ParamFunction::clearTies() {
-  for (size_t i = 0; i < nParams(); ++i) {
+  for (auto &tie : m_ties) {
+    size_t i = getParameterIndex(*tie);
     unfix(i);
   }
   m_ties.clear();

@@ -31,10 +31,6 @@ using namespace MantidQt::MantidWidgets;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-namespace {
-Mantid::Kernel::Logger g_log("Reflectometry GUI");
-}
-
 /** Constructor
 * @param mainView :: [input] The view we're managing
 * @param progressableView :: [input] The view reporting progress
@@ -121,7 +117,7 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     transfer();
     break;
   case IReflRunsTabPresenter::InstrumentChangedFlag:
-    changeInstrument();
+    m_mainPresenter->setInstrumentName(m_view->getSearchInstrument());
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
     pushCommands();
@@ -451,17 +447,6 @@ std::string
 ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_mainPresenter->runPythonAlgorithm(pythonCode);
-}
-
-/** Changes the current instrument in the data processor widget. Also updates
- * the config service and prints an information message
-*/
-void ReflRunsTabPresenter::changeInstrument() {
-  const std::string instrument = m_view->getSearchInstrument();
-  m_mainPresenter->setInstrumentName(instrument);
-  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
-                                                      instrument);
-  g_log.information() << "Instrument changed to " << instrument;
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

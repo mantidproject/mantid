@@ -53,8 +53,6 @@ public:
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
-  /// Get the window type as a string
-  std::string getWindowType() override { return "Instrument"; }
 
 public slots:
   void closeSafely();

@@ -1,13 +1,12 @@
 #include "MantidDataHandling/LoadMLZ.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
@@ -24,8 +23,6 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
-using HistogramData::BinEdges;
-using HistogramData::Counts;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMLZ)
@@ -203,8 +200,8 @@ void LoadMLZ::initWorkSpace(
  */
 void LoadMLZ::initInstrumentSpecific() {
   // Read data from IDF: distance source-sample and distance sample-detectors
-  m_l1 = m_localWorkspace->spectrumInfo().l1();
-  m_l2 = m_localWorkspace->spectrumInfo().l2(1);
+  m_l1 = m_mlzloader.getL1(m_localWorkspace);
+  m_l2 = m_mlzloader.getL2(m_localWorkspace);
 
   g_log.debug() << "L1: " << m_l1 << ", L2: " << m_l2 << '\n';
 }
@@ -367,17 +364,25 @@ void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   }
 
   // Assign calculated bins to first X axis
-  BinEdges edges(std::move(detectorTofBins));
+  m_localWorkspace->dataX(0)
+      .assign(detectorTofBins.begin(), detectorTofBins.end());
 
   Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+      if (spec > 0) {
+        // just copy the time binning axis to every spectra
+        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
+      }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
 
-      m_localWorkspace->setHistogram(
-          spec, edges, Counts(data_p, data_p + m_numberOfChannels));
+      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+      // Assign Error
+      MantidVec &E = m_localWorkspace->dataE(spec);
+      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+                     LoadMLZ::calculateError);
 
       ++spec;
       progress.report();

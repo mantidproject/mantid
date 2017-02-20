@@ -16,11 +16,9 @@ Improvements
 
 - :ref:`LoadILLTOF <algm-LoadILLTOF>` has been upgraded to version 2. The new version loads the TOF axis as defined by the 'time_of_flight' field in the NeXus file. Consequently, the *FilenameVanadium* and *WorkspaceVanadium* input properties were removed and no 'EPP' entry is added to the sample logs anymore.
 
-- The Debye-Waller factor correction was applied incorrectly to the vanadium data in :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`. This, as well as too pessimistic error evaluation in the algorithm have been fixed.
+- Overly pessimistic error calculation in :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>` have been fixed.
 
 - A new input property *Temperature* has been added to :ref:`ComputeCalibrationCoefVan <algm-ComputeCalibrationCoefVan>`.
-
-- :ref:`PyChop` has been updated to reflect physical changes to LET's choppers. It will now also not output zero flux Ei reps for LET and Merlin in multi-rep mode. An additional tab is created if the "Instrument Scientist Mode" option is selected which shows the time widths at the detector due to the moderator and choppers for each calculation.
 
 New features
 ------------

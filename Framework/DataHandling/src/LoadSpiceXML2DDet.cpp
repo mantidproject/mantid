@@ -521,25 +521,27 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // scan per column
         for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
           double counts = atof(veccounts[j_row].c_str());
-          size_t rowIndex, columnIndex;
 
           if (loadinstrument) {
             // the detector ID and ws index are set up in column-major too!
-            rowIndex = i_col * numpixelx + j_row;
-            columnIndex = 0;
+            size_t wsindex = i_col * numpixelx + j_row;
+            //  size_t wsindex = j_row * numpixely + icol;
+            // size_t wsindex = icol * numpixelx + j_row;
+            outws->dataX(wsindex)[0] = static_cast<double>(wsindex);
+            outws->dataY(wsindex)[0] = counts;
+            if (counts > 0)
+              outws->dataE(wsindex)[0] = sqrt(counts);
+            else
+              outws->dataE(wsindex)[0] = 1.0;
+
           } else {
-            rowIndex = j_row;
-            columnIndex = i_col;
+            outws->dataX(j_row)[i_col] = static_cast<double>(j_row);
+            outws->dataY(j_row)[i_col] = counts;
+            if (counts > 0)
+              outws->dataE(j_row)[i_col] = sqrt(counts);
+            else
+              outws->dataE(j_row)[i_col] = 1.0;
           }
-
-          outws->mutableX(rowIndex)[columnIndex] =
-              static_cast<double>(columnIndex);
-          outws->mutableY(rowIndex)[columnIndex] = counts;
-
-          if (counts > 0)
-            outws->mutableE(rowIndex)[columnIndex] = sqrt(counts);
-          else
-            outws->mutableE(rowIndex)[columnIndex] = 1.0;
 
           // record max count
           if (counts > max_counts) {
@@ -711,9 +713,8 @@ void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
   size_t numspec = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     double ki = 2. * M_PI / wavelength;
-    auto &x = dataws->mutableX(iws);
-    x[0] = ki;
-    x[1] = ki + 0.00001;
+    dataws->dataX(iws)[0] = ki;
+    dataws->dataX(iws)[1] = ki + 0.00001;
   }
 
   dataws->getAxis(0)->setUnit("Momentum");

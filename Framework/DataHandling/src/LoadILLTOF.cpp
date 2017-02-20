@@ -3,7 +3,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -254,12 +253,12 @@ void LoadILLTOF::initWorkSpace(NeXus::NXEntry &entry,
  *
  */
 void LoadILLTOF::initInstrumentSpecific() {
-  m_l1 = m_localWorkspace->spectrumInfo().l1();
+  m_l1 = m_loader.getL1(m_localWorkspace);
   // this will be mainly for IN5 (flat PSD detector)
   m_l2 = m_loader.getInstrumentProperty(m_localWorkspace, "l2");
   if (m_l2 == EMPTY_DBL()) {
     g_log.debug("Calculating L2 from the IDF.");
-    m_l2 = m_localWorkspace->spectrumInfo().l2(1);
+    m_l2 = m_loader.getL2(m_localWorkspace);
   }
 }
 

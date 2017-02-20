@@ -438,7 +438,6 @@ set ( TEST_FILES
 	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
-        LoadSpecTest.h
 	LoadSPETest.h
         LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
@@ -476,7 +475,7 @@ set ( TEST_FILES
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFITSTest.h
-	SaveFocusedXYETest.h
+	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h

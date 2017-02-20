@@ -54,19 +54,14 @@ double MantidMatrixModel::data(int row, int col) const {
   Mantid::Kernel::ReadLock _lock(*m_workspace);
 
   double val;
-  switch (m_type) {
-  case X:
-    val = m_workspace->x(row + m_startRow)[col];
-    break;
-  case Y:
-    val = m_workspace->y(row + m_startRow)[col];
-    break;
-  case E:
-    val = m_workspace->e(row + m_startRow)[col];
-    break;
-  default:
-    val = m_workspace->dx(row + m_startRow)[col];
-    break;
+  if (m_type == X) {
+    val = m_workspace->readX(row + m_startRow)[col];
+  } else if (m_type == Y) {
+    val = m_workspace->readY(row + m_startRow)[col];
+  } else if (m_type == E) {
+    val = m_workspace->readE(row + m_startRow)[col];
+  } else {
+    val = m_workspace->readDx(row + m_startRow)[col];
   }
   return val;
 }
@@ -147,7 +142,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
       // get bin centre value
       double binCentreValue;
-      const auto &xVec = m_workspace->x(0);
+      const Mantid::MantidVec xVec = m_workspace->readX(0);
       if (m_workspace->isHistogramData()) {
         if ((section + 1) >= static_cast<int>(xVec.size()))
           return section;

@@ -3,7 +3,6 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/Timer.h"
 #include <boost/format.hpp>
 #include <cxxtest/TestSuite.h>
@@ -176,10 +175,9 @@ private:
 
     const double A1 = 1;
     std::string componentLinks = "";
-
-    const auto &spectrumInfo = ws->spectrumInfo();
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
+      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+
       // A0, will vary with workspace index, from detector to detector, A1 is
       // constant = 1.
       componentLinks +=
@@ -193,7 +191,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     detector.getName() % wsIndex % A1);
+                     det->getName() % wsIndex % A1);
     }
 
     // Create a parameter file, with a root equation that will apply to all
@@ -230,10 +228,8 @@ private:
     const std::string instrumentName = ws->getInstrument()->getName();
 
     std::string componentLinks = "";
-    const auto &spectrumInfo = ws->spectrumInfo();
-
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
+      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
 
       // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
       componentLinks +=
@@ -243,7 +239,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     detector.getName() % wsIndex);
+                     det->getName() % wsIndex);
     }
 
     // Create a parameter file, with a root equation that will apply to all

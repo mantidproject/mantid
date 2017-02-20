@@ -58,9 +58,9 @@ components are aligned.
 Usage
 -----
 
-**Example - Align the Y and Z position of bank26 in POWGEN:**
+**Example - Align the X and Z position of bank26 in POWGEN:**
 
-.. testcode:: position
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
             CalFilename="PG3_golden.cal",
@@ -74,22 +74,21 @@ Usage
       AlignComponents(CalibrationTable="PG3_cal",
               Workspace=ws,
 	      MaskWorkspace="PG3_mask",
-	      Yposition=True, ZPosition=True,
+	      Xposition=True, ZPosition=True,
               ComponentList=component)
       ws=mtd['ws']
-      final_pos = ws.getInstrument().getComponentByName(component).getPos()
-      print "Final position is [{:.2f}.{:.2f},{:.2f}]".format(final_pos[0],final_pos[1],final_pos[2])
+      print "Final position is",ws.getInstrument().getComponentByName(component).getPos()
 
 Output:
 
-.. testoutput:: position
+.. code-block:: none
 
     Start position is [1.54436,0.863271,-1.9297]
-    Final position is [1.54.0.85,-1.95]
+    Final position is [1.50591,0.863271,-1.92734]
 
-**Example - Align the Y rotation of bank25 and bank46 in POWGEN:**
+**Example - Align the Y rotation of bank26 and bank46 in POWGEN:**
 
-.. testcode:: rotation
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -98,10 +97,10 @@ Output:
 	    MakeMaskWorkspace=True,
 	    WorkspaceName="PG3")
       ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
-      components="bank25,bank46"
-      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
+      components="bank26,bank46"
+      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Start bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
+      print "Start bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
       print "Start bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
       AlignComponents(CalibrationTable="PG3_cal",
 	      Workspace=ws,
@@ -110,23 +109,23 @@ Output:
               AlphaRotation=True,
 	      ComponentList=components)
       ws=mtd['ws']
-      bank25Rot = ws.getInstrument().getComponentByName("bank25").getRotation().getEulerAngles()
+      bank26Rot = ws.getInstrument().getComponentByName("bank26").getRotation().getEulerAngles()
       bank46Rot = ws.getInstrument().getComponentByName("bank46").getRotation().getEulerAngles()
-      print "Final bank25 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank25Rot[0], bank25Rot[1], bank25Rot[2])
-      print "Final bank46 rotation is [{:.2f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
+      print "Final bank26 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank26Rot[0], bank26Rot[1], bank26Rot[2])
+      print "Final bank46 rotation is [{:.3f}.{:.3f},{:.3f}]".format(bank46Rot[0], bank46Rot[1], bank46Rot[2])
 
 Output:
 
-.. testoutput:: rotation
+.. code-block:: none
 
-      Start bank25 rotation is [-24.089.0.179,9.030]
+      Start bank26 rotation is [-24.061.0.120,18.016]
       Start bank46 rotation is [-41.092.0.061,17.795]
-      Final bank25 rotation is [-24.089.0.179,9.030]
-      Final bank46 rotation is [-37.40.0.061,17.795]
+      Final bank26 rotation is [-25.226.0.120,18.016]
+      Final bank46 rotation is [-37.397.0.061,17.795]
 
 **Example - Align sample position in POWGEN:**
 
-.. testcode:: sample
+.. code-block:: python
 
       LoadCalFile(InstrumentName="PG3",
 	    CalFilename="PG3_golden.cal",
@@ -144,14 +143,14 @@ Output:
             MaskWorkspace="PG3_mask",
             FitSamplePosition=True,
 	    Zposition=True)
-      print "Final sample position is {:.3f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
+      print "Final sample position is {:.5f}".format(mtd['ws'].getInstrument().getSample().getPos().getZ())
 
 Output:
 
-.. testoutput:: sample
+.. code-block:: none
 
       Start sample position is 0.0
-      Final sample position is 0.028
+      Final sample position is 0.02826
 
 .. categories::
 

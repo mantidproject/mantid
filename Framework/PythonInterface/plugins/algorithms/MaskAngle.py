@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+﻿#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi
 import mantid.kernel

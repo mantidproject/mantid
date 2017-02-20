@@ -22,7 +22,7 @@ public:
 
   SpectraAxisTest() {
     ws = new WorkspaceTester;
-    ws->initialize(5, 1, 1);
+    ws->init(5, 1, 1);
     spectraAxis = new SpectraAxis(ws);
     spectraAxis->title() = "A spectra axis";
   }

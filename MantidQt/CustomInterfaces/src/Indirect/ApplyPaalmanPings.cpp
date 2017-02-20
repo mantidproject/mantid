@@ -34,8 +34,6 @@ ApplyPaalmanPings::ApplyPaalmanPings(QWidget *parent) : CorrectionsTab(parent) {
           SLOT(updateContainer()));
   connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
-  connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this,
-          SLOT(updateContainer()));
   connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this,
           SLOT(updateContainer()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
@@ -124,7 +122,7 @@ void ApplyPaalmanPings::updateContainer() {
     scaleAlg->execute();
 
     const auto sampleValid = m_uiForm.dsSample->isValid();
-    if (sampleValid && m_uiForm.ckRebinContainer->isChecked()) {
+    if (sampleValid) {
       IAlgorithm_sptr rebin =
           AlgorithmManager::Instance().create("RebinToWorkspace");
       rebin->initialize();
@@ -133,7 +131,7 @@ void ApplyPaalmanPings::updateContainer() {
       rebin->setProperty("WorkspaceToMatch", m_sampleWorkspaceName);
       rebin->setProperty("OutputWorkspace", m_containerWorkspaceName);
       rebin->execute();
-    } else if (!sampleValid) {
+    } else {
       // Sample was not valid so do not rebin
       m_uiForm.ppPreview->removeSpectrum("Container");
       return;
@@ -178,15 +176,17 @@ void ApplyPaalmanPings::run() {
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(cloneName);
     // Check for same binning across sample and container
     if (!checkWorkspaceBinningMatches(sampleWs, canClone)) {
-      const char *text = "Binning on sample and container does not match."
-                         "Would you like to enable rebinning of the container?";
+      const char *text =
+          "Binning on sample and container does not match."
+          "Would you like to rebin the container to match the sample?";
 
       int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 
       if (result == QMessageBox::Yes) {
-        m_uiForm.ckRebinContainer->setChecked(true);
+        addRebinStep(QString::fromStdString(canName),
+                     QString::fromStdString(m_sampleWorkspaceName));
       } else {
         m_batchAlgoRunner->clearQueue();
         g_log.error("Cannot apply absorption corrections "
@@ -207,8 +207,6 @@ void ApplyPaalmanPings::run() {
       const double canShiftFactor = m_uiForm.spCanShift->value();
       applyCorrAlg->setProperty("canShiftFactor", canShiftFactor);
     }
-    const bool rebinContainer = m_uiForm.ckRebinContainer->isChecked();
-    applyCorrAlg->setProperty("RebinCanToSample", rebinContainer);
   }
 
   if (useCorrections) {
@@ -318,6 +316,28 @@ void ApplyPaalmanPings::run() {
   m_pythonExportWsName = outputWsName.toStdString();
   // m_containerWorkspaceName = m_uiForm.dsContainer->getCurrentDataName();
   // updateContainer();
+}
+
+/**
+* Adds a rebin to workspace step to the calculation for when using a sample and
+*container that
+* have different binning.
+*
+* @param toRebin
+* @param toMatch
+*/
+void ApplyPaalmanPings::addRebinStep(QString toRebin, QString toMatch) {
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
+  rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
+
+  IAlgorithm_sptr rebinAlg =
+      AlgorithmManager::Instance().create("RebinToWorkspace");
+  rebinAlg->initialize();
+
+  rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
+  rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
+
+  m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
 }
 
 /**

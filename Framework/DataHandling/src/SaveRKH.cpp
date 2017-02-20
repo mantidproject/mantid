@@ -7,8 +7,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/DateTimeFormatter.h>
 #include <Poco/LocalDateTime.h>
+#include <Poco/DateTimeFormatter.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -139,9 +139,9 @@ void SaveRKH::write1D() {
   const size_t nbins = m_workspace->blocksize();
 
   for (size_t i = 0; i < nhist; ++i) {
-    const auto &xdata = m_workspace->x(i);
-    const auto &ydata = m_workspace->y(i);
-    const auto &edata = m_workspace->e(i);
+    const auto &xdata = m_workspace->readX(i);
+    const auto &ydata = m_workspace->readY(i);
+    const auto &edata = m_workspace->readE(i);
 
     specnum_t specid(0);
     try {
@@ -199,18 +199,20 @@ void SaveRKH::write2D() {
   }
 
   // Now the data
-  const size_t num_hist = m_workspace->getNumberHistograms();
-  m_outRKH << "\n   " << m_workspace->blocksize() << "   " << num_hist << "  "
-           << std::scientific << std::setprecision(12) << 1.0 << "\n";
+  const size_t xSize = m_workspace->blocksize();
+  const size_t ySize = m_workspace->getNumberHistograms();
+  m_outRKH << "\n   " << xSize << "   " << ySize << "  " << std::scientific
+           << std::setprecision(12) << 1.0 << "\n";
   const int iflag = 3;
   m_outRKH << "  " << iflag << "(8E12.4)\n";
 
   bool requireNewLine = false;
   int itemCount(0);
-  for (size_t i = 0; i < num_hist; ++i) {
-    for (const auto &yVal : m_workspace->y(i)) {
+  for (size_t i = 0; i < ySize; ++i) {
+    const auto &ydata = m_workspace->readY(i);
+    for (size_t j = 0; j < xSize; ++j) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
-               << yVal;
+               << ydata[j];
       requireNewLine = true;
       if ((itemCount + 1) % LINE_LENGTH == 0) {
         m_outRKH << "\n";
@@ -219,7 +221,6 @@ void SaveRKH::write2D() {
       ++itemCount;
     }
   }
-
   // extra new line is required if number of data written out in last column is
   // less than LINE_LENGTH
   if (requireNewLine)
@@ -227,10 +228,11 @@ void SaveRKH::write2D() {
 
   // Then all the error values
   itemCount = 0;
-  for (size_t i = 0; i < num_hist; ++i) {
-    for (const auto &eVal : m_workspace->e(i)) {
+  for (size_t i = 0; i < ySize; ++i) {
+    const auto &edata = m_workspace->readE(i);
+    for (size_t j = 0; j < xSize; ++j) {
       m_outRKH << std::setw(12) << std::scientific << std::setprecision(4)
-               << eVal;
+               << edata[j];
       if ((itemCount + 1) % LINE_LENGTH == 0)
         m_outRKH << "\n";
       ++itemCount;

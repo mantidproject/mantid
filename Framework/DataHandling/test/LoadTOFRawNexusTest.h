@@ -11,8 +11,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -72,9 +72,10 @@ public:
     TS_ASSERT_EQUALS(spec.getSpectrumNo(), 27956);
     TS_ASSERT_EQUALS(spec.getDetectorIDs().size(), 1);
     TS_ASSERT(spec.hasDetectorID(27955));
-    auto &X = spec.x();
-    auto &Y = spec.y();
-    auto &E = spec.e();
+    MantidVec X, Y, E;
+    X = spec.dataX();
+    Y = spec.dataY();
+    E = spec.dataE();
     TS_ASSERT_EQUALS(X.size(), 502);
     TS_ASSERT_EQUALS(Y.size(), 501);
     TS_ASSERT_EQUALS(E.size(), 501);
@@ -91,8 +92,8 @@ public:
     TS_ASSERT_EQUALS(spec2.getSpectrumNo(), 38020);
     TS_ASSERT_EQUALS(spec2.getDetectorIDs().size(), 1);
     TS_ASSERT(spec2.hasDetectorID(38019));
-    TS_ASSERT_DELTA(spec2.y()[105], 23.0, 1e-4);
-    TS_ASSERT_DELTA(spec2.e()[105], sqrt(23.0), 1e-4);
+    TS_ASSERT_DELTA(spec2.dataY()[105], 23.0, 1e-4);
+    TS_ASSERT_DELTA(spec2.dataE()[105], sqrt(23.0), 1e-4);
 
     TS_ASSERT_EQUALS(ws->getAxis(1)->length(), 77824);
     TS_ASSERT_EQUALS(ws->getAxis(0)->length(), 502);
@@ -120,12 +121,13 @@ public:
 
     // Compare workspaces
     Mantid::API::IAlgorithm_sptr alg = FrameworkManager::Instance().exec(
-        "CompareWorkspaces", 8, "Workspace1", "outWS", "Workspace2",
+        "CheckWorkspacesMatch", 8, "Workspace1", "outWS", "Workspace2",
         "outWS_event_2D", "Tolerance", "1e-4", "CheckAxes", "0");
     // We skip Axis check because of floating point imprecision makes a false
     // negative.
 
-    TS_ASSERT(alg->getProperty("Result"));
+    std::string s = alg->getPropertyValue("Result");
+    TS_ASSERT_EQUALS(s, "Success!");
 
     Mantid::API::MatrixWorkspace_sptr ws1, ws2;
     TS_ASSERT_THROWS_NOTHING(

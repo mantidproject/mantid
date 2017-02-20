@@ -1,17 +1,18 @@
+// Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
+// Main Module Header
 #include "MantidCurveFitting/Functions/InelasticDiffRotDiscreteCircle.h"
+// Mantid Headers from the same project
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-
-#include "MantidAPI/DetectorInfo.h"
+// Mantid headers from other projects
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidTypes/SpectrumDefinition.h"
-
+// 3rd party library headers (N/A)
+// standard library headers
 #include <cmath>
 #include <limits>
 #include <sstream>
@@ -143,29 +144,27 @@ void InelasticDiffRotDiscreteCircle::setWorkspace(
   if (!workspace)
     return;
 
-  const auto &spectrumInfo = workspace->spectrumInfo();
-  const auto &detectorIDs = workspace->detectorInfo().detectorIDs();
-  for (size_t idx = 0; idx < spectrumInfo.size(); idx++) {
-    if (!spectrumInfo.hasDetectors(idx)) {
+  size_t numHist = workspace->getNumberHistograms();
+  for (size_t idx = 0; idx < numHist; idx++) {
+    Mantid::Geometry::IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(idx);
+    } catch (Kernel::Exception::NotFoundError &) {
       m_qValueCache.clear();
-      g_log.information(
-          "Cannot populate Q values from workspace - no detectors set.");
+      g_log.information("Cannot populate Q values from workspace");
       break;
     }
 
-    const auto detectorIndex = spectrumInfo.spectrumDefinition(idx)[0].first;
-
     try {
-      double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
-      double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
+      double efixed = workspace->getEFixed(det);
+      double usignTheta = 0.5 * workspace->detectorTwoTheta(*det);
 
-      double q = Mantid::Kernel::UnitConversion::run(usingTheta, efixed);
+      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
 
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
-      g_log.information("Cannot populate Q values from workspace - could not "
-                        "find EFixed value.");
+      g_log.information("Cannot populate Q values from workspace");
       return;
     }
   }

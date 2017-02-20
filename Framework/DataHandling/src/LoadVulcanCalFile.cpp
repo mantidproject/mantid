@@ -2,23 +2,23 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+#include <fstream>
 #include <Poco/Path.h>
-#include <fstream>
 
-#include <fstream>
 #include <sstream>
+#include <fstream>
 
-#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -291,11 +291,11 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
   std::ostringstream msg;
   auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i) {
-    if (m_maskWS->y(i)[0] > 0.5) {
+    if (m_maskWS->readY(i)[0] > 0.5) {
       m_maskWS->getSpectrum(i).clearData();
       spectrumInfo.setMasked(i, true);
-      m_maskWS->mutableY(i)[0] = 1.0;
-      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->y(i)[0]
+      m_maskWS->dataY(i)[0] = 1.0;
+      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0]
           << "\n";
     }
   }
@@ -468,7 +468,7 @@ void LoadVulcanCalFile::processOffsets(
       throw runtime_error("It cannot happen!");
 
     double offset = offsetiter->second + bankcorriter->second;
-    m_tofOffsetsWS->mutableY(iws)[0] = pow(10., offset);
+    m_tofOffsetsWS->dataY(iws)[0] = pow(10., offset);
   }
 }
 
@@ -486,7 +486,7 @@ void LoadVulcanCalFile::alignEventWorkspace() {
     PARALLEL_START_INTERUPT_REGION
 
     // Compute the conversion factor
-    double factor = m_tofOffsetsWS->y(i)[0];
+    double factor = m_tofOffsetsWS->readY(i)[0];
 
     // Perform the multiplication on all events
     m_eventWS->getSpectrum(i).convertTof(1. / factor);
@@ -559,11 +559,11 @@ void LoadVulcanCalFile::convertOffsets() {
     double totL = l1 + l2;
 
     // Calcualte converted offset
-    double vuloffset = m_tofOffsetsWS->y(iws)[0];
+    double vuloffset = m_tofOffsetsWS->readY(iws)[0];
     double manoffset = (totL * sin(twotheta * 0.5 * M_PI / 180.)) /
                            (effL * sin(effTheta * M_PI / 180.)) / vuloffset -
                        1.;
-    m_offsetsWS->mutableY(iws)[0] = manoffset;
+    m_offsetsWS->dataY(iws)[0] = manoffset;
   }
 }
 
@@ -682,10 +682,10 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
           // Not selected, then mask this detector
           maskWS->getSpectrum(wi).clearData();
           maskSpectrumInfo->setMasked(wi, true);
-          maskWS->mutableY(wi)[0] = 1.0;
+          maskWS->dataY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
-          maskWS->mutableY(wi)[0] = 0.0;
+          maskWS->dataY(wi)[0] = 0.0;
           if (!hasUnmasked)
             hasUnmasked = true;
         }

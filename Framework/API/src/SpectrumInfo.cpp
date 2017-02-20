@@ -2,10 +2,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/make_shared.hpp>
 #include <algorithm>
@@ -13,40 +11,21 @@
 namespace Mantid {
 namespace API {
 
-SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           const ExperimentInfo &experimentInfo)
+SpectrumInfo::SpectrumInfo(const ExperimentInfo &experimentInfo)
     : m_experimentInfo(experimentInfo),
       m_detectorInfo(experimentInfo.detectorInfo()),
-      m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
-SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           ExperimentInfo &experimentInfo)
+SpectrumInfo::SpectrumInfo(ExperimentInfo &experimentInfo)
     : m_experimentInfo(experimentInfo),
       m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
-      m_detectorInfo(*m_mutableDetectorInfo), m_spectrumInfo(spectrumInfo),
+      m_detectorInfo(*m_mutableDetectorInfo),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
 SpectrumInfo::~SpectrumInfo() = default;
-
-/// Returns the size of the SpectrumInfo, i.e., the number of spectra.
-size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
-
-/// Returns a const reference to the SpectrumDefinition of the spectrum.
-const SpectrumDefinition &
-SpectrumInfo::spectrumDefinition(const size_t index) const {
-  m_experimentInfo.updateSpectrumDefinitionIfNecessary(index);
-  return m_spectrumInfo.spectrumDefinition(index);
-}
-
-const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
-SpectrumInfo::sharedSpectrumDefinitions() const {
-  for (size_t i = 0; i < size(); ++i)
-    m_experimentInfo.updateSpectrumDefinitionIfNecessary(i);
-  return m_spectrumInfo.sharedSpectrumDefinitions();
-}
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
@@ -136,14 +115,31 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  return spectrumDefinition(index).size() > 0;
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /// Returns true if the spectrum is associated with exactly one detector.
 bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
+  size_t count = 0;
   // Workspaces can contain invalid detector IDs. Those IDs will be silently
   // ignored here until this is fixed.
-  return spectrumDefinition(index).size() == 1;
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
+      ++count;
+    }
+  }
+  return count == 1;
 }
 
 /** Set the mask flag of the spectrum with given index. Not thread safe.
@@ -178,14 +174,16 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   if (m_lastIndex[thread] == index)
     return *m_lastDetector[thread];
 
+  m_lastIndex[thread] = index;
+
   // Note: This function body has big overlap with the method
   // MatrixWorkspace::getDetector(). The plan is to eventually remove the
   // latter, once SpectrumInfo is in widespread use.
-  const auto &specDef = spectrumDefinition(index);
-  const size_t ndets = specDef.size();
+  const auto &dets = m_experimentInfo.detectorIDsInGroup(index);
+  const size_t ndets = dets.size();
   if (ndets == 1) {
     // If only 1 detector for the spectrum number, just return it
-    const auto detIndex = specDef[0].first;
+    const auto detIndex = m_detectorInfo.indexOf(*dets.begin());
     m_lastDetector[thread] = m_detectorInfo.getDetectorPtr(detIndex);
   } else if (ndets == 0) {
     throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): No "
@@ -195,14 +193,21 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   } else {
     // Else need to construct a DetectorGroup and use that
     std::vector<boost::shared_ptr<const Geometry::IDetector>> det_ptrs;
-    for (const auto &index : specDef) {
-      const auto detIndex = index.first;
-      det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+    for (const auto &id : dets) {
+      try {
+        const auto detIndex = m_detectorInfo.indexOf(id);
+        det_ptrs.push_back(m_detectorInfo.getDetectorPtr(detIndex));
+      } catch (std::out_of_range &) {
+        // Workspaces can contain invalid detector IDs. Those IDs will be
+        // silently ignored here until this is fixed. Some valid IDs will exist
+        // if hasDetectors or hasUniqueDetectors has returned true, but there
+        // could still be invalid IDs.
+      }
     }
     m_lastDetector[thread] =
         boost::make_shared<Geometry::DetectorGroup>(det_ptrs);
   }
-  m_lastIndex[thread] = index;
+
   return *m_lastDetector[thread];
 }
 
@@ -221,8 +226,14 @@ SpectrumInfo::getDetectorVector(const size_t index) const {
 
 std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
   std::vector<size_t> detIndices;
-  for (const auto &def : spectrumDefinition(index))
-    detIndices.push_back(def.first);
+  const auto &validDetectorIDs = m_detectorInfo.detectorIDs();
+  for (const auto &id : m_experimentInfo.detectorIDsInGroup(index)) {
+    const auto &it = std::lower_bound(validDetectorIDs.cbegin(),
+                                      validDetectorIDs.cend(), id);
+    if (it != validDetectorIDs.cend() && *it == id) {
+      detIndices.push_back(m_detectorInfo.indexOf(id));
+    }
+  }
   if (detIndices.empty())
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");

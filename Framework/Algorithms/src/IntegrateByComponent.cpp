@@ -1,10 +1,8 @@
 #include "MantidAlgorithms/IntegrateByComponent.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
@@ -175,6 +173,7 @@ std::vector<std::vector<size_t>>
 IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
+  Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
   if (parents == 0) // this should not happen in this file, but if one reuses
                     // the function and parents==0, the program has a sudden end
                     // without this check.
@@ -182,24 +181,27 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     return makeInstrumentMap(countsWS);
   }
 
-  const auto spectrumInfo = countsWS->spectrumInfo();
-  const auto &detectorInfo = countsWS->detectorInfo();
+  if (!instrument) {
+    g_log.warning("Workspace has no instrument. LevelsUP is ignored");
+    return makeInstrumentMap(countsWS);
+  }
+
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    if (!spectrumInfo.hasDetectors(i)) {
-      g_log.debug("Spectrum has no detector, skipping");
-      continue;
-    }
+    detid_t d = (*(countsWS->getSpectrum(i).getDetectorIDs().begin()));
+    try {
+      std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
+          instrument->getDetector(d)->getAncestors();
 
-    const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
-    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
-        detectorInfo.detector(detIdx).getAncestors();
-
-    if (anc.size() < static_cast<size_t>(parents)) {
-      g_log.warning("Too many levels up. Will ignore LevelsUp");
-      parents = 0;
-      return makeInstrumentMap(countsWS);
+      if (anc.size() < static_cast<size_t>(parents)) {
+        g_log.warning("Too many levels up. Will ignore LevelsUp");
+        parents = 0;
+        return makeInstrumentMap(countsWS);
+      }
+      mymap.emplace(anc[parents - 1]->getComponentID(), i);
+    } catch (Mantid::Kernel::Exception::NotFoundError &e) {
+      // do nothing
+      g_log.debug(e.what());
     }
-    mymap.emplace(anc[parents - 1]->getComponentID(), i);
   }
 
   std::vector<std::vector<size_t>> speclist;

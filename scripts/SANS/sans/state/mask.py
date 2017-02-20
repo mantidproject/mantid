@@ -2,7 +2,6 @@
 
 """State describing the masking behaviour of the SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringListParameter, StringParameter,
@@ -229,7 +228,7 @@ class StateMask(StateBase):
         # --------------------
         # Detectors
         # --------------------
-        for _, value in list(self.detectors.items()):
+        for _, value in self.detectors.items():
             value.validate()
 
         if is_invalid:

@@ -11,7 +11,6 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
@@ -262,21 +261,16 @@ public:
     // masked
     std::vector<detid_t> maskSourceDet, maskTargDet;
 
-    const auto &spectrumInfoSource = source->spectrumInfo();
-    const auto &spectrumInfoTarget = maskWs->spectrumInfo();
+    const auto &spectrumInfo = source->spectrumInfo();
     size_t n_steps = source->getNumberHistograms();
     for (size_t i = 0; i < n_steps; ++i) {
-      bool source_masked = spectrumInfoSource.isMasked(i);
+      bool source_masked = spectrumInfo.isMasked(i);
       if (source_masked) {
-        const auto &detector = spectrumInfoSource.detector(i);
-        const auto detectorId = detector.getID();
-        maskSourceDet.push_back(detectorId);
+        maskSourceDet.push_back(source->getDetector(i)->getID());
       }
       bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        const auto &detector = spectrumInfoTarget.detector(i);
-        const auto detectorId = detector.getID();
-        maskTargDet.push_back(detectorId);
+        maskTargDet.push_back(maskWs->getDetector(i)->getID());
       }
     }
     std::sort(maskSourceDet.begin(), maskSourceDet.end());

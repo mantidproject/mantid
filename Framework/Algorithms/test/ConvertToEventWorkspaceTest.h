@@ -6,9 +6,9 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
@@ -85,7 +85,7 @@ public:
       return;
 
     // This performs a full comparison (histogram
-    CompareWorkspaces matcher;
+    CheckWorkspacesMatch matcher;
     matcher.initialize();
     matcher.setProperty("Workspace1",
                         boost::dynamic_pointer_cast<MatrixWorkspace>(inWS));
@@ -95,7 +95,7 @@ public:
     matcher.setProperty("Tolerance", 1e-6);
     matcher.execute();
     TS_ASSERT(matcher.isExecuted());
-    TS_ASSERT(matcher.getProperty("Result"));
+    TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), "Success!");
 
     // Event-specific checks
     TS_ASSERT_EQUALS(outWS->getNumberEvents(),

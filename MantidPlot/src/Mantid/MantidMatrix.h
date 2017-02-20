@@ -108,9 +108,6 @@ public:
     return m_table_viewE->selectionModel();
   }
 
-  /// Get the window type as a string
-  std::string getWindowType() override { return "Workspace"; }
-
   int numRows() const { return m_rows; }
   int numCols() const { return m_cols; }
   double dataX(int row, int col) const;

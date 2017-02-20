@@ -43,9 +43,9 @@ public:
     wsNameOut = "MinusTest_outputWorkspace";
     DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
 
-    fibWS1d = WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
-    histWS_5x10_123 = WorkspaceCreationHelper::create2DWorkspace123(5,10, true);
-    histWS_5x10_154 = WorkspaceCreationHelper::create2DWorkspace154(5,10, true);
+    fibWS1d = WorkspaceCreationHelper::create1DWorkspaceFib(5);
+    histWS_5x10_123 = WorkspaceCreationHelper::create2DWorkspace123(5,10);
+    histWS_5x10_154 = WorkspaceCreationHelper::create2DWorkspace154(5,10);
     histWS_5x10_bin = WorkspaceCreationHelper::create2DWorkspace(5,10);
     eventWS_5x10_50 = WorkspaceCreationHelper::createEventWorkspace(5,10,50,0.0,1.0,2);
     eventWS_small = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
@@ -167,7 +167,7 @@ public:
   {
     int nBins = 5;
     MatrixWorkspace_sptr work_in1 = fibWS1d;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins);
     performTest(work_in1,work_in2);
   }
 
@@ -206,9 +206,8 @@ public:
   void test_1D_Rand2D()
   {
     int nHist = 5,nBins=5;
-    const bool isHistogram(true);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, isHistogram);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, isHistogram);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins);
     performTest(work_in1,work_in2);
   }
 
@@ -216,14 +215,14 @@ public:
   {
     int nBins=10;
     MatrixWorkspace_sptr work_in1 = histWS_5x10_154;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins);
     performTest(work_in1,work_in2);
   }
 
   void test_1DVertical_2D()
   {
     int nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(1,nBins);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_154;
     if (DO_PLUS)
     {
@@ -239,7 +238,7 @@ public:
   {
     //In 2D workspaces, the X bins have to match
     int nHist = 10,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins, true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(1,nBins*5);
     performTest_fails(work_in1, work_in2);
   }
@@ -704,7 +703,6 @@ public:
     alg->setPropertyValue("RHSWorkspace",wsName2);
     alg->setPropertyValue("OutputWorkspace",wsNameOut);
     alg->setProperty("AllowDifferentNumberSpectra", allowMismatchedSpectra);
-    alg->setRethrows(true);
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;

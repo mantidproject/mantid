@@ -1,4 +1,3 @@
-#include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
@@ -6,27 +5,28 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MDUnit.h"
-#include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <H5Cpp.h>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <algorithm>
 #include <cctype>
-#include <functional>
 #include <iterator>
+#include <functional>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -98,7 +98,7 @@ void write2DWorkspace(H5::Group &group,
 
   // Set the dimension
   const size_t dimension0 = workspace->getNumberHistograms();
-  const size_t dimension1 = workspace->y(0).size();
+  const size_t dimension1 = workspace->readY(0).size();
   const hsize_t rank = 2;
   hsize_t dimensionArray[rank] = {static_cast<hsize_t>(dimension0),
                                   static_cast<hsize_t>(dimension1)};
@@ -382,7 +382,7 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
 
   //-----------------------------------------
   // Add Q with units  + uncertainty definition
-  const auto &qValue = workspace->points(0);
+  const auto qValue = workspace->readX(0);
   std::map<std::string, std::string> qAttributes;
   auto qUnit = getUnitFromMDDimension(workspace->getDimension(0));
   qUnit = getMomentumTransferLabel(qUnit);
@@ -391,39 +391,52 @@ void addData1D(H5::Group &data, Mantid::API::MatrixWorkspace_sptr workspace) {
     qAttributes.emplace(sasUncertaintyAttr, sasDataQdev);
   }
 
-  writeArray1DWithStrAttributes(data, sasDataQ, qValue.rawData(), qAttributes);
+  if (workspace->isHistogramData()) {
+    std::vector<double> qValueCentres;
+    Mantid::Kernel::VectorHelper::convertToBinCentre(qValue, qValueCentres);
+    writeArray1DWithStrAttributes(data, sasDataQ, qValueCentres, qAttributes);
+  } else {
+    writeArray1DWithStrAttributes(data, sasDataQ, qValue, qAttributes);
+  }
 
   //-----------------------------------------
   // Add I with units + uncertainty definition
-  const auto &intensity = workspace->y(0);
+  const auto intensity = workspace->readY(0);
   std::map<std::string, std::string> iAttributes;
   auto iUnit = getIntensityUnit(workspace);
   iUnit = getIntensityUnitLabel(iUnit);
   iAttributes.emplace(sasUnitAttr, iUnit);
   iAttributes.emplace(sasUncertaintyAttr, sasDataIdev);
 
-  writeArray1DWithStrAttributes(data, sasDataI, intensity.rawData(),
-                                iAttributes);
+  writeArray1DWithStrAttributes(data, sasDataI, intensity, iAttributes);
 
   //-----------------------------------------
   // Add Idev with units
-  const auto &intensityUncertainty = workspace->e(0);
+  const auto intensityUncertainty = workspace->readE(0);
   std::map<std::string, std::string> eAttributes;
   eAttributes.insert(
       std::make_pair(sasUnitAttr, iUnit)); // same units as intensity
 
-  writeArray1DWithStrAttributes(data, sasDataIdev,
-                                intensityUncertainty.rawData(), eAttributes);
+  writeArray1DWithStrAttributes(data, sasDataIdev, intensityUncertainty,
+                                eAttributes);
 
   //-----------------------------------------
   // Add Qdev with units if available
   if (workspace->hasDx(0)) {
-    const auto qResolution = workspace->pointStandardDeviations(0);
+    const auto qResolution = workspace->readDx(0);
     std::map<std::string, std::string> xUncertaintyAttributes;
     xUncertaintyAttributes.emplace(sasUnitAttr, qUnit);
 
-    writeArray1DWithStrAttributes(data, sasDataQdev, qResolution.rawData(),
-                                  xUncertaintyAttributes);
+    if (workspace->isHistogramData()) {
+      std::vector<double> qResolutionCentres;
+      Mantid::Kernel::VectorHelper::convertToBinCentre(qResolution,
+                                                       qResolutionCentres);
+      writeArray1DWithStrAttributes(data, sasDataQdev, qResolutionCentres,
+                                    xUncertaintyAttributes);
+    } else {
+      writeArray1DWithStrAttributes(data, sasDataQdev, qResolution,
+                                    xUncertaintyAttributes);
+    }
   }
 }
 
@@ -640,7 +653,7 @@ void addTransmission(H5::Group &group,
 
   //-----------------------------------------
   // Add T with units + uncertainty definition
-  const auto transmissionData = workspace->y(0);
+  const auto transmissionData = workspace->readY(0);
   std::map<std::string, std::string> transmissionAttributes;
   std::string unit;
   if (unit.empty()) {
@@ -651,22 +664,21 @@ void addTransmission(H5::Group &group,
                                  sasTransmissionSpectrumTdev);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumT,
-                                transmissionData.rawData(),
-                                transmissionAttributes);
+                                transmissionData, transmissionAttributes);
 
   //-----------------------------------------
   // Add Tdev with units
-  const auto transmissionErrors = workspace->e(0);
+  const auto transmissionErrors = workspace->readE(0);
   std::map<std::string, std::string> transmissionErrorAttributes;
   transmissionErrorAttributes.emplace(sasUnitAttr, unit);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumTdev,
-                                transmissionErrors.rawData(),
+                                transmissionErrors,
                                 transmissionErrorAttributes);
 
   //-----------------------------------------
   // Add lambda with units
-  const auto lambda = workspace->x(0);
+  const auto lambda = workspace->readX(0);
   std::map<std::string, std::string> lambdaAttributes;
   auto lambdaUnit = getUnitFromMDDimension(workspace->getDimension(0));
   if (lambdaUnit.empty() || lambdaUnit == "Angstrom") {
@@ -675,7 +687,7 @@ void addTransmission(H5::Group &group,
   lambdaAttributes.emplace(sasUnitAttr, lambdaUnit);
 
   writeArray1DWithStrAttributes(transmission, sasTransmissionSpectrumLambda,
-                                lambda.rawData(), lambdaAttributes);
+                                lambda, lambdaAttributes);
 }
 }
 

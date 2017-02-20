@@ -5,7 +5,6 @@
 
 #include <string>
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -68,13 +67,10 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
     ExecuteAlgorithm(ws, cmptName, detList, paramName, paramValue);
 
-    const auto &detectorInfo = ws->detectorInfo();
-    const auto index1 = detectorInfo.indexOf(1);
-    const auto &cmpt1 = detectorInfo.detector(index1);
-    TS_ASSERT_EQUALS(paramValue, cmpt1.getStringParameter(paramName)[0]);
-    const auto index2 = detectorInfo.indexOf(2);
-    const auto &cmpt2 = detectorInfo.detector(index2);
-    TS_ASSERT_EQUALS(paramValue, cmpt2.getStringParameter(paramName)[0]);
+    auto cmpt = ws->getInstrument()->getDetector(1);
+    TS_ASSERT_EQUALS(paramValue, cmpt->getStringParameter(paramName)[0]);
+    cmpt = ws->getInstrument()->getDetector(2);
+    TS_ASSERT_EQUALS(paramValue, cmpt->getStringParameter(paramName)[0]);
   }
 
   void test_cmpt_int_value() {

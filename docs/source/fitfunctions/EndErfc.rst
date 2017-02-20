@@ -9,12 +9,9 @@ EndErfc
 Description
 -----------
 
-This is a fitting function that makes use of the complementary error function for detector-tube calibration
+This is a fitting function for the complementary error function.
 
-The function :math:`f(x)=A \cdot erfc(\frac{B-x}{C}) + D` with the following constraints:
-
-- :math:`D \geq 0`
-- :math:`f(x) = -2A` if :math:`A<0` 
+The function is A*erfc((B-x)/C) + D for positive A and the same minus 2A for negative A.
 
 .. attributes::
 

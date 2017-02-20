@@ -25,15 +25,8 @@ formats such as RST and plain text.
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
+from scipy import stats  # older version of numpy does not support nanmean and nanmedian
 import post_processing as postproc
-
-# older version of numpy does not support nanmean and nanmedian
-# and nanmean and nanmedian was removed in scipy 0.18 in favor of numpy
-# so try numpy first then scipy.stats
-try:
-    from numpy import nanmean, nanmedian
-except ImportError:
-    from scipy.stats import nanmean, nanmedian
 
 # Some naming conventions for the output files
 BENCHMARK_VERSION_STR = 'v3.8'
@@ -455,8 +448,8 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
     results_text += '---------------- Summary (accuracy): -------- \n'
     results_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_acc_rankings, 0))
     results_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_acc_rankings, 0))
-    results_text += 'Mean: {0}\n'.format(nanmean(norm_acc_rankings, 0))
-    results_text += 'Median: {0}\n'.format(nanmedian(norm_acc_rankings, 0))
+    results_text += 'Mean: {0}\n'.format(stats.nanmean(norm_acc_rankings, 0))
+    results_text += 'Median: {0}\n'.format(stats.nanmedian(norm_acc_rankings, 0))
     results_text += '\n'
 
     print(results_text)
@@ -474,8 +467,8 @@ def print_tables_simple_text(minimizers, results_per_test, accuracy_tbl, time_tb
     time_text += '---------------- Summary (run time): -------- \n'
     time_text += 'Best ranking: {0}\n'.format(np.nanmin(norm_runtimes, 0))
     time_text += 'Worst ranking: {0}\n'.format(np.nanmax(norm_runtimes, 0))
-    time_text += 'Mean: {0}\n'.format(nanmean(norm_runtimes, 0))
-    time_text += 'Median: {0}\n'.format(nanmedian(norm_runtimes, 0))
+    time_text += 'Mean: {0}\n'.format(stats.nanmean(norm_runtimes, 0))
+    time_text += 'Median: {0}\n'.format(stats.nanmedian(norm_runtimes, 0))
     time_text += '\n'
 
     print(time_text)

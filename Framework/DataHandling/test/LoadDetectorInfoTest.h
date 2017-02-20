@@ -3,25 +3,25 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <Poco/Path.h>
+#include <Poco/File.h>
 
 #include <algorithm>
 #include <fstream>
@@ -300,28 +300,27 @@ public:
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT(grouper.isExecuted());
 
-    const auto &pmap = WS->constInstrumentParameters();
-    const auto &detInfo = WS->detectorInfo();
+    const ParameterMap &pmap = WS->constInstrumentParameters();
 
     // read the parameters from some random detectors, they're parameters are
     // all set to the same thing
     for (int i = 0; i < NUMRANDOM; ++i) {
-      const size_t detIndex = detInfo.indexOf(DETECTS[i]);
+      int detID = DETECTS[i];
+      IDetector_const_sptr detector = WS->getInstrument()->getDetector(detID);
 
-      const auto &det = detInfo.detector(detIndex);
-      Parameter_sptr par = pmap.getRecursive(&det, "TubePressure");
+      Parameter_sptr par = pmap.getRecursive(detector.get(), "TubePressure");
 
       TS_ASSERT(par);
       TS_ASSERT_EQUALS(par->asString(), castaround("10.0"));
-      par = pmap.getRecursive(&det, "TubeThickness");
+      par = pmap.getRecursive(detector.get(), "TubeThickness");
       TS_ASSERT(par);
 
       TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0, 6));
     }
 
     // Test that a random detector has been moved
-    const V3D pos = detInfo.position(detInfo.indexOf(DETECTS[0]));
-    TS_ASSERT_EQUALS(V3D(0, 0.2406324, 4.014795), pos);
+    IDetector_const_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
+    TS_ASSERT_EQUALS(V3D(0, 0.2406324, 4.014795), det->getPos());
 
     AnalysisDataService::Instance().remove(m_MariWS);
   }
@@ -361,12 +360,13 @@ public:
             AnalysisDataService::Instance().retrieve(m_InoutWS));
 
     const auto &pmap = WS->constInstrumentParameters();
-    const auto &detInfo = WS->detectorInfo();
 
     for (int j = 0; j < SmallTestDatFile::NDETECTS; ++j) {
 
-      const size_t detIndex = detInfo.indexOf(j);
-      const IComponent *baseComp = detInfo.detector(detIndex).getComponentID();
+      boost::shared_ptr<const IDetector> detector =
+          WS->getInstrument()->getDetector(j);
+
+      const IComponent *baseComp = detector->getComponentID();
 
       Parameter_sptr par = pmap.get(baseComp, "TubePressure");
       // this is only for PSD detectors, code 3
@@ -397,7 +397,7 @@ public:
       } else
         TS_ASSERT(!par);
 
-      const V3D pos = detInfo.position(detIndex);
+      const V3D pos = detector->getPos();
       V3D expected;
       if (j == 1) // Monitors are fixed and unaffected
       {

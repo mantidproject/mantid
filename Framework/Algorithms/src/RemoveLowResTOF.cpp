@@ -1,7 +1,6 @@
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -32,9 +31,9 @@ DECLARE_ALGORITHM(RemoveLowResTOF)
 
 /// Default constructor
 RemoveLowResTOF::RemoveLowResTOF()
-    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_Tmin(0.),
-      m_wavelengthMin(0.), m_numberOfSpectra(0), m_progress(nullptr),
-      m_outputLowResTOF(false) {}
+    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_instrument(),
+      m_sample(), m_L1(0.), m_Tmin(0.), m_wavelengthMin(0.),
+      m_numberOfSpectra(0), m_progress(nullptr), m_outputLowResTOF(false) {}
 
 /// Destructor
 RemoveLowResTOF::~RemoveLowResTOF() { delete m_progress; }
@@ -99,7 +98,16 @@ void RemoveLowResTOF::init() {
 void RemoveLowResTOF::exec() {
   // Get the input workspace
   m_inputWS = this->getProperty("InputWorkspace");
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+
+  // without the primary flight path the algorithm cannot work
+  try {
+    m_instrument = m_inputWS->getInstrument();
+    m_sample = m_instrument->getSample();
+    m_L1 = m_instrument->getSource()->getDistance(*m_sample);
+  } catch (NotFoundError &) {
+    throw InstrumentDefinitionError(
+        "Unable to calculate source-sample distance", m_inputWS->getTitle());
+  }
 
   m_DIFCref = this->getProperty("ReferenceDIFC");
   m_K = this->getProperty("K");
@@ -123,7 +131,7 @@ void RemoveLowResTOF::exec() {
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   if (m_inputEvWS != nullptr) {
-    this->execEvent(spectrumInfo);
+    this->execEvent();
     return;
   }
 
@@ -135,7 +143,7 @@ void RemoveLowResTOF::exec() {
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     // calculate where to zero out to
-    const double tofMin = this->calcTofMin(workspaceIndex, spectrumInfo);
+    const double tofMin = this->calcTofMin(workspaceIndex);
     const auto &X = m_inputWS->x(0);
     auto last = std::lower_bound(X.cbegin(), X.cend(), tofMin);
     if (last == X.end())
@@ -154,7 +162,7 @@ void RemoveLowResTOF::exec() {
 
 /** Remove low resolution TOF from an EventWorkspace
   */
-void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
+void RemoveLowResTOF::execEvent() {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = getProperty("OutputWorkspace");
   auto outW = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutW);
@@ -184,7 +192,7 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra;
        workspaceIndex++) {
     if (outW->getSpectrum(workspaceIndex).getNumberEvents() > 0) {
-      double tmin = this->calcTofMin(workspaceIndex, spectrumInfo);
+      double tmin = this->calcTofMin(workspaceIndex);
       if (tmin != tmin) {
         // Problematic
         g_log.warning() << "tmin for workspaceIndex " << workspaceIndex
@@ -243,10 +251,11 @@ void RemoveLowResTOF::execEvent(const SpectrumInfo &spectrumInfo) {
   this->runMaskDetectors();
 }
 
-double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
-                                   const SpectrumInfo &spectrumInfo) {
-
-  const double l1 = spectrumInfo.l1();
+double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex) {
+  const Kernel::V3D &sourcePos = m_instrument->getSource()->getPos();
+  const Kernel::V3D &samplePos = m_sample->getPos();
+  const Kernel::V3D &beamline = samplePos - sourcePos;
+  double beamline_norm = 2. * beamline.norm();
 
   // Get a vector of detector IDs
   std::vector<detid_t> detNumbers;
@@ -256,10 +265,9 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
     std::map<detid_t, double> offsets; // just an empty offsets map
-    Geometry::Instrument_const_sptr instrument = m_inputWS->getInstrument();
-    double dspmap = Conversion::tofToDSpacingFactor(
-        l1, spectrumInfo.l2(workspaceIndex),
-        spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
+    double dspmap =
+        Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
+                                   m_instrument, detNumbers, offsets);
 
     // this is related to the reference tof
     double sqrtdmin =
@@ -271,13 +279,17 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
       g_log.warning() << "tmin is nan because dspmap = " << dspmap << ".\n";
     }
   } else {
-    const double l2 = spectrumInfo.l2(workspaceIndex);
+    double l2 = 0;
+    for (auto det : detSet) {
+      l2 += m_instrument->getDetector(det)->getDistance(*m_sample);
+    }
+    l2 /= static_cast<double>(detSet.size());
 
     Kernel::Unit_sptr wavelength = UnitFactory::Instance().create("Wavelength");
     // unfortunately there isn't a good way to convert a single value
     std::vector<double> X(1), temp(1);
     X[0] = m_wavelengthMin;
-    wavelength->toTOF(X, temp, l1, l2, 0., 0, 0., 0.);
+    wavelength->toTOF(X, temp, m_L1, l2, 0., 0, 0., 0.);
     tmin = X[0];
   }
 

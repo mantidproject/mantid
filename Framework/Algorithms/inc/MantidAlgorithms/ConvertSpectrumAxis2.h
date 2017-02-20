@@ -8,10 +8,6 @@
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
-namespace API {
-class DetectorInfo;
-class MatrixWorkspace;
-}
 namespace Algorithms {
 /** Converts the representation of the vertical axis (the one up the side of
     a matrix in MantidPlot) of a Workspace2D from its default of holding the
@@ -74,10 +70,10 @@ private:
   void exec() override;
   /// Converting to theta.
   void createThetaMap(API::Progress &progress, const std::string &targetUnit,
-                      API::MatrixWorkspace_sptr &inputWS);
+                      API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Converting to Q and QSquared
   void createElasticQMap(API::Progress &progress, const std::string &targetUnit,
-                         API::MatrixWorkspace_sptr &inputWS);
+                         API::MatrixWorkspace_sptr &inputWS, size_t nHist);
   /// Creates an output workspace.
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::Progress &progress, const std::string &targetUnit,
@@ -87,9 +83,8 @@ private:
   std::multimap<double, size_t> m_indexMap;
 
   /// Getting Efixed
-  double getEfixed(const size_t detectorIndex,
-                   const Mantid::API::DetectorInfo &detectorInfo,
-                   const API::MatrixWorkspace &inputWS, const int emode) const;
+  double getEfixed(const Mantid::Geometry::IDetector &detector,
+                   API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };
 
 } // namespace Algorithms

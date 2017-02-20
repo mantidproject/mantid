@@ -7,6 +7,7 @@ import mantidplottests
 from mantidplottests import *
 import time
 import numpy as np
+from distutils.version import LooseVersion
 from PyQt4 import QtCore
 
 try:
@@ -20,19 +21,20 @@ except ImportError:
 
 class MantidPlotMatplotlibTest(unittest.TestCase):
 
-    def setUp(self):
-        # A deliberate pause so that the tests wait a small
-        # moment for MantidPlot to initialize properly
-        # It seems to stop the occasional lockup
-        time.sleep(0.2)
+    def tearDown(self):
+        if LooseVersion(mpl.__version__) >= '1.5.0':
+             plt.close('all')
+        else:
+            # Old versions of matplotlib.pyplot.close work without this
+            # in a normal script session but fail here. The workaround
+            # is to ensure this happens on the same thread too.
+            gui_cmd(plt.close, 'all')
 
     def test_1d_plot(self):
         x, y = np.arange(1.0,10.0), np.arange(1.0,10.)
         ax = plt.plot(x,y)
         self.assertTrue(ax is not None)
         plt.show()
-        time.sleep(0.2)
-        plt.close()
 
     def test_image_plot(self):
         delta = 0.025
@@ -46,8 +48,6 @@ class MantidPlotMatplotlibTest(unittest.TestCase):
                         origin='lower', extent=[-3, 3, -3, 3],
                         vmax=abs(Z).max(), vmin=-abs(Z).max())
         plt.show()
-        time.sleep(0.2)
-        plt.close()
 
 # Run the unit tests
 if HAVE_MPL:

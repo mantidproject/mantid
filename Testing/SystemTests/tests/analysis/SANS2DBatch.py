@@ -1,7 +1,6 @@
 #pylint: disable=no-init,attribute-defined-outside-init
-
-from __future__ import (absolute_import, division, print_function)
 import stresstesting
+
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 from mantid import config

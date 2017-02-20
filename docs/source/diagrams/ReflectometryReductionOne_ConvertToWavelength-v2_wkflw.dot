@@ -1,5 +1,4 @@
 digraph ReflectometryReductionOne {
-splines=line
 label = "\n"
 rankdir = TB;
  $global_style
@@ -8,7 +7,7 @@ subgraph params {
  $param_style
   inputWS             [label="InputWorkspace"]
   outputWS            [label="OutputWorkspaceWavelength"]
-  procCommands        [label="ProcessingInstructions"]
+  procCommands        [label="ProcessingCommands"]
   wavMin              [label="WavelengthMin", group=gwav]
   wavMax              [label="WavelengthMax", group=gwav]
   monitorIndex        [label="I0MonitorIndex"]
@@ -25,9 +24,7 @@ subgraph decisions {
 
 subgraph algorithms {
  $algorithm_style
-  convertDet    [label="ConvertUnits\n(AlignBins = True)"]
-  convertDB     [label="ConvertUnits\n(AlignBins = True)"]
-  convertMon    [label="ConvertUnits\n(AlignBins = True)", group=g11]
+  convertWav    [label="ConvertUnits\n(AlignBins = True)"]
   groupDet      [label="GroupDetectors"]
   cropMonWS     [label="CropWorkspace", group=g11]
   calcFlatBg    [label="CalculateFlatBackground", group=g11]
@@ -44,25 +41,22 @@ subgraph processes {
 
 subgraph values {
  $value_style
+  valWav        [label="I(&lambda;)"]
 }
 
-inputWS				-> groupDet			[label="Detectors"]
-inputWS				-> groupDetRDB		[label="Direct Beam"]
-inputWS				-> cropMonWS		[label="Monitors"]
+inputWS             -> convertWav
+convertWav          -> valWav
+valWav              -> groupDet       [label="Detectors"]
+procCommands        -> groupDet
 
-procCommands		-> groupDet
-groupDet			-> convertDet
+valWav              -> groupDetRDB    [label="Direct Beam"]
+regionOfDirectBeam  -> groupDetRDB
+groupDetRDB         -> divideDetRDB
+groupDet            -> divideDetRDB
 
-regionOfDirectBeam	-> groupDetRDB
-groupDetRDB			-> convertDB
-
-monitorIndex		-> cropMonWS
-cropMonWS			-> convertMon
-
-convertDet			-> divideDetRDB
-convertDB			-> divideDetRDB
-
-convertMon          -> calcFlatBg
+valWav              -> cropMonWS      [label="Monitors"]
+monitorIndex        -> cropMonWS
+cropMonWS           -> calcFlatBg
 monBackWavMin       -> calcFlatBg
 monBackWavMax       -> calcFlatBg
 calcFlatBg          -> intMon
@@ -76,8 +70,6 @@ divideDetMon        -> cropWav
 wavMax              -> cropWav
 cropWav             -> outputWS
 
-{rank=same; groupDet; groupDetRDB; cropMonWS}
-{rank=same; convertDet; convertDB; convertMon}
 {rank=same; monIntWavMin; monIntWavMax}
 {rank=same; divideDetRDB; intMon}
 {rank=same; monBackWavMin; monBackWavMax}

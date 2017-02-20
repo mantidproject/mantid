@@ -8,12 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
-// Forward declare
 namespace Mantid {
-namespace HistogramData {
-class Histogram;
-}
-
 namespace DataHandling {
 /**
      Saves a focused data set
@@ -97,17 +92,14 @@ private:
   /// Write the header information
   void writeHeaders(const std::string &format, std::stringstream &os,
                     double primaryflightpath) const;
-
   /// Write out the data in RALF format
   void writeRALFdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
-
+                     std::stringstream &out, const MantidVec &X,
+                     const MantidVec &Y, const MantidVec &E) const;
   /// Write out the data in SLOG format
   void writeSLOGdata(const int bank, const bool MultiplyByBinWidth,
-                     std::stringstream &out,
-                     const HistogramData::Histogram &histo) const;
-
+                     std::stringstream &out, const MantidVec &X,
+                     const MantidVec &Y, const MantidVec &E) const;
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,

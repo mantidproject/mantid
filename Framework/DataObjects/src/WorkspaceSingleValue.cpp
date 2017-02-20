@@ -12,7 +12,6 @@ DECLARE_WORKSPACE(WorkspaceSingleValue)
 /// Constructor
 WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
     : API::HistoWorkspace() {
-  initialize(1, 1, 1);
   // Set the "histogram" to the single value
   data.dataX().resize(1, 0.0);
   data.setCounts(1, value);
@@ -49,7 +48,6 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
 
 /// Return the underlying Histogram1D at the given workspace index.
 Histogram1D &WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
-  data.setExperimentInfo(this, 0);
   return data;
 }
 

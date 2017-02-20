@@ -19,9 +19,7 @@ QString getExtensionFromFilter(const QString &selectedFilter) {
   if (boost::regex_search(selectedFilter.toStdString(), result,
                           FILE_EXT_REG_EXP) &&
       result.size() == 2) {
-    // clang fails to cast result[1] to std::string.
-    std::string output = result[1];
-    auto extension = QString::fromStdString(output);
+    auto extension = QString::fromStdString(result[1]);
     if (extension.startsWith("*"))
       return extension.remove(0, 1);
     else

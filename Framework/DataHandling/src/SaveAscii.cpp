@@ -2,17 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/SaveAscii.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 
-#include <boost/tokenizer.hpp>
-#include <fstream>
 #include <set>
+#include <fstream>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -192,6 +192,8 @@ void SaveAscii::exec() {
     file << '\n';
   }
 
+  bool isHistogram = ws->isHistogramData();
+
   // Set the number precision
   int prec = getProperty("Precision");
   if (prec != EMPTY_INT())
@@ -199,23 +201,28 @@ void SaveAscii::exec() {
 
   Progress progress(this, 0, 1, nBins);
   auto pointDeltas = ws->pointStandardDeviations(0);
-  auto points = ws->points(0);
   for (int bin = 0; bin < nBins; bin++) {
-    file << points[bin];
+    if (isHistogram) // bin centres
+    {
+      file << (ws->readX(0)[bin] + ws->readX(0)[bin + 1]) / 2;
+    } else // data points
+    {
+      file << ws->readX(0)[bin];
+    }
 
     if (idx.empty())
       for (int spec = 0; spec < nSpectra; spec++) {
         file << sep;
-        file << ws->y(spec)[bin];
+        file << ws->readY(spec)[bin];
         file << sep;
-        file << ws->e(spec)[bin];
+        file << ws->readE(spec)[bin];
       }
     else
       for (auto spec : idx) {
         file << sep;
-        file << ws->y(spec)[bin];
+        file << ws->readY(spec)[bin];
         file << sep;
-        file << ws->e(spec)[bin];
+        file << ws->readE(spec)[bin];
       }
 
     if (write_dx) {

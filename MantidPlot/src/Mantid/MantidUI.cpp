@@ -1225,18 +1225,10 @@ Table *MantidUI::createDetectorTable(
 
   // check if efixed value is available
   bool calcQ(true);
-
-  const auto &spectrumInfo = ws->spectrumInfo();
-  if (spectrumInfo.hasDetectors(0)) {
-    try {
-      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
-                                                  Mantid::NoDeleting());
-      ws->getEFixed(detector);
-    } catch (std::runtime_error &) {
-      calcQ = false;
-    }
-  } else {
-    // No detectors available
+  try {
+    auto detector = ws->getDetector(0);
+    ws->getEFixed(detector);
+  } catch (std::runtime_error &) {
     calcQ = false;
   }
 
@@ -1282,6 +1274,7 @@ Table *MantidUI::createDetectorTable(
                                  // value should be displayed
   QVector<QList<QVariant>> tableColValues;
   tableColValues.resize(nrows);
+  const auto &spectrumInfo = ws->spectrumInfo();
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     // Note PARALLEL_START_INTERUPT_REGION & friends apparently not needed (like
@@ -1294,7 +1287,7 @@ Table *MantidUI::createDetectorTable(
     QList<QVariant> &colValues = tableColValues[row];
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
     colValues << QVariant(static_cast<double>(wsIndex));
-    const double dataY0(ws->y(wsIndex)[0]), dataE0(ws->e(wsIndex)[0]);
+    const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
@@ -2786,9 +2779,9 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
   // t->askOnCloseEvent(false);
 
   for (int i = 0; i < no_cols; i++) {
-    const auto &dataXPoints = workspace->points(indexList[i]);
-    const auto &dataY = workspace->y(indexList[i]);
-    const auto &dataE = workspace->e(indexList[i]);
+    const Mantid::MantidVec &dataX = workspace->readX(indexList[i]);
+    const Mantid::MantidVec &dataY = workspace->readY(indexList[i]);
+    const Mantid::MantidVec &dataE = workspace->readE(indexList[i]);
 
     const int kY = (c + 1) * i + 1;
     const int kX = (c + 1) * i;
@@ -2802,7 +2795,11 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
       t->setColName(kErr, "ES" + QString::number(indexList[i]));
     }
     for (int j = 0; j < numRows; j++) {
-      t->setCell(j, kX, dataXPoints[j]);
+      if (isHistogram && binCentres) {
+        t->setCell(j, kX, (dataX[j] + dataX[j + 1]) / 2);
+      } else {
+        t->setCell(j, kX, dataX[j]);
+      }
       t->setCell(j, kY, dataY[j]);
 
       if (errs)
@@ -2812,7 +2809,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
       int iRow = numRows;
       t->addRows(1);
       if (i == 0)
-        t->setCell(iRow, 0, dataXPoints[iRow]);
+        t->setCell(iRow, 0, dataX[iRow]);
       t->setCell(iRow, kY, 0);
       if (errs)
         t->setCell(iRow, kErr, 0);
@@ -3611,8 +3608,8 @@ Table *MantidUI::createTableFromBins(
       t->setColName(kErr, "EB" + QString::number(bins[i]));
     }
     for (int j = j0; j <= j1; j++) {
-      const auto &dataY = workspace->y(j);
-      const auto &dataE = workspace->e(j);
+      const Mantid::MantidVec &dataY = workspace->readY(j);
+      const Mantid::MantidVec &dataE = workspace->readE(j);
 
       if (i == 0) {
         // Get the X axis values from the vertical axis of the workspace

@@ -110,7 +110,12 @@ void WorkspaceFactoryImpl::initializeFromParent(
 
   // Same number of histograms = copy over the spectra data
   if (parent.getNumberHistograms() == child.getNumberHistograms()) {
-    child.setIndexInfo(parent.indexInfo());
+    for (size_t wi = 0; wi < parent.getNumberHistograms(); wi++) {
+      auto &childSpec = child.getSpectrum(wi);
+      const auto &parentSpec = parent.getSpectrum(wi);
+      // Copy spectrum number and detector IDs
+      childSpec.copyInfoFrom(parentSpec);
+    }
   }
 
   // deal with axis

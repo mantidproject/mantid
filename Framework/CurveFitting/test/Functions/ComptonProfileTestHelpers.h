@@ -2,7 +2,6 @@
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidIndexing/IndexInfo.h"
@@ -165,9 +164,8 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
                                     const Mantid::detid_t detID) {
   // Parameters
   auto &pmap = ws->instrumentParameters();
-  const auto &detectorInfo = ws->detectorInfo();
-  const auto detIndex = detectorInfo.indexOf(detID);
-  const auto compID = detectorInfo.detector(detIndex).getComponentID();
+  auto det0 = ws->getInstrument()->getDetector(detID);
+  auto compID = det0->getComponentID();
 
   pmap.addDouble(compID, "sigma_l1", 0.021);
   pmap.addDouble(compID, "sigma_l2", 0.023);

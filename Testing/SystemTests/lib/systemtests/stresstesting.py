@@ -292,7 +292,7 @@ class MantidStressTest(unittest.TestCase):
 
     def validateWorkspaces(self, valNames=None,mismatchName=None):
         '''
-        Performs a check that two workspaces are equal using the CompareWorkspaces
+        Performs a check that two workspaces are equal using the CheckWorkspacesMatch
         algorithm. Loads one workspace from a nexus file if appropriate.
         Returns true if: the workspaces match 
                       OR the validate method has not been overridden.
@@ -302,7 +302,7 @@ class MantidStressTest(unittest.TestCase):
             valNames = self.validate()
 
         from mantid.simpleapi import SaveNexus, AlgorithmManager
-        checker = AlgorithmManager.create("CompareWorkspaces")
+        checker = AlgorithmManager.create("CheckWorkspacesMatch")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1",valNames[0])
         checker.setPropertyValue("Workspace2",valNames[1])
@@ -312,7 +312,7 @@ class MantidStressTest(unittest.TestCase):
         for d in self.disableChecking:
             checker.setPropertyValue("Check"+d,"0")
         checker.execute()
-        if not checker.getProperty("Result").value:
+        if checker.getPropertyValue("Result") != 'Success!':
             print(self.__class__.__name__)
             if mismatchName:
                 SaveNexus(InputWorkspace=valNames[0],Filename=self.__class__.__name__+mismatchName+'-mismatch.nxs')

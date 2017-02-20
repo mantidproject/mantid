@@ -135,13 +135,14 @@ std::vector<double> FunctionQDepends::extractQValues(
     const auto &spectrumInfo = workspace.spectrumInfo();
     size_t numHist = workspace.getNumberHistograms();
     for (size_t wi = 0; wi < numHist; wi++) {
-      if (spectrumInfo.hasDetectors(wi)) {
-        const auto detID = spectrumInfo.detector(wi).getID();
-        double efixed = workspace.getEFixed(detID);
+      try {
+        Mantid::Geometry::IDetector_const_sptr detector;
+        detector = workspace.getDetector(wi);
+        double efixed = workspace.getEFixed(detector);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
         double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
         qs.push_back(q);
-      } else {
+      } catch (Kernel::Exception::NotFoundError &) {
         g_log.debug("Cannot populate Q values from workspace");
         qs.clear();
         break;

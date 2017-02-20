@@ -214,9 +214,6 @@ private:
                                  int64_t ndets, int64_t n_vms_compat_spectra,
                                  std::map<int64_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
-
-  /// Check if is the file is a multiple time regime file
-  bool isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const;
 };
 
 } // namespace DataHandling

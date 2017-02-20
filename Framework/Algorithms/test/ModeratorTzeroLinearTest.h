@@ -2,9 +2,12 @@
 #define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ModeratorTzeroLinear.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Events.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -18,7 +21,7 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
 
 namespace {
-void addToInstrument(MatrixWorkspace_sptr testWS,
+void AddToInstrument(MatrixWorkspace_sptr testWS,
                      const bool &add_deltaE_mode = false,
                      const bool &add_t0_formula = false) {
   const double evalue(2.082); // energy corresponding to the first order Bragg
@@ -26,11 +29,9 @@ void addToInstrument(MatrixWorkspace_sptr testWS,
   if (add_deltaE_mode) {
     testWS->instrumentParameters().addString(
         testWS->getInstrument()->getComponentID(), "deltaE-mode", "indirect");
-    auto &pmap = testWS->instrumentParameters();
-    const auto &spectrumInfo = testWS->spectrumInfo();
-    for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist) {
-      pmap.addDouble(&spectrumInfo.detector(ihist), "Efixed", evalue);
-    }
+    for (size_t ihist = 0; ihist < testWS->getNumberHistograms(); ++ihist)
+      testWS->instrumentParameters().addDouble(
+          testWS->getDetector(ihist)->getComponentID(), "Efixed", evalue);
   }
   if (add_t0_formula) {
     testWS->instrumentParameters().addDouble(
@@ -83,7 +84,7 @@ public:
     MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
     AnalysisDataService::Instance().add("testWS", testWS);
     const bool add_deltaE_mode = true;
-    addToInstrument(testWS, add_deltaE_mode);
+    AddToInstrument(testWS, add_deltaE_mode);
     ModeratorTzeroLinear alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", testWS);
@@ -101,7 +102,7 @@ public:
     MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
     const bool add_deltaE_mode = true;
     const bool add_t0_formula = true;
-    addToInstrument(testWS, add_deltaE_mode, add_t0_formula);
+    AddToInstrument(testWS, add_deltaE_mode, add_t0_formula);
     ModeratorTzeroLinear alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", testWS);
@@ -122,7 +123,7 @@ public:
     EventWorkspace_sptr testWS = CreateEventWorkspace();
     const bool add_deltaE_mode = true;
     const bool add_t0_formula = true;
-    addToInstrument(testWS, add_deltaE_mode, add_t0_formula);
+    AddToInstrument(testWS, add_deltaE_mode, add_t0_formula);
     ModeratorTzeroLinear alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", testWS);
@@ -214,7 +215,7 @@ public:
   }
 
   void testExec() {
-    addToInstrument(input, true, true);
+    AddToInstrument(input, true, true);
     alg.initialize();
     alg.setProperty("InputWorkspace", input);
     alg.setPropertyValue("OutputWorkspace", "output");
@@ -222,7 +223,7 @@ public:
   }
 
   void testExecEvent() {
-    addToInstrument(inputEvent, true, true);
+    AddToInstrument(inputEvent, true, true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inputEvent);
     alg.setPropertyValue("OutputWorkspace", "output");

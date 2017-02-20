@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -28,9 +27,12 @@ private:
   /*
    * Calculate what the weight should be.
    */
-  double calculate_weight_at(double xMin, double xMax, double twotheta) {
+  double calculate_weight_at(MatrixWorkspace_sptr &ws, const int bin_index) {
+    auto &xData = ws->x(0);
 
-    double lam = 0.5 * (xMin + xMax);
+    auto detector = ws->getDetector(0);
+    double twotheta = ws->detectorTwoTheta(*detector);
+    double lam = 0.5 * (xData[bin_index] + xData[bin_index + 1]);
     double weight = std::sin(0.5 * twotheta);
     weight = weight * weight;
     weight = weight / (lam * lam * lam * lam);
@@ -131,20 +133,16 @@ public:
     const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "Wavelength");
 
-    const auto &xData = out_ws->x(0);
-    const auto &yData = out_ws->y(0);
-    const auto &eData = out_ws->e(0);
-    const auto &spectrumInfo = out_ws->spectrumInfo();
+    auto &yData = out_ws->y(0);
+    auto &eData = out_ws->e(0);
 
     int index = 0;
-    double weight = calculate_weight_at(xData[index], xData[index + 1],
-                                        spectrumInfo.twoTheta(0));
+    double weight = calculate_weight_at(out_ws, index /*y index*/);
     TS_ASSERT_EQUALS(yData[index], weight);
     TS_ASSERT_EQUALS(eData[index], weight);
 
     index++; // go to 1
-    weight = calculate_weight_at(xData[index], xData[index + 1],
-                                 spectrumInfo.twoTheta(0));
+    weight = calculate_weight_at(out_ws, index /*y index*/);
     TS_ASSERT_EQUALS(yData[index], weight);
     TS_ASSERT_EQUALS(eData[index], weight);
   }

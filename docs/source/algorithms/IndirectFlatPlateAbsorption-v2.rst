@@ -11,18 +11,13 @@ Description
 
 Calculates and applies corrections for scattering abs absorption in a flat plate
 sample for a run on an indirect inelastic instrument, optionally allowing for
-the subtraction or corrections of the container. Uses :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`
-to calculate the corrections.
-
+the subtraction or corrections of the container.
 
 The correction factor workspace is a workspace group containing the correction
 factors in the Paalman and Pings format, note that only :math:`{A_{s,s}}` and
 :math:`A_{c,c}` factors are calculated by this algorithm.
 
-Workflow
---------
 
-.. diagram:: IndirectFlatPlateAbsorption-v2_wkflw.dot
 
 Usage
 -----

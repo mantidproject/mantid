@@ -7,7 +7,6 @@
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
@@ -413,33 +412,40 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
-  void test_accessing_SpectrumInfo_creates_default_grouping() {
-    using namespace Mantid;
+  void test_getDetectorByID() {
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
 
-    const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
-        &spectrumInfo.detector(0));
-    TS_ASSERT(!detGroup);
-    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(), 1);
+    IDetector_const_sptr det;
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+
+    // Set a mapping
+    std::set<Mantid::detid_t> group{1, 2};
+    Mantid::det2group_map mapping{{1, group}};
+    exptInfo->cacheDetectorGroupings(mapping);
+
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
   }
 
-  void test_cacheDetectorGroupings_creates_correct_SpectrumInfo() {
+  void test_detectorIDsInGroup() {
     using namespace Mantid;
     ExperimentInfo_sptr exptInfo(new ExperimentInfo);
     addInstrumentWithParameter(*exptInfo, "a", "b");
+
+    std::set<detid_t> dets;
+    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
+    TS_ASSERT_EQUALS(dets, std::set<detid_t>{1});
 
     // Set a mapping
     std::set<detid_t> group{1, 2};
     Mantid::det2group_map mapping{{1, group}};
     exptInfo->cacheDetectorGroupings(mapping);
 
-    const auto &spectrumInfo = exptInfo->spectrumInfo();
-    const auto *detGroup = dynamic_cast<const Geometry::DetectorGroup *>(
-        &spectrumInfo.detector(0));
-    TS_ASSERT(detGroup);
-    TS_ASSERT_EQUALS(detGroup->getDetectorIDs(), (std::vector<detid_t>{1, 2}));
+    TS_ASSERT_THROWS_NOTHING(dets = exptInfo->detectorIDsInGroup(0));
+    TS_ASSERT_EQUALS(dets, group);
   }
 
   void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw() {
@@ -449,22 +455,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
   }
 
-  void test_Getting_Group_For_Unknown_ID_Throws() {
+  void test_Getting_Group_Members_For_Unknown_ID_Throws() {
     ExperimentInfo expt;
 
-    TS_ASSERT_THROWS(expt.groupOfDetectorID(1), std::out_of_range);
+    TS_ASSERT_THROWS(expt.getGroupMembers(1), std::runtime_error);
   }
 
   void
-  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_Group() {
+  test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs() {
     ExperimentInfo expt;
     Mantid::det2group_map mappings;
     mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    size_t index;
-    TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
-    TS_ASSERT_EQUALS(index, 0);
+    std::set<Mantid::detid_t> ids;
+    TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
   }
 
   struct fromToEntry {

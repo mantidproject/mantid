@@ -22,7 +22,7 @@ struct PeakViewColor {
       : colorCross(colorCross), colorSphere(colorSphere),
         colorEllipsoid(colorEllipsoid) {}
 
-  bool operator==(const PeakViewColor &other) const {
+  bool operator==(const PeakViewColor &other) {
     auto sameColorCross = this->colorCross == other.colorCross;
     auto sameColorSphere = this->colorSphere == other.colorSphere;
     auto sameColorEllipsoid = this->colorEllipsoid == other.colorEllipsoid;
@@ -30,9 +30,7 @@ struct PeakViewColor {
     return sameColorCross && sameColorSphere && sameColorEllipsoid;
   }
 
-  bool operator!=(const PeakViewColor &other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const PeakViewColor &other) { return !(*this == other); }
 
   QColor colorCross;
   QColor colorSphere;

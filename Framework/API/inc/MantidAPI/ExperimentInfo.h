@@ -8,19 +8,16 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/cow_ptr.h"
 
 #include <list>
 #include <mutex>
 
 namespace Mantid {
-class SpectrumDefinition;
 namespace Kernel {
 class Property;
 }
 namespace Beamline {
 class DetectorInfo;
-class SpectrumInfo;
 }
 namespace Geometry {
 class ParameterMap;
@@ -33,7 +30,6 @@ class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
-class SpectrumInfo;
 
 /** This class is shared by a few Workspace types
  * and holds information related to a particular experiment/run:
@@ -78,11 +74,11 @@ public:
   void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
-  virtual void cacheDetectorGroupings(const det2group_map &mapping);
-
-  void setNumberOfDetectorGroups(const size_t count) const;
-  void setDetectorGrouping(const size_t index,
-                           const std::set<detid_t> &detIDs) const;
+  void cacheDetectorGroupings(const det2group_map &mapping);
+  /// Returns the detector IDs that make up the group that this ID is part of
+  const std::set<detid_t> &getGroupMembers(const detid_t detID) const;
+  /// Get a detector or detector group from an ID
+  Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
 
   /// Set an object describing the source properties and take ownership
   void setModeratorModel(ModeratorModel *source);
@@ -162,22 +158,16 @@ public:
   const DetectorInfo &detectorInfo() const;
   DetectorInfo &mutableDetectorInfo();
 
-  const SpectrumInfo &spectrumInfo() const;
-  SpectrumInfo &mutableSpectrumInfo();
-
-  void invalidateSpectrumDefinition(const size_t index);
-  void updateSpectrumDefinitionIfNecessary(const size_t index) const;
-
-  virtual size_t groupOfDetectorID(const detid_t detID) const;
+  virtual size_t numberOfDetectorGroups() const;
+  virtual const std::set<detid_t> &detectorIDsInGroup(const size_t index) const;
 
 protected:
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
-  void setSpectrumDefinitions(
-      Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
+  /// Called when instrument or parameter map is reset to notify child classes.
+  virtual void invalidateInstrumentReferences() const {}
 
-  virtual void updateCachedDetectorGrouping(const size_t index) const;
   /// Description of the source object
   boost::shared_ptr<ModeratorModel> m_moderatorModel;
   /// Description of the choppers for this experiment.
@@ -213,9 +203,9 @@ private:
   // Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string &filename);
   /// Detector grouping information
+  mutable std::vector<std::set<detid_t>> m_detgroups;
   mutable std::unordered_map<detid_t, size_t> m_det2group;
   void cacheDefaultDetectorGrouping() const; // Not thread-safe
-  void invalidateAllSpectrumDefinitions();
   mutable std::once_flag m_defaultDetectorGroupingCached;
 
   /// Mutex to protect against cow_ptr copying
@@ -224,13 +214,6 @@ private:
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
   mutable std::mutex m_detectorInfoMutex;
-
-  mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
-  mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
-  mutable std::mutex m_spectrumInfoMutex;
-  // This vector stores boolean flags but uses char to do so since
-  // std::vector<bool> is not thread-safe.
-  mutable std::vector<char> m_spectrumDefinitionNeedsUpdate;
 };
 
 /// Shared pointer to ExperimentInfo

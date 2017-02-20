@@ -4,7 +4,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Sample.h"
 
 namespace Mantid {
@@ -130,9 +129,7 @@ void CachedExperimentInfo::initCaches(
     const Geometry::Instrument_const_sptr &instrument, const detid_t detID) {
   // Throws if detector does not exist
   // Takes into account possible detector mapping
-  const size_t index = m_exptInfo.groupOfDetectorID(detID);
-  const auto &specInfo = m_exptInfo.spectrumInfo();
-  const auto &det = specInfo.detector(index);
+  IDetector_const_sptr det = m_exptInfo.getDetectorByID(detID);
 
   // Instrument distances
   boost::shared_ptr<const ReferenceFrame> refFrame =
@@ -154,12 +151,12 @@ void CachedExperimentInfo::initCaches(
   const Kernel::V3D beamDir = samplePos - source->getPos();
 
   // Cache
-  m_twoTheta = det.getTwoTheta(samplePos, beamDir);
-  m_phi = det.getPhi();
+  m_twoTheta = det->getTwoTheta(samplePos, beamDir);
+  m_phi = det->getPhi();
   m_modToChop = firstChopper->getDistance(*source);
   m_apertureToChop = firstChopper->getDistance(*aperture);
   m_chopToSample = sample->getDistance(*firstChopper);
-  m_sampleToDet = det.getDistance(*sample);
+  m_sampleToDet = det->getDistance(*sample);
 
   // Aperture
   Geometry::BoundingBox apertureBox;
@@ -178,12 +175,12 @@ void CachedExperimentInfo::initCaches(
 
   // Detector volume
   // Make sure it encompasses all possible detectors
-  det.getBoundingBox(m_detBox);
+  det->getBoundingBox(m_detBox);
   if (m_detBox.isNull()) {
     throw std::invalid_argument("CachedExperimentInfo::initCaches - Detector "
                                 "has no bounding box, cannot sample from it. "
                                 "ID:" +
-                                std::to_string(det.getID()));
+                                std::to_string(det->getID()));
   }
 
   constexpr double rad2deg = 180. / M_PI;
@@ -198,8 +195,7 @@ void CachedExperimentInfo::initCaches(
       m_exptInfo.sample().getOrientedLattice().getU() * m_gonimeter->getR();
 
   // EFixed
-  m_efixed = m_exptInfo.getEFixed(
-      boost::shared_ptr<const Geometry::IDetector>(&det, NoDeleting()));
+  m_efixed = m_exptInfo.getEFixed(det);
 }
 }
 }

@@ -22,10 +22,13 @@ add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
-# /W3     - Warning Level 3 (This is also the default)
+# /w34296 - Treat warning C4396, about comparison on unsigned and zero,
+#           as a level 3 warning
+# /w34389 - Treat warning C4389, about equality comparison on unsigned
+#           and signed, as a level 3 warning
 # /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
 #           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling

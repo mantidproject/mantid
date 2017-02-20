@@ -2,7 +2,6 @@
 
 # pylint: disable=invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 from math import (acos, sqrt, degrees)
 from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.kernel import (DateAndTime)

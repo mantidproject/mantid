@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -54,14 +54,15 @@ public:
     if (!out)
       return;
 
-    // Best way to test this is to use the CompareWorkspaces algorithm
-    Mantid::Algorithms::CompareWorkspaces checker;
+    // Best way to test this is to use the CheckWorkspacesMatch algorithm
+    Mantid::Algorithms::CheckWorkspacesMatch checker;
     checker.initialize();
     checker.setProperty("Workspace1", in);
     checker.setProperty("Workspace2", out);
     checker.execute();
 
-    TS_ASSERT(checker.getProperty("Result"));
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
+                     checker.successString());
   }
 
   void testExec_Event_to_2D() {

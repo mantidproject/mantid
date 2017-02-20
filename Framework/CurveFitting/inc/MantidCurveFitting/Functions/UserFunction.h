@@ -83,7 +83,7 @@ public:
 private:
   /// The formula
   std::string m_formula;
-  /// extended muParser instance
+  /// muParser instance
   mu::Parser *m_parser;
   /// Used as 'x' variable in m_parser.
   mutable double m_x;

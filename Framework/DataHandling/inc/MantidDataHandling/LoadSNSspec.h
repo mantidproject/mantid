@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 
 namespace Mantid {
@@ -46,8 +45,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor>,
-                              API::DeprecatedAlgorithm {
+class DLLExport LoadSNSspec : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   LoadSNSspec();
   const std::string name() const override { return "LoadSNSspec"; }

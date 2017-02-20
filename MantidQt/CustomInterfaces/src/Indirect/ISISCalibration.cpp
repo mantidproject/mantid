@@ -411,7 +411,7 @@ void ISISCalibration::calPlotRaw() {
   MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-  const auto &dataX = input->x(0);
+  const Mantid::MantidVec &dataX = input->readX(0);
   QPair<double, double> range(dataX.front(), dataX.back());
 
   m_uiForm.ppCalibration->clear();
@@ -491,7 +491,7 @@ void ISISCalibration::calPlotEnergy() {
     return;
   }
 
-  const auto &dataX = energyWs->x(0);
+  const Mantid::MantidVec &dataX = energyWs->readX(0);
   QPair<double, double> range(dataX.front(), dataX.back());
 
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");

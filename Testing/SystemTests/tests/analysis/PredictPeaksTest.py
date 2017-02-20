@@ -9,7 +9,7 @@ from mantid.geometry import CrystalStructure
 
 # The WISH test has a data mismatch which might be caused by the 'old' code having a bug (issue #14105).
 # The difference is that peaks may have different d-values because they are assigned to a different detector.
-# Instead of using the CompareWorkspaces, only H, K and L are compared.
+# Instead of using the CheckWorkspacesMatch, only H, K and L are compared.
 class PredictPeaksTestWISH(stresstesting.MantidStressTest):
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
@@ -66,9 +66,9 @@ class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
 
         reference = LoadNexus('predict_peaks_test_random_ub_topaz.nxs')
 
-        simulationWorkspaceMatch = CompareWorkspaces(peaks, reference)
+        simulationWorkspaceMatch = CheckWorkspacesMatch(peaks, reference)
 
-        self.assertTrue(simulationWorkspaceMatch[0])
+        self.assertEquals(simulationWorkspaceMatch, 'Success!')
 
 
 class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):

@@ -327,7 +327,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                                          SpectraRange=[3, 53],
                                          Efixed=1.845)
 
-        self.assertTrue(CompareWorkspaces(ref, wks)[0])
+        self.assertTrue(CheckWorkspacesMatch(ref, wks), 'Success!')
 
 
     def test_reduction_with_can_scale(self):

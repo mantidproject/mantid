@@ -1,4 +1,4 @@
-#pylint: disable=no-init,attribute-defined-outside-init
+﻿#pylint: disable=no-init,attribute-defined-outside-init
 """
 System Test for BASIS autoreduction
 """

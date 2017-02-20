@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadDiffCal.h"
 // reuse what another test has for creating dummy workspaces
@@ -70,11 +69,13 @@ public:
     TS_ASSERT(ws);
 
     if (ws) {
-      auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+      auto checkAlg =
+          FrameworkManager::Instance().createAlgorithm("CheckWorkspacesMatch");
       checkAlg->setProperty("Workspace1", calWSIn);
       checkAlg->setProperty("Workspace2", ws);
       checkAlg->execute();
-      TS_ASSERT(checkAlg->getProperty("Result"));
+      std::string result = checkAlg->getPropertyValue("Result");
+      TS_ASSERT_EQUALS(result, "Success!");
 
       AnalysisDataService::Instance().remove(outWSName + "_cal");
     }

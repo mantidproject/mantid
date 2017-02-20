@@ -1,5 +1,4 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
@@ -17,7 +16,7 @@ class SANSAddBatch(stresstesting.MantidStressTest):
     result = ''
 
     def cleanup(self):
-        print("Cleanup")
+        print "Cleanup"
         absfile = FileFinder.getFullPath("input.csv")
         if os.path.exists(absfile):
             os.remove(absfile)
@@ -32,7 +31,7 @@ class SANSAddBatch(stresstesting.MantidStressTest):
     # Find the file , this should really be in the BatchReduce reduction step
 
         f = open(self.csv_file,'w')
-        print("sample_sans,99630-add,output_as, %s"%self.output_file, file=f)
+        print >> f, "sample_sans,99630-add,output_as, %s"%self.output_file
         f.close()
         runnum = '99630'
         sansadd.add_runs((runnum, runnum),'LOQ','.RAW')
@@ -41,7 +40,7 @@ class SANSAddBatch(stresstesting.MantidStressTest):
         ici.MaskFile('MASK.094AA')
         batch.BatchReduce(self.csv_file, 'nxs', plotresults=False, saveAlgs={'SaveNexus':'nxs'})
 
-        print(' reduction without')
+        print ' reduction without'
 
         ici._refresh_singleton()
 
@@ -62,7 +61,7 @@ class SANSAddBatch(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
         self.tolerance = 1.0e-10 #almost ZERO!
-        print('validating', self.result, self.output_file)
+        print 'validating', self.result, self.output_file
         return self.result,self.output_file+'.nxs'
 
     def __del__(self):

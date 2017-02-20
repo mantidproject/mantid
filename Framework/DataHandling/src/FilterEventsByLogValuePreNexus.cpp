@@ -1798,6 +1798,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
   if (!source)
     throw std::runtime_error("Source is not set up in local workspace.");
+  double l1 = instrument->getDistance(*source);
+  g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   //----------------------------------------------------------------------------------
   // process the individual events
@@ -1808,12 +1810,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   int64_t boundindex(0);
   int64_t prevbtime(0);
   PixelType boundpixel(0);
-
-  const auto &detectorInfo = m_localWorkspace->detectorInfo();
-  const auto &detIds = detectorInfo.detectorIDs();
-
-  double l1 = detectorInfo.l1();
-  g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
     bool iswrongdetid = false;
@@ -1942,11 +1938,13 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       } else {
         double factor(1.0);
         if (m_corretctTOF) {
-          if (std::find(detIds.begin(), detIds.end(), pixelid) == detIds.end())
-            throw std::runtime_error("Unable to get access to detector ");
-
           // Calculate TOF correction value
-          double l2 = detectorInfo.l2(pixelid);
+          IComponent_const_sptr det =
+              boost::dynamic_pointer_cast<const IComponent>(
+                  instrument->getDetector(pixelid));
+          if (!det)
+            throw std::runtime_error("Unable to get access to detector ");
+          double l2 = instrument->getDistance(*det);
           factor = (l1) / (l1 + l2);
         }
 

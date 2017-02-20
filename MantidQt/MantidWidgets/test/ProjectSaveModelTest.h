@@ -19,9 +19,9 @@ class ProjectSaveModelTest : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    auto ws1 = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
+    auto ws1 = WorkspaceCreationHelper::create1DWorkspaceRand(10);
     WorkspaceCreationHelper::storeWS("ws1", ws1);
-    auto ws2 = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
+    auto ws2 = WorkspaceCreationHelper::create1DWorkspaceRand(10);
     WorkspaceCreationHelper::storeWS("ws2", ws2);
   }
 

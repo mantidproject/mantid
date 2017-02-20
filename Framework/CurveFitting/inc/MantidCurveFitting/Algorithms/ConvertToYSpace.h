@@ -2,7 +2,6 @@
 #define MANTID_CURVEFITTING_CONVERTTOYSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 
@@ -77,9 +76,10 @@ public:
   getDetectorParameters(const API::MatrixWorkspace_const_sptr &ws,
                         const size_t index);
   /// Retrieve a component parameter
-  static double getComponentParameter(const Geometry::IComponent &det,
-                                      const Geometry::ParameterMap &pmap,
-                                      const std::string &name);
+  static double
+  getComponentParameter(const Geometry::IComponent_const_sptr &comp,
+                        const Geometry::ParameterMap &pmap,
+                        const std::string &name);
   /// Convert single time value to Y,Q & Ei values
   static void calculateY(double &yspace, double &qspace, double &ei,
                          const double mass, const double tsec, const double k1,

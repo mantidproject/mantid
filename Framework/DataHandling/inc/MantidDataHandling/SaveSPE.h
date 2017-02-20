@@ -6,13 +6,8 @@
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
-#include <vector>
 
 namespace Mantid {
-namespace HistogramData {
-class HistogramY;
-class HistogramE;
-}
 namespace DataHandling {
 /**
      Saves a workspace into an ASCII SPE file.
@@ -79,7 +74,7 @@ private:
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
                  const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
-  void writeBins(const std::vector<double> &Vs, FILE *const outFile) const;
+  void writeBins(const MantidVec &Vs, FILE *const outFile) const;
   void writeValue(const double value, FILE *const outFile) const;
   void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked,
                         const int masked) const;
@@ -98,16 +93,14 @@ private:
   static const double MASK_ERROR;
 
   // temporary variable to keep verified signal values for current spectra
-  mutable std::vector<double> m_tSignal;
+  mutable MantidVec m_tSignal;
   // temporary variable to keep verified error values for current spectra
-  mutable std::vector<double> m_tError;
+  mutable MantidVec m_tError;
 
   // method verifies if a spectra contains any NaN or Inf values and replaces
   // these values with SPE-specified constants
-  void check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
-                              const HistogramData::HistogramE &inErr,
-                              std::vector<double> &Signal,
-                              std::vector<double> &Error) const;
+  void check_and_copy_spectra(const MantidVec &inSignal, const MantidVec &inErr,
+                              MantidVec &Signal, MantidVec &Error) const;
 };
 
 } // namespace DataHandling

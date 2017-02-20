@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/PropertyHandler.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+//#include "../FunctionCurve.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -11,6 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
@@ -19,6 +21,7 @@
 #include "ParameterPropertyManager.h"
 
 #include <QMessageBox>
+#include <QMenu>
 
 using std::size_t;
 
@@ -367,12 +370,13 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   // from data values at the ends of the fitting interval
   if (f->name() == "LinearBackground" && !m_browser->workspaceName().empty()) {
     if (ws && wi < ws->getNumberHistograms()) {
-      const auto &X = ws->x(wi);
+      const Mantid::MantidVec &X = ws->readX(wi);
       size_t istart = 0, iend = 0;
       for (size_t i = 0; i < X.size() - 1; ++i) {
         double x = X[i];
-        if (x < m_browser->startX())
+        if (x < m_browser->startX()) {
           istart = i;
+        }
         if (x > m_browser->endX()) {
           iend = i;
           if (iend > 0)
@@ -381,7 +385,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
         }
       }
       if (iend > istart) {
-        const auto &Y = ws->y(wi);
+        const Mantid::MantidVec &Y = ws->readY(wi);
         double p0 = Y[istart];
         double p1 = Y[iend];
         double A1 = (p1 - p0) / (X[iend] - X[istart]);
@@ -1109,8 +1113,8 @@ double PropertyHandler::EstimateFwhm() const {
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
-    const auto &X = ws->x(wi);
-    const auto &Y = ws->y(wi);
+    const Mantid::MantidVec &X = ws->readX(wi);
+    const Mantid::MantidVec &Y = ws->readY(wi);
     size_t n = Y.size() - 1;
     if (m_ci < 0 || m_ci > static_cast<int>(n)) {
       fwhm = 0.;
@@ -1156,8 +1160,8 @@ void PropertyHandler::calcBase() {
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
-    const auto &X = ws->x(wi);
-    const auto &Y = ws->y(wi);
+    const Mantid::MantidVec &X = ws->readX(wi);
+    const Mantid::MantidVec &Y = ws->readY(wi);
     int n = static_cast<int>(Y.size()) - 1;
     if (m_ci < 0 || m_ci > n || !m_browser->m_autoBackground) {
       m_base = 0.;
@@ -1214,7 +1218,7 @@ void PropertyHandler::setCentre(const double &c) {
         m_browser->getWorkspace());
     if (ws) {
       size_t wi = m_browser->workspaceIndex();
-      const auto &X = ws->x(wi);
+      const Mantid::MantidVec &X = ws->readX(wi);
       int n = static_cast<int>(X.size()) - 2;
       if (m_ci < 0)
         m_ci = 0;

@@ -505,18 +505,19 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 
   // Put x-values
   for (size_t i = 0; i < 2; ++i) {
-    auto &dataX = disws->mutableX(i);
+    MantidVec &dataX = disws->dataX(i);
     dataX[0] = 0;
     for (size_t j = 0; j < sizex; ++j) {
       int64_t time =
           pulsetimes[j].totalNanoseconds() - pulsetimes[0].totalNanoseconds();
       dataX[j] = static_cast<double>(time) * 1.0E-9;
+      // dataX[j] = static_cast<double>(j);
     }
   }
 
   // Put y-values
-  auto &dataY0 = disws->mutableY(0);
-  auto &dataY1 = disws->mutableY(1);
+  MantidVec &dataY0 = disws->dataY(0);
+  MantidVec &dataY1 = disws->dataY(1);
 
   dataY0[0] = 0;
   dataY1[1] = static_cast<double>(event_indices[0]);

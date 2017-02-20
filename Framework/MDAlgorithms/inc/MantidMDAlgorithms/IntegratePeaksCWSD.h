@@ -95,6 +95,8 @@ private:
   /// Integrated peaks' intensity per run number
   std::map<int, double> m_runPeakCountsMap;
 
+  /// Mask
+  bool m_maskDets;
   DataObjects::MaskWorkspace_sptr m_maskWS;
   std::vector<detid_t> vecMaskedDetID;
 

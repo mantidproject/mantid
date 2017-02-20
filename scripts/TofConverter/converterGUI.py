@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
-from .ui_converter import Ui_MainWindow #import line for the UI python class
+from ui_converter import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
 import TofConverter.convertUnits
@@ -97,12 +96,12 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
-        except UnboundLocalError as ule:
+        except UnboundLocalError, ule:
             QtGui.QMessageBox.warning(self, "TofConverter", str(ule))
             return
-        except ArithmeticError as ae:
+        except ArithmeticError, ae:
             QtGui.QMessageBox.warning(self, "TofConverter", str(ae))
             return
-        except RuntimeError as re:
+        except RuntimeError, re:
             QtGui.QMessageBox.warning(self, "TofConverter", str(re))
             return

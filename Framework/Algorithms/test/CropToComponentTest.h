@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CropToComponent.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataHandling/LoadRaw3.h"
 
@@ -192,9 +192,9 @@ private:
     std::vector<size_t> indices(numberOfHistograms);
     std::iota(indices.begin(), indices.end(), 0);
 
-    const auto &spectrumInfo = workspace->spectrumInfo();
     for (const auto index : indices) {
-      Mantid::detid_t detectorID = spectrumInfo.detector(index).getID();
+      auto det = workspace->getDetector(index);
+      Mantid::detid_t detectorID = det->getID();
       TSM_ASSERT_EQUALS("The detector IDs should match.", expectedIDs[index],
                         detectorID);
     }

@@ -5,7 +5,6 @@ import six
 import subprocess
 import shutil
 import hashlib
-import io
 import AbinsModules
 import os
 
@@ -412,30 +411,17 @@ class IOmodule(object):
 
     # noinspection PyMethodMayBeStatic
     def _calculate_hash(self, filename=None):
-        """
-        Calculates hash  of a file defined by filename according to sha512 algorithm.
-        :param filename: name of a file to calculate hash (full path to the file)
-        :return: string representation of hash
-        """
-        return self._calculate_hash_core(filename=filename, coding='utf-8')
+        buf = 65536  # chop content of phonon file into 64kb chunks to minimize memory consumption for hash creation
+        sha = hashlib.sha512()
 
-    def _calculate_hash_core(self, filename=None, coding=None):
-        """
-        Helper function for calculating hash.
-        :param filename: name of a file to calculate hash
-        :param fun_obj: object function to open file
-        :return: string representation of hash
-        """
-        hash_calculator = hashlib.sha512()
-        buf = 65536  # chop content of a file into 64kb chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rt", encoding=coding, buffering=buf, newline=None) as f:
+        with open(filename, 'rU') as f:
             while True:
                 data = f.read(buf)
                 if not data:
                     break
-                hash_calculator.update(data.encode(coding))
+                sha.update(data.encode('utf-8'))
 
-        return hash_calculator.hexdigest()
+        return sha.hexdigest()
 
     def _get_advanced_parameters(self):
         """
@@ -443,8 +429,7 @@ class IOmodule(object):
         Returns: string representation of hash for  file  with advanced parameters
                  which contains only hexadecimal digits
         """
-        h = self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
-        return h
+        return self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
 
     def get_input_filename(self):
         return self._input_filename

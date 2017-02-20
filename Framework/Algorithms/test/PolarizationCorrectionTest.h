@@ -137,7 +137,7 @@ public:
 
   MatrixWorkspace_sptr create1DWorkspace(int size, double signal,
                                          double error) {
-    auto ws = create1DWorkspaceConstant(size, signal, error, true);
+    auto ws = create1DWorkspaceConstant(size, signal, error);
     ws->getAxis(0)->setUnit("Wavelength");
     return ws;
   }
@@ -170,14 +170,15 @@ public:
     for (size_t i = 0; i < outWS->size(); ++i) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+          AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
       checkAlg->setProperty("Tolerance", 3e-16);
       checkAlg->execute();
-      TS_ASSERT(checkAlg->getProperty("Result"));
+      const std::string result = checkAlg->getProperty("Result");
+      TS_ASSERT_EQUALS("Success!", result);
     }
   }
 
@@ -204,13 +205,14 @@ public:
     for (size_t i = 0; i < outWS->size(); ++i) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg =
-          AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+          AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
       checkAlg->initialize();
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
       checkAlg->execute();
-      TS_ASSERT(checkAlg->getProperty("Result"));
+      const std::string result = checkAlg->getProperty("Result");
+      TS_ASSERT_EQUALS("Success!", result);
     }
   }
 };

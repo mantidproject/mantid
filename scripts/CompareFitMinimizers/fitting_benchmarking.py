@@ -137,7 +137,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
     prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
 
-    probs, results = list(zip(*prob_results))
+    probs, results = zip(*prob_results)
 
     if len(probs) != len(results):
         raise RuntimeError('probs : {0}, prob_results: {1}'.format(len(probs), len(results)))

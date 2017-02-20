@@ -5,12 +5,18 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
+#include <Poco/AutoPtr.h>
+#include <Poco/NObserver.h>
 
 #include <QAction>
+#include <QBrush>
 #include <QPalette>
+#include <QVBoxLayout>
 
 #include <qwt_array.h>
 #include <qwt_data.h>
@@ -618,7 +624,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
 
   // Check the X axis is large enough
-  if (ws->x(0).size() < 2)
+  if (ws->readX(0).size() < 2)
     throw std::runtime_error(
         "X axis is too small to generate a histogram plot.");
 
@@ -638,7 +644,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
     ws = convertXAlg->getProperty("OutputWorkspace");
   }
 
-  auto wsDataY = ws->y(wsIndex);
+  std::vector<double> wsDataY = ws->readY(wsIndex);
 
   // If using log scale need to remove all negative Y values
   bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
@@ -657,10 +663,14 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   }
 
   // Create the Qwt data
-  const auto &wsXPoints = ws->points(wsIndex);
-
-  QwtArray<double> dataX = QVector<double>::fromStdVector(wsXPoints.rawData());
-  QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY.rawData());
+  std::vector<double> X;
+  if (ws->isHistogramData()) {
+    Mantid::Kernel::VectorHelper::convertToBinCentre(ws->readX(wsIndex), X);
+  } else {
+    X = ws->readX(wsIndex);
+  }
+  QwtArray<double> dataX = QVector<double>::fromStdVector(X);
+  QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
   QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
@@ -672,7 +682,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
   // Create error bars if needed
   if (curveConfig.showErrorsAction->isChecked()) {
     curveConfig.errorCurve =
-        new ErrorCurve(curveConfig.curve, ws->e(wsIndex).rawData());
+        new ErrorCurve(curveConfig.curve, ws->readE(wsIndex));
     curveConfig.errorCurve->attach(m_uiForm.plot);
   } else {
     curveConfig.errorCurve = NULL;

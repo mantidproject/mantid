@@ -6,23 +6,7 @@
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "../Functions/ComptonProfileTestHelpers.h"
 
-using namespace Mantid::API;
 using Mantid::CurveFitting::Algorithms::ConvertToYSpace;
-
-namespace {
-/** Creates an instance of the ConvertToYSpace algorithm and sets its
-* properties.
-*
-* @return ConvertToYSpace alg
-*/
-IAlgorithm_sptr createAlgorithm() {
-  IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
-  alg->initialize();
-  alg->setChild(true);
-  alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
-  return alg;
-}
-}
 
 class ConvertToYSpaceTest : public CxxTest::TestSuite {
 public:
@@ -149,35 +133,15 @@ public:
 
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
-};
-
-class ConvertToYSpaceTestPerformance : public CxxTest::TestSuite {
-public:
-  static ConvertToYSpaceTestPerformance *createSuite() {
-    return new ConvertToYSpaceTestPerformance();
-  }
-  static void destroySuite(ConvertToYSpaceTestPerformance *suite) {
-    delete suite;
-  }
-
-  void setUp() override {
-    convertToYSpaceAlg = createAlgorithm();
-    double x0(50.0), x1(300.0), dx(0.5);
-    auto testWS = ComptonProfileTestHelpers::createTestWorkspace(
-        1000, x0, x1, dx, true, true);
-    convertToYSpaceAlg->setChild(false);
-    convertToYSpaceAlg->setProperty("InputWorkspace", testWS);
-    convertToYSpaceAlg->setProperty("Mass", 1.0097);
-    convertToYSpaceAlg->setProperty("QWorkspace",
-                                    "ConvertToYSpace_Test_qSpace");
-  }
-
-  void testConvertToYSpaceTestPerformance() {
-    TS_ASSERT_THROWS_NOTHING(convertToYSpaceAlg->execute());
-  }
 
 private:
-  IAlgorithm_sptr convertToYSpaceAlg;
+  Mantid::API::IAlgorithm_sptr createAlgorithm() {
+    Mantid::API::IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
+    alg->initialize();
+    alg->setChild(true);
+    alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
+    return alg;
+  }
 };
 
 #endif /* MANTID_CURVEFITTING_CONVERTTOYSPACETEST_H_ */

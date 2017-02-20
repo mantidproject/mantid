@@ -304,8 +304,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         mono_ref = tReducer.mono_sample(ref_ws, ei_guess,wb_clone)
 
-        rez = CompareWorkspaces(mono_s,mono_ref)
-        self.assertTrue(rez[0])
+        rez = CheckWorkspacesMatch(mono_s,mono_ref)
+        self.assertEqual(rez,'Success!')
 
 
     def test_tof_range(self):
@@ -408,10 +408,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
 
-        rez = CompareWorkspaces(result[0],result2[0])
-        self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1],result2[1])
-        self.assertTrue(rez[0])
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
 
 
     def test_multirep_abs_units_mode(self):
@@ -474,10 +474,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         result2 = tReducer.convert_to_energy(None,run2)
 
-        rez = CompareWorkspaces(result[0],result2[0])
-        self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1],result2[1])
-        self.assertTrue(rez[0])
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
 
     def test_abs_multirep_with_bkg_and_bleed(self):
         # create test workspace
@@ -547,10 +547,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
         AddSampleLog(run2,LogName='goodfrm',LogText='1',LogType='Number')
         result2 = tReducer.convert_to_energy(None,run2)
 
-        rez = CompareWorkspaces(result[0],result2[0])
-        self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1],result2[1])
-        self.assertTrue(rez[0])
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
 
     def test_sum_monitors(self):
         # create test workspace

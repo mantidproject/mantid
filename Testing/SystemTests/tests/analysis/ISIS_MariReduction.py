@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+﻿#pylint: disable=invalid-name
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
 #

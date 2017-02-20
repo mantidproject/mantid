@@ -68,7 +68,7 @@ Usage
 
     wsOutput = LoadNexusProcessed(wsPath)
 
-    print CompareWorkspaces(ws,wsOutput, CheckInstrument=False)[0]
+    print CheckWorkspacesMatch(ws,wsOutput, CheckInstrument=False)
 
     os.remove(wsPath)
 
@@ -76,7 +76,7 @@ Output:
 
 .. testoutput:: LoadNexusProcessedex
 
-   True
+   Success!
 
 .. categories::
 

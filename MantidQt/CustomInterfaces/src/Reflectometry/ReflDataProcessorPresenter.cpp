@@ -363,28 +363,32 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
   scale->initialize();
   scale->setProperty("InputWorkspace", monName);
   scale->setProperty("Factor", fraction);
-  scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
+  scale->setProperty("OutputWorkspace", monName);
   scale->execute();
 
-  IAlgorithm_sptr rebinDet =
-      AlgorithmManager::Instance().create("RebinToWorkspace");
+  IAlgorithm_sptr rebinMon = AlgorithmManager::Instance().create("Rebin");
+  rebinMon->initialize();
+  rebinMon->setProperty("InputWorkspace", monName);
+  rebinMon->setProperty("OutputWorkspace", monName);
+  rebinMon->setProperty("Params", "0, 100, 100000");
+  rebinMon->setProperty("PreserveEvents", false);
+  rebinMon->execute();
+
+  IAlgorithm_sptr rebinDet = AlgorithmManager::Instance().create("Rebin");
   rebinDet->initialize();
-  rebinDet->setProperty("WorkspaceToRebin", sliceName);
-  rebinDet->setProperty("WorkspaceToMatch", "__" + monName + "_temp");
+  rebinDet->setProperty("InputWorkspace", sliceName);
   rebinDet->setProperty("OutputWorkspace", sliceName);
+  rebinDet->setProperty("Params", "0, 100, 100000");
   rebinDet->setProperty("PreserveEvents", false);
   rebinDet->execute();
 
   IAlgorithm_sptr append = AlgorithmManager::Instance().create("AppendSpectra");
   append->initialize();
-  append->setProperty("InputWorkspace1", "__" + monName + "_temp");
+  append->setProperty("InputWorkspace1", monName);
   append->setProperty("InputWorkspace2", sliceName);
   append->setProperty("OutputWorkspace", sliceName);
   append->setProperty("MergeLogs", true);
   append->execute();
-
-  // Remove temporary monitor ws
-  AnalysisDataService::Instance().remove("__" + monName + "_temp");
 
   return sliceName.substr(4);
 }

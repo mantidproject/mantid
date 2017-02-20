@@ -9,7 +9,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/CPUTimer.h"
 #include "PropertyManagerHelper.h"
 
@@ -203,10 +202,10 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,
                                                                      200);
 
-    const auto &spectrumInfo = ws->spectrumInfo();
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < numpixels; i++) {
-      TS_ASSERT(spectrumInfo.hasDetectors(i));
+      IDetector_const_sptr det = ws->getDetector(i);
+      TS_ASSERT(det);
     }
   }
 

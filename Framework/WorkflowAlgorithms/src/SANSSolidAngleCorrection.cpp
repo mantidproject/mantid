@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -98,13 +99,13 @@ void SANSSolidAngleCorrection::exec() {
   Progress progress(this, 0.0, 1.0, numHists);
 
   // Number of X bins
-  const int xLength = static_cast<int>(inputWS->y(0).size());
+  const int xLength = static_cast<int>(inputWS->readY(0).size());
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
   for (int i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
-    outputWS->setSharedX(i, inputWS->sharedX(i));
+    outputWS->dataX(i) = inputWS->readX(i);
 
     if (!spectrumInfo.hasDetectors(i)) {
       g_log.warning() << "Workspace index " << i
@@ -116,11 +117,11 @@ void SANSSolidAngleCorrection::exec() {
     if (spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i))
       continue;
 
-    const auto &YIn = inputWS->y(i);
-    const auto &EIn = inputWS->e(i);
+    const MantidVec &YIn = inputWS->readY(i);
+    const MantidVec &EIn = inputWS->readE(i);
 
-    auto &YOut = outputWS->mutableY(i);
-    auto &EOut = outputWS->mutableE(i);
+    MantidVec &YOut = outputWS->dataY(i);
+    MantidVec &EOut = outputWS->dataE(i);
 
     // Compute solid angle correction factor
     const bool is_tube = getProperty("DetectorTubes");

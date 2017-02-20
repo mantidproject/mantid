@@ -78,7 +78,6 @@
 
   <instrument name="IMAT">
     <technique>Neutron Imaging</technique>
-    <zeropadding size="8"/>
     <livedata>
       <connection name="histo" address="NDXIMAT:6789" listener="ISISHistoDataListener" />
     </livedata>
@@ -175,8 +174,6 @@
   </instrument>
 
   <instrument name="POLARIS" shortname="POL">
-    <zeropadding size="5" startRunNumber="1" prefix="POL"/>
-    <zeropadding size="8" startRunNumber="96912" prefix="POLARIS"/>
     <technique>Neutron Diffraction</technique>
     <livedata>
       <connection name="histo" address="NDXPOLARIS:6789" listener="ISISHistoDataListener" />

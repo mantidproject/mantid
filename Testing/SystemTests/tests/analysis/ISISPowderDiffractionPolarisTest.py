@@ -1,4 +1,4 @@
-# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace

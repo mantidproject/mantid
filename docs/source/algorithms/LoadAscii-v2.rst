@@ -67,7 +67,7 @@ Usage
     #Load it again - Load would work just as well as LoadAscii
     wsOutput = LoadAscii(savefile,Unit="Label")
 
-    print CompareWorkspaces(ws1,wsOutput)[0]
+    print CheckWorkspacesMatch(ws1,wsOutput)
 
     #clean up the file I saved
     os.remove(savefile)
@@ -76,7 +76,7 @@ Output:
 
 .. testoutput:: LoadASCII
 
-   True
+   Success!
 
 .. categories::
 

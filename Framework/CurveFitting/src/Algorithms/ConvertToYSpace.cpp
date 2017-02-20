@@ -61,23 +61,24 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
     throw std::invalid_argument(
         "ConvertToYSpace - Workspace has no source/sample.");
   }
-
-  const auto &spectrumInfo = ws->spectrumInfo();
-  if (!spectrumInfo.hasDetectors(index))
+  Geometry::IDetector_const_sptr det;
+  try {
+    det = ws->getDetector(index);
+  } catch (Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument("ConvertToYSpace - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(index));
+  }
 
   DetectorParams detpar;
   const auto &pmap = ws->constInstrumentParameters();
-  const auto &det = spectrumInfo.detector(index);
-  detpar.l1 = spectrumInfo.l1();
-  detpar.l2 = spectrumInfo.l2(index);
-  detpar.pos = spectrumInfo.position(index);
-  detpar.theta = spectrumInfo.twoTheta(index);
-  detpar.t0 =
-      getComponentParameter(det, pmap, "t0") * 1e-6; // Convert to seconds
-  detpar.efixed = getComponentParameter(det, pmap, "efixed");
+  detpar.l1 = sample->getDistance(*source);
+  detpar.l2 = det->getDistance(*sample);
+  detpar.pos = det->getPos();
+  detpar.theta = ws->detectorTwoTheta(*det);
+  detpar.t0 = ConvertToYSpace::getComponentParameter(det, pmap, "t0") *
+              1e-6; // Convert to seconds
+  detpar.efixed = ConvertToYSpace::getComponentParameter(det, pmap, "efixed");
   return detpar;
 }
 
@@ -90,15 +91,19 @@ DetectorParams ConvertToYSpace::getDetectorParameters(
 * @returns The value of the parameter if it exists
 * @throws A std::invalid_argument error if the parameter does not exist
 */
-double
-ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
-                                       const Geometry::ParameterMap &pmap,
-                                       const std::string &name) {
+double ConvertToYSpace::getComponentParameter(
+    const Geometry::IComponent_const_sptr &comp,
+    const Geometry::ParameterMap &pmap, const std::string &name) {
+  if (!comp)
+    throw std::invalid_argument(
+        "ComptonProfile - Cannot retrieve parameter from NULL component");
+
   double result(0.0);
-  if (const auto &group =
-          dynamic_cast<const Geometry::DetectorGroup *>(&comp)) {
+  if (const auto group =
+          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(comp)) {
+    const auto dets = group->getDetectors();
     double avg(0.0);
-    for (const auto &det : group->getDetectors()) {
+    for (const auto &det : dets) {
       auto param = pmap.getRecursive(det->getComponentID(), name);
       if (param)
         avg += param->value<double>();
@@ -109,7 +114,7 @@ ConvertToYSpace::getComponentParameter(const Geometry::IComponent &comp,
     }
     result = avg / static_cast<double>(group->nDets());
   } else {
-    auto param = pmap.getRecursive(comp.getComponentID(), name);
+    auto param = pmap.getRecursive(comp->getComponentID(), name);
     if (param) {
       result = param->value<double>();
     } else {

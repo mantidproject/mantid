@@ -1,4 +1,3 @@
-from __future__ import (absolute_import, division, print_function)
 def assert_validate_error(caller, error_type, obj):
     try:
         obj.validate()
