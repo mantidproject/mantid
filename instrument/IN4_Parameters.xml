@@ -22,7 +22,7 @@
 
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
-			<value val="1"/>
+			<value val="397"/>
 		</parameter>
 
 		<!-- MergeRuns behavior when merging sample logs. -->
