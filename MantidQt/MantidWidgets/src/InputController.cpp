@@ -226,7 +226,7 @@ void InputControllerMoveUnwrapped::mousePressEvent(QMouseEvent *event) {
     m_isButtonPressed = true;
     m_rect.setTopLeft(QPoint(event->x(), event->y()));
   } else if (event->button() == Qt::RightButton) {
-    if(event->modifiers() & Qt::ControlModifier) {
+    if (event->modifiers() & Qt::ControlModifier) {
       emit resetZoom();
     } else {
       m_isButtonPressed = true;
@@ -251,7 +251,7 @@ void InputControllerMoveUnwrapped::mouseMoveEvent(QMouseEvent *event) {
 void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
   if (m_isButtonPressed && event->button() == Qt::LeftButton) {
     emit zoom();
-  } else if(m_isButtonPressed && event->button() == Qt::RightButton) {
+  } else if (m_isButtonPressed && event->button() == Qt::RightButton) {
     emit unzoom();
   }
   m_isButtonPressed = false;

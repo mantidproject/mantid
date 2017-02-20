@@ -638,19 +638,19 @@ void UnwrappedSurface::unzoom() {
   double owidth = old.width();
   double oheight = old.height();
 
-  auto newWidth = owidth/width* owidth;
-  auto newHeight = oheight/height* oheight;
-  auto newLeft = left + width/2 - newWidth/2;
-  auto newTop = top + height/2 - newHeight/2;
-  m_viewRect = RectF(QPointF(newLeft, newTop), QPointF(newLeft + newWidth, newTop + newHeight));
+  auto newWidth = owidth / width * owidth;
+  auto newHeight = oheight / height * oheight;
+  auto newLeft = left + width / 2 - newWidth / 2;
+  auto newTop = top + height / 2 - newHeight / 2;
+  m_viewRect = RectF(QPointF(newLeft, newTop),
+                     QPointF(newLeft + newWidth, newTop + newHeight));
 
   updateView();
   emptySelectionRect();
   emit updateInfoText();
 }
 
-void UnwrappedSurface::resetZoom()
-{
+void UnwrappedSurface::resetZoom() {
   if (m_zoomStack.empty())
     return;
 
