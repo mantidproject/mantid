@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>
@@ -17,6 +19,8 @@ using namespace std;
 class AsyncAlgorithm : public Algorithm {
 public:
   AsyncAlgorithm() : Algorithm(), throw_exception(false) {}
+  AsyncAlgorithm(const bool throw_default)
+      : Algorithm(), throw_exception(throw_default) {}
   ~AsyncAlgorithm() override {}
   const std::string name() const override {
     return "AsyncAlgorithm";
@@ -29,7 +33,11 @@ public:
   } ///< Algorithm's category for identification
   const std::string summary() const override { return "Test summary"; }
 
-  void init() override {}
+  void init() override {
+    declareProperty(std::make_unique<WorkspaceProperty<>>(
+        "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
+  }
+
   void exec() override {
     Poco::Thread *thr = Poco::Thread::current();
     for (int i = 0; i < NofLoops; i++) {
@@ -43,10 +51,25 @@ public:
     }
   }
   int result;
+
+protected:
   bool throw_exception;
 };
 
 DECLARE_ALGORITHM(AsyncAlgorithm)
+
+// AsyncAlgorithmThrows is the same as AsyncAlgorithm except that it
+// throws by default. This provides an easy way to make sure any child
+// algorithms also throw.
+class AsyncAlgorithmThrows : public AsyncAlgorithm {
+public:
+  AsyncAlgorithmThrows() : AsyncAlgorithm(true) {}
+  const std::string name() const override {
+    return "AsyncAlgorithmThrows";
+  } ///< Algorithm's name for identification
+};
+
+DECLARE_ALGORITHM(AsyncAlgorithmThrows)
 
 class AsynchronousTest : public CxxTest::TestSuite {
 public:
@@ -61,7 +84,7 @@ public:
         m_finishedObserver(*this, &AsynchronousTest::handleFinished),
         finishedNotificationReseived(false),
         m_errorObserver(*this, &AsynchronousTest::handleError),
-        errorNotificationReseived(false),
+        errorNotificationReseived(false), errorNotificationMessage(""),
         m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
   }
 
@@ -85,10 +108,11 @@ public:
   Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification>
       m_errorObserver;
   bool errorNotificationReseived;
+  std::string errorNotificationMessage;
   void handleError(
       const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf) {
-    TS_ASSERT_EQUALS(pNf->what, "Exception thrown")
     errorNotificationReseived = true;
+    errorNotificationMessage = pNf->what;
   }
 
   Poco::NObserver<AsynchronousTest,
@@ -135,19 +159,53 @@ public:
 
   void testException() {
     finishedNotificationReseived = false;
-    AsyncAlgorithm alg;
+    AsyncAlgorithmThrows alg;
     alg.addObserver(m_startedObserver);
     alg.addObserver(m_finishedObserver);
     alg.addObserver(m_progressObserver);
     alg.addObserver(m_errorObserver);
     alg.initialize();
-    alg.throw_exception = true;
     Poco::ActiveResult<bool> result = alg.executeAsync();
     result.wait();
     TS_ASSERT(!alg.isExecuted())
     TS_ASSERT_LESS_THAN(alg.result, NofLoops - 1)
     TS_ASSERT(!finishedNotificationReseived)
     TS_ASSERT(errorNotificationReseived)
+    TS_ASSERT_EQUALS(errorNotificationMessage, "Exception thrown")
+  }
+
+  void testExceptionGroupWS() {
+    // Create a group workspace
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    ws0->initialize(2, 4, 3);
+    AnalysisDataService::Instance().addOrReplace("ws0", ws0);
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
+    ws1->initialize(2, 4, 3);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    WorkspaceGroup_sptr groupWS(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("groupWS", groupWS);
+    groupWS->add("ws0");
+    groupWS->add("ws1");
+
+    finishedNotificationReseived = false;
+    AsyncAlgorithmThrows alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "groupWS");
+    alg.addObserver(m_startedObserver);
+    alg.addObserver(m_finishedObserver);
+    alg.addObserver(m_progressObserver);
+    alg.addObserver(m_errorObserver);
+    alg.initialize();
+    Poco::ActiveResult<bool> result = alg.executeAsync();
+    result.wait();
+    TS_ASSERT(!alg.isExecuted())
+    TS_ASSERT(!finishedNotificationReseived)
+    TS_ASSERT(errorNotificationReseived)
+    TS_ASSERT_EQUALS(errorNotificationMessage,
+                     "Execution of AsyncAlgorithmThrows for group entry 1 "
+                     "failed: Exception thrown")
   }
 };
 
