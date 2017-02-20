@@ -391,7 +391,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const auto q) {
+    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const V3D& q) {
       // Compute expected direction
       const auto qBeam = q.scalar_prod(refBeamDir);
       const double norm_q = q.norm();
@@ -466,7 +466,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testTheta = [this, &sphereInst, &radius](const auto theta) {
+    auto testTheta = [this, &sphereInst, &radius](const double theta) {
       const auto expectedDir = V3D(sin(theta), 0., cos(theta));
 
       // test without extended detector space
