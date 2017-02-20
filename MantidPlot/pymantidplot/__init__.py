@@ -801,14 +801,13 @@ def plotSlice(source, label="", xydim=None, slicepoint=None,
 
     Optional Keyword Args:
         label :: label for the window title
-        xydim :: indexes or names of the dimensions to plot, as an (X,Y) list or tuple. See SliceViewer::setXYDim()
-        slicepoint :: list with the slice point in each dimension.
-                      Must be the same length as the number of dimensions of the workspace.
-                      See SliceViewer::setSlicePoint()
-        colormin :: value of the minimum color in the scale. See SliceViewer::setColorScaleMin()
-        colormax :: value of the maximum color in the scale. See SliceViewer::setColorScaleMax()
-        colorscalelog :: value of the maximum color in the scale. See SliceViewer::setColorScaleLog()
-        limits :: list with the (xleft, xright, ybottom, ytop) limits to the view to show. See SliceViewer::setXYLimits()
+        xydim :: indexes or names of the dimensions to plot, as an (X,Y) list or tuple. See `SliceViewer::setXYDim()`
+        slicepoint :: list with the slice point in each dimension.Must be the same length as the number of \
+dimensions of the workspace. See SliceViewer::setSlicePoint()
+        colormin :: value of the minimum color in the scale. See `SliceViewer::setColorScaleMin()`
+        colormax :: value of the maximum color in the scale. See `SliceViewer::setColorScaleMax()`
+        colorscalelog :: value of the maximum color in the scale. See `SliceViewer::setColorScaleLog()`
+        limits :: list with the (xleft, xright, ybottom, ytop) limits to the view to show. See `SliceViewer::setXYLimits()`
         normalization :: 0=none; 1=volume (default); 2=# of events.
 
     Returns:
