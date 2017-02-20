@@ -3521,8 +3521,28 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
                              "to continue by selecting a valid instrument");
   }
 
-  output->setItemText(0, dets[1]);
-  output->setItemText(1, dets[3]);
+  // The setting of the detector here has been the cause of problems for (apparently years).
+  // The code assumes for the indices
+  // |     | LOQ                | SANS2D         | LARMOR                  |
+  // |-----|--------------------|----------------|-------------------------|
+  // |  0  | main-detector-bank | rear-detector  | DetectorBench           |
+  // |  1  | HAB                | front-detector | front-detector (unused) |
+  // |  2  | both               | both           | both                    |
+  // |  3  | merged             | merged         | merged                  |
+  // But the Python method above listDetectors will return the selected detector first,
+  // ie if HAB was selected on LOQ, then it would return ["HAB","main-detector-bank"]
+  // if main-detector-bank was selected on LOQ, then it would return ["main-detector-bank", "HAB"]
+  // which means we need to assign the names to the right slots.
+  QStringList detectorNames = {dets[1], dets[3]};
+  for (auto& name : detectorNames) {
+    if (name == "main-detector-bank" || name ==  "rear-detector" || name == "DetectorBench") {
+      output->setItemText(0, name);
+    }
+
+    if (name == "HAB" || name == "front-detector") {
+      output->setItemText(1, name);
+    }
+  }
 }
 /** Checks if the workspace is a group and returns the first member of group,
 * throws
