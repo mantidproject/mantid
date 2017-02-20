@@ -21,9 +21,11 @@ public:
 
   void testGetRunParameters() { runTest(true); }
 
+  void testGetSampleParameters() {runTest(false, true); }
+
 private:
   // Check the parameters are correct
-  void runTest(bool tableToExist) {
+  void runTest(bool tableToExist, bool getSampleParameters=false) {
     RawFileInfo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_EQUALS(alg.isInitialized(), true);
@@ -32,6 +34,10 @@ private:
     alg.setPropertyValue("Filename", m_filetotest);
     if (tableToExist) {
       alg.setPropertyValue("GetRunParameters", "1");
+    }
+
+    if (getSampleParameters) {
+      alg.setPropertyValue("GetSampleParameters", "1");
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -82,6 +88,10 @@ private:
 
       // Tidy up
       Mantid::API::AnalysisDataService::Instance().remove("Raw_RPB");
+    }
+
+    if (getSampleParameters) {
+      Mantid::API::Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
     }
   }
 
