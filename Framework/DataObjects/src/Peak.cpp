@@ -607,10 +607,11 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
   }
 }
 
-V3D Peak::getVirtualDetectorPosition(const V3D& detectorDir) const {
-  const auto component = getInstrument()->getComponentByName("extended-detector-space");
+V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
+  const auto component =
+      getInstrument()->getComponentByName("extended-detector-space");
   if (!component) {
-      return detectorDir; // the best idea we have is just the direction
+    return detectorDir; // the best idea we have is just the direction
   }
 
   auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);

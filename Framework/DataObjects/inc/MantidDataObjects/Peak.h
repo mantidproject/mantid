@@ -154,7 +154,7 @@ public:
   Peak &operator=(const Peak &other);
 
   /// Get the approximate position of a peak that falls off the detectors
-  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D& detectorDir) const;
+  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam);

@@ -365,46 +365,49 @@ public:
 
   void test_setQSampleFrameVirtualDetectorWithQLab() {
     constexpr auto radius = 10.;
-    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = new ObjComponent("extended-detector-space", extendedSpaceObj, sphereInst.get());
+    auto sphereInst =
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj =
+        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = new ObjComponent("extended-detector-space",
+                                          extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace);
     const auto refFrame = sphereInst->getReferenceFrame();
     const auto refBeamDir = refFrame->vecPointingAlongBeam();
 
     // test with & without extended detector space
-    // extended space is a sphere, so all points should fall radius*detector 
+    // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
     auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const auto q) {
-        // Compute expected direction
-        const auto qBeam = q.scalar_prod(refBeamDir);
-        const double norm_q = q.norm();
-        const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+      // Compute expected direction
+      const auto qBeam = q.scalar_prod(refBeamDir);
+      const double norm_q = q.norm();
+      const double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
 
-        V3D detectorDir = q * - 1.0;
-        detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
-        detectorDir.normalize();
+      V3D detectorDir = q * -1.0;
+      detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+      detectorDir.normalize();
 
-        // test without extended detector space
-        // should be a unit vector in the direction of the virtual detector position
-        Peak peak1(inst, q);
+      // test without extended detector space
+      // should be a unit vector in the direction of the virtual detector
+      // position
+      Peak peak1(inst, q);
 
-        // skip tests for which Q actually does intersect with a valid detector
-        if (peak1.getDetectorID() > 0) {
-            return;
-        }
+      // skip tests for which Q actually does intersect with a valid detector
+      if (peak1.getDetectorID() > 0) {
+        return;
+      }
 
-        TS_ASSERT_EQUALS(peak1.getDetectorID(), -1)
-        TS_ASSERT_EQUALS(peak1.getDetPos(), detectorDir)
+      TS_ASSERT_EQUALS(peak1.getDetectorID(), -1)
+      TS_ASSERT_EQUALS(peak1.getDetPos(), detectorDir)
 
-        // test with extended detector space
-        // should be the full vector to the virtual detector position
-        Peak peak2(sphereInst, q);
-        TS_ASSERT_EQUALS(peak2.getDetectorID(), -1)
-        TS_ASSERT_EQUALS(peak2.getDetPos(), detectorDir*radius)
+      // test with extended detector space
+      // should be the full vector to the virtual detector position
+      Peak peak2(sphereInst, q);
+      TS_ASSERT_EQUALS(peak2.getDetectorID(), -1)
+      TS_ASSERT_EQUALS(peak2.getDetPos(), detectorDir * radius)
     };
-
 
     // Make hemisphere of q vectors to test
     std::vector<double> xDirections(20);
@@ -414,59 +417,65 @@ public:
     // create x values of the range -1 to 1
     int index = 0;
     double startValue = -1;
-    std::generate(xDirections.begin(), xDirections.end(), 
-            [&index, &startValue]() { return startValue + index++*0.1; });
+    std::generate(
+        xDirections.begin(), xDirections.end(),
+        [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     // create z values of the range 0.1 to 1
     // ignore negative z values as these are not physical!
     index = 0;
     startValue = 0.1;
-    std::generate(zDirections.begin(), zDirections.end(), 
-            [&index, &startValue]() { return startValue + index++*0.1; });
+    std::generate(
+        zDirections.begin(), zDirections.end(),
+        [&index, &startValue]() { return startValue + index++ * 0.1; });
 
     yDirections = xDirections;
 
-    for (auto & x : xDirections) {
-        for (auto & y : yDirections) {
-            for (auto & z : zDirections) {
-                testQ(V3D(x, y, z));
-            }
+    for (auto &x : xDirections) {
+      for (auto &y : yDirections) {
+        for (auto &z : zDirections) {
+          testQ(V3D(x, y, z));
         }
+      }
     }
   }
 
   void test_setQSampleFrameVirtualDetectorWithScatteringAngle() {
     constexpr auto radius = 10.;
-    auto sphereInst = ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
-    auto extendedSpaceObj = ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = new ObjComponent("extended-detector-space", extendedSpaceObj, sphereInst.get());
+    auto sphereInst =
+        ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
+    auto extendedSpaceObj =
+        ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
+    auto extendedSpace = new ObjComponent("extended-detector-space",
+                                          extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
     sphereInst->add(extendedSpace);
 
     // test with & without extended detector space
-    // extended space is a sphere, so all points should fall radius*detector 
+    // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
     auto testTheta = [this, &sphereInst, &radius](const auto theta) {
-        const auto expectedDir = V3D(sin(theta), 0., cos(theta));
+      const auto expectedDir = V3D(sin(theta), 0., cos(theta));
 
-        // test without extended detector space
-        // should be {sin(theta), 0, cos(theta)}
-        Peak p1(this->inst, theta, 2.0);
-        V3D detPos1 = p1.getDetPos();
-        TS_ASSERT_EQUALS(detPos1, expectedDir);
+      // test without extended detector space
+      // should be {sin(theta), 0, cos(theta)}
+      Peak p1(this->inst, theta, 2.0);
+      V3D detPos1 = p1.getDetPos();
+      TS_ASSERT_EQUALS(detPos1, expectedDir);
 
-        // test with extended detector space
-        // should be radius*{sin(theta), 0, cos(theta)}
-        Peak p2(sphereInst, theta, 2.0);
-        V3D detPos2 = p2.getDetPos();
-        TS_ASSERT_EQUALS(detPos2, expectedDir*radius);
+      // test with extended detector space
+      // should be radius*{sin(theta), 0, cos(theta)}
+      Peak p2(sphereInst, theta, 2.0);
+      V3D detPos2 = p2.getDetPos();
+      TS_ASSERT_EQUALS(detPos2, expectedDir * radius);
     };
 
     // generate & test a range of angles from 0 - 360
     int index = 0;
     std::vector<double> angles(8);
-    std::generate(angles.begin(), angles.end(), [&index, &angles]() 
-            { return index++*M_PI/angles.size();});
+    std::generate(angles.begin(), angles.end(), [&index, &angles]() {
+      return index++ * M_PI / angles.size();
+    });
 
     std::for_each(angles.begin(), angles.end(), testTheta);
   }
