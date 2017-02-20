@@ -145,9 +145,6 @@ public:
 
     Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
         testDirectories);
-
-    auto test =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   }
 
   void tearDown() override {
