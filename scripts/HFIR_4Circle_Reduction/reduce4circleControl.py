@@ -1488,7 +1488,7 @@ class CWSCDReductionControl(object):
             return False, str(run_err)
 
         # Add data storage
-        assert AnalysisDataService.doesExist(pt_ws_name)
+        assert AnalysisDataService.doesExist(pt_ws_name), 'blabla'
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
@@ -1513,12 +1513,31 @@ class CWSCDReductionControl(object):
         assert isinstance(merged_ws_name, str), 'Target MDWorkspace name for merged scans %s (%s) must ' \
                                                 'be a string.' % (str(merged_ws_name), type(merged_ws_name))
 
+
         # get the workspace
         ws_name_list = ''
         for i_ws, ws_name in enumerate(scan_md_ws_list):
+            # build the input MDWorkspace list
             if i_ws != 0:
                 ws_name_list += ', '
             ws_name_list += ws_name
+        
+            # rebin the MDEventWorkspace to make all MDEventWorkspace have same MDGrid
+            md_ws = AnalysisDataService.retrieve(ws_name)
+            frame = md_ws.getDimension(0).getMDFrame().name()
+            
+            if frame == 'HKL':
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='H,-10,10,1',
+                                     AlignedDim1='K,-10,10,1',
+                                     AlignedDim2='L,-10,10,1',
+                                     OutputWorkspace=ws_name)
+            else:
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='Q_sample_x,-10,10,1',
+                                     AlignedDim1='Q_sample_y,-10,10,1',
+                                     AlignedDim2='Q_sample_z,-10,10,1',
+                                     OutputWorkspace=ws_name)
         # END-FOR
 
         # merge
