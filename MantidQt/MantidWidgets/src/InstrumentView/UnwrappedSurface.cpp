@@ -618,11 +618,32 @@ void UnwrappedSurface::zoom(const QRectF &area) {
 }
 
 void UnwrappedSurface::unzoom() {
-  if (!m_zoomStack.isEmpty()) {
-    m_viewRect = m_zoomStack.pop();
-    updateView();
-    emit updateInfoText();
-  }
+  if (!m_viewImage)
+    return;
+
+  RectF newView = selectionRectUV();
+  if (newView.isEmpty())
+    return;
+
+  auto area = newView.toQRectF();
+  double left = area.left();
+  double top = area.top();
+  double width = area.width();
+  double height = area.height();
+
+  auto old = m_viewRect.toQRectF();
+  double owidth = old.width();
+  double oheight = old.height();
+
+  auto newWidth = owidth/width* owidth;
+  auto newHeight = oheight/height* oheight;
+  auto newLeft = left + width/2 - newWidth/2;
+  auto newTop = top + height/2 - newHeight/2;
+  m_viewRect = RectF(QPointF(newLeft, newTop), QPointF(newLeft + newWidth, newTop + newHeight));
+
+  updateView();
+  emptySelectionRect();
+  emit updateInfoText();
 }
 
 void UnwrappedSurface::zoom() {
