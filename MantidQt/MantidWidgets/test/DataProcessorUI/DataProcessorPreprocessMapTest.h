@@ -31,11 +31,26 @@ public:
 
   void test_add_element() {
     DataProcessorPreprocessMap preprocessMap;
-    preprocessMap.addElement("Runs", "Load");
+    preprocessMap.addElement("Runs", "Plus");
     preprocessMap.addElement("Transmission Runs",
-                             "CreateTransmissionWorkspaceAuto");
+                             "CreateTransmissionWorkspaceAuto", "TRANS_",
+                             "FirstTransmissionRun,SecondTransmissionRun");
 
     auto preprocessingInstructions = preprocessMap.asMap();
+
+    DataProcessorPreprocessingAlgorithm algPlus =
+        preprocessingInstructions["Runs"];
+    TS_ASSERT_EQUALS(algPlus.name(), "Plus");
+    TS_ASSERT_EQUALS(algPlus.prefix(), "");
+    TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<std::string>());
+
+    DataProcessorPreprocessingAlgorithm algTrans =
+        preprocessingInstructions["Transmission Runs"];
+    TS_ASSERT_EQUALS(algTrans.name(), "CreateTransmissionWorkspaceAuto");
+    TS_ASSERT_EQUALS(algTrans.prefix(), "TRANS_");
+    std::set<std::string> blacklist = {"FirstTransmissionRun",
+                                       "SecondTransmissionRun"};
+    TS_ASSERT_EQUALS(algTrans.blacklist(), blacklist);
   }
 };
 #endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORPREPROCESSMAPTEST_H */
