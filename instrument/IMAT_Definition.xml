@@ -153,7 +153,7 @@ see http://www.mantidproject.org/IDF -->
   <!-- Z axis faces away from gauge volume, so that we can use 'facing'.
        Note that all components created so far (both the banks and the modules within
        the banks) are located at 0,0,0 (the sample position) but with different orientations. -->
-  <!-- The modules are divided internally into 9 blocks of 27 pixels each, giving 243 pixels.
+  <!-- The modules are divided internally into 9 blocks of 25 pixels each, giving 225 pixels.
        The pixel at the lowest two-theta and the two pixels at the highest two-theta are not used,
 	   giving 240 active pixels over the width of the module. The is a small gap of about 2.2 mm
 	   between the blocks, although the design is specified in terms of a 3 mm pixel pitch within
@@ -163,10 +163,7 @@ see http://www.mantidproject.org/IDF -->
   <component type="detector-block">
     <!-- We have a total of 9 detector blocks per ROW -->
     <!-- One of these -->
-    <location  r="1.5" t="-12.8" p="0">
-	    <facing x="0.0" y="0.0" z="0.0"/>
-		  <exclude sub-part="pixel1" />
-	  </location>
+    <location  r="1.5" t="-12.8" p="0"><facing x="0.0" y="0.0" z="0.0"/> </location>
     <!-- Seven of these -->
     <location  r="1.5" t="-9.6" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
     <location  r="1.5" t="-6.4" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
@@ -177,10 +174,9 @@ see http://www.mantidproject.org/IDF -->
     <location  r="1.5" t="9.6" p="0"> <facing x="0.0" y="0.0" z="0.0"/> </location>
     <!-- One of these -->
     <location  r="1.5" t="9.6" p="0">
-	    <facing x="0.0" y="0.0" z="0.0"/>
-		  <exclude sub-part="pixel24" />
-		  <exclude sub-part="pixel25" />
-	  </location>
+	    <facing x="0.0" y="0.0" z="0.0"/> </location>
+		  <!--removed from inside location ^ <exclude sub-part="pixel24" />
+		  <exclude sub-part="pixel25" />-->
   </component>
 </type>
 <!-- There might be some transmission detector ids left over ? try adding more down-->
@@ -206,12 +202,12 @@ see http://www.mantidproject.org/IDF -->
     <location x="0.016" y="0" z="0" name="pixel17" />
     <location x="0.020" y="0" z="0" name="pixel18" />
     <location x="0.024" y="0" z="0" name="pixel19" />
-    <location x="0.028" y="0" z="0" name="pixel20" />
-    <location x="0.032" y="0" z="0" name="pixel21" />
+    <location x="0.028" y="0" z="0" name="pixel20" /> <!--# we only need 180 pixels per row-->
+    <!--<location x="0.032" y="0" z="0" name="pixel21" />
     <location x="0.036" y="0" z="0" name="pixel22" />
     <location x="0.040" y="0" z="0" name="pixel23" />
     <location x="0.044" y="0" z="0" name="pixel24" />
-    <location x="0.048" y="0" z="0" name="pixel25" />
+    <location x="0.048" y="0" z="0" name="pixel25" />-->
   </component>
 </type>
 
@@ -237,7 +233,6 @@ see http://www.mantidproject.org/IDF -->
   <id start="106001" end="106100"/>
   <id start="107001" end="107100"/>
   <id start="108001" end="108100"/>
-  <id start="109001" end="109100"/>  
 </idlist>
 
 <idlist idname="SouthBank">
@@ -250,7 +245,6 @@ see http://www.mantidproject.org/IDF -->
   <id start="112001" end="112100"/>
   <id start="113001" end="113100"/>
   <id start="110001" end="110100"/>
-  <id start="111001" end="111100"/>
 </idlist>
 
 </instrument>
