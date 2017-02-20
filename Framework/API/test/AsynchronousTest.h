@@ -88,43 +88,6 @@ public:
         m_progressObserver(*this, &AsynchronousTest::handleProgress), count(0) {
   }
 
-  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification>
-      m_startedObserver;
-  bool startedNotificationReseived;
-  void handleStarted(
-      const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification> &) {
-    startedNotificationReseived = true;
-  }
-
-  Poco::NObserver<AsynchronousTest,
-                  Mantid::API::Algorithm::FinishedNotification>
-      m_finishedObserver;
-  bool finishedNotificationReseived;
-  void handleFinished(
-      const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &) {
-    finishedNotificationReseived = true;
-  }
-
-  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification>
-      m_errorObserver;
-  bool errorNotificationReseived;
-  std::string errorNotificationMessage;
-  void handleError(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf) {
-    errorNotificationReseived = true;
-    errorNotificationMessage = pNf->what;
-  }
-
-  Poco::NObserver<AsynchronousTest,
-                  Mantid::API::Algorithm::ProgressNotification>
-      m_progressObserver;
-  int count;
-  void handleProgress(
-      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf) {
-    count++;
-    TS_ASSERT_LESS_THAN(pNf->progress, 1.000001)
-  }
-
   void testExecution() {
     AsyncAlgorithm alg;
     setupTest(alg);
@@ -204,6 +167,43 @@ public:
   }
 
 private:
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification>
+      m_startedObserver;
+  bool startedNotificationReseived;
+  void handleStarted(
+      const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification> &) {
+    startedNotificationReseived = true;
+  }
+
+  Poco::NObserver<AsynchronousTest,
+                  Mantid::API::Algorithm::FinishedNotification>
+      m_finishedObserver;
+  bool finishedNotificationReseived;
+  void handleFinished(
+      const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification> &) {
+    finishedNotificationReseived = true;
+  }
+
+  Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::ErrorNotification>
+      m_errorObserver;
+  bool errorNotificationReseived;
+  std::string errorNotificationMessage;
+  void handleError(
+      const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification> &pNf) {
+    errorNotificationReseived = true;
+    errorNotificationMessage = pNf->what;
+  }
+
+  Poco::NObserver<AsynchronousTest,
+                  Mantid::API::Algorithm::ProgressNotification>
+      m_progressObserver;
+  int count;
+  void handleProgress(
+      const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification> &pNf) {
+    count++;
+    TS_ASSERT_LESS_THAN(pNf->progress, 1.000001)
+  }
+
   WorkspaceGroup_sptr makeGroupWorkspace() {
     boost::shared_ptr<WorkspaceTester> ws0 =
         boost::make_shared<WorkspaceTester>();
