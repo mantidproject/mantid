@@ -92,21 +92,12 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         load_opts = dict()
         load_opts['Mode'] = 'FoilOut'
         load_opts['InstrumentParFile'] = self._par_filename
-        # Load monitors as True so monitors will not be loaded separately in LoadVesuvio
+        # Tell LoadVesuvio to load the monitors and keep them in the output
         load_opts['LoadMonitors'] = True
 
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=1)
 
         prog_reporter.report("Loading Files")
-
-        # Split up runs as LoadVesuvio sums multiple runs
-        input_files = self._data_files
-        for run in input_files:
-            try:
-                number_generator = IntArrayProperty('array_generator', run)
-                self._data_files = number_generator.value.tolist()
-            except RuntimeError:
-                raise RuntimeError("Could not generate run numbers from this input: " + run)
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
@@ -115,7 +106,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
                                                                sum_files=self._sum_files,
                                                                load_opts=load_opts)
 
-        prog_reporter.resetNumSteps(self._workspace_names.__len__(), 0.0, 1.0)
+        prog_reporter.resetNumSteps(len(self._workspace_names), 0.0, 1.0)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
