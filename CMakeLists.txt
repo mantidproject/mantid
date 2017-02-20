@@ -40,6 +40,11 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 include ( Eigen )
 
 ###########################################################################
+# Bootstrap any dependencies
+###########################################################################
+include ( Bootstrap )
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 # VATES flag. Requires ParaView
@@ -55,11 +60,6 @@ endif ()
 if ( ENABLE_MANTIDPLOT )
   include ( ParaViewSetup )
 endif ()
-
-###########################################################################
-# Bootstrap any dependencies
-###########################################################################
-include ( Bootstrap )
 
 ###########################################################################
 # Set expected variables for OS X

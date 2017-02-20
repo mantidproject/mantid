@@ -31,8 +31,30 @@ CurveFitting
 Improved
 ########
 
+- :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
+
 Python
 ------
+
+- For multiple output parameters, python algorithms now return a `namedtuple` instead of a tuple. Old scripts should still work,
+  but one can now do
+
+  .. code-block:: python
+
+      results = GetEi(w)
+      print(results)
+      print(results.IncidentEnergy)
+      print(results[0])
+
+  This will yield:
+
+  .. code-block:: python
+
+      GetEi_returns(IncidentEnergy=3.0, FirstMonitorPeak=0.0, FirstMonitorIndex=0, Tzero=61.77080180287334)
+      3.0
+      3.0
+
+
 
 Python Algorithms
 #################

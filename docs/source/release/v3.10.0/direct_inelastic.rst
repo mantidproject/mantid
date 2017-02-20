@@ -5,6 +5,14 @@ Direct Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
+Algorithms
+----------
+
+Improved
+########
+
+- :ref:`LoadILLTof <algm-LoadILLTOF-v2>` now loads the monitor spectra last making the spectrum numbers and detectors IDs match.
+
 Crystal Field
 -------------
 
