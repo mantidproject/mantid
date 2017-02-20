@@ -7,6 +7,8 @@
 
 #include <QWidget>
 #include <qabstractitemmodel.h>
+#include <boost/algorithm/string.hpp>
+
 namespace {
 const QString DataProcessorSettingsGroup =
     "Mantid/MantidWidgets/ISISDataProcessorUI";
@@ -349,6 +351,20 @@ void QDataProcessorWidget::setInstrumentList(
   int index = ui.comboProcessInstrument->findData(
       QString::fromStdString(defaultInstrument), Qt::DisplayRole);
   ui.comboProcessInstrument->setCurrentIndex(index);
+}
+
+/**
+Set the list of available instruments to process
+@param instruments : The list of instruments available as a comma-separated
+string
+@param defaultInstrument : The instrument to have selected by default
+*/
+void QDataProcessorWidget::setInstrumentList(
+    const std::string &instruments, const std::string &defaultInstrument) {
+
+  std::vector<std::string> instr;
+  boost::split(instr, instruments, boost::is_any_of(","));
+  m_presenter->setInstrumentList(instr, defaultInstrument);
 }
 
 /**

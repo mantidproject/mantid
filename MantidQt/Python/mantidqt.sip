@@ -1554,6 +1554,8 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &,
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
+void setInstrumentList(const std::string &instruments, const std::string &defaultInstrument);
+
 private:
 QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 };

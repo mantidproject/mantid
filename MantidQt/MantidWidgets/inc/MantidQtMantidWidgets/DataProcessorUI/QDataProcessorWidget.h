@@ -98,6 +98,8 @@ public:
   void setTableList(const std::set<std::string> &tables) override;
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
+  void setInstrumentList(const std::string &instruments,
+                         const std::string &defaultInstrument);
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
