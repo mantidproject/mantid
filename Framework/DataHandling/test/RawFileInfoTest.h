@@ -21,11 +21,11 @@ public:
 
   void testGetRunParameters() { runTest(true); }
 
-  void testGetSampleParameters() {runTest(false, true); }
+  void testGetSampleParameters() { runTest(false, true); }
 
 private:
   // Check the parameters are correct
-  void runTest(bool tableToExist, bool getSampleParameters=false) {
+  void runTest(bool tableToExist, bool getSampleParameters = false) {
     RawFileInfo alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_EQUALS(alg.isInitialized(), true);
@@ -91,7 +91,8 @@ private:
     }
 
     if (getSampleParameters) {
-      Mantid::API::Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
+      Mantid::API::Workspace_sptr workspace =
+          Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
       TS_ASSERT(workspace.get());
 
       Mantid::API::ITableWorkspace_sptr sample_table =
