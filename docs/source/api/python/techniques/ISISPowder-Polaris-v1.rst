@@ -133,6 +133,12 @@ Advanced Script Parameters
   for the detectors. This file must be located at the top of the calibration
   directory as noted here :ref:`polaris_calibration_folder-powder-diffraction-ref`
 
+- `focused_cropping_values` - Stores the TOF window to crop down to on a bank-by-bank
+  basis. This is one of the final steps applied to a focused workspace. The values
+  are stored as a list of tuples, with one tuple per bank and each containing
+  the minimum and maximum values in TOF. The window specified must be less than
+  both `vanadium_cropping_values` and `raw_data_tof_cropping`
+
 - `masking_file_name` - The name of the file containing Vanadium masking information.
   This file must be located at the top of the calibration directory as noted here:
   :ref:`polaris_calibration_folder-powder-diffraction-ref`
@@ -143,12 +149,6 @@ Advanced Script Parameters
 
 - `spline_coefficient` - The coefficient to use whilst taking a b-spline of the
   Vanadium workspace during calibration
-
-- `tof_cropping_ranges` - Stores the TOF window to crop down to on a bank-by-bank
-  basis. This is one of the final steps applied to a focused workspace. The values
-  are stored as a list of tuples, with one tuple per bank and each containing
-  the minimum and maximum values in TOF. The window specified must be less than
-  both `vanadium_cropping_values` and `raw_data_tof_cropping`
 
 - `vanadium_cropping_values` - Stores the TOF window the vanadium workspace is
   cropped down to after focusing. This value is stored as a tuple of the minimum
