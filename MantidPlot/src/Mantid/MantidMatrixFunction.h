@@ -6,6 +6,7 @@
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/HistogramX.h"
 
 #include <QPointer>
 #include <vector>
@@ -67,7 +68,7 @@ public:
   void getRowYRange(size_t row, double &ymin, double &ymax) const;
   /// Return in xmin and xmax the inetrval the cell takes on the x axis
   void getRowXRange(int row, double &xmin, double &xmax) const;
-  const Mantid::MantidVec &getMantidVec(int row) const;
+  const Mantid::HistogramData::HistogramX &getHistogramX(int row) const;
 
 private:
   /* Private methods */

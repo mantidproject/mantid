@@ -7,6 +7,7 @@ SANS Changes
 
 Bug Fixes
 ---------
+- Fixed wrong first spectrum number for LARMOR. The first non-monitor spectrum number is 11, but it had been set to 10.
 
 |
 
