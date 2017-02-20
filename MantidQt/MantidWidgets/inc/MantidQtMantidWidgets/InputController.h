@@ -195,6 +195,7 @@ public:
 signals:
   void setSelectionRect(const QRect &);
   void zoom();
+  void resetZoom();
   void unzoom();
 
 private:

@@ -80,6 +80,7 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor *rootActor)
   connect(moveController, SIGNAL(setSelectionRect(QRect)), this,
           SLOT(setSelectionRect(QRect)));
   connect(moveController, SIGNAL(zoom()), this, SLOT(zoom()));
+  connect(moveController, SIGNAL(resetZoom()), this, SLOT(resetZoom()));
   connect(moveController, SIGNAL(unzoom()), this, SLOT(unzoom()));
 }
 
@@ -625,6 +626,8 @@ void UnwrappedSurface::unzoom() {
   if (newView.isEmpty())
     return;
 
+  m_zoomStack.push(m_viewRect);
+
   auto area = newView.toQRectF();
   double left = area.left();
   double top = area.top();
@@ -641,6 +644,18 @@ void UnwrappedSurface::unzoom() {
   auto newTop = top + height/2 - newHeight/2;
   m_viewRect = RectF(QPointF(newLeft, newTop), QPointF(newLeft + newWidth, newTop + newHeight));
 
+  updateView();
+  emptySelectionRect();
+  emit updateInfoText();
+}
+
+void UnwrappedSurface::resetZoom()
+{
+  if (m_zoomStack.empty())
+    return;
+
+  m_viewRect = m_zoomStack.first();
+  m_zoomStack.clear();
   updateView();
   emptySelectionRect();
   emit updateInfoText();
