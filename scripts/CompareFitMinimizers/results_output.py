@@ -34,6 +34,8 @@ import os
 BENCHMARK_VERSION_STR = 'v3.8'
 FILENAME_SUFFIX_ACCURACY = 'acc'
 FILENAME_SUFFIX_RUNTIME = 'runtime'
+FILENAME_EXT_TXT = 'txt'
+FILENAME_EXT_HTML = 'html'
 # Directory of where the script is called from (e.g. MantidPlot dir)
 WORKING_DIR = os.getcwd()
 # Directory of this script (e.g. in source)
@@ -84,9 +86,9 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         # optionally save the above table to a .txt file and a .html file
         if save_to_file:
             save_table_to_file(table_data=tbl_acc_indiv, errors=use_errors, group_name=group_name,
-                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension='txt')
+                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension=FILENAME_EXT_TXT)
             save_table_to_file(table_data=tbl_acc_indiv, errors=use_errors, group_name=group_name,
-                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension='html')
+                               metric_type=FILENAME_SUFFIX_ACCURACY, file_extension=FILENAME_EXT_HTML)
 
         # print out accuracy summary table for this group of fit problems
         ext_summary_cols = minimizers
@@ -111,9 +113,9 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
         # optionally save the above table to a .txt file and a .html file
         if save_to_file:
             save_table_to_file(table_data=tbl_runtime_indiv, errors=use_errors, group_name=group_name,
-                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension='txt')
+                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension=FILENAME_EXT_TXT)
             save_table_to_file(table_data=tbl_runtime_indiv, errors=use_errors, group_name=group_name,
-                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension='html')
+                               metric_type=FILENAME_SUFFIX_RUNTIME, file_extension=FILENAME_EXT_HTML)
 
         # print out runtime summary table for this group of fit problems
         tbl_runtime_summary = build_rst_table(ext_summary_cols, ext_summary_rows, summary_cells_runtime,
@@ -211,12 +213,8 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     print(tbl_all_summary_acc)
 
     if save_to_file:
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_ACCURACY, group_name='summary'))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_all_summary_acc, file=tbl_file)
-        print('Saved {fname}.txt to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
+        save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_TXT)
+        save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_HTML)
 
     header = '**************** Runtime ******** \n\n'
     print(header)
@@ -226,12 +224,8 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     print(tbl_all_summary_runtime)
 
     if save_to_file:
-        fname = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.txt'.
-                 format(weighted=weighted_suffix_string(use_errors),
-                        version=BENCHMARK_VERSION_STR, metric_type=FILENAME_SUFFIX_RUNTIME, group_name='summary'))
-        with open(fname, 'w') as tbl_file:
-            print(tbl_all_summary_runtime, file=tbl_file)
-        print('Saved {fname}.txt to {working_directory}'.format(fname=fname, working_directory=WORKING_DIR))
+        save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_TXT)
+        save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_HTML)
 
 
 def weighted_suffix_string(use_errors):
