@@ -18,18 +18,18 @@ Citation
 Please cite any usage of Mantid as follows:
 
 - *Mantid 3.9.1: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*.
-`doi: 10.5286/Software/Mantid3.9.1 <http://dx.doi.org/10.5286/Software/Mantid3.9.1>`_
+  `doi: 10.5286/Software/Mantid3.9.1 <http://dx.doi.org/10.5286/Software/Mantid3.9.1>`_
 
 
 Changes in this version
 -----------------------
 
-* `18884 <https://api.github.com/repos/mantidproject/mantid/pulls/18884>`_ Add support for NeXus files in LoadVesuvio
-* `18888 <https://api.github.com/repos/mantidproject/mantid/pulls/18888>`_ Fix LOQ Batch reduction issues
-* `18889 <https://api.github.com/repos/mantidproject/mantid/pulls/18889>`_ Workspace dock deletion bugs
-* `18914 <https://api.github.com/repos/mantidproject/mantid/pulls/18914>`_ Fix mass ws deletion bug
-* `18926 <https://api.github.com/repos/mantidproject/mantid/pulls/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
-* `18927 <https://api.github.com/repos/mantidproject/mantid/pulls/18927>`_ Fix sum file behaviour for vesuvio diffraction
+* `18884 <https://www.github.com/mantidproject/mantid/pull/18884>`_ Add support for NeXus files in LoadVesuvio
+* `18888 <https://www.github.com/mantidproject/mantid/pull/18888>`_ Fix LOQ Batch reduction issues
+* `18889 <https://www.github.com/mantidproject/mantid/pull/18889>`_ Workspace dock deletion bugs
+* `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
+* `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
+* `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
 
 Summary of impact
 -----------------
