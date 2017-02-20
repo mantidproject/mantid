@@ -8,7 +8,7 @@
 This module contains a class to create a graphical user interface for PyChop.
 """
 
-from __future__ import absolute_import, division
+from __future__ import (absolute_import, division, print_function)
 import sys
 import re
 import numpy as np
