@@ -345,16 +345,7 @@ ReflRunsTabPresenter::getTransferStrategy() {
 /**
 Used to tell the presenter something has changed in the ADS
 */
-void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
-
-  switch (flag) {
-  case DataProcessorMainPresenter::ADSChangedFlag:
-    pushCommands();
-    break;
-  }
-  // Not having a 'default' case is deliberate. gcc issues a warning if there's
-  // a flag we aren't handling.
-}
+void ReflRunsTabPresenter::notifyADSChanged() { pushCommands(); }
 
 /** Requests global pre-processing options as a string. Options are supplied by
 * the main

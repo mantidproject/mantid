@@ -96,7 +96,7 @@ public:
     // Expect that the view is populated with the list of row commands
     EXPECT_CALL(mockRunsTabView, setRowCommandsProxy()).Times(Exactly(1));
     // The presenter is notified that something changed in the ADS
-    presenter.notify(DataProcessorMainPresenter::ADSChangedFlag);
+    presenter.notifyADSChanged();
 
     // Verify expectations
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockRunsTabView));

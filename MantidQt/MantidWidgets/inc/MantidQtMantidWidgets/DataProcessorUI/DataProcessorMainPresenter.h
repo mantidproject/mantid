@@ -1,6 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORMAINPRESENTER_H
 
+#include "MantidKernel/System.h"
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class DataProcessorMainPresenter
@@ -39,28 +41,42 @@ class DataProcessorMainPresenter {
 public:
   virtual ~DataProcessorMainPresenter(){};
 
-  enum Flag { ADSChangedFlag };
-
   /// Notify this receiver that something changed in the ADS
-  virtual void notify(DataProcessorMainPresenter::Flag flag) = 0;
+  virtual void notifyADSChanged() { ; };
 
   /// Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
+                                    const std::string &defaultValue) {
+    return std::string();
+  };
+  virtual bool askUserYesNo(std::string prompt, std::string title) {
+    return false;
+  };
+  virtual void giveUserWarning(std::string prompt, std::string title) {
+    UNUSED_ARG(prompt);
+    UNUSED_ARG(title);
+  };
+  virtual void giveUserCritical(std::string prompt, std::string title) {
+    UNUSED_ARG(prompt);
+    UNUSED_ARG(title);
+  };
+  virtual std::string runPythonAlgorithm(const std::string &algorithm) {
+    return std::string();
+  };
 
   /// Return global options for pre-processing as a string
-  virtual std::string getPreprocessingOptionsAsString() const = 0;
+  virtual std::string getPreprocessingOptionsAsString() const {
+    return std::string();
+  };
   /// Return global options for reduction
-  virtual std::string getProcessingOptions() const = 0;
+  virtual std::string getProcessingOptions() const { return std::string(); };
   /// Return global options for post-processing
-  virtual std::string getPostprocessingOptions() const = 0;
+  virtual std::string getPostprocessingOptions() const {
+    return std::string();
+  };
   /// Return global options for time-slicing
-  virtual std::string getTimeSlicingOptions() const = 0;
+  virtual std::string getTimeSlicingOptions() const { return std::string(); };
 };
 }
 }

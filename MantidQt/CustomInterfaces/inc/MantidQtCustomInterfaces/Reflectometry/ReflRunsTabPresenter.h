@@ -65,7 +65,7 @@ public:
   ~ReflRunsTabPresenter() override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notify(DataProcessorMainPresenter::Flag flag) override;
+  void notifyADSChanged() override;
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
                             const std::string &defaultValue) override;

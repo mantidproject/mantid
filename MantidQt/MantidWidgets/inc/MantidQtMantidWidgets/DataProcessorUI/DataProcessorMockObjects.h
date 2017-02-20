@@ -75,7 +75,7 @@ public:
   ~MockMainPresenter() override {}
 
   // Notify
-  MOCK_METHOD1(notify, void(DataProcessorMainPresenter::Flag));
+  MOCK_METHOD0(notifyADSChanged, void());
 
   // Prompt methods
   MOCK_METHOD3(askUserString,

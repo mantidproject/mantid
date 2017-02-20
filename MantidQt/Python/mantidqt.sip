@@ -1564,21 +1564,20 @@ class DataProcessorMainPresenter
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 %End
 public:
-virtual std::string askUserString(const std::string &prompt, const std::string &title, const std::string &defaultValue) = 0;
-virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
-virtual void giveUserWarning(std::string prompt, std::string title) = 0;
-virtual void giveUserCritical(std::string prompt, std::string title) = 0;
-virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
-
-virtual std::string getPreprocessingOptionsAsString() const = 0;
-virtual std::string getProcessingOptions() const = 0;
-virtual std::string getPostprocessingOptions() const = 0;
-
-virtual ~DataProcessorMainPresenter();
-
-private:
 DataProcessorMainPresenter();
 
+virtual std::string askUserString(const std::string &prompt, const std::string &title, const std::string &defaultValue);
+virtual bool askUserYesNo(std::string prompt, std::string title);
+virtual void giveUserWarning(std::string prompt, std::string title);
+virtual void giveUserCritical(std::string prompt, std::string title);
+virtual std::string runPythonAlgorithm(const std::string &algorithm);
+
+virtual std::string getPreprocessingOptionsAsString() const;
+virtual std::string getProcessingOptions() const;
+virtual std::string getPostprocessingOptions() const;
+virtual std::string getTimeSlicingOptions() const;
+
+virtual void notifyADSChanged();
 };
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
