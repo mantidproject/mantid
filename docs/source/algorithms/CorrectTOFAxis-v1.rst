@@ -35,18 +35,80 @@ Whether the *ReferenceSpectra* input property refers to workspace indices, spect
 Usage
 -----
 
-**Example - CorrectTOFAxis by specifying the elatic bin and L2 from reference spectra**
+**Example - CorrectTOFAxis by specifying the elastic bin and L2**
 
-.. testcode:: ExElasticBin
+.. textCode:: ExElasticBinWithL2
 
-    import numpy
-    from scipy import constants
+    from mantid.kernel import DeltaEModeType, UnitConversion
     
     L1 = 2.0 # in metres.
     L2 = 2.0
     Ei = 55.0 # in meV
-    v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-    elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+                                    srcValue=Ei,
+                                    l1=L1, l2=L2, 
+                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
+    
+    # Make a workspace with wrong TOF axis.
+    TOFMin = 0.0
+    TOFMax = 100.0
+    binWidth = 0.5
+    # Lets say the elastic bin is in the centre of the spectrum.
+    elasticBinIndex = int(((TOFMax - TOFMin) / binWidth) / 2.0)
+    # Build a Gaussian elastic peak in the workspace.
+    peakCentre = TOFMin + elasticBinIndex * binWidth
+    spectrumDescription = '''name=Gaussian, PeakCentre={0},
+    Height=100, Sigma={1}'''.format(peakCentre, 0.03 * peakCentre)
+    ws = CreateSampleWorkspace(WorkspaceType='Histogram',
+        NumBanks=1,
+        BankPixelWidth=1,
+        Function='User Defined',
+        UserDefinedFunction=spectrumDescription,
+        BankDistanceFromSample=L2,
+        SourceDistanceFromSample=L1,
+        XMin=TOFMin,
+        XMax=TOFMax,
+        BinWidth=binWidth)
+    
+    # Do the correction.
+    correctedWs = CorrectTOFAxis(ws,
+        IndexType='Workspace Index',
+        ElasticBinIndex=elasticBinIndex,
+        EFixed=Ei,
+        L2=L2)
+    
+    # Convert TOF to energy transfer.
+    convertedWs = ConvertUnits(correctedWs,
+        Target='DeltaE',
+        EMode='Direct')
+    
+    # Check results
+    # Zero energy transfer should be around elasticBinIndex.
+    for index in range(elasticBinIndex-1, elasticBinIndex+2):
+        binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
+        print('DeltaE at the centre of bin {0}: {1:0.4f}'.format(index,binCentre))
+
+Output:
+
+.. testoutput:: ExElasticBinWithL2
+
+    DeltaE at the centre of bin 99: -0.0893
+    DeltaE at the centre of bin 100: -0.0000
+    DeltaE at the centre of bin 101: 0.0891
+
+**Example - CorrectTOFAxis by specifying the elastic bin and taking L2 from reference spectra**
+
+.. testcode:: ExElasticBinWithRef
+
+    from mantid.kernel import DeltaEModeType, UnitConversion
+    
+    L1 = 2.0 # in metres.
+    L2 = 2.0
+    Ei = 55.0 # in meV
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+                                    srcValue=Ei,
+                                    l1=L1, l2=L2, 
+                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
     
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
@@ -85,28 +147,30 @@ Usage
     # Zero energy transfer should be around elasticBinIndex.
     for index in range(elasticBinIndex-1, elasticBinIndex+2):
         binCentre = (convertedWs.readX(0)[index+1] + convertedWs.readX(0)[index]) / 2
-        print('DeltaE at bin centre {0}: {1:0.4f}'.format(index,binCentre))
+        print('DeltaE at the centre of bin {0}: {1:0.4f}'.format(index,binCentre))
 
 Output:
 
-.. testoutput:: ExElasticBin
+.. testoutput:: ExElasticBinWithRef
 
-    DeltaE at bin centre 99: -0.0893
-    DeltaE at bin centre 100: -0.0000
-    DeltaE at bin centre 101: 0.0891
+    DeltaE at the centre of bin 99: -0.0893
+    DeltaE at the centre of bin 100: -0.0000
+    DeltaE at the centre of bin 101: 0.0891
 
 **Example - CorrectTOFAxis using EPP table**
 
 .. testcode:: ExEPPTable
 
+    from mantid.kernel import DeltaEModeType, UnitConversion
     import numpy
-    from scipy import constants
     
     L1 = 2.0 # in metres
     L2 = 2.0
     Ei = 55.0 # in meV
-    velocity = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-    elasticTOF = (L1 + L2) / velocity * 1e6 # in micro seconds.
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+                                    srcValue=Ei,
+                                    l1=L1, l2=L2, 
+                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
     
     # Make a workspace with wrong TOF axis.
     TOFMin = 0.0
@@ -155,14 +219,16 @@ Output:
 
 .. testcode:: ExReferenceWS
 
+    from mantid.kernel import DeltaEModeType, UnitConversion
     import numpy
-    from scipy import constants
     
     L1 = 2.0
     L2 = 2.0
     Ei = 55.0 # in meV
-    v = numpy.sqrt(2 * Ei * 1e-3 * constants.e / constants.m_n)
-    elasticTOF = (L1 + L2) / v * 1e6 # in micro seconds.
+    elasticTOF = UnitConversion.run(src='Energy', dest='TOF', 
+                                    srcValue=Ei,
+                                    l1=L1, l2=L2, 
+                                    theta=0, emode=DeltaEModeType.Direct, efixed=Ei)
     
     # Make two workspaces with wrong TOF axis.
     TOFMin = 0.0
