@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <cctype>
 
 namespace Mantid {
 namespace CurveFitting {
