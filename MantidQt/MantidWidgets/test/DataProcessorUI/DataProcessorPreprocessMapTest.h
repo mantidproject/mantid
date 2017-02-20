@@ -32,9 +32,10 @@ public:
   void test_add_element() {
     DataProcessorPreprocessMap preprocessMap;
     preprocessMap.addElement("Runs", "Load");
-	preprocessMap.addElement("Transmission Runs", "CreateTransmissionWorkspaceAuto");
+    preprocessMap.addElement("Transmission Runs",
+                             "CreateTransmissionWorkspaceAuto");
 
-	auto preprocessingInstructions = preprocessMap.asMap();
+    auto preprocessingInstructions = preprocessMap.asMap();
   }
 };
 #endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORPREPROCESSMAPTEST_H */

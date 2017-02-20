@@ -47,7 +47,7 @@ convertStringToMap(const std::string &options) {
     std::vector<std::string> opt;
     boost::split(opt, option, boost::is_any_of(","));
 
-	std::vector<std::string> temp(opt.begin() + 1, opt.end());
+    std::vector<std::string> temp(opt.begin() + 1, opt.end());
 
     optionsMap[opt[0]] = boost::algorithm::join(temp, ",");
   }
