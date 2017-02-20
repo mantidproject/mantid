@@ -1146,6 +1146,8 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
   double numws = static_cast<double>(m_outputWorkspacesMap.size());
   double outwsindex = 0.;
+
+  // split sample logs from original workspace to new one
   for (auto &ws : m_outputWorkspacesMap) {
     int wsindex = ws.first;
     DataObjects::EventWorkspace_sptr opws = ws.second;
@@ -1247,6 +1249,73 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 
   g_log.notice("Splitters in format of Matrixworkspace are not recommended to "
                "split sample logs. ");
+
+
+  // split sample logs
+
+  // find the maximum index of the outputs' index
+  std::set<int>::iterator target_iter;
+  int max_target_index = 0;
+  for (target_iter = m_targetWorkspaceIndexSet.begin(); target_iter != m_targetWorkspaceIndexSet.end(); ++target_iter)
+  {
+      g_log.notice() << "[DB] Target workspace index : " << *target_iter << "\n";
+      if (*target_iter > max_target_index)
+          max_target_index = *target_iter;
+  }
+  g_log.notice() << "[DB] Max Index = " << max_target_index << "\n";
+
+
+  for (auto property : m_eventWS->run().getProperties())
+  {
+      // insert 0 even if it is empty for contructing a vector
+    g_log.notice() << "Process sample log" << property->name() << "\n";
+    TimeSeriesProperty<double> *dbl_prop = dynamic_cast<TimeSeriesProperty<double> *>(property);
+    TimeSeriesProperty<int> *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(property);
+    if (dbl_prop)
+    {
+       std::vector<TimeSeriesProperty<double> *> output_vector;
+       for (int tindex = 0; tindex <= max_target_index; ++tindex)
+       {
+           TimeSeriesProperty<double> *new_property = new TimeSeriesProperty<double>(dbl_prop->name());
+           output_vector.push_back(new_property);
+       }
+
+       // split
+       // dbl_prop->splitByTimeVector(m_vecSplitterTime, m_vecSplitterGroup, output_vector);
+
+       // set to output workspace
+       for (int tindex = 0; tindex <= max_target_index; ++tindex)
+       {
+          // find output workspace
+          std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+          wsiter = m_outputWorkspacesMap.find(tindex);
+          if (wsiter == m_outputWorkspacesMap.end())
+          {
+              g_log.error() << "Workspace target (" << tindex << ") does not have workspace associated." << "\n";
+          }
+          else
+          {
+             DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+             ws_i->mutableRun().addProperty(output_vector[tindex], true);
+          }
+       }
+
+    }
+    else if (int_prop)
+    {
+
+        // TODO:FIXME - Implement this part
+        ;
+    }
+    else
+    {
+        // TODO:FIXME - Copy the prperty!
+        // set to output workspace ??? -- may not be needed! as the way how output workspace is created
+
+    }
+  }
+
+  return;
 }
 
 /** Generate splitters for specified workspace index as a subset of

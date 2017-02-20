@@ -619,6 +619,9 @@ public:
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
                     1.0E-4);
 
+    // TODO:FIXME - Test the sample logs
+    ;
+
     // 5. Clean up
     AnalysisDataService::Instance().remove("Test10");
     AnalysisDataService::Instance().remove("Splitter10");
