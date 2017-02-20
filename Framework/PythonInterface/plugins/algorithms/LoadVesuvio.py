@@ -7,6 +7,8 @@ from LoadEmptyVesuvio import LoadEmptyVesuvio
 
 import copy
 import numpy as np
+import re
+import six
 
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
@@ -17,6 +19,8 @@ INST_PAR_PROP = "InstrumentParFile"
 SUM_PROP = "SumSpectra"
 LOAD_MON = "LoadMonitors"
 WKSP_PROP_LOAD_MON= "OutputMonitorWorkspace"
+
+FILENAME_RE = re.compile(r'^([0-9]+)(\.[a-zA-z]+)?$')
 
 # Raw workspace names which are necessary at the moment
 SUMMED_WS = "__loadraw_evs"
@@ -315,22 +319,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
 
         runs = self._get_runs()
-
         all_spectra = [item for sublist in self._spectra for item in sublist]
 
         if len(runs) > 1:
             self._set_spectra_type(all_spectra[0])
             self._setup_raw(all_spectra)
         else:
-            isis = config.getFacility("ISIS")
-            vesuvio = isis.instrument("VESUVIO")
-            run_no = runs[0]
-            run_str = vesuvio.filePrefix(int(run_no)) + run_no
-
-            self._raise_error_period_scatter(run_str, self._back_scattering)
-            all_spectra = [item for sublist in self._spectra for item in sublist]
-
-            self._load_single_run_spec_and_mon(all_spectra, run_str)
+            self._load_single_run_spec_and_mon(all_spectra, self._get_filename(runs[0]))
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -408,7 +403,27 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
+    def _get_filename(self, run_or_filename):
+        """Given a string containing either a filename/partial filename or run number find the correct
+        file prefix"""
+        isis = config.getFacility("ISIS")
+        vesuvio = isis.instrument("VESUVIO")
+        if isinstance(run_or_filename, six.integer_types):
+            run_no = run_or_filename
+            return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
+        else:
+            match = FILENAME_RE.match(run_or_filename)
+            if match:
+                run_no = match.group(1)
+                return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
+            else:
+                # Assume file is okay and give it a go with Load
+                return run_or_filename
+
+    #----------------------------------------------------------------------------------------
+
     def _load_single_run_spec_and_mon(self, all_spectra, run_str):
+        self._raise_error_period_scatter(run_str, self._back_scattering)
         # check if the monitor spectra are already in the spectra list
         filtered_spectra = sorted([i for i in all_spectra if i <= self._mon_spectra[-1]])
         mons_in_ws = False
@@ -579,15 +594,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
             @param spectra :: The list of spectra to load
             @returns a tuple of length 2 containing (main_detector_ws, monitor_ws)
         """
-        isis = config.getFacility("ISIS")
-        vesuvio = isis.instrument("VESUVIO")
         runs = self._get_runs()
 
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         spec_inc_mon = self._mon_spectra
         spec_inc_mon.extend(spectra)
         for index, run in enumerate(runs):
-            filename = vesuvio.filePrefix(int(run)) + str(run)
+            filename = self._get_filename(run)
             self._raise_error_period_scatter(filename, self._back_scattering)
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_WS + '_monitors'
