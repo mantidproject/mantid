@@ -67,18 +67,6 @@ public:
                        const Kernel::Quat &rot);
   Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws,
                                    const std::string &componentName);
-  template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_sptr inputWS,
-                       const std::string &propertyName) {
-    if (inputWS->run().hasProperty(propertyName)) {
-      Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-      return boost::lexical_cast<T>(prop->value());
-    } else {
-      std::string mesg =
-          "No '" + propertyName + "' property found in the input workspace....";
-      throw std::runtime_error(mesg);
-    }
-  }
 
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
