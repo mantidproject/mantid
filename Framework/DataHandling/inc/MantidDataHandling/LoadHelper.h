@@ -4,7 +4,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 

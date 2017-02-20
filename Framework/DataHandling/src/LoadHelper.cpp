@@ -4,6 +4,7 @@
 
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 
