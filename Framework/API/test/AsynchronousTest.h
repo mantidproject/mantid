@@ -18,9 +18,9 @@ using namespace std;
 
 class AsyncAlgorithm : public Algorithm {
 public:
-  AsyncAlgorithm() : Algorithm(), throw_exception(false) {}
+  AsyncAlgorithm() : Algorithm(), throw_exception(false), result(0) {}
   AsyncAlgorithm(const bool throw_default)
-      : Algorithm(), throw_exception(throw_default) {}
+      : Algorithm(), throw_exception(throw_default), result(0) {}
   ~AsyncAlgorithm() override {}
   const std::string name() const override {
     return "AsyncAlgorithm";
@@ -126,11 +126,15 @@ public:
   }
 
   void testExecution() {
+    startedNotificationReseived = false;
+    finishedNotificationReseived = false;
+    errorNotificationReseived = false;
+    count = 0;
     AsyncAlgorithm alg;
-    alg.initialize();
     alg.addObserver(m_startedObserver);
     alg.addObserver(m_finishedObserver);
     alg.addObserver(m_progressObserver);
+    alg.initialize();
     Poco::ActiveResult<bool> result = alg.executeAsync();
     TS_ASSERT(!result.available())
     result.wait();
@@ -143,7 +147,9 @@ public:
   }
 
   void testCancel() {
+    startedNotificationReseived = false;
     finishedNotificationReseived = false;
+    errorNotificationReseived = false;
     AsyncAlgorithm alg;
     alg.addObserver(m_startedObserver);
     alg.addObserver(m_finishedObserver);
@@ -158,7 +164,9 @@ public:
   }
 
   void testException() {
+    startedNotificationReseived = false;
     finishedNotificationReseived = false;
+    errorNotificationReseived = false;
     AsyncAlgorithmThrows alg;
     alg.addObserver(m_startedObserver);
     alg.addObserver(m_finishedObserver);
@@ -174,38 +182,96 @@ public:
     TS_ASSERT_EQUALS(errorNotificationMessage, "Exception thrown")
   }
 
-  void testExceptionGroupWS() {
-    // Create a group workspace
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
-    ws0->initialize(2, 4, 3);
-    AnalysisDataService::Instance().addOrReplace("ws0", ws0);
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
-    ws1->initialize(2, 4, 3);
-    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
-    WorkspaceGroup_sptr groupWS(new WorkspaceGroup());
-    AnalysisDataService::Instance().addOrReplace("groupWS", groupWS);
-    groupWS->add("ws0");
-    groupWS->add("ws1");
-
+  void testExecutionGroupWS() {
+    startedNotificationReseived = false;
     finishedNotificationReseived = false;
-    AsyncAlgorithmThrows alg;
+    errorNotificationReseived = false;
+    count = 0;
+    WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
+    AsyncAlgorithm alg;
+    alg.addObserver(m_startedObserver);
+    alg.addObserver(m_finishedObserver);
+    alg.addObserver(m_progressObserver);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "groupWS");
+    Poco::ActiveResult<bool> result = alg.executeAsync();
+    TS_ASSERT(!result.available())
+    result.wait();
+    TS_ASSERT(result.available())
+    TS_ASSERT(alg.isExecuted())
+    TS_ASSERT(startedNotificationReseived)
+    TS_ASSERT(finishedNotificationReseived)
+    // There are 2 * NofLoops because there are two child workspaces
+    TS_ASSERT_EQUALS(count, NofLoops * 2)
+    // The parent algorithm is not executed directly, so the result remains 0
+    TS_ASSERT_EQUALS(alg.result, 0)
+  }
+
+  void testCancelGroupWS() {
+    startedNotificationReseived = false;
+    finishedNotificationReseived = false;
+    errorNotificationReseived = false;
+    WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
+    AsyncAlgorithm alg;
+    alg.addObserver(m_startedObserver);
+    alg.addObserver(m_finishedObserver);
+    alg.addObserver(m_progressObserver);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "groupWS");
+    Poco::ActiveResult<bool> result = alg.executeAsync();
+    alg.cancel();
+    result.wait();
+    TS_ASSERT(!alg.isExecuted())
+    TS_ASSERT(startedNotificationReseived)
+    TS_ASSERT(!finishedNotificationReseived)
+    TS_ASSERT(!errorNotificationReseived)
+    // The parent algorithm is not executed directly, so the result remains 0
+    TS_ASSERT_EQUALS(alg.result, 0)
+  }
+
+  void testExceptionGroupWS() {
+    startedNotificationReseived = false;
+    finishedNotificationReseived = false;
+    errorNotificationReseived = false;
+    WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
+    AsyncAlgorithmThrows alg;
     alg.addObserver(m_startedObserver);
     alg.addObserver(m_finishedObserver);
     alg.addObserver(m_progressObserver);
     alg.addObserver(m_errorObserver);
     alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
     result.wait();
     TS_ASSERT(!alg.isExecuted())
+    TS_ASSERT(startedNotificationReseived)
     TS_ASSERT(!finishedNotificationReseived)
     TS_ASSERT(errorNotificationReseived)
     TS_ASSERT_EQUALS(errorNotificationMessage,
                      "Execution of AsyncAlgorithmThrows for group entry 1 "
                      "failed: Exception thrown")
+    // The parent algorithm is not executed directly, so the result remains 0
+    TS_ASSERT_EQUALS(alg.result, 0)
+  }
+
+private:
+  WorkspaceGroup_sptr makeGroupWorkspace() {
+    boost::shared_ptr<WorkspaceTester> ws0 =
+        boost::make_shared<WorkspaceTester>();
+    ws0->initialize(2, 4, 3);
+    AnalysisDataService::Instance().addOrReplace("ws0", ws0);
+
+    boost::shared_ptr<WorkspaceTester> ws1 =
+        boost::make_shared<WorkspaceTester>();
+    ws1->initialize(2, 4, 3);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+
+    WorkspaceGroup_sptr groupWS(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("groupWS", groupWS);
+    groupWS->add("ws0");
+    groupWS->add("ws1");
+
+    return groupWS;
   }
 };
 
