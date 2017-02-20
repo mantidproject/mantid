@@ -92,6 +92,34 @@ private:
 
     if (getSampleParameters) {
       Mantid::API::Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve("Raw_SPB");
+      TS_ASSERT(workspace.get());
+
+      Mantid::API::ITableWorkspace_sptr sample_table =
+          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
+      TS_ASSERT(sample_table.get());
+
+      // Sample type
+      int e_type = sample_table->getRef<int>("e_type", 0);
+      TS_ASSERT_EQUALS(e_type, 1);
+
+      // Sample geometry
+      int e_geom = sample_table->getRef<int>("e_geom", 0);
+      TS_ASSERT_EQUALS(e_geom, 3);
+
+      // Sample thickness
+      double e_thick = sample_table->getRef<double>("e_thick", 0);
+      TS_ASSERT_EQUALS(e_thick, 1);
+
+      // Sample height
+      double e_height = sample_table->getRef<double>("e_height", 0);
+      TS_ASSERT_EQUALS(e_height, 1);
+
+      // Sample width
+      double e_width = sample_table->getRef<double>("e_width", 0);
+      TS_ASSERT_EQUALS(e_width, 1);
+
+      // Tidy up
+      Mantid::API::AnalysisDataService::Instance().remove("Raw_SPB");
     }
   }
 
