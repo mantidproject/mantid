@@ -47,8 +47,9 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1, 
-                    bool useExtendedDetectorSpace = false) {
+                    std::vector<V3D> hkls, int convention = 1,
+                    bool useExtendedDetectorSpace = false,
+                    bool addExtendedDetectorDefinition = false) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -58,11 +59,12 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
 
-    if (useExtendedDetectorSpace) {
-        auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
-        auto extendedSpace = new ObjComponent("extended-detector-space", extendedSpaceObj, inst.get());
-        extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-        inst->add(extendedSpace);
+    if (addExtendedDetectorDefinition) {
+      auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
+      auto extendedSpace = new ObjComponent("extended-detector-space",
+                                            extendedSpaceObj, inst.get());
+      extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
+      inst->add(extendedSpace);
     }
 
     inWS->setInstrument(inst);
@@ -86,8 +88,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("ReflectionCondition", reflectionCondition));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
-    TS_ASSERT_THROWS_NOTHING(
-            alg.setProperty("UseExtendedDetectorSpace", useExtendedDetectorSpace));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PredictPeaksOutsideDetectors",
+                                             useExtendedDetectorSpace));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -103,7 +105,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
     V3D hklTest = {-10, -6, 1};
     hklTest *= convention;
-    if (expectedNumber > 1 && !useExtendedDetectorSpace) {
+    if (expectedNumber > 1 && !addExtendedDetectorDefinition) {
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
     }
 
@@ -113,16 +115,21 @@ public:
 
   void test_exec() { do_test_exec("Primitive", 10, std::vector<V3D>()); }
 
-  void test_exec_withExtendedDetectorSpace() 
-  { do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true); }
-
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition() {
     do_test_exec("C-face centred", 6, std::vector<V3D>());
   }
 
+  void test_exec_withExtendedDetectorSpace() {
+    do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true, true);
+  }
+
   void test_exec_withReflectionConditionAndExtendedDetectorSpace() {
-    do_test_exec("C-face centred", 1690, std::vector<V3D>(), 1, true);
+    do_test_exec("C-face centred", 1690, std::vector<V3D>(), 1, true, true);
+  }
+
+  void test_exec_withExtendedDetectorSpaceOptionCheckedNoDefinition() {
+    do_test_exec("Primitive", 10, std::vector<V3D>(), 1, true, false);
   }
 
   void test_exec_withInputHKLList() {

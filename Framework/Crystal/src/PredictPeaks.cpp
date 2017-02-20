@@ -102,9 +102,9 @@ void PredictPeaks::init() {
                   "checked.\n"
                   "Keep unchecked to use the original values");
 
-  declareProperty("UseExtendedDetectorSpace", false,
-                  "Use the extended detector space (if defined for the"
-                  " instrument) to predict peaks which do not fall onto any" 
+  declareProperty("PredictPeaksOutsideDetectors", false,
+                  "Use an extended detector space (if defined for the"
+                  " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
 
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
@@ -438,7 +438,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
      space component is defined which can be used to approximate a peak's 
      position in detector space.
      */
-  bool useExtendedDetectorSpace = getProperty("UseExtendedDetectorSpace");
+  bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
   if (!p.getDetector() && !(useExtendedDetectorSpace && 
               m_inst->getComponentByName("extended-detector-space")))
       return;
