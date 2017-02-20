@@ -35,6 +35,7 @@ Changes in this version
 * `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
 * `18915 <https://www.github.com/mantidproject/mantid/pull/18915>`_ Add missing parameter in function call in performance test
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
+* `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
 
 Summary of impact
@@ -65,6 +66,8 @@ Summary of impact
 | 18915 | Fixes test builds                                                                 | Fix function calls                          | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpretation of list indices in GUI   | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18927 | Allow Vesuvio to sum runs in diffraction reduction                                | Fix incorrect assignment in loop            | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
