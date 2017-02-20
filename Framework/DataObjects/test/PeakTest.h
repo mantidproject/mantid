@@ -264,6 +264,18 @@ public:
     TS_ASSERT_EQUALS(qLab, qSampleRotated);
   }
 
+  void test_getQLabFrame() {
+      Instrument_sptr inst =
+          ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+      Peak p(inst, 0, 1.5);
+      p.setQLabFrame(V3D(1, 1, 1));
+      auto q = p.getQLabFrame();
+      // should be the same
+      TS_ASSERT_DELTA(q[0], 1, 1e-5);
+      TS_ASSERT_DELTA(q[1], 1, 1e-5);
+      TS_ASSERT_DELTA(q[2], 1, 1e-5);
+  }
+
   //------------------------------------------------------------------------------------
   /** Can't have Q = 0,0,0 or 0 in the Z direction when creating */
   void test_setQLabFrame_ThrowsIfQIsNull() {

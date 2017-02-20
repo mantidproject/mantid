@@ -531,6 +531,7 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
                         boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
   m_detectorID = -1;
+  detPos = V3D();
   m_det = IDetector_sptr();
   m_row = -1;
   m_col = -1;
