@@ -52,8 +52,6 @@ public:
   static double calculateStandardError(double in) { return sqrt(in); }
   double calculateEnergy(double);
   double calculateTOF(double, double);
-  double getL1(const API::MatrixWorkspace_sptr &);
-  double getL2(const API::MatrixWorkspace_sptr &, int detId = 1);
   double getInstrumentProperty(const API::MatrixWorkspace_sptr &, std::string);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
