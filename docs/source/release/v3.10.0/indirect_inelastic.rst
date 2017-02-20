@@ -26,7 +26,7 @@ Jump Fit
 
 Improvements
 ------------
-
+- OSIRIS diffraction now rebins container workspaces to match the sample workspace
 
 Bugfixes
 --------
