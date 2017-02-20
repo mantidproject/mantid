@@ -391,7 +391,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const V3D &q) {
+    auto testQ = [&](const V3D &q) {
       // Compute expected direction
       const auto qBeam = q.scalar_prod(refBeamDir);
       const double norm_q = q.norm();
@@ -486,7 +486,7 @@ public:
     int index = 0;
     std::vector<double> angles(8);
     std::generate(angles.begin(), angles.end(), [&index, &angles]() {
-      return index++ * M_PI / angles.size();
+      return static_cast<double>(index++) * M_PI / angles.size();
     });
 
     std::for_each(angles.begin(), angles.end(), testTheta);
