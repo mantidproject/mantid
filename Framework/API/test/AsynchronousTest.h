@@ -126,81 +126,48 @@ public:
   }
 
   void testExecution() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
-    count = 0;
     AsyncAlgorithm alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
-    alg.initialize();
+    setupTest(alg);
     Poco::ActiveResult<bool> result = alg.executeAsync();
     TS_ASSERT(!result.available())
     result.wait();
+    generalChecks(alg, true, true, true, false);
     TS_ASSERT(result.available())
-    TS_ASSERT(alg.isExecuted())
-    TS_ASSERT(startedNotificationReseived)
-    TS_ASSERT(finishedNotificationReseived)
     TS_ASSERT_EQUALS(count, NofLoops)
     TS_ASSERT_EQUALS(alg.result, NofLoops - 1)
   }
 
   void testCancel() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
     AsyncAlgorithm alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
-    alg.initialize();
+    setupTest(alg);
     Poco::ActiveResult<bool> result = alg.executeAsync();
     alg.cancel();
     result.wait();
-    TS_ASSERT(!alg.isExecuted())
+    generalChecks(alg, false, true, false, true);
     TS_ASSERT_LESS_THAN(alg.result, NofLoops - 1)
-    TS_ASSERT(!finishedNotificationReseived)
   }
 
   void testException() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
     AsyncAlgorithmThrows alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
+    setupTest(alg);
     alg.addObserver(m_errorObserver);
-    alg.initialize();
     Poco::ActiveResult<bool> result = alg.executeAsync();
     result.wait();
-    TS_ASSERT(!alg.isExecuted())
+    generalChecks(alg, false, true, false, true);
     TS_ASSERT_LESS_THAN(alg.result, NofLoops - 1)
-    TS_ASSERT(!finishedNotificationReseived)
-    TS_ASSERT(errorNotificationReseived)
     TS_ASSERT_EQUALS(errorNotificationMessage, "Exception thrown")
   }
 
   void testExecutionGroupWS() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
-    count = 0;
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithm alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
-    alg.initialize();
+    setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
     TS_ASSERT(!result.available())
     result.wait();
+    generalChecks(alg, true, true, true, false);
     TS_ASSERT(result.available())
-    TS_ASSERT(alg.isExecuted())
-    TS_ASSERT(startedNotificationReseived)
-    TS_ASSERT(finishedNotificationReseived)
     // There are 2 * NofLoops because there are two child workspaces
     TS_ASSERT_EQUALS(count, NofLoops * 2)
     // The parent algorithm is not executed directly, so the result remains 0
@@ -208,45 +175,27 @@ public:
   }
 
   void testCancelGroupWS() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithm alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
-    alg.initialize();
+    setupTest(alg);
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
     alg.cancel();
     result.wait();
-    TS_ASSERT(!alg.isExecuted())
-    TS_ASSERT(startedNotificationReseived)
-    TS_ASSERT(!finishedNotificationReseived)
-    TS_ASSERT(!errorNotificationReseived)
+    generalChecks(alg, false, true, false, false);
     // The parent algorithm is not executed directly, so the result remains 0
     TS_ASSERT_EQUALS(alg.result, 0)
   }
 
   void testExceptionGroupWS() {
-    startedNotificationReseived = false;
-    finishedNotificationReseived = false;
-    errorNotificationReseived = false;
     WorkspaceGroup_sptr groupWS = makeGroupWorkspace();
     AsyncAlgorithmThrows alg;
-    alg.addObserver(m_startedObserver);
-    alg.addObserver(m_finishedObserver);
-    alg.addObserver(m_progressObserver);
-    alg.addObserver(m_errorObserver);
+    setupTest(alg);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", "groupWS");
     Poco::ActiveResult<bool> result = alg.executeAsync();
     result.wait();
-    TS_ASSERT(!alg.isExecuted())
-    TS_ASSERT(startedNotificationReseived)
-    TS_ASSERT(!finishedNotificationReseived)
-    TS_ASSERT(errorNotificationReseived)
+    generalChecks(alg, false, true, false, true);
     TS_ASSERT_EQUALS(errorNotificationMessage,
                      "Execution of AsyncAlgorithmThrows for group entry 1 "
                      "failed: Exception thrown")
@@ -272,6 +221,29 @@ private:
     groupWS->add("ws1");
 
     return groupWS;
+  }
+
+  // Generic setup for all tests
+  void setupTest(AsyncAlgorithm &alg) {
+    startedNotificationReseived = false;
+    finishedNotificationReseived = false;
+    errorNotificationReseived = false;
+    count = 0;
+
+    alg.initialize();
+    alg.addObserver(m_startedObserver);
+    alg.addObserver(m_finishedObserver);
+    alg.addObserver(m_progressObserver);
+    alg.addObserver(m_errorObserver);
+  }
+
+  void generalChecks(AsyncAlgorithm &alg, const bool expectExecuted,
+                     const bool expectStarted, const bool expectFinished,
+                     const bool expectError) {
+    TS_ASSERT_EQUALS(alg.isExecuted(), expectExecuted)
+    TS_ASSERT_EQUALS(startedNotificationReseived, expectStarted)
+    TS_ASSERT_EQUALS(finishedNotificationReseived, expectFinished)
+    TS_ASSERT_EQUALS(errorNotificationReseived, expectError)
   }
 };
 
