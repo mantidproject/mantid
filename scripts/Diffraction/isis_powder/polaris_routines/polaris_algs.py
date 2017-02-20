@@ -49,7 +49,7 @@ def get_run_details(run_number_string, inst_settings):
     offsets_file_full_path = os.path.join(in_calib_dir, offset_file_name)
 
     # Generate the name of the splined file we will either be loading or saving
-    chopper_status = "On" if inst_settings.chopper_on else "Off"
+    chopper_status = "ChopperOn" if inst_settings.chopper_on else "ChopperOff"
     splined_vanadium_name = common.generate_splined_name(vanadium_runs, chopper_status, offset_file_name)
 
     splined_vanadium = os.path.join(in_calib_dir, splined_vanadium_name)
