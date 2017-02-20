@@ -23,7 +23,7 @@ class Gem(AbstractInst):
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_van_normalisation=self._inst_settings.van_norm)
+                           do_van_normalisation=self._inst_settings.do_van_norm)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -54,6 +54,16 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
+
+    def _crop_banks_to_user_tof(self, focused_banks):
+        return common.crop_banks_in_tof(focused_banks, self._inst_settings.focused_cropping_values)
+
+    def _crop_raw_to_expected_tof_range(self, ws_to_crop):
+        raw_cropping_values = self._inst_settings.raw_tof_cropping_values
+        return common.crop_in_tof(ws_to_crop, raw_cropping_values[0], raw_cropping_values[1])
+
+    def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
+        return common.crop_banks_in_tof(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
 
 def _gem_generate_inst_name(run_number):

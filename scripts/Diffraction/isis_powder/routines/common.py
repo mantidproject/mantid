@@ -32,7 +32,11 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     :return: A list of cropped workspaces
     """
     if not isinstance(crop_values_list, list):
-        raise ValueError("The cropping values were not in a list type")
+        if isinstance(bank_list, list):
+            raise ValueError("The cropping values were not in a list type")
+        else:
+            raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
@@ -60,6 +64,8 @@ def crop_in_tof(ws_to_crop, x_min=None, x_max=None):
         cropped_ws = _crop_single_ws_in_tof(ws_to_crop, x_max=x_max, x_min=x_min)
 
     return cropped_ws
+
+
 def dictionary_key_helper(dictionary, key, throws=True, exception_msg=None):
     """
     Checks if the key is in the dictionary and performs various different actions if it is not depending on
@@ -99,20 +105,6 @@ def extract_ws_spectra(ws_to_split):
         spectra_bank_list.append(mantid.CropWorkspace(InputWorkspace=ws_to_split, OutputWorkspace=output_name,
                                                       StartWorkspaceIndex=i, EndWorkspaceIndex=i))
     return spectra_bank_list
-
-
-def extract_and_crop_spectra(focused_ws, instrument):
-    """
-    Extracts the individual spectra from a focused workspace (see extract_ws_spectra) then applies
-    the user specified cropping. This is the smallest cropping window for use on focused data that
-    is applied on a bank by bank basis. It then returns the extracted and cropped workspaces as a list.
-    :param focused_ws: The focused workspace to extract and crop the spectra of
-    :param instrument: The instrument object associated to this workspace
-    :return: The extracted and cropped workspaces as a list
-    """
-    ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument._crop_banks_to_user_tof(ws_spectra)
-    return ws_spectra
 
 
 def generate_run_numbers(run_number_string):

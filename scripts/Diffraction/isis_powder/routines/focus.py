@@ -38,8 +38,10 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
                                                      input_workspace=focused_ws,
                                                      perform_vanadium_norm=perform_vanadium_norm)
 
+    cropped_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
+
     # Output
-    processed_nexus_files = instrument._output_focused_ws(calibrated_spectra, run_details=run_details)
+    processed_nexus_files = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
 
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
@@ -53,7 +55,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
 def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform_vanadium_norm):
     run_details = instrument._get_run_details(run_number_string=run_number)
     converted_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
-    split_data_spectra = common.extract_and_crop_spectra(converted_ws, instrument=instrument)
+    split_data_spectra = common.extract_ws_spectra(converted_ws)
 
     if perform_vanadium_norm:
         processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
