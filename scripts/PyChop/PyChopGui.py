@@ -113,7 +113,7 @@ class PyChopGui(QtGui.QMainWindow):
         Sets the chopper frequency(ies), in Hz.
         """
         freq_gui = float(self.widgets['FrequencyCombo']['Combo'].currentText())
-        freq_in = kwargs['manual_freq'] if ('manual_freq' in list(kwargs.keys())) else freq_gui
+        freq_in = kwargs['manual_freq'] if ('manual_freq' in kwargs.keys()) else freq_gui
         if 'LET' in str(self.engine.instname):
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
             chop2phase = float(self.widgets['Chopper2Phase']['Edit'].text()) % 1e5
@@ -232,7 +232,7 @@ class PyChopGui(QtGui.QMainWindow):
         overplot = self.widgets['HoldCheck'].isChecked()
         if hasattr(freq, '__len__'):
             freq = freq[-1]
-        update = kwargs['update'] if 'update' in list(kwargs.keys()) else False
+        update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
         searchStr = '([A-Z]+) "([A-z ]+)" ([0-9]+) Hz'

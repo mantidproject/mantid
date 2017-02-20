@@ -138,9 +138,9 @@ class ISISFermi:
         mychop = ISISFermi('Mari', 'G', 300)
         mychop.setFrequency(250)
         """
-        if 'Chopper2Phase' in list(kwargs.keys()):
+        if 'Chopper2Phase' in kwargs.keys():
             diskchopper_phase = kwargs['Chopper2Phase']
-        elif 'diskchopper_phase' in list(kwargs.keys()):
+        elif 'diskchopper_phase' in kwargs.keys():
             diskchopper_phase = kwargs['diskchopper_phase']
         else:
             diskchopper_phase = None

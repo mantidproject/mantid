@@ -34,7 +34,7 @@ class PyChop2:
 
     def __init__(self, instname, *args):
         instname = instname.upper()
-        if instname not in list(self.__Classes.keys()):
+        if instname not in self.__Classes.keys():
             raise ValueError('Instrument %s not recognised' % (instname))
         self.object = self.__Classes[instname](instname, *args)
         self.instname = instname
@@ -43,7 +43,7 @@ class PyChop2:
         """
         ! Returns a list of currently implemented instruments
         """
-        return list(self.__Classes.keys())
+        return self.__Classes.keys()
 
     def setInstrument(self, *args):
         """
@@ -131,7 +131,7 @@ class PyChop2:
         """
         Private method to obtain multi-rep information
         """
-        if self.instname not in list(self.__MultiRepClasses.keys()):
+        if self.instname not in self.__MultiRepClasses.keys():
             raise ValueError('Instrument %s does not support multirep mode')
         if self.__MultiRepClasses[self.instname] == self.__Classes[self.instname]:
             obj = self.object
@@ -202,7 +202,7 @@ class PyChop2:
             if not isinstance(args[0], str):
                 raise ValueError('The first argument must be the instrument name')
             instname = args[0].upper()
-        elif 'inst' in list(kwargs.keys()):
+        elif 'inst' in kwargs.keys():
             instname = kwargs['inst'].upper()
         else:
             raise RuntimeError('You must specify the instrument name')
@@ -213,7 +213,7 @@ class PyChop2:
             lna = (len(argname) if len(args) > len(argname) else len(args))
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
-            for ind in list(kwargs.keys()):
+            for ind in kwargs.keys():
                 if ind in argname:
                     argdict[ind] = kwargs[ind]
             for ind in range(1, 4):
@@ -222,7 +222,7 @@ class PyChop2:
             obj.setChopper(argdict['chtyp'], argdict['freq'])
             obj.setEi(argdict['ei'])
         else:
-            if 'variant' in list(kwargs.keys()):
+            if 'variant' in kwargs.keys():
                 argdict['variant'] = kwargs['variant']
             if len(args) > 1 and isinstance(args[1], str):
                 argname = ['inst', 'variant', 'freq', 'ei', 'etrans']
@@ -231,14 +231,14 @@ class PyChop2:
             lna = (len(argname) if len(args) > len(argname) else len(args))
             for ind in range(1, lna):
                 argdict[argname[ind]] = args[ind]
-            for ind in list(kwargs.keys()):
+            for ind in kwargs.keys():
                 if ind in argname:
                     argdict[ind] = kwargs[ind]
-            if 'variant' in list(argdict.keys()):
+            if 'variant' in argdict.keys():
                 obj.setChopper(argdict['variant'])
-            if 'freq' not in list(argdict.keys()) or 'ei' not in list(argdict.keys()):
+            if 'freq' not in argdict.keys() or 'ei' not in argdict.keys():
                 raise RuntimeError('The chopper frequency and focused incident energy must be specified')
             obj.setFrequency(argdict['freq'])
             obj.setEi(argdict['ei'])
-        etrans = argdict['etrans'] if 'etrans' in list(argdict.keys()) else 0.
+        etrans = argdict['etrans'] if 'etrans' in argdict.keys() else 0.
         return obj.getResolution(etrans), obj.getFlux()
