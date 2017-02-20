@@ -270,7 +270,7 @@ void LoadIsawDetCal::exec() {
       ComponentScaling detScaling;
       detScaling.scaleX = CM_TO_M * width / det->xsize();
       detScaling.scaleY = CM_TO_M * height / det->ysize();
-      detScaling.componentName = det->getFullName();
+      detScaling.componentName = detname;
       rectangularDetectorScalings.push_back(detScaling);
 
       doRotation(rX, rY, detectorInfo, det);
@@ -431,8 +431,6 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
   Quat Rot = Q2 * Q1;
 
   // Then find the corresponding relative position
-
-  // TODO: This needs checking.
   const auto parent = comp->getParent();
   if (parent) {
     Quat rot0 = parent->getRelativeRot();
@@ -466,7 +464,6 @@ void LoadIsawDetCal::applyScalings(
     IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
     alg1->setProperty<Workspace_sptr>("Workspace", ws);
     alg1->setProperty("ComponentName", scaling.componentName);
-    // Convert from cm to m
     alg1->setProperty("ScaleX", scaling.scaleX);
     alg1->setProperty("ScaleY", scaling.scaleY);
     alg1->executeAsChildAlg();
