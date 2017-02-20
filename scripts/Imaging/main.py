@@ -22,23 +22,6 @@ from __future__ import (absolute_import, division, print_function)
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-"""
-Do a tomographic reconstruction, including:
-- Pre-processing of input raw images,
-- 3d volume reconstruction using a third party tomographic reconstruction tool
-- Post-processing of reconstructed volume
-- Saving reconstruction results (and pre-processing results, and self-save this script and subpackages)
-
-This command line script and the classes and packages that it uses are prepared so that
-they can be run from Mantid, locally (as a process) or remotely (through the tomographic reconstruction
-GUI remote job submission, or the remote algorithms).
-
-Example command lines:
-
-python tomo_reconstruct.py --help
-"""
-
-
 def check_version_info():
     import sys
     python_version = sys.version_info
@@ -58,23 +41,28 @@ def main():
     if config.func.debug:
         if config.func.debug_port is not None:
             import pydevd
-            pydevd.settrace('localhost', port=config.func.debug_port,
-                            stdoutToServer=True, stderrToServer=True)
+            pydevd.settrace(
+                'localhost',
+                port=config.func.debug_port,
+                stdoutToServer=True,
+                stderrToServer=True)
 
-    if config.func.find_cor:
-        # run find_center stuff
-        import recon.find_cor
-        res = recon.find_cor.execute(config)
-    elif config.func.imopr:
-        import imopr.runner
-        res = imopr.runner.execute(config)
+    if config.func.imopr:
+        from imopr import imopr
+        res = imopr.execute(config)
+    elif config.func.aggregate:
+        from aggregate import aggregate
+        res = aggregate.execute(config)
+    elif config.func.convert:
+        from convert import convert
+        res = convert.execute(config)
     else:
-        # run recon stuff
-        import recon.runner
+        from recon import recon
         cmd_line = " ".join(sys.argv)
-        res = recon.runner.execute(config, cmd_line)
+        res = recon.execute(config, cmd_line)
 
     return res
+
 
 if __name__ == '__main__':
     main()

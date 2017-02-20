@@ -16,8 +16,17 @@ def write_nxs(data,
               dark=None,
               projection_angles=None,
               overwrite=False):
-    # Adapted code from Nagella, Srikanth (STFC,RAL,SC)
-    # <srikanth.nagella@stfc.ac.uk>
+    """
+    Write a h5 NXS file.
+
+    :param data: the sample data that will be saved
+    :param filename: The full path of the output file, plus the name.
+    :param flat: An averaged flat image MUST BE PROVIDED
+    :param dark: An averaged flat image MUST BE PROVIDED
+    :param projection_angles: Pre-calculated projection angles for the stack.
+    :param overwrite: Overwrite an existing file.
+    """
+
     assert flat is not None and dark is not None, \
         "When saving out NEXUS file, Flat and Dark images must be provided with -F and -D."
 
@@ -25,8 +34,8 @@ def write_nxs(data,
     import h5py
     nxs = h5py.File(filename, 'w')
 
-    flat = np.atleast_3d(flat).reshape(1, data.shape[1], data.shape[2])
-    dark = np.atleast_3d(dark).reshape(1, data.shape[1], data.shape[2])
+    flat = flat.reshape(1, data.shape[1], data.shape[2])
+    dark = dark.reshape(1, data.shape[1], data.shape[2])
 
     # new shape to account for appending flat and dark images
     correct_shape = (data.shape[0] + 2, data.shape[1], data.shape[2])
@@ -53,9 +62,9 @@ def create_image_name(custom_idx, idx, name_prefix, zfill_len, name_postfix,
                       extension):
     if custom_idx is None:
         name = name_prefix + str(idx).zfill(
-            zfill_len) + name_postfix + extension
+            zfill_len) + name_postfix + "." + extension
     else:
-        name = name_prefix + str(custom_idx) + name_postfix + extension
+        name = name_prefix + str(custom_idx) + name_postfix + "." + extension
     return name
 
 
@@ -93,6 +102,11 @@ class Saver(object):
 
         self._overwrite_all = config.func.overwrite_all
         self._data_as_stack = config.func.data_as_stack
+
+        if self._img_format == 'nxs' and not self._data_as_stack:
+            raise ValueError(
+                "Cannot save out individual NXS files! Please provide --data-as-stack."
+            )
 
         self._preproc_dir = config.func.preproc_subdir
         self._save_preproc = config.func.save_preproc
@@ -265,20 +279,16 @@ class Saver(object):
                                    custom_idx=None,
                                    zfill_len=6,
                                    name_postfix=''):
-        if self._img_format in ['tif', 'tiff']:
-            extension = '.tiff'
-            write_func = write_img
-        else:
-            if self._img_format in ['nxs']:
-                self._h.tomo_print_error(
-                    "Cannot save out individual NXS files. Saving out FITS instead."
-                )
-            extension = '.fits'
+        if self._img_format in ['fit', 'fits']:
             write_func = write_fits
+        else:
+            # pass all other formats to skimage
+            write_func = write_img
 
         for idx in range(0, data.shape[0]):
             name = create_image_name(custom_idx, idx, name_prefix, zfill_len,
-                                     name_postfix, extension)
+                                     name_postfix, self._img_format)
+            print(name)
             write_func(data[idx, :, :],
                        os.path.join(output_dir, name), self._overwrite_all)
 

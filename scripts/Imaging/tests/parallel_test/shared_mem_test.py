@@ -37,7 +37,7 @@ class SharedMemTest(unittest.TestCase):
         # create partial
         from parallel import shared_mem as psm
         f = psm.create_partial(
-            add_inplace, fwd_function=psm.inplace_fwd_func, add_arg=add_arg)
+            add_inplace, fwd_func=psm.inplace_fwd_func, add_arg=add_arg)
         # execute parallel
         img = psm.execute(img, f, name="Inplace test")
         # compare results
@@ -56,7 +56,7 @@ class SharedMemTest(unittest.TestCase):
         # create partial
         from parallel import shared_mem as psm
         f = psm.create_partial(
-            return_from_func, fwd_function=psm.fwd_func, add_arg=add_arg)
+            return_from_func, fwd_func=psm.return_fwd_func, add_arg=add_arg)
         # execute parallel
         img = psm.execute(img, f, name="Fwd func test")
         # compare results
@@ -80,7 +80,7 @@ class SharedMemTest(unittest.TestCase):
         # create partial
         from parallel import shared_mem as psm
         f = psm.create_partial(
-            add_inplace, fwd_function=psm.inplace_fwd_func, add_arg=add_arg)
+            add_inplace, fwd_func=psm.inplace_fwd_func, add_arg=add_arg)
         # execute parallel
         res = psm.execute(img, f, name="Fail Inplace test")
         # compare results
@@ -101,7 +101,7 @@ class SharedMemTest(unittest.TestCase):
         # create partial
         from parallel import shared_mem as psm
         f = psm.create_partial(
-            return_from_func, fwd_function=psm.fwd_func, add_arg=add_arg)
+            return_from_func, fwd_func=psm.return_fwd_func, add_arg=add_arg)
         # execute parallel
         res = psm.execute(img, f, name="Fwd func test")
         # compare results

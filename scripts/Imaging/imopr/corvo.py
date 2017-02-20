@@ -9,7 +9,7 @@ def execute(sample, flat, dark, config, indices):
         "Running IMOPR with action COR using tomopy find_center_vo")
 
     from recon.tools import importer
-    tool = importer.timed_import(config.func.tool)
+    tool = importer.timed_import(config)
 
     inc = float(config.func.max_angle) / sample.shape[0]
     proj_angles = np.arange(0, sample.shape[0] * inc, inc)
@@ -25,15 +25,7 @@ def execute(sample, flat, dark, config, indices):
     # This works on sinograms by default. 
     # Thankfully it's not said anywhere, but the code gets the sinogram
     # in tomopy.rotation.py find_center_vo(...)
-    cor = tool.find_center_vo(
-        tomo=sample,
-        ind=i1,
-        smin=243,
-        smax=294,
-        srad=20,
-        step=1,
-        ratio=1.0,
-        drop=0)
+    cor = tool.find_center_vo(tomo=sample)
     print(cor)
 
     return sample

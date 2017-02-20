@@ -26,33 +26,36 @@ class CircularMaskTest(unittest.TestCase):
         images, control = th.gen_img_shared_array_and_copy()
 
         ratio = 0
-        result = self.alg.execute(images, ratio, self.h)
+        mask_val = 0.
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_equal(result, control)
 
         ratio = 1
-        result = self.alg.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_equal(result, control)
 
         ratio = -1
-        result = self.alg.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_equal(result, control)
 
         ratio = None
-        result = self.alg.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_equal(result, control)
 
     def test_executed(self):
         images, control = th.gen_img_shared_array_and_copy()
 
         ratio = 0.001
-        result = self.alg.execute(images, ratio, self.h)
+        mask_val = 0.
+
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_raises(AssertionError, npt.assert_array_equal, result,
                           control)
 
         # reset the input images
         images, control = th.gen_img_shared_array_and_copy()
         ratio = 0.994
-        result = self.alg.execute(images, ratio, self.h)
+        result = self.alg.execute(images, ratio, mask_val, self.h)
         npt.assert_raises(AssertionError, npt.assert_array_equal, result,
                           control)
 
@@ -60,6 +63,7 @@ class CircularMaskTest(unittest.TestCase):
         images, control = th.gen_img_shared_array_and_copy()
 
         ratio = 0.001
+
         result = self.alg.execute(images, ratio)
         npt.assert_raises(AssertionError, npt.assert_array_equal, result,
                           control)

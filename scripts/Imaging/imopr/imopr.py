@@ -2,6 +2,32 @@ from __future__ import (absolute_import, division, print_function)
 
 
 def execute(config):
+    """
+    Execute the image operator. This allows performing operations on single images, or specified images slices.
+
+    Currently available modes:
+        - recon - do a reconstruction on a single or multiple slices, --imopr 1 recon, --imopr 10 34 recon
+        - sino - visualise the sinogram for single or multiple slices, --imopr 1 sino, --imopr 10 34 sino
+        - vis - just visualise the single or multiple images, --imopr 1 vis, --imopr 10 34 vis
+        - cor - get the COR for a slice or multiple slices using tomopy find_center, --imopr 1 cor, --imopr 10 34 cor
+        - corvo - get the COR for a slice or multiple slices using
+                  tomopy find_center_vo, --imopr 1 corvo, --imopr 10 34 corvo
+        - corpc - get the COR for a slice or multiple slices using
+                  tomopy find_center_pc, --imopr 1 corpc, --imopr 10 34 corpc
+        - corwrite - get the COR for a slice or multiple slices using
+                  tomopy write_center, --imopr 1 corpc, --imopr 10 34 corwrite
+        - opr - do operations on 2 images, that can be:
+                sum(also +), --imopr 1 3 sum, --imopr 10 34 +
+                subtract(also sub, -), --imopr 1 3 sub, --imopr 10 34 -
+                divide(also div, /), --imopr 1 3 div, --imopr 10 34 /
+                multiply(also mul, *), --imopr 1 3 mul, --imopr 10 34 *
+                mean(also avg, x), --imopr 1 3 avg, --imopr 10 34 x
+
+    COR functions reference: http://tomopy.readthedocs.io/en/latest/api/tomopy.recon.rotation.html
+
+    :param config:
+    :return:
+    """
     # use [:] to get a copy of the list
     commands = config.func.imopr[:]
 

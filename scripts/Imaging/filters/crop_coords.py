@@ -4,7 +4,18 @@ from helper import Helper
 
 
 def execute(sample, region_of_interest, flat, dark, h=None):
-    if sample is not None and flat is None:
+    """
+    Execute the Circular Mask filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param region_of_interest: The region of interest that will be cropped
+    :param flat: The average flat image to be cropped
+    :param dark: The average dark image to be cropped
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+    """
+    if sample is not None and flat is None and dark is not None:
         return execute_volume(sample, region_of_interest, h), None, None
     else:
         return execute_volume(sample, region_of_interest, h), \

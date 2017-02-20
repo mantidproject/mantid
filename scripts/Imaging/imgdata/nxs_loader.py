@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from helper import Helper
 
-from imgdata.loader import get_file_names, nxsread, parallel_move_data, do_stack_load_par, do_stack_load_seq, load_stack
 
 
 def execute(input_data_file, img_format, data_dtype, cores, chunksize,
@@ -28,6 +27,7 @@ def _do_nxs_load(input_data_file, img_format, data_dtype, cores, chunksize,
     :param h: Helper class, if not provided will be initialised with empty constructor
     :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
+    from imgdata.loader import nxsread, load_stack
 
     data = load_stack(nxsread, input_data_file, data_dtype, "NXS Load", cores,
                       chunksize, parallel_load, h)
@@ -35,23 +35,22 @@ def _do_nxs_load(input_data_file, img_format, data_dtype, cores, chunksize,
     return data[:-2, :, :], data[-2, :, :], data[-1, :, :]
 
 
-def _do_stack_move_seq(data, new_data, img_shape, name, h):
+def _do_stack_move_seq(data, input_data, img_shape, name, h):
     """
     Sequential version of loading the data.
     This performs faster locally, but parallel performs faster on SCARF
 
-    :param data: shared array of data
-    :param load_func:
-    :param file_name: the name of the stack file
-    :param img_shape:
-    :param name:
+    :param data: shared array of output data
+    :param data: input array of images loaded from IO
+    :param img_shape: the shape of the loaded images
+    :param name: name for the progress bar
     :param h: Helper class, if not provided will be initialised with empty constructor
     :return:
     """
     # this will open the file but not read all of it in
     h.prog_init(img_shape[0], name)
     for i in range(img_shape[0]):
-        data[i] = new_data[i]
+        data[i] = input_data[i]
         h.prog_update()
     h.prog_close()
     return data
@@ -59,6 +58,7 @@ def _do_stack_move_seq(data, new_data, img_shape, name, h):
 
 def _do_stack_move_par(data, new_data, cores, chunksize, name, h):
     # this runs faster on SCARF
+    from imgdata.loader import parallel_move_data
     from parallel import two_shared_mem as ptsm
     f = ptsm.create_partial(
         parallel_move_data, fwd_function=ptsm.inplace_fwd_func)

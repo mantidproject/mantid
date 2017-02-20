@@ -1,8 +1,30 @@
 from __future__ import (absolute_import, division, print_function)
 from helper import Helper
 
+def modes():
+    return ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
+
 
 def execute(data, size, mode, order, cores=None, chunksize=None, h=None):
+    """
+    Execute the Gaussian filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param size: The size of the kernel
+    :param mode: The mode with which to handle the endges
+    :param order: The order of the filter along each axis is given as a sequence of integers, or as a single number.
+                  An order of 0 corresponds to convolution with a Gaussian kernel.
+                  An order of 1, 2, or 3 corresponds to convolution with the first, second or third
+                  derivatives of a Gaussian. Higher order derivatives are not implemented
+
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+
+    Full reference:
+    https://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.ndimage.filters.gaussian_filter.html
+
+    """
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -22,17 +44,9 @@ def execute(data, size, mode, order, cores=None, chunksize=None, h=None):
 
 def _execute_seq(data, size, mode, order, h=None):
     """
-
-    :param data: The sample image data as a 3D numpy.ndarray
-    :param size: Size of the filter kernel
-    :param mode: Mode for the borders of the filter. Options available in script -h command
-    :param order: An order of 0 corresponds to convolution with a Gaussian kernel.
-            An order of 1, 2, or 3 corresponds to convolution with the first, second or third derivatives of a Gaussian.
-            Higher order derivatives are not implemented.
-    :param h: Helper class, if not provided will be initialised with empty constructor
-
-    :return: Returns the processed data
+    Sequential CPU version of the Gaussian filter
     """
+
     from filters.median_filter import import_scipy_ndimage
 
     scipy_ndimage = import_scipy_ndimage()
@@ -57,17 +71,7 @@ def _execute_seq(data, size, mode, order, h=None):
 
 def _execute_par(data, size, mode, order, cores=None, chunksize=None, h=None):
     """
-    Parallel version of the gaussian filter.
-
-    :param data: The sample image data as a 3D numpy.ndarray
-    :param size: Size of the filter kernel
-    :param mode: Mode for the borders of the filter. Options available in script -h command
-    :param order: An order of 0 corresponds to convolution with a Gaussian kernel.
-            An order of 1, 2, or 3 corresponds to convolution with the first, second or third derivatives of a Gaussian.
-            Higher order derivatives are not implemented.
-    :param h: Helper class, if not provided will be initialised with empty constructor
-
-    :return: Returns the processed data
+    Parallel CPU version of the Gaussian filter
     """
     from filters.median_filter import import_scipy_ndimage
 
@@ -77,7 +81,7 @@ def _execute_par(data, size, mode, order, cores=None, chunksize=None, h=None):
 
     f = psm.create_partial(
         scipy_ndimage.gaussian_filter,
-        fwd_function=psm.fwd_func,
+        fwd_func=psm.return_fwd_func,
         sigma=size,
         mode=mode,
         order=order)

@@ -1,9 +1,20 @@
 from __future__ import (absolute_import, division, print_function)
 from helper import Helper
 
+def modes():
+    return ['dark', 'bright', 'both']
 
 def execute(data, outliers_threshold, outliers_mode, h=None):
-    # Apply outliers for the normalization?
+    """
+    Execute the Outliers filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param outliers_threshold: The threshold related to the pixel value that will be clipped
+    :param outliers_mode: Which pixels will be clipped: dark, bright or both
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+    """
     h = Helper.empty_init() if h is None else h
 
     if outliers_threshold and outliers_threshold > 0.0 and outliers_mode is not None:

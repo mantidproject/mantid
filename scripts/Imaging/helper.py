@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-import sys
+
 """
 Class for commonly used functions across the modules
 
@@ -286,7 +286,7 @@ class Helper(object):
                     total=total, desc=desc, ascii=ascii, unit=unit)
             except ImportError:
                 try:
-                    from recon.custom_timer import CustomTimer
+                    from custom_timer import CustomTimer
                     self._progress_bar = CustomTimer(total, desc)
                 except ImportError:
                     self._progress_bar = None

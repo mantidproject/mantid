@@ -1,16 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-"""
-parallel.shared_mem: Runs a function in parallel.
-                     Expects and uses a single 3D shared memory array between the processes.
-parallel.two_shared_mem: Runs a function in parallel.
-                         Expects and uses two 3D shared memory arrays between the processes.
-parallel.exclusive_mem: Runs a function in parallel.
-                         Uses a 3D memory array, but each process will copy the piece of data
-                         it's processing, before processing it, if the data is in any way read
-                         or modified, triggering the copy-on-write.
-"""
-
 # Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -32,3 +21,40 @@ parallel.exclusive_mem: Runs a function in parallel.
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+import sys
+
+
+class CustomTimer(object):
+    """
+    Custom fallback implementation for timer that provides only a basic loading bar.
+    This timer bar will be used if tqdm is not present of the system.
+    """
+
+    def __init__(self, total, prefix=''):
+        self._total = total
+        self._iter = 0
+        self._prefix = prefix + ": "
+        self._bar_len = 40
+
+    def update(self, iterations):
+        self._iter += iterations
+
+        filled_len = int(
+            round(self._bar_len * self._iter / float(self._total)))
+
+        bar = self._prefix + '[' + '=' * filled_len + \
+            '-' * (self._bar_len - filled_len) + \
+            "]" + str(self._iter) + ' / ' + str(self._total)
+
+        print(bar, end='\r')
+        sys.stdout.flush()
+
+        if self._iter == self._total:
+            print()
+
+    def close(self):
+        """
+        Do nothing, just here to maintain compatibility with the TQDM timer
+        """
+        pass

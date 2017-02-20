@@ -47,7 +47,6 @@ class FunctionalConfig(object):
         self.data_dtype = np.float32
 
         self.cor = None
-        self.find_cor = False
 
         self.verbosity = 3
 
@@ -99,7 +98,6 @@ class FunctionalConfig(object):
                + "Save images as file stacks: {0}\n".format(str(self.data_as_stack)) \
                + "Data type: {0}\n".format(str(self.data_dtype)) \
                + "Provided center of rotation: {0}\n".format(str(self.cor)) \
-               + "Find COR Run: {0}\n".format(str(self.find_cor)) \
                + "Verbosity: {0}\n".format(str(self.verbosity)) \
                + "Overwrite files in output directory: {0}\n".format(str(self.overwrite_all)) \
                + "Debug: {0}\n".format(str(self.debug)) \
@@ -276,14 +274,6 @@ class FunctionalConfig(object):
         grp_run_modes = parser.add_argument_group('Run Modes')
 
         grp_run_modes.add_argument(
-            "-f",
-            "--find-cor",
-            action='store_true',
-            required=False,
-            help="Find the center of rotation (in pixels). Rotation around y axis is assumed"
-        )
-
-        grp_run_modes.add_argument(
             "--convert",
             required=False,
             action='store_true',
@@ -311,7 +301,8 @@ class FunctionalConfig(object):
             required=False,
             type=str,
             default=self.aggregate,
-            help='Aggregate image energy levels. The expected input is --aggregate <start> <end> <method:{sum, avg}>... to select indices.\n\
+            help='Aggregate image energy levels. The expected input is '
+                 '--aggregate <start> <end> <method:{sum, avg}>... to select indices.\n\
                   There must always be an even lenght of indices: --aggregate 0 100 101 201 300 400 sum'
         )
 
@@ -321,9 +312,9 @@ class FunctionalConfig(object):
             required=False,
             type=str,
             default=self.aggregate_angles,
-            help='Select which angles to be aggregated with --aggregate.\n\
-                  This is to help running the same algorithm on multiple nodes, while avoiding the integration of mpi4py.\n\
-                  Sample command: --aggregate-angles 0 10, will select only angles 0 - 10 inclusive.'
+            help="Select which angles to be aggregated with --aggregate.\n"
+                  "This can be used to spread out the load on multiple nodes.\n"
+                  "Sample command: --aggregate-angles 0 10, will select only angles 0 - 10 inclusive."
         )
 
         grp_run_modes.add_argument(
@@ -391,7 +382,8 @@ class FunctionalConfig(object):
             required=False,
             type=float,
             default=self.max_angle,
-            help="Maximum angle of the last projection.\nAssuming first angle=0, and uniform angle increment for every projection"
+            help="Maximum angle of the last projection.\n"
+                 "Assuming first angle=0, and uniform angle increment for every projection"
         )
 
         grp_recon.add_argument(
@@ -459,8 +451,6 @@ class FunctionalConfig(object):
         if args.cor:
             self.cor = int(args.cor)
 
-        self.find_cor = args.find_cor
-
         self.verbosity = args.verbosity
         self.overwrite_all = args.overwrite_all
 
@@ -495,7 +485,6 @@ class FunctionalConfig(object):
                 -s/--save-preproc, --convert, --aggregate")
 
         if self.cor is None \
-                and not self.find_cor \
                 and not self.only_preproc \
                 and not self.imopr \
                 and not self.aggregate\

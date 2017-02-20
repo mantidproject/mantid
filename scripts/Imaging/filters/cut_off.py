@@ -3,7 +3,15 @@ from helper import Helper
 
 
 def execute(data, cut_off_level, h=None):
-    # Apply cut-off for the normalization?
+    """
+    Execute the Cut off filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param cut_off_level: The threshold related to the minimum pixel value that will be clipped
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+    """
     h = Helper.empty_init() if h is None else h
 
     if cut_off_level and cut_off_level > 0.0:

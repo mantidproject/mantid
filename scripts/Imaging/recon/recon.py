@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from helper import Helper
 
 
 def execute(config, cmd_line):
@@ -16,7 +17,6 @@ def execute(config, cmd_line):
     :param cmd_line: The full command line text if running from the CLI.
     """
 
-    from helper import Helper
     h = Helper(config)
     config.helper = h
     h.total_execution_timer()
@@ -62,7 +62,7 @@ def execute(config, cmd_line):
     return recon
 
 
-def pre_processing(config, sample, flat, dark):
+def pre_processing(config, sample, flat, dark, h=None):
     """
     Does the pre-processing steps specified in the configuration file.
 
@@ -70,8 +70,11 @@ def pre_processing(config, sample, flat, dark):
     :param sample: The sample image data as a 3D numpy.ndarray
     :param flat: The flat averaged image data as a 2D numpy.array
     :param dark: The dark averaged image data as a 2D numpy.array
+    :param h: Helper class, if not provided will be initialised with the config
+
     """
-    h = config.helper
+    h = Helper(config) if h is None else h
+
     if config.func.reuse_preproc is True:
         h.tomo_print_warning(
             "Pre-processing steps have been skipped, because --reuse-preproc flag has been passed."
@@ -79,7 +82,7 @@ def pre_processing(config, sample, flat, dark):
         return sample, flat, dark
 
     from filters import rotate_stack, crop_coords, normalise_by_flat_dark, normalise_by_air_region, outliers, \
-        mcp_corrections, rebin, median_filter, gaussian
+        rebin, median_filter, gaussian
 
     cores = config.func.cores
     chunksize = config.func.chunksize
@@ -142,7 +145,7 @@ def pre_processing(config, sample, flat, dark):
     sample = outliers.execute(sample, config.pre.outliers_threshold,
                               config.pre.outliers_mode, h)
 
-    # mcp_corrections
+    # mcp_corrections, they have to be included as well
     # data = mcp_corrections.execute(data, config)
 
     sample = rebin.execute(
@@ -173,21 +176,21 @@ def pre_processing(config, sample, flat, dark):
     return sample, flat, dark
 
 
-def post_processing(config, recon_data):
+def post_processing(config, recon_data, h=None):
     """
     Does the post-processing steps specified in the configuration file.
 
     :param config: A ReconstructionConfig with all the necessary parameters to run a reconstruction.
-    :param sample: The sample image data as a 3D numpy.ndarray
+    :param recon_data: The reconstructed image data as a 3D numpy.ndarray
+    :param h: Helper class, if not provided will be initialised with the config
     :return: The reconstructed data.
     """
     from filters import circular_mask, gaussian, median_filter, outliers
 
-    h = config.helper
-    debug = True if config.func.debug else False
+    h = Helper(config) if h is None else h
 
     recon_data = circular_mask.execute(recon_data, config.post.circular_mask,
-                                       h)
+                                       config.post.circular_mask_val, h)
 
     recon_data = outliers.execute(recon_data, config.post.outliers_threshold,
                                   config.post.outliers_mode, h)

@@ -21,15 +21,15 @@ from __future__ import (absolute_import, division, print_function)
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
-from recon.configs.functional_config import FunctionalConfig
-from recon.configs.postproc_config import PostProcConfig
-from recon.configs.preproc_config import PreProcConfig
-from recon.configs.recon_config import ReconstructionConfig
 
 
 def grab_full_config():
-    import argparse
+    from configs.functional_config import FunctionalConfig
+    from configs.postproc_config import PostProcConfig
+    from configs.preproc_config import PreProcConfig
+    from configs.recon_config import ReconstructionConfig
 
+    import argparse
     from argparse import RawTextHelpFormatter
 
     parser = argparse.ArgumentParser(

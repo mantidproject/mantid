@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 # Copyright &copy; 2017-2018 ISIS Rutherford Appleton Laboratory, NScD
 # Oak Ridge National Laboratory & European Spallation Source
 #
@@ -19,4 +21,7 @@
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
-import tool_importer
+
+from recon.tools import importer
+from recon.tools import astra_tool
+from recon.tools import tomopy_tool

@@ -1,8 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
-from imgdata.loader import get_folder_names, get_file_names
 
 
 def execute(config):
+    """
+    Aggregates images.
+
+    Energy levels can be selected with --agregate 0 100, this selects energy levels from 0 to 100
+    Angles can be selected with --aggregate-angles 0 10, this selects angles 0 to 10
+    Output can be in a single folder --aggregate-single-folder-output, or in a separate folder for each angle
+
+    :param config: The full reconstruction config
+    """
     from helper import Helper
     h = Helper(config)
     input_path = config.func.input_path
@@ -113,6 +121,8 @@ def do_sanity_checks(output_path, agg_method, commands):
 
 def get_image_files_paths(input_path, angle_folders, img_format,
                           selected_indices):
+    from imgdata.loader import get_file_names
+
     import os
     angle_image_paths = []
     for folder in angle_folders:
@@ -147,6 +157,7 @@ def get_indices_for_energy_levels(energy_levels):
 
 
 def get_angle_folders(input_path, img_format, selected_angles):
+    from imgdata.loader import get_folder_names
     # get all the angles folders
     angle_folders = get_folder_names(input_path, img_format)
 

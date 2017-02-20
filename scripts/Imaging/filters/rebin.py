@@ -1,12 +1,30 @@
 from __future__ import (absolute_import, division, print_function)
 from helper import Helper
-"""
-REBIN does not use shared_memory, because it has to resize the array!
-However the information that needs to be copied is 0s, so it should not be expensive to do so!
-"""
 
+def modes():
+    return ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
 
 def execute(data, rebin_param, mode, cores=None, chunksize=None, h=None):
+    """
+    Execute the Rebin/imresize filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param rebin_param: int, float or tuple
+                        int - Percentage of current size.
+                        float - Fraction of current size.
+                        tuple - Size of the output image.
+
+    :param mode: Interpolation to use for re-sizing ('nearest', 'lanczos', 'bilinear', 'bicubic' or 'cubic').
+
+
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+
+    Full reference:
+    https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.misc.imresize.html
+
+    """
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -88,6 +106,7 @@ def _execute_custom(data, config):
     Returns :: downscaled volume, with the dimensions implied by block_size, and the
     same data type as the input data volume.
     """
+    raise NotImplementedError("This function's implementation is disabled.")
 
     if 0 != np.mod(data_vol.shape[1], block_size) or 0 != np.mod(
             data_vol.shape[2], block_size):

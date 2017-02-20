@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+# This way ALL separate instances of a Readme will write to the same output!
+total_string = ""
 
 class Readme(object):
     def __init__(self, config, saver, h):
@@ -21,7 +23,8 @@ class Readme(object):
 
         :param string: string to be appended
         """
-        self._total_string += string + '\n'
+        global total_string
+        total_string += string + '\n'
 
     def begin(self, cmd_line, config):
         """
@@ -35,7 +38,6 @@ class Readme(object):
         Returns :: time now (begin of run) in number of seconds since epoch (time() time)
         """
 
-        print(self._readme_fullpath)
         if self._readme_fullpath is None:
             return
 

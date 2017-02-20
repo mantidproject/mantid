@@ -3,6 +3,11 @@ from imgdata.loader import get_folder_names, get_file_names
 
 
 def execute(config):
+    """
+    Converts images from one input format to another output format.
+
+    :param config: The full ReconstructionConfig
+    """
     from helper import Helper
     h = Helper(config)
     output_dir = config.func.output_path

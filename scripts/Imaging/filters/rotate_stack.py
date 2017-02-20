@@ -23,20 +23,20 @@ def execute(data,
     """
     Rotates a stack (sample, flat and dark images).
 
-    This function must be used on the whole picture, which is a square.
+    This function only works with square images.
 
     If the picture is cropped first, the ROI coordinates
     have to be adjusted separately to be pointing at the NON ROTATED image!
 
-    :param data :: stack of sample images
+    :param data: stack of sample images
     :param rotation: The rotation to be performed
-    :param flat :: flat images average
-    :param dark :: dark images average
-    :param cores :: cores for parallel execution
-    :param chunksize :: chunk for each worker
+    :param flat: flat images average
+    :param dark: dark images average
+    :param cores: cores for parallel execution
+    :param chunksize: chunk for each worker
     :param h: Helper class, if not provided will be initialised with empty constructor
 
-    :return :: rotated images
+    :return: rotated images
     """
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
@@ -69,13 +69,13 @@ def _execute_seq(data, rotation, h=None):
     If the picture is cropped first, the ROI coordinates
     have to be adjusted separately to be pointing at the NON ROTATED image!
 
-    :param data :: stack of sample images
+    :param data: stack of sample images
     :param rotation: The rotation to be performed
-    :param flat :: flat images average
-    :param dark :: dark images average
+    :param flat: flat images average
+    :param dark: dark images average
     :param h: Helper class, if not provided will be initialised with empty constructor
 
-    Returns :: rotated images
+    Returns: rotated images
     """
     h.pstart(
         "Starting rotation step ({0} degrees clockwise), with pixel data type: {1}...".
@@ -106,7 +106,7 @@ def _execute_par(data, rotation, cores=None, chunksize=None, h=None):
 
     f = psm.create_partial(
         _rotate_image_inplace,
-        fwd_function=psm.inplace_fwd_func,
+        fwd_func=psm.inplace_fwd_func,
         rotation=rotation)
 
     data = psm.execute(

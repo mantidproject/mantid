@@ -115,13 +115,13 @@ class PreProcConfig(object):
             help="Size / width of the median filter(pre - processing)."
         )
 
-        median_modes = ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
+        from filters.median_filter import modes as median_modes
         grp_pre.add_argument(
             "--pre-median-mode",
             type=str,
             required=False,
             default=self.median_mode,
-            choices=median_modes,
+            choices=median_modes(),
             help="Default: %(default)s\n"
                  "Mode of median filter which determines how the array borders are handled."
 
@@ -169,12 +169,12 @@ class PreProcConfig(object):
                  "Pixels below this threshold with respect to maximum intensity in the stack "
                  "will be set to the minimum value.")
 
-        outliers_mode = ['dark', 'bright', 'both']
+        from filters.outliers import modes as outliers_modes
         grp_pre.add_argument(
             "--pre-outliers-mode",
             required=False,
             type=str,
-            choices=outliers_mode,
+            choices=outliers_modes(),
             help="Which pixels to clip, only dark ones, bright ones or both.")
 
         grp_pre.add_argument(
@@ -185,13 +185,13 @@ class PreProcConfig(object):
             "If not specified no scaling will be done."
         )
 
-        rebin_modes = ['nearest', 'lanczos', 'bilinear', 'bicubic', 'cubic']
+        from filters.rebin import modes as rebin_modes
         grp_pre.add_argument(
             "--rebin-mode",
             required=False,
             type=str,
             default=self.rebin_mode,
-            choices=rebin_modes,
+            choices=rebin_modes(),
             help="Default: %(default)s\n"
             "Specify which interpolation mode will be used for the scaling of the image."
         )
@@ -211,12 +211,13 @@ class PreProcConfig(object):
             help="Apply gaussian filter (2d) on reconstructed volume with the given window size."
         )
 
+        from filters.gaussian import modes as gaussian_modes
         grp_pre.add_argument(
             "--pre-gaussian-mode",
             type=str,
             required=False,
             default=self.gaussian_mode,
-            choices=median_modes,
+            choices=gaussian_modes(),
             help="Default: %(default)s\nMode of gaussian filter which determines how the array borders are handled.(pre processing).")
 
         grp_pre.add_argument(

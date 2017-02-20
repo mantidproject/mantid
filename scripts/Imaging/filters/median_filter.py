@@ -1,24 +1,25 @@
 from __future__ import (absolute_import, print_function, division)
 from helper import Helper
 
-
-def import_scipy_ndimage():
-    """
-    Tries to import scipy so that the median filter can be applied
-    :return:
-    """
-
-    try:
-        import scipy.ndimage as scipy_ndimage
-    except ImportError:
-        raise ImportError(
-            "Could not find the subpackage scipy.ndimage, required for image pre-/post-processing"
-        )
-
-    return scipy_ndimage
-
+def modes():
+    return ['reflect', 'constant', 'nearest', 'mirror', 'wrap']
 
 def execute(data, size, mode, cores=None, chunksize=None, h=None):
+    """
+    Execute the Median filter.
+
+    :param data: The sample image data as a 3D numpy.ndarray
+    :param size: The size of the kernel
+    :param mode: The mode with which to handle the edges
+
+    :param h: Helper class, if not provided will be initialised with empty constructor
+
+    :return: the data after being processed with the filter
+
+    Full reference:
+    https://docs.scipy.org/doc/scipy-0.16.1/reference/generated/scipy.ndimage.filters.median_filter.html
+
+    """
     h = Helper.empty_init() if h is None else h
     h.check_data_stack(data)
 
@@ -83,7 +84,7 @@ def _execute_par(data, size, mode, cores=None, chunksize=None, h=None):
     from parallel import shared_mem as psm
     f = psm.create_partial(
         scipy_ndimage.median_filter,
-        fwd_function=psm.fwd_func,
+        fwd_func=psm.return_fwd_func,
         size=size,
         mode=mode)
 
@@ -100,7 +101,17 @@ def _execute_par(data, size, mode, cores=None, chunksize=None, h=None):
     return data
 
 
-# timeit.timeit(stmt='zoom(sample)', setup='from __main__ import sample, loader, zoom; import numpy as np; gc.enable()', number=100)
+def import_scipy_ndimage():
+    """
+    Tries to import scipy so that the median filter can be applied
+    :return:
+    """
 
-# timeit.timeit(stmt='execute_mp(data, size, mode)', setup='from __main__ import data, size, mode, h', number=10)
-# timeit.timeit(stmt='execute_mp_prog(data, size, mode)', setup='from __main__ import data, size, mode, h', number=10)
+    try:
+        import scipy.ndimage as scipy_ndimage
+    except ImportError:
+        raise ImportError(
+            "Could not find the subpackage scipy.ndimage, required for image pre-/post-processing"
+        )
+
+    return scipy_ndimage

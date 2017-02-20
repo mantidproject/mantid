@@ -38,7 +38,18 @@ def supported_formats():
     return avail_list
 
 
-def load_data(config, h):
+def load_data(config, h=None):
+    """
+    Load data by reading the provided configuration file for paths.
+    This is intended to be used internally within the scripts.
+
+    :param config: The full reconstruction config
+    :param h: Helper class, if not provided will be initialised with the config
+
+    :return: the loaded data as a tuple (sample, flat, dark)
+    """
+    h = Helper(config) if h is None else h
+
     h.pstart("Loading data...")
     input_path = config.func.input_path
     input_path_flat = config.func.input_path_flat
@@ -65,7 +76,7 @@ def load(input_path=None,
          input_path_flat=None,
          input_path_dark=None,
          img_format=None,
-         data_dtype=np.float32,
+         dtype=np.float32,
          cores=None,
          chunksize=None,
          parallel_load=False,
@@ -79,13 +90,13 @@ def load(input_path=None,
     :param input_path_flat: Optional: Path for the input Flat images folder
     :param input_path_dark: Optional: Path for the input Dark images folder
     :param img_format: Default:'fits', format for the input images
-    :param data_dtype: Default:np.float32, data type for the input images
+    :param dtype: Default:np.float32, data type for the input images
     :param cores: Default:1, cores to be used if parallel_load is True
     :param chunksize: chunk of work per worker
     :param parallel_load: Default: False, if set to true the loading of the data will be done in parallel.
             This could be faster depending on the IO system. For local HDD runs the recommended setting is False
     :param h: Helper class, if not provided will be initialised with empty constructor
-    :returns :: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
+    :return: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
 
     h = Helper.empty_init() if h is None else h
@@ -102,17 +113,17 @@ def load(input_path=None,
         from imgdata import img_loader
         sample, flat, dark = img_loader.execute(
             fitsread, input_file_names, input_path_flat, input_path_dark,
-            img_format, data_dtype, cores, chunksize, parallel_load, h)
+            img_format, dtype, cores, chunksize, parallel_load, h)
     elif img_format in ['nxs']:
         from imgdata import nxs_loader
         sample, flat, dark = nxs_loader.execute(input_file_names[0],
-                                                img_format, data_dtype, cores,
+                                                img_format, dtype, cores,
                                                 chunksize, parallel_load, h)
     else:
         from imgdata import img_loader
         sample, flat, dark = img_loader.execute(
             imread, input_file_names, input_path_flat, input_path_dark,
-            img_format, data_dtype, cores, chunksize, parallel_load, h)
+            img_format, dtype, cores, chunksize, parallel_load, h)
 
     Helper.check_data_stack(sample)
 
@@ -150,9 +161,6 @@ def imread(filename):
 
 
 def import_pyfits():
-    """
-    To import pyfits optionally only when it is/can be used
-    """
     try:
         import pyfits
     except ImportError:
@@ -187,6 +195,13 @@ def import_skimage_io():
 
 
 def get_file_names(path, img_format, prefix=''):
+    """
+    Get all file names in a directory with a specific format.
+    :param path: The path to be checked.
+    :param img_format: The image format used as a postfix after the .
+    :param prefix: A specific prefix for the images
+    :return: All the file names, sorted by ascending
+    """
     import os
     import glob
 
@@ -207,9 +222,13 @@ def get_file_names(path, img_format, prefix=''):
     return files_match
 
 
-def get_folder_names(path, prefix=''):
+def get_folder_names(path):
+    """
+    Get all folder names in a specific path.
+    :param path: The path to be checked.
+    :return: All the folder names, sorted by ascending
+    """
     import os
-    import glob
 
     path = os.path.abspath(os.path.expanduser(path))
 
@@ -294,21 +313,21 @@ def load_stack(load_func,
                parallel_load=False,
                h=None):
     """
-    Load a single image file that is expected to be a stack of images.
+    Load a single image FILE that is expected to be a stack of images.
 
     Parallel execution can be slower depending on the storage system.
 
-    ! On local HDDs it's usually 50% SLOWER, thus not recommended!
+    ! On HDD I've found it's about 50% SLOWER, thus not recommended!
 
     :param file_name :: list of image file paths given as strings
     :param load_func :: file name extension if fixed (to set the expected image format)
     :param dtype :: data type for the output numpy array
-    :param name:
-    :param cores:
-    :param chunksize:
-    :param parallel_load:
+    :param cores: Default:1, cores to be used if parallel_load is True
+    :param chunksize: chunk of work per worker
+    :param parallel_load: Default: False, if set to true the loading of the data will be done in parallel.
+            This could be faster depending on the IO system. For local HDD runs the recommended setting is False
     :param h: Helper class, if not provided will be initialised with empty constructor
-    :return:
+    :return: stack of images as a 3-elements tuple: numpy array with sample images, white image, and dark image.
     """
     # create shared array
     from parallel import utility as pu
