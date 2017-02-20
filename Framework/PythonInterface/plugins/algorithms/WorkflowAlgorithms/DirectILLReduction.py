@@ -14,7 +14,7 @@ from scipy import constants
 
 
 def _createDetectorGroups(ws):
-    """Find detectors with (almost) same theta and group them. Masked
+    """Find workspace indices with (almost) same theta and group them. Masked
     detectors are ignored.
     """
     numHistograms = ws.getNumberHistograms()
@@ -26,7 +26,7 @@ def _createDetectorGroups(ws):
         det1 = ws.getDetector(i)
         if det1.isMasked():
             continue
-        currentGroup = [det1.getID()]
+        currentGroup = [i]
         twoTheta1 = ws.detectorTwoTheta(det1)
         for j in range(i + 1, numHistograms):
             if j in assignedDets:
@@ -36,7 +36,7 @@ def _createDetectorGroups(ws):
                 continue
             twoTheta2 = ws.detectorTwoTheta(det2)
             if abs(twoTheta1 - twoTheta2) < 0.01 / 180.0 * constants.pi:
-                currentGroup.append(det2.getID())
+                currentGroup.append(j)
                 assignedDets.append(j)
         groups.append(currentGroup)
     return groups
