@@ -109,15 +109,15 @@ private:
 
       // Sample thickness
       double e_thick = sample_table->getRef<double>("e_thick", 0);
-      TS_ASSERT_EQUALS(e_thick, 1);
+      TS_ASSERT_EQUALS(e_thick, 2.);
 
       // Sample height
       double e_height = sample_table->getRef<double>("e_height", 0);
-      TS_ASSERT_EQUALS(e_height, 1);
+      TS_ASSERT_EQUALS(e_height, 8.);
 
       // Sample width
       double e_width = sample_table->getRef<double>("e_width", 0);
-      TS_ASSERT_EQUALS(e_width, 1);
+      TS_ASSERT_EQUALS(e_width, 8.);
 
       // Tidy up
       Mantid::API::AnalysisDataService::Instance().remove("Raw_SPB");
