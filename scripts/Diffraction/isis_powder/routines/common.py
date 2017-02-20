@@ -116,8 +116,8 @@ def generate_run_numbers(run_number_string):
     :return: A list of run numbers generated from the string
     """
     # Check its not a single run
-    if isinstance(run_number_string, int) and run_number_string.isdigit():
-        return [int(run_number_string)]  # Cast into a list and return
+    if isinstance(run_number_string, int):
+            return [int(run_number_string)]  # Cast into a list and return
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
