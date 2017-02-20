@@ -72,7 +72,6 @@ class AggregateTest(unittest.TestCase):
             # generate a list of filenames with 000000 numbers appended
             filenames = []
             for i in range(num_images):
-                print(base_name + str(i) + '.' + file_format)
                 filenames.append(base_name + str(i) + '.' + file_format)
 
             for f in filenames:

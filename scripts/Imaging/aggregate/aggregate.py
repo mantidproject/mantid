@@ -44,7 +44,6 @@ def execute(config):
     # generate the file names in each angle folder
     angle_image_paths = get_image_files_paths(input_path, angle_folders,
                                               img_format, selected_indices)
-
     # create an enumerator for the angle folders
     if selected_angles:
         angle_image_paths = enumerate(
@@ -159,7 +158,7 @@ def get_indices_for_energy_levels(energy_levels):
 def get_angle_folders(input_path, img_format, selected_angles):
     from imgdata.loader import get_folder_names
     # get all the angles folders
-    angle_folders = get_folder_names(input_path, img_format)
+    angle_folders = get_folder_names(input_path)
 
     # if --aggregate-angles <id1> <id2> specifies anything,
     # exclude all other angle folders

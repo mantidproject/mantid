@@ -18,7 +18,7 @@ def execute(sample, flat, dark, config, indices):
         )
 
     from recon.tools import importer
-    tool = importer.timed_import(config.func.tool)
+    tool = importer.timed_import(config)
 
     inc = float(config.func.max_angle) / sample.shape[0]
     proj_angles = np.arange(0, sample.shape[0] * inc, inc)

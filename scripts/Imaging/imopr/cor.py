@@ -8,7 +8,7 @@ def execute(sample, flat, dark, config, indices):
     helper.print_start("Running IMOPR with action COR")
 
     from recon.tools import importer
-    tool = importer.timed_import(config.func.tool)
+    tool = importer.timed_import(config)
 
     print("Calculating projection angles..")
     inc = float(config.func.max_angle) / sample.shape[0]
