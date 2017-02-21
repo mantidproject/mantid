@@ -656,7 +656,7 @@ void SCDCalibratePanels::LoadISawDetCal(
     // instrument->getComponentByName(detname);
     boost::shared_ptr<const IComponent> parent = det->getParent();
     if (parent) {
-      Quat rot0 = parent->getRelativeRot().inverse();
+      Quat rot0Inv = parent->getRelativeRot().inverse();
       Rot = Rot * rot0Inv;
     }
     boost::shared_ptr<const IComponent> grandparent = parent->getParent();
