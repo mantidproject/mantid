@@ -338,7 +338,6 @@ bool Quat::operator==(const Quat &q) const {
  */
 bool Quat::operator!=(const Quat &_q) const { return (!operator==(_q)); }
 
-
 /** Quaternion normalization
  *
  * Divide all elements by the quaternion norm
@@ -368,7 +367,6 @@ double Quat::len() const { return sqrt(len2()); }
  * @return the length squared
  */
 double Quat::len2() const { return (w * w + a * a + b * b + c * c); }
-
 
 /** Inverse a quaternion
  *
