@@ -648,6 +648,7 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("RowFilename", OUTPUTS);
   setPropertyGroup("TofFilename", OUTPUTS);
 }
+
 void SCDCalibratePanels::updateBankParams(
     boost::shared_ptr<const Geometry::IComponent> bank_const,
     boost::shared_ptr<Geometry::ParameterMap> pmap,
@@ -702,14 +703,14 @@ void SCDCalibratePanels::updateSourceParams(
     pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
 }
 
-void SCDCalibratePanels::FixUpSourceParameterMap(
-    boost::shared_ptr<const Instrument> NewInstrument, double const L0,
-    V3D const newSampPos, boost::shared_ptr<const ParameterMap> const pmapOld) {
-  boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
-  IComponent_const_sptr source = NewInstrument->getSource();
+void SCDCalibratePanels::fixUpSourceParameterMap(
+    boost::shared_ptr<const Instrument> newInstrument, double const L0,
+    const V3D newSampPos, boost::shared_ptr<const ParameterMap> const pmapOld) {
+  boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
+  IComponent_const_sptr source = newInstrument->getSource();
   updateSourceParams(source, pmap, pmapOld);
 
-  IComponent_const_sptr sample = NewInstrument->getSample();
+  IComponent_const_sptr sample = newInstrument->getSample();
   V3D SamplePos = sample->getPos();
   if (SamplePos != newSampPos) {
     V3D newSampRelPos = newSampPos - SamplePos;
@@ -731,17 +732,17 @@ void SCDCalibratePanels::FixUpSourceParameterMap(
   pmap->addPositionCoordinate(source.get(), string("z"), newsourceRelPos.Z());
 }
 
-void SCDCalibratePanels::FixUpBankParameterMap(
-    vector<string> const bankNames,
-    boost::shared_ptr<const Instrument> NewInstrument, V3D const pos,
-    Quat const rot, double const DetWScale, double const DetHtScale,
-    boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
-  boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
+void SCDCalibratePanels::fixUpBankParameterMap(
+    const vector<string> bankNames,
+    boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
+    const Quat rot, double const detWScale, double const detHtScale,
+    boost::shared_ptr<const ParameterMap> const pmapOld, bool rotCenters) {
+  boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   for (const auto &bankName : bankNames) {
 
     boost::shared_ptr<const IComponent> bank1 =
-        NewInstrument->getComponentByName(bankName);
+        newInstrument->getComponentByName(bankName);
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
         boost::dynamic_pointer_cast<const RectangularDetector>(
             bank1); // Component
@@ -760,7 +761,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
     //---------Rotate center of bank ----------------------
     V3D Center = bank->getPos();
     V3D Center_orig(Center);
-    if (RotCenters)
+    if (rotCenters)
       rot.rotate(Center);
 
     V3D pos1 = bank->getRelativePos();
@@ -784,14 +785,14 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 
     double scalex, scaley;
     if (!oldScalex.empty())
-      scalex = oldScalex[0] * DetWScale;
+      scalex = oldScalex[0] * detWScale;
     else
-      scalex = DetWScale;
+      scalex = detWScale;
 
     if (!oldScaley.empty())
-      scaley = oldScaley[0] * DetHtScale;
+      scaley = oldScaley[0] * detHtScale;
     else
-      scaley = DetHtScale;
+      scaley = detHtScale;
 
     pmap->addDouble(bank.get(), string("scalex"), scalex);
     pmap->addDouble(bank.get(), string("scaley"), scaley);

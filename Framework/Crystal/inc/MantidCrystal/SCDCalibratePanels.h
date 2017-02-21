@@ -76,7 +76,7 @@ public:
    *
    *  @param bankNames      The names of the banks(panels) that will be updated
    *
-   *  @param NewInstrument  The instrument whose parameter map will be changed
+   *  @param newInstrument  The instrument whose parameter map will be changed
    *                         to reflect the new values below
    *
    *  @param  pos           The quantity to be added to the current relative
@@ -86,12 +86,12 @@ public:
    *                        rotations, from old NewInstrument, of the banks in
    *bankNames.
    *
-   *  @param  DetWScale     The factor to multiply the current detector width,
+   *  @param  detWScale     The factor to multiply the current detector width,
    *                        from old NewInstrument, by to get the new detector
    *width
    *                        for the banks in bankNames.
    *
-   *  @param   DetHtScale  The factor to multiply the current detector height,
+   *  @param   detHtScale  The factor to multiply the current detector height,
    *                        from old NewInstrument, by to get the new detector
    *height
    *                        for the banks in bankNames.
@@ -101,24 +101,24 @@ public:
    *the
    *                        NewInstrument's parameter map.
    *
-   *   @param RotCenters Rotate the centers of the panels(the same amount)
+   *   @param rotCenters Rotate the centers of the panels(the same amount)
    *with the
    *                        rotation of panels around their center
    */
-  static void FixUpBankParameterMap(
+  static void fixUpBankParameterMap(
       std::vector<std::string> const bankNames,
-      boost::shared_ptr<const Geometry::Instrument> NewInstrument,
-      Kernel::V3D const pos, Kernel::Quat const rot, double const DetWScale,
-      double const DetHtScale,
+      boost::shared_ptr<const Geometry::Instrument> newInstrument,
+      Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
+      double const detHtScale,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
-      bool RotCenters);
+      bool rotCenters);
 
   /**
    * *  Updates the ParameterMap for NewInstrument to reflect the position of
   *the
    * source.
    *
-   * @param NewInstrument  The instrument whose parameter map will be changed
+   * @param newInstrument  The instrument whose parameter map will be changed
   *                         to reflect the new source position
   *
    * @param L0             The distance from source to sample( should be
@@ -131,8 +131,8 @@ public:
   *the
   *                        NewInstrument's parameter map.
    */
-  static void FixUpSourceParameterMap(
-      boost::shared_ptr<const Geometry::Instrument> NewInstrument,
+  static void fixUpSourceParameterMap(
+      boost::shared_ptr<const Geometry::Instrument> newInstrument,
       double const L0, Kernel::V3D const newSampPos,
       boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
 

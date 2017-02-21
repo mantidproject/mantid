@@ -440,7 +440,7 @@ void OptimizeCrystalPlacement::exec() {
 
   auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
 
-  SCDCalibratePanels::FixUpSourceParameterMap(NewInstrument, L0, newSampPos,
+  SCDCalibratePanels::fixUpSourceParameterMap(NewInstrument, L0, newSampPos,
                                               pmap_old);
 
   for (int i = 0; i < OutPeaks->getNumberPeaks(); i++)

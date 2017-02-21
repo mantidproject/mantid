@@ -135,7 +135,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
+    SCDCalibratePanels::fixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
@@ -229,7 +229,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    SCDCalibratePanels::FixUpBankParameterMap(
+    SCDCalibratePanels::fixUpBankParameterMap(
         bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
   }
   return startChar;
