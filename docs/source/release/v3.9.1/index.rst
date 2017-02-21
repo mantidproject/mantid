@@ -37,6 +37,7 @@ Changes in this version
 * `18915 <https://www.github.com/mantidproject/mantid/pull/18915>`_ Add missing parameter in function call in performance test
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
 * `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
+* `18952 <https://www.github.com/mantidproject/mantid/pull/18952>`_ Fix an issue in TimeSeriesProperty
 * `18955 <https://www.github.com/mantidproject/mantid/pull/18955>`_ Fix crash in MonitorDlg
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
 * `18972 <https://www.github.com/mantidproject/mantid/pull/18972>`_ Fix reading dead time data in Muon interface
@@ -77,6 +78,8 @@ Summary of impact
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpretation of list indices in GUI   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18927 | Allow Vesuvio to sum runs in diffraction reduction                                | Fix incorrect assignment in loop            | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18952 | Avoid out of bounds access when comparing TimeSeriesProperty objects              | Check real size of objects first            | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18955 | Avoid possible crash in algorithm monitor dialog                                  | Check for null pointer                      | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
