@@ -38,7 +38,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
         if 'VESUVIO' in ipf_filename:
             # Load all spectra. They are cropped later
-            LoadVesuvio(Filename=filename,
+            LoadVesuvio(Filename=str(filename),
                         OutputWorkspace=ws_name,
                         SpectrumList='1-198',
                         **load_opts)
