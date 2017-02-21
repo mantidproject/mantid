@@ -21,6 +21,14 @@ of the field. The rest of the parameters are optional.
 Possible values for the `Ion` argument::
 
  Ce, Pr, Nd, Pm, Sm, Eu, Gd, Tb, Dy, Ho, Er, Tm, Yb
+
+These are the trivalent rare-earth ions. For other rare earth ions, use the equivalent trivalent ion based on
+the number of *f*-electrons in the outer shell (e.g. for Pr\ :sup:`4+` (4\ *f*\ :sup:`1`) use `Ce`). 
+The rare earth ions sets the correct value of the Lande g-factor. In addition, a pure spin ion with arbitrary
+(but half-integral) *S* (or *J*) values are also supported using the syntax: `Ion=S<n>` where `<n>` is an integer
+or half-integer value, e.g. `Ion=S2` or `Ion=S1.5`. In these cases, the g-factor is set to *g*\ :sub:`J` = 2.
+The prefix letter can also be `J` instead of `S`, and lower case letters are also supported. (e.g. `Ion=j1`,
+`Ion=s2.5` and `Ion=J0.5` are all valid).
  
 Allowed values for `Symmetry`::
 

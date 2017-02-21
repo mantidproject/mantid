@@ -455,9 +455,15 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
 
   try {
     if (!wsNames.isEmpty()) {
-      for (auto &ws : wsNames) {
-        deleteWorkspace(ws);
+      auto alg = createAlgorithm("DeleteWorkspaces");
+      alg->setLogging(false);
+      std::vector<std::string> vecWsNames;
+      vecWsNames.reserve(wsNames.size());
+      foreach (auto wsName, wsNames) {
+        vecWsNames.push_back(wsName.toStdString());
       }
+      alg->setProperty("WorkspaceList", vecWsNames);
+      executeAlgorithmAsync(alg);
     } else if ((m &&
                 (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
                !m->workspaceName().isEmpty()) {

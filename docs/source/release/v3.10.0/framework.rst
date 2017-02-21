@@ -11,6 +11,7 @@ Algorithms
 New
 ###
 
+- :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
 
 Improved
 ########
@@ -25,8 +26,10 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 
-CurveFitting
-------------
+Bugs
+----
+
+- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
 
 Improved
 ########
