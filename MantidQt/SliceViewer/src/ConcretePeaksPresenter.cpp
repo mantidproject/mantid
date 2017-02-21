@@ -159,7 +159,7 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
           canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
-
+  m_initMappingTransform = true;
   this->initialize();
 }
 
@@ -184,11 +184,14 @@ void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr peaksWS) {
  * @brief initialize inner components. Produces the views.
  */
 void ConcretePeaksPresenter::initialize() {
-  const bool transformSucceeded = this->configureMappingTransform();
+
+  const bool transformSucceeded =
+      this->configureMappingTransform(m_initMappingTransform);
 
   // Make and register each peak widget.
   produceViews();
-
+  changeShownDim(); // in case dimensions shown are not those expected by
+                    // default transformation
   if (!transformSucceeded) {
     hideAll();
   }
@@ -271,13 +274,20 @@ bool ConcretePeaksPresenter::changeShownDim() {
  changes the chosen dimensions to plot.
  @return True if the mapping has succeeded.
  */
-bool ConcretePeaksPresenter::configureMappingTransform() {
+bool ConcretePeaksPresenter::configureMappingTransform(
+    bool m_initMappingTransform) {
   bool transformSucceeded = false;
   try {
-    std::string xLabel = m_viewFactory->getPlotXLabel();
-    std::string yLabel = m_viewFactory->getPlotYLabel();
-    auto temp = m_transformFactory->createTransform(xLabel, yLabel);
-    m_transform = temp;
+    if (m_initMappingTransform) {
+      auto temp = m_transformFactory->createDefaultTransform();
+      m_transform = temp;
+      m_initMappingTransform = false;
+    } else {
+      std::string xLabel = m_viewFactory->getPlotXLabel();
+      std::string yLabel = m_viewFactory->getPlotYLabel();
+      auto temp = m_transformFactory->createTransform(xLabel, yLabel);
+      m_transform = temp;
+    }
     showAll();
     transformSucceeded = true;
   } catch (Mantid::Geometry::PeakTransformException &) {
