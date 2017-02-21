@@ -88,6 +88,7 @@ void ScriptFileInterpreter::spacesToTabs() {
     m_editor->selectAll();
 
   QString text = m_editor->selectedText();
+  std::string test = text.toStdString();
 
   // Use the tab space count for each converted characters
   QString spaces = "";
@@ -95,7 +96,9 @@ void ScriptFileInterpreter::spacesToTabs() {
   for (int i = 0; i < m_editor->tabWidth(); ++i)
     spaces = spaces + " ";
 
+  std::string testSpaces = spaces.toStdString();
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
+  std::string testReplaced = text.toStdString();
   replaceSelectedText(m_editor, text);
 }
 
@@ -223,11 +226,14 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
 inline void
 ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
                                            const QString &text) {
-  int UTF8_CodePage = 65001;
-  const char *b = ((editor->SCI_GETCODEPAGE == UTF8_CodePage)
-                       ? text.toUtf8().constData()
-                       : text.toLatin1().constData());
-  editor->SendScintilla(editor->SCI_REPLACESEL, b);
+  const int UTF8_CodePage = 65001;
+  QByteArray convertedText;
+  if (editor->SCI_GETCODEPAGE == UTF8_CodePage) {
+    convertedText = text.toUtf8();
+  } else {
+    convertedText = text.toUtf8();
+  }
+  editor->SendScintilla(editor->SCI_REPLACESEL, convertedText.constData());
 }
 
 /**
