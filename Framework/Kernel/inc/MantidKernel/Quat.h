@@ -84,17 +84,11 @@ public:
   //! Re-initialize to identity
   void init();
   //! Normalize
-  Quat normalize1() const;
+  Quat normalize() const;
   //! Take the complex conjugate
-  Quat conjugate1() const;
+  Quat conjugate() const;
   //! Inverse a quaternion (in the sense of rotation inversion)
-  Quat inverse1() const;
-  //! Normalize
-  void normalize();
-  //! Take the complex conjugate
-  void conjugate();
-  //! Inverse a quaternion (in the sense of rotation inversion)
-  void inverse();
+  Quat inverse() const;
   //! Is the quaternion representing a null rotation
   bool isNull(const double tolerance = 0.001) const;
   //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix

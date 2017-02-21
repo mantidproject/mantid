@@ -1828,9 +1828,8 @@ void InstrumentDefinitionParser::makeXYplaneFaceComponent(
   // the
   // 'facing object'.
   Kernel::V3D z = Kernel::V3D(0, 0, 1);
-  Kernel::Quat R = in->getRotation();
-  R.inverse();
-  R.rotate(facingDirection);
+  Kernel::Quat rInv = in->getRotation().inverse();
+  rInv.rotate(facingDirection);
 
   Kernel::V3D normal = facingDirection.cross_prod(z);
   normal.normalize();

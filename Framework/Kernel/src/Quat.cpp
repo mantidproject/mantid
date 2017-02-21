@@ -338,27 +338,12 @@ bool Quat::operator==(const Quat &q) const {
  */
 bool Quat::operator!=(const Quat &_q) const { return (!operator==(_q)); }
 
-/** Quaternion normalization
- *
- * Divide all elements by the quaternion norm
- */
-void Quat::normalize() {
-  double overnorm;
-  if (len2() == 0)
-    overnorm = 1.0;
-  else
-    overnorm = 1.0 / len();
-  w *= overnorm;
-  a *= overnorm;
-  b *= overnorm;
-  c *= overnorm;
-}
 
 /** Quaternion normalization
  *
  * Divide all elements by the quaternion norm
  */
-Quat Quat::normalize1() const {
+Quat Quat::normalize() const {
   double overnorm;
   if (len2() == 0)
     overnorm = 1.0;
@@ -372,18 +357,7 @@ Quat Quat::normalize1() const {
  *  Reverse the sign of the 3 imaginary components of the
  *  quaternion
  */
-void Quat::conjugate() {
-  a *= -1.0;
-  b *= -1.0;
-  c *= -1.0;
-}
-
-/** Quaternion complex conjugate
- *
- *  Reverse the sign of the 3 imaginary components of the
- *  quaternion
- */
-Quat Quat::conjugate1() const { return Quat(w, a * -1, b * -1, c * -1); }
+Quat Quat::conjugate() const { return Quat(w, a * -1, b * -1, c * -1); }
 
 /** Quaternion length
  * @return the length
@@ -395,27 +369,12 @@ double Quat::len() const { return sqrt(len2()); }
  */
 double Quat::len2() const { return (w * w + a * a + b * b + c * c); }
 
-/** Inverse a quaternion
- *
- */
-void Quat::inverse() {
-  conjugate();
-  double overnorm = len2();
-  if (overnorm == 0)
-    overnorm = 1.0;
-  else
-    overnorm = 1.0 / overnorm;
-  w *= overnorm;
-  a *= overnorm;
-  b *= overnorm;
-  c *= overnorm;
-}
 
 /** Inverse a quaternion
  *
  */
-Quat Quat::inverse1() const {
-  auto conj = this->conjugate1();
+Quat Quat::inverse() const {
+  auto conj = this->conjugate();
   double overnorm = conj.len2();
   if (overnorm == 0)
     overnorm = 1.0;
@@ -434,8 +393,7 @@ Quat Quat::inverse1() const {
  *   v.
  */
 void Quat::rotate(V3D &v) const {
-  Quat qinvert(*this);
-  qinvert.inverse();
+  Quat qinvert = inverse();
   Quat pos(0.0, v[0], v[1], v[2]);
   pos *= qinvert;
   pos = (*this) * pos;

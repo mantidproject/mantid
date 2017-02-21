@@ -656,17 +656,15 @@ void SCDCalibratePanels::LoadISawDetCal(
     // instrument->getComponentByName(detname);
     boost::shared_ptr<const IComponent> parent = det->getParent();
     if (parent) {
-      Quat rot0 = parent->getRelativeRot();
-      rot0.inverse();
-      Rot = Rot * rot0;
+      Quat rot0 = parent->getRelativeRot().inverse();
+      Rot = Rot * rot0Inv;
     }
     boost::shared_ptr<const IComponent> grandparent = parent->getParent();
     if (grandparent) // Why this is not correct but most Rectangular detectors
                      // have no grandparent.
     {
-      Quat rot0 = grandparent->getRelativeRot();
-      rot0.inverse();
-      Rot = Rot * rot0;
+      Quat rot0Inv = grandparent->getRelativeRot().inverse();
+      Rot = Rot * rot0Inv;
     }
 
     // Set or overwrite "rot" instrument parameter.
