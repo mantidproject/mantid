@@ -258,6 +258,13 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
+    bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    if (useExtendedDetectorSpace &&
+        !m_inst->getComponentByName("extended-detector-space")) {
+      g_log.warning() << "Attempting to find peaks outside of detectors but"
+                         "no extended detector space has been defined";
+    }
+
     for (auto &possibleHKL : possibleHKLs) {
       if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
