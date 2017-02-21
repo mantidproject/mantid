@@ -486,7 +486,8 @@ public:
     int index = 0;
     std::vector<double> angles(8);
     std::generate(angles.begin(), angles.end(), [&index, &angles]() {
-      return static_cast<double>(index++) * M_PI / angles.size();
+      return static_cast<double>(index++) * M_PI /
+             static_cast<double>(angles.size());
     });
 
     std::for_each(angles.begin(), angles.end(), testTheta);
