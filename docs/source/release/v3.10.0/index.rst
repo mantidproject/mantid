@@ -51,6 +51,7 @@ Changes
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>
    Diffraction <diffraction>
+   Imaging <imaging>
    Muon Analysis <muon>
    Reflectometry <reflectometry>
 
