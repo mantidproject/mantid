@@ -519,11 +519,13 @@ void FilterEvents::processTableSplittersWorkspace() {
       else
         int_target = mapiter->second;
     }
+
+    // add a new ordered-integer-target
     if (addnew) {
       // target is not in map
       int_target = max_target_index;
       m_targetIndexMap.insert(
-          std::pair<std::string, int>(target, max_target_index));
+          std::pair<std::string, int>(target, int_target));
       m_wsGroupIndexTargetMap.emplace(int_target, target);
       this->m_targetWorkspaceIndexSet.insert(int_target);
       max_target_index++;
@@ -533,6 +535,9 @@ void FilterEvents::processTableSplittersWorkspace() {
     m_vecSplitterTime.push_back(stop_64);
     m_vecSplitterGroup.push_back(int_target);
   } // END-FOR (irow)
+
+  // record max target index
+  m_maxTargetIndex = max_target_index - 1;
 
   // add un-defined splitter to map
   if (found_undefined_splitter) {
@@ -593,26 +598,30 @@ void FilterEvents::processMatrixSplitterWorkspace() {
     std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
 
     if (mapiter == m_yIndexMap.end()) {
-      uint32_t target_index = 0;
+      uint32_t int_target = 0;
       // default to 0 as undefined slot.  if well-defined, then use the current
       // unused max_target_index
       if (y_index >= 0) {
-        target_index = max_target_index;
+        int_target = max_target_index;
         ++max_target_index;
       }
 
       // un-defined or un-filtered
-      m_vecSplitterGroup[i] = target_index;
+      m_vecSplitterGroup[i] = int_target;
 
-      m_yIndexMap.emplace(y_index, target_index);
-      m_wsGroupdYMap.emplace(target_index, y_index);
-      m_targetWorkspaceIndexSet.insert(target_index);
+      // add to maps and etc.
+      m_yIndexMap.emplace(y_index, int_target);
+      m_wsGroupdYMap.emplace(int_target, y_index);
+      m_targetWorkspaceIndexSet.insert(int_target);
     } else {
       // this target Y-index has been registered
       uint32_t target_index = mapiter->second;
       m_vecSplitterGroup[i] = target_index;
     }
   }
+
+  // register the max target integer
+  m_maxTargetIndex = max_target_index - 1;
 
   return;
 }
@@ -1273,6 +1282,12 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
   }
   g_log.notice() << "[DB] Max Index = " << max_target_index << "\n";
 
+  // convert vector of int64 to Time
+  std::vector<Kernel::DateAndTime> split_datetime_vec(m_vecSplitterTime.size());
+  for (size_t i = 0; i < m_vecSplitterTime.size(); ++i) {
+    DateAndTime split_time(m_vecSplitterTime[i]);
+    split_datetime_vec[i] = split_time;
+  }
 
   for (auto property : m_eventWS->run().getProperties())
   {
@@ -1282,6 +1297,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
     TimeSeriesProperty<int> *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(property);
     if (dbl_prop)
     {
+        g_log.notice() << "DEBUG: " << "split double TSP " << dbl_prop->name() << "\n";
        std::vector<TimeSeriesProperty<double> *> output_vector;
        for (int tindex = 0; tindex <= max_target_index; ++tindex)
        {
@@ -1290,7 +1306,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
        }
 
        // split
-       // dbl_prop->splitByTimeVector(m_vecSplitterTime, m_vecSplitterGroup, output_vector);
+       dbl_prop->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
+                                   output_vector);
 
        // set to output workspace
        for (int tindex = 0; tindex <= max_target_index; ++tindex)
@@ -1312,15 +1329,58 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
     }
     else if (int_prop)
     {
+      // integer log
+      std::vector<TimeSeriesProperty<int> *> output_vector;
+      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+        TimeSeriesProperty<int> *new_property =
+            new TimeSeriesProperty<int>(int_prop->name());
+        output_vector.push_back(new_property);
+      }
 
-        // TODO:FIXME - Implement this part
-        ;
+      g_log.notice() << "DEBUG: " << "split integer TSP " << int_prop->name() << " with size "
+                                                                                 << int_prop->size() << "\n";
+
+      // split
+      int_prop->splitByTimeVector(split_datetime_vec, m_vecSplitterGroup,
+                                  output_vector);
+
+      // set to output workspace
+      for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+        // find output workspace
+        std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+        wsiter = m_outputWorkspacesMap.find(tindex);
+        if (wsiter == m_outputWorkspacesMap.end()) {
+          g_log.error() << "Workspace target (" << tindex
+                        << ") does not have workspace associated."
+                        << "\n";
+        } else {
+          DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+          ws_i->mutableRun().addProperty(output_vector[tindex], true);
+        }
+      }
     }
     else
     {
         // TODO:FIXME - Copy the prperty!
         // set to output workspace ??? -- may not be needed! as the way how output workspace is created
 
+    }
+  }
+
+  for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+    // set to output workspace
+    for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+      // find output workspace
+      std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+      wsiter = m_outputWorkspacesMap.find(tindex);
+      if (wsiter == m_outputWorkspacesMap.end()) {
+        g_log.error() << "Workspace target (" << tindex
+                      << ") does not have workspace associated."
+                      << "\n";
+      } else {
+        DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+        ws_i->mutableRun().integrateProtonCharge();
+      }
     }
   }
 
