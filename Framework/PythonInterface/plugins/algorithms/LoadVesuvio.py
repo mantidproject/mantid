@@ -7,6 +7,7 @@ from LoadEmptyVesuvio import LoadEmptyVesuvio
 
 import copy
 import numpy as np
+import os
 import re
 import six
 
@@ -158,7 +159,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
         # Validate run number ranges
         run_str = self.getProperty(RUN_PROP).value
-        if "-" in run_str:
+        # String could be a full file path
+        if "-" in os.path.basename(run_str):
             lower, upper = run_str.split("-")
             issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
 
