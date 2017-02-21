@@ -622,7 +622,15 @@
     <technique>Powder diffraction</technique>
   </instrument>
 
-  <instrument name="D20">
+  <instrument name="D20a">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D20b">
+    <technique>Powder diffraction</technique>
+  </instrument>
+
+  <instrument name="D20c">
     <technique>Powder diffraction</technique>
   </instrument>
 
