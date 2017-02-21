@@ -98,7 +98,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNumberHistograms(), 1)
 
 
-    def test_reduction_with_mulitple_sample_and_multiple_can(self):
+    def test_reduction_with_multiple_sample_and_multiple_can(self):
         """
         Test reduction with multiple sample, vanadium and container runs
         """
@@ -114,6 +114,19 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(wks.getNumberHistograms(), 1)
 
+    def test_mismatch_sample_container_bins(self):
+        """
+        Test when the container bins are a different size to the sample bins.
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI89813.raw'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['osi89757.raw'],
+                                         Container=['OSI10241.raw'],
+                                         SpectraMin=3,
+                                         SpectraMax=361)
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
 
     def test_spectra_with_bad_detectors(self):
         """
@@ -156,7 +169,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                           SpectraMax=361)
 
 
-    def test_mismatch_sample_contianer_numbers(self):
+    def test_mismatch_sample_container_numbers(self):
         """
         Test error handling when number of samples is not equal to number of containers
         """
