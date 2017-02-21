@@ -78,6 +78,7 @@
 
   <instrument name="IMAT">
     <technique>Neutron Imaging</technique>
+    <zeropadding size="8"/>
     <livedata>
       <connection name="histo" address="NDXIMAT:6789" listener="ISISHistoDataListener" />
     </livedata>
