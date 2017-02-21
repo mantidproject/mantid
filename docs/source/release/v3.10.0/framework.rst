@@ -61,6 +61,7 @@ Python
       3.0
       3.0
 
+- Exposed more `SpectrumInfo` functionality to Python.
 
 
 Python Algorithms
