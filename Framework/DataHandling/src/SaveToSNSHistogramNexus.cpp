@@ -655,6 +655,10 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   NXname attrName;
   void *attrBuffer;
 
+  std::array<const char *, 6> attrs = {{"NeXus_version", "XML_version",
+                                        "HDF_version", "HDF5_Version",
+                                        "file_name", "file_time"}};
+
   do {
 #ifdef NEXUS43
     status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
@@ -669,10 +673,10 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
         return NX_ERROR;
       attrLen = dims[0];
 #endif
-      if (strcmp(attrName, "NeXus_version") &&
-          strcmp(attrName, "XML_version") && strcmp(attrName, "HDF_version") &&
-          strcmp(attrName, "HDF5_Version") && strcmp(attrName, "file_name") &&
-          strcmp(attrName, "file_time")) {
+      if (std::none_of(attrs.cbegin(), attrs.cend(),
+                       [attrName](const char *name) {
+                         return strcmp(attrName, name) == 0;
+                       })) {
         attrLen++; /* Add space for string termination */
         if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NX_OK)
           return NX_ERROR;
