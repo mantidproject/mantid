@@ -98,7 +98,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=1)
 
         prog_reporter.report("Loading Files")
-
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
                                                                spec_min=self._spectra_range[0],
@@ -182,7 +181,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         self._mode = 'diffspec'
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
-        self._data_files = self.getProperty('InputFiles').value
         self._par_filename = self.getPropertyValue('InstrumentParFile')
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_string = self.getPropertyValue('RebinParam')
@@ -197,17 +195,20 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
             self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
         logger.information('IPF filename is: %s' % self._ipf_filename)
 
-        # Only enable sum files if we actually have more than one file
-        sum_files = self.getProperty('SumFiles').value
-        self._sum_files = False
-
-        if sum_files:
-            num_raw_files = len(self._data_files)
-            if num_raw_files > 1:
-                self._sum_files = True
-                logger.information('Summing files enabled (have %d files)' % num_raw_files)
-            else:
-                logger.information('SumFiles options is ignored when only one file is provided')
+        # Split up runs given as a range LoadVesuvio sums multiple runs on its own
+        self._sum_files = self.getProperty('SumFiles').value
+        user_input = self.getProperty('InputFiles').value
+        single_files = []
+        for run in user_input:
+            try:
+                number_generator = IntArrayProperty('array_generator', run)
+                single_files.extend(number_generator.value.tolist())
+            except RuntimeError as exc:
+                raise RuntimeError("Could not generate run numbers from '{0}': '{1}'".format(run, str(exc)))
+        # end
+        self._data_files = single_files
+        if self._sum_files and len(self._data_files) == 1:
+            logger.warning('Ignoring SumFiles=True as only one file has been provided')
 
 
 AlgorithmFactory.subscribe(VesuvioDiffractionReduction)
