@@ -24,32 +24,18 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
-* `18884 <https://www.github.com/mantidproject/mantid/pull/18884>`_ Add support for NeXus files in LoadVesuvio
-* `18888 <https://www.github.com/mantidproject/mantid/pull/18888>`_ Fix LOQ Batch reduction issues
-* `18889 <https://www.github.com/mantidproject/mantid/pull/18889>`_ Workspace dock deletion bugs
-* `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
-* `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
-* `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
+* `18891 <https://www.github.com/mantidproject/mantid/pull/18891>`_ Fix bug in gd_prtn_chrg for chunked data
 
 Summary of impact
 -----------------
 
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| Issue | Impact                                                                            | Solution | Side Effect  |
-|       |                                                                                   |          | Probability  |
-+=======+===================================================================================+==========+==============+
-| 18884 | Add support for NeXus files in LoadVesuvio                                        |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| 18888 | Fix LOQ Batch reduction issues                                                    |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| 18889 | Workspace dock deletion bugs                                                      |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| 18914 | Fix mass ws deletion bug                                                          |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| 18926 | Fix wrong detector selection when loading high angle bank user files in ISIS SANS |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
-| 18927 | Fix sum file behaviour for vesuvio diffraction                                    |          | **unknown**  |
-+-------+-----------------------------------------------------------------------------------+----------+--------------+
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| Issue | Impact                                                                            | Solution                                    | Side Effect  |
+|       |                                                                                   |                                             | Probability  |
++=======+===================================================================================+=============================================+==============+
+| 18891 | Fix bug in gd_prtn_chrg for chunked data                                          | Recalculate proton charge just prior to use | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+
 
 .. _download page: http://download.mantidproject.org
 
