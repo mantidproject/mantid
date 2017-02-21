@@ -48,9 +48,14 @@ public:
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,
                                     const std::string &defaultValue) {
+    UNUSED_ARG(prompt);
+    UNUSED_ARG(title);
+    UNUSED_ARG(defaultValue);
     return std::string();
   };
   virtual bool askUserYesNo(std::string prompt, std::string title) {
+    UNUSED_ARG(prompt);
+    UNUSED_ARG(title);
     return false;
   };
   virtual void giveUserWarning(std::string prompt, std::string title) {
@@ -62,6 +67,7 @@ public:
     UNUSED_ARG(title);
   };
   virtual std::string runPythonAlgorithm(const std::string &algorithm) {
+    UNUSED_ARG(algorithm);
     return std::string();
   };
 
