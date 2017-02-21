@@ -354,6 +354,19 @@ void Quat::normalize() {
   c *= overnorm;
 }
 
+/** Quaternion normalization
+ *
+ * Divide all elements by the quaternion norm
+ */
+Quat Quat::normalize1() const {
+  double overnorm;
+  if (len2() == 0)
+    overnorm = 1.0;
+  else
+    overnorm = 1.0 / len();
+  return Quat(w * overnorm, a * overnorm, b * overnorm, c * overnorm);
+}
+
 /** Quaternion complex conjugate
  *
  *  Reverse the sign of the 3 imaginary components of the
@@ -364,6 +377,13 @@ void Quat::conjugate() {
   b *= -1.0;
   c *= -1.0;
 }
+
+/** Quaternion complex conjugate
+ *
+ *  Reverse the sign of the 3 imaginary components of the
+ *  quaternion
+ */
+Quat Quat::conjugate1() const { return Quat(w, a * -1, b * -1, c * -1); }
 
 /** Quaternion length
  * @return the length
@@ -389,6 +409,20 @@ void Quat::inverse() {
   a *= overnorm;
   b *= overnorm;
   c *= overnorm;
+}
+
+/** Inverse a quaternion
+ *
+ */
+Quat Quat::inverse1() const {
+  auto conj = this->conjugate1();
+  double overnorm = conj.len2();
+  if (overnorm == 0)
+    overnorm = 1.0;
+  else
+    overnorm = 1.0 / overnorm;
+  return Quat(conj.real() * overnorm, conj.imagI() * overnorm,
+              conj.imagJ() * overnorm, conj.imagK() * overnorm);
 }
 
 /** 	Rotate a vector.

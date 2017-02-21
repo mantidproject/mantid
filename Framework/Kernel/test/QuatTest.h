@@ -121,6 +121,15 @@ public:
     TS_ASSERT_DELTA(q[3], 0.5, 0.000001);
   }
 
+  void testnormalizemethod1() {
+    Quat quat(2, 2, 2, 2);
+    auto norm = quat.normalize1();
+    TS_ASSERT_DELTA(norm[0], 0.5, 0.000001);
+    TS_ASSERT_DELTA(norm[1], 0.5, 0.000001);
+    TS_ASSERT_DELTA(norm[2], 0.5, 0.000001);
+    TS_ASSERT_DELTA(norm[3], 0.5, 0.000001);
+  }
+
   void testconjugatemethod() {
     q(1, 1, 1, 1);
     q.conjugate();
@@ -128,6 +137,15 @@ public:
     TS_ASSERT_EQUALS(q[1], -1);
     TS_ASSERT_EQUALS(q[2], -1);
     TS_ASSERT_EQUALS(q[3], -1);
+  }
+
+  void testconjugatemethod1() {
+    Quat quat(1, 1, 1, 1);
+    auto conj = quat.conjugate1();
+    TS_ASSERT_EQUALS(conj[0], 1);
+    TS_ASSERT_EQUALS(conj[1], -1);
+    TS_ASSERT_EQUALS(conj[2], -1);
+    TS_ASSERT_EQUALS(conj[3], -1);
   }
 
   void testinversemethod() {
@@ -139,6 +157,16 @@ public:
     TS_ASSERT_DELTA(q[1], 0, 0.000001);
     TS_ASSERT_DELTA(q[2], 0, 0.000001);
     TS_ASSERT_DELTA(q[3], 0, 0.000001);
+  }
+
+  void testinversemethod1() {
+    Quat quat(2, 3, 4, 5);
+    auto qinv = quat.inverse1();
+    quat *= qinv;
+    TS_ASSERT_DELTA(quat[0], 1, 0.000001);
+    TS_ASSERT_DELTA(quat[1], 0, 0.000001);
+    TS_ASSERT_DELTA(quat[2], 0, 0.000001);
+    TS_ASSERT_DELTA(quat[3], 0, 0.000001);
   }
 
   void testoperatorplus() {

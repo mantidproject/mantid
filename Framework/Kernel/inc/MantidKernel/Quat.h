@@ -84,6 +84,12 @@ public:
   //! Re-initialize to identity
   void init();
   //! Normalize
+  Quat normalize1() const;
+  //! Take the complex conjugate
+  Quat conjugate1() const;
+  //! Inverse a quaternion (in the sense of rotation inversion)
+  Quat inverse1() const;
+  //! Normalize
   void normalize();
   //! Take the complex conjugate
   void conjugate();
