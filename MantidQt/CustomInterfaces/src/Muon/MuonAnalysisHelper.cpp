@@ -496,15 +496,15 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   };
 
   // Comparison function for doubles
-  auto numericalCompare = [](const std::string &first,
-                             const std::string &second) {
-    try {
-      return boost::lexical_cast<double>(first) <
-             boost::lexical_cast<double>(second);
-    } catch (boost::bad_lexical_cast & /*e*/) {
-      return false;
-    }
-  };
+  auto numericalCompare =
+      [](const std::string &first, const std::string &second) {
+        try {
+          return boost::lexical_cast<double>(first) <
+                 boost::lexical_cast<double>(second);
+        } catch (boost::bad_lexical_cast & /*e*/) {
+          return false;
+        }
+      };
 
   // Range of log values
   auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);

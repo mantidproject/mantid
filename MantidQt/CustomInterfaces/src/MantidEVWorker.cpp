@@ -1028,19 +1028,15 @@ bool MantidEVWorker::showUB(const std::string &peaks_ws_name) {
 
     g_log.notice() << '\n';
     g_log.notice() << "Mantid UB = \n";
-    sprintf(logInfo,
-            std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
-                        "%12.8f\n %12.8f %12.8f %12.8f\n")
-                .c_str(),
+    sprintf(logInfo, std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
+                                 "%12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
             UB[0][0], UB[0][1], UB[0][2], UB[1][0], UB[1][1], UB[1][2],
             UB[2][0], UB[2][1], UB[2][2]);
     g_log.notice(std::string(logInfo));
 
     g_log.notice() << "ISAW UB = \n";
-    sprintf(logInfo,
-            std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
-                        "%12.8f\n %12.8f %12.8f %12.8f\n")
-                .c_str(),
+    sprintf(logInfo, std::string(" %12.8f %12.8f %12.8f\n %12.8f %12.8f "
+                                 "%12.8f\n %12.8f %12.8f %12.8f\n").c_str(),
             UB[2][0], UB[0][0], UB[1][0], UB[2][1], UB[0][1], UB[1][1],
             UB[2][2], UB[0][2], UB[1][2]);
     g_log.notice(std::string(logInfo));

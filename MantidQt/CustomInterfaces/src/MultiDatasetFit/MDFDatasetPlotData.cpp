@@ -95,15 +95,16 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
   bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
   auto &xValues = ws->points(wsIndex);
 
-  m_dataCurve->setData(xValues.rawData().data(), ws->y(wsIndex).rawData().data(),
+  m_dataCurve->setData(xValues.rawData().data(),
+                       ws->y(wsIndex).rawData().data(),
                        static_cast<int>(xValues.size()));
 
   if (m_dataErrorCurve) {
     m_dataErrorCurve->detach();
     delete m_dataErrorCurve;
   }
-  m_dataErrorCurve =
-      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, ws->e(wsIndex).rawData());
+  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(
+      m_dataCurve, ws->e(wsIndex).rawData());
 
   if (haveFitCurves) {
     auto xBegin = std::lower_bound(xValues.begin(), xValues.end(),
@@ -115,11 +116,13 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
     if (i0 + n > static_cast<int>(xValues.size()))
       return;
     m_calcCurve = new QwtPlotCurve("calc");
-    m_calcCurve->setData(xValues.rawData().data() + i0, outputWS->y(1).rawData().data(), n);
+    m_calcCurve->setData(xValues.rawData().data() + i0,
+                         outputWS->y(1).rawData().data(), n);
     QPen penCalc("red");
     m_calcCurve->setPen(penCalc);
     m_diffCurve = new QwtPlotCurve("diff");
-    m_diffCurve->setData(xValues.rawData().data() + i0, outputWS->y(2).rawData().data(), n);
+    m_diffCurve->setData(xValues.rawData().data() + i0,
+                         outputWS->y(2).rawData().data(), n);
     QPen penDiff("green");
     m_diffCurve->setPen(penDiff);
   }
