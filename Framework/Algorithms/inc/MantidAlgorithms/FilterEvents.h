@@ -134,6 +134,7 @@ private:
   bool m_useArbTableSplitters;
 
   std::set<int> m_targetWorkspaceIndexSet;
+  int m_maxTargetIndex;
   Kernel::TimeSplitterType m_splitters;
   std::map<int, DataObjects::EventWorkspace_sptr> m_outputWorkspacesMap;
   std::vector<std::string> m_wsNames;
@@ -151,6 +152,9 @@ private:
   std::vector<std::string> getTimeSeriesLogNames();
 
   Kernel::TimeSplitterType generateSplitters(int wsindex);
+
+  void generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);

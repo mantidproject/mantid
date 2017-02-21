@@ -192,10 +192,19 @@ void FilterEvents::exec() {
     progressamount = 0.6;
   else
     progressamount = 0.7;
+
+  std::vector<Kernel::TimeSeriesProperty<int> *> split_tsp_vector;
   if (m_useSplittersWorkspace)
+  {
     filterEventsBySplitters(progressamount);
+  }
   else
+  {
     filterEventsByVectorSplitters(progressamount);
+    generateSplitterTSP(split_tsp_vector);
+  }
+
+  // TODO:FIXME - assign split_tsp_vector to all the output workspaces!
 
   // Optional to group detector
   if (m_toGroupWS) {
@@ -1364,6 +1373,38 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
     else
       int_prop->filterByTimes(splitters);
   }
+}
+
+
+/** Generate a vector of integer time series property for each splitter corresponding to each target (in integer)
+ * in each splitter-time-series-property, 1 stands for include and 0 stands for time for neutrons to be discarded.
+ * @brief FilterEvents::generateSplitterTSP
+ * @param split_tsp_vec
+ */
+void FilterEvents::generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec)
+{
+  // clear vector to set up
+  split_tsp_vec.clear();
+
+  // initialize m_maxTargetIndex + 1 time series properties in integer
+  // TODO:FIXME - m_maxTargetIndex is not set up yet!
+  for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget)
+  {
+    Kernel::TimeSeriesProperty<int> *split_tsp = new Kernel::TimeSeriesProperty<int>("splitter");
+    split_tsp_vec.push_back(split_tsp);
+  }
+
+  // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add each entry to corresponding splitter TSP
+  for (size_t igrp = 0; igrp < m_vecSplitterGroup.size(); ++igrp)
+  {
+    int itarget = m_vecSplitterGroup[igrp];
+    DateAndTime start_time(m_vecSplitterTime[igrp]);
+    DateAndTime stop_time(m_vecSplitterTime[igrp+1]);
+    split_tsp_vec[itarget]->addValue(start_time, 1);
+    split_tsp_vec[itarget]->addValue(stop_time, 0);
+  }
+
+  return;
 }
 
 /** Get all filterable logs' names (double and integer)
