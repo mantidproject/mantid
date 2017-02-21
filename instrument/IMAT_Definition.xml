@@ -182,6 +182,7 @@ see http://www.mantidproject.org/IDF -->
 <!-- There might be some transmission detector ids left over ? try adding more down-->
 <!-- Pixels inside a single detector block -->
 <type name="detector-block">
+  <!--# we only need 180 pixels per row-->
   <component type="detector-pixel">
     <location x="-0.048" y="0" z="0" name="pixel1" />
     <location x="-0.044" y="0" z="0" name="pixel2" />
@@ -201,8 +202,8 @@ see http://www.mantidproject.org/IDF -->
     <location x="0.012" y="0" z="0" name="pixel16" />
     <location x="0.016" y="0" z="0" name="pixel17" />
     <location x="0.020" y="0" z="0" name="pixel18" />
+    <location x="0.028" y="0" z="0" name="pixel20" /> 
     <location x="0.024" y="0" z="0" name="pixel19" />
-    <location x="0.028" y="0" z="0" name="pixel20" /> <!--# we only need 180 pixels per row-->
     <!--<location x="0.032" y="0" z="0" name="pixel21" />
     <location x="0.036" y="0" z="0" name="pixel22" />
     <location x="0.040" y="0" z="0" name="pixel23" />
@@ -226,17 +227,17 @@ see http://www.mantidproject.org/IDF -->
   <!-- 100 detectors per line -->
   <id start="100001" end="100100"/>
   <id start="101001" end="101100"/>
-  <id start="102001" end="102100"/>
+  <!--<id start="102001" end="102100"/>
   <id start="103001" end="103100"/>
   <id start="104001" end="104100"/>
   <id start="105001" end="105100"/>
   <id start="106001" end="106100"/>
   <id start="107001" end="107100"/>
-  <id start="108001" end="108100"/>
+  <id start="108001" end="108100"/>-->
 </idlist>
 
 <idlist idname="SouthBank">
-  <id start="118001" end="118100"/>
+  <!--<id start="118001" end="118100"/>
   <id start="119001" end="119100"/>  
   <id start="116001" end="116100"/>
   <id start="117001" end="117100"/>
@@ -244,7 +245,7 @@ see http://www.mantidproject.org/IDF -->
   <id start="115001" end="115100"/>
   <id start="112001" end="112100"/>
   <id start="113001" end="113100"/>
-  <id start="110001" end="110100"/>
+  <id start="110001" end="110100"/>-->
 </idlist>
 
 </instrument>
