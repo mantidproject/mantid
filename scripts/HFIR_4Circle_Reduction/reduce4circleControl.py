@@ -1516,7 +1516,6 @@ class CWSCDReductionControl(object):
         assert isinstance(merged_ws_name, str), 'Target MDWorkspace name for merged scans %s (%s) must ' \
                                                 'be a string.' % (str(merged_ws_name), type(merged_ws_name))
 
-
         # get the workspace
         ws_name_list = ''
         for i_ws, ws_name in enumerate(scan_md_ws_list):
@@ -1524,11 +1523,11 @@ class CWSCDReductionControl(object):
             if i_ws != 0:
                 ws_name_list += ', '
             ws_name_list += ws_name
-        
+
             # rebin the MDEventWorkspace to make all MDEventWorkspace have same MDGrid
             md_ws = AnalysisDataService.retrieve(ws_name)
             frame = md_ws.getDimension(0).getMDFrame().name()
-            
+
             if frame == 'HKL':
                 mantidsimple.SliceMD(InputWorkspace=ws_name,
                                      AlignedDim0='H,-10,10,1',
