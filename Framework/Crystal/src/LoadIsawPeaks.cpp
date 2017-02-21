@@ -1,5 +1,6 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
@@ -111,6 +112,7 @@ void LoadIsawPeaks::exec() {
 std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
                                           std::string startChar,
                                           Geometry::Instrument_const_sptr instr,
+                                          DetectorInfo &detectorInfo,
                                           double &T0) {
 
   ParameterMap_sptr parMap = instr->getParameterMap();
@@ -135,8 +137,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    SCDCalibratePanels::fixUpSourceParameterMap(instr, L1 / 100, sampPos,
-                                                parMap);
+    SCDCalibratePanels::fixUpSamplePosition(instr, L1 / 100, sampPos, detectorInfo);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
@@ -295,7 +296,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
 
-  std::string s = ApplyCalibInfo(in, "", instr, T0);
+  std::string s = ApplyCalibInfo(in, "", instr, tempWS->mutableDetectorInfo(), T0);
   outWS->setInstrument(instr);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of

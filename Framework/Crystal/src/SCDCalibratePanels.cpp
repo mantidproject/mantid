@@ -1,6 +1,7 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -684,52 +685,28 @@ void SCDCalibratePanels::updateBankParams(
   }
 }
 
-void SCDCalibratePanels::updateSourceParams(
-    boost::shared_ptr<const Geometry::IComponent> bank_const,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "x", pos.X());
-    pmap->addDouble(bank_const.get(), "y", pos.Y());
-    pmap->addDouble(bank_const.get(), "z", pos.Z());
-    pmap->addV3D(bank_const.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
-  if (rot)
-    pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-}
-
-void SCDCalibratePanels::fixUpSourceParameterMap(
+void SCDCalibratePanels::fixUpSamplePosition(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
-    const V3D newSampPos, boost::shared_ptr<const ParameterMap> const pmapOld) {
+    const V3D newSampPos, DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
-  IComponent_const_sptr source = newInstrument->getSource();
-  updateSourceParams(source, pmap, pmapOld);
 
+  IComponent_const_sptr source = newInstrument->getSource();
   IComponent_const_sptr sample = newInstrument->getSample();
-  V3D SamplePos = sample->getPos();
-  if (SamplePos != newSampPos) {
-    V3D newSampRelPos = newSampPos - SamplePos;
-    pmap->addPositionCoordinate(sample.get(), string("x"), newSampRelPos.X());
-    pmap->addPositionCoordinate(sample.get(), string("y"), newSampRelPos.Y());
-    pmap->addPositionCoordinate(sample.get(), string("z"), newSampRelPos.Z());
+
+  V3D samplePos = detectorInfo.samplePosition();
+  if (samplePos != newSampPos) {
+    detectorInfo.setPosition(*sample, newSampPos);
   }
   V3D sourceRelPos = source->getRelativePos();
-  V3D sourcePos = source->getPos();
+  V3D sourcePos = detectorInfo.sourcePosition();
   V3D parentSourcePos = sourcePos - sourceRelPos;
-  V3D source2sampleDir = SamplePos - source->getPos();
+  V3D source2sampleDir = samplePos - source->getPos();
 
   double scalee = L0 / source2sampleDir.norm();
-  V3D newsourcePos = sample->getPos() - source2sampleDir * scalee;
+  V3D newsourcePos = newSampPos - source2sampleDir * scalee;
   V3D newsourceRelPos = newsourcePos - parentSourcePos;
 
-  pmap->addPositionCoordinate(source.get(), string("x"), newsourceRelPos.X());
-  pmap->addPositionCoordinate(source.get(), string("y"), newsourceRelPos.Y());
-  pmap->addPositionCoordinate(source.get(), string("z"), newsourceRelPos.Z());
+  detectorInfo.setPosition(*source, newsourceRelPos);
 }
 
 void SCDCalibratePanels::fixUpBankParameterMap(
