@@ -511,11 +511,11 @@ public:
     delete suite;
   }
 //clang-format on
-  ConvertMDHistoToMatrixWorkspaceTestPerformance() {
-    std::vector<size_t> nonIntegr(2);
-    nonIntegr[0] = 0;
-    nonIntegr[1] = 1;
-    size_t ndims = 4;
+  void setUp() override{
+    std::vector<size_t> nonInteger(2);
+    nonInteger[0] = 0;
+    nonInteger[1] = 1;
+    const size_t ndims = 4;
     size_t size = 1;
 
     // property values for CreateMDHistoWorkspace
@@ -526,7 +526,7 @@ public:
     std::vector<coord_t> end(ndims);
     for (size_t i = 0; i < ndims; ++i) {
       names[i] = "x_" + boost::lexical_cast<std::string>(i);
-      if (nonIntegr.end() != std::find(nonIntegr.begin(), nonIntegr.end(), i)) {
+      if (nonInteger.end() != std::find(nonInteger.begin(), nonInteger.end(), i)) {
         size_t nbins = 3 + i;
         size *= nbins;
         numberOfBins[i] = nbins;
@@ -538,15 +538,10 @@ public:
     }
     signal_t signal(0.f), error(0.f);
     // IMDHistoWorkspace_sptr slice =
-    slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+    auto slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
         ndims, signal, error, &numberOfBins.front(), &start.front(),
         &end.front(), names);
-  }
-
-  void test_ConvertMDhistoToMatrixWorkspace() {
-
-    std::vector<size_t> nonIntegr(2);
-    auto alg =
+    alg =
         AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
     alg->initialize();
     alg->setRethrows(true);
@@ -555,40 +550,19 @@ public:
     alg->setPropertyValue("OutputWorkspace",
                           "_2"); // Not really required for child algorithm
 
-    if (nonIntegr.size() > 2 || nonIntegr.empty()) {
-      TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-    } else {
+
+  }
+
+  void test_ConvertMDhistoToMatrixWorkspace() {
+
       try {
         alg->execute();
       } catch (std::exception &e) {
         TS_FAIL(e.what());
       }
-
-      MatrixWorkspace_sptr matrix = alg->getProperty("OutputWorkspace");
-      TS_ASSERT(matrix);
-
-      if (nonIntegr.size() == 1) {
-        TS_ASSERT_EQUALS(matrix->getNumberHistograms(), 1);
-      }
-
-      if (nonIntegr.size() >= 1) {
-        auto xDim = slice->getDimension(nonIntegr[0]);
-        TS_ASSERT_EQUALS(xDim->getNBins(), matrix->blocksize());
-        for (size_t i = 0; i < matrix->getNumberHistograms(); ++i) {
-          TS_ASSERT_EQUALS(matrix->readX(i).front(), xDim->getMinimum());
-          TS_ASSERT_EQUALS(matrix->readX(i).back(), xDim->getMaximum());
-        }
-      } else if (nonIntegr.size() == 2) {
-        auto yDim = slice->getDimension(nonIntegr[1]);
-        TS_ASSERT_EQUALS(yDim->getNBins(), matrix->getNumberHistograms());
-        auto axis = matrix->getAxis(1);
-        TS_ASSERT_EQUALS(axis->getMin(), yDim->getMinimum());
-        TS_ASSERT_EQUALS(axis->getMax(), yDim->getMaximum());
-      }
-    }
   }
 
 private:
-  IMDHistoWorkspace_sptr slice;
+  IAlgorithm_sptr alg;
 };
 #endif /* CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_ */

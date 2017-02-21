@@ -8,6 +8,8 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
+
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
@@ -217,13 +219,14 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
                    xAxisLabel);
   }
 
+  auto &mutableXValues=outputWorkspace->mutableX(0);
   //VMD inTargetCoord;
   for (size_t i = 0; i < line.x.size(); ++i) {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * line.x[i];
 
     VMD inTargetCoord = transform->applyVMD(wsCoord);
-    outputWorkspace->mutableX(0)[i] = inTargetCoord[id];
+    mutableXValues[i] = inTargetCoord[id];
   }
   //outputWorkspace->mutableX(0) = inTargetCoord;
 
@@ -286,8 +289,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   const size_t xValsSize = outputWorkspace->x(0).size();
   const double dx = xDim->getBinWidth();
   const double minX = xDim->getMinimum();
-  outputWorkspace->setBinEdges(0,xValsSize,HistogramData::LinearGenerator(minX,dx));
-  
+  outputWorkspace->setBinEdges(0, xValsSize, HistogramData::LinearGenerator(minX, dx));
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
