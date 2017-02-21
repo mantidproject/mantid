@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 import os
 
-from isis_powder.routines import common, yaml_parser
+from isis_powder.routines import absorb_corrections, common, yaml_parser
 from isis_powder.routines.RunDetails import RunDetails
 from isis_powder.polaris_routines import polaris_advanced_config
 
@@ -12,24 +12,8 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
-
-    height_key = "cylinder_sample_height"
-    radius_key = "cylinder_sample_radius"
-    pos_key = "cylinder_position"
-    formula_key = "chemical_formula"
-
-    e_msg = "The following key was not found in the advanced configuration for sample correction:\n"
-
-    height = common.dictionary_key_helper(dictionary=absorb_dict, key=height_key, exception_msg=e_msg + height_key)
-    radius = common.dictionary_key_helper(dictionary=absorb_dict, key=radius_key, exception_msg=e_msg + radius_key)
-    pos = common.dictionary_key_helper(dictionary=absorb_dict, key=pos_key, exception_msg=e_msg + pos_key)
-
-    formula = common.dictionary_key_helper(dictionary=absorb_dict, key=formula_key, exception_msg=e_msg + formula_key)
-
-    ws_to_correct = common.calculate__cylinder_absorb_corrections(
-        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula)
-
+    ws_to_correct = absorb_corrections.run_cylinder_absorb_corrections(
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering, config_dict=absorb_dict)
     return ws_to_correct
 
 

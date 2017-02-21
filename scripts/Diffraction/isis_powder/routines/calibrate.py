@@ -21,7 +21,8 @@ def create_van(instrument, run_details, absorb):
 
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                        CalibrationFile=run_details.offset_file_path)
-
+    import pydevd
+    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
     if absorb:
         aligned_ws = _apply_absorb_corrections(instrument=instrument, run_details=run_details,
                                                van_ws=aligned_ws)

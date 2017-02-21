@@ -5,35 +5,6 @@ import mantid.simpleapi as mantid
 from isis_powder.routines.common_enums import InputBatchingEnum
 
 
-def calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
-                                           c_height, c_radius, c_pos, chemical_formula):
-    """
-    Calculates vanadium absorption corrections for the specified workspace. The workspace
-    should have any monitor spectra masked before being passed into this method. Additionally
-    it takes details of the sample container and sets the sample geometry to a cylinder with
-    the specified geometry. This function uses Mayers Sample Correction to perform the corrections.
-    :param ws_to_correct: The workspace to apply the sample corrections to
-    :param multiple_scattering: True if the effects of multiple scattering should be accounted for, else False
-    :param c_height: The height of the cylinder as a float
-    :param c_radius: The radius of the cylinder as a float
-    :param c_pos: The position as a list of three float values
-    :param chemical_formula: The chemical formula of the container - usually set to 'V' for Vanadium
-    :return: The workspace with corrections applied
-    """
-    geometry_json = {'Shape': 'Cylinder', 'Height': c_height,
-                     'Radius': c_radius, 'Center': c_pos}
-    material_json = {'ChemicalFormula': chemical_formula}
-
-    mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
-
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="TOF")
-    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
-                                                  MultipleScattering=multiple_scattering)
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="dSpacing")
-
-    return ws_to_correct
-
-
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
     Provides a light wrapper around the dictionary key helper which provides a generic error
