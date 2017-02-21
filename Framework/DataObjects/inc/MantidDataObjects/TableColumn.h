@@ -157,22 +157,27 @@ public:
    * is throw.
    * @param i :: The index to an element.
    */
-  double toDouble(size_t i) const override {
-    typedef
+  template<typename T>
+  double convertToDouble(const T& value) const
+  {   typedef
         typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
                                   Type, InconvertibleToDoubleType>::type
             DoubleType;
-    if (typeid(m_data[i]) == typeid(std::string)) {
-      std::string trimmedString = boost::lexical_cast<std::string>(
-          m_data[i]); // so not to alter the original data
+      return boost::numeric_cast<double, DoubleType>(value);
+  }
+  double convertToDouble(std::string value) const
+  {    return boost::lexical_cast<double>(value);
+  }
 
-      if (trimmedString.back() == ':') {
-        trimmedString.pop_back(); // so not to alter the original data
-      }
-      return std::stod(trimmedString);
+
+  double toDouble(size_t i) const override {
+   //if (typeid(m_data[i])==typeid(std::string)) {
+   /* if (isItString(m_data[i])) {
+      return boost::lexical_cast<double>(m_data[i]);
     } else {
       return boost::numeric_cast<double, DoubleType>(m_data[i]);
-    }
+    }*/
+	return convertToDouble(m_data[i]);
   }
 
   /**
