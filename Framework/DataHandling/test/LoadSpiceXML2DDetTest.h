@@ -50,7 +50,7 @@ public:
    *   sample logs: including run_start, monitor, omega, chi, phi and 2theta
    * @brief Load data without instrument
    */
-  void test_LoadDataNoInstrument() {
+  void Passed_test_LoadDataNoInstrument() {
     LoadSpiceXML2DDet loader;
     loader.initialize();
 
@@ -161,6 +161,11 @@ public:
         AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    for (auto property : outws->run().getProperties())
+    {
+      std::cout << property->name() << ": " << property->value() << "\n";
+    }
 
     // test signal value on various pixels
     // pixel at (256, 1): column 1
@@ -283,7 +288,7 @@ public:
    *    (a) at center pixel, 2-theta = 42.797
    * @brief Load data and instrument with sample log value
    */
-  void test_loadDataUsingSampleLogValue() {
+  void Xtest_loadDataUsingSampleLogValue() {
     // initialize the algorithm
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -374,7 +379,7 @@ public:
    * Testing include
    * 1. 2theta = 15 degree: scattering angle of all 4 corners should be same;
    */
-  void test_loadHB3ACalibratedDetDistance() {
+  void Xtest_loadHB3ACalibratedDetDistance() {
     // Test 2theta at 15 degree with sample-detector distance shift
     LoadSpiceXML2DDet loader;
     loader.initialize();
@@ -469,7 +474,7 @@ public:
    *  3. Check the symmetry of the peak positions
    * @brief Load data and instrument with sample log value
    */
-  void test_loadDataShiftDetectorCenter() {
+  void Xtest_loadDataShiftDetectorCenter() {
     // initialize the algorithm
     LoadSpiceXML2DDet loader;
     loader.initialize();

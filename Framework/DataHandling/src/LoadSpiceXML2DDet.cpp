@@ -583,10 +583,10 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()
                       << " (int) value = " << ivalue << "\n";
       } else {
-        outws->mutableRun().addProperty(
-            new PropertyWithValue<std::string>(nodename, nodevalue));
-        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-                      << " (string) value = " << nodevalue << "\n";
+        // outws->mutableRun().addProperty(
+        //     new PropertyWithValue<std::string>(nodename, nodevalue));
+        // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
+        //               << " (string) value = " << nodevalue << "\n";
       }
     }
   }
@@ -843,6 +843,13 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     g_log.warning() << "Pt. " << ptnumber
                     << " is not found.  Log is not loaded to output workspace."
                     << "\n";
+
+  // set up run start
+  matrixws->mutableRun().addProperty(new PropertyWithValue<std::string>("run_start", "2016-07-23T06:55:21.502270666"));
+  matrixws->mutableRun().addProperty(new PropertyWithValue<std::string>("start_time", "2016-07-23T06:55:21.502270666"));
+   
+  //
+  //
 }
 
 /** Get wavelength if the instrument is HB3A
