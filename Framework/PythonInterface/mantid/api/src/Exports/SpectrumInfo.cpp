@@ -16,7 +16,8 @@ void export_SpectrumInfo() {
            "Returns true if the spectrum is associated with detectors in the "
            "instrument.")
       .def("position", &SpectrumInfo::position, (arg("self"), arg("index")),
-           "Returns the position of the detector(s) associated with the spectrum.")
+           "Returns the position of the detector(s) associated with the "
+           "spectrum.")
       .def("l2", &SpectrumInfo::l2, (arg("self"), arg("index")),
            "Returns the distance from the sample of the detector(s) "
            "associated with the spectrum.")

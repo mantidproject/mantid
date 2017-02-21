@@ -135,14 +135,12 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
 /// Returns the phi angle (in radians) for the spectrum with given index
 double SpectrumInfo::phi(const size_t index) const {
   if (isMonitor(index))
-    throw std::logic_error(
-        "phi is not defined for monitors.");
+    throw std::logic_error("phi is not defined for monitors.");
   Kernel::V3D pos = position(index);
   double p, dummy;
   pos.getSpherical(dummy, dummy, p);
   return p * M_PI / 180.;
 }
-
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
