@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>661</width>
-    <height>462</height>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,6 +49,9 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="1" column="0">
@@ -82,6 +85,9 @@
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="ShowGroups" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -145,7 +151,16 @@
         </property>
         <widget class="QWidget" name="pgFlatPlate">
          <layout class="QGridLayout" name="gridLayout_2">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="0" column="2">
@@ -238,7 +253,16 @@
         </widget>
         <widget class="QWidget" name="pgCylinder">
          <layout class="QGridLayout" name="gridLayout_4">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">
@@ -345,7 +369,16 @@
         </widget>
         <widget class="QWidget" name="pgAnnulus">
          <layout class="QGridLayout" name="gridLayout_5">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">

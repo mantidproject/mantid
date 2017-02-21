@@ -44,6 +44,9 @@
          <string>_Result.nxs</string>
         </stringlist>
        </property>
+       <property name="ShowGroups" stdset="0">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="1" column="3">

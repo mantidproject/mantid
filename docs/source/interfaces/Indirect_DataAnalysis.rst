@@ -21,6 +21,8 @@ Reduction interface or using :math:`S(Q, \omega)` files (*_sqw.nxs*) and
 workspaces (*_sqw*) created using either the Indirect Data Reduction interface or
 taken from a bespoke algorithm or auto reduction.
 
+These interfaces do not support GroupWorkspace as input.
+
 Action Buttons
 ~~~~~~~~~~~~~~
 

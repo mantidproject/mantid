@@ -40,6 +40,11 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+#################
+
+Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+
 Bugs Resolved
 -------------
 
