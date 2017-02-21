@@ -144,26 +144,6 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayoutModelDisplayOptions">
            <item>
-            <widget class="QPushButton" name="pushButtonModelOption2">
-             <property name="toolTip">
-              <string>Add one or more spectra from a workspace</string>
-             </property>
-             <property name="text">
-              <string>some action</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButtonModelOption1">
-             <property name="toolTip">
-              <string>Remove selected spectra</string>
-             </property>
-             <property name="text">
-              <string>another action</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <spacer name="modelDisplayOptionsSpacer">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -281,9 +261,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>pushButtonModelOption1</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
