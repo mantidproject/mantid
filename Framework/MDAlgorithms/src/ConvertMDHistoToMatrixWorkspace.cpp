@@ -193,8 +193,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
 
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, line.x.size(), line.y.size());
-  outputWorkspace->mutableY(0) =line.y;
-  outputWorkspace->mutableE(0)=line.e;
+  outputWorkspace->mutableY(0) = line.y;
+  outputWorkspace->mutableE(0) = line.e;
 
   const size_t numberTransformsToOriginal =
       inputWorkspace->getNumberTransformsToOriginal();
@@ -219,8 +219,8 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
                    xAxisLabel);
   }
 
-  auto &mutableXValues=outputWorkspace->mutableX(0);
-  //VMD inTargetCoord;
+  auto &mutableXValues = outputWorkspace->mutableX(0);
+  // VMD inTargetCoord;
   for (size_t i = 0; i < line.x.size(); ++i) {
     // Coordinates in the workspace being plotted
     VMD wsCoord = start + dir * line.x[i];
@@ -228,7 +228,7 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
     VMD inTargetCoord = transform->applyVMD(wsCoord);
     mutableXValues[i] = inTargetCoord[id];
   }
-  //outputWorkspace->mutableX(0) = inTargetCoord;
+  // outputWorkspace->mutableX(0) = inTargetCoord;
 
   boost::shared_ptr<Kernel::Units::Label> labelX =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(
@@ -289,7 +289,8 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   const size_t xValsSize = outputWorkspace->x(0).size();
   const double dx = xDim->getBinWidth();
   const double minX = xDim->getMinimum();
-  outputWorkspace->setBinEdges(0, xValsSize, HistogramData::LinearGenerator(minX, dx));
+  outputWorkspace->setBinEdges(0, xValsSize,
+                               HistogramData::LinearGenerator(minX, dx));
   // set the y-values and errors
   for (size_t i = 0; i < ny; ++i) {
     if (i > 0)
