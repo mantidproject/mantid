@@ -96,10 +96,12 @@ private:
   /// Create output MatrixWorkspace
   API::MatrixWorkspace_sptr
   createMatrixWorkspaceVersion2(const std::vector<SpiceXMLNode> &vecxmlnode,
-                        	const std::string &detnodename,
-                        	const bool &loadinstrument);
+                                const std::string &detnodename,
+                                const bool &loadinstrument);
 
-  API::MatrixWorkspace_sptr parseDetectorNode(const std::string &detvaluestr,  bool loadinstrument, double& max_counts);
+  API::MatrixWorkspace_sptr parseDetectorNode(const std::string &detvaluestr,
+                                              bool loadinstrument,
+                                              double &max_counts);
 
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded
