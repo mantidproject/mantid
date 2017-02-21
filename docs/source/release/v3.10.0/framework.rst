@@ -16,6 +16,10 @@ New
 Improved
 ########
 
+Bug Fixes
+#########
+
+- Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 
 Deprecated
 ##########
