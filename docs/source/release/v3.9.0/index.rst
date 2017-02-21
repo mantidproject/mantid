@@ -30,6 +30,8 @@ Installation packages can be found on our `download page`_
 which now links to sourceforge to mirror our download files around the world, you can also
 access the source code on `GitHub release page`_.
 
+This is the last version to support RedHat Enterprise Linux 6 (RHEL6).
+
 Citation
 --------
 

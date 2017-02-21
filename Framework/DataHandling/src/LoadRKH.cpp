@@ -47,46 +47,64 @@ using namespace Mantid::Kernel;
 
 DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
-namespace {
-void readLinesForRKH1D(std::istream &stream, int readStart, int readEnd,
-                       std::vector<double> &columnOne,
-                       std::vector<double> &ydata, std::vector<double> &errdata,
-                       Progress &prog) {
-  std::string fileline;
-  for (int index = 1; index <= readEnd; ++index) {
-    getline(stream, fileline);
-    if (index < readStart)
-      continue;
-    double x(0.), y(0.), yerr(0.);
-    std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    prog.report();
-  }
-}
+/**
+ * Read data from a RKH1D file
+ *
+ * @param stream :: the input stream to read from
+ * @param readStart :: the line to start reading from
+ * @param readEnd :: the line to stop reading at
+ * @param x :: histogram data points to fill
+ * @param y :: histogram data counts to fill
+ * @param ye :: histogram data count standard deviations to fill
+ * @param xe :: histogram data point standard deviations to fill
+ * @param prog :: handle to progress bar
+ * @param readXError :: whether to read x errors (optional, default: false)
+ */
+void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
+                                int readEnd, HistogramData::Points &x,
+                                HistogramData::Counts &y,
+                                HistogramData::CountStandardDeviations &ye,
+                                HistogramData::PointStandardDeviations &xe,
+                                Progress &prog, bool readXError) {
 
-void readLinesWithXErrorForRKH1D(std::istream &stream, int readStart,
-                                 int readEnd, std::vector<double> &columnOne,
-                                 std::vector<double> &ydata,
-                                 std::vector<double> &errdata,
-                                 std::vector<double> &xError, Progress &prog) {
+  std::vector<double> xData;
+  std::vector<double> yData;
+  std::vector<double> xError;
+  std::vector<double> yError;
+
+  xData.reserve(readEnd);
+  yData.reserve(readEnd);
+  xError.reserve(readEnd);
+  yError.reserve(readEnd);
+
   std::string fileline;
   for (int index = 1; index <= readEnd; ++index) {
     getline(stream, fileline);
     if (index < readStart)
       continue;
-    double x(0.), y(0.), yerr(0.), xerr(0.);
+
+    double xValue(0.), yValue(0.), yErrorValue(0.);
     std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr >> xerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    xError.push_back(xerr);
+    datastr >> xValue >> yValue >> yErrorValue;
+
+    xData.push_back(xValue);
+    yData.push_back(yValue);
+    yError.push_back(yErrorValue);
+
+    // check if we need to read in x error values
+    if (readXError) {
+      double xErrorValue(0.);
+      datastr >> xErrorValue;
+      xError.push_back(xErrorValue);
+    }
+
     prog.report();
   }
-}
+
+  x = xData;
+  y = yData;
+  ye = yError;
+  xe = xError;
 }
 
 /**
@@ -286,23 +304,18 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   int pointsToRead = readEnd - readStart + 1;
   // Now stream sits at the first line of data
-  std::vector<double> columnOne, ydata, errdata, xError;
-  columnOne.reserve(readEnd);
-  ydata.reserve(readEnd);
-  errdata.reserve(readEnd);
+  HistogramData::Points columnOne;
+  HistogramData::Counts ydata;
+  HistogramData::PointStandardDeviations xError;
+  HistogramData::CountStandardDeviations errdata;
 
   auto hasXError = hasXerror(m_fileIn);
 
   Progress prog(this, 0.0, 1.0, readEnd);
 
-  if (hasXError) {
-    xError.reserve(readEnd);
-    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata,
-                                errdata, xError, prog);
-  } else {
-    readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
-                      prog);
-  }
+  readLinesForRKH1D(m_fileIn, readStart, readEnd, columnOne, ydata, errdata,
+                    xError, prog, hasXError);
+
   m_fileIn.close();
 
   assert(pointsToRead == static_cast<int>(columnOne.size()));
@@ -318,9 +331,9 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
         "Workspace2D", 1, pointsToRead, pointsToRead);
     localworkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create(firstColVal);
-    localworkspace->dataX(0) = columnOne;
-    localworkspace->dataY(0) = ydata;
-    localworkspace->dataE(0) = errdata;
+    localworkspace->setPoints(0, columnOne);
+    localworkspace->setCounts(0, ydata);
+    localworkspace->setCountStandardDeviations(0, errdata);
     if (hasXError) {
       localworkspace->setPointStandardDeviations(0, xError);
     }

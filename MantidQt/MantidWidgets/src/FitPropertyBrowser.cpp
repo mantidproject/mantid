@@ -3,25 +3,21 @@
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 #include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/Expression.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
@@ -31,7 +27,6 @@
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
-#include "qtpropertymanager.h"
 #include "qteditorfactory.h"
 #include "DoubleEditorFactory.h"
 #include "ParameterPropertyManager.h"
@@ -39,18 +34,15 @@
 #include <Poco/ActiveResult.h>
 
 #include <QVBoxLayout>
-#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QSettings>
-#include <QFileInfo>
 #include <QApplication>
 #include <QClipboard>
 #include <QSignalMapper>
-#include <QMetaMethod>
 #include <QTreeWidget>
 #include <QUrl>
 
@@ -1059,9 +1051,9 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     }
     if (mws) {
       size_t wi = static_cast<size_t>(workspaceIndex());
-      if (wi < mws->getNumberHistograms() && !mws->readX(wi).empty()) {
-        setStartX(mws->readX(wi).front());
-        setEndX(mws->readX(wi).back());
+      if (wi < mws->getNumberHistograms() && !mws->x(wi).empty()) {
+        setStartX(mws->x(wi).front());
+        setEndX(mws->x(wi).back());
       }
     }
   }
@@ -2919,9 +2911,10 @@ FitPropertyBrowser::createMatrixFromTableWorkspace() const {
     Mantid::API::MatrixWorkspace_sptr mws =
         Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1,
                                                          rowCount, rowCount);
-    Mantid::MantidVec &X = mws->dataX(0);
-    Mantid::MantidVec &Y = mws->dataY(0);
-    Mantid::MantidVec &E = mws->dataE(0);
+    auto &X = mws->mutableX(0);
+    auto &Y = mws->mutableY(0);
+    auto &E = mws->mutableE(0);
+
     for (size_t row = 0; row < rowCount; ++row) {
       X[row] = xcol->toDouble(row);
       Y[row] = ycol->toDouble(row);
@@ -3071,11 +3064,8 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    // Create and open the URL of the help page
-    QString url =
-        QString::fromStdString("http://docs.mantidproject.org/fitfunctions/" +
-                               handler->ifun()->name());
-    MantidDesktopServices::openUrl(QUrl(url));
+    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),
+                                               handler->ifun()->name());
   }
 }
 

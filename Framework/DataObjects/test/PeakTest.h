@@ -264,6 +264,18 @@ public:
     TS_ASSERT_EQUALS(qLab, qSampleRotated);
   }
 
+  void test_getQLabFrame() {
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    Peak p(inst, 0, 1.5);
+    p.setQLabFrame(V3D(1, 1, 1));
+    auto q = p.getQLabFrame();
+    // should be the same
+    TS_ASSERT_DELTA(q[0], 1, 1e-5);
+    TS_ASSERT_DELTA(q[1], 1, 1e-5);
+    TS_ASSERT_DELTA(q[2], 1, 1e-5);
+  }
+
   //------------------------------------------------------------------------------------
   /** Can't have Q = 0,0,0 or 0 in the Z direction when creating */
   void test_setQLabFrame_ThrowsIfQIsNull() {
@@ -379,7 +391,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testQ = [this, &sphereInst, &refFrame, &refBeamDir](const auto q) {
+    auto testQ = [&](const V3D &q) {
       // Compute expected direction
       const auto qBeam = q.scalar_prod(refBeamDir);
       const double norm_q = q.norm();
@@ -454,7 +466,7 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testTheta = [this, &sphereInst, &radius](const auto theta) {
+    auto testTheta = [this, &sphereInst, &radius](const double theta) {
       const auto expectedDir = V3D(sin(theta), 0., cos(theta));
 
       // test without extended detector space
@@ -474,7 +486,8 @@ public:
     int index = 0;
     std::vector<double> angles(8);
     std::generate(angles.begin(), angles.end(), [&index, &angles]() {
-      return index++ * M_PI / angles.size();
+      return static_cast<double>(index++) * M_PI /
+             static_cast<double>(angles.size());
     });
 
     std::for_each(angles.begin(), angles.end(), testTheta);

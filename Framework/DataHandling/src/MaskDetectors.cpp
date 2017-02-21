@@ -8,8 +8,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include <set>
 #include <numeric>
+#include <set>
 
 namespace { // declare file scoped function
 /** internal method copies values in specified range from source list to the
@@ -370,7 +370,7 @@ void MaskDetectors::extractMaskedWSDetIDs(
 
   int64_t nHist = maskWS->getNumberHistograms();
   for (int64_t i = 0; i < nHist; ++i) {
-    if (maskWS->readY(i)[0] > 0.5) {
+    if (maskWS->y(i)[0] > 0.5) {
 
       try {
         const auto dets = maskWS->getSpectrum(i).getDetectorIDs();
@@ -573,7 +573,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     constrainIndexInRange(indexList, tmp_index, startIndex, endIndex);
 
     for (size_t i = startIndex; i <= endIndex; ++i) {
-      if (maskedWorkspace->dataY(i)[0] > 0.5) {
+      if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
         tmp_index.push_back(i);
       }
@@ -583,7 +583,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
     endIndex = maskedWorkspace->getNumberHistograms();
     for (size_t i = 0; i < endIndex; ++i) {
 
-      if (maskedWorkspace->dataY(i)[0] > 0.5) {
+      if (maskedWorkspace->y(i)[0] > 0.5) {
         g_log.debug() << "Adding WorkspaceIndex " << i << " to mask.\n";
         tmp_index.push_back(i);
       }
