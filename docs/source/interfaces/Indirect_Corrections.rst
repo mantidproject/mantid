@@ -14,6 +14,8 @@ Overview
 Provides correction routines for quasielastic, inelastic and diffraction
 reductions.
 
+These interfaces do not support GroupWorkspace as input.
+
 Action Buttons
 ~~~~~~~~~~~~~~
 
