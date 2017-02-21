@@ -12,6 +12,7 @@ Improved
 ########
 
 - :ref:`LoadILLTof <algm-LoadILLTOF-v2>` now loads the monitor spectra last making the spectrum numbers and detectors IDs match.
+- In :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>`, the sample to detector distance can now be directly given using the new *L2* property.
 
 Crystal Field
 -------------
