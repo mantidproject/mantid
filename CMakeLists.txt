@@ -35,6 +35,16 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #e
 set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 
 ###########################################################################
+# Include Eigen as an external project
+###########################################################################
+include ( Eigen )
+
+###########################################################################
+# Bootstrap any dependencies
+###########################################################################
+include ( Bootstrap )
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 # VATES flag. Requires ParaView
@@ -50,11 +60,6 @@ endif ()
 if ( ENABLE_MANTIDPLOT )
   include ( ParaViewSetup )
 endif ()
-
-###########################################################################
-# Bootstrap any dependencies
-###########################################################################
-include ( Bootstrap )
 
 ###########################################################################
 # Set expected variables for OS X
@@ -329,6 +334,12 @@ if ( ENABLE_CPACK )
             list ( APPEND DEPENDS_LIST ", libhdf5-cpp-11,libnexus0v5 (>= 4.3),libjsoncpp1,libqscintilla2-12v5, libmuparser2v5,libqwtplot3d-qt4-0v5,libgsl2,liboce-foundation10,liboce-modeling10")
             list (REMOVE_ITEM DEPENDS_LIST "libjsoncpp0 (>=0.7.0)," "libqscintilla2-11," "libmuparser2," "libnexus0 (>= 4.3)," "libqwtplot3d-qt4-0," "libgsl0ldbl," "liboce-foundation8,liboce-modeling8,")
         endif()
+        # Change DEPENDS_LIST for python 3
+        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
+          list (REMOVE_ITEM DEPENDS_LIST "python-nxs (>= 4.3)," "python-pycifrw (>= 4.2.1),")
+          string ( REPLACE "python-" "python3-" DEPENDS_LIST ${DEPENDS_LIST} )
+          string ( REPLACE "python3-qt4" "python3-pyqt4" DEPENDS_LIST ${DEPENDS_LIST} )
+        endif ()
         # parse list to string required for deb package
         string ( REPLACE ";" "" CPACK_DEBIAN_PACKAGE_DEPENDS ${DEPENDS_LIST} )
       endif()

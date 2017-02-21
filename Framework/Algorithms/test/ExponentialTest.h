@@ -30,7 +30,7 @@ public:
     int sizex = 10;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(sizex);
+        WorkspaceCreationHelper::create1DWorkspaceFib(sizex, true);
 
     AnalysisDataService::Instance().add("test_in11", work_in1);
     setError(work_in1);

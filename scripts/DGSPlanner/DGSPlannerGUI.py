@@ -1,13 +1,14 @@
 #pylint: disable=invalid-name,relative-import
-import InstrumentSetupWidget
-import ClassicUBInputWidget
-import MatrixUBInputWidget
-import DimensionSelectorWidget
+from __future__ import (absolute_import, division, print_function)
+from . import InstrumentSetupWidget
+from . import ClassicUBInputWidget
+from . import MatrixUBInputWidget
+from . import DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 import mantidqtpython as mqt
-from ValidateOL import ValidateOL
+from .ValidateOL import ValidateOL
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
@@ -190,7 +191,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                     if reply==QtGui.QMessageBox.No:
                         return
             if self.masterDict['makeFast']:
-                sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
+                sp=list(range(mantid.mtd["__temp_instrument"].getNumberHistograms()))
                 tomask=sp[::4]+sp[1::4]+sp[2::4]
                 mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0

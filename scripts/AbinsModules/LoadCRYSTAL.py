@@ -59,7 +59,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         found_type = False
         molecular = False
-        with open(self._clerk.get_input_filename()) as crystal_file:
+        with open(self._clerk.get_input_filename(),  "r") as crystal_file:
             for line in crystal_file:
                 if "MOLECULAR CALCULATION" in line or "0D - MOLECULE" in line:
                     molecular = True
@@ -86,7 +86,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         :return: list with atomic coordinates
         """
         filename = self._clerk.get_input_filename()
-        with open(filename) as crystal_file:
+        with open(filename,  "r") as crystal_file:
             logger.notice("Reading from " + filename)
             coord_lines = []
             found_coord = False
@@ -97,7 +97,8 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                 if found_coord:
                     if "LOCAL ATOMIC FUNCTIONS BASIS SET" in line or \
                                     "ROTATION" in line or "T = ATOM BELONGING " in line or \
-                                    "PSEUDOPOTENTIAL INFORMATION" in line:
+                                    "PSEUDOPOTENTIAL INFORMATION" in line or\
+                                    "STARTING BASIS SET HANDLING" in line:
 
                         found_coord = False
                         if not found_coord:
@@ -119,7 +120,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Reads vibrational modes (frequencies and displacements)
         """
-        with open(self._clerk.get_input_filename()) as crystal_file:
+        with open(self._clerk.get_input_filename(), "r") as crystal_file:
             freq = []
             xdisp = []
             ydisp = []

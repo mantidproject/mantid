@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -14,6 +15,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
 #include <cmath>
@@ -210,30 +212,22 @@ void DetectorEfficiencyCor::correctForEfficiency(
   auto yValues = m_inputWS->y(spectraIn);
   auto eValues = m_inputWS->e(spectraIn);
 
-  // get a pointer to the detectors that created the spectrum
-  const std::set<detid_t> &dets =
-      m_inputWS->getSpectrum(spectraIn).getDetectorIDs();
-  const double ndets(static_cast<double>(dets.size())); // We correct each pixel
-                                                        // so make sure we
-                                                        // average the
-                                                        // correction computing
-                                                        // it for the spectrum
-
   // Storage for the reciprocal wave vectors that are calculated as the
   // correction proceeds
   std::vector<double> oneOverWaveVectors(yValues.size());
-  for (auto it = dets.cbegin(); it != dets.cend(); ++it) {
-    IDetector_const_sptr det_member =
-        m_inputWS->getInstrument()->getDetector(*it);
+  const auto &detectorInfo = m_inputWS->detectorInfo();
+  const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(spectraIn);
 
+  for (const auto index : spectrumDefinition) {
+    const auto detIndex = index.first;
+    const auto &det_member = detectorInfo.detector(detIndex);
     Parameter_sptr par =
-        m_paraMap->getRecursive(det_member->getComponentID(), PRESSURE_PARAM);
+        m_paraMap->getRecursive(det_member.getComponentID(), PRESSURE_PARAM);
     if (!par) {
       throw Exception::NotFoundError(PRESSURE_PARAM, spectraIn);
     }
     const double atms = par->value<double>();
-    par =
-        m_paraMap->getRecursive(det_member->getComponentID(), THICKNESS_PARAM);
+    par = m_paraMap->getRecursive(det_member.getComponentID(), THICKNESS_PARAM);
     if (!par) {
       throw Exception::NotFoundError(THICKNESS_PARAM, spectraIn);
     }
@@ -245,9 +239,9 @@ void DetectorEfficiencyCor::correctForEfficiency(
     // now get the sin of the angle, it's the magnitude of the cross product of
     // unit vector along the detector tube axis and a unit vector directed from
     // the sample to the detector centre
-    V3D vectorFromSample = det_member->getPos() - m_samplePos;
+    V3D vectorFromSample = det_member.getPos() - m_samplePos;
     vectorFromSample.normalize();
-    Quat rot = det_member->getRotation();
+    Quat rot = det_member.getRotation();
     // rotate the original cylinder object axis to get the detector axis in the
     // actual instrument
     rot.rotate(detAxis);
@@ -267,14 +261,15 @@ void DetectorEfficiencyCor::correctForEfficiency(
     auto wavItr = oneOverWaveVectors.begin();
 
     for (; youtItr != yout.end(); ++youtItr, ++eoutItr) {
-      if (it == dets.begin()) {
+      if (index == spectrumDefinition[0]) {
         *youtItr = 0.0;
         *eoutItr = 0.0;
         *wavItr = calculateOneOverK(*xItr, *(xItr + 1));
       }
       const double oneOverWave = *wavItr;
+      const double nDets(static_cast<double>(spectrumDefinition.size()));
       const double factor =
-          1.0 / ndets / detectorEfficiency(det_const * oneOverWave);
+          1.0 / nDets / detectorEfficiency(det_const * oneOverWave);
       *youtItr += (*yinItr) * factor;
       *eoutItr += (*einItr) * factor;
       ++yinItr;
@@ -306,10 +301,10 @@ double DetectorEfficiencyCor::calculateOneOverK(double loBinBound,
 * @param detRadius :: An output parameter that contains the detector radius
 * @param detAxis :: An output parameter that contains the detector axis vector
 */
-void DetectorEfficiencyCor::getDetectorGeometry(
-    const Geometry::IDetector_const_sptr &det, double &detRadius,
-    V3D &detAxis) {
-  boost::shared_ptr<const Object> shape_sptr = det->shape();
+void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det,
+                                                double &detRadius,
+                                                V3D &detAxis) {
+  boost::shared_ptr<const Object> shape_sptr = det.shape();
   if (!shape_sptr->hasValidShape()) {
     throw Exception::NotFoundError("Shape", "Detector has no shape");
   }

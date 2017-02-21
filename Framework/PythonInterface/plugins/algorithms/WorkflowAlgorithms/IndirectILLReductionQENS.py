@@ -172,11 +172,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         if xstart > 0:
             self.log().debug('Mask bins smaller than {0}'.format(xstart))
-            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[0], XMax=x_values[xstart])
+            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[0], XMax=x_values[int(xstart)])
 
         if xend < len(x_values) - 1:
             self.log().debug('Mask bins larger than {0}'.format(xend))
-            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[xend + 1], XMax=x_values[-1])
+            MaskBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=x_values[int(xend) + 1], XMax=x_values[-1])
 
     def _filter_files(self, files, label):
         '''

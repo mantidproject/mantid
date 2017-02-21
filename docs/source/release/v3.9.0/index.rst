@@ -1,3 +1,5 @@
+.. _v3.9.0:
+
 ==========================
 Mantid 3.9.0 Release Notes
 ==========================
@@ -12,11 +14,9 @@ Mantid 3.9.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
+We are proud to announce version 3.9 of Mantid. This release contains the long awaited ability to visualise non orthogonal crystal systems correctly in the slice viewer, as well as partial project saving in the Mantidplot interface.
 
-**TODO: Add paragraph summarizing big changes**
-
-This is just one of many improvements in this release, so please take a
+These are just two of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -31,6 +31,8 @@ have, or crashes that occur on our `forum`_.
 Installation packages can be found on our `download page`_
 which now links to sourceforge to mirror our download files around the world, you can also
 access the source code on `GitHub release page`_.
+
+This is the last version to support RedHat Enterprise Linux 6 (RHEL6).
 
 Citation
 --------

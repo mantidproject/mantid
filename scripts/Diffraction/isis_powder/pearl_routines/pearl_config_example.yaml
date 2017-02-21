@@ -1,0 +1,14 @@
+# This is an example configuration file
+# It is not set up for any specific machine and is to give the user an idea of the layout
+user_name : "Mantid_Tester"
+
+# By using the ' character instead of the " character we don't need to escape the path
+calibration_directory : 'C:\pearl\calibration'
+output_directory : 'C:\pearl\output'
+calibration_config_path : 'C:\pearl\calibration\cal_map.yaml'
+
+# We can also set a default tt_mode using this too
+tt_mode: "tt88"
+
+# Or maybe turn long mode off by default
+long_mode : False
