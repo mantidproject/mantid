@@ -49,7 +49,8 @@ class Gem(AbstractInst):
         return _gem_generate_inst_name(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, van_ws):
-        raise NotImplementedError()
+        return gem_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
+                                                     multiple_scattering=self._inst_settings.multiple_scattering)
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,

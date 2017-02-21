@@ -1,6 +1,21 @@
 from __future__ import (absolute_import, division, print_function)
 
-raw_tof_cropping_values = (500, 20000)
+absorption_correction_params = {
+    # These are read directly by the generate absorb corrections functions instead of being parsed.
+    # Therefore they cannot be overridden using basic config files or keyword arguments.
+    "cylinder_sample_height": 4.0,
+    "cylinder_sample_radius": 0.4,
+    "cylinder_position": [0., 0., 0.],
+
+    "chemical_formula": "V",
+}
+
+
+gem_adv_config_params = {
+    "raw_tof_cropping_values": (500, 20000),
+    "spline_coefficient": 30
+
+}
 
 focused_cropping_values = [(550, 19900),  # Bank 1
                            (550, 19900),  # Bank 2
@@ -20,8 +35,8 @@ vanadium_cropping_values = [(510, 19997),  # Bank 1
 
 
 all_adv_variables = {
-    "raw_tof_cropping_values" : raw_tof_cropping_values,
-    "focused_cropping_values" : focused_cropping_values,
+    "raw_tof_cropping_values": gem_adv_config_params,
+    "focused_cropping_values": focused_cropping_values,
     "vanadium_cropping_values": vanadium_cropping_values
 }
 

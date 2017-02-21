@@ -12,16 +12,23 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 55)))
 
     absorb_dict = polaris_advanced_config.absorption_correction_params
-    geometry_json = {'Shape': 'Cylinder', 'Height': absorb_dict["cylinder_sample_height"],
-                     'Radius': absorb_dict["cylinder_sample_radius"], 'Center': absorb_dict["cylinder_position"]}
-    material_json = {'ChemicalFormula': absorb_dict["chemical_formula"]}
 
-    mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
+    height_key = "cylinder_sample_height"
+    radius_key = "cylinder_sample_radius"
+    pos_key = "cylinder_position"
+    formula_key = "chemical_formula"
 
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="TOF")
-    ws_to_correct = mantid.MayersSampleCorrection(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
-                                                  MultipleScattering=multiple_scattering)
-    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct, Target="dSpacing")
+    e_msg = "The following key was not found in the advanced configuration for sample correction:\n"
+
+    height = common.dictionary_key_helper(dictionary=absorb_dict, key=height_key, exception_msg=e_msg + height_key)
+    radius = common.dictionary_key_helper(dictionary=absorb_dict, key=radius_key, exception_msg=e_msg + radius_key)
+    pos = common.dictionary_key_helper(dictionary=absorb_dict, key=pos_key, exception_msg=e_msg + pos_key)
+
+    formula = common.dictionary_key_helper(dictionary=absorb_dict, key=formula_key, exception_msg=e_msg + formula_key)
+
+    ws_to_correct = common.calculate__cylinder_absorb_corrections(
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
+        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula)
 
     return ws_to_correct
 

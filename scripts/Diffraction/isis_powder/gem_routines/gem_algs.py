@@ -1,8 +1,36 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, RunDetails, yaml_parser
+from isis_powder.gem_routines import gem_advanced_config
+
+
+def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
+    # First 100 detectors are monitors or not connected to DAE
+    mantid.MaskDetectors(ws_to_correct, SpectraList=list(range(0, 101)))
+
+    absorb_dict = gem_advanced_config.absorption_correction_params
+
+    height_key = "cylinder_sample_height"
+    radius_key = "cylinder_sample_radius"
+    pos_key = "cylinder_position"
+    formula_key = "chemical_formula"
+
+    e_msg = "The following key was not found in the advanced configuration for sample correction:\n"
+
+    height = common.dictionary_key_helper(dictionary=absorb_dict, key=height_key, exception_msg=e_msg + height_key)
+    radius = common.dictionary_key_helper(dictionary=absorb_dict, key=radius_key, exception_msg=e_msg + radius_key)
+    pos = common.dictionary_key_helper(dictionary=absorb_dict, key=pos_key, exception_msg=e_msg + pos_key)
+
+    formula = common.dictionary_key_helper(dictionary=absorb_dict, key=formula_key, exception_msg=e_msg + formula_key)
+
+    ws_to_correct = common.calculate__cylinder_absorb_corrections(
+        ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
+        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula)
+
+    return ws_to_correct
 
 
 def get_run_details(run_number_string, inst_settings):

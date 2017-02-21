@@ -66,6 +66,6 @@ variables = {
     # Used by the script to find the dictionaries in advanced config.
     "file_names_dict": file_names,
     "script_params": script_params,
-    "tof_cropping_ranges": focused_cropping_values,
+    "focused_cropping_values": focused_cropping_values,
     "vanadium_cropping_values": vanadium_cropping_values
 }
