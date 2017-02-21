@@ -71,7 +71,7 @@ double MantidMatrixFunction::operator()(double x, double y) {
   size_t j = indexX(i, x);
 
   if (j < columns())
-    return m_workspace->readY(i)[j];
+    return m_workspace->y(i)[j];
   else
     return m_outside;
 }
@@ -107,7 +107,7 @@ void MantidMatrixFunction::connectToViewer(QObject *viewer) {
 }
 
 double MantidMatrixFunction::value(size_t row, size_t col) const {
-  return m_workspace->readY(row)[col];
+  return m_workspace->y(row)[col];
 }
 
 void MantidMatrixFunction::getRowYRange(size_t row, double &ymin,
@@ -139,19 +139,20 @@ void MantidMatrixFunction::getRowYRange(size_t row, double &ymin,
 
 void MantidMatrixFunction::getRowXRange(int row, double &xmin,
                                         double &xmax) const {
-  const Mantid::MantidVec &X = m_workspace->readX(row);
+  const auto &X = m_workspace->x(row);
   xmin = X[0];
   xmax = X[X.size() - 1];
 }
 
-const Mantid::MantidVec &MantidMatrixFunction::getMantidVec(int row) const {
-  return m_workspace->readX(row);
+const Mantid::HistogramData::HistogramX &
+MantidMatrixFunction::getHistogramX(int row) const {
+  return m_workspace->x(row);
 }
 
 size_t MantidMatrixFunction::indexX(size_t row, double s) const {
   size_t n = m_workspace->blocksize();
 
-  const Mantid::MantidVec &X = m_workspace->readX(row);
+  const auto &X = m_workspace->x(row);
   if (n == 0 || s < X[0] || s > X[n - 1])
     return std::numeric_limits<size_t>::max();
 
