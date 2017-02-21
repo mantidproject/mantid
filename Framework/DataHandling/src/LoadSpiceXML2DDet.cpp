@@ -670,16 +670,20 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
 
   // Add the property to output workspace
   // TODO:FIXME - need to find out how to add run_start!!!
-  for (std::map<std::string, std::string>::iterator miter = str_log_map.begin(); miter != str_log_map.end(); ++miter){
-    outws->mutableRun().addProperty(new PropertyWithValue<std::string>(miter->first, miter->second));
+  for (std::map<std::string, std::string>::iterator miter = str_log_map.begin();
+       miter != str_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<std::string>(miter->first, miter->second));
   }
-  for (std::map<std::string, int>::iterator miter = int_log_map.begin(); miter != int_log_map.end(); ++miter)
-  {
-    outws->mutableRun().addProperty(new PropertyWithValue<int>(miter->first, miter->second));
+  for (std::map<std::string, int>::iterator miter = int_log_map.begin();
+       miter != int_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<int>(miter->first, miter->second));
   }
-  for (std::map<std::string, double>::iterator miter = dbl_log_map.begin(); miter != dbl_log_map.end(); ++miter)
-  {
-    outws->mutableRun().addProperty(new PropertyWithValue<double>(miter->first, miter->second));
+  for (std::map<std::string, double>::iterator miter = dbl_log_map.begin();
+       miter != dbl_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<double>(miter->first, miter->second));
   }
 
   // Raise exception if no detector node is found
