@@ -35,6 +35,8 @@ class DataProcessorAppendGroupCommand : public DataProcessorCommandBase {
 public:
   DataProcessorAppendGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorAppendGroupCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorAppendGroupCommand(){};
 
   void execute() override {

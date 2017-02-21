@@ -35,6 +35,8 @@ class DataProcessorDeleteGroupCommand : public DataProcessorCommandBase {
 public:
   DataProcessorDeleteGroupCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorDeleteGroupCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorDeleteGroupCommand(){};
 
   void execute() override {

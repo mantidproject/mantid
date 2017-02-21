@@ -36,6 +36,8 @@ class DataProcessorExportTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorExportTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorExportTableCommand(){};
 
   void execute() override {

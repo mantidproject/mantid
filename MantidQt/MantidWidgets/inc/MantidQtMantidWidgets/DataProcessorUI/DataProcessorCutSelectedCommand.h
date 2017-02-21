@@ -34,6 +34,8 @@ class DataProcessorCutSelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorCutSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorCutSelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorCutSelectedCommand(){};
 
   void execute() override {

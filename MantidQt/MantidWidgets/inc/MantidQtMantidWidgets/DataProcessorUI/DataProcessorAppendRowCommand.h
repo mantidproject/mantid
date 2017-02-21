@@ -35,6 +35,8 @@ class DataProcessorAppendRowCommand : public DataProcessorCommandBase {
 public:
   DataProcessorAppendRowCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorAppendRowCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorAppendRowCommand(){};
 
   void execute() override {

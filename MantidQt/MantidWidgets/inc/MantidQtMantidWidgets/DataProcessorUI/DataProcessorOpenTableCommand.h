@@ -34,6 +34,8 @@ class DataProcessorOpenTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorOpenTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorOpenTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorOpenTableCommand(){};
 
   void execute() override{

@@ -34,6 +34,8 @@ class DataProcessorCopySelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorCopySelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorCopySelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorCopySelectedCommand(){};
 
   void execute() override {

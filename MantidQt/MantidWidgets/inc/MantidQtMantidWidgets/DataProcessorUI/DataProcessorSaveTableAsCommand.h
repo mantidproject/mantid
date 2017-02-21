@@ -34,6 +34,8 @@ class DataProcessorSaveTableAsCommand : public DataProcessorCommandBase {
 public:
   DataProcessorSaveTableAsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorSaveTableAsCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorSaveTableAsCommand(){};
 
   void execute() override {

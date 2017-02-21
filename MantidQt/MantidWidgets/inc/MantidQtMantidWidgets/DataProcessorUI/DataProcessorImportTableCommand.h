@@ -34,6 +34,8 @@ class DataProcessorImportTableCommand : public DataProcessorCommandBase {
 public:
   DataProcessorImportTableCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorImportTableCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorImportTableCommand(){};
 
   void execute() override {

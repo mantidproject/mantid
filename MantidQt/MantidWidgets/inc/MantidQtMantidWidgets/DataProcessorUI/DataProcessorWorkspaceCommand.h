@@ -35,6 +35,9 @@ public:
   DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
                                 const std::string &name)
       : DataProcessorCommandBase(tablePresenter), m_name(name){};
+  DataProcessorWorkspaceCommand(const QDataProcessorWidget &widget,
+                                const std::string &name)
+      : DataProcessorCommandBase(widget), m_name(name){};
   virtual ~DataProcessorWorkspaceCommand(){};
 
   void execute() override {

@@ -1581,6 +1581,406 @@ virtual std::string getTimeSlicingOptions() const;
 
 virtual void notifyADSChanged();
 };
+
+class DataProcessorAppendRowCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendRowCommand.h"
+%End
+public:
+DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorAppendRowCommand();
+DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::DataProcessorAppendRowCommand &);
+};
+
+class DataProcessorAppendGroupCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorAppendGroupCommand.h"
+%End
+public:
+DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorAppendGroupCommand();
+DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::DataProcessorAppendGroupCommand &);
+};
+
+class DataProcessorClearSelectedCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorClearSelectedCommand.h"
+%End
+public:
+DataProcessorClearSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorClearSelectedCommand();
+DataProcessorClearSelectedCommand(const MantidQt::MantidWidgets::DataProcessorClearSelectedCommand &);
+};
+
+class DataProcessorCopySelectedCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCopySelectedCommand.h"
+%End
+public:
+DataProcessorCopySelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorCopySelectedCommand();
+DataProcessorCopySelectedCommand(const MantidQt::MantidWidgets::DataProcessorCopySelectedCommand &);
+};
+
+class DataProcessorCutSelectedCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCutSelectedCommand.h"
+%End
+public:
+DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorCutSelectedCommand();
+DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::DataProcessorCutSelectedCommand &);
+};
+
+class DataProcessorDeleteGroupCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
+%End
+public:
+DataProcessorDeleteGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorDeleteGroupCommand();
+DataProcessorDeleteGroupCommand(const MantidQt::MantidWidgets::DataProcessorDeleteGroupCommand &);
+};
+
+class DataProcessorDeleteRowCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorDeleteRowCommand.h"
+%End
+public:
+DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorDeleteRowCommand();
+DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::DataProcessorDeleteRowCommand &);
+};
+
+class DataProcessorExpandCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExpandCommand.h"
+%End
+public:
+DataProcessorExpandCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorExpandCommand();
+DataProcessorExpandCommand(const MantidQt::MantidWidgets::DataProcessorExpandCommand &);
+};
+
+class DataProcessorExportTableCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorExportTableCommand.h"
+%End
+public:
+DataProcessorExportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorExportTableCommand();
+DataProcessorExportTableCommand(const MantidQt::MantidWidgets::DataProcessorExportTableCommand &);
+};
+
+class DataProcessorGroupRowsCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorGroupRowsCommand.h"
+%End
+public:
+DataProcessorGroupRowsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorGroupRowsCommand();
+DataProcessorGroupRowsCommand(const MantidQt::MantidWidgets::DataProcessorGroupRowsCommand &);
+};
+
+class DataProcessorImportTableCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorImportTableCommand.h"
+%End
+public:
+DataProcessorImportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorImportTableCommand();
+DataProcessorImportTableCommand(const MantidQt::MantidWidgets::DataProcessorImportTableCommand &);
+};
+
+class DataProcessorNewTableCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h"
+%End
+public:
+DataProcessorNewTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorNewTableCommand();
+DataProcessorNewTableCommand(const MantidQt::MantidWidgets::DataProcessorNewTableCommand &);
+};
+
+class DataProcessorOpenTableCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h"
+%End
+public:
+DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorOpenTableCommand();
+DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::DataProcessorOpenTableCommand &);
+};
+
+class DataProcessorOptionsCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h"
+%End
+public:
+DataProcessorOptionsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorOptionsCommand();
+DataProcessorOptionsCommand(const MantidQt::MantidWidgets::DataProcessorOptionsCommand &);
+};
+
+class DataProcessorPasteSelectedCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
+%End
+public:
+DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorPasteSelectedCommand();
+DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::DataProcessorPasteSelectedCommand &);
+};
+
+class DataProcessorPlotGroupCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h"
+%End
+public:
+DataProcessorPlotGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorPlotGroupCommand();
+DataProcessorPlotGroupCommand(const MantidQt::MantidWidgets::DataProcessorPlotGroupCommand &);
+};
+
+class DataProcessorPlotRowCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotRowCommand.h"
+%End
+public:
+DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorPlotRowCommand();
+DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::DataProcessorPlotRowCommand &);
+};
+
+class DataProcessorProcessCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessCommand.h"
+%End
+public:
+DataProcessorProcessCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorProcessCommand();
+DataProcessorProcessCommand(const MantidQt::MantidWidgets::DataProcessorProcessCommand &);
+};
+
+class DataProcessorSaveTableAsCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
+%End
+public:
+DataProcessorSaveTableAsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorSaveTableAsCommand();
+DataProcessorSaveTableAsCommand(const MantidQt::MantidWidgets::DataProcessorSaveTableAsCommand &);
+};
+
+class DataProcessorSeparatorCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSeparatorCommand.h"
+%End
+public:
+DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorSeparatorCommand();
+DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::DataProcessorSeparatorCommand &);
+};
+
+class DataProcessorWorkspaceCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+%End
+public:
+DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &, const std::string &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorWorkspaceCommand();
+DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::DataProcessorWorkspaceCommand &);
+};
+
 }; // end namespace MantidWidgets
 }; // end namespace MantidQt
 

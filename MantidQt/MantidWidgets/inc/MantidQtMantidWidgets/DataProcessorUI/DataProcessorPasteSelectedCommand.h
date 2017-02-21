@@ -34,6 +34,8 @@ class DataProcessorPasteSelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorPasteSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorPasteSelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorPasteSelectedCommand(){};
 
   void execute() override {

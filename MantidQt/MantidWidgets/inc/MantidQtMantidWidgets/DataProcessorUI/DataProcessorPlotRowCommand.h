@@ -34,6 +34,8 @@ class DataProcessorPlotRowCommand : public DataProcessorCommandBase {
 public:
   DataProcessorPlotRowCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorPlotRowCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorPlotRowCommand(){};
 
   void execute() override {

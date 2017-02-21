@@ -36,6 +36,8 @@ class DataProcessorSeparatorCommand : public DataProcessorCommandBase {
 public:
   DataProcessorSeparatorCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorSeparatorCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorSeparatorCommand(){};
 
   void execute() override{};

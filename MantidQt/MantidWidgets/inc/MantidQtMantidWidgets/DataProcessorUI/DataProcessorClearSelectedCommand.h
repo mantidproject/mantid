@@ -34,6 +34,8 @@ class DataProcessorClearSelectedCommand : public DataProcessorCommandBase {
 public:
   DataProcessorClearSelectedCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
+  DataProcessorClearSelectedCommand(const QDataProcessorWidget &widget)
+      : DataProcessorCommandBase(widget){};
   virtual ~DataProcessorClearSelectedCommand(){};
 
   void execute() override {
