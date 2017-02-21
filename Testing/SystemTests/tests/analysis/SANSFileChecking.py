@@ -1,9 +1,10 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 #pylint: disable=too-many-public-methods
 """
 Check that file manipulation works fine
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
@@ -40,7 +41,7 @@ class SANSFileCheckingTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             self.assertEqual(measurement_time, expected_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
 
     def test_that_sans2D_nexus_file_with_date_is_evaluated_correctly(self):
@@ -88,7 +89,7 @@ class SANSMatchIDFInReducerAndWorkspaceTest(unittest.TestCase):
             measurement_time = su.get_measurement_time_from_file(full_path)
             idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
         else:
-            print "Missing data files. Path to system test data needs to be set."
+            print("Missing data files. Path to system test data needs to be set.")
             self.assertTrue(False)
         return idf_path_workspace
 

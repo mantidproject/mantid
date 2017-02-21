@@ -138,7 +138,7 @@ public:
 public:
   void test_input_workspace_must_be_imdhisto() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 0);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 0, true);
     ConvertMDHistoToMatrixWorkspace alg;
     alg.setRethrows(true);
     alg.initialize();

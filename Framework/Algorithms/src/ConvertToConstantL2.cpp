@@ -1,19 +1,19 @@
 #include "MantidAlgorithms/ConvertToConstantL2.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
+#include <boost/format.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -74,8 +74,6 @@ void ConvertToConstantL2::exec() {
 
   initWorkspaces();
 
-  Geometry::ParameterMap &pmap = m_outputWS->instrumentParameters();
-
   // Calculate the number of spectra in this workspace
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
@@ -83,7 +81,8 @@ void ConvertToConstantL2::exec() {
   int64_t numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
-  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  const auto &inputSpecInfo = m_inputWS->spectrumInfo();
+  auto &outputDetInfo = m_outputWS->mutableDetectorInfo();
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
@@ -92,24 +91,33 @@ void ConvertToConstantL2::exec() {
     m_outputWS->setHistogram(i, m_inputWS->histogram(i));
 
     // Should not move the monitors
-    if (spectrumInfo.isMonitor(i)) {
+    if (inputSpecInfo.isMonitor(i))
       continue;
+
+    // Throw if detector doesn't exist or is a group
+    if (!inputSpecInfo.hasUniqueDetector(i)) {
+      const auto errorMsg =
+          boost::format("The detector for spectrum number %d was either not "
+                        "found, or is a group.") %
+          i;
+      throw std::runtime_error(errorMsg.str());
     }
 
     // subract the diference in l2
-    double thisDetL2 = spectrumInfo.l2(i);
+    double thisDetL2 = inputSpecInfo.l2(i);
     double deltaL2 = std::abs(thisDetL2 - m_l2);
     double deltaTOF = calculateTOF(deltaL2);
     deltaTOF *= 1e6; // micro sec
 
     // position - set all detector distance to constant l2
     double r, theta, phi;
-    V3D oldPos = spectrumInfo.position(i);
+    V3D oldPos = inputSpecInfo.position(i);
     oldPos.getSpherical(r, theta, phi);
     V3D newPos;
     newPos.spherical(m_l2, theta, phi);
-    ComponentHelper::moveComponent(spectrumInfo.detector(i), pmap, newPos,
-                                   ComponentHelper::Absolute);
+
+    const size_t detIndex = inputSpecInfo.spectrumDefinition(i)[0].first;
+    outputDetInfo.setPosition(detIndex, newPos);
 
     m_outputWS->mutableX(i) -= deltaTOF;
 

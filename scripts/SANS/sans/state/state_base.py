@@ -293,7 +293,7 @@ def rename_descriptor_names(cls):
     :param cls: The class with the TypedParameters
     :return: The class with the TypedParameters
     """
-    for attribute_name, attribute_value in cls.__dict__.items():
+    for attribute_name, attribute_value in list(cls.__dict__.items()):
         if isinstance(attribute_value, TypedParameter):
             attribute_value.name = '_{0}#{1}'.format(type(attribute_value).__name__, attribute_name)
     return cls
@@ -437,7 +437,7 @@ def convert_state_to_dict(instance):
     descriptor_values, descriptor_types = get_descriptor_values(instance)
     # Add the descriptors to a dict
     state_dict = dict()
-    for key, value in descriptor_values.items():
+    for key, value in list(descriptor_values.items()):
         # If the value is a SANSBaseState then create a dict from it
         # If the value is a dict, then we need to check what the sub types are
         # If the value is a ClassTypeParameter, then we need to encode it
@@ -448,7 +448,7 @@ def convert_state_to_dict(instance):
         elif isinstance(value, dict):
             # If we have a dict, then we need to watch out since a value in the dict might be a State
             sub_dictionary = {}
-            for key_sub, val_sub in value.items():
+            for key_sub, val_sub in list(value.items()):
                 if isinstance(val_sub, StateBase):
                     sub_dictionary_value = val_sub.property_manager
                 else:

@@ -1299,6 +1299,10 @@ QPixmap SliceViewer::getImage() {
   // Hide the line overlay handles
   this->m_lineOverlay->setShowHandles(false);
   this->m_colorBar->setRenderMode(true);
+  auto previousStyle = ui.frmPlot->styleSheet();
+  ui.frmPlot->setStyleSheet("background-color: white;");
+  this->m_colorBar->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_NONE);
 
   // Grab it
   QCoreApplication::processEvents();
@@ -1309,7 +1313,9 @@ QPixmap SliceViewer::getImage() {
   this->m_lineOverlay->setShowHandles(true);
   this->m_colorBar->setRenderMode(false);
   this->setFastRender(oldFast);
-
+  this->m_colorBar->setCheckBoxMode(
+      MantidWidgets::ColorBarWidget::ADD_AUTOSCALE_BOTH);
+  ui.frmPlot->setStyleSheet(previousStyle);
   return pix;
 }
 
@@ -2948,7 +2954,7 @@ void SliceViewer::switchAxis() {
   if (m_canSwitchScales) { // cannot be called when sliceviewer first
                            // initialised because axis is inaccurate
     auto isHKL = API::isHKLDimensions(m_ws, m_dimX, m_dimY);
-    if (isHKL) {
+    if (isHKL && ui.btnNonOrthogonalToggle->isChecked()) {
       applyNonOrthogonalAxisScaleDraw();
     } else {
       applyOrthogonalAxisScaleDraw();

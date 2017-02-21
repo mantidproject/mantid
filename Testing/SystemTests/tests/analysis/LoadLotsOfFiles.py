@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy
@@ -56,6 +56,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'PG3_9829_event.nxs',
                 'REF_M_9684_event.nxs',
                 'REF_M_9709_event.nxs',
+                'REF_M_24945_event.nxs',
+                'REF_M_24949_event.nxs',
                 'SANS2D_periodTests.csv',
                 'SANS2D_992_91A.csv',
                 'SANS2D_mask_batch.csv',
