@@ -13,9 +13,9 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QSpinBox>
 
 #include <boost/lexical_cast.hpp>
@@ -162,7 +162,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   double counts(0.0);
   for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < runWs->blocksize(); ++j) {
-      counts += runWs->dataY(i)[j];
+      counts += runWs->y(i)[j];
     }
   }
   // output this number to three decimal places
@@ -496,15 +496,15 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
   };
 
   // Comparison function for doubles
-  auto numericalCompare =
-      [](const std::string &first, const std::string &second) {
-        try {
-          return boost::lexical_cast<double>(first) <
-                 boost::lexical_cast<double>(second);
-        } catch (boost::bad_lexical_cast & /*e*/) {
-          return false;
-        }
-      };
+  auto numericalCompare = [](const std::string &first,
+                             const std::string &second) {
+    try {
+      return boost::lexical_cast<double>(first) <
+             boost::lexical_cast<double>(second);
+    } catch (boost::bad_lexical_cast & /*e*/) {
+      return false;
+    }
+  };
 
   // Range of log values
   auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);

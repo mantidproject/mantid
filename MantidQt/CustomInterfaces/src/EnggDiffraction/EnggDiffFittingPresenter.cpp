@@ -10,8 +10,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
-#include <fstream>
 #include <cctype>
+#include <fstream>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -1212,10 +1212,10 @@ std::string EnggDiffFittingPresenter::functionStrFactory(
       "name=LinearBackground,A0=" + boost::lexical_cast<std::string>(A0) +
       ",A1=" + boost::lexical_cast<std::string>(A1) +
       ";name=BackToBackExponential,I=" + boost::lexical_cast<std::string>(I) +
-      ",A=" + boost::lexical_cast<std::string>(A) + ",B=" +
-      boost::lexical_cast<std::string>(B) + ",X0=" +
-      boost::lexical_cast<std::string>(X0) + ",S=" +
-      boost::lexical_cast<std::string>(S);
+      ",A=" + boost::lexical_cast<std::string>(A) +
+      ",B=" + boost::lexical_cast<std::string>(B) +
+      ",X0=" + boost::lexical_cast<std::string>(X0) +
+      ",S=" + boost::lexical_cast<std::string>(S);
 
   return functionStr;
 }
@@ -1354,7 +1354,8 @@ void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1371,7 +1372,8 @@ void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1388,7 +1390,8 @@ void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1405,7 +1408,8 @@ void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1448,8 +1452,8 @@ void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
     g_log.warning()
         << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
         << wks->getName() << ". Using default, which is not adjusted for this "
-                             "workspace/run: DIFA: " << difa
-        << ", DIFC: " << difc << ", TZERO: " << tzero
+                             "workspace/run: DIFA: "
+        << difa << ", DIFC: " << difc << ", TZERO: " << tzero
         << ". Error details: " << rexc.what() << '\n';
   }
 }
@@ -1494,8 +1498,8 @@ void EnggDiffFittingPresenter::runAlignDetectorsAlg(std::string workspaceName) {
     row << detID << difc << difa << tzero;
   } catch (std::runtime_error &rexc) {
     g_log.error() << "Failed to prepare calibration table input to convert "
-                     "units with the algorithm " << algName
-                  << ". Error details: " << rexc.what() << '\n';
+                     "units with the algorithm "
+                  << algName << ". Error details: " << rexc.what() << '\n';
     return;
   }
 
@@ -1544,9 +1548,11 @@ void EnggDiffFittingPresenter::runConvertUnitsAlg(std::string workspaceName) {
     ConvertUnits->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits to convert "
-                     "workspace to " << targetUnit
+                     "workspace to "
+                  << targetUnit
                   << ", Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1564,7 +1570,8 @@ void EnggDiffFittingPresenter::runCloneWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1573,8 +1580,8 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
-  currentClonedWS->dataY(0) = currentPeakWS->readY(0);
-  currentClonedWS->dataE(0) = currentPeakWS->readE(0);
+  currentClonedWS->mutableY(0) = currentPeakWS->y(0);
+  currentClonedWS->mutableE(0) = currentPeakWS->e(0);
 }
 
 void EnggDiffFittingPresenter::setBankItems(

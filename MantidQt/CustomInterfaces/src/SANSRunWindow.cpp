@@ -1,26 +1,26 @@
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/V3D.h"
 
-#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
@@ -31,11 +31,11 @@
 #include <QTextStream>
 #include <QUrl>
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
+#include <Poco/StringTokenizer.h>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
@@ -848,7 +848,8 @@ bool SANSRunWindow::loadUserFile() {
   QString errors =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton()))").trimmed();
+                              "ReductionSingleton()))")
+          .trimmed();
   // create a string list with a string for each line
   const QStringList allOutput = errors.split("\n");
   errors.clear();
@@ -874,8 +875,9 @@ bool SANSRunWindow::loadUserFile() {
       runReduceScriptFunction("print(i.ReductionSingleton().mask.min_radius)")
           .toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param * unit_conv));
-  dbl_param = runReduceScriptFunction(
-                  "print(i.ReductionSingleton().mask.max_radius)").toDouble();
+  dbl_param =
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.max_radius)")
+          .toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param * unit_conv));
   // EventsTime
   m_uiForm.l_events_binning->setText(
@@ -885,10 +887,12 @@ bool SANSRunWindow::loadUserFile() {
       "print(i.ReductionSingleton().to_wavelen.wav_low)"));
   m_uiForm.wav_max->setText(
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_wavelen.wav_high)").trimmed());
+          "print(i.ReductionSingleton().to_wavelen.wav_high)")
+          .trimmed());
   const QString wav_step =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
+          "print(i.ReductionSingleton().to_wavelen.wav_step)")
+          .trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
   // Q
@@ -920,20 +924,24 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.frontDetRescale->setText(
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.scale)").trimmed());
+                              "FRONT').rescaleAndShift.scale)")
+          .trimmed());
   m_uiForm.frontDetShift->setText(
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.shift)").trimmed());
+                              "FRONT').rescaleAndShift.shift)")
+          .trimmed());
 
   QString fitScale =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitScale)").trimmed();
+                              "FRONT').rescaleAndShift.fitScale)")
+          .trimmed();
   QString fitShift =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitShift)").trimmed();
+                              "FRONT').rescaleAndShift.fitShift)")
+          .trimmed();
 
   if (fitScale == "True")
     m_uiForm.frontDetRescaleCB->setChecked(true);
@@ -955,11 +963,13 @@ bool SANSRunWindow::loadUserFile() {
     m_uiForm.frontDetQmin->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMin)").trimmed());
+                                "'FRONT').rescaleAndShift.qMin)")
+            .trimmed());
     m_uiForm.frontDetQmax->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMax)").trimmed());
+                                "'FRONT').rescaleAndShift.qMax)")
+            .trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
 
@@ -1009,15 +1019,15 @@ bool SANSRunWindow::loadUserFile() {
       m_uiForm.enableFrontFlood_ck->checkState() == Qt::Checked);
 
   // Scale factor
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton()._corr_and_scale.rescale)").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton()._corr_and_scale.rescale)")
+                  .toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param / 100.));
 
   // Sample offset if one has been specified
-  dbl_param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.SAMPLE_Z_CORR)").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().instrument.SAMPLE_Z_CORR)")
+                  .toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param * unit_conv));
 
   // Centre coordinates
@@ -1053,9 +1063,9 @@ bool SANSRunWindow::loadUserFile() {
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
   // Gravity switch
-  QString param =
-      runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_Q.get_gravity())").trimmed();
+  QString param = runReduceScriptFunction(
+                      "print(i.ReductionSingleton().to_Q.get_gravity())")
+                      .trimmed();
   if (param == "True") {
     m_uiForm.gravity_check->setChecked(true);
   } else {
@@ -1065,14 +1075,16 @@ bool SANSRunWindow::loadUserFile() {
   // Read the extra length for the gravity correction
   const double extraLengthParam =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().to_Q.get_extra_length())").toDouble();
+          "print(i.ReductionSingleton().to_Q.get_extra_length())")
+          .toDouble();
   m_uiForm.gravity_extra_length_line_edit->setText(
       QString::number(extraLengthParam));
 
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)")
+          .trimmed();
 
   if (detName == "REAR" || detName == "MAIN") {
     m_uiForm.detbank_sel->setCurrentIndex(0);
@@ -1966,9 +1978,11 @@ void SANSRunWindow::saveFileBrowse() {
   prevValues.beginGroup("CustomInterfaces/SANSRunWindow/SaveOutput");
   // use their previous directory first and go to their default if that fails
   QString prevPath =
-      prevValues.value("dir", QString::fromStdString(
-                                  ConfigService::Instance().getString(
-                                      "defaultsave.directory"))).toString();
+      prevValues
+          .value("dir",
+                 QString::fromStdString(ConfigService::Instance().getString(
+                     "defaultsave.directory")))
+          .toString();
 
   const QString filter = ";;AllFiles (*)";
 
@@ -2093,11 +2107,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
 
-  if (sample_workspace && (!sample_workspace->readX(0).empty())) {
-    m_uiForm.tof_min->setText(
-        QString::number(sample_workspace->readX(0).front()));
-    m_uiForm.tof_max->setText(
-        QString::number(sample_workspace->readX(0).back()));
+  if (sample_workspace && (!sample_workspace->x(0).empty())) {
+    m_uiForm.tof_min->setText(QString::number(sample_workspace->x(0).front()));
+    m_uiForm.tof_max->setText(QString::number(sample_workspace->x(0).back()));
   }
 
   // Set the geometry if the sample has been changed
@@ -2317,8 +2329,8 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type) {
   }
   // Set the Front detector Rescale and Shift
   QString fdArguments = "scale=" + m_uiForm.frontDetRescale->text().trimmed() +
-                        "," + "shift=" +
-                        m_uiForm.frontDetShift->text().trimmed();
+                        "," +
+                        "shift=" + m_uiForm.frontDetShift->text().trimmed();
   if (m_uiForm.frontDetRescaleCB->isChecked())
     fdArguments += ", fitScale=True";
   if (m_uiForm.frontDetShiftCB->isChecked())
@@ -2813,9 +2825,9 @@ void SANSRunWindow::handleRunFindCentre() {
   py_code +=
       "from centre_finder import FindDirectionEnum as FindDirectionEnum \n";
   // Find centre function
-  py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" +
-             m_uiForm.beam_rmax->text() + ",MaxIter=" +
-             m_uiForm.beam_iter->text() + ",";
+  py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() +
+             ",rupp=" + m_uiForm.beam_rmax->text() +
+             ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
 
   if (m_uiForm.beamstart_box->currentIndex() == 0) {
     py_code += "xstart = None, ystart = None";
@@ -2890,7 +2902,8 @@ void SANSRunWindow::handleRunFindCentre() {
   QString errors =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton()))").trimmed();
+                              "ReductionSingleton()))")
+          .trimmed();
 
   g_centreFinderLog.notice() << result.toStdString() << "\n";
 
@@ -2953,8 +2966,9 @@ void SANSRunWindow::handleDefSaveClick() {
       auto geometryID = m_uiForm.sample_geomid->currentText();
       // Remove the first three characters, since they are unwanted
       auto geometryName = geometryID.mid(3);
-      saveCommand += ", Geometry='" + geometryName + "', SampleHeight=" +
-                     sampleHeight + ", SampleWidth=" + sampleWidth +
+      saveCommand += ", Geometry='" + geometryName +
+                     "', SampleHeight=" + sampleHeight +
+                     ", SampleWidth=" + sampleWidth +
                      ", SampleThickness=" + sampleThickness;
       saveCommand += ")\n";
     } else if ((*alg) == "SaveNXcanSAS") {
@@ -3111,7 +3125,8 @@ void SANSRunWindow::handleInstrumentChange() {
       "print(i.ReductionSingleton().instrument.cur_detector().name())");
   QString detectorSelection =
       runReduceScriptFunction(
-          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)")
+          .trimmed();
   int ind = m_uiForm.detbank_sel->findText(detect);
   // We set the detector selection only if nothing is set yet.
   // Previously, we didn't handle merged and both at this point
@@ -3819,7 +3834,8 @@ void SANSRunWindow::loadTransmissionSettings() {
   QString transMin =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "lambdaMin('SAMPLE'))").trimmed();
+                              "lambdaMin('SAMPLE'))")
+          .trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck->setChecked(false);
   } else {
@@ -3828,13 +3844,15 @@ void SANSRunWindow::loadTransmissionSettings() {
     m_uiForm.trans_max->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('SAMPLE'))").trimmed());
+                                "calculator.lambdaMax('SAMPLE'))")
+            .trimmed());
   }
 
   QString text =
       runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "fitMethod('SAMPLE'))").trimmed();
+                              "fitMethod('SAMPLE'))")
+          .trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt->setCurrentIndex(index);
@@ -3846,7 +3864,8 @@ void SANSRunWindow::loadTransmissionSettings() {
 
   transMin = runReduceScriptFunction("print("
                                      "i.ReductionSingleton().transmission_"
-                                     "calculator.lambdaMin('CAN'))").trimmed();
+                                     "calculator.lambdaMin('CAN'))")
+                 .trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck_can->setChecked(false);
   } else {
@@ -3855,11 +3874,13 @@ void SANSRunWindow::loadTransmissionSettings() {
     m_uiForm.trans_max_can->setText(
         runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('CAN'))").trimmed());
+                                "calculator.lambdaMax('CAN'))")
+            .trimmed());
   }
   text = runReduceScriptFunction("print("
                                  "i.ReductionSingleton().transmission_"
-                                 "calculator.fitMethod('CAN'))").trimmed();
+                                 "calculator.fitMethod('CAN'))")
+             .trimmed();
   index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
@@ -4364,18 +4385,18 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
     auto roi = m_uiForm.trans_roi_files_line_edit->text();
     if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
       roi = "'" + roi.simplified() + "'";
-      roi = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
-                              roi + "))",
-                          false);
+      roi = runPythonCode(
+          "\nprint(i.ConvertToPythonStringList(to_convert=" + roi + "))",
+          false);
       pythonCode += "i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
     }
     // Handle Mask
     auto mask = m_uiForm.trans_masking_line_edit->text();
     if (!mask.isEmpty()) {
       mask = "'" + mask.simplified() + "'";
-      mask = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
-                               mask + "))",
-                           false);
+      mask = runPythonCode(
+          "\nprint(i.ConvertToPythonStringList(to_convert=" + mask + "))",
+          false);
       pythonCode += "i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
     }
 
@@ -4576,9 +4597,9 @@ void SANSRunWindow::setBeamFinderDetails() {
   auto instrumentName = m_uiForm.inst_opt->currentText();
 
   // Set the labels according to the instrument
-  auto requiresAngle =
-      runReduceScriptFunction(
-          "print(i.is_current_workspace_an_angle_workspace())").simplified();
+  auto requiresAngle = runReduceScriptFunction(
+                           "print(i.is_current_workspace_an_angle_workspace())")
+                           .simplified();
   QString labelPosition;
   if (requiresAngle == m_constants.getPythonTrueKeyword()) {
     labelPosition = "Current ( " + QString(QChar(0x03B2)) + " , y ) [";
@@ -4953,9 +4974,9 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
 
   auto createPythonScript = [](bool isTime, bool isMon, QString component) {
     return "i.get_background_correction(is_time = " +
-           convertBoolToPythonBoolString(isTime) + ", is_mon=" +
-           convertBoolToPythonBoolString(isMon) + ", component='" + component +
-           "')";
+           convertBoolToPythonBoolString(isTime) +
+           ", is_mon=" + convertBoolToPythonBoolString(isMon) +
+           ", component='" + component + "')";
   };
 
   for (auto &command : commandMap) {
