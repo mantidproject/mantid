@@ -27,10 +27,10 @@ ComplexType conjg(const ComplexMatrixValueConverter &conv) {
   return std::conj(static_cast<ComplexType>(conv));
 }
 
-// number of rare earth ions (?)
+// number of rare earth ions (trivalent rare earths with unfilled f-shell)
 const int maxNre = 13;
 
-// define some rare earth constants (?)
+// define some rare earth constants (ggj is the Lande g-factor, ddimj=2J+1)
 const std::array<double, maxNre> ggj = {
     6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0,     2.0,
     3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.};
@@ -578,10 +578,11 @@ void zeeman(ComplexFortranMatrix &hamiltonian, const int nre,
   auto bextp = bext(1) + i * bext(2);
   auto bextm = bext(1) - i * bext(2);
   ComplexType bextz = bext(3);
-  auto gj = ggj[nre - 1];
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   auto facmol = 2 * (gj - 1) * c_myb;
   auto facext = gj * c_myb;
-  auto dimj = ddimj[nre - 1];
+  // Negative nre means arbitrary J, with abs(nre) = 2J. dimj=2J+1
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   auto j = 0.5 * (dimj - 1.0);
   int dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);
@@ -693,12 +694,12 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
                           const DoubleFortranVector &bext,
                           const ComplexFortranMatrix &bkq, double alpha_euler,
                           double beta_euler, double gamma_euler) {
-  if (nre <= 0 || nre > maxNre) {
+  if (nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }
 
   // initialize some rare earth constants
-  auto dimj = ddimj[nre - 1];
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
 
   //------------------------------------------------------------
   //       transform the Bkq with
@@ -928,7 +929,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
                           DoubleFortranVector &e_energies,
                           DoubleFortranMatrix &i_energies) {
   int dim = static_cast<int>(energies.size());
-  auto dimj = ddimj[nre - 1];
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   if (static_cast<double>(dim) != dimj) {
     throw std::runtime_error("calculateIntensities was called for a wrong ion");
   }
@@ -946,7 +947,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
 
   // calculates the transition intensities for a powdered sample
   auto r0 = c_r0();
-  auto gj = ggj[nre - 1];
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   DoubleFortranMatrix mat(1, dim, 1, dim);
   intcalc(r0, gj, occupation_factor, jt2mat, energies, mat, dim, temperature);
 
@@ -1050,8 +1051,8 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
 void calculateMagneticMoment(const ComplexFortranMatrix &ev,
                              const DoubleFortranVector &Hdir, const int nre,
                              DoubleFortranVector &moment) {
-  int dim = (int)ddimj[nre - 1];
-  auto gj = ggj[nre - 1];
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   moment.allocate(dim);
   for (auto i = 1; i <= dim; ++i) {
     moment(i) = real(matjx(ev, i, i, dim)) * Hdir(1) + // <ev|jx|ev>
@@ -1069,8 +1070,8 @@ void calculateMagneticMoment(const ComplexFortranMatrix &ev,
 void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
                                    const std::vector<double> &Hdir,
                                    const int nre, ComplexFortranMatrix &mumat) {
-  int dim = (int)ddimj[nre - 1];
-  auto gj = ggj[nre - 1];
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   mumat.allocate(1, dim, 1, dim);
   for (auto i = 1; i <= dim; ++i) {
     for (auto j = 1; j <= dim; ++j) {
