@@ -37,7 +37,9 @@ Changes in this version
 * `18915 <https://www.github.com/mantidproject/mantid/pull/18915>`_ Add missing parameter in function call in performance test
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
 * `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
+* `18955 <https://www.github.com/mantidproject/mantid/pull/18955>`_ Fix crash in MonitorDlg
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
+* `18972 <https://www.github.com/mantidproject/mantid/pull/18972>`_ Fix reading dead time data in Muon interface
 
 Summary of impact
 -----------------
@@ -72,9 +74,12 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18927 | Allow Vesuvio to sum runs in diffraction reduction                                | Fix incorrect assignment in loop            | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18955 | Avoid possible crash in algorithm monitor dialog                                  | Check for null pointer                      | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-
+| 18972 | Loads data with/without dead-time correction as per user request                  | Clear data cache after option is updated    | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
