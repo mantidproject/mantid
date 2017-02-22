@@ -88,7 +88,6 @@ void ScriptFileInterpreter::spacesToTabs() {
     m_editor->selectAll();
 
   QString text = m_editor->selectedText();
-  std::string test = text.toStdString();
 
   // Use the tab space count for each converted characters
   QString spaces = "";
@@ -96,9 +95,7 @@ void ScriptFileInterpreter::spacesToTabs() {
   for (int i = 0; i < m_editor->tabWidth(); ++i)
     spaces = spaces + " ";
 
-  std::string testSpaces = spaces.toStdString();
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
-  std::string testReplaced = text.toStdString();
   replaceSelectedText(m_editor, text);
 }
 
