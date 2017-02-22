@@ -93,18 +93,32 @@ std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
   return m_eventPresenter->getTimeSlicingOptions(group);
 }
 
-/** Returns global time-slicing values
+/** Returns time-slicing values
 *
 * @param group :: Index of the group in 'Event Handling' tab from which to get
 *the values
-* @return :: Global time-slicing values
+* @return :: Time-slicing values
 */
 std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
 
   checkEventPtrValid(m_eventPresenter);
 
-  // Request global time-slicing options to 'Event Handling' presenter
+  // Request global time-slicing values to 'Event Handling' presenter
   return m_eventPresenter->getTimeSlicingValues(group);
+}
+
+/** Returns time-slicing type
+*
+* @param group :: Index of the group in 'Event Handling' tab from which to get
+*the type
+* @return :: Time-slicing type
+*/
+std::string ReflMainWindowPresenter::getTimeSlicingType(int group) const {
+
+  checkEventPtrValid(m_eventPresenter);
+
+  // Request time-slicing type to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingType(group);
 }
 
 /**

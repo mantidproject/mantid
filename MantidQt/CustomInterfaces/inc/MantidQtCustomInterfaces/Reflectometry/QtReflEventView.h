@@ -47,8 +47,10 @@ public:
 
   /// Returns the number of time slices
   std::string getTimeSlices() const override;
-  /// Returns time slicing values
+  /// Returns time-slicing values
   std::string getTimeSlicingValues() const override;
+  /// Returns time-slicing type
+  std::string getTimeSlicingType() const override;
 
 public slots:
   /// Enable / disable slicing option entry fields

@@ -77,6 +77,27 @@ std::string QtReflEventView::getTimeSlicingValues() const {
   return values;
 }
 
+/** Returns the type of time slicing that was selected 
+* @return :: Time slicing type
+*/
+std::string QtReflEventView::getTimeSlicingType() const {
+
+  std::string type;
+  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
+
+  if (checkedButton == m_buttonList[0]) {
+    type = "UniformEven";
+  } else if (checkedButton == m_buttonList[1]) {
+    type = "Uniform";
+  } else if (checkedButton == m_buttonList[2]) {
+    type = "Custom";
+  } else if (checkedButton == m_buttonList[3]) {
+    type = "LogValue";
+  }
+
+  return type;
+}
+
 /** Enable slicing option entries for checked button and disable all others.
 */
 void QtReflEventView::toggleSlicingOptions() const {

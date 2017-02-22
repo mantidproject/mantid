@@ -41,6 +41,8 @@ public:
   virtual std::string getTimeSlicingOptions() const = 0;
   /// Time-slicing values
   virtual std::string getTimeSlicingValues() const = 0;
+  /// Time-slicing type
+  virtual std::string getTimeSlicingType() const = 0;
 };
 }
 }

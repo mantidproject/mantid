@@ -48,8 +48,10 @@ public:
 
   /// Returns global options for time-slicing
   std::string getTimeSlicingOptions(int group) const override;
-  /// Returns global options for time-slicing values
+  /// Returns time-slicing values
   std::string getTimeSlicingValues(int group) const override;
+  /// Return time-slicing type
+  std::string getTimeSlicingType(int group) const override;
 
 private:
   /// The presenters for each group as a vector
