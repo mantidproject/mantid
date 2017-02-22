@@ -24,7 +24,16 @@ bool areIteratorsEqual(iter1 firstIter1, iter1 lastIter1, iter2 firstIter2,
   while (firstIter1 != lastIter1 && firstIter2 != lastIter2) {
     // Check individual values of iterators
     if (*firstIter1 != *firstIter2) {
-      return false;
+      // Check if we need to account for EOL differences
+      if (*firstIter1 == '\r') {
+        std::advance(firstIter1, 2); // Consume CRLF
+        firstIter2++;
+      } else if (*firstIter2 == '\r') {
+        std::advance(firstIter2, 2); // Consume CRLF
+        firstIter1++;
+      } else {
+        return false;
+      }
     }
 
     firstIter1++;
@@ -37,8 +46,8 @@ bool areIteratorsEqual(iter1 firstIter1, iter1 lastIter1, iter2 firstIter2,
 /**
   * Compares two file streams for equality and returns
   * true if these are equal, false if they differ in any way.
-  * This does not account for line endings i.e. CRLF and LF
-  * on Windows and Unix files would return false
+  * This does account for line endings i.e. CRLF and LF
+  * will not be counted as a mismatch
   *
   * @param referenceFileStream :: The ifstream to the reference file
   * @param fileToCheck :: The ifstream to the file to check
@@ -58,9 +67,9 @@ bool compareFileStreams(std::ifstream &referenceFileStream,
 
 /**
   * Checks the two files at the specified paths are equal in both
-  * length and content. This does not take into account line endings
-  * i.e. CRLF and LF between Windows and Unix. If the files cannot
-  * be opened it will throw. a runtime error.
+  * length and content. This does take into account line endings
+  * i.e. CRLF and LF between Windows and Unix is OK.
+  * If the files cannot be opened it will throw. a runtime error.
   *
   * @param referenceFileFullPath:: The full path to the reference file
   * @param outFileFullPath:: The full path to the output file to check
