@@ -93,6 +93,20 @@ std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
   return m_eventPresenter->getTimeSlicingOptions(group);
 }
 
+/** Returns global time-slicing values
+*
+* @param group :: Index of the group in 'Event Handling' tab from which to get
+*the values
+* @return :: Global time-slicing values
+*/
+std::string ReflMainWindowPresenter::getTimeSlicingValues(int group) const {
+
+  checkEventPtrValid(m_eventPresenter);
+
+  // Request global time-slicing options to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingValues(group);
+}
+
 /**
 Tells the view to show an critical error dialog
 @param prompt : The prompt to appear on the dialog

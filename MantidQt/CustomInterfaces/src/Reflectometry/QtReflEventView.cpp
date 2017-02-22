@@ -19,7 +19,7 @@ QtReflEventView::QtReflEventView(QWidget *parent) {
   m_buttonList.push_back(m_ui.customTimeSlicesRadioButton);
   m_buttonList.push_back(m_ui.logValueSlicesRadioButton);
 
-  // Whenever one of the slicing option button is selected, their corresponding
+  // Whenever one of the slicing option buttons is selected, their corresponding
   // entry is enabled, otherwise they remain disabled.
   for (auto &button : m_buttonList) {
     connect(button, SIGNAL(toggled(bool)), this, SLOT(toggleSlicingOptions()));
@@ -61,18 +61,31 @@ std::string QtReflEventView::getTimeSlices() const {
 */
 std::string QtReflEventView::getTimeSlicingValues() const {
 
-  return "";
+  std::string values;
+  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
+
+  if (checkedButton == m_buttonList[0]) {
+    values = m_ui.uniformEvenTimeSlicesEdit->text().toStdString();
+  } else if (checkedButton == m_buttonList[1]) {
+    values = m_ui.uniformTimeSlicesEdit->text().toStdString();
+  } else if (checkedButton == m_buttonList[2]) {
+    values = m_ui.customTimeSlicesEdit->text().toStdString();
+  } else if (checkedButton == m_buttonList[3]) {
+    values = m_ui.logValueComboBox->currentText().toStdString();
+  }
+
+  return values;
 }
 
 /** Enable slicing option entries for checked button and disable all others.
 */
 void QtReflEventView::toggleSlicingOptions() const {
 
-  const auto checked = m_ui.slicingOptionsButtonGroup->checkedButton();
+  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
 
   std::vector<bool> entriesEnabled(m_buttonList.size(), false);
   for (size_t i = 0; i < m_buttonList.size(); i++) {
-    if (m_buttonList[i] == checked)
+    if (m_buttonList[i] == checkedButton)
       entriesEnabled[i] = true;
   }
 

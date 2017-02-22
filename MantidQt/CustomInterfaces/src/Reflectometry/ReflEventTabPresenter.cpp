@@ -27,5 +27,15 @@ std::string ReflEventTabPresenter::getTimeSlicingOptions(int group) const {
 
   return m_eventPresenters.at(group)->getTimeSlicingOptions();
 }
+
+/** Returns global time-slicing values for 'ReflectometryReductionOneAuto'
+*
+* @param group :: The group from which to get the values
+* @return :: Global time-slicing values for 'ReflectometryReductionOneAuto'
+*/
+std::string ReflEventTabPresenter::getTimeSlicingValues(int group) const {
+
+  return m_eventPresenters.at(group)->getTimeSlicingValues();
+}
 }
 }

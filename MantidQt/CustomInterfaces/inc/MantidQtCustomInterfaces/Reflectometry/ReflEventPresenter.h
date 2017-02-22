@@ -46,6 +46,8 @@ public:
 
   /// Returns global options for time slicing
   std::string getTimeSlicingOptions() const override;
+  /// Returns global time-slicing values
+  std::string getTimeSlicingValues() const override;
 
 private:
   /// The view we are managing

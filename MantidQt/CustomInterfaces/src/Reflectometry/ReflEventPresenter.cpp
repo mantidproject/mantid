@@ -23,5 +23,13 @@ std::string ReflEventPresenter::getTimeSlicingOptions() const {
 
   return m_view->getTimeSlices();
 }
+
+/** Returns the time-slicing values
+* @return :: The time-slicing values
+*/
+std::string ReflEventPresenter::getTimeSlicingValues() const {
+
+  return m_view->getTimeSlicingValues();
+}
 }
 }

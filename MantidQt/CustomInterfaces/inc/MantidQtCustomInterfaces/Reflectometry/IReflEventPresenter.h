@@ -39,6 +39,8 @@ public:
   virtual ~IReflEventPresenter(){};
   /// Time-slicing options
   virtual std::string getTimeSlicingOptions() const = 0;
+  /// Time-slicing values
+  virtual std::string getTimeSlicingValues() const = 0;
 };
 }
 }
