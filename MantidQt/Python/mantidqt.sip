@@ -1924,6 +1924,25 @@ DataProcessorProcessCommand();
 DataProcessorProcessCommand(const MantidQt::MantidWidgets::DataProcessorProcessCommand &);
 };
 
+class DataProcessorSaveTableCommand
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorSaveTableCommand.h"
+%End
+public:
+DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
+void execute();
+std::string name();
+std::string icon();
+std::string tooltip();
+std::string whatsthis();
+std::string shortcut();
+
+private:
+DataProcessorSaveTableCommand();
+DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::DataProcessorSaveTableCommand &);
+};
+
 class DataProcessorSaveTableAsCommand
 {
 %TypeHeaderCode
