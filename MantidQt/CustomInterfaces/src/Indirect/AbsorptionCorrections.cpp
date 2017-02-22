@@ -6,8 +6,6 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 
-#include <iostream>
-
 #include <QRegExpValidator>
 
 using namespace Mantid::API;
