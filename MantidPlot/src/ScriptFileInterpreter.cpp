@@ -226,12 +226,12 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
 inline void
 ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
                                            const QString &text) {
-  const int UTF8_CodePage = 65001;
+  const unsigned int UTF8_CodePage = 65001;
   QByteArray convertedText;
-  if (editor->SCI_GETCODEPAGE == UTF8_CodePage) {
+  if (static_cast<unsigned int>(editor->SCI_GETCODEPAGE) == UTF8_CodePage) {
     convertedText = text.toUtf8();
   } else {
-    convertedText = text.toUtf8();
+    convertedText = text.toLatin1();
   }
   editor->SendScintilla(editor->SCI_REPLACESEL, convertedText.constData());
 }
