@@ -15,6 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -217,6 +218,38 @@ public:
     TS_ASSERT_EQUALS(outputWS->x(0).size(), 1994);
   }
 
+  /* currently disabled, alg does not support point data yet*/
+  void xtestExecPointData() {
+    MatrixWorkspace_sptr outputWS = WorkspaceCreationHelper::create1DWorkspaceFib(10,false);
+    std::string wsName = "RemoveBins_PointData";
+    std::string wsNameOutput = wsName + "_Output";
+    AnalysisDataService::Instance().addOrReplace(wsName, outputWS);
+    
+    RemoveBins algPD;
+
+    algPD.initialize();
+    TS_ASSERT_THROWS_NOTHING(algPD.setPropertyValue("InputWorkspace", wsName);)
+    algPD.setPropertyValue("OutputWorkspace", wsNameOutput);
+    algPD.setPropertyValue("XMin", "5");
+    algPD.setPropertyValue("XMax", "6");
+    algPD.setPropertyValue("Interpolation", "Linear");
+    try {
+      TS_ASSERT_EQUALS(algPD.execute(), true);
+    } catch (std::runtime_error &e) {
+      TS_FAIL(e.what());
+    }
+    
+    TS_ASSERT_EQUALS(outputWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(outputWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(outputWS->x(0)[0], 10);
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2);
+
+    //cleanup
+    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().remove(wsNameOutput);
+  }
+
+
   Workspace2D_sptr makeDummyWorkspace2D() {
     Workspace2D_sptr testWorkspace(new Workspace2D);
 
@@ -233,9 +266,6 @@ public:
     testWorkspace->mutableE(0) = E;
     testWorkspace->mutableY(1) = std::move(Y);
     testWorkspace->mutableE(1) = std::move(E);
-
-    testWorkspace->getAxis(0)->unit() =
-        Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     AnalysisDataService::Instance().addOrReplace("input2D", testWorkspace);
 

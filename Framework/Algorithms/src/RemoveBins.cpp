@@ -36,9 +36,7 @@ RemoveBins::RemoveBins()
  *
  */
 void RemoveBins::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>();
-  wsValidator->add<HistogramValidator>();
+  auto wsValidator = boost::make_shared<HistogramValidator>();
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
@@ -73,6 +71,26 @@ void RemoveBins::init() {
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, will remove data only in the given spectrum of the "
                   "workspace. Otherwise, all spectra will be acted upon.");
+}
+
+/** Checks that the workspace has units if the RangeUnit is not AsInput
+*
+*/
+std::map<std::string, std::string> RemoveBins::validateInputs() {
+  std::map<std::string, std::string> result;
+  const std::string rangeUnit = getProperty("RangeUnit");
+  const bool unitChange = (rangeUnit != "AsInput");
+  if (unitChange) {  
+    // Get input workspace
+    MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+    WorkspaceUnitValidator unitValidator;
+    std::string errorString = unitValidator.isValid(inputWorkspace);
+    if (!errorString.empty()) {
+      result["InputWorkspace"] =
+        "The workspace must have units if the RangeUnit is not \"AsInput\"";
+    }
+  }
+  return result;
 }
 
 /** Executes the algorithm
