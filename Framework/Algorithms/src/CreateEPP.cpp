@@ -17,12 +17,16 @@ using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
 namespace {
+/** A private namespace holding the property names.
+ */
 namespace PropertyNames {
 const static std::string INPUT_WORKSPACE("InputWorkspace");
 const static std::string OUTPUT_WORKSPACE("OutputWorkspace");
 const static std::string SIGMA("Sigma");
 } // namespace PropertyNames
 
+/** A private namespace holding the column names of the EPP table.
+ */
 namespace ColumnNames {
 const static std::string WS_INDEX("WorkspaceIndex");
 const static std::string PEAK_CENTRE("PeakCentre");
@@ -35,6 +39,10 @@ const static std::string CHI_SQUARED("chiSq");
 const static std::string STATUS("FitStatus");
 }
 
+/** Add standard EPP table columns to the input workspace.
+ *
+ * @param ws The TableWorkspace to add the columns to.
+ */
 void addEPPColumns(API::ITableWorkspace_sptr ws) {
   ws->addColumn("int", ColumnNames::WS_INDEX);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE);
@@ -129,6 +137,11 @@ void CreateEPP::exec() {
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outputWS);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Validate the algorithm's properties.
+ *
+ * @return A map of porperty names and their issues.
+ */
 std::map<std::string, std::string> CreateEPP::validateInputs(void) {
   std::map<std::string, std::string> issues;
   API::MatrixWorkspace_sptr inputWS =
