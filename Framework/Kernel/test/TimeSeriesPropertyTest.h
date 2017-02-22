@@ -296,7 +296,7 @@ public:
     filter2->addValue("2016-Mar-17T05:00:00", 0);
     log2->filterWith(filter2);
 
-    TS_ASSERT_THROWS_NOTHING(*log1 == *log2);
+    TS_ASSERT(!(*log1 == *log2));
 
     delete log1;
     delete log2;
