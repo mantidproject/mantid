@@ -358,6 +358,26 @@ public:
     }
   }
 
+  void TestSetInstrumentDirectory() {
+
+    auto originalDirectories =
+        ConfigService::Instance().getInstrumentDirectories();
+    std::vector<std::string> testDirectories;
+    testDirectories.push_back("Test Directory 1");
+    testDirectories.push_back("Test Directory 2");
+    ConfigService::Instance().setInstrumentDirectories(testDirectories);
+    auto readDirectories = ConfigService::Instance().getInstrumentDirectories();
+    TS_ASSERT_EQUALS(readDirectories.size(), testDirectories.size());
+    TS_ASSERT_EQUALS(readDirectories[0], testDirectories[0]);
+    TS_ASSERT_EQUALS(readDirectories[1], testDirectories[1]);
+
+    // Restore original settings
+    ConfigService::Instance().setInstrumentDirectories(originalDirectories);
+    readDirectories = ConfigService::Instance().getInstrumentDirectories();
+    TS_ASSERT_EQUALS(readDirectories.size(), originalDirectories.size());
+    TS_ASSERT_EQUALS(readDirectories[0], originalDirectories[0]);
+  }
+
   void TestCustomProperty() {
     std::string countString =
         ConfigService::Instance().getString("algorithms.retained");

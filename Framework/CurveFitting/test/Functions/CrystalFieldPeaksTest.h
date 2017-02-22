@@ -12,6 +12,7 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidCurveFitting/FortranDefs.h"
 
 using Mantid::CurveFitting::Functions::CrystalFieldPeaks;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -94,6 +95,35 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("Temperature").asDouble(), 25.0);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceEnergy").asDouble(), 1e-10);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-1);
+  }
+
+  void test_arbitrary_J() {
+    IFunction_sptr fun(new CrystalFieldPeaks);
+    Mantid::CurveFitting::DoubleFortranVector en;
+    Mantid::CurveFitting::ComplexFortranMatrix wf;
+    int nre = 1;
+    auto &peaks = dynamic_cast<CrystalFieldPeaks &>(*fun);
+    peaks.setParameter("B20", 0.37737);
+    peaks.setAttributeValue("Temperature", 44.0);
+    peaks.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
+    peaks.setAttributeValue("Ion", "something");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.4");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -5);
+    peaks.setAttributeValue("Ion", "s1");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -2);
+    peaks.setAttributeValue("Ion", "j1.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -3);
+    peaks.setAttributeValue("Ion", "J2");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -4);
   }
 
   void test_evaluate_alg_no_input_workspace() {
