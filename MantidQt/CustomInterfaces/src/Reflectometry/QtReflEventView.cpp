@@ -14,10 +14,10 @@ QtReflEventView::QtReflEventView(QWidget *parent) {
   initLayout();
 
   // Add slicing option buttons to list
-  m_buttonList.push_back(m_ui.uniformEvenTimeSlicesRadioButton);
-  m_buttonList.push_back(m_ui.uniformTimeSlicesRadioButton);
-  m_buttonList.push_back(m_ui.customTimeSlicesRadioButton);
-  m_buttonList.push_back(m_ui.logValueSlicesRadioButton);
+  m_buttonList.push_back(m_ui.uniformEvenButton);
+  m_buttonList.push_back(m_ui.uniformButton);
+  m_buttonList.push_back(m_ui.customButton);
+  m_buttonList.push_back(m_ui.logValueButton);
 
   // Whenever one of the slicing option buttons is selected, their corresponding
   // entry is enabled, otherwise they remain disabled.
@@ -53,7 +53,7 @@ IReflEventPresenter *QtReflEventView::getPresenter() const {
 */
 std::string QtReflEventView::getTimeSlices() const {
 
-  return m_ui.customTimeSlicesEdit->text().toStdString();
+  return m_ui.customEdit->text().toStdString();
 }
 
 /** Returns the time slicing value(s) obtained from the selected widget
@@ -65,11 +65,11 @@ std::string QtReflEventView::getTimeSlicingValues() const {
   const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
 
   if (checkedButton == m_buttonList[0]) {
-    values = m_ui.uniformEvenTimeSlicesEdit->text().toStdString();
+    values = m_ui.uniformEvenEdit->text().toStdString();
   } else if (checkedButton == m_buttonList[1]) {
-    values = m_ui.uniformTimeSlicesEdit->text().toStdString();
+    values = m_ui.uniformEdit->text().toStdString();
   } else if (checkedButton == m_buttonList[2]) {
-    values = m_ui.customTimeSlicesEdit->text().toStdString();
+    values = m_ui.customEdit->text().toStdString();
   } else if (checkedButton == m_buttonList[3]) {
     values = m_ui.logValueComboBox->currentText().toStdString();
   }
@@ -110,9 +110,9 @@ void QtReflEventView::toggleSlicingOptions() const {
       entriesEnabled[i] = true;
   }
 
-  m_ui.uniformEvenTimeSlicesEdit->setEnabled(entriesEnabled[0]);
-  m_ui.uniformTimeSlicesEdit->setEnabled(entriesEnabled[1]);
-  m_ui.customTimeSlicesEdit->setEnabled(entriesEnabled[2]);
+  m_ui.uniformEvenEdit->setEnabled(entriesEnabled[0]);
+  m_ui.uniformEdit->setEnabled(entriesEnabled[1]);
+  m_ui.customEdit->setEnabled(entriesEnabled[2]);
   m_ui.logValueComboBox->setEnabled(entriesEnabled[3]);
 }
 
