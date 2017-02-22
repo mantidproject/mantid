@@ -27,7 +27,7 @@ private:
     alg.setProperty("InputWorkspace", m_interWS);
     alg.setProperty("TwoTheta", twoTheta);
     if (!correctionType.empty())
-      alg.setProperty("CorrectionType", correctionType);
+      alg.setProperty("DetectorCorrectionType", correctionType);
     if (!detectorName.empty())
       alg.setProperty("DetectorComponentName", detectorName);
     alg.setPropertyValue("OutputWorkspace", "test_out");
@@ -103,7 +103,7 @@ public:
   }
 
   void test_correct_point_detector_vertical_shift_default() {
-    // Omit the CorrectionType property to check that a vertical shift
+    // Omit the DetectorCorrectionType property to check that a vertical shift
     // is done by default
     SpecularReflectionPositionCorrect2 alg;
     setupAlgorithm(alg, 1.4, "", "point-detector");

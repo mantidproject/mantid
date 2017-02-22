@@ -221,9 +221,9 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     options.push_back("ScaleFactor=" + scaleFactor);
 
   // Add correction type
-  auto correctionType = m_view->getCorrectionType();
+  auto correctionType = m_view->getDetectorCorrectionType();
   if (!correctionType.empty())
-    options.push_back("CorrectionType=" + correctionType);
+    options.push_back("DetectorCorrectionType=" + correctionType);
 
   // Add momentum transfer limits
   auto qTransStep = m_view->getMomentumTransferStep();
@@ -344,7 +344,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   if (!cPp.empty())
     defaults[5] = cPp[0];
 
-  defaults[6] = alg->getPropertyValue("CorrectionType");
+  defaults[6] = alg->getPropertyValue("DetectorCorrectionType");
 
   m_view->setExpDefaults(defaults);
 }

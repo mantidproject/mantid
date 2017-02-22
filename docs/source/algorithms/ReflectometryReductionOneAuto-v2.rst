@@ -186,7 +186,7 @@ Output:
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, CorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
     print "%.5f" % (IvsLam.readY(0)[175])
     print "%.5f" % (IvsLam.readY(0)[176])

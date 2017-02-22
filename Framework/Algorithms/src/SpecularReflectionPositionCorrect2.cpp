@@ -64,7 +64,7 @@ void SpecularReflectionPositionCorrect2::init() {
   correctionTypeValidator->add(
       boost::make_shared<StringListValidator>(correctionType));
   declareProperty(
-      "CorrectionType", correctionType[0], correctionTypeValidator,
+      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "Whether detectors should be shifted vertically or rotated around the "
       "sample position.",
       Direction::Input);
@@ -118,7 +118,7 @@ void SpecularReflectionPositionCorrect2::exec() {
   const V3D samplePosition = sample->getPos();
 
   // Type of movement (vertical shift or rotation around the sample)
-  const std::string correctionType = getProperty("CorrectionType");
+  const std::string correctionType = getProperty("DetectorCorrectionType");
 
   // Sample-to-detector
   const V3D sampleToDetector = detectorPosition - samplePosition;

@@ -290,14 +290,14 @@
                   </spacer>
                 </item>
                 <item row="8" column="0">
-                  <widget class="QLabel" name="correctionTypeLabel">
+                  <widget class="QLabel" name="detectorCorrectionTypeLabel">
                     <property name="text">
-                      <string>CorrectionType</string>
+                      <string>DetectorCorrectionType</string>
                     </property>
                   </widget>
                 </item>
                 <item row="8" column="1">
-                  <widget class="QComboBox" name="correctionTypeComboBox">
+                  <widget class="QComboBox" name="detectorCorrectionTypeComboBox">
                     <item>
                       <property name="text">
                         <string>VerticalShift</string>

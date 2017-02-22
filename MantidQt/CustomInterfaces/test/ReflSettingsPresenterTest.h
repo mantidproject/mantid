@@ -153,7 +153,7 @@ public:
     EXPECT_CALL(mockView, getScaleFactor())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getCorrectionType())
+    EXPECT_CALL(mockView, getDetectorCorrectionType())
         .Times(Exactly(1))
         .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getMomentumTransferStep())
@@ -192,7 +192,7 @@ public:
     TS_ASSERT_EQUALS(optionsVec[13], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[16], "CorrectionType=VerticalShift");
+    TS_ASSERT_EQUALS(optionsVec[16], "DetectorCorrectionType=VerticalShift");
     TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"3,4\"");
     TS_ASSERT_EQUALS(optionsVec[19], "StartOverlap=10");
@@ -241,11 +241,13 @@ public:
     presenter.setInstrumentName("POLREF");
 
     std::vector<std::string> defaults = {
-        "PointDetectorAnalysis", "None",
+        "PointDetectorAnalysis",
+        "None",
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0", "VerticalShift"};
+        "0.972762,0.001828,-0.000261,0.0",
+        "VerticalShift"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);

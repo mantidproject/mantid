@@ -35,11 +35,11 @@ Usage
    instr = polref.getInstrument()
    print 'Original position: ' + str(instr.getComponentByName('point-detector').getPos())
 
-   polref_vert = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', CorrectionType='VerticalShift')
+   polref_vert = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', DetectorCorrectionType='VerticalShift')
    instr = polref_vert.getInstrument()
    print 'Vertical shift:    ' + str(instr.getComponentByName('point-detector').getPos())
 
-   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', CorrectionType='RotateAroundSample')
+   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='point-detector', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print 'Rotated:           ' + str(instr.getComponentByName('point-detector').getPos())
    
@@ -67,7 +67,7 @@ Output:
    instr = polref_vert.getInstrument()
    print 'Vertical shift:    ' + str(instr.getComponentByName('lineardetector').getPos())
 
-   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector', CorrectionType='RotateAroundSample')
+   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='lineardetector', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print 'Rotated:           ' + str(instr.getComponentByName('lineardetector').getPos())
    
@@ -95,7 +95,7 @@ Output:
    instr = polref_vert.getInstrument()
    print 'Vertical shift:    ' + str(instr.getComponentByName('OSMOND').getPos())
 
-   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND', CorrectionType='RotateAroundSample')
+   polref_rot = SpecularReflectionPositionCorrect(polref, TwoTheta = 2*0.49, DetectorComponentName='OSMOND', DetectorCorrectionType='RotateAroundSample')
    instr = polref_rot.getInstrument()
    print 'Rotated:           ' + str(instr.getComponentByName('OSMOND').getPos())
    

@@ -7,7 +7,7 @@ Reflectometry Changes
 
 Algorithms
 ----------
-* The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``CorrectionType``, which specifies whether detector positions should be corrected by a vertical shift (default) or by a rotation around the sample position.
+* The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``DetectorCorrectionType``, which specifies whether detector positions should be corrected by a vertical shift (default) or by a rotation around the sample position.
 
 ConvertToReflectometryQ
 -----------------------

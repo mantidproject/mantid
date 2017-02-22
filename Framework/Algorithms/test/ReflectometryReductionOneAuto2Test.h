@@ -293,7 +293,7 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 1.5);
-    alg.setProperty("CorrectionType", "RotateAroundSample");
+    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
@@ -340,7 +340,7 @@ public:
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
-    alg.setProperty("CorrectionType", "VerticalShift");
+    alg.setProperty("DetectorCorrectionType", "VerticalShift");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("OutputWorkspace", "IvsQ");

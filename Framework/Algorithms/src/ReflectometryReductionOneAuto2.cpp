@@ -141,7 +141,7 @@ void ReflectometryReductionOneAuto2::init() {
   correctionTypeValidator->add(
       boost::make_shared<StringListValidator>(correctionType));
   declareProperty(
-      "CorrectionType", correctionType[0], correctionTypeValidator,
+      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
       "Whether detectors should be shifted vertically or rotated around the "
       "sample position.",
       Direction::Input);
@@ -343,7 +343,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
                                           detectorsOfInterest.end());
 
   const double theta = getProperty("ThetaIn");
-  const std::string correctionType = getProperty("CorrectionType");
+  const std::string correctionType = getProperty("DetectorCorrectionType");
 
   MatrixWorkspace_sptr corrected = inputWS;
 
@@ -352,7 +352,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
         createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
     alg->setProperty("TwoTheta", theta * 2);
-    alg->setProperty("CorrectionType", correctionType);
+    alg->setProperty("DetectorCorrectionType", correctionType);
     alg->setProperty("DetectorComponentName", detector);
     alg->execute();
     corrected = alg->getProperty("OutputWorkspace");

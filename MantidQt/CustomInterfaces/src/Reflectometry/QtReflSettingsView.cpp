@@ -79,10 +79,10 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
 
-  int ctIndex = m_ui.correctionTypeComboBox->findText(
+  int ctIndex = m_ui.detectorCorrectionTypeComboBox->findText(
       QString::fromStdString(defaults[6]));
   if (ctIndex != -1)
-    m_ui.correctionTypeComboBox->setCurrentIndex(ctIndex);
+    m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
 }
 
 /* Sets default values for all instrument settings given a list of default
@@ -244,9 +244,9 @@ std::string QtReflSettingsView::getScaleFactor() const {
 /** Return selected correction type
 * @return :: selected correction type
 */
-std::string QtReflSettingsView::getCorrectionType() const {
+std::string QtReflSettingsView::getDetectorCorrectionType() const {
 
-  return m_ui.correctionTypeComboBox->currentText().toStdString();
+  return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
 }
 
 /** Return integrated monitors option
