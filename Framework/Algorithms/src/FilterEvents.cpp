@@ -34,6 +34,9 @@ using namespace std;
 const int64_t TOLERANCE(1000000); // splitter time tolerance in nano-second.
                                   // this value has resolution to 10000Hz
 
+/// (integer) splitting target for undefined region, which will be recorded in m_splitterGroup
+const uint32_t UNDEFINED_SPLITTING_TARGET(0);
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -197,6 +200,7 @@ void FilterEvents::exec() {
   if (m_useSplittersWorkspace)
   {
     filterEventsBySplitters(progressamount);
+    generateSplitterTSPalpha(split_tsp_vector);
   }
   else
   {
@@ -205,8 +209,10 @@ void FilterEvents::exec() {
   }
 
   // TODO:FIXME - assign split_tsp_vector to all the output workspaces!
+  mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // Optional to group detector
+  // TODO:FIXME - move this part to a method
   if (m_toGroupWS) {
     m_progress = 0.9;
     progress(m_progress, "Group workspaces");
@@ -224,6 +230,7 @@ void FilterEvents::exec() {
     }
   }
 
+  // TODO:FIXME - move this part to a method
   // Form the names of output workspaces
   std::vector<std::string> outputwsnames;
   std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
@@ -240,6 +247,7 @@ void FilterEvents::exec() {
   progress(m_progress, "Completed");
 }
 
+//----------------------------------------------------------------------------------------------
 /** Process input properties
  */
 void FilterEvents::processAlgorithmProperties() {
@@ -360,8 +368,11 @@ void FilterEvents::processAlgorithmProperties() {
   } // END-IF: m_isSplitterRelativeTime
 }
 
-/** Examine whether any spectrum does not have detector
-  */
+//----------------------------------------------------------------------------------------------
+/**  Examine whether any spectrum does not have detector
+ * Warning message will be written out
+ * @brief FilterEvents::examineEventWS
+ */
 void FilterEvents::examineEventWS() {
   size_t numhist = m_eventWS->getNumberHistograms();
   m_vecSkip.resize(numhist, false);
@@ -369,9 +380,10 @@ void FilterEvents::examineEventWS() {
   if (m_specSkipType == EventFilterSkipNoDetTOFCorr &&
       m_tofCorrType == NoneCorrect) {
     // No TOF correction and skip spectrum only if TOF correction is required
-    g_log.notice("By user's choice, No spectrum will be skipped even if it has "
+    g_log.warning("By user's choice, No spectrum will be skipped even if it has "
                  "no detector.");
   } else {
+      // check detectors whether there is any of them that will be skipped
     stringstream msgss;
     size_t numskipspec = 0;
     size_t numeventsskip = 0;
@@ -390,7 +402,6 @@ void FilterEvents::examineEventWS() {
         else
           msgss << ",";
       }
-
     } // ENDFOR
 
     if (numskipspec > 0) {
@@ -406,8 +417,11 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
+
+  return;
 }
 
+//----------------------------------------------------------------------------------------------
 /** Purpose:
  *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
  *    and create a map for all workspace group number
@@ -451,6 +465,7 @@ void FilterEvents::processSplittersWorkspace() {
   }
 }
 
+//----------------------------------------------------------------------------------------------
 /** Convert SplittersWorkspace to vector of time and vector of target (itarget)
  * NOTE: This is designed to use a single vector/vector splitters for all types of inputs
  *       It is not used before vast experiment on speed comparison!
@@ -470,10 +485,10 @@ void FilterEvents::convertSplittersWorkspaceToVectors()
   for (size_t irow = 0; irow < num_rows; ++irow)
   {
     Kernel::SplittingInterval splitter = m_splittersWorkspace->getSplitter(irow);
-    if (m_vecSplitterTime.size() == 0 || splitter.start() > m_vecSplitterTime.end())
+    if (m_vecSplitterTime.size() == 0 || splitter.start() > m_vecSplitterTime.back())
     {
-      m_vecSplitterTime.push_back(splitter.start());
-      m_vecSplitterTime.push_back(splitter.stop());
+      m_vecSplitterTime.push_back(splitter.start().totalNanoseconds());
+      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
       // 0 stands for not defined
       m_vecSplitterGroup.push_back(0);
     }
@@ -481,7 +496,14 @@ void FilterEvents::convertSplittersWorkspaceToVectors()
 
 }
 
+//----------------------------------------------------------------------------------------------
 /** process the input splitters given by a TableWorkspace
+ * The method will transfer the start/stop time to "m_vecSplitterTime"
+ * and map the splitting target (in string) to "m_vecSplitterGroup".
+ * The mapping will be recorded in "m_targetIndexMap" and "m_wsGroupIndexTargetMap".
+ * Also, "m_maxTargetIndex" is set up to record the highest target group/index,
+ * i.e., max value of m_vecSplitterGroup
+ *
  * @brief FilterEvents::processTableSplittersWorkspace
  */
 void FilterEvents::processTableSplittersWorkspace() {
@@ -524,7 +546,7 @@ void FilterEvents::processTableSplittersWorkspace() {
       // -1
       m_vecSplitterTime.push_back(start_64);
       // NOTE: use index = 0 for un-defined slot
-      m_vecSplitterGroup.push_back(0);
+      m_vecSplitterGroup.push_back(UNDEFINED_SPLITTING_TARGET);
       found_undefined_splitter = true;
     } else if (abs(start_64 - m_vecSplitterTime.back()) < TOLERANCE) {
       // new splitter's start time is same (within tolerance) as the stop time
@@ -533,7 +555,7 @@ void FilterEvents::processTableSplittersWorkspace() {
     } else {
       // new splitter's start time is before the stop time of the last splitter.
       throw std::runtime_error(
-          "Input table workspace does not have splitters set up in order.");
+          "Input table workspace does not have splitters set up in order, which is a requirement.");
     }
 
     // convert string-target to integer target
@@ -583,16 +605,22 @@ void FilterEvents::processTableSplittersWorkspace() {
   return;
 }
 
+//----------------------------------------------------------------------------------------------
 /**
  * @brief FilterEvents::processMatrixSplitterWorkspace
  * Purpose:
- *   Convert the splitters in matrix workspace to a vector of splitters
+ *   Convert the splitters in MatrixWorkspace to m_vecSplitterTime and m_vecSplitterGroup
  * Requirements:
  *   m_matrixSplitterWS has valid value
  *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
  * Guarantees
- *   Splitters stored in m_matrixSpliterWS are transformed to
- *   m_vecSplitterTime and m_workGroupIndexes, which are of same size
+ *  - Splitters stored in m_matrixSpliterWS are transformed to
+ *    "m_vecSplitterTime" and "m_vecSplitterGroup", whose sizes differ by 1.
+ *  - Y values are mapped to integer group index stored in "m_vecSplitterGroup".
+ *    The mapping is recorded in "m_yIndexMap" and "m_wsGroupdYMap"
+ *    "m_maxTargetIndex" is used to register the maximum group index
+ *    Negative Y is defined as "undefined"
+ * Note: there is NO undefined split region here, while any NEGATIVE Y value is defined as "undefined splitter"
  */
 void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
@@ -625,12 +653,13 @@ void FilterEvents::processMatrixSplitterWorkspace() {
 
     int y_index = static_cast<int>(Y[i]);
 
+    // try to find Y[i] in m_yIndexMap
     std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
-
     if (mapiter == m_yIndexMap.end()) {
-      uint32_t int_target = 0;
-      // default to 0 as undefined slot.  if well-defined, then use the current
-      // unused max_target_index
+        // new
+        // default to 0 as undefined slot.
+      uint32_t int_target = UNDEFINED_SPLITTING_TARGET;
+      //  if well-defined, then use the current
       if (y_index >= 0) {
         int_target = max_target_index;
         ++max_target_index;
@@ -644,7 +673,7 @@ void FilterEvents::processMatrixSplitterWorkspace() {
       m_wsGroupdYMap.emplace(int_target, y_index);
       m_targetWorkspaceIndexSet.insert(int_target);
     } else {
-      // this target Y-index has been registered
+      // this target Y-index has been registered previously
       uint32_t target_index = mapiter->second;
       m_vecSplitterGroup[i] = target_index;
     }
@@ -656,148 +685,9 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   return;
 }
 
-void FilterEvents::createOutputWorkspacesMatrixCase() {
-  // check condition
-  if (!m_matrixSplitterWS) {
-    g_log.error("createOutputWorkspacesMatrixCase() is applied to "
-                "MatrixWorkspace splitters only!");
-    throw std::runtime_error("Wrong call!");
-  }
-
-  // set up new workspaces
-  // Note: m_targetWorkspaceIndexSet is used in different manner among
-  // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
-  size_t numoutputws = m_targetWorkspaceIndexSet.size();
-  size_t wsgindex = 0;
-
-  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
-    std::stringstream wsname;
-
-    // workspace name
-    if (wsgroup >= 0) {
-      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
-      int target_name = m_wsGroupdYMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
-    } else {
-      wsname << m_outputWSNameBase << "_unfiltered";
-    }
-
-    // create new workspace
-    boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
-    m_outputWorkspacesMap.emplace(wsgroup, optws);
-
-    // add to output workspace property
-    std::stringstream propertynamess;
-    if (wsgroup == 0) {
-      propertynamess << "OutputWorkspace_unfiltered";
-    } else {
-      propertynamess << "OutputWorkspace_" << wsgroup;
-    }
-
-    // Inserted this pair to map
-    m_wsNames.push_back(wsname.str());
-
-    // Set (property) to output workspace and set to ADS
-    declareProperty(Kernel::make_unique<
-                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                        propertynamess.str(), wsname.str(), Direction::Output),
-                    "Output");
-    setProperty(propertynamess.str(), optws);
-    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
-
-    g_log.debug() << "Created output Workspace of group = " << wsgroup
-                  << "  Property Name = " << propertynamess.str()
-                  << " Workspace name = " << wsname.str()
-                  << " with Number of events = " << optws->getNumberEvents()
-                  << "\n";
-
-    // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
-    progress(m_progress, "Creating output workspace");
-    wsgindex += 1;
-  } // END-FOR (wsgroup)
-
-  // Set output and do debug report
-  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
-                 << numoutputws << "\n";
-  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
-
-  return;
-}
-
-void FilterEvents::createOutputWorkspacesTableSplitterCase() {
-  // check condition
-  if (!m_useArbTableSplitters) {
-    g_log.error("createOutputWorkspacesTableSplitterCase() is applied to "
-                "TableWorkspace splitters only!");
-    throw std::runtime_error("Wrong call!");
-  }
-
-  // set up new workspaces
-  size_t numoutputws = m_targetWorkspaceIndexSet.size();
-  size_t wsgindex = 0;
-
-  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
-    std::stringstream wsname;
-
-    // workspace name
-    if (wsgroup >= 0) {
-      std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
-      wsname << m_outputWSNameBase << "_" << target_name;
-    } else {
-      wsname << m_outputWSNameBase << "_unfiltered";
-    }
-
-    // create new workspace
-    boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
-    m_outputWorkspacesMap.emplace(wsgroup, optws);
-
-    // add to output workspace property
-    std::stringstream propertynamess;
-    if (wsgroup < 0) {
-      propertynamess << "OutputWorkspace_unfiltered";
-    } else {
-      propertynamess << "OutputWorkspace_" << wsgroup;
-    }
-
-    // Inserted this pair to map
-    m_wsNames.push_back(wsname.str());
-
-    // Set (property) to output workspace and set to ADS
-    declareProperty(Kernel::make_unique<
-                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
-                        propertynamess.str(), wsname.str(), Direction::Output),
-                    "Output");
-    setProperty(propertynamess.str(), optws);
-    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
-
-    g_log.debug() << "Created output Workspace of group = " << wsgroup
-                  << "  Property Name = " << propertynamess.str()
-                  << " Workspace name = " << wsname.str()
-                  << " with Number of events = " << optws->getNumberEvents()
-                  << "\n";
-
-    // Update progress report
-    m_progress =
-        0.1 +
-        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
-    progress(m_progress, "Creating output workspace");
-    wsgindex += 1;
-  } // END-FOR (wsgroup)
-
-  // Set output and do debug report
-  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
-                 << numoutputws << "\n";
-  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
-
-  return;
-}
-
-/** Create a list of EventWorkspace for output
+//----------------------------------------------------------------------------------------------
+/** Create a list of EventWorkspace for output in the case that splitters are given by
+ *  SplittersWorkspace
  */
 void FilterEvents::createOutputWorkspaces() {
 
@@ -906,6 +796,167 @@ void FilterEvents::createOutputWorkspaces() {
   setProperty("NumberOutputWS", numoutputws);
 
   g_log.information("Output workspaces are created. ");
+}
+
+
+//----------------------------------------------------------------------------------------------
+/** Create output EventWorkspaces in the case that the splitters are given by MatrixWorkspace
+ * Here is the list of class variables that will be updated:
+ * - m_outputWorkspacesMap: use (integer) group index to find output EventWorkspace
+ * - m_wsNames: vector of output workspaces
+ * @brief FilterEvents::createOutputWorkspacesMatrixCase
+ */
+void FilterEvents::createOutputWorkspacesMatrixCase() {
+  // check condition
+  if (!m_matrixSplitterWS) {
+    g_log.error("createOutputWorkspacesMatrixCase() is applied to "
+                "MatrixWorkspace splitters only!");
+    throw std::runtime_error("Wrong call!");
+  }
+
+  // set up new workspaces
+  // Note: m_targetWorkspaceIndexSet is used in different manner among
+  // SplittersWorkspace, MatrixWorkspace and TableWorkspace cases
+  size_t numoutputws = m_targetWorkspaceIndexSet.size();
+  size_t wsgindex = 0;
+
+  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
+      if (wsgroup < 0)
+          throw std::runtime_error("It is not possible to have split-target group index < 0 in MatrixWorkspace case.");
+
+    // workspace name
+          std::stringstream wsname;
+    if (wsgroup > 0) {
+      //  std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+      int target_name = m_wsGroupdYMap[wsgroup];
+      wsname << m_outputWSNameBase << "_" << target_name;
+    } else {
+      wsname << m_outputWSNameBase << "_unfiltered";
+    }
+
+    // create new workspace from input EventWorkspace and all the sample logs are copied to the new one
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
+    m_outputWorkspacesMap.emplace(wsgroup, optws);
+
+    // add to output workspace property
+    std::stringstream propertynamess;
+    if (wsgroup == 0) {
+      propertynamess << "OutputWorkspace_unfiltered";
+    } else {
+      propertynamess << "OutputWorkspace_" << wsgroup;
+    }
+
+    // Inserted this pair to map
+    m_wsNames.push_back(wsname.str());
+
+    // Set (property) to output workspace and set to ADS
+    declareProperty(Kernel::make_unique<
+                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                        propertynamess.str(), wsname.str(), Direction::Output),
+                    "Output");
+    setProperty(propertynamess.str(), optws);
+    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+
+    g_log.debug() << "Created output Workspace of group = " << wsgroup
+                  << "  Property Name = " << propertynamess.str()
+                  << " Workspace name = " << wsname.str()
+                  << " with Number of events = " << optws->getNumberEvents()
+                  << "\n";
+
+    // Update progress report
+    m_progress =
+        0.1 +
+        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    progress(m_progress, "Creating output workspace");
+    wsgindex += 1;
+  } // END-FOR (wsgroup)
+
+  // Set output and do debug report
+  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
+                 << numoutputws << "\n";
+  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create output EventWorkspaces in the case that the splitters are given by TableWorkspace
+ * Here is the list of class variables that will be updated:
+ * - m_outputWorkspacesMap: use (integer) group index to find output EventWorkspace
+ * - m_wsNames: vector of output workspaces
+ * @brief FilterEvents::createOutputWorkspacesMatrixCase
+ */
+void FilterEvents::createOutputWorkspacesTableSplitterCase() {
+  // check condition
+  if (!m_useArbTableSplitters) {
+    g_log.error("createOutputWorkspacesTableSplitterCase() is applied to "
+                "TableWorkspace splitters only!");
+    throw std::runtime_error("Wrong call!");
+  }
+
+  // set up new workspaces
+  size_t numoutputws = m_targetWorkspaceIndexSet.size();
+  size_t wsgindex = 0;
+
+  for (auto const wsgroup : m_targetWorkspaceIndexSet) {
+      if (wsgroup < 0)
+          throw std::runtime_error("It is not possible to have split-target group index < 0 in TableWorkspace case.");
+
+    // workspace name
+          std::stringstream wsname;
+    if (wsgroup > 0) {
+        // get target name via map
+      std::string target_name = m_wsGroupIndexTargetMap[wsgroup];
+      wsname << m_outputWSNameBase << "_" << target_name;
+    } else {
+      wsname << m_outputWSNameBase << "_unfiltered";
+    }
+
+    // create new workspace
+    boost::shared_ptr<EventWorkspace> optws =
+        create<DataObjects::EventWorkspace>(*m_eventWS);
+    m_outputWorkspacesMap.emplace(wsgroup, optws);
+
+    // add to output workspace property
+    std::stringstream propertynamess;
+    if (wsgroup < 0) {
+      propertynamess << "OutputWorkspace_unfiltered";
+    } else {
+      propertynamess << "OutputWorkspace_" << wsgroup;
+    }
+
+    // Inserted this pair to map
+    m_wsNames.push_back(wsname.str());
+
+    // Set (property) to output workspace and set to ADS
+    declareProperty(Kernel::make_unique<
+                        API::WorkspaceProperty<DataObjects::EventWorkspace>>(
+                        propertynamess.str(), wsname.str(), Direction::Output),
+                    "Output");
+    setProperty(propertynamess.str(), optws);
+    AnalysisDataService::Instance().addOrReplace(wsname.str(), optws);
+
+    g_log.debug() << "Created output Workspace of group = " << wsgroup
+                  << "  Property Name = " << propertynamess.str()
+                  << " Workspace name = " << wsname.str()
+                  << " with Number of events = " << optws->getNumberEvents()
+                  << "\n";
+
+    // Update progress report
+    m_progress =
+        0.1 +
+        0.1 * static_cast<double>(wsgindex) / static_cast<double>(numoutputws);
+    progress(m_progress, "Creating output workspace");
+    wsgindex += 1;
+  } // END-FOR (wsgroup)
+
+  // Set output and do debug report
+  g_log.notice() << "[DEBUG TableSplitter] Output workspace number: "
+                 << numoutputws << "\n";
+  setProperty("NumberOutputWS", static_cast<int>(numoutputws));
+
+  return;
 }
 
 /** Set up neutron event's TOF correction.
@@ -1468,6 +1519,7 @@ void FilterEvents::splitLog(EventWorkspace_sptr eventws, std::string logname,
 
 /** Generate a vector of integer time series property for each splitter corresponding to each target (in integer)
  * in each splitter-time-series-property, 1 stands for include and 0 stands for time for neutrons to be discarded.
+ * If there is no UN-DEFINED
  * @brief FilterEvents::generateSplitterTSP
  * @param split_tsp_vec
  */

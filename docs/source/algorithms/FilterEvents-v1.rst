@@ -94,6 +94,25 @@ Comparing with other event filtering algorithms
 Wiki page :ref:`EventFiltering` has a detailed introduction on event
 filtering in MantidPlot.
 
+
+Developer's Note
+----------------
+
+Splitters given by TableWorkspace
+=================================
+
+ - The *start/stop* time is converted to **m_vecSplitterTime**.
+ - The *splitting target* (in string) is mapped to a set of continuous integers that are stored in **m_vecSplitterGroup**.
+   - The mapping will be recorded in **m_targetIndexMap** and **m_wsGroupIndexTargetMap**.
+   - Class variable **m_maxTargetIndex** is set up to record the highest target group/index,i.e., the max value of m_vecSplitterGroup
+
+
+Undefined splitting target
+==========================
+
+Indexed as **0** in **m_vecSplitterGroup**.
+
+
 Usage
 -----
 

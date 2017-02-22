@@ -544,7 +544,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Xtest_FilterRelativeTime() {
+  void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -806,8 +806,9 @@ public:
 
     // add some arbitrary sample log for splitting or not splitting
     eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogA", "A"));
-    // eventWS->mutableRun().addProperty("LogB", "B", true);
-    // eventWS->mutableRun().addProperty("Title", "Testing EventWorkspace");
+    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogB", "B"));
+    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
+    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("Title", "Testing EventWorkspace"));
 
     // add an integer slow log
     auto int_tsp = Kernel::make_unique<Kernel::TimeSeriesProperty<int> >("slow_int_log");
