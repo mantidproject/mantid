@@ -62,17 +62,15 @@ std::string QtReflEventView::getTimeSlices() const {
 std::string QtReflEventView::getTimeSlicingValues() const {
 
   std::string values;
-  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
 
-  if (checkedButton == m_buttonList[0]) {
+  if (m_sliceType == m_slicingTypes[0])
     values = m_ui.uniformEvenEdit->text().toStdString();
-  } else if (checkedButton == m_buttonList[1]) {
+  else if (m_sliceType == m_slicingTypes[1])
     values = m_ui.uniformEdit->text().toStdString();
-  } else if (checkedButton == m_buttonList[2]) {
+  else if (m_sliceType == m_slicingTypes[2])
     values = m_ui.customEdit->text().toStdString();
-  } else if (checkedButton == m_buttonList[3]) {
+  else if (m_sliceType == m_slicingTypes[3])
     values = m_ui.logValueComboBox->currentText().toStdString();
-  }
 
   return values;
 }
@@ -82,20 +80,7 @@ std::string QtReflEventView::getTimeSlicingValues() const {
 */
 std::string QtReflEventView::getTimeSlicingType() const {
 
-  std::string type;
-  const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
-
-  if (checkedButton == m_buttonList[0]) {
-    type = "UniformEven";
-  } else if (checkedButton == m_buttonList[1]) {
-    type = "Uniform";
-  } else if (checkedButton == m_buttonList[2]) {
-    type = "Custom";
-  } else if (checkedButton == m_buttonList[3]) {
-    type = "LogValue";
-  }
-
-  return type;
+  return m_sliceType;
 }
 
 /** Enable slicing option entries for checked button and disable all others.
@@ -106,8 +91,11 @@ void QtReflEventView::toggleSlicingOptions() const {
 
   std::vector<bool> entriesEnabled(m_buttonList.size(), false);
   for (size_t i = 0; i < m_buttonList.size(); i++) {
-    if (m_buttonList[i] == checkedButton)
+    if (m_buttonList[i] == checkedButton) {
+      m_sliceType = m_slicingTypes[i];
       entriesEnabled[i] = true;
+      break;
+    }
   }
 
   m_ui.uniformEvenEdit->setEnabled(entriesEnabled[0]);
