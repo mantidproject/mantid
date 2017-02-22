@@ -47,11 +47,13 @@ void RemoveBins::init() {
                   "The upper bound of the region to be removed.");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
+
   //remove some known units that will not work
   units.erase(std::remove(units.begin(), units.end(), "Empty"));
   units.erase(std::remove(units.begin(), units.end(), "Label"));
   units.erase(std::remove(units.begin(), units.end(), "Time"));
   units.erase(std::remove(units.begin(), units.end(), "Degrees"));
+
   //add a default do nothing value
   units.insert(units.begin(), "AsInput");
   declareProperty("RangeUnit", "AsInput",
