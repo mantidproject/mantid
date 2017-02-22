@@ -158,9 +158,10 @@ class LoadVesuvio(LoadEmptyVesuvio):
         issues = {}
 
         # Validate run number ranges
-        run_str = self.getProperty(RUN_PROP).value
+        user_input = self.getProperty(RUN_PROP).value
+        run_str = os.path.basename(user_input)
         # String could be a full file path
-        if "-" in os.path.basename(run_str):
+        if "-" in run_str:
             lower, upper = run_str.split("-")
             issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
 
@@ -685,17 +686,19 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         Returns the runs as a list of strings
         """
-        run_str = self.getProperty(RUN_PROP).value
+        # String could be a full file path
+        user_input = self.getProperty(RUN_PROP).value
+        run_str = os.path.basename(user_input)
         # Load is not doing the right thing when summing. The numbers don't look correct
         if "-" in run_str:
             lower, upper = run_str.split("-")
             # Range goes lower to up-1 but we want to include the last number
             runs = list(range(int(lower), int(upper)+1))
-
         elif "," in run_str:
             runs = run_str.split(",")
         else:
-            runs = [run_str]
+            # Leave it as it is
+            runs = [user_input]
 
         return runs
 
