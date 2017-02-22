@@ -301,7 +301,7 @@ void ConfigServiceImpl::setBaseDirectory() {
     // code crash.
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
     f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists())
+    if (f.exists())
       return;
   }
 
