@@ -190,8 +190,9 @@ public:
   }
 
   void testRangeUnit() {
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10);
-    //scale x values up to 0-1000 range
+    MatrixWorkspace_sptr inputWS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1, 10);
+    // scale x values up to 0-1000 range
     inputWS->getSpectrum(0).mutableX() *= 100;
     std::string wsName = "RemoveBins_RangeUnit";
     std::string wsNameOutput = wsName + "_Output";
@@ -201,7 +202,7 @@ public:
 
     algRU.initialize();
     TS_ASSERT_THROWS_NOTHING(algRU.setPropertyValue("InputWorkspace", wsName);)
-      algRU.setPropertyValue("OutputWorkspace", wsNameOutput);
+    algRU.setPropertyValue("OutputWorkspace", wsNameOutput);
     algRU.setPropertyValue("XMin", "0.05");
     algRU.setPropertyValue("XMax", "0.1");
     algRU.setPropertyValue("RangeUnit", "Wavelength");
@@ -214,13 +215,13 @@ public:
       return;
 
     MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOutput);
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            wsNameOutput);
 
-    std::vector<double> expected = { 2, 2, 2, 1.68054, 0, 0, 0.638921, 2, 2, 2 };
+    std::vector<double> expected = {2, 2, 2, 1.68054, 0, 0, 0.638921, 2, 2, 2};
     for (size_t i = 0; i < outputWS->y(0).size(); i++) {
-      TS_ASSERT_DELTA(outputWS->y(0)[i], expected[i],0.0001);
+      TS_ASSERT_DELTA(outputWS->y(0)[i], expected[i], 0.0001);
     }
-
   }
 
   Workspace2D_sptr makeDummyWorkspace2D() {

@@ -48,13 +48,13 @@ void RemoveBins::init() {
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
 
-  //remove some known units that will not work
+  // remove some known units that will not work
   units.erase(std::remove(units.begin(), units.end(), "Empty"));
   units.erase(std::remove(units.begin(), units.end(), "Label"));
   units.erase(std::remove(units.begin(), units.end(), "Time"));
   units.erase(std::remove(units.begin(), units.end(), "Degrees"));
 
-  //add a default do nothing value
+  // add a default do nothing value
   units.insert(units.begin(), "AsInput");
   declareProperty("RangeUnit", "AsInput",
                   boost::make_shared<StringListValidator>(units),
@@ -100,11 +100,11 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
   // If WorkspaceIndex has been set it must be valid
   const int index = getProperty("WorkspaceIndex");
   if (!isEmpty(index) &&
-    index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
+      index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
     std::stringstream failureMsg;
     failureMsg << "The value of WorkspaceIndex provided (" << index
-      << ") is larger than the size of this workspace ("
-      << m_inputWorkspace->getNumberHistograms() << ")";
+               << ") is larger than the size of this workspace ("
+               << m_inputWorkspace->getNumberHistograms() << ")";
     g_log.error(failureMsg.str());
     result["WorkspaceIndex"] = failureMsg.str();
   }
@@ -113,22 +113,23 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
   m_interpolate = (interpolation == "Linear");
 
   const bool unitChange = (rangeUnit != "AsInput");
-  if (unitChange) {  
+  if (unitChange) {
     std::string errorString = "";
     if (m_inputWorkspace->axes() == 0)
-      errorString = "A single valued workspace has no unit, which is required for "
-      "this algorithm";
+      errorString =
+          "A single valued workspace has no unit, which is required for "
+          "this algorithm";
 
     Kernel::Unit_const_sptr unit = m_inputWorkspace->getAxis(0)->unit();
     // If m_unitID is empty it means that the workspace must have units, which
     // can be anything
-    if (unit && (!boost::dynamic_pointer_cast<const Kernel::Unit>(unit)))
-    {
-      errorString = "The workspace must have units if the RangeUnit is not \"AsInput\"";
+    if (unit && (!boost::dynamic_pointer_cast<const Kernel::Unit>(unit))) {
+      errorString =
+          "The workspace must have units if the RangeUnit is not \"AsInput\"";
     }
     if (!errorString.empty()) {
       g_log.error() << "InputWorkspace: " << errorString << "\n";
-      result["InputWorkspace"] = errorString;  
+      result["InputWorkspace"] = errorString;
     }
   }
   return result;
