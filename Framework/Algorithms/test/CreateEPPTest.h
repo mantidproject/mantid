@@ -27,8 +27,42 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void test_NormalOperation()
-  {
+  void test_Height() {
+    const int nSpectra = 1;
+    const int nBins = 33;
+    const double Ei = 13.7;
+    API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nSpectra, nBins);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto l1 = spectrumInfo.l1();
+    const auto l2 = spectrumInfo.l2(0);
+    const auto elasticTOF = Kernel::UnitConversion::run("Energy", "TOF", Ei, l1, l2, 0.0, Kernel::DeltaEMode::Direct, Ei);
+    const double binWidth = 22.7;
+    // Elastic bin will be in the centre of the spectrum.
+    for (size_t binIndex = 0; binIndex < nBins + 1; ++binIndex) {
+      const int shift = static_cast<int>(binIndex) - nBins / 2;
+      inputWS->mutableX(0)[binIndex] = elasticTOF + shift * binWidth;
+    }
+    const double height = 667.0;
+    inputWS->mutableY(0)[nBins / 2 - 1] = height;
+    const bool overwrite = true;
+    inputWS->mutableRun().addProperty<double>("Ei", Ei, overwrite);
+    CreateEPP alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    API::ITableWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getRef<double>("Height", 0), height)
+  }
+
+  void test_NormalOperation() {
     const int nSpectra = 3;
     const int nBins = 13;
     const double Ei = 42.7;
@@ -92,6 +126,29 @@ public:
         }
       }
     }
+  }
+
+  void test_SetSigma() {
+    const int nSpectra = 1;
+    const int nBins = 1;
+    API::MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nSpectra, nBins);
+    const bool overwrite = true;
+    inputWS->mutableRun().addProperty<double>("Ei", 1.0, overwrite);
+    const double sigma = 2.23;
+    CreateEPP alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Sigma", sigma))
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+    API::ITableWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getRef<double>("Sigma", 0), sigma)
   }
 
 private:
