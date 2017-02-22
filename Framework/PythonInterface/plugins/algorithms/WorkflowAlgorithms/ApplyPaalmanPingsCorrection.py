@@ -277,15 +277,18 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 from IndirectCommon import getEfixed
                 efixed = getEfixed(input_ws)
             else:
-                raise ValueError('Unit %s in sample workspace is not supported' % unit)
+                s_api.CloneWorkspace(InputWorkspace=input_ws,
+                                     OutputWorkspace=output_ws)
+                #raise ValueError('Unit %s in sample workspace is not supported' % unit)
 
-            # Do conversion
-            # Use temporary workspace so we don't modify data
-            s_api.ConvertUnits(InputWorkspace=input_ws,
-                               OutputWorkspace=output_ws,
-                               Target=target,
-                               EMode=emode,
-                               EFixed=efixed)
+            if unit == 'dSpacing' or unit == 'DeltaE':
+                # Do conversion
+                # Use temporary workspace so we don't modify data
+                s_api.ConvertUnits(InputWorkspace=input_ws,
+                                   OutputWorkspace=output_ws,
+                                   Target=target,
+                                   EMode=emode,
+                                   EFixed=efixed)
 
         else:
             # No need to convert

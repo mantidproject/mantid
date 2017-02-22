@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>462</height>
+    <width>703</width>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,15 +16,56 @@
   <layout class="QVBoxLayout" name="layoutAbsF2P">
    <item>
     <widget class="QGroupBox" name="gbInput">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Input</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_11">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbInputType">
+        <property name="text">
+         <string>Sample:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsContainer" native="true">
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="autoLoad" stdset="0">
+         <bool>true</bool>
+        </property>
+        <property name="workspaceSuffixes" stdset="0">
+         <stringlist>
+          <string>_red</string>
+          <string>_sqw</string>
+         </stringlist>
+        </property>
+        <property name="fileBrowserSuffixes" stdset="0">
+         <stringlist>
+          <string>_red.nxs</string>
+          <string>_sqw.nxs</string>
+         </stringlist>
+        </property>
+        <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -58,40 +99,127 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="autoLoad" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_red</string>
-          <string>_sqw</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_red.nxs</string>
-          <string>_sqw.nxs</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbInputType">
-        <property name="text">
-         <string>Sample:</string>
-        </property>
-       </widget>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="corrDetails">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Correction computation details. By default will be set automatically from the instrument parameters of the input workspace. Modify to override.</string>
+     </property>
+     <property name="title">
+      <string>Correction Details </string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="labelEmode">
+          <property name="text">
+           <string>Emode</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbEmode">
+          <property name="toolTip">
+           <string>Choose the energy transfer mode. </string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Indirect</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Direct</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Elastic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Efixed</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Efixed Value (mev)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="doubleEfixed">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Efixed value in mev. </string>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbNwave">
+          <property name="text">
+           <string>Number Wavelengths</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="spNwave">
+          <property name="toolTip">
+           <string>Number of wavelength points to calculate the corrections for.</string>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cbInterpolate">
+          <property name="toolTip">
+           <string>Interpolate the corrections as a function of wavelength.</string>
+          </property>
+          <property name="text">
+           <string>Interpolate</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -145,13 +273,31 @@
         </property>
         <widget class="QWidget" name="pgFlatPlate">
          <layout class="QGridLayout" name="gridLayout_2">
-          <property name="margin">
+          <property name="leftMargin">
            <number>0</number>
           </property>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbFlatSampleAngle">
-            <property name="text">
-             <string>Sample Angle:</string>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -165,13 +311,23 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="lbFlatCanBackThickness">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbFlatSampleThickness">
             <property name="text">
-             <string>Container Back Thickness:</string>
+             <string>Sample Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -191,26 +347,10 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbFlatSampleThickness">
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbFlatSampleAngle">
             <property name="text">
-             <string>Sample Thickness:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+             <string>Sample Angle (degree):</string>
             </property>
            </widget>
           </item>
@@ -221,16 +361,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
-            <property name="suffix">
-             <string> cm</string>
+          <item row="3" column="2">
+           <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+            <property name="text">
+             <string>Container Back Thickness:</string>
             </property>
            </widget>
           </item>
@@ -238,7 +375,16 @@
         </widget>
         <widget class="QWidget" name="pgCylinder">
          <layout class="QGridLayout" name="gridLayout_4">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">
@@ -345,7 +491,16 @@
         </widget>
         <widget class="QWidget" name="pgAnnulus">
          <layout class="QGridLayout" name="gridLayout_5">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="5" column="3">
@@ -487,13 +642,23 @@
       <string>Sample Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleDensity">
-        <property name="maximum">
-         <double>9999.989999999999782</double>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbSampleChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
         </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="valSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
@@ -511,10 +676,13 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbSampleChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
+        <property name="maximum">
+         <double>9999.989999999999782</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
         </property>
        </widget>
       </item>
@@ -522,19 +690,6 @@
        <widget class="QLineEdit" name="leSampleChemicalFormula">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valSampleChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -562,18 +717,24 @@
       <string>Can Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QComboBox" name="cbCanDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
-         </property>
-        </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="valCanChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
        </widget>
       </item>
       <item row="0" column="3">
@@ -596,24 +757,18 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valCanChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>
@@ -773,8 +928,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>640</x>
-     <y>65</y>
+     <x>633</x>
+     <y>64</y>
     </hint>
    </hints>
   </connection>
@@ -789,8 +944,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>99</x>
-     <y>222</y>
+     <x>126</x>
+     <y>258</y>
     </hint>
    </hints>
   </connection>
@@ -805,8 +960,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>413</x>
-     <y>222</y>
+     <x>497</x>
+     <y>258</y>
     </hint>
    </hints>
   </connection>
@@ -821,8 +976,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>256</x>
-     <y>222</y>
+     <x>326</x>
+     <y>258</y>
     </hint>
    </hints>
   </connection>
@@ -837,8 +992,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>569</x>
-     <y>222</y>
+     <x>633</x>
+     <y>258</y>
     </hint>
    </hints>
   </connection>
@@ -853,8 +1008,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>115</x>
-     <y>178</y>
+     <x>99</x>
+     <y>160</y>
     </hint>
    </hints>
   </connection>
@@ -869,8 +1024,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>178</y>
+     <x>126</x>
+     <y>160</y>
     </hint>
    </hints>
   </connection>
@@ -881,12 +1036,12 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>256</x>
-     <y>222</y>
+     <x>326</x>
+     <y>258</y>
     </hint>
     <hint type="destinationlabel">
-     <x>569</x>
-     <y>222</y>
+     <x>633</x>
+     <y>258</y>
     </hint>
    </hints>
   </connection>
@@ -901,8 +1056,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>178</y>
+     <x>44</x>
+     <y>166</y>
     </hint>
    </hints>
   </connection>
@@ -917,8 +1072,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>119</x>
-     <y>178</y>
+     <x>71</x>
+     <y>166</y>
     </hint>
    </hints>
   </connection>

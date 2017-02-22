@@ -30,6 +30,9 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(getBeamWidthFromWorkspace(const QString &)));
 
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
+          SLOT(fillCorrectionDetails(const QString &)));
+
   QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
@@ -73,9 +76,21 @@ void CalculatePaalmanPings::run() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           sampleWsName.toStdString());
 
+  const auto emode = m_uiForm.cbEmode->currentText();
+  absCorAlgo->setProperty("EMode", emode.toStdString());
+
+  const auto efixed = m_uiForm.doubleEfixed->value();
+  absCorAlgo->setProperty("EFixed", efixed);
+
+  const long int numwave = m_uiForm.spNwave->value();
+  absCorAlgo->setProperty("NumberWavelengths", numwave);
+
+  const bool inter = m_uiForm.cbInterpolate->isChecked();
+  absCorAlgo->setProperty("Interpolate", inter);
+
   // If not in wavelength then do conversion
   const auto sampleXUnit = sampleWs->getAxis(0)->unit();
-  if (sampleXUnit->caption() != "Wavelength") {
+  if (sampleXUnit->caption() != "Wavelength" && emode != "Efixed") {
     g_log.information(
         "Sample workspace not in wavelength, need to convert to continue.");
     absCorProps["SampleWorkspace"] =
@@ -104,7 +119,7 @@ void CalculatePaalmanPings::run() {
 
     // If not in wavelength then do conversion
     Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
-    if (canXUnit->caption() != "Wavelength") {
+    if (canXUnit->caption() != "Wavelength" && emode != "Efixed") {
       g_log.information("Container workspace not in wavelength, need to "
                         "convert to continue.");
       absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
@@ -122,11 +137,6 @@ void CalculatePaalmanPings::run() {
 
     addShapeSpecificCanOptions(absCorAlgo, sampleShape);
   }
-
-  const auto eMode = getEMode(sampleWs);
-  absCorAlgo->setProperty("EMode", eMode);
-  if (eMode == "Indirect")
-    absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
 
   // Generate workspace names
   auto nameCutIndex = sampleWsName.lastIndexOf("_");
@@ -315,6 +325,41 @@ void CalculatePaalmanPings::postProcessComplete(bool error) {
 void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
   m_uiForm.dsSample->readSettings(settings.group());
   m_uiForm.dsContainer->readSettings(settings.group());
+}
+
+/**
+ * Slot that tries to populate correction details from
+ * instrument parameters on sample workspace selection
+ * @param wsName Sample workspace name
+ */
+void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+
+  try {
+    m_uiForm.doubleEfixed->setValue(getEFixed(ws));
+  } catch (std::runtime_error) {
+    // do nothing if there is no efixed
+  }
+
+  auto emode = QString::fromStdString(getEMode(ws));
+  int index = m_uiForm.cbEmode->findText(emode);
+  if (index != -1) {
+    m_uiForm.cbEmode->setCurrentIndex(index);
+  }
+
+  auto inst = ws->getInstrument();
+  if (inst) {
+    if (inst->hasParameter("AbsorptionCorrectionNumberWavelength")) {
+      m_uiForm.spNwave->setValue(
+          inst->getIntParameter("AbsorptionCorrectionNumberWavelength")[0]);
+    }
+    if (inst->hasParameter("AbsorptionCorrectionInterpolate")) {
+      bool interpolate =
+          inst->getBoolParameter("AbsorptionCorrectionInterpolate")[0];
+      m_uiForm.cbInterpolate->setChecked(interpolate);
+    }
+  }
 }
 
 /**

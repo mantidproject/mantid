@@ -24,6 +24,7 @@ private slots:
   void absCorComplete(bool error);
   void postProcessComplete(bool error);
   void getBeamWidthFromWorkspace(const QString &wsName);
+  void fillCorrectionDetails(const QString &wsName);
   void validateChemical();
   void saveClicked();
   void plotClicked();
