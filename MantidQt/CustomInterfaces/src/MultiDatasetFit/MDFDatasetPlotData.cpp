@@ -93,7 +93,7 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
                               int wsIndex,
                               const Mantid::API::MatrixWorkspace *outputWS) {
   bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
-  auto &xValues = ws->points(wsIndex);
+  auto xValues = ws->points(wsIndex);
 
   m_dataCurve->setData(xValues.rawData().data(),
                        ws->y(wsIndex).rawData().data(),

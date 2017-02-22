@@ -184,8 +184,7 @@ void SampleTransmission::algorithmComplete(bool error) {
   m_uiForm.twResults->addTopLevelItem(transmissionItem);
   transmissionItem->setExpanded(true);
 
-  auto &transmissionData = ws->y(0);
-  Statistics stats = getStatistics(transmissionData.rawData());
+  Statistics stats = getStatistics(ws->y(0).rawData());
 
   QMap<QString, double> transmissionStats;
   transmissionStats["Min"] = stats.minimum;
