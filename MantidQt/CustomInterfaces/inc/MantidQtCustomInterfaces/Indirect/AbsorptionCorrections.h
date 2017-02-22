@@ -23,6 +23,7 @@ private slots:
   void saveClicked();
   void plotClicked();
   void getBeamDefaults(const QString &dataName);
+  void changeSampleDensityUnit(int);
 
 private:
   void addSaveWorkspace(QString wsName);

@@ -6,6 +6,8 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 
+#include <iostream>
+
 #include <QRegExpValidator>
 
 using namespace Mantid::API;
@@ -35,6 +37,9 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
+  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changeSampleDensityUnit(int)));
 }
 
 void AbsorptionCorrections::setup() {}
@@ -360,6 +365,18 @@ void AbsorptionCorrections::plotClicked() {
     plotSpectrum(plotCorr, 0);
   }
   plotSpectrum(plotData, 0);
+}
+
+/**
+ * Handle changing of the sample density unit
+ */
+void AbsorptionCorrections::changeSampleDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
+  }
 }
 } // namespace CustomInterfaces
 } // namespace MantidQt
