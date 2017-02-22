@@ -47,6 +47,8 @@ public:
 
   /// Returns the number of time slices
   std::string getTimeSlices() const override;
+  /// Returns time slicing values
+  std::string getTimeSlicingValues() const override;
 
 public slots:
   /// Enable / disable slicing option entry fields
@@ -62,8 +64,8 @@ private:
   /// The presenter
   std::unique_ptr<IReflEventPresenter> m_presenter;
 
-  typedef std::pair<QRadioButton *, QWidget *> ButtonEntryPair;
-  std::vector<ButtonEntryPair> m_buttonEntryPairsList;
+  /// List of radio buttons
+  std::vector<QRadioButton *> m_buttonList;
 };
 
 } // namespace Mantid
