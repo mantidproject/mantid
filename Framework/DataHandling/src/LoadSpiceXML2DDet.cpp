@@ -584,22 +584,24 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
                       << " (int) value = " << ivalue << "\n";
       } else {
         std::string str_value(nodevalue);
-        if (nodename.compare("start_time") == 0)
-        {
+        if (nodename.compare("start_time") == 0) {
           // replace 2015-01-17 13:36:45 by
-          g_log.notice() << "FIXME ! : Original start time: " << nodevalue << "  vs. Mantid time format: " << "2016-07-23T06:55:21.502270666"
+          g_log.notice() << "FIXME ! : Original start time: " << nodevalue
+                         << "  vs. Mantid time format: "
+                         << "2016-07-23T06:55:21.502270666"
                          << "\n";
           str_value = nodevalue;
           str_value.replace(10, 1, "T");
           g_log.notice() << "Replaced string = " << str_value << "\n";
           // str_value = "2016-07-23T06:55:21.502270666";
           /*
-           * Original start time: 2015-01-17 13:36:45  vs. Mantid time format: 2016-07-23T06:55:21.502270666
+           * Original start time: 2015-01-17 13:36:45  vs. Mantid time format:
+           *2016-07-23T06:55:21.502270666
            *
            */
         }
         outws->mutableRun().addProperty(
-             new PropertyWithValue<std::string>(nodename, str_value));
+            new PropertyWithValue<std::string>(nodename, str_value));
         // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
         //               << " (string) value = " << nodevalue << "\n";
       }
@@ -860,9 +862,13 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
                     << "\n";
 
   // set up run start
-  // matrixws->mutableRun().addProperty(new PropertyWithValue<std::string>("run_start", "2016-07-23T06:55:21.502270666"));
-  // matrixws->mutableRun().addProperty(new PropertyWithValue<std::string>("start_time", "2016-07-23T06:55:21.502270666"));
-   
+  // matrixws->mutableRun().addProperty(new
+  // PropertyWithValue<std::string>("run_start",
+  // "2016-07-23T06:55:21.502270666"));
+  // matrixws->mutableRun().addProperty(new
+  // PropertyWithValue<std::string>("start_time",
+  // "2016-07-23T06:55:21.502270666"));
+
   //
   //
 }

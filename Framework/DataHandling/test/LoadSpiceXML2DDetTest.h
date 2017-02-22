@@ -162,8 +162,7 @@ public:
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
-    for (auto property : outws->run().getProperties())
-    {
+    for (auto property : outws->run().getProperties()) {
       std::cout << property->name() << ": " << property->value() << "\n";
     }
 
