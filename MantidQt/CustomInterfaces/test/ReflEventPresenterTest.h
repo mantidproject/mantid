@@ -37,6 +37,30 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
+
+  void test_get_slicing_values() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getTimeSlicingValues())
+      .Times(Exactly(1))
+      .WillOnce(Return("5"));
+    presenter.getTimeSlicingValues();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
+  void test_get_slicing_type() {
+    MockEventView mockView;
+    ReflEventPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, getTimeSlicingType())
+      .Times(Exactly(1))
+      .WillOnce(Return("UniformEven"));
+    presenter.getTimeSlicingType();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H */

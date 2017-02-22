@@ -110,6 +110,8 @@ class MockEventView : public IReflEventView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTimeSlices, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 
   // Calls we don't care about
   IReflEventPresenter *getPresenter() const override { return nullptr; }
@@ -166,12 +168,22 @@ public:
 class MockEventPresenter : public IReflEventPresenter {
 public:
   MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
   ~MockEventPresenter() override{};
 };
 
 class MockEventTabPresenter : public IReflEventTabPresenter {
 public:
   std::string getTimeSlicingOptions(int group) const override {
+    UNUSED_ARG(group)
+    return std::string();
+  };
+  std::string getTimeSlicingValues(int group) const override {
+    UNUSED_ARG(group)
+    return std::string();
+  };
+  std::string getTimeSlicingType(int group) const override {
     UNUSED_ARG(group)
     return std::string();
   };
@@ -229,6 +241,14 @@ public:
     UNUSED_ARG(group);
     return std::string();
   };
+  std::string getTimeSlicingValues(int group) const override {
+    UNUSED_ARG(group);
+    return std::string();
+  }
+  std::string getTimeSlicingType(int group) const override {
+    UNUSED_ARG(group);
+    return std::string();
+  }
 
   ~MockMainWindowPresenter() override{};
 };
