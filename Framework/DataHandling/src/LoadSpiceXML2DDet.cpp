@@ -238,7 +238,8 @@ void LoadSpiceXML2DDet::processInputs() {
                              "It either has 2 integers or left empty to get "
                              "determined automatically.");
   }
-  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", " << m_numPixelY << "\n";
+  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", "
+                << m_numPixelY << "\n";
 
   m_loadInstrument = getProperty("LoadInstrument");
 
@@ -525,8 +526,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "[Version 1] Row " << i_col << " contains " << veccounts.size()
-                << " items other than " << numpixely
+          errss << "[Version 1] Row " << i_col << " contains "
+                << veccounts.size() << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
         }
@@ -589,8 +590,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           str_value = nodevalue;
           str_value.replace(10, 1, "T");
-          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format "
-                        << str_value << "\n";
+          g_log.debug() << "Replace start_time " << nodevalue
+                        << " by Mantid time format " << str_value << "\n";
         }
         outws->mutableRun().addProperty(
             new PropertyWithValue<std::string>(nodename, str_value));
@@ -658,15 +659,14 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
           // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           std::string str_value(nodevalue);
           str_value.replace(10, 1, "T");
-          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format "
-                        << str_value << "\n";
+          g_log.debug() << "Replace start_time " << nodevalue
+                        << " by Mantid time format " << str_value << "\n";
           str_log_map.emplace(nodename, str_value);
-        }
-        else
+        } else
           str_log_map.emplace(nodename, nodevalue);
       } // END-IF-ELSE (node value type)
-    } // END-IF-ELSE (detector-node or log node)
-  } // END-FOR (xml nodes)
+    }   // END-IF-ELSE (detector-node or log node)
+  }     // END-FOR (xml nodes)
 
   // Add the property to output workspace
   for (std::map<std::string, std::string>::iterator miter = str_log_map.begin();
@@ -713,12 +713,11 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   // file records data in column major)
   size_t num_empty_line = 0;
   size_t num_weird_line = 0;
-  for (size_t iline = 0; iline < vecLines.size(); ++iline)
-  {
+  for (size_t iline = 0; iline < vecLines.size(); ++iline) {
     if (vecLines[iline].size() == 0)
-      ++ num_empty_line;
+      ++num_empty_line;
     else if (vecLines[iline].size() < 100)
-      ++ num_weird_line;
+      ++num_weird_line;
   }
   size_t num_pixel_x = vecLines.size() - num_empty_line - num_weird_line;
   g_log.information() << "There are " << num_empty_line << " lines and "
@@ -727,9 +726,10 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   // read the first line to determine the number of pixels at X direction
   size_t first_regular_line = 0;
   if (vecLines[first_regular_line].size() < 100)
-    ++ first_regular_line;
+    ++first_regular_line;
   std::vector<std::string> veccounts;
-  boost::split(veccounts, vecLines[first_regular_line], boost::algorithm::is_any_of(" \t"));
+  boost::split(veccounts, vecLines[first_regular_line],
+               boost::algorithm::is_any_of(" \t"));
   size_t num_pixel_y = veccounts.size();
 
   // create output workspace

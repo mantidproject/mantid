@@ -584,14 +584,16 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Test with loading instrument without Spice scan Table and WITHOUT user-specified detector
+  /** Test with loading instrument without Spice scan Table and WITHOUT
+   * user-specified detector
    * geometry, while the 2theta value is from sample
    *    sample log
    *  Testing includes:
    *  1. Load the instrument without Spice Table;
    *  2. Check the positions of detectors.
    *    (a) at center pixel, 2-theta = 42.797
-   * This should have the same result as unti test "test_loadDataUsingSampleLogValue"
+   * This should have the same result as unti test
+   * "test_loadDataUsingSampleLogValue"
    * @brief Load data and instrument with sample log value
    */
   void test_loadDataWithoutSpecifyingDetectorGeometry() {
