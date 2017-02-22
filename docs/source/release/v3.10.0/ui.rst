@@ -40,6 +40,11 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+#################
+
+- Indirect > Corrections > CalculatePaalmanPings is upgraded with few new options for computation of the corrections. Those are needed to be able to compute the corrections for different scenarios, like QENS, FWS, diffraction.
+
 Bugs Resolved
 -------------
 
