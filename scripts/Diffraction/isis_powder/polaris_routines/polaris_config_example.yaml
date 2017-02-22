@@ -1,0 +1,14 @@
+# This is an example configuration file
+# It is not set up for any specific machine and is to give the user an idea of the layout
+user_name : "Mantid_Tester"
+
+# By using the ' character instead of the " character we don't need to escape the path
+calibration_directory : 'C:\polaris\calibration'
+output_directory : 'C:\polaris\output'
+calibration_mapping_file : 'C:\polaris\calibration\cal_map.yaml'
+
+# We can also use this configuration to set default options - e.g. always divide by vanadium spline
+do_van_normalisation : True
+
+# Or set a default chopper mode
+chopper_on : False

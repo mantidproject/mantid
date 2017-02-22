@@ -5,7 +5,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -73,11 +72,6 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   m_isCommonBinsFlag = other.m_isCommonBinsFlag;
   m_masks = other.m_masks;
   // TODO: Do we need to init m_monitorWorkspace?
-
-  // This call causes copying of m_parmap (ParameterMap). The constructor of
-  // ExperimentInfo just kept a shared_ptr to the same map as in other, which
-  // is not enough as soon as the maps in one of the workspaces it edited.
-  instrumentParameters();
 }
 
 /// Destructor
@@ -93,6 +87,12 @@ MatrixWorkspace::~MatrixWorkspace() {
  *
  * Used for access to spectrum number and detector ID information of spectra. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  // API::SpectrumInfo::sharedSpectrumDefinitions updates definitions before
+  // returning. We always set spectrum definitions, since definitions that were
+  // previously set into the IndexInfo may have run out of sync (due to a
+  // copy-on-write mechanism).
+  m_indexInfo->setSpectrumDefinitions(
+      spectrumInfo().sharedSpectrumDefinitions());
   return *m_indexInfo;
 }
 
@@ -112,6 +112,22 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
     auto ids = indexInfo.detectorIDs(i);
     spectrum.setDetectorIDs(std::set<detid_t>(ids.begin(), ids.end()));
   }
+  // This sets the SpectrumDefinitions for the SpectrumInfo, which may seem
+  // counterintuitive at first -- why would setting IndexInfo modify internals
+  // of SpectrumInfo? However, logically it would not make sense to assign
+  // SpectrumDefinitions in an assignment of SpectrumInfo: Changing
+  // SpectrumDefinitions requires also changes at a higher level of a workspace
+  // (in particular the histograms, which would need to be regrouped as well).
+  // Thus, assignment of SpectrumInfo should just check for compatible
+  // SpectrumDefinitions and assign other data (such as per-spectrum masking
+  // flags, which do not exist yet). Furthermore, since currently detector
+  // groupings are still stored in ISpectrum (in addition to the
+  // SpectrumDefinitions in SpectrumInfo), an assigment of SpectrumDefinitions
+  // in SpectrumInfo would lead to inconsistent workspaces. SpectrumDefinitions
+  // are thus assigned by IndexInfo, which acts at a highler level and is
+  // typically used at construction time of a workspace, i.e., there is no data
+  // in histograms yet which would need to be regrouped.
+  setSpectrumDefinitions(indexInfo.spectrumDefinitions());
 }
 
 /// @returns A human-readable string of the current state
@@ -169,6 +185,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   if (m_isInitialized)
     return;
 
+  setNumberOfDetectorGroups(NVectors);
+
   // Invoke init() method of the derived class inside a try/catch clause
   try {
     this->init(NVectors, XLength, YLength);
@@ -192,6 +210,8 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized)
     return;
+
+  setNumberOfDetectorGroups(NVectors);
 
   // Invoke init() method of the derived class inside a try/catch clause
   try {
@@ -236,55 +256,6 @@ const std::string MatrixWorkspace::getTitle() const {
     return title;
   } else
     return Workspace::getTitle();
-}
-
-/** Return a reference to the SpectrumInfo object.
- *
- * Any modifications of the instrument or instrument parameters will invalidate
- * this reference.
- */
-const SpectrumInfo &MatrixWorkspace::spectrumInfo() const {
-  if (!m_spectrumInfo) {
-    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
-    if (!m_spectrumInfo)
-      m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
-  }
-  return *m_spectrumInfo;
-}
-
-/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
- */
-SpectrumInfo &MatrixWorkspace::mutableSpectrumInfo() {
-  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
-  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
-  // modifications. This will trigger a copy if required. Note that the
-  // following happens internally:
-  // 1. make_unique creates a new SpectrumInfo, which calls
-  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
-  // count to the ParameterMap is typically not 1, so
-  // invalidateInstrumentReferences() is called.
-  // 2. invalidateInstrumentReferences() resets m_spectrumInfo, releasing any
-  // parameterized detectors and thus dropping any unneeded references to the
-  // ParameterMap.
-  // 3. Construction of SpectrumInfo continues and the result is assigned to
-  // m_spectrumInfo.
-
-  // No locking here since this non-const method is not thread safe.
-  m_spectrumInfo = Kernel::make_unique<SpectrumInfo>(*this);
-  return *m_spectrumInfo;
-}
-
-/** Resets the SpectrumInfo object on modification of the Instrument.
- *
- * This needs to be called by any code that causes a reallocation of the
- * instrument or the parameter map since currently SpectrumInfo buffers the
- * result of MatrixWorkspace::getInstrument(). This method should be removed
- * once SpectrumInfo is an independent object.
- */
-void MatrixWorkspace::invalidateInstrumentReferences() const {
-  // None of the methods in ExperimentInfo that calls this is thread safe, so we
-  // do not need to bother with locking here.
-  m_spectrumInfo = nullptr;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
@@ -1997,17 +1968,29 @@ MatrixWorkspace::detectorIDs(const size_t index) const {
   return getSpectrum(index).getDetectorIDs();
 }
 
-/// Returns the number of detector groups. This is equal to the number of
-/// spectra.
-size_t MatrixWorkspace::numberOfDetectorGroups() const {
-  return getNumberHistograms();
+/// Cache a lookup of grouped detIDs to member IDs. Always throws
+/// std::runtime_error since MatrixWorkspace supports detector grouping via
+/// spectra instead of the caching mechanism.
+void MatrixWorkspace::cacheDetectorGroupings(const det2group_map &) {
+  throw std::runtime_error("Cannot cache detector groupings in a "
+                           "MatrixWorkspace -- grouping must be defined via "
+                           "spectra");
 }
 
-/// Returns a set of detector IDs for a group. This is equal to the detector IDs
-/// of the spectrum at given index.
-const std::set<detid_t> &
-MatrixWorkspace::detectorIDsInGroup(const size_t index) const {
-  return getSpectrum(index).getDetectorIDs();
+/// Throws an exception. This method is only for MDWorkspaces.
+size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
+  throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
+                           "for MatrixWorkspace, only for MDWorkspaces");
+}
+
+/** Update detector grouping for spectrum with given index.
+ *
+ * This method is called when the detector grouping stored in SpectrumDefinition
+ * at `index` in Beamline::SpectrumInfo is not initialized or outdated. Detector
+ * IDs are currently stored in ISpectrum, but grouping information needs to be
+ * available and updated in Beamline::SpectrumInfo. */
+void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
+  setDetectorGrouping(index, getSpectrum(index).getDetectorIDs());
 }
 
 } // namespace API

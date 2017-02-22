@@ -53,7 +53,7 @@ set ( SRC_FILES
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILLIndirect.cpp
-	src/LoadILLTOF.cpp
+	src/LoadILLIndirect2.cpp
 	src/LoadILLTOF2.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
@@ -228,7 +228,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILLIndirect.h
-	inc/MantidDataHandling/LoadILLTOF.h
+	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
@@ -397,11 +397,12 @@ set ( TEST_FILES
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
 	LoadILLIndirectTest.h
-	LoadILLTOFTest.h
+	LoadILLIndirect2Test.h
 	LoadILLTOF2Test.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
 	LoadISISNexusTest.h
+	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
@@ -434,7 +435,9 @@ set ( TEST_FILES
 	LoadTBLTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
+	LoadSpecTest.h
 	LoadSPETest.h
+	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSavuTomoConfigTest.h
@@ -470,7 +473,7 @@ set ( TEST_FILES
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFITSTest.h
-	SaveFocussedXYETest.h
+	SaveFocusedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
@@ -483,6 +486,7 @@ set ( TEST_FILES
 	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
+	SaveOpenGenieAsciiTest.h
 	SavePARTest.h
 	SavePDFGuiTest.h
 	SavePHXTest.h

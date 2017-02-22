@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/Normalization.h"
 
 #include <vtkCellData.h>
+#include <vtkCellType.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
 #include <vtkNew.h>
@@ -115,7 +116,7 @@ void vtkSplatterPlotFactory::doCreate(
   }
   size_t num_boxes_to_use = static_cast<size_t>(
       m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
-  if (num_boxes_to_use >= m_sortedBoxes.size()) {
+  if (num_boxes_to_use > 0 && num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
 
@@ -211,6 +212,12 @@ void vtkSplatterPlotFactory::doCreate(
   // Add points and scalars
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->GetPointData()->SetScalars(signal.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+
+  visualDataSet->Allocate(points->GetNumberOfPoints());
+  for (vtkIdType ptId = 0; ptId < points->GetNumberOfPoints(); ++ptId) {
+    visualDataSet->InsertNextCell(VTK_VERTEX, 1, &ptId);
+  }
 }
 
 /**
