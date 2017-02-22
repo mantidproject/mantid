@@ -6,6 +6,14 @@
 #include <cassert>
 #include <sstream>
 
+#ifdef __clang__
+#ifndef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored                                               \
+    "-Wcppcoreguidelines-pro-bounds-pointer-arithmetic"
+#endif
+#endif
+
 namespace Mantid {
 namespace Kernel {
 
@@ -17,7 +25,7 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
            double *f, double *c__, double *g, double *a, double *acc, int *iter,
            int *mode, double *w, int *l_w__, int *jw, int *l_jw__);
 ///@endcond
-}
+} // namespace
 
 /**
  * Perform the minimization using the SLSQP routine
@@ -3008,8 +3016,14 @@ L40:
 
 ///@endcond
 
-} // <anonymous>
+} // namespace
 
 } // namespace Math
-}
-} // namespace Mantid::Kernel
+} // namespace Kernel
+} // namespace Mantid
+
+#ifndef __APPLE__
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#endif
