@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
@@ -18,9 +19,9 @@ using namespace std;
 
 class AsyncAlgorithm : public Algorithm {
 public:
-  AsyncAlgorithm() : Algorithm(), throw_exception(false), result(0) {}
+  AsyncAlgorithm() : Algorithm(), result(0), throw_exception(false) {}
   AsyncAlgorithm(const bool throw_default)
-      : Algorithm(), throw_exception(throw_default), result(0) {}
+      : Algorithm(), result(0), throw_exception(throw_default) {}
   ~AsyncAlgorithm() override {}
   const std::string name() const override {
     return "AsyncAlgorithm";
@@ -34,7 +35,7 @@ public:
   const std::string summary() const override { return "Test summary"; }
 
   void init() override {
-    declareProperty(std::make_unique<WorkspaceProperty<>>(
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
         "InputWorkspace", "", Direction::Input, PropertyMode::Optional));
   }
 
