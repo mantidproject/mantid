@@ -48,6 +48,11 @@ public:
   /// Returns the number of time slices
   std::string getTimeSlices() const override;
 
+public slots:
+  /// Enable / disable slicing option entry fields
+  void toggleSlicingOptions() const;
+
+
 private:
   /// Initialise the interface
   void initLayout();
@@ -56,6 +61,9 @@ private:
   Ui::ReflEventWidget m_ui;
   /// The presenter
   std::unique_ptr<IReflEventPresenter> m_presenter;
+
+  typedef std::pair<QRadioButton *, QWidget *> ButtonEntryPair;
+  std::vector<ButtonEntryPair> m_buttonEntryPairsList;
 };
 
 } // namespace Mantid

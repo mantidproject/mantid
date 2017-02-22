@@ -29,6 +29,16 @@
                   <number>10</number>
                 </property>
                 <item row="0" column="0">
+                  <widget class="QRadioButton" name="uniformEvenTimeSlicesRadioButton">
+                    <property name="checked">
+                      <bool>true</bool>
+                    </property>
+                    <attribute name="buttonGroup">
+                      <string notr="true">slicingOptionsButtonGroup</string>
+                    </attribute>
+                  </widget>
+                </item>
+                <item row="0" column="1">
                   <widget class="QLineEdit" name="uniformEvenTimeSlicesEdit">
                     <property name="sizeHint" stdset="0">
                       <size>
@@ -38,14 +48,14 @@
                     </property>
                   </widget>
                 </item>
-                <item row="0" column="1">
+                <item row="0" column="2">
                   <widget class="QLabel" name="uniformEvenTimeSlicesLabel">
                     <property name="text">
                       <string>even time slices</string>
                     </property>
                   </widget>
                 </item>
-                <item row="0" column="2">
+                <item row="0" column="3">
                   <spacer name="uniformEvenTimeSlicesSpacer">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
@@ -59,6 +69,13 @@
                   </spacer>
                 </item>
                 <item row="1" column="0">
+                  <widget class="QRadioButton" name="uniformTimeSlicesRadioButton">
+                    <attribute name="buttonGroup">
+                      <string notr="true">slicingOptionsButtonGroup</string>
+                    </attribute>
+                  </widget>
+                </item>
+                <item row="1" column="1">
                   <widget class="QLineEdit" name="uniformTimeSlicesEdit">
                     <property name="sizeHint" stdset="0">
                       <size>
@@ -68,14 +85,14 @@
                     </property>
                   </widget>
                 </item>
-                <item row="1" column="1">
+                <item row="1" column="2">
                   <widget class="QLabel" name="uniformTimeSlicesLabel">
                     <property name="text">
                       <string>(sec) slices</string>
                     </property>
                   </widget>
                 </item>
-                <item row="1" column="2">
+                <item row="1" column="3">
                   <spacer name="uniformTimeSlicesSpacer">
                     <property name="orientation">
                       <enum>Qt::Horizontal</enum>
@@ -99,6 +116,13 @@
             <string>Custom slicing</string>
           </property>
           <layout class="QHBoxLayout" name="customLayout">
+            <item>
+              <widget class="QRadioButton" name="customTimeSlicesRadioButton">
+                <attribute name="buttonGroup">
+                  <string notr="true">slicingOptionsButtonGroup</string>
+                </attribute>
+              </widget>
+            </item>
             <item>
               <widget class="QLabel" name="customTimeSlicesLabel">
                 <property name="text">
@@ -138,6 +162,13 @@
             <string>Slicing by log value</string>
           </property>
           <layout class="QHBoxLayout" name="logValueLayout">
+            <item>
+              <widget class="QRadioButton" name="logValueSlicesRadioButton">
+                <attribute name="buttonGroup">
+                  <string notr="true">slicingOptionsButtonGroup</string>
+                </attribute>
+              </widget>
+            </item>
             <item>
               <widget class="QComboBox" name="logValueComboBox">
                 <item>
@@ -182,4 +213,7 @@
   <customwidgets/>
   <resources/>
   <connections/>
+  <buttongroups>
+    <buttongroup name="slicingOptionsButtonGroup"/>
+  </buttongroups>
 </ui>
