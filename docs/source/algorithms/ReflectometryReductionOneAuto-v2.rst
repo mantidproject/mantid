@@ -28,9 +28,10 @@ Note that ProcessingInstructions are workspace indices, not detector IDs. The fi
 to monitors, rather than detectors of interest. For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
 Once the algorithm determines the detectors of interest it corrects their positions according to :literal:`ThetaIn`,
-if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. If :literal:`ThetaIn` is not set, detectors
-will not be corrected. However, it is recommended to use this option to ensure that :ref:`algm-ReflectometryReductionOne`
-is able to convert from wavelength to momentum transfer properly.
+if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them
+vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
+If :literal:`ThetaIn` is not set, detectors will not be corrected. However, it is recommended to use this option to
+ensure that :ref:`algm-ReflectometryReductionOne` is able to convert from wavelength to momentum transfer properly.
 
 Next, the algorithm will try to populate input properties which have not been set. Specifically, it will search for
 :literal:`LambdaMin`, :literal:`LambdaMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,
