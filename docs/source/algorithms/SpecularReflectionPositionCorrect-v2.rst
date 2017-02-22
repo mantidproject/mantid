@@ -45,6 +45,8 @@ Usage
    
 Output:
 
+Note that in this case the difference between shifting the detectors vertically or rotating them is negligible.
+
 .. testoutput:: SpecularReflectionPositionCorrectPointDetector 
 
    point-detector
