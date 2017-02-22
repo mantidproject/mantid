@@ -153,15 +153,15 @@ public:
     EXPECT_CALL(mockView, getScaleFactor())
         .Times(Exactly(1))
         .WillOnce(Return("2"));
-    EXPECT_CALL(mockView, getDetectorCorrectionType())
-        .Times(Exactly(1))
-        .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getMomentumTransferStep())
         .Times(Exactly(1))
         .WillOnce(Return("-0.02"));
     EXPECT_CALL(mockView, getProcessingInstructions())
         .Times(Exactly(1))
         .WillOnce(Return("3,4"));
+    EXPECT_CALL(mockView, getDetectorCorrectionType())
+        .Times(Exactly(1))
+        .WillOnce(Return("VerticalShift"));
     EXPECT_CALL(mockView, getTransmissionRuns())
         .Times(Exactly(1))
         .WillOnce(Return("INTER00013463,INTER00013464"));
@@ -192,9 +192,9 @@ public:
     TS_ASSERT_EQUALS(optionsVec[13], "WavelengthMax=15");
     TS_ASSERT_EQUALS(optionsVec[14], "I0MonitorIndex=2");
     TS_ASSERT_EQUALS(optionsVec[15], "ScaleFactor=2");
-    TS_ASSERT_EQUALS(optionsVec[16], "DetectorCorrectionType=VerticalShift");
-    TS_ASSERT_EQUALS(optionsVec[17], "MomentumTransferStep=-0.02");
-    TS_ASSERT_EQUALS(optionsVec[18], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[16], "MomentumTransferStep=-0.02");
+    TS_ASSERT_EQUALS(optionsVec[17], "ProcessingInstructions=\"3,4\"");
+    TS_ASSERT_EQUALS(optionsVec[18], "DetectorCorrectionType=VerticalShift");
     TS_ASSERT_EQUALS(optionsVec[19], "StartOverlap=10");
     TS_ASSERT_EQUALS(optionsVec[20], "EndOverlap=12");
     TS_ASSERT_EQUALS(optionsVec[21],
