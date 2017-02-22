@@ -674,7 +674,7 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
       attrLen = dims[0];
 #endif
       if (std::none_of(attrs.cbegin(), attrs.cend(),
-                       [attrName](const char *name) {
+                       [&attrName](const char *name) {
                          return strcmp(attrName, name) == 0;
                        })) {
         attrLen++; /* Add space for string termination */
