@@ -223,41 +223,6 @@ public:
 
   }
 
-  /* currently disabled, alg does not support point data yet*/
-  void xtestExecPointData() {
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create1DWorkspaceFib(10,false);
-    std::string wsName = "RemoveBins_PointData";
-    std::string wsNameOutput = wsName + "_Output";
-    AnalysisDataService::Instance().addOrReplace(wsName, inputWS);
-    
-    RemoveBins algPD;
-
-    algPD.initialize();
-    TS_ASSERT_THROWS_NOTHING(algPD.setPropertyValue("InputWorkspace", wsName);)
-    algPD.setPropertyValue("OutputWorkspace", wsNameOutput);
-    algPD.setPropertyValue("XMin", "5");
-    algPD.setPropertyValue("XMax", "6");
-    algPD.setPropertyValue("Interpolation", "Linear");
-    try {
-      TS_ASSERT_EQUALS(algPD.execute(), true);
-    } catch (std::runtime_error &e) {
-      TS_FAIL(e.what());
-    }
-
-    MatrixWorkspace_const_sptr outputWS =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOutput);
-
-    TS_ASSERT_EQUALS(outputWS->x(0).size(), 4);
-    TS_ASSERT_EQUALS(outputWS->y(0).size(), 3);
-    TS_ASSERT_EQUALS(outputWS->x(0)[0], 10);
-    TS_ASSERT_EQUALS(outputWS->y(0)[0], 2);
-
-    //cleanup
-    AnalysisDataService::Instance().remove(wsName);
-    AnalysisDataService::Instance().remove(wsNameOutput);
-  }
-
-
   Workspace2D_sptr makeDummyWorkspace2D() {
     Workspace2D_sptr testWorkspace(new Workspace2D);
 
