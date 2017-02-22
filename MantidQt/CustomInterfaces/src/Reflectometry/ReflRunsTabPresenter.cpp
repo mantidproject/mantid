@@ -394,6 +394,20 @@ std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
   return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
 }
 
+/** Requests time-slicing values. Values are supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+}
+
+/** Requests time-slicing type. Type is supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingType() const {
+  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
+}
+
 /**
 Tells the view to show an critical error dialog
 @param prompt : The prompt to appear on the dialog

@@ -78,6 +78,8 @@ public:
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
   std::string getTimeSlicingOptions() const override;
+  std::string getTimeSlicingValues() const override;
+  std::string getTimeSlicingType() const override;
 
 private:
   /// The search model
