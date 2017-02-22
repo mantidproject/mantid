@@ -97,8 +97,8 @@ public:
   MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &),
-                     void(const std::vector<std::string> &));
+  MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
+                                           const std::vector<std::string> &));
   MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   // Calls we don't care about
   void
