@@ -73,21 +73,58 @@ void RemoveBins::init() {
                   "workspace. Otherwise, all spectra will be acted upon.");
 }
 
-/** Checks that the workspace has units if the RangeUnit is not AsInput
-*
+/** Checks cross property validation
+*   @returns a map of PropertyName->ErrorMessage
 */
 std::map<std::string, std::string> RemoveBins::validateInputs() {
   std::map<std::string, std::string> result;
   const std::string rangeUnit = getProperty("RangeUnit");
+
+  // Get input workspace
+  m_inputWorkspace = getProperty("InputWorkspace");
+
+  // If that was OK, then we can get their values
+  m_startX = getProperty("XMin");
+  m_endX = getProperty("XMax");
+
+  if (m_startX > m_endX) {
+    const std::string failure("XMax must be greater than XMin.");
+    g_log.error(failure);
+    result["XMax"] = failure;
+  }
+
+  // If WorkspaceIndex has been set it must be valid
+  const int index = getProperty("WorkspaceIndex");
+  if (!isEmpty(index) &&
+    index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
+    std::stringstream failureMsg;
+    failureMsg << "The value of WorkspaceIndex provided (" << index
+      << ") is larger than the size of this workspace ("
+      << m_inputWorkspace->getNumberHistograms() << ")";
+    g_log.error(failureMsg.str());
+    result["WorkspaceIndex"] = failureMsg.str();
+  }
+
+  const std::string interpolation = getProperty("Interpolation");
+  m_interpolate = (interpolation == "Linear");
+
   const bool unitChange = (rangeUnit != "AsInput");
   if (unitChange) {  
-    // Get input workspace
-    MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-    WorkspaceUnitValidator unitValidator;
-    std::string errorString = unitValidator.isValid(inputWorkspace);
+    std::string errorString = "";
+    if (m_inputWorkspace->axes() == 0)
+      errorString = "A single valued workspace has no unit, which is required for "
+      "this algorithm";
+
+    Kernel::Unit_const_sptr unit = m_inputWorkspace->getAxis(0)->unit();
+    // If m_unitID is empty it means that the workspace must have units, which
+    // can be anything
+    if (unit && (!boost::dynamic_pointer_cast<const Kernel::Unit>(unit)))
+    {
+      errorString = "The workspace must have units if the RangeUnit is not \"AsInput\"";
+    }
     if (!errorString.empty()) {
-      result["InputWorkspace"] =
-        "The workspace must have units if the RangeUnit is not \"AsInput\"";
+      g_log.error() << "InputWorkspace: " << errorString << "\n";
+      result["InputWorkspace"] = errorString;  
     }
   }
   return result;
@@ -97,8 +134,6 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
  *
  */
 void RemoveBins::exec() {
-  this->checkProperties();
-
   // If the X range has been given in a different unit, or if the workspace
   // isn't square, then we will need
   // to calculate the bin indices to cut out each time.
@@ -187,40 +222,6 @@ void RemoveBins::exec() {
   // Assign to the output workspace property
   setProperty("OutputWorkspace", outputWS);
   m_inputWorkspace.reset();
-}
-
-/** Retrieve the input properties and check that they are valid
- *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less
- * than XMin
- */
-void RemoveBins::checkProperties() {
-  // Get input workspace
-  m_inputWorkspace = getProperty("InputWorkspace");
-
-  // If that was OK, then we can get their values
-  m_startX = getProperty("XMin");
-  m_endX = getProperty("XMax");
-
-  if (m_startX > m_endX) {
-    const std::string failure("XMax must be greater than XMin.");
-    g_log.error(failure);
-    throw std::invalid_argument(failure);
-  }
-
-  // If WorkspaceIndex has been set it must be valid
-  const int index = getProperty("WorkspaceIndex");
-  if (!isEmpty(index) &&
-      index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
-    g_log.error() << "The value of WorkspaceIndex provided (" << index
-                  << ") is larger than the size of this workspace ("
-                  << m_inputWorkspace->getNumberHistograms() << ")\n";
-    throw Kernel::Exception::IndexError(
-        index, m_inputWorkspace->getNumberHistograms() - 1,
-        "RemoveBins WorkspaceIndex property");
-  }
-
-  const std::string interpolation = getProperty("Interpolation");
-  m_interpolate = (interpolation == "Linear");
 }
 
 /// Calls CropWorkspace as a Child Algorithm to remove bins from the start or

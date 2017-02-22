@@ -83,7 +83,6 @@ private:
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  void checkProperties();
   void crop(const double &start, const double &end);
   void transformRangeUnit(const int index, double &startX, double &endX);
   void calculateDetectorPosition(const int index, double &l1, double &l2,

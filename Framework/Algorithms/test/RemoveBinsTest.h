@@ -189,41 +189,46 @@ public:
     AnalysisDataService::Instance().remove(outputWSName);
   }
 
-  void xtestRealData() {
-    Mantid::DataHandling::LoadMuonNexus2 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    loader.execute();
-    TS_ASSERT(loader.isExecuted())
+  void testRangeUnit() {
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10);
+    //scale x values up to 0-1000 range
+    inputWS->getSpectrum(0).mutableX() *= 100;
+    std::string wsName = "RemoveBins_RangeUnit";
+    std::string wsNameOutput = wsName + "_Output";
+    AnalysisDataService::Instance().addOrReplace(wsName, inputWS);
 
-    // Test removing time bins from the front
-    alg2.initialize();
-    TS_ASSERT(alg2.isInitialized())
+    RemoveBins algRU;
 
-    alg2.setPropertyValue("InputWorkspace", "EMU6473");
-    alg2.setPropertyValue("OutputWorkspace", "result1");
-    alg2.setPropertyValue("XMin", "-0.255");
-    alg2.setPropertyValue("XMax", "-0.158");
-
+    algRU.initialize();
+    TS_ASSERT_THROWS_NOTHING(algRU.setPropertyValue("InputWorkspace", wsName);)
+      algRU.setPropertyValue("OutputWorkspace", wsNameOutput);
+    algRU.setPropertyValue("XMin", "0.05");
+    algRU.setPropertyValue("XMax", "0.1");
+    algRU.setPropertyValue("RangeUnit", "Wavelength");
     try {
-      TS_ASSERT_EQUALS(alg2.execute(), true);
+      TS_ASSERT_EQUALS(algRU.execute(), true);
     } catch (std::runtime_error &e) {
       TS_FAIL(e.what());
     }
+    if (algRU.isExecuted() == false)
+      return;
 
     MatrixWorkspace_const_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("result1");
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOutput);
 
-    TS_ASSERT_EQUALS(outputWS->x(0).size(), 1994);
+    std::vector<double> expected = { 2, 2, 2, 1.68054, 0, 0, 0.638921, 2, 2, 2 };
+    for (size_t i = 0; i < outputWS->y(0).size(); i++) {
+      TS_ASSERT_DELTA(outputWS->y(0)[i], expected[i],0.0001);
+    }
+
   }
 
   /* currently disabled, alg does not support point data yet*/
   void xtestExecPointData() {
-    MatrixWorkspace_sptr outputWS = WorkspaceCreationHelper::create1DWorkspaceFib(10,false);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create1DWorkspaceFib(10,false);
     std::string wsName = "RemoveBins_PointData";
     std::string wsNameOutput = wsName + "_Output";
-    AnalysisDataService::Instance().addOrReplace(wsName, outputWS);
+    AnalysisDataService::Instance().addOrReplace(wsName, inputWS);
     
     RemoveBins algPD;
 
@@ -238,7 +243,10 @@ public:
     } catch (std::runtime_error &e) {
       TS_FAIL(e.what());
     }
-    
+
+    MatrixWorkspace_const_sptr outputWS =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsNameOutput);
+
     TS_ASSERT_EQUALS(outputWS->x(0).size(), 4);
     TS_ASSERT_EQUALS(outputWS->y(0).size(), 3);
     TS_ASSERT_EQUALS(outputWS->x(0)[0], 10);
