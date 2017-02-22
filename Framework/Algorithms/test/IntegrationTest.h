@@ -29,18 +29,18 @@ public:
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    double *a = new double[25];
-    double *e = new double[25];
-    for (int i = 0; i < 25; ++i) {
-      a[i] = i;
-      e[i] = sqrt(double(i));
+    std::vector<double> a(25);
+    std::vector<double> e(a.size());
+    for (size_t i = 0; i < a.size(); ++i) {
+      a[i] = static_cast<double>(i);
+      e[i] = sqrt(static_cast<double>(i));
     }
     for (int j = 0; j < 5; ++j) {
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->dataY(j) = Mantid::MantidVec(a + (5 * j), a + (5 * j) + 5);
-      space2D->dataE(j) = Mantid::MantidVec(e + (5 * j), e + (5 * j) + 5);
+      space2D->dataY(j) = Mantid::MantidVec(a.cbegin() + (5 * j), a.cend() + (5 * j) + 5);
+      space2D->dataE(j) = Mantid::MantidVec(e.cbegin() + (5 * j), e.cend() + (5 * j) + 5);
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
