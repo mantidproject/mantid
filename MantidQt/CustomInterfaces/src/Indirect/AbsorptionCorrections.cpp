@@ -36,8 +36,8 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(changeSampleDensityUnit(int)));
+  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeSampleDensityUnit(int)));
 }
 
 void AbsorptionCorrections::setup() {}
