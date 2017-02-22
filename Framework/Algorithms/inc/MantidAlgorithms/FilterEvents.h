@@ -123,6 +123,9 @@ private:
   /// Examine workspace
   void examineEventWS();
 
+  /// Convert SplittersWorkspace to vector of time and vector of target (itarget)
+  void convertSplittersWorkspaceToVectors();
+
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
   DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;

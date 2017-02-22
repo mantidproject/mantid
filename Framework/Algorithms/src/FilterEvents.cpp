@@ -451,6 +451,36 @@ void FilterEvents::processSplittersWorkspace() {
   }
 }
 
+/** Convert SplittersWorkspace to vector of time and vector of target (itarget)
+ * NOTE: This is designed to use a single vector/vector splitters for all types of inputs
+ *       It is not used before vast experiment on speed comparison!
+ * @brief FilterEvents::convertSplittersWorkspaceToVectors
+ */
+void FilterEvents::convertSplittersWorkspaceToVectors()
+{
+  // check: only applied for splitters given by SplittersWorkspace
+  assert (m_useSplittersWorkspace);
+
+  // clear and get ready
+  m_vecSplitterGroup.clear();
+  m_vecSplitterTime.clear();
+
+  // convert SplittersWorkspace to a set of pairs which can be sorted
+  size_t num_rows = this->m_splittersWorkspace->rowCount();
+  for (size_t irow = 0; irow < num_rows; ++irow)
+  {
+    Kernel::SplittingInterval splitter = m_splittersWorkspace->getSplitter(irow);
+    if (m_vecSplitterTime.size() == 0 || splitter.start() > m_vecSplitterTime.end())
+    {
+      m_vecSplitterTime.push_back(splitter.start());
+      m_vecSplitterTime.push_back(splitter.stop());
+      // 0 stands for not defined
+      m_vecSplitterGroup.push_back(0);
+    }
+  }
+
+}
+
 /** process the input splitters given by a TableWorkspace
  * @brief FilterEvents::processTableSplittersWorkspace
  */
