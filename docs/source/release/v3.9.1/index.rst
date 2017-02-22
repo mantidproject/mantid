@@ -24,6 +24,7 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
+* `18833 <https://www.github.com/mantidproject/mantid/pull/18833>`_ Added check for if nonorthogonal axes should be displayed
 * `18891 <https://www.github.com/mantidproject/mantid/pull/18891>`_ Fix bug in gd_prtn_chrg for chunked data
 * `18907 <https://www.github.com/mantidproject/mantid/pull/18907>`_ Fix zeropadding for IMAT in Facilities.XML
 * `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
@@ -38,6 +39,8 @@ Summary of impact
 | Issue | Impact                                                                            | Solution                                    | Side Effect  |
 |       |                                                                                   |                                             | Probability  |
 +=======+===================================================================================+=============================================+==============+
+| 18833 | HKL axes now respect the non-orthogonal checkbox                                  | Add check if button is in a checked state   | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18891 | Fixes bug in gd_prtn_chrg for chunked data                                        | Recalculate proton charge just prior to use | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18907 | Allows IMAT to use general file finding mechanism                                 | Facilities file update                      | **low**      |
