@@ -16,6 +16,8 @@ New
 Improved
 ########
 
+- :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+
 Bug Fixes
 #########
 
