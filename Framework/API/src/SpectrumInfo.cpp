@@ -137,9 +137,7 @@ double SpectrumInfo::phi(const size_t index) const {
   if (isMonitor(index))
     throw std::logic_error("phi is not defined for monitors.");
   Kernel::V3D pos = position(index);
-  double p, dummy;
-  pos.getSpherical(dummy, dummy, p);
-  return p * M_PI / 180.;
+  return std::atan2(pos[1],pos[0]);
 }
 
 /// Returns true if the spectrum is associated with detectors in the instrument.
