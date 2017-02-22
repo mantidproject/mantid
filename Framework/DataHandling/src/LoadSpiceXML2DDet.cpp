@@ -238,6 +238,7 @@ void LoadSpiceXML2DDet::processInputs() {
                              "It either has 2 integers or left empty to get "
                              "determined automatically.");
   }
+  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", " << m_numPixelY << "\n";
 
   m_loadInstrument = getProperty("LoadInstrument");
 
@@ -524,7 +525,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "Row " << i_col << " contains " << veccounts.size()
+          errss << "[Version 1] Row " << i_col << " contains " << veccounts.size()
                 << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
@@ -585,25 +586,14 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
       } else {
         std::string str_value(nodevalue);
         if (nodename.compare("start_time") == 0) {
-          // replace 2015-01-17 13:36:45 by
-          g_log.notice() << "FIXME ! : Original start time: " << nodevalue
-                         << "  vs. Mantid time format: "
-                         << "2016-07-23T06:55:21.502270666"
-                         << "\n";
+          // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
           str_value = nodevalue;
           str_value.replace(10, 1, "T");
-          g_log.notice() << "Replaced string = " << str_value << "\n";
-          // str_value = "2016-07-23T06:55:21.502270666";
-          /*
-           * Original start time: 2015-01-17 13:36:45  vs. Mantid time format:
-           *2016-07-23T06:55:21.502270666
-           *
-           */
+          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format "
+                        << str_value << "\n";
         }
         outws->mutableRun().addProperty(
             new PropertyWithValue<std::string>(nodename, str_value));
-        // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-        //               << " (string) value = " << nodevalue << "\n";
       }
     }
   }
@@ -627,10 +617,6 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
     const std::vector<SpiceXMLNode> &vecxmlnode, const std::string &detnodename,
     const bool &loadinstrument) {
-
-  // TODO FIXME - NOW : change the order to parse Detector-node and create
-  // output workspace such that the detector geometry can be figured out from
-  // the XML file's detector-Node
 
   // Create matrix workspace
   MatrixWorkspace_sptr outws;
@@ -663,30 +649,26 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
       const std::string nodevalue = xmlnode.getValue();
       if (xmlnode.isDouble()) {
         double dvalue = atof(nodevalue.c_str());
-        // outws->mutableRun().addProperty(
-        //     new PropertyWithValue<double>(nodename, dvalue));
-        // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-        //               << " (double) value = " << dvalue << "\n";
         dbl_log_map.emplace(nodename, dvalue);
       } else if (xmlnode.isInteger()) {
         int ivalue = atoi(nodevalue.c_str());
-        // outws->mutableRun().addProperty(
-        //     new PropertyWithValue<int>(nodename, ivalue));
-        // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-        //               << " (int) value = " << ivalue << "\n";
         int_log_map.emplace(nodename, ivalue);
       } else {
-        // outws->mutableRun().addProperty(
-        //     new PropertyWithValue<std::string>(nodename, nodevalue));
-        // g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-        //               << " (string) value = " << nodevalue << "\n";
-        str_log_map.emplace(nodename, nodevalue);
-      }
-    }
-  }
+        if (nodename.compare("start_time") == 0) {
+          // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
+          std::string str_value(nodevalue);
+          str_value.replace(10, 1, "T");
+          g_log.debug() << "Replace start_time " << nodevalue << " by Mantid time format "
+                        << str_value << "\n";
+          str_log_map.emplace(nodename, str_value);
+        }
+        else
+          str_log_map.emplace(nodename, nodevalue);
+      } // END-IF-ELSE (node value type)
+    } // END-IF-ELSE (detector-node or log node)
+  } // END-FOR (xml nodes)
 
   // Add the property to output workspace
-  // TODO:FIXME - need to find out how to add run_start!!!
   for (std::map<std::string, std::string>::iterator miter = str_log_map.begin();
        miter != str_log_map.end(); ++miter) {
     outws->mutableRun().addProperty(
@@ -729,11 +711,25 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
 
   // determine the number of pixels at X direction (bear in mind that the XML
   // file records data in column major)
-  size_t num_pixel_x = vecLines.size();
+  size_t num_empty_line = 0;
+  size_t num_weird_line = 0;
+  for (size_t iline = 0; iline < vecLines.size(); ++iline)
+  {
+    if (vecLines[iline].size() == 0)
+      ++ num_empty_line;
+    else if (vecLines[iline].size() < 100)
+      ++ num_weird_line;
+  }
+  size_t num_pixel_x = vecLines.size() - num_empty_line - num_weird_line;
+  g_log.information() << "There are " << num_empty_line << " lines and "
+                      << num_weird_line << " lines are not regular.\n";
 
   // read the first line to determine the number of pixels at X direction
+  size_t first_regular_line = 0;
+  if (vecLines[first_regular_line].size() < 100)
+    ++ first_regular_line;
   std::vector<std::string> veccounts;
-  boost::split(veccounts, vecLines[0], boost::algorithm::is_any_of(" \t"));
+  boost::split(veccounts, vecLines[first_regular_line], boost::algorithm::is_any_of(" \t"));
   size_t num_pixel_y = veccounts.size();
 
   // create output workspace
@@ -753,8 +749,12 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   // FIXME - This may waste the previous result by parsing first line
   size_t i_col = 0;
   max_counts = 0;
-  for (size_t i = 0; i < vecLines.size(); ++i) {
+  for (size_t i = first_regular_line; i < vecLines.size(); ++i) {
     std::string &line = vecLines[i];
+
+    // skip empty lines
+    if (line.size() < 100)
+      continue;
 
     // Skip empty line
     if (line.empty()) {
@@ -860,17 +860,6 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     g_log.warning() << "Pt. " << ptnumber
                     << " is not found.  Log is not loaded to output workspace."
                     << "\n";
-
-  // set up run start
-  // matrixws->mutableRun().addProperty(new
-  // PropertyWithValue<std::string>("run_start",
-  // "2016-07-23T06:55:21.502270666"));
-  // matrixws->mutableRun().addProperty(new
-  // PropertyWithValue<std::string>("start_time",
-  // "2016-07-23T06:55:21.502270666"));
-
-  //
-  //
 }
 
 /** Get wavelength if the instrument is HB3A
