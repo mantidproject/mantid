@@ -22,7 +22,7 @@ class MagnetismReflectometryReductionTest(stresstesting.MantidStressTest):
                                         CutTimeAxis=True,
                                         UseWLTimeAxis=False,
                                         QMin=0.005,
-                                        QStep=0.01,
+                                        QStep=-0.01,
                                         TimeAxisStep=40,
                                         TimeAxisRange=[25000, 54000],
                                         SpecularPixel=126.9,
