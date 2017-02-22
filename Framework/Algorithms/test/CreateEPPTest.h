@@ -165,10 +165,10 @@ public:
 private:
   bool hasCorrectColumns(const std::vector<std::string> &names) {
     const size_t nNames = 9;
-    const std::array<std::string, 9> columnNames = {
+    const std::array<std::string, 9> columnNames = {{
         "WorkspaceIndex", "PeakCentre", "PeakCentreError",
         "Sigma",          "SigmaError", "Height",
-        "HeightError",    "chiSq",      "FitStatus"};
+        "HeightError",    "chiSq",      "FitStatus"}};
     if (names.size() != nNames) {
       return false;
     }
