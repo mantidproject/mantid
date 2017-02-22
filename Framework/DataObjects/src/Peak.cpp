@@ -615,9 +615,10 @@ V3D Peak::getVirtualDetectorPosition(const V3D &detectorDir) const {
     return detectorDir; // the best idea we have is just the direction
   }
 
-  auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);
+  const auto object =
+      boost::dynamic_pointer_cast<const ObjComponent>(component);
   Geometry::Track track(samplePos, detectorDir);
-  c->shape()->interceptSurface(track);
+  object->shape()->interceptSurface(track);
   return track.back().exitPoint;
 }
 
