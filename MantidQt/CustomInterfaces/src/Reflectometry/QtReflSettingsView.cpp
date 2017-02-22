@@ -78,29 +78,31 @@ void QtReflSettingsView::setExpDefaults(
   m_ui.CAlphaEdit->setText(QString::fromStdString(defaults[3]));
   m_ui.CApEdit->setText(QString::fromStdString(defaults[4]));
   m_ui.CPpEdit->setText(QString::fromStdString(defaults[5]));
-
-  int ctIndex = m_ui.detectorCorrectionTypeComboBox->findText(
-      QString::fromStdString(defaults[6]));
-  if (ctIndex != -1)
-    m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
 }
 
 /* Sets default values for all instrument settings given a list of default
 * values.
 */
 void QtReflSettingsView::setInstDefaults(
-    const std::vector<double> &defaults) const {
+    const std::vector<double> &defaults_double,
+    const std::vector<std::string> &defaults_str) const {
 
-  auto intMonCheckState = (defaults[0] != 0) ? Qt::Checked : Qt::Unchecked;
+  auto intMonCheckState =
+      (defaults_double[0] != 0) ? Qt::Checked : Qt::Unchecked;
   m_ui.intMonCheckBox->setCheckState(intMonCheckState);
 
-  m_ui.monIntMinEdit->setText(QString::number(defaults[1]));
-  m_ui.monIntMaxEdit->setText(QString::number(defaults[2]));
-  m_ui.monBgMinEdit->setText(QString::number(defaults[3]));
-  m_ui.monBgMaxEdit->setText(QString::number(defaults[4]));
-  m_ui.lamMinEdit->setText(QString::number(defaults[5]));
-  m_ui.lamMaxEdit->setText(QString::number(defaults[6]));
-  m_ui.I0MonIndexEdit->setText(QString::number(defaults[7]));
+  m_ui.monIntMinEdit->setText(QString::number(defaults_double[1]));
+  m_ui.monIntMaxEdit->setText(QString::number(defaults_double[2]));
+  m_ui.monBgMinEdit->setText(QString::number(defaults_double[3]));
+  m_ui.monBgMaxEdit->setText(QString::number(defaults_double[4]));
+  m_ui.lamMinEdit->setText(QString::number(defaults_double[5]));
+  m_ui.lamMaxEdit->setText(QString::number(defaults_double[6]));
+  m_ui.I0MonIndexEdit->setText(QString::number(defaults_double[7]));
+
+  int ctIndex = m_ui.detectorCorrectionTypeComboBox->findText(
+      QString::fromStdString(defaults_str[0]));
+  if (ctIndex != -1)
+    m_ui.detectorCorrectionTypeComboBox->setCurrentIndex(ctIndex);
 }
 
 /* Sets the enabled status of polarisation corrections and parameters
@@ -241,14 +243,6 @@ std::string QtReflSettingsView::getScaleFactor() const {
   return m_ui.scaleFactorEdit->text().toStdString();
 }
 
-/** Return selected correction type
-* @return :: selected correction type
-*/
-std::string QtReflSettingsView::getDetectorCorrectionType() const {
-
-  return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
-}
-
 /** Return integrated monitors option
 * @return :: integrated monitors check
 */
@@ -319,6 +313,14 @@ std::string QtReflSettingsView::getI0MonitorIndex() const {
 std::string QtReflSettingsView::getProcessingInstructions() const {
 
   return m_ui.procInstEdit->text().toStdString();
+}
+
+/** Return selected correction type
+* @return :: selected correction type
+*/
+std::string QtReflSettingsView::getDetectorCorrectionType() const {
+
+  return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
 }
 
 } // namespace CustomInterfaces

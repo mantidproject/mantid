@@ -246,8 +246,7 @@ public:
         "1.006831,-0.011467,0.002244,-0.000095",
         "1.017526,-0.017183,0.003136,-0.000140",
         "0.917940,0.038265,-0.006645,0.000282",
-        "0.972762,0.001828,-0.000261,0.0",
-        "VerticalShift"};
+        "0.972762,0.001828,-0.000261,0.0"};
 
     EXPECT_CALL(mockView, setExpDefaults(defaults)).Times(1);
     presenter.notify(IReflSettingsPresenter::ExpDefaultsFlag);
@@ -264,9 +263,12 @@ public:
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
 
-    std::vector<double> defaults = {1., 4.0, 10., 17., 18., 1.5, 17., 2.0};
+    std::vector<double> defaults_double = {1.,  4.0, 10., 17.,
+                                           18., 1.5, 17., 2.0};
+    std::vector<std::string> defaults_str = {"VerticalShift"};
 
-    EXPECT_CALL(mockView, setInstDefaults(defaults)).Times(1);
+    EXPECT_CALL(mockView, setInstDefaults(defaults_double, defaults_str))
+        .Times(1);
     presenter.notify(IReflSettingsPresenter::InstDefaultsFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }

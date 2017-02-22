@@ -65,7 +65,6 @@ public:
   virtual std::string getCPp() const = 0;
   virtual std::string getMomentumTransferStep() const = 0;
   virtual std::string getScaleFactor() const = 0;
-  virtual std::string getDetectorCorrectionType() const = 0;
   /// Instrument settings
   virtual std::string getIntMonCheck() const = 0;
   virtual std::string getMonitorIntegralMin() const = 0;
@@ -76,10 +75,12 @@ public:
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
   virtual std::string getProcessingInstructions() const = 0;
+  virtual std::string getDetectorCorrectionType() const = 0;
 
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
-  virtual void setInstDefaults(const std::vector<double> &) const = 0;
+  virtual void setInstDefaults(const std::vector<double> &,
+                               const std::vector<std::string> &) const = 0;
 
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
