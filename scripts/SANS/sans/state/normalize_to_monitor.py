@@ -2,6 +2,7 @@
 
 """State describing the normalization to the incident monitor for SANS reduction."""
 
+from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, PositiveIntegerParameter,
@@ -117,7 +118,7 @@ class StateNormalizeToMonitor(StateBase):
                                            {"background_TOF_monitor_start": self.background_TOF_monitor_start,
                                             "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                 is_invalid.update(entry)
-            for key_start, value_start in self.background_TOF_monitor_start.items():
+            for key_start, value_start in list(self.background_TOF_monitor_start.items()):
                 if key_start not in self.background_TOF_monitor_stop:
                     entry = validation_message("The monitor background TOF had spectrum number mismatch.",
                                                "Make sure that all monitors have entries for start and stop.",

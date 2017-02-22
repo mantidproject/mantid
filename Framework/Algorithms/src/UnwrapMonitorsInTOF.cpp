@@ -63,18 +63,19 @@ MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource,
   return MinAndMaxTof(minTof, maxTof);
 }
 
-double
-getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace *workspace,
-                                       size_t workspaceIndex) {
-  const auto detector = workspace->getDetector(workspaceIndex);
-  return detector->getDistance(*(workspace->getInstrument()->getSource()));
+double getDistanceFromSourceForWorkspaceIndex(
+    Mantid::API::MatrixWorkspace *workspace,
+    const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex) {
+  const auto &detector = spectrumInfo.detector(workspaceIndex);
+  return detector.getDistance(*(workspace->getInstrument()->getSource()));
 }
 
 MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace,
+                             const Mantid::API::SpectrumInfo &spectrumInfo,
                              size_t workspaceIndex, double lowerWavelengthLimit,
                              double upperWavelengthLimit) {
-  const auto distanceFromSource =
-      getDistanceFromSourceForWorkspaceIndex(workspace, workspaceIndex);
+  const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(
+      workspace, spectrumInfo, workspaceIndex);
   return getMinAndMaxTofForDistanceFromSoure(
       distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }
@@ -332,9 +333,11 @@ void UnwrapMonitorsInTOF::exec() {
   const auto workspaceIndices =
       getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
+  const auto &spectrumInfo = outputWorkspace->spectrumInfo();
+
   for (const auto &workspaceIndex : workspaceIndices) {
     const auto minMaxTof =
-        getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
+        getMinAndMaxTof(outputWorkspace.get(), spectrumInfo, workspaceIndex,
                         lowerWavelengthLimit, upperWavelengthLimit);
     auto points = getPoints(outputWorkspace.get(), workspaceIndex);
     auto counts =

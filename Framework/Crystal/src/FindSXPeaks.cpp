@@ -99,10 +99,7 @@ void FindSXPeaks::exec() {
   Progress progress(this, 0, 1, (m_MaxSpec - m_MinSpec + 1));
 
   // Calculate the primary flight path.
-  Kernel::V3D sample = localworkspace->getInstrument()->getSample()->getPos();
-  Kernel::V3D source = localworkspace->getInstrument()->getSource()->getPos();
-  Kernel::V3D L1 = sample - source;
-  double l1 = L1.norm();
+  const auto &spectrumInfo = localworkspace->spectrumInfo();
 
   peakvector entries;
   // Reserve 1000 peaks to make later push_back fast for first 1000 peaks, but
@@ -155,34 +152,26 @@ void FindSXPeaks::exec() {
     double rightBinEdge = *std::next(leftBinPosition);
     double tof = 0.5 * (leftBinEdge + rightBinEdge);
 
-    Geometry::IDetector_const_sptr det;
-    try {
-      det = localworkspace->getDetector(static_cast<size_t>(i));
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
     // If no detector found, skip onto the next spectrum
-    if (!det)
+    if (!spectrumInfo.hasDetectors(static_cast<size_t>(i))) {
       continue;
+    }
+    if (!spectrumInfo.hasUniqueDetector(i)) {
+      std::ostringstream sout;
+      sout << "Spectrum at workspace index " << i
+           << " has unsupported number of detectors.";
+      throw std::runtime_error(sout.str());
+    }
+    const auto &det = spectrumInfo.detector(static_cast<size_t>(i));
 
-    double phi = det->getPhi();
+    double phi = det.getPhi();
     if (phi < 0) {
       phi += 2.0 * M_PI;
     }
 
-    double th2 = det->getTwoTheta(sample, L1);
-
     std::vector<int> specs(1, i);
 
-    Mantid::Kernel::V3D L2 = det->getPos();
-    L2 -= sample;
-
-    SXPeak peak(tof, th2, phi, *maxY, specs, l1 + L2.norm(), det->getID(),
-                localworkspace->getInstrument());
+    SXPeak peak(tof, phi, *maxY, specs, i, spectrumInfo);
     PARALLEL_CRITICAL(entries) { entries.push_back(peak); }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

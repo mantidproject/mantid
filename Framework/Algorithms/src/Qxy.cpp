@@ -142,7 +142,8 @@ void Qxy::exec() {
     // get the bins that are included inside the RadiusCut/WaveCutcut off, those
     // to calculate for
     const size_t wavStart = helper.waveLengthCutOff(
-        inputWorkspace, getProperty("RadiusCut"), getProperty("WaveCut"), i);
+        inputWorkspace, spectrumInfo, getProperty("RadiusCut"),
+        getProperty("WaveCut"), i);
     if (wavStart >= inputWorkspace->y(i).size()) {
       // all the spectra in this detector are out of range
       continue;

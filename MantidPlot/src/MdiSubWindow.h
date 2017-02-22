@@ -145,6 +145,7 @@ public:
   ApplicationWindow *applicationWindow() { return d_app; }
   /// Get the pointer to Folder
   Folder *folder() { return d_folder; }
+
 public slots:
 
   //! Return the window label
@@ -282,6 +283,13 @@ public: // non-slot methods
                   const int fileVersion);
   /// Serialises to a string that can be saved to a project file.
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+  /// Get the window type as a string
+  std::string getWindowType() override;
+
 signals:
   //! Emitted when the window was closed
   void closedWindow(MdiSubWindow *);

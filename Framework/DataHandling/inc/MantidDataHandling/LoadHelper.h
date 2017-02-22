@@ -51,8 +51,6 @@ public:
   static double calculateStandardError(double in) { return sqrt(in); }
   double calculateEnergy(double);
   double calculateTOF(double, double);
-  double getL1(const API::MatrixWorkspace_sptr &);
-  double getL2(const API::MatrixWorkspace_sptr &, int detId = 1);
   double getInstrumentProperty(const API::MatrixWorkspace_sptr &, std::string);
   void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails);
   void dumpNexusAttributes(NXhandle nxfileID, std::string &indentStr);
@@ -66,9 +64,6 @@ public:
                        const Kernel::Quat &rot);
   Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws,
                                    const std::string &componentName);
-  template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
-                       const std::string &propertyName);
 
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,

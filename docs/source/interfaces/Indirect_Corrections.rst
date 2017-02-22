@@ -258,8 +258,14 @@ Use Container
 Shape
   Select the shape of the sample (see specific geometry options below).
 
-Number Density
-  Number density for either the sample or container.
+Number Wavelengths
+  Number of wavelengths for calculation
+
+Events
+  Number of neutron events
+
+Mass Density/Number Density
+  Mass density or Number Density for either the sample or container.
 
 Chemical Formula
   Chemical formula for either the sample or container in the format expected by
@@ -277,10 +283,10 @@ Keep Correction Factors
   be created, this will have the suffix *_Factors*.
 
 Plot Result
-  If checked the corrected workspace and correction factors will be plotted.
+  If clicked the corrected workspace and correction factors will be plotted.
 
 Save Result
-  If checked the corrected workspace and (if *Keep Correction Factors* is
+  If Clicked the corrected workspace and (if *Keep Correction Factors* is
   checked) the correction factor workspace will be saved as a NeXus file in the
   default save directory.
 
@@ -302,15 +308,14 @@ Sample Height
 Sample Thickness
   Thickness of the sample in :math:`cm`.
 
+Sample Angle
+  Angle of the sample to the beam in radians.
+
 Container Front Thickness
   Thickness of the front of the container in :math:`cm`.
 
 Container Back Thickness
   Thickness of the back of the container in :math:`cm`.
-
-Element Size
-  Size of the square "chunks" to divide the frontal area of the sample into to
-  calculate corrections in :math:`cm`.
 
 Annulus
 ~~~~~~~
@@ -333,8 +338,8 @@ Container Inner Radius
 Container Outer Radius
   Radius of the outer wall of the container in :math:`cm`.
 
-Neutron Events
-  Number of events to use in the Monte Carlo simulation.
+Sample Height
+  Height of the sample in :math:`cm`.
 
 Cylinder
 ~~~~~~~~
@@ -351,10 +356,10 @@ Sample Radius
 Container Radius
   Radius of the outer wall of the container in :math:`cm`.
 
-Neutron Events
-  Number of events to use in the Monte Carlo simulation.
-  
-  
+Sample Height
+  Height of the sample in :math:`cm`.
+
+
 Container Subtraction
 ---------------------
 
