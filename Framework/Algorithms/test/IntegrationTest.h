@@ -39,16 +39,16 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->dataY(j) = Mantid::MantidVec(a.cbegin() + (5 * j), a.cend() + (5 * j) + 5);
-      space2D->dataE(j) = Mantid::MantidVec(e.cbegin() + (5 * j), e.cend() + (5 * j) + 5);
+      space2D->dataY(j) =
+          Mantid::MantidVec(a.cbegin() + (5 * j), a.cend() + (5 * j) + 5);
+      space2D->dataE(j) =
+          Mantid::MantidVec(e.cbegin() + (5 * j), e.cend() + (5 * j) + 5);
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
   }
 
-  void tearDown() override {
-    AnalysisDataService::Instance().clear();
-  }
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void testInit() {
     Integration alg;
@@ -124,7 +124,6 @@ public:
     alg.setPropertyValue("InputWorkspace", "testSpace");
     alg.setPropertyValue("OutputWorkspace", "out2");
 
-
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS(alg.setPropertyValue("StartWorkspaceIndex", "-1"),
                      std::invalid_argument);
@@ -150,14 +149,16 @@ public:
   void testRangeWithPartialBins() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+        input = boost::dynamic_pointer_cast<Workspace2D>(
+            AnalysisDataService::Instance().retrieve("testSpace")))
     assertRangeWithPartialBins(input);
   }
 
   void testRangeWithPartialBinsAndDistributionData() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+        input = boost::dynamic_pointer_cast<Workspace2D>(
+            AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
     assertRangeWithPartialBins(input);
   }
@@ -486,7 +487,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
@@ -494,11 +496,11 @@ public:
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
     TS_ASSERT_EQUALS(output->blocksize(), 1)
-    const std::array<double, 5> correctAnswers{{1+2+3, 7, 11+12, 18, 22}};
+    const std::array<double, 5> correctAnswers{{1 + 2 + 3, 7, 11 + 12, 18, 22}};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       TS_ASSERT_EQUALS(output->x(i)[0], lowerLimits[i])
       TS_ASSERT_EQUALS(output->x(i)[1], upperLimits[i])
@@ -513,7 +515,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
@@ -527,7 +530,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", upperLimit))
@@ -535,11 +539,12 @@ public:
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
     TS_ASSERT_EQUALS(output->blocksize(), 1)
-    const std::array<double, 5> correctAnswers{{1+2+3, 7+8, 11+12+13, 18, 22+23}};
+    const std::array<double, 5> correctAnswers{
+        {1 + 2 + 3, 7 + 8, 11 + 12 + 13, 18, 22 + 23}};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       TS_ASSERT_EQUALS(output->x(i)[0], lowerLimits[i])
       TS_ASSERT_EQUALS(output->x(i)[1], upperLimit)
@@ -554,7 +559,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", upperLimit))
@@ -568,7 +574,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", lowerLimit))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
@@ -576,11 +583,12 @@ public:
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
     TS_ASSERT_EQUALS(output->blocksize(), 1)
-    const std::array<double, 5> correctAnswers{{1, 6+7+8, 11+12+13+14, 16+17, 21+22+23}};
+    const std::array<double, 5> correctAnswers{
+        {1, 6 + 7 + 8, 11 + 12 + 13 + 14, 16 + 17, 21 + 22 + 23}};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
       TS_ASSERT_EQUALS(output->x(i)[0], lowerLimit)
       TS_ASSERT_EQUALS(output->x(i)[1], upperLimits[i])
@@ -595,7 +603,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", lowerLimit))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
@@ -609,7 +618,8 @@ public:
     Integration alg;
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 1))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", 2))
@@ -619,8 +629,8 @@ public:
     TS_ASSERT(alg.isExecuted())
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              "out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2)
     TS_ASSERT_EQUALS(output->blocksize(), 1)
     const std::array<double, 2> correctAnswers{{7, 12}};

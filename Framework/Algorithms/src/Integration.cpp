@@ -49,8 +49,10 @@ void Integration::init() {
   declareProperty("IncludePartialBins", false,
                   "If true then partial bins from the beginning and end of the "
                   "input range are also included in the integration.");
-  declareProperty(make_unique<ArrayProperty<double>>("RangeLowerList"), "A list of lower integration limits (as X values).");
-  declareProperty(make_unique<ArrayProperty<double>>("RangeUpperList"), "A list of upper integration limits (as X values).");
+  declareProperty(make_unique<ArrayProperty<double>>("RangeLowerList"),
+                  "A list of lower integration limits (as X values).");
+  declareProperty(make_unique<ArrayProperty<double>>("RangeUpperList"),
+                  "A list of upper integration limits (as X values).");
 }
 
 /**
@@ -107,13 +109,17 @@ void Integration::exec() {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
     maxSpec = numberOfSpectra;
   }
-  auto rangeListCheck = [minSpec, maxSpec](const std::vector<double> &list, const char *name) {
+  auto rangeListCheck = [minSpec, maxSpec](const std::vector<double> &list,
+                                           const char *name) {
     if (maxSpec < minSpec) {
-      throw std::runtime_error("Maximum spectrum index smaller than the minimum.");
+      throw std::runtime_error(
+          "Maximum spectrum index smaller than the minimum.");
     }
-    if (!list.empty() && list.size() != static_cast<size_t>(maxSpec - minSpec) + 1) {
+    if (!list.empty() &&
+        list.size() != static_cast<size_t>(maxSpec - minSpec) + 1) {
       std::ostringstream sout;
-      sout << name << " has " << list.size() << " values but it should contain " << maxSpec - minSpec + 1 << '\n';
+      sout << name << " has " << list.size() << " values but it should contain "
+           << maxSpec - minSpec + 1 << '\n';
       throw std::runtime_error(sout.str());
     }
   };
@@ -129,7 +135,8 @@ void Integration::exec() {
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
     if (!minRanges.empty() || !maxRanges.empty()) {
-      throw std::runtime_error("Range lists not supported for EventWorkspaces.");
+      throw std::runtime_error(
+          "Range lists not supported for EventWorkspaces.");
     }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
     double evntMinRange =
@@ -190,11 +197,12 @@ void Integration::exec() {
     const MantidVec &Y = inSpec.readY();
     const MantidVec &E = inSpec.readE();
 
-
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    const double lowerLimit = minRanges.empty() ? minRange : minRanges[i - minSpec];
-    const double upperLimit = maxRanges.empty() ? maxRange : maxRanges[i - minSpec];
+    const double lowerLimit =
+        minRanges.empty() ? minRange : minRanges[i - minSpec];
+    const double upperLimit =
+        maxRanges.empty() ? maxRange : maxRanges[i - minSpec];
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values
@@ -207,19 +215,21 @@ void Integration::exec() {
 
     if (upperLimit < lowerLimit) {
       std::ostringstream sout;
-      sout << "Upper integration limit " << upperLimit << " for workspace index " << i << " smaller than the lower limit " << lowerLimit << ". Setting integral to zero.\n";
+      sout << "Upper integration limit " << upperLimit
+           << " for workspace index " << i << " smaller than the lower limit "
+           << lowerLimit << ". Setting integral to zero.\n";
       g_log.warning() << sout.str();
       progress.report();
       continue;
     }
     if (lowerLimit == EMPTY_DBL()) {
-        lowit = X.begin();
+      lowit = X.begin();
     } else {
       lowit = std::lower_bound(X.begin(), X.end(), lowerLimit, tolerant_less());
     }
 
     if (upperLimit == EMPTY_DBL()) {
-        highit = X.end();
+      highit = X.end();
     } else {
       highit = std::upper_bound(lowit, X.end(), upperLimit, tolerant_less());
     }
@@ -389,24 +399,29 @@ std::map<std::string, std::string> Integration::validateInputs() {
   const double maxRange = getProperty("RangeUpper");
   const std::vector<double> minRanges = getProperty("RangeLowerList");
   const std::vector<double> maxRanges = getProperty("RangeUpperList");
-  if (!minRanges.empty() && !maxRanges.empty() && minRanges.size() != maxRanges.size()) {
-    issues["RangeLowerList"] = "RangeLowerList has different number of values as RangeUpperList.";
+  if (!minRanges.empty() && !maxRanges.empty() &&
+      minRanges.size() != maxRanges.size()) {
+    issues["RangeLowerList"] =
+        "RangeLowerList has different number of values as RangeUpperList.";
     return issues;
   }
   for (size_t i = 0; i < minRanges.size(); ++i) {
     const auto x = minRanges[i];
     if (!isEmpty(maxRange) && x > maxRange) {
-      issues["RangeLowerList"] = "RangeLowerList has a value greater than RangeUpper.";
+      issues["RangeLowerList"] =
+          "RangeLowerList has a value greater than RangeUpper.";
       break;
     } else if (!maxRanges.empty() && x > maxRanges[i]) {
-      issues["RangeLowerList"] = "RangeLowerList has a value greater than the corresponding one in RangeUpperList.";
+      issues["RangeLowerList"] = "RangeLowerList has a value greater than the "
+                                 "corresponding one in RangeUpperList.";
       break;
     }
   }
   if (!isEmpty(minRange)) {
     for (const auto x : maxRanges) {
       if (x < minRange) {
-        issues["RangeUpperList"] = "RangeUpperList has a value lower than RangeLower.";
+        issues["RangeUpperList"] =
+            "RangeUpperList has a value lower than RangeLower.";
         break;
       }
     }
