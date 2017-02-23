@@ -11,7 +11,8 @@ Description
 
 This algorithm returns the nexus (HDF) files in the given files list that satisfy the specified criteria.
 This is done without actually loading the data, but just the needed metadata.
-Input files need to exist and be specified following the Mantid rules in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
+Input files need to exist and be specified following the Mantid rules in
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 Criteria could be any python logical expression involving the nexus entry names enclosed with ``$`` symbol.
 Arbitrary number of criteria can be combined. The metadata entry should contain only one element.
 Note, that if the entry is of string type, string comparison will be performed.

@@ -1323,8 +1323,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         out_ws_name = 'out_ws'
         time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
-        import time
-        time.sleep(10)
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
         lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
@@ -1513,8 +1511,6 @@ class TestBenchRotDetection(unittest.TestCase):
 
     def test_workspace_without_bench_raises(self):
         # Arrange
-        import time
-        time.sleep(10)
         ws = self._get_sample_workspace(has_bench_rot=False)
         # Act + Assert
         expected_raise = True
@@ -1523,8 +1519,6 @@ class TestBenchRotDetection(unittest.TestCase):
 
     def test_workspace_without_bench_but_no_log_dict_does_not_raise(self):
         # Arrange
-        import time
-        time.sleep(10)
         ws = self._get_sample_workspace(has_bench_rot=False)
         # Act + Assert
         expected_raise = False
