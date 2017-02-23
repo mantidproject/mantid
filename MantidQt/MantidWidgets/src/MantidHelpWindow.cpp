@@ -260,7 +260,7 @@ void MantidHelpWindow::showConcept(const QString &name) {
 void MantidHelpWindow::showFitFunction(const std::string &name) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
-    url += "functions/";
+    url += "fitfunctions/";
     if (name.empty())
       url += "index.html";
     else

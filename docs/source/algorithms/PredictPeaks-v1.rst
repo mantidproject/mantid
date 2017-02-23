@@ -28,8 +28,11 @@ attempted to those that can be detected/produced by your instrument.
 
 The ReflectionCondition also limits the peaks attempted to those possible 
 with that reflection condition.
-By inputting the PointGroup, you take the crystal symmetry into account so
-HKL peaks that are equivalent, due to symmetry, are considered to be the same.
+
+By optionally inputting a point group symmetry,
+the HKL peaks that are equivalent due to symmetry are
+considered to be the same.  Only the primary hkl are predicted
+which means that higher symmetries will predict fewer peaks.
 
 Furthermore it's possible to calculate structure factors for the
 predicted peaks by activating the CalculateStructureFactors-option.

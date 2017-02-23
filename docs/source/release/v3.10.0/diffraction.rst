@@ -8,8 +8,12 @@ Diffraction Changes
 Crystal Improvements
 --------------------
 -  :ref:`PredictPeaks <algm-PredictPeaks>`
-   has been modified to optionally use the point group symmetry to reduce
-   the number of predicted peaks.
+   has been modified to optionally use the point group symmetry
+   so that HKL peaks that are equivalent, due to symmetry, are
+   considered to be the same.  Only the primary hkl are predicted
+   which means that higher symmetries will predict fewer peaks.
+- :ref:`StartLiveData <algm-StartLiveData>` will load "live"
+  data streaming from MaNDi data server.
 
 Engineering Diffraction
 -----------------------
