@@ -24,7 +24,7 @@ public:
   static IntegrationTest *createSuite() { return new IntegrationTest(); }
   static void destroySuite(IntegrationTest *suite) { delete suite; }
 
-  IntegrationTest() {
+  void setUp() override {
     // Set up a small workspace for testing
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
@@ -46,43 +46,20 @@ public:
     AnalysisDataService::Instance().add("testSpace", space);
   }
 
-  ~IntegrationTest() override { AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+  }
 
   void testInit() {
+    Integration alg;
+    alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-
-    // Set the properties
-    alg.setPropertyValue("InputWorkspace", "testSpace");
-    outputSpace = "IntegrationOuter";
-    alg.setPropertyValue("OutputWorkspace", outputSpace);
-
-    alg.setPropertyValue("RangeLower", "0.1");
-    alg.setPropertyValue("RangeUpper", "4.0");
-    alg.setPropertyValue("StartWorkspaceIndex", "2");
-    alg.setPropertyValue("EndWorkspaceIndex", "4");
-
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT(alg2.isInitialized());
-
-    // Set the properties
-    alg2.setPropertyValue("InputWorkspace", "testSpace");
-    alg2.setPropertyValue("OutputWorkspace", "out2");
-
-    TS_ASSERT_THROWS_NOTHING(alg3.initialize());
-    TS_ASSERT(alg3.isInitialized());
-
-    // Set the properties
-    alg3.setPropertyValue("InputWorkspace", "testSpace");
-    alg3.setPropertyValue("OutputWorkspace", "out3");
-    alg3.setPropertyValue("RangeLower", "0.1");
-    alg3.setPropertyValue("RangeUpper", "4.5");
-    alg3.setPropertyValue("StartWorkspaceIndex", "2");
-    alg3.setPropertyValue("EndWorkspaceIndex", "4");
-    alg3.setPropertyValue("IncludePartialBins", "1");
   }
 
   void testNoCrashInside1Bin() {
+    Integration algNoCrash;
+    algNoCrash.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(algNoCrash.initialize());
     TS_ASSERT(algNoCrash.isInitialized());
     // Set the properties
@@ -96,8 +73,18 @@ public:
   }
 
   void testRangeNoPartialBins() {
-    if (!alg.isInitialized())
-      alg.initialize();
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("InputWorkspace", "testSpace");
+    const std::string outputSpace = "IntegrationOuter";
+    alg.setPropertyValue("OutputWorkspace", outputSpace);
+    alg.setPropertyValue("RangeLower", "0.1");
+    alg.setPropertyValue("RangeUpper", "4.0");
+    alg.setPropertyValue("StartWorkspaceIndex", "2");
+    alg.setPropertyValue("EndWorkspaceIndex", "4");
+
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -128,15 +115,22 @@ public:
   }
 
   void testNoRangeNoPartialBins() {
-    if (!alg2.isInitialized())
-      alg2.initialize();
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    // Set the properties
+    alg.setPropertyValue("InputWorkspace", "testSpace");
+    alg.setPropertyValue("OutputWorkspace", "out2");
+
 
     // Check setting of invalid property value causes failure
-    TS_ASSERT_THROWS(alg2.setPropertyValue("StartWorkspaceIndex", "-1"),
+    TS_ASSERT_THROWS(alg.setPropertyValue("StartWorkspaceIndex", "-1"),
                      std::invalid_argument);
 
-    TS_ASSERT_THROWS_NOTHING(alg2.execute());
-    TS_ASSERT(alg2.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
     // Get back the saved workspace
     Workspace_sptr output;
@@ -154,67 +148,18 @@ public:
   }
 
   void testRangeWithPartialBins() {
-    if (!alg3.isInitialized())
-      alg3.initialize();
-    TS_ASSERT_THROWS_NOTHING(alg3.execute());
-    TS_ASSERT(alg3.isExecuted());
-
-    // Get back the saved workspace
-    Workspace_sptr output;
+    Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve("out3"));
+        input = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    assertRangeWithPartialBins(input);
+  }
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    size_t max = 0;
-    TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    const double yy[3] = {52., 74., 96.};
-    const double ee[3] = {6.899, 8.240, 9.391};
-    for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->dataX(i);
-      Mantid::MantidVec &y = output2D->dataY(i);
-      Mantid::MantidVec &e = output2D->dataE(i);
-
-      TS_ASSERT_EQUALS(x.size(), 2);
-      TS_ASSERT_EQUALS(y.size(), 1);
-      TS_ASSERT_EQUALS(e.size(), 1);
-
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
-      TS_ASSERT_EQUALS(y[0], yy[i]);
-      TS_ASSERT_DELTA(e[0], ee[i], 0.001);
-    }
-
-    // Test that the same values occur for a distribution
-    Workspace_sptr input;
+  void testRangeWithPartialBinsAndDistributionData() {
+    Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = AnalysisDataService::Instance().retrieve("testSpace"));
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    input2D->setDistribution(true);
-    // Replace workspace
-    AnalysisDataService::Instance().addOrReplace("testSpace", input2D);
-
-    alg3.execute();
-    // Retest
-    TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve("out3"));
-
-    output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->dataX(i);
-      Mantid::MantidVec &y = output2D->dataY(i);
-      Mantid::MantidVec &e = output2D->dataE(i);
-
-      TS_ASSERT_EQUALS(x.size(), 2);
-      TS_ASSERT_EQUALS(y.size(), 1);
-      TS_ASSERT_EQUALS(e.size(), 1);
-
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
-      TS_ASSERT_EQUALS(y[0], yy[i]);
-      TS_ASSERT_DELTA(e[0], ee[i], 0.001);
-    }
+        input = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve("testSpace")))
+    input->setDistribution(true);
+    assertRangeWithPartialBins(input);
   }
 
   void doTestEvent(std::string inName, std::string outName,
@@ -534,13 +479,50 @@ public:
 
     AnalysisDataService::Instance().remove(outWsName);
   }
-
 private:
-  Integration alg;        // Test with range limits
-  Integration alg2;       // Test without limits
-  Integration alg3;       // Test with range and partial bins
-  Integration algNoCrash; // test for integration inside bin
-  std::string outputSpace;
+  void assertRangeWithPartialBins(Workspace_sptr input) {
+    Integration alg;
+    alg.setRethrows(false);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    // Set the properties
+    alg.setProperty("InputWorkspace", input);
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setPropertyValue("RangeLower", "0.1");
+    alg.setPropertyValue("RangeUpper", "4.5");
+    alg.setPropertyValue("StartWorkspaceIndex", "2");
+    alg.setPropertyValue("EndWorkspaceIndex", "4");
+    alg.setPropertyValue("IncludePartialBins", "1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieve("out"));
+
+    Workspace2D_sptr output2D =
+        boost::dynamic_pointer_cast<Workspace2D>(output);
+    size_t max = 0;
+    TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
+    const double yy[3] = {52., 74., 96.};
+    const double ee[3] = {6.899, 8.240, 9.391};
+    for (size_t i = 0; i < max; ++i) {
+      Mantid::MantidVec &x = output2D->dataX(i);
+      Mantid::MantidVec &y = output2D->dataY(i);
+      Mantid::MantidVec &e = output2D->dataE(i);
+
+      TS_ASSERT_EQUALS(x.size(), 2);
+      TS_ASSERT_EQUALS(y.size(), 1);
+      TS_ASSERT_EQUALS(e.size(), 1);
+
+      TS_ASSERT_EQUALS(x[0], 0.1);
+      TS_ASSERT_EQUALS(x[1], 4.5);
+      TS_ASSERT_EQUALS(y[0], yy[i]);
+      TS_ASSERT_DELTA(e[0], ee[i], 0.001);
+    }
+  }
 };
 
 #endif /*INTEGRATIONTEST_H_*/
