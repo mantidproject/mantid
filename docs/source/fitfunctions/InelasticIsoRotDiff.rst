@@ -60,11 +60,7 @@ and the overal intensity of the signal with a fit to the following model:
 .. testcode:: ExampleInelasticIsoRotDiff
 
     import numpy as np
-    import scipy
-    if int(scipy.__version__.split('.')[1]) < 18:
-        from scipy.special import sph_jn as jn
-    else:
-        from scipy.special import spherical_jn as jn
+    from scipy.special import sph_jn
     """Generate resolution function with the following properties:
     1. Gaussian in Energy
     2. Dynamic range = [-0.1, 0.1] meV with spacing 0.0004 meV
@@ -91,7 +87,7 @@ and the overal intensity of the signal with a fit to the following model:
     for Q in Qs:
         centre=dE*np.random.random()  # some shift along the energy axis
         dataY=np.zeros(nE)  # holds the inelastic signal for this Q-value
-        js=jn(N,Q*R)[0]  # spherical bessel functions from L=0 to L=N
+        js=sph_jn(N,Q*R)[0]  # spherical bessel functions from L=0 to L=N
         for L in range(1,N+1):
             HWHM = L*(L+1)*hbar/tau; aL=(2*L+1)*js[L]**2
             dataY += H*aL/np.pi * HWHM/(HWHM**2+(dataX-centre)**2)  # add component
