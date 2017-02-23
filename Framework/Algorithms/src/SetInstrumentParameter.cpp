@@ -189,7 +189,7 @@ void SetInstrumentParameter::addParameter(
   if (paramType == "String") {
     pmap.addString(cmptId, paramName, paramValue);
   } else if (paramType == "Number") {
-    int intVal;    
+    int intVal;
     if (Strings::convert(paramValue, intVal)) {
       pmap.addInt(cmptId, paramName, intVal);
     } else {
