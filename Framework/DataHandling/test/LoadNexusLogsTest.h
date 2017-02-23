@@ -84,7 +84,8 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     35); // 34 logs in file + 1 synthetic nperiods log
+                     36); // 34 logs in file + 1 synthetic nperiods log
+                          // + 1 proton_charge_by_period log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
