@@ -150,6 +150,18 @@ public:
     TS_ASSERT_EQUALS(paramValue2, cmpt->getStringParameter(paramName)[0]);
   }
 
+  void test_bool() {
+    std::string paramName = "TestParam";
+    std::string paramType = "Bool";
+    std::string paramValue = "true";
+
+    MatrixWorkspace_sptr ws =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
+
+    ExecuteAlgorithm(ws, "", "", paramName, paramValue, paramType);
+    TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0]);
+  }
+
   MatrixWorkspace_sptr
   ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string cmptName,
                    std::string detList, std::string paramName,

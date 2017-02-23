@@ -17,6 +17,7 @@ Improved
 ########
 
 - :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
 
 Bug Fixes
 #########
