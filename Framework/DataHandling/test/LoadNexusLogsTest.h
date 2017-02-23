@@ -12,7 +12,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-
 using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -171,10 +170,14 @@ public:
                       uniquePeriods.size());
 
     const bool hasProtonChargeByPeriod = run.hasProperty("run_title");
-    TSM_ASSERT("Should have extracted proton_charge_by_period log.", hasProtonChargeByPeriod);
+    TSM_ASSERT("Should have extracted proton_charge_by_period log.",
+               hasProtonChargeByPeriod);
 
-    std::vector<double> protonChargeByPeriod = run.getPropertyValueAsType<std::vector<double>>("proton_charge_by_period");
-    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4, protonChargeByPeriod.size());
+    std::vector<double> protonChargeByPeriod =
+        run.getPropertyValueAsType<std::vector<double>>(
+            "proton_charge_by_period");
+    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4,
+                      protonChargeByPeriod.size());
   }
 
   void test_extract_run_title_from_event_nexus() {
