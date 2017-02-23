@@ -28,6 +28,8 @@ private slots:
   void validateChemical();
   void saveClicked();
   void plotClicked();
+  void changeSampleDensityUnit(int);
+  void changeCanDensityUnit(int);
 
 private:
   void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg,

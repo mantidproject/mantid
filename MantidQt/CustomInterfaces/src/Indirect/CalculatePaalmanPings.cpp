@@ -45,6 +45,12 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
+  // Connect slots for toggling the mass/number density unit
+  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeSampleDensityUnit(int)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeCanDensityUnit(int)));
+
   UserInputValidator uiv;
   if (uiv.checkFieldIsNotEmpty("Can Chemical Formula",
                                m_uiForm.leCanChemicalFormula,
@@ -496,5 +502,30 @@ void CalculatePaalmanPings::plotClicked() {
       plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
 }
+
+/**
+ * Handle changing of the sample density unit
+ */
+void CalculatePaalmanPings::changeSampleDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spSampleDensity->setSuffix(" /A3");
+  }
+}
+
+/**
+ * Handle changing of the can density unit
+ */
+void CalculatePaalmanPings::changeCanDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spCanDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spCanDensity->setSuffix(" /A3");
+  }
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

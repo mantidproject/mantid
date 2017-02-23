@@ -684,6 +684,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spSampleDensity">
+        <property name="suffix">
+         <string> g/cm3</string>
+        </property>
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
@@ -755,6 +758,9 @@
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spCanDensity">
+        <property name="suffix">
+         <string> g/cm3</string>
+        </property>
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
