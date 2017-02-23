@@ -195,6 +195,7 @@ if( "@MAKE_VATES@" == "ON" )
           "Contents/Libraries/vtkParaViewWebCorePython.so",
           "Contents/Libraries/vtkPVAnimationPython.so",
           "Contents/Libraries/vtkPVCatalystPython.so",
+          "Contents/Libraries/vtkPVCinemaReaderPython.so",
           "Contents/Libraries/vtkPVClientServerCoreDefaultPython.so",
           "Contents/Libraries/vtkPVClientServerCoreRenderingPython.so",
           "Contents/Libraries/vtkPVPythonCatalystPython.so",
