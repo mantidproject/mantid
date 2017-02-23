@@ -15,6 +15,7 @@ New
 Improved
 ########
 
+- Two new properties were added to :ref:`algm-Integration`: *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 
 Deprecated
 ##########
