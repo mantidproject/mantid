@@ -156,7 +156,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Efixed Value (mev)</string>
+           <string>Efixed</string>
           </property>
          </widget>
         </item>
@@ -167,6 +167,9 @@
           </property>
           <property name="toolTip">
            <string>Efixed value in mev. </string>
+          </property>
+          <property name="suffix">
+           <string> meV</string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -350,12 +353,15 @@
           <item row="0" column="2">
            <widget class="QLabel" name="lbFlatSampleAngle">
             <property name="text">
-             <string>Sample Angle (degree):</string>
+             <string>Sample Angle:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
+            <property name="suffix">
+             <string> °</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
