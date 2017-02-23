@@ -66,16 +66,11 @@ private:
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces
   bool processGroupAsEventWS(int groupID, const GroupData &group,
-                             const std::vector<double> &startTimes,
-                             const std::vector<double> &stopTimes);
+                             const std::string &timeSlicingType,
+                             const std::string &timeSlicingValues);
   // Process a group of runs which are not event workspaces
   bool processGroupAsNonEventWS(int groupID, const GroupData &group);
 
-  // Parse time slicing from type and input string
-  void parseTimeSlicing(const std::string &slicingType,
-                        const std::string &timeSlicing,
-                        std::vector<double> &startTimes,
-                        std::vector<double> &stopTimes);
   // Parse uniform even time slicing from input string
   void parseUniformEven(const std::string &timeSlicing,
                         std::vector<double> &startTimes,
@@ -98,8 +93,8 @@ private:
   // Load a run (non-event workspace)
   void loadNonEventRun(const std::string &runNo);
   // Take a slice from event workspace
-  std::string takeSlice(const std::string &runNo, double startTime,
-                        double stopTime);
+  std::string takeSlice(const std::string &runNo, size_t sliceIndex,
+                        double startTime, double stopTime);
 };
 }
 }

@@ -55,11 +55,9 @@ void ReflDataProcessorPresenter::process() {
     return;
   }
 
-  std::vector<double> startTimes, stopTimes;
+  // Get time slicing type
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
-  // Parse time slices
-  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
   // Get selected runs
   const auto items = m_manager->selectedData(true);
 
@@ -86,7 +84,8 @@ void ReflDataProcessorPresenter::process() {
 
       if (allEventWS) {
         // Process the group
-        if (processGroupAsEventWS(item.first, group, startTimes, stopTimes))
+        if (processGroupAsEventWS(item.first, group, timeSlicingType,
+                                  timeSlicingValues))
           errors = true;
 
         // Notebook not implemented yet
@@ -167,16 +166,25 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
 *
 * @param groupID :: An integer number indicating the id of this group
 * @param group :: the group of event workspaces
-* @param startTimes :: start times for the set of slices
-* @param stopTimes :: stop times for the set of slices
+* @param timeSlicingType :: The type of time slicing being used
+* @param timeSlicingValues :: The string of values to perform time slicing with
 * @return :: true if errors were encountered
 */
 bool ReflDataProcessorPresenter::processGroupAsEventWS(
-    int groupID, const GroupData &group, const std::vector<double> &startTimes,
-    const std::vector<double> &stopTimes) {
+    int groupID, const GroupData &group, const std::string &timeSlicingType,
+    const std::string &timeSlicingValues) {
 
   bool errors = false;
-  size_t numSlices = startTimes.size();
+  bool multiRow = group.size() > 1;
+  size_t numSlices = INT_MAX;
+
+  std::vector<double> startTimes, stopTimes;
+
+  // For custom slicing, the start/stop times are the same for all rows
+  if (timeSlicingType == "Custom") {
+    parseCustom(timeSlicingValues, startTimes, stopTimes);
+    numSlices = startTimes.size();
+  }
 
   for (const auto &row : group) {
 
@@ -185,9 +193,38 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     // The run number
     std::string runNo = row.second.at(0);
 
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
+      // For uniform slicing we need the total duration of the run
+      std::string runName = "TOF_" + runNo;
+      IEventWorkspace_const_sptr mws =
+          AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
+      const auto minTime = mws->getSpectrum(0).getPulseTimeMin();
+      const auto maxTime = mws->getSpectrum(0).getPulseTimeMax();
+      const auto totalDuration = maxTime - minTime;
+      double totalDurationSec = totalDuration.seconds();
+      double sliceDuration;
+
+      // Determine slice duration and number of slices
+      if (timeSlicingType == "UniformEven") {
+        numSlices = std::stoi(timeSlicingValues);
+        sliceDuration = totalDurationSec / numSlices;
+      } else if (timeSlicingType == "Uniform") {
+        sliceDuration = std::stoi(timeSlicingValues);
+        numSlices = ceil(totalDurationSec / sliceDuration);
+        // For multiple rows, we only use common slices (lowest num of slices)
+        numSlices = std::min(numSlices, startTimes.size());
+      }
+
+      // Add the start/stop times
+      for (size_t i = 0; i < numSlices; i++) {
+        startTimes.push_back(sliceDuration * i);
+        stopTimes.push_back(sliceDuration * (i + 1));
+      }
+    }
+
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runNo, startTimes[i], stopTimes[i]);
+        auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(data);
         slice[0] = wsName;
         auto newData = reduceRow(slice);
@@ -200,15 +237,14 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   }
 
   // Post-process (if needed)
-  if (group.size() > 1) {
+  if (multiRow) {
     for (size_t i = 0; i < numSlices; i++) {
 
       GroupData groupNew;
       std::vector<std::string> data;
       for (const auto &row : group) {
         data = row.second;
-        data[0] = row.second[0] + "_" + std::to_string((int)startTimes[i]) +
-                  "_" + std::to_string((int)stopTimes[i]);
+        data[0] = row.second[0] + "_slice_" + std::to_string(i);
         groupNew[row.first] = data;
       }
       try {
@@ -253,33 +289,6 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
   return errors;
 }
 
-/** Parses a string and type to extract time slicing
-*
-* @param slicingType :: The type of slicing to be done
-* @param timeSlicing :: The string to parse
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
-*/
-void ReflDataProcessorPresenter::parseTimeSlicing(
-    const std::string &slicingType, const std::string &timeSlicing,
-    std::vector<double> &startTimes, std::vector<double> &stopTimes) {
-
-  if (slicingType == "UniformEven")
-    parseUniformEven(timeSlicing, startTimes, stopTimes);
-  else if (slicingType == "Uniform")
-    parseUniform(timeSlicing, startTimes, stopTimes);
-  else if (slicingType == "Custom")
-    parseCustom(timeSlicing, startTimes, stopTimes);
-  else if (slicingType == "LogValues")
-    parseLogValue(timeSlicing, startTimes, stopTimes);
-
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
-}
-
 /** Parses a string to extract uniform even time slicing
 *
 * @param timeSlicing :: The string to parse
@@ -292,7 +301,9 @@ void ReflDataProcessorPresenter::parseUniformEven(
     const std::string &timeSlicing, std::vector<double> &startTimes,
     std::vector<double> &stopTimes) {
 
-  // Not implemented yet!
+  if (startTimes.size() != stopTimes.size())
+    m_mainPresenter->giveUserCritical("Error parsing time slices",
+                                      "Time slicing error");
 }
 
 /** Parses a string to extract uniform time slicing
@@ -306,8 +317,10 @@ void ReflDataProcessorPresenter::parseUniformEven(
 void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
                                               std::vector<double> &startTimes,
                                               std::vector<double> &stopTimes) {
-  
-  // Not implemented yet!
+
+  if (startTimes.size() != stopTimes.size())
+    m_mainPresenter->giveUserCritical("Error parsing time slices",
+                                      "Time slicing error");
 }
 
 /** Parses a string to extract custom time slicing
@@ -345,6 +358,10 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
       stopTimes.push_back(times[i + 1]);
     }
   }
+
+  if (startTimes.size() != stopTimes.size())
+    m_mainPresenter->giveUserCritical("Error parsing time slices",
+                                      "Time slicing error");
 }
 
 /** Parses a string to extract log value time slicing
@@ -400,17 +417,18 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
 * @param runNo :: the run number as a string
+* @param sliceIndex :: the index of the slice being taken
 * @param startTime :: start time
 * @param stopTime :: stop time
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
+                                                  size_t sliceIndex,
                                                   double startTime,
                                                   double stopTime) {
 
   std::string runName = "TOF_" + runNo;
-  std::string sliceName = runName + "_" + std::to_string((int)startTime) + "_" +
-                          std::to_string((int)stopTime);
+  std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
   std::string monName = runName + "_monitors";
 
   // Filter by time
@@ -473,8 +491,8 @@ void ReflDataProcessorPresenter::plotRow() {
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
-  // Parse time slices
-  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
+  if (timeSlicingType == "Custom")
+    parseCustom(timeSlicingValues, startTimes, stopTimes);
   size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
@@ -549,8 +567,8 @@ void ReflDataProcessorPresenter::plotGroup() {
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
-  // Parse time slices
-  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
+  if (timeSlicingType == "Custom")
+    parseCustom(timeSlicingValues, startTimes, stopTimes);
   size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
