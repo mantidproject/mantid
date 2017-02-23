@@ -174,7 +174,7 @@ public:
    * @param value :: The value of the element.
    */
 
-  double convertToDouble(std::string value) const {
+  double convertToDouble(const std::string value) const {
     //return boost::lexical_cast<double>(value);
     return std::stod(value);
   }
