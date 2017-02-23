@@ -30,6 +30,7 @@ Changes in this version
 * `18865 <https://www.github.com/mantidproject/mantid/pull/18865>`_ Fix bug in reflectometry GUI
 * `18875 <https://www.github.com/mantidproject/mantid/pull/18875>`_ U correction not correctly applied to viewport
 * `18884 <https://www.github.com/mantidproject/mantid/pull/18884>`_ Add support for NeXus files in LoadVesuvio
+* `18888 <https://www.github.com/mantidproject/mantid/pull/18888>`_ Fix LOQ Batch reduction issues
 * `18891 <https://www.github.com/mantidproject/mantid/pull/18891>`_ Fix bug in gd_prtn_chrg for chunked data
 * `18907 <https://www.github.com/mantidproject/mantid/pull/18907>`_ Fix zeropadding for IMAT in Facilities.XML
 * `18914 <https://www.github.com/mantidproject/mantid/pull/18914>`_ Fix mass ws deletion bug
@@ -56,6 +57,8 @@ Summary of impact
 | 18875 | Displays all of instrument when U correction applied                              | Apply U correction in appropriate all places| **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18884 | Allows Vesuvio to Load NeXus files from current cycle                             | Use Load not LoadRaw in algorithm           | **medium**   |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18888 | Fixes batch reduction for LOQ at ISIS                                             | Checks correctly for userfile in batch run  | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18891 | Fixes bug in gd_prtn_chrg for chunked data                                        | Recalculate proton charge just prior to use | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
