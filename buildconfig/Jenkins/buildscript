@@ -98,7 +98,7 @@ if [ -d $BUILD_DIR ]; then
   rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
-      rm -rf $BUILD_DIR/google-*
+      rm -rf $BUILD_DIR/googletest-*
   fi
 else
   mkdir $BUILD_DIR
