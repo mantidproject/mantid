@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 
@@ -15,6 +15,9 @@
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class ALCPeakFittingModelTest : public CxxTest::TestSuite {
   ALCPeakFittingModel *m_model;
@@ -48,13 +51,13 @@ public:
   }
 
   void test_fit() {
-    std::vector<double> x = {1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00};
-    std::vector<double> y = {0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00};
+    MatrixWorkspace_sptr data =
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 8, 8);
 
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, y.size(), y.size());
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+    data->setHistogram(0,
+                       Points{1.00, 2.00, 3.00, 4.00, 5.00, 6.00, 7.00, 8.00},
+                       Counts{0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00},
+                       CountStandardDeviations(8, 0));
 
     m_model->setData(data);
 
