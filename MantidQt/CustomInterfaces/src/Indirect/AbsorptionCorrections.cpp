@@ -36,8 +36,11 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
 
+  // Handle density units
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeSampleDensityUnit(int)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
+    SLOT(changeCanDensityUnit(int)));
 }
 
 void AbsorptionCorrections::setup() {}
@@ -373,8 +376,22 @@ void AbsorptionCorrections::changeSampleDensityUnit(int index) {
   if (index == 0) {
     m_uiForm.spSampleDensity->setSuffix(" g/cm3");
   } else {
-    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
+    m_uiForm.spSampleDensity->setSuffix(" 1/Å3");
   }
 }
+
+/**
+* Handle changing of the container density unit
+*/
+void AbsorptionCorrections::changeCanDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spCanDensity->setSuffix(" g/cm3");
+  }
+  else {
+    m_uiForm.spCanDensity->setSuffix(" 1/Å3");
+  }
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
