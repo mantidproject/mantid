@@ -176,9 +176,9 @@ void ALCBaselineModellingPresenter::updateCorrectedCurve() {
 
 void ALCBaselineModellingPresenter::updateBaselineCurve() {
   if (IFunction_const_sptr fittedFunc = m_model->fittedFunction()) {
-    const std::vector<double> &xValues = m_model->data()->readX(0);
+    auto &xValues = m_model->data()->x(0);
     m_view->setBaselineCurve(
-        *(ALCHelper::curveDataFromFunction(fittedFunc, xValues)));
+        *(ALCHelper::curveDataFromFunction(fittedFunc, xValues.rawData())));
   } else {
     m_view->setBaselineCurve(*(ALCHelper::emptyCurveData()));
   }
