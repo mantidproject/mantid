@@ -73,7 +73,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
     throw std::invalid_argument("Supplied list of files is empty");
 
   // Convert list of files into a mangled map key
-   const auto toString = [](QStringList qsl) {
+  const auto toString = [](QStringList qsl) {
     std::ostringstream oss;
     qsl.sort();
     for (const QString qs : qsl) {
@@ -86,10 +86,9 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   updateCache();
   // Check cache to see if we've loaded this set of files before
   const std::string fileString = toString(files);
-  if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end())
-  {
-		g_log.information("Using cached workspace for file(s): " + fileString);
-		return m_loadedDataCache[fileString];
+  if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end()) {
+    g_log.information("Using cached workspace for file(s): " + fileString);
+    return m_loadedDataCache[fileString];
   }
 
   LoadResult result;
@@ -474,9 +473,9 @@ void MuonAnalysisDataLoader::updateCache() const {
 }
 
 void MuonAnalysisDataLoader::clearCache() {
-	if (!m_loadedDataCache.empty()) {
-		m_loadedDataCache.clear();
-	}
+  if (!m_loadedDataCache.empty()) {
+    m_loadedDataCache.clear();
+  }
 }
 
 } // namespace CustomInterfaces

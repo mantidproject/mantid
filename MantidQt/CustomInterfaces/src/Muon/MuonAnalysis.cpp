@@ -2757,7 +2757,7 @@ void MuonAnalysis::deadTimeFileSelected() {
  * from the form
  */
 void MuonAnalysis::setTimeZeroState(int checkBoxState) {
-	m_dataLoader.clearCache();
+  m_dataLoader.clearCache();
   if (checkBoxState == -1)
     checkBoxState = m_uiForm.timeZeroAuto->checkState();
 

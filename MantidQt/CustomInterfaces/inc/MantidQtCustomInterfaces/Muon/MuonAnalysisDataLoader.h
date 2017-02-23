@@ -95,7 +95,7 @@ public:
   /// Load dead times from file
   Mantid::API::Workspace_sptr
   loadDeadTimesFromFile(const std::string &filename) const;
-  //empty the cache
+  // empty the cache
   void clearCache();
 
 protected:
