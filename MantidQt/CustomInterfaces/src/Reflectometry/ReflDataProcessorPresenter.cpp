@@ -49,16 +49,17 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::process();
     return;
   }
 
-  // Parse time slices
   std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
+  // Parse time slices
+  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
   // Get selected runs
   const auto items = m_manager->selectedData(true);
 
@@ -252,43 +253,113 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
   return errors;
 }
 
-/** Parses a string to extract time slicing
+/** Parses a string and type to extract time slicing
 *
-* @param timeSlicing :: the string to parse
+* @param slicingType :: The type of slicing to be done
+* @param timeSlicing :: The string to parse
 * @param startTimes :: [output] A vector containing the start time for each
 *slice
 * @param stopTimes :: [output] A vector containing the stop time for each
 *slice
 */
 void ReflDataProcessorPresenter::parseTimeSlicing(
+    const std::string &slicingType, const std::string &timeSlicing,
+    std::vector<double> &startTimes, std::vector<double> &stopTimes) {
+
+  if (slicingType == "UniformEven")
+    parseUniformEven(timeSlicing, startTimes, stopTimes);
+  else if (slicingType == "Uniform")
+    parseUniform(timeSlicing, startTimes, stopTimes);
+  else if (slicingType == "Custom")
+    parseCustom(timeSlicing, startTimes, stopTimes);
+  else if (slicingType == "LogValues")
+    parseLogValue(timeSlicing, startTimes, stopTimes);
+
+  if (startTimes.size() != stopTimes.size())
+    m_mainPresenter->giveUserCritical("Error parsing time slices",
+                                      "Time slicing error");
+}
+
+/** Parses a string to extract uniform even time slicing
+*
+* @param timeSlicing :: The string to parse
+* @param startTimes :: [output] A vector containing the start time for each
+*slice
+* @param stopTimes :: [output] A vector containing the stop time for each
+*slice
+*/
+void ReflDataProcessorPresenter::parseUniformEven(
     const std::string &timeSlicing, std::vector<double> &startTimes,
     std::vector<double> &stopTimes) {
+
+  // Not implemented yet!
+}
+
+/** Parses a string to extract uniform time slicing
+*
+* @param timeSlicing :: The string to parse
+* @param startTimes :: [output] A vector containing the start time for each
+*slice
+* @param stopTimes :: [output] A vector containing the stop time for each
+*slice
+*/
+void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
+                                              std::vector<double> &startTimes,
+                                              std::vector<double> &stopTimes) {
+  
+  // Not implemented yet!
+}
+
+/** Parses a string to extract custom time slicing
+*
+* @param timeSlicing :: The string to parse
+* @param startTimes :: [output] A vector containing the start time for each
+*slice
+* @param stopTimes :: [output] A vector containing the stop time for each
+*slice
+*/
+void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
+                                             std::vector<double> &startTimes,
+                                             std::vector<double> &stopTimes) {
 
   std::vector<std::string> timesStr;
   boost::split(timesStr, timeSlicing, boost::is_any_of(","));
 
   std::vector<double> times;
   std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
-                 [](const std::string &astr) { return std::stod(astr); });
+    [](const std::string &astr) { return std::stod(astr); });
 
   size_t numTimes = times.size();
 
   if (numTimes == 1) {
     startTimes.push_back(0);
     stopTimes.push_back(times[0]);
-  } else if (numTimes == 2) {
+  }
+  else if (numTimes == 2) {
     startTimes.push_back(times[0]);
     stopTimes.push_back(times[1]);
-  } else {
+  }
+  else {
     for (size_t i = 0; i < numTimes - 1; i++) {
       startTimes.push_back(times[i]);
       stopTimes.push_back(times[i + 1]);
     }
   }
+}
 
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
+/** Parses a string to extract log value time slicing
+*
+* @param timeSlicing :: The string to parse
+* @param startTimes :: [output] A vector containing the start time for each
+*slice
+* @param stopTimes :: [output] A vector containing the stop time for each
+*slice
+*/
+void ReflDataProcessorPresenter::parseLogValue(const std::string &timeSlicing,
+                                               std::vector<double> &startTimes,
+                                               std::vector<double> &stopTimes) {
+
+  // Not implemented yet!
 }
 
 /** Loads an event workspace and puts it into the ADS
@@ -393,15 +464,17 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
 void ReflDataProcessorPresenter::plotRow() {
 
   // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
-    GenericDataProcessorPresenter::plotRow();
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
+    GenericDataProcessorPresenter::process();
     return;
   }
 
-  // Parse time slices
   std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+
+  // Parse time slices
+  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
   size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
@@ -467,15 +540,17 @@ std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
 void ReflDataProcessorPresenter::plotGroup() {
 
   // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
-    GenericDataProcessorPresenter::plotGroup();
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
+    GenericDataProcessorPresenter::process();
     return;
   }
 
-  // Parse time slices
   std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+
+  // Parse time slices
+  parseTimeSlicing(timeSlicingType, timeSlicingValues, startTimes, stopTimes);
   size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
