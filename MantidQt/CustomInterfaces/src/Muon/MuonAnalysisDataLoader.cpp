@@ -88,28 +88,8 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
   const std::string fileString = toString(files);
   if (m_loadedDataCache.find(fileString) != m_loadedDataCache.end())
   {
-	 /* LoadResult result = m_loadedDataCache[fileString];
-	  if (m_deadTimesType == DeadTimesType::FromFile) { // manually reset the DeadTime
-		  IAlgorithm_sptr load =
-			  AlgorithmManager::Instance().createUnmanaged("LoadMuonNexus");
-		  load->initialize();
-		  load->setChild(true);
-		  load->setLogging(false); // We'll take care of printing messages ourselves
-		  std::string fileString2 = toString(files);
-		  fileString2.pop_back();
-		  const std::string fileString3 = fileString2;
-		  load->setPropertyValue("Filename", fileString3);
-		  g_log.information("Using cached workspace for file(s): " + fileString);
-		  // Just to pass validation
-		  load->setPropertyValue("OutputWorkspace", "__NotUsed");
-		  load->setPropertyValue("DeadTimeTable", "__NotUsed");
-		  load->execute();
-		  result.loadedDeadTimes = load->getProperty("DeadTimeTable");
-	  }
-    return result;*/
 		g_log.information("Using cached workspace for file(s): " + fileString);
 		return m_loadedDataCache[fileString];
-
   }
 
   LoadResult result;
@@ -493,7 +473,7 @@ void MuonAnalysisDataLoader::updateCache() const {
   }
 }
 
-void MuonAnalysisDataLoader::emptyCache() {
+void MuonAnalysisDataLoader::clearCache() {
 	if (!m_loadedDataCache.empty()) {
 		m_loadedDataCache.clear();
 	}

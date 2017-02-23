@@ -96,7 +96,7 @@ public:
   Mantid::API::Workspace_sptr
   loadDeadTimesFromFile(const std::string &filename) const;
   //empty the cache
-  void emptyCache();
+  void clearCache();
 
 protected:
   /// Set properties of algorithm from options
