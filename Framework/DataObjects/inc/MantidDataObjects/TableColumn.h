@@ -167,7 +167,7 @@ public:
 
   /**
    * Cast an string to double if possible. If it's impossible
-   * boost::numeric::bad_lexical_cast
+   * std::invalid_argument
    * is throw. In case of an overflow boost::numeric::positive_overflow or
    * boost::numeric::negative_overflow
    * is throw.
@@ -175,7 +175,6 @@ public:
    */
 
   double convertToDouble(const std::string value) const {
-    // return boost::lexical_cast<double>(value);
     return std::stod(value);
   }
 
