@@ -1595,6 +1595,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorAppendRowCommand();
@@ -1614,6 +1615,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorAppendGroupCommand();
@@ -1633,6 +1635,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorClearSelectedCommand();
@@ -1652,6 +1655,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorCopySelectedCommand();
@@ -1671,6 +1675,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorCutSelectedCommand();
@@ -1690,6 +1695,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorDeleteGroupCommand();
@@ -1709,6 +1715,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorDeleteRowCommand();
@@ -1728,6 +1735,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorExpandCommand();
@@ -1747,6 +1755,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorExportTableCommand();
@@ -1766,6 +1775,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorGroupRowsCommand();
@@ -1785,6 +1795,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorImportTableCommand();
@@ -1804,6 +1815,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorNewTableCommand();
@@ -1823,6 +1835,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorOpenTableCommand();
@@ -1842,6 +1855,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorOptionsCommand();
@@ -1861,6 +1875,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorPasteSelectedCommand();
@@ -1880,6 +1895,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorPlotGroupCommand();
@@ -1899,6 +1915,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorPlotRowCommand();
@@ -1918,6 +1935,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorProcessCommand();
@@ -1937,6 +1955,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorSaveTableCommand();
@@ -1956,6 +1975,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorSaveTableAsCommand();
@@ -1975,6 +1995,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorSeparatorCommand();
@@ -1994,6 +2015,7 @@ std::string icon();
 std::string tooltip();
 std::string whatsthis();
 std::string shortcut();
+bool hasChild();
 
 private:
 DataProcessorWorkspaceCommand();
