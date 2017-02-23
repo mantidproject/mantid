@@ -284,10 +284,6 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   mantidMenu->setObjectName("mantidMenu");
   mantidMenuAboutToShow();
 
-  QShortcut *sc =
-      new QShortcut(QKeySequence(QKeySequence::Delete), m_appWindow);
-  connect(sc, SIGNAL(activated()), this, SLOT(deletePressEvent()));
-
   menuMantidMatrix = new QMenu(m_appWindow);
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this,
           SLOT(menuMantidMatrixAboutToShow()));

@@ -198,6 +198,7 @@ public slots:
   void sortDescending();
   void chooseByName();
   void chooseByLastModified();
+  void keyPressEvent(QKeyEvent *) override;
 
 protected slots:
   void popupMenu(const QPoint &pos);
