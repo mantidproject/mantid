@@ -114,12 +114,12 @@ void PredictPeaks::init() {
   for (auto &pg : m_pointGroups) {
     prop2Options.push_back(pg->getName());
   }
-  declareProperty("PointGroup", "",
-                  boost::make_shared<StringListValidator>(prop2Options),
-                  "Optionally apply point group symmetry to this crystal "
-                  "so that HKL peaks that are equivalent, due to symmetry, are "
-                  "considered to be the same.  Only the primary hkl are predicted "
-                  "which means that higher symmetries will predict fewer peaks.");
+  declareProperty(
+      "PointGroup", "", boost::make_shared<StringListValidator>(prop2Options),
+      "Optionally apply point group symmetry to this crystal "
+      "so that HKL peaks that are equivalent, due to symmetry, are "
+      "considered to be the same.  Only the primary hkl are predicted "
+      "which means that higher symmetries will predict fewer peaks.");
 
   // Disable some props when using HKLPeaksWorkspace
   auto makeSet = [] {
