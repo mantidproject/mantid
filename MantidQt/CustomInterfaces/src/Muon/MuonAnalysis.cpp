@@ -2694,7 +2694,7 @@ void MuonAnalysis::doSetToolbarsHidden(bool hidden) {
  */
 void MuonAnalysis::onDeadTimeTypeChanged(int choice) {
   m_deadTimesChanged = true;
-
+  m_dataLoader.emptyCache();
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -2757,6 +2757,7 @@ void MuonAnalysis::deadTimeFileSelected() {
  * from the form
  */
 void MuonAnalysis::setTimeZeroState(int checkBoxState) {
+	m_dataLoader.emptyCache();
   if (checkBoxState == -1)
     checkBoxState = m_uiForm.timeZeroAuto->checkState();
 
@@ -2778,6 +2779,7 @@ void MuonAnalysis::setTimeZeroState(int checkBoxState) {
  * from the form
  */
 void MuonAnalysis::setFirstGoodDataState(int checkBoxState) {
+  m_dataLoader.emptyCache();
   if (checkBoxState == -1)
     checkBoxState = m_uiForm.firstGoodDataAuto->checkState();
 
