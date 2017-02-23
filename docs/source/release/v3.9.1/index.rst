@@ -24,6 +24,7 @@ Please cite any usage of Mantid as follows:
 Changes in this version
 -----------------------
 
+* `18777 <https://www.github.com/mantidproject/mantid/pull/18777>`_ Add live data address for MANDI
 * `18833 <https://www.github.com/mantidproject/mantid/pull/18833>`_ Added check for if nonorthogonal axes should be displayed
 * `18857 <https://www.github.com/mantidproject/mantid/pull/18857>`_ Indirect Diffraction - OSIRIS diffonly interface crash
 * `18865 <https://www.github.com/mantidproject/mantid/pull/18865>`_ Fix bug in reflectometry GUI
@@ -42,6 +43,8 @@ Summary of impact
 | Issue | Impact                                                                            | Solution                                    | Side Effect  |
 |       |                                                                                   |                                             | Probability  |
 +=======+===================================================================================+=============================================+==============+
+| 18777 | Allow MANDI to use live data                                                      | Add address to facilities file              | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18833 | HKL axes now respect the non-orthogonal checkbox                                  | Add check if button is in a checked state   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18857 | Diffraction reduction in diffonly mode does not crash fro OSIRIS                  | Only run OSIRIS-specific reduction          | **low**      |
