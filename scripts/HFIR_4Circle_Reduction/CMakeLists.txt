@@ -7,6 +7,8 @@ set( UI_FILES
   OptimizeLattice.ui
   RefineUbFftDialog.ui
   SpiceViewerDialog.ui
+  UBSelectPeaksDialog.ui
+  AddUBPeaksDialog.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)
