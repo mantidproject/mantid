@@ -155,7 +155,7 @@ public:
    * is throw. In case of an overflow boost::numeric::positive_overflow or
    * boost::numeric::negative_overflow
    * is throw.
-   * @param i :: The index to an element.
+   * @param value :: The value of the element.
    */
   template <typename T> double convertToDouble(const T &value) const {
     typedef
@@ -164,6 +164,16 @@ public:
             DoubleType;
     return boost::numeric_cast<double, DoubleType>(value);
   }
+
+  /**
+   * Cast an string to double if possible. If it's impossible
+   * boost::numeric::bad_lexical_cast
+   * is throw. In case of an overflow boost::numeric::positive_overflow or
+   * boost::numeric::negative_overflow
+   * is throw.
+   * @param value :: The value of the element.
+   */
+
   double convertToDouble(std::string value) const {
     return boost::lexical_cast<double>(value);
   }
