@@ -8,7 +8,7 @@ from isis_reflectometry import combineMulti
 class ReflectometryQuickCombineMulti(stresstesting.MantidStressTest):
     """
     This is a system test for the top-level CombineMulti routines. Quick is the name given to the
-    ISIS Reflectometry (Old) reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q| taken at
+    ISIS reflectometry reduction scripts. CombineMulti is used for stitching together runs converted Into I/I0 vs |Q| taken at
     different incident angles (and hence covering different Q-ranges)
     """
 

@@ -7,7 +7,7 @@ from isis_reflectometry import quick
 class ReflectometryQuickMultiDetector(stresstesting.MantidStressTest):
     """
     This is a system test for the top-level quick routines. Quick is the name given to the
-    ISIS Reflectometry (Old) reduction scripts.
+    ISIS reflectometry reduction scripts.
 
     This test uses the multidetector functionality within the script.
     No transmission runs are passed, so it uses correction algorithms instead.

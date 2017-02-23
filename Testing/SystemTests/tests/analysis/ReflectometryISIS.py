@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 """
-These system tests are to verify the behaviour of the ISIS Reflectometry (Old) reduction scripts
+These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
 import stresstesting
