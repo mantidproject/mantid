@@ -6,6 +6,7 @@ Contains the ISISDisk class which calculates resolution and flux for ISIS Disk c
 spectrometer (LET) - using the functions in MulpyRep and additional tables of instrument parameters
 """
 
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from . import MulpyRep
 from .ISISFermi import ISISFermi
@@ -201,9 +202,9 @@ class ISISDisk:
         chop_width = np.array(chop_width) * (self.samp_det + self.chop_samp + lastChopDist) / lastChopDist
         mod_width = np.array(mod_width) * (self.chop_samp + self.samp_det) / lastChopDist
         if len(ie_list) == 1:
-            chop_width = chop_width[ie_list]
-            mod_width = mod_width[ie_list]
-            res_el = res_el[ie_list]
+            chop_width = chop_width[ie_list[0]]
+            mod_width = mod_width[ie_list[0]]
+            res_el = res_el[ie_list[0]]
         return Eis, res_list, res_el, percent, ie_list, chop_width, mod_width
 
     def getElasticResolution(self, Ei_in=None, frequency=None):

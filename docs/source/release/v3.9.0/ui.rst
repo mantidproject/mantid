@@ -9,6 +9,17 @@ UI & Usability Changes
 User Interface
 --------------
 
+Project Saving
+##############
+
+.. figure:: ../../images/PartialProjectSaveDialog.png
+   :class: screenshot
+   :width: 500px
+   :align: right
+
+- We have added a new dialog when saving a project that allows you to select which workspaces you want to save, and will tell you which graph windows will be included or excluded based on your selections.
+- The size of each workspace in memory is listed so you can speed up project saving (and reloading) by excluding large workspaces you do not need.
+
 Windows
 #######
 
@@ -62,14 +73,26 @@ Custom Interfaces
 SliceViewer Improvements
 ------------------------
 
-- Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
-
 .. figure:: ../../images/SliceViewerNonOrthogonal.png
    :class: screenshot
    :width: 450px
    :align: right
 
    SliceViewer with nonorthogonal view 
+   
+- Added the ability to view data using non orthogonal axes. View can be toggled on or off. When non orthogonal view is toggled the peak viewer and line viewer tools are disabled.
+- Setting the thickess now means that the slicing happens between `-0.5*thicness+center` and `+0.5*thicness+center`, instead of `-thicness+center` and `+thicness+center`. For the LineViewer, the python `setPlanarWidth` and `getPlanarWidth` are still having the old behavior, but the constructor is fixed.
+
+VSI Improvements
+----------------
+
+- ParaView updated to v5.2.0
+- The sources and views more reliably show progress in the VSI status bar. 
+- Added a button to the standard view which applies the threshold filter.
+- Update the cut button to match the equivalent ParaView icon.
+- Changed the fallback for when MDHistoworkspace was opened in the (incompatible) SplatterPlot view to the MultiSlice view.
+- Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
+- Drawing of a MDHistoWorkspace is now carried out in parallel using vtkSMPTools.
 
 Bugs Resolved
 -------------
@@ -90,19 +113,8 @@ Bugs Resolved
 - Fixed a bug where changing the integration range of the instrument view would clear the applied zooming.
 - Fixed a bug where the threshold filter in the VSI SplatterPlot view only returned an empty dataset.
 - Fixed a bug where plotting a column of TableWorkspace in the GUI did not work if decimal separator was not a dot.
-
-
-VSI Improvements
-----------------
-
-- ParaView updated to v5.2.0
-- The sources and views more reliably show progress in the VSI status bar. 
-- Added a button to the standard view which applies the threshold filter.
-- Update the cut button to match the equivalent ParaView icon.
-- Changed the fallback for when MDHistoworkspace was opened in the (incompatible) SplatterPlot view to the MultiSlice view.
-- Faster initial loading of a MDHistoworkspace in the MultiSlice and ThreeSlice view.
-- Drawing of a MDHistoWorkspace is now carried out in parallel using vtkSMPTools.
-
+- Fixed a bug where closing a second plot window would cause a newly activated window to be resized.
+- Fixed a bug where pressing the pick mode button in the SplatterPlotView of the VSI caused Mantid to crash.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_

@@ -39,9 +39,9 @@ void WorkspaceAlgorithm::exec() {
   int count = 0;
   size_t histogramCount = workspace->getNumberHistograms();
   for (size_t i = 0; i < histogramCount; ++i) {
-    const MantidVec &XValues = workspace->readX(i);
-    const MantidVec &YValues = workspace->readY(i);
-    const MantidVec &EValues = workspace->readE(i);
+    auto &XValues = workspace->x(i);
+    auto &YValues = workspace->y(i);
+    auto &EValues = workspace->e(i);
 
     for (size_t j = 0; j < workspace->blocksize(); ++j) {
       g_log.information() << "Point number " << count++

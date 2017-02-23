@@ -6,6 +6,7 @@
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -16,6 +17,7 @@
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/SpectrumInfo.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -24,6 +26,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/make_unique.h"
+
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
@@ -54,7 +58,9 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {
+  m_parmap->setDetectorInfo(m_detectorInfo);
+}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -63,6 +69,7 @@ ExperimentInfo::ExperimentInfo()
  */
 ExperimentInfo::ExperimentInfo(const ExperimentInfo &source) {
   this->copyExperimentInfoFrom(&source);
+  setSpectrumDefinitions(source.spectrumInfo().sharedSpectrumDefinitions());
 }
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -83,14 +90,19 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
     m_choppers.push_back(chopper->clone());
   }
   *m_detectorInfo = *other->m_detectorInfo;
+  // We do not copy Beamline::SpectrumInfo (which contains detector grouping
+  // information) for now:
+  // - For MatrixWorkspace, grouping information is still stored in ISpectrum
+  //   and should not be overridden (copy is done in ExperimentInfo ctor, but
+  //   not here since we just copy the experiment data).
+  // - For cached groupings (for MDWorkspaces), grouping was not copied in the
+  //   old implementation either.
 }
 
 /** Clone this ExperimentInfo class into a new one
  */
 ExperimentInfo *ExperimentInfo::cloneExperimentInfo() const {
-  auto out = new ExperimentInfo();
-  out->copyExperimentInfoFrom(this);
-  return out;
+  return new ExperimentInfo(*this);
 }
 
 /// @returns A human-readable description of the object
@@ -194,16 +206,22 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
-    m_parmap = instr->getParameterMap();
+    m_parmap = boost::make_shared<ParameterMap>(*instr->getParameterMap());
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
+  m_parmap->setDetectorInfo(m_detectorInfo);
+  // Detector IDs that were previously dropped because they were not part of the
+  // instrument may now suddenly be valid, so we have to reinitialize the
+  // detector grouping. Also the index corresponding to specific IDs may have
+  // changed.
+  invalidateAllSpectrumDefinitions();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -235,7 +253,7 @@ Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
     // Check again because another thread may have taken copy
     // and dropped reference count since previous check
     if (!m_parmap.unique()) {
-      invalidateInstrumentReferences();
+      m_spectrumInfoWrapper = nullptr;
       m_detectorInfoWrapper = nullptr;
     }
     if (!m_parmap.unique()) {
@@ -386,9 +404,10 @@ void ExperimentInfo::populateInstrumentParameters() {
 void ExperimentInfo::replaceInstrumentParameters(
     const Geometry::ParameterMap &pmap) {
   populateIfNotLoaded();
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
+  m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
 /**
@@ -400,9 +419,10 @@ void ExperimentInfo::replaceInstrumentParameters(
  */
 void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   populateIfNotLoaded();
-  invalidateInstrumentReferences();
+  m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
+  m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
 /**
@@ -414,44 +434,63 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
  */
 void ExperimentInfo::cacheDetectorGroupings(const det2group_map &mapping) {
   populateIfNotLoaded();
-  m_detgroups.clear();
+  if (mapping.empty()) {
+    cacheDefaultDetectorGrouping();
+    return;
+  }
+  setNumberOfDetectorGroups(mapping.size());
+  size_t specIndex = 0;
   for (const auto &item : mapping) {
-    m_det2group[item.first] = m_detgroups.size();
-    m_detgroups.push_back(item.second);
-  }
-  // Create default grouping if `mapping` is empty.
-  cacheDefaultDetectorGrouping();
-}
-
-/// Returns the detector IDs that make up the group that this ID is part of
-const std::set<detid_t> &
-ExperimentInfo::getGroupMembers(const detid_t detID) const {
-  populateIfNotLoaded();
-  auto iter = m_det2group.find(detID);
-  if (iter != m_det2group.end()) {
-    return m_detgroups[iter->second];
-  } else {
-    throw std::runtime_error(
-        "ExperimentInfo::getGroupMembers - Unable to find ID " +
-        std::to_string(detID) + " in lookup");
+    m_det2group[item.first] = specIndex;
+    setDetectorGrouping(specIndex, item.second);
+    specIndex++;
   }
 }
 
-/**
- * Get a detector or detector group from an ID
- * @param detID ::
- * @returns A single detector or detector group depending on the mapping set.
- * @see set
- */
-Geometry::IDetector_const_sptr
-ExperimentInfo::getDetectorByID(const detid_t detID) const {
+/** Sets the number of detector groups.
+ *
+ * This method should not need to be called explicitly. The number of detector
+ * groups will be set either when initializing a MatrixWorkspace, or by calling
+ * `cacheDetectorGroupings` for an ExperimentInfo stored in an MDWorkspace. */
+void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   populateIfNotLoaded();
-  if (m_detgroups.empty()) {
-    return getInstrument()->getDetector(detID);
-  } else {
-    const auto &ids = this->getGroupMembers(detID);
-    return getInstrument()->getDetectorG(ids);
+  if (m_spectrumInfo)
+    m_spectrumDefinitionNeedsUpdate.clear();
+  m_spectrumDefinitionNeedsUpdate.resize(count, 1);
+  m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(count);
+  m_spectrumInfoWrapper = nullptr;
+}
+
+/** Sets the detector grouping for the spectrum with the given `index`.
+ *
+ * This method should not need to be called explicitly. Groupings are updated
+ * automatically when modifying detector IDs in a workspace (via ISpectrum). */
+void ExperimentInfo::setDetectorGrouping(
+    const size_t index, const std::set<detid_t> &detIDs) const {
+  SpectrumDefinition specDef;
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
+    }
   }
+  m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
+  m_spectrumDefinitionNeedsUpdate.at(index) = 0;
+}
+
+/** Update detector grouping for spectrum with given index.
+ *
+ * This method is called when the detector grouping stored in SpectrumDefinition
+ * at `index` in Beamline::SpectrumInfo is not initialized or outdated. The
+ * implementation throws, since no grouping information for update is available
+ * when grouping comes from a call to `cacheDetectorGroupings`. This method is
+ * overridden in MatrixWorkspace. */
+void ExperimentInfo::updateCachedDetectorGrouping(const size_t) const {
+  throw std::runtime_error("ExperimentInfo::updateCachedDetectorGrouping: "
+                           "Cannot update -- grouping information not "
+                           "available");
 }
 
 /**
@@ -1018,39 +1057,109 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   return *m_detectorInfoWrapper;
 }
 
-/** Returns the number of detector groups.
+/** Return a reference to the SpectrumInfo object.
  *
- * This is a virtual method. The default implementation returns grouping
- * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
- * more common case is handled by the overload of this method in
- * MatrixWorkspace. The purpose of this method is to be able to construct
- * SpectrumInfo based on an ExperimentInfo object, including grouping
- * information. Grouping information can be cached in ExperimentInfo, or can be
- * obtained from child classes (MatrixWorkspace). */
-size_t ExperimentInfo::numberOfDetectorGroups() const {
+ * Any modifications of the instrument or instrument parameters will invalidate
+ * this reference.
+ */
+const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
   populateIfNotLoaded();
-  std::call_once(m_defaultDetectorGroupingCached,
-                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
-
-  return m_detgroups.size();
+  if (!m_spectrumInfoWrapper) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
+      cacheDefaultDetectorGrouping();
+    if (!m_spectrumInfoWrapper)
+      m_spectrumInfoWrapper =
+          Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
+  }
+  // Rebuild any spectrum definitions that are out of date. Accessing
+  // `API::SpectrumInfo` will rebuild invalid spectrum definitions as it
+  // encounters them (if detector IDs in an `ISpectrum` are changed), however we
+  // need to deal with one special case here:
+  // If two algorithms (or two threads in the same algorithm) access the same
+  // workspace for reading at the same time, calls to
+  // `updateSpectrumDefinitionIfNecessary` done by `API::SpectrumInfo` break
+  // thread-safety. `Algorithm` sets a read-lock, but this lazy update method is
+  // `const` and will modify internals of the workspace nevertheless. We thus
+  // need explicit locking here. Note that we do not need extra locking in the
+  // case of `ExperimentInfo::mutableSpectrumInfo` or other calls to
+  // `updateSpectrumDefinitionIfNecessary` done by `API::SpectrumInfo`: If the
+  // workspace is only read-locked, this update will ensure that no updates will
+  // be triggered by SpectrumInfo, since changing detector IDs in an `ISpectrum`
+  // is not possible for a read-only workspace. If the workspace is write-locked
+  // detector IDs in ISpectrum may change, but the write-lock by `Algorithm`
+  // guarantees that there is no concurrent reader and thus updating is safe.
+  if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
+                  m_spectrumDefinitionNeedsUpdate.cend(),
+                  [](char i) { return i == 1; })) {
+    std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
+    if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
+                    m_spectrumDefinitionNeedsUpdate.cend(),
+                    [](char i) { return i == 1; })) {
+      for (size_t i = 0; i < m_spectrumInfoWrapper->size(); ++i)
+        updateSpectrumDefinitionIfNecessary(i);
+    }
+  }
+  return *m_spectrumInfoWrapper;
 }
 
-/** Returns a set of detector IDs for a group.
- *
- * This is a virtual method. The default implementation returns grouping
- * information cached in the ExperimentInfo. This is used in MDAlgorithms. The
- * more common case is handled by the overload of this method in
- * MatrixWorkspace. The purpose of this method is to be able to construct
- * SpectrumInfo based on an ExperimentInfo object, including grouping
- * information. Grouping information can be cached in ExperimentInfo, or can be
- * obtained from child classes (MatrixWorkspace). */
-const std::set<detid_t> &
-ExperimentInfo::detectorIDsInGroup(const size_t index) const {
+/** Return a non-const reference to the SpectrumInfo object. Not thread safe.
+ */
+SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   populateIfNotLoaded();
-  std::call_once(m_defaultDetectorGroupingCached,
-                 &ExperimentInfo::cacheDefaultDetectorGrouping, this);
+  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
+  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
+  // modifications. This will trigger a copy if required. Note that the
+  // following happens internally:
+  // 1. make_unique creates a new SpectrumInfo, which calls
+  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
+  // count to the ParameterMap is typically not 1, so
+  // invalidateInstrumentReferences() is called.
+  // 2. invalidateInstrumentReferences() resets m_spectrumInfoWrapper, releasing
+  // any parameterized detectors and thus dropping any unneeded references to
+  // the ParameterMap.
+  // 3. Construction of SpectrumInfo continues and the result is assigned to
+  // m_spectrumInfoWrapper.
 
-  return m_detgroups.at(index);
+  // No locking here since this non-const method is not thread safe.
+  if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
+    cacheDefaultDetectorGrouping();
+  m_spectrumInfoWrapper =
+      Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
+  return *m_spectrumInfoWrapper;
+}
+
+/// Sets the SpectrumDefinition for all spectra.
+void ExperimentInfo::setSpectrumDefinitions(
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+  if (spectrumDefinitions) {
+    m_spectrumInfo = Kernel::make_unique<Beamline::SpectrumInfo>(
+        std::move(spectrumDefinitions));
+    m_spectrumDefinitionNeedsUpdate.resize(0);
+    m_spectrumDefinitionNeedsUpdate.resize(m_spectrumInfo->size(), 0);
+  } else {
+    // Keep the old m_spectrumInfo which should have the correct size, but
+    // invalidate all definitions.
+    invalidateAllSpectrumDefinitions();
+  }
+  m_spectrumInfoWrapper = nullptr;
+}
+
+/** Notifies the ExperimentInfo that a spectrum definition has changed.
+ *
+ * ExperimentInfo will rebuild its spectrum definitions before the next use. In
+ * general it should not be necessary to use this method: ISpectrum will take
+ * care of this when its detector IDs are modified. */
+void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
+  // This uses a vector of char, such that flags for different indices can be
+  // set from different threads (std::vector<bool> is not thread-safe).
+  m_spectrumDefinitionNeedsUpdate.at(index) = 1;
+}
+
+void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
+    const size_t index) const {
+  if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
+    updateCachedDetectorGrouping(index);
 }
 
 /** Sets up a default detector grouping.
@@ -1059,12 +1168,45 @@ ExperimentInfo::detectorIDsInGroup(const size_t index) const {
  * that do not have grouping information. In such cases a default 1:1
  * mapping/grouping is generated by this method. See also issue #18252. */
 void ExperimentInfo::cacheDefaultDetectorGrouping() const {
-  if (!m_detgroups.empty())
+  if (m_spectrumInfo && (m_spectrumInfo->size() != 0))
     return;
-  for (const auto detID : sptr_instrument->getDetectorIDs()) {
-    m_det2group[detID] = m_detgroups.size();
-    m_detgroups.push_back({detID});
+  const auto &detIDs = sptr_instrument->getDetectorIDs();
+  setNumberOfDetectorGroups(detIDs.size());
+  size_t specIndex = 0;
+  for (const auto detID : detIDs) {
+    m_det2group[detID] = specIndex;
+    const size_t detIndex = detectorInfo().indexOf(detID);
+    SpectrumDefinition specDef;
+    specDef.add(detIndex);
+    m_spectrumInfo->setSpectrumDefinition(specIndex, std::move(specDef));
+    m_spectrumDefinitionNeedsUpdate.at(specIndex) = 0;
+    specIndex++;
   }
+}
+
+/** Returns the index of the (first) group the detID is part of.
+ *
+ * The purpose of this method is access to grouping information for
+ * MDWorkspaces. */
+size_t ExperimentInfo::groupOfDetectorID(const detid_t detID) const {
+  if (!m_spectrumInfo || (m_spectrumInfo->size() == 0))
+    return detectorInfo().indexOf(detID);
+
+  auto iter = m_det2group.find(detID);
+  if (iter != m_det2group.end()) {
+    return iter->second;
+  } else {
+    throw std::out_of_range(
+        "ExperimentInfo::groupOfDetectorID - Unable to find ID " +
+        std::to_string(detID) + " in lookup");
+  }
+}
+
+/// Sets flags for all spectrum definitions indicating that they need to be
+/// updated.
+void ExperimentInfo::invalidateAllSpectrumDefinitions() {
+  std::fill(m_spectrumDefinitionNeedsUpdate.begin(),
+            m_spectrumDefinitionNeedsUpdate.end(), 1);
 }
 
 /** Save the object to an open NeXus file.

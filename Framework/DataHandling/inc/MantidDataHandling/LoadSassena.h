@@ -83,15 +83,16 @@ protected:
   herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
                        std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  MantidVec loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                         std::vector<int> &sorting_indexes);
+  HistogramData::Points loadQvectors(const hid_t &h5file,
+                                     API::WorkspaceGroup_sptr gws,
+                                     std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
   void loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-              const std::string setName, const MantidVec &qvmod,
+              const std::string setName, const HistogramData::Points &qvmod,
               const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
   void loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-               const std::string setName, const MantidVec &qvmod,
+               const std::string setName, const HistogramData::Points &qvmod,
                const std::vector<int> &sorting_indexes);
 
 private:

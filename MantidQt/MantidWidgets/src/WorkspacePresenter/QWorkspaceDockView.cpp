@@ -1281,6 +1281,9 @@ void QWorkspaceDockView::popupContextMenu() {
     } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
+    } else {
+      // None of the above? -> not a workspace
+      return;
     }
     addClearMenuItems(menu, selectedWsName);
 

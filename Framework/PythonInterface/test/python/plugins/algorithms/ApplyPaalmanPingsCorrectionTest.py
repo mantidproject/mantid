@@ -3,7 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import Load, ConvertUnits, SplineInterpolation, ApplyPaalmanPingsCorrection, DeleteWorkspace
+from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
+                              SplineInterpolation, ApplyPaalmanPingsCorrection,
+                              DeleteWorkspace)
+import numpy
 
 
 class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
@@ -60,7 +63,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Do validation on a correction workspace.
 
         @param ws Workspace to validate
-        @param correction_type Type of correction that should hav ebeen applied
+        @param correction_type Type of correction that should have been applied
         """
 
         # X axis should be in wavelength
@@ -130,6 +133,63 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
+    def test_container_input_workspace_not_unintentionally_rebinned(self):
+        xs = numpy.array([0.0, 1.0, 0.0, 1.1])
+        ys = numpy.array([2.2, 3.3])
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                   UnitX='Wavelength')
+        ys = numpy.array([0.11, 0.22])
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                      UnitX='Wavelength')
+        corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
+                                                CanWorkspace=container_1)
+        numHisto = container_1.getNumberHistograms()
+        for i in range(numHisto):
+            container_xs = container_1.readX(i)
+            for j in range(len(container_xs)):
+                self.assertEqual(container_xs[j], xs[i * numHisto + j])
+        DeleteWorkspace(sample_1)
+        DeleteWorkspace(container_1)
+        DeleteWorkspace(corrected)
+
+    def test_container_rebinning_enabled(self):
+        xs = numpy.array([0.0, 1.0, 0.0, 1.1])
+        ys = numpy.array([2.2, 3.3])
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                   UnitX='Wavelength')
+        xs = numpy.array([-1.0, 0.0, 1.0, 2.0, -1.0, 0.0, 1.0, 2.0])
+        ys = numpy.array([0.101, 0.102, 0.103, 0.104, 0.105, 0.106])
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                      UnitX='Wavelength')
+        corrected = ApplyPaalmanPingsCorrection(SampleWorkspace=sample_1,
+                                                CanWorkspace=container_1,
+                                                RebinCanToSample=True)
+        self.assertTrue(numpy.all(sample_1.extractY() > corrected.extractY()))
+        DeleteWorkspace(sample_1)
+        DeleteWorkspace(container_1)
+        DeleteWorkspace(corrected)
+
+    def test_container_rebinning_disabled(self):
+        xs = numpy.array([0.0, 1.0, 0.0, 1.1])
+        ys = numpy.array([2.2, 3.3])
+        sample_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                   UnitX='Wavelength')
+        xs = numpy.array([-1.0, 0.0, 1.0, 2.0, -1.0, 0.0, 1.0, 2.0])
+        ys = numpy.array([0.101, 0.102, 0.103, 0.104, 0.105, 0.106])
+        container_1 = CreateWorkspace(DataX=xs, DataY=ys, NSpec=2,
+                                      UnitX='Wavelength')
+        corrected_ws_name = 'corrected_workspace'
+        kwargs = {
+            'SampleWorkspace': sample_1,
+            'CanWorkspace': container_1,
+            'OutputWorkspaced': corrected_ws_name,
+            'RebinCanToSample': False
+        }
+        # The Minus algorithm will fail due to different bins in sample and
+        # container.
+        self.assertRaises(RuntimeError, ApplyPaalmanPingsCorrection, **kwargs)
+        DeleteWorkspace(sample_1)
+        DeleteWorkspace(container_1)
 
 if __name__=="__main__":
     unittest.main()

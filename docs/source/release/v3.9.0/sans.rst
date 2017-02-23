@@ -24,7 +24,7 @@ Bug Fixes
 - Fix for merged reduction with phi masking.
 - Fix SAScollimation issue in SaveCanSAS1D and LoadCanSAS1D.
 - Improved CropToComponent and removed detector ordering.
-
+- Fix for faulty beam stop arm masking for certain angles.
 
 X uncertainties (delta-Q)
 -------------------------

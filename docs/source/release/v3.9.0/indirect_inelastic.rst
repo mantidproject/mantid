@@ -60,6 +60,11 @@ Transmission
 
 - Option to calculate number density from mass density
 
+Diffraction
+###########
+
+- Add option for normalisation by vanadium to spectroscopy mode. Divides the sample by vanadium after container subtraction.
+
 Vesuvio
 #######
 
@@ -79,7 +84,7 @@ Bugfixes
 
 - Clicking 'Save' without creating a res file in *ISISCalibration* no longer causes an error
 - Fixed issue when trying to plot multiple spectra from Indirect interfaces
+- The plot options for *I(Q,t)Fit* had 'beta' displayed twice and the options did not plot the respective parameter
 - *Jumpfit* creates a HWHM workspace in order to avoid the original workspace data being halved whenever loaded
-
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

@@ -19,14 +19,14 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     WorkspaceUnitValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must have units");
   }
 
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     ws->getAxis(0)->setUnit("TOF");
     WorkspaceUnitValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
