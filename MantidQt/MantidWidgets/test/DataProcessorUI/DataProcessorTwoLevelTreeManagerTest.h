@@ -331,7 +331,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(manager.newTable(whitelist));
     auto ws = manager.getTableWorkspace();
     TS_ASSERT_EQUALS(ws->rowCount(), 1);
-	TS_ASSERT_EQUALS(ws->columnCount(), whitelist.size() + 1);
+    TS_ASSERT_EQUALS(ws->columnCount(), whitelist.size() + 1);
     // But the row should be empty
     TS_ASSERT_EQUALS(ws->String(0, 0), std::string());
     TS_ASSERT_EQUALS(ws->String(0, 1), std::string());
