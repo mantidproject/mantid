@@ -70,6 +70,8 @@ public:
   // Get the index for a given column, row and parent
   QModelIndex index(int row, int column,
                     const QModelIndex &parent = QModelIndex()) const override;
+  // Get the underlying data structure
+  Mantid::API::ITableWorkspace_sptr getTableWorkspace() const;
 
   // Get the parent
   QModelIndex parent(const QModelIndex &index) const override;

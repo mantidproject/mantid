@@ -46,8 +46,7 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorTwoLevelTreeModel(table, whitelist)),
-      m_ws(table) {}
+      m_model(new QDataProcessorTwoLevelTreeModel(table, whitelist)) {}
 
 /**
 * Constructor (no table workspace given)
@@ -368,10 +367,6 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
 void DataProcessorTwoLevelTreeManager::newTable(
     const DataProcessorWhiteList &whitelist) {
 
-  size_t nrows = m_ws->rowCount();
-  for (size_t row = 0; row < nrows; row++)
-    m_ws->removeRow(0);
-
   m_model.reset(new QDataProcessorTwoLevelTreeModel(
       createDefaultWorkspace(whitelist), whitelist));
 }
@@ -384,7 +379,6 @@ void DataProcessorTwoLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
-    m_ws = table;
     m_model.reset(new QDataProcessorTwoLevelTreeModel(table, whitelist));
   } else
     throw std::runtime_error("Selected table has the incorrect number of "
@@ -527,10 +521,26 @@ void DataProcessorTwoLevelTreeManager::transfer(
     const std::vector<std::map<std::string, std::string>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
+  ITableWorkspace_sptr ws = m_model->getTableWorkspace();
+
+  if (ws->rowCount() == 1) {
+    // If the table only has one row, check if it is empty and if so, remove it.
+    // This is to make things nicer when transferring, as the default table has
+    // one empty row
+    size_t cols = ws->columnCount();
+    bool emptyTable = true;
+    for (size_t i = 0; i < cols; i++) {
+      if (!ws->String(0, i).empty())
+        emptyTable = false;
+    }
+    if (emptyTable)
+      ws->removeRow(0);
+  }
+
   // Loop over the rows (vector elements)
   for (const auto &row : runs) {
 
-    TableRow newRow = m_ws->appendRow();
+    TableRow newRow = ws->appendRow();
     try {
       newRow << row.at("Group");
     } catch (std::out_of_range &) {
@@ -548,7 +558,7 @@ void DataProcessorTwoLevelTreeManager::transfer(
     }
   }
 
-  m_model.reset(new QDataProcessorTwoLevelTreeModel(m_ws, whitelist));
+  m_model.reset(new QDataProcessorTwoLevelTreeModel(ws, whitelist));
 }
 
 /** Updates a row with new data
@@ -580,7 +590,7 @@ DataProcessorTwoLevelTreeManager::getModel() {
 */
 ITableWorkspace_sptr DataProcessorTwoLevelTreeManager::getTableWorkspace() {
 
-  return m_ws;
+  return m_model->getTableWorkspace();
 }
 
 /**

@@ -452,6 +452,11 @@ public:
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace"));
+    ITableWorkspace_sptr ws =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "Workspace");
+    TS_ASSERT_EQUALS(ws->rowCount(), 4);
+    TS_ASSERT_EQUALS(ws->columnCount(), 9);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("Workspace");
