@@ -154,9 +154,9 @@ public:
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(result->blocksize(), 3);
 
-    TS_ASSERT_EQUALS(result->readY(0)[0], 6);
-    TS_ASSERT_EQUALS(result->readY(0)[1], 6);
-    TS_ASSERT_EQUALS(result->readY(0)[2], 6);
+    TS_ASSERT_EQUALS(result->y(0)[0], 6);
+    TS_ASSERT_EQUALS(result->y(0)[1], 6);
+    TS_ASSERT_EQUALS(result->y(0)[2], 6);
 
     TS_ASSERT_EQUALS(result->run().getProperty("run_number")->value(),
                      "15189-91");
@@ -166,8 +166,8 @@ public:
                      end.toSimpleString());
 
     // Original workspaces shouldn't be touched
-    TS_ASSERT_EQUALS(ws1->readY(0)[0], 2);
-    TS_ASSERT_EQUALS(ws3->readY(0)[2], 2);
+    TS_ASSERT_EQUALS(ws1->y(0)[0], 2);
+    TS_ASSERT_EQUALS(ws3->y(0)[2], 2);
   }
 
   void test_findConsecutiveRuns() {

@@ -53,8 +53,8 @@ public:
 
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create(
         "Workspace2D", 1, y.size(), y.size());
-    data->dataY(0) = y;
-    data->dataX(0) = x;
+    data->mutableY(0) = y;
+    data->mutableX(0) = x;
 
     m_model->setData(data);
 

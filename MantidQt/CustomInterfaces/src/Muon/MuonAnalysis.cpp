@@ -1296,7 +1296,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
   // Populate bin width info in Plot options
   double binWidth =
-      matrix_workspace->dataX(0)[1] - matrix_workspace->dataX(0)[0];
+      matrix_workspace->dataX(0)[1] - matrix_workspace->mutableX(0)[0];
   m_uiForm.optionLabelBinWidth->setText(
       QString("Data collected with histogram bins of %1 %2s")
           .arg(binWidth)
@@ -1755,15 +1755,15 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
           AnalysisDataService::Instance().retrieve(wsName.toStdString());
       MatrixWorkspace_sptr matrix_workspace =
           boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-      const Mantid::MantidVec &dataY = matrix_workspace->readY(0);
+      const auto &yData = matrix_workspace->y(0);
 
       if (min.isEmpty())
         params["YAxisMin"] =
-            QString::number(*min_element(dataY.begin(), dataY.end()));
+            QString::number(*min_element(yData.rawData().begin(), yData.rawData().end()));
 
       if (max.isEmpty())
         params["YAxisMax"] =
-            QString::number(*max_element(dataY.begin(), dataY.end()));
+            QString::number(*max_element(yData.rawData().begin(), yData.rawData().end()));
     }
   }
 
@@ -1978,7 +1978,7 @@ std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
     MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
-    double binSize = ws->dataX(0)[1] - ws->dataX(0)[0];
+    double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
 

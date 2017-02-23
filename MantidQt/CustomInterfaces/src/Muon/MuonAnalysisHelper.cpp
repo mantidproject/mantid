@@ -162,7 +162,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   double counts(0.0);
   for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
     for (size_t j = 0; j < runWs->blocksize(); ++j) {
-      counts += runWs->dataY(i)[j];
+      counts += runWs->y(i)[j];
     }
   }
   // output this number to three decimal places
