@@ -175,12 +175,12 @@ public:
    */
 
   double convertToDouble(const std::string value) const {
-    //return boost::lexical_cast<double>(value);
+    // return boost::lexical_cast<double>(value);
     return std::stod(value);
   }
 
   double toDouble(size_t i) const override {
-   return convertToDouble(m_data[i]);
+    return convertToDouble(m_data[i]);
   }
 
   /**
