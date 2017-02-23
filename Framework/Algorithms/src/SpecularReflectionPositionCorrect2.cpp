@@ -73,6 +73,29 @@ void SpecularReflectionPositionCorrect2::init() {
       "An output workspace.");
 }
 
+/** Validate inputs
+*/
+std::map<std::string, std::string>
+SpecularReflectionPositionCorrect2::validateInputs() {
+
+  std::map<std::string, std::string> results;
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  auto inst = inputWS->getInstrument();
+
+  // Detector
+  const std::string detectorName = getProperty("DetectorComponentName");
+  if (!inst->getComponentByName(detectorName))
+    results["DetectorComponentName"] = "Detector component not found.";
+
+  // Sample
+  const std::string sampleName = getProperty("SampleComponentName");
+  if (!inst->getComponentByName(sampleName))
+    results["SampleComponentName"] = "Sample component not found.";
+
+  return results;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
