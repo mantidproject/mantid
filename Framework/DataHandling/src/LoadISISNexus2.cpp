@@ -1131,23 +1131,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
                     << "data associated with this workspace\n";
     return;
   }
-  // For ISIS Nexus only, fabricate an additional log containing an array of
-  // proton charge information from the periods group.
-  try {
-    NXClass protonChargeClass = entry.openNXGroup("periods");
-    NXFloat periodsCharge = protonChargeClass.openNXFloat("proton_charge");
-    periodsCharge.load();
-    size_t nperiods = periodsCharge.dim0();
-    std::vector<double> chargesVector(nperiods);
-    std::copy(periodsCharge(), periodsCharge() + nperiods,
-              chargesVector.begin());
-    ArrayProperty<double> *protonLogData =
-        new ArrayProperty<double>("proton_charge_by_period", chargesVector);
-    ws->mutableRun().addProperty(protonLogData);
-  } catch (std::runtime_error &) {
-    this->g_log.debug("Cannot read periods information from the nexus file. "
-                      "This group may be absent.");
-  }
+
   // Populate the instrument parameters.
   ws->populateInstrumentParameters();
 
