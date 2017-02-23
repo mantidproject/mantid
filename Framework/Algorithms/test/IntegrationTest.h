@@ -479,6 +479,159 @@ public:
 
     AnalysisDataService::Instance().remove(outWsName);
   }
+
+  void testRangeLists() {
+    const std::vector<double> lowerLimits{{1, 2, 1, 3, 2}};
+    const std::vector<double> upperLimits{{4, 3, 3, 4, 3}};
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS(output->blocksize(), 1)
+    const std::array<double, 5> correctAnswers{{1+2+3, 7, 11+12, 18, 22}};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], lowerLimits[i])
+      TS_ASSERT_EQUALS(output->x(i)[1], upperLimits[i])
+      TS_ASSERT_EQUALS(output->y(i)[0], correctAnswers[i])
+      TS_ASSERT_EQUALS(output->e(i)[0], std::sqrt(correctAnswers[i]))
+    }
+  }
+
+  void testFailureIfRangeLowerListGreaterThanRangeUpperList() {
+    const std::vector<double> lowerLimits{{4, 3, 3, 4, 3}};
+    const std::vector<double> upperLimits{{1, 2, 1, 3, 2}};
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
+    TS_ASSERT_THROWS_ANYTHING(alg.execute())
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void testRangeLowerListAndRangeUpper() {
+    const std::vector<double> lowerLimits{{1, 2, 1, 3, 2}};
+    const double upperLimit = 4;
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", upperLimit))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS(output->blocksize(), 1)
+    const std::array<double, 5> correctAnswers{{1+2+3, 7+8, 11+12+13, 18, 22+23}};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], lowerLimits[i])
+      TS_ASSERT_EQUALS(output->x(i)[1], upperLimit)
+      TS_ASSERT_EQUALS(output->y(i)[0], correctAnswers[i])
+      TS_ASSERT_DELTA(output->e(i)[0], std::sqrt(correctAnswers[i]), 1e-7)
+    }
+  }
+
+  void testFailureIfRangeLowerListGreaterThanRangeUpper() {
+    const std::vector<double> lowerLimits{{1, 2, 1, 3, 2}};
+    const double upperLimit = 1;
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", upperLimit))
+    TS_ASSERT_THROWS_ANYTHING(alg.execute())
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void testRangeLowerAndRangeUpperList() {
+    const double lowerLimit = 1;
+    const std::vector<double> upperLimits{{2, 4, 5, 3, 4}};
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", lowerLimit))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS(output->blocksize(), 1)
+    const std::array<double, 5> correctAnswers{{1, 6+7+8, 11+12+13+14, 16+17, 21+22+23}};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], lowerLimit)
+      TS_ASSERT_EQUALS(output->x(i)[1], upperLimits[i])
+      TS_ASSERT_EQUALS(output->y(i)[0], correctAnswers[i])
+      TS_ASSERT_DELTA(output->e(i)[0], std::sqrt(correctAnswers[i]), 1e-7)
+    }
+  }
+
+  void testFailureIfRangeLowerGreaterThanRangeUpperList() {
+    const double lowerLimit = 3;
+    const std::vector<double> upperLimits{{2, 4, 5, 3, 4}};
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", lowerLimit))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
+    TS_ASSERT_THROWS_ANYTHING(alg.execute())
+    TS_ASSERT(!alg.isExecuted())
+  }
+
+  void testRangeListsWithStartAndEndWorkspaceIndices() {
+    const std::vector<double> lowerLimits{{2, 2}};
+    const std::vector<double> upperLimits{{3, 3}};
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 1))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", 2))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLowerList", lowerLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpperList", upperLimits))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+          output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              "out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 2)
+    TS_ASSERT_EQUALS(output->blocksize(), 1)
+    const std::array<double, 2> correctAnswers{{7, 12}};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], lowerLimits[i])
+      TS_ASSERT_EQUALS(output->x(i)[1], upperLimits[i])
+      TS_ASSERT_EQUALS(output->y(i)[0], correctAnswers[i])
+      TS_ASSERT_DELTA(output->e(i)[0], std::sqrt(correctAnswers[i]), 1e-7)
+    }
+  }
+
 private:
   void assertRangeWithPartialBins(Workspace_sptr input) {
     Integration alg;
