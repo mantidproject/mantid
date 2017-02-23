@@ -1622,6 +1622,15 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
+* Sets the search directories for XML instrument definition files (IDFs)
+* @param directories An ordered list of paths for instrument searching
+*/
+void ConfigServiceImpl::setInstrumentDirectories(
+    const std::vector<std::string> &directories) {
+  m_InstrumentDirs = directories;
+}
+
+/**
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */

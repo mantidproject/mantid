@@ -100,8 +100,6 @@ private:
   DataProcessorPresenter *m_presenter;
   /// The model
   boost::shared_ptr<QDataProcessorTwoLevelTreeModel> m_model;
-  /// The workspace the model is currently representing
-  Mantid::API::ITableWorkspace_sptr m_ws;
 
   /// Insert a row in the model
   void insertRow(int groupIndex, int rowIndex);

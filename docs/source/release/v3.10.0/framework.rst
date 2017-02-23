@@ -11,10 +11,15 @@ Algorithms
 New
 ###
 
+- :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
 
 Improved
 ########
 
+Bug Fixes
+#########
+
+- Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 
 Deprecated
 ##########
@@ -25,11 +30,15 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 
-CurveFitting
-------------
+Bugs
+----
+
+- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
 
 Improved
 ########
+
+- :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 Python
 ------
