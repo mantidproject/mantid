@@ -175,17 +175,12 @@ public:
    */
 
   double convertToDouble(std::string value) const {
-    return boost::lexical_cast<double>(value);
+    //return boost::lexical_cast<double>(value);
+    return std::stod(value);
   }
 
   double toDouble(size_t i) const override {
-    // if (typeid(m_data[i])==typeid(std::string)) {
-    /* if (isItString(m_data[i])) {
-       return boost::lexical_cast<double>(m_data[i]);
-     } else {
-       return boost::numeric_cast<double, DoubleType>(m_data[i]);
-     }*/
-    return convertToDouble(m_data[i]);
+   return convertToDouble(m_data[i]);
   }
 
   /**
