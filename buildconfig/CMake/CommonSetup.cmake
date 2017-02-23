@@ -275,13 +275,7 @@ else ()
 endif ()
 
 # Some unit tests need GMock/GTest
-find_package ( GMock )
-
-if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
-else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
-endif()
+include ( GoogleTest )
 
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
