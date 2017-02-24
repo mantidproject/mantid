@@ -152,12 +152,17 @@ private:
 
   double m_progress;
 
+  /// DOC! TODO
   std::vector<std::string> getTimeSeriesLogNames();
 
   Kernel::TimeSplitterType generateSplitters(int wsindex);
 
   void generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
+  void generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+
+  ///
+  void mapSplitterTSPtoWorkspaces(const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);

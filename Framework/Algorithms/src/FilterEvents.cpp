@@ -496,16 +496,16 @@ void FilterEvents::convertSplittersWorkspaceToVectors()
     else if (splitter.start() < m_vecSplitterTime.back() - TOLERANCE)
     {
       // almost same: then add the spliters.stop() only
-      m_vecSplitterTime.push_back(splitter.stop());
+      m_vecSplitterTime.push_back(splitter.stop().totalNanoseconds());
       m_vecSplitterGroup.push_back(splitter.index());
     }
     else
     {
       // have to insert the somewhere
-      std::vector<int64_t>::iterator finditer = std::lower_bound(m_vecSplitterTime.begin(), m_vecSplitterTime.end(), splitter.start());
+      std::vector<int64_t>::iterator finditer = std::lower_bound(m_vecSplitterTime.begin(), m_vecSplitterTime.end(), splitter.start().totalNanoseconds());
       // get the index
       size_t split_index = static_cast<size_t>(finditer - m_vecSplitterTime.begin());
-      if (*finditer - splitter.start() > TOLERANCE)
+      if (*finditer - splitter.start().totalNanoseconds() > TOLERANCE)
       {
         // the start time is before one splitter indicated by *finditer: insert both
         // check
@@ -518,13 +518,13 @@ void FilterEvents::convertSplittersWorkspaceToVectors()
 
         }
         // inset the full set
-        m_vecSplitterTime.insert(finditer, splitter.stop());
-        m_vecSplitterTime.insert(finditer, splitter.start());
+        m_vecSplitterTime.insert(finditer, splitter.stop().totalNanoseconds());
+        m_vecSplitterTime.insert(finditer, splitter.start().totalNanoseconds());
         // insert the target
-        m_vecSplitterGroup.insert(splitter.index(), UNDEFINED_SPLITTING_TARGET);
-        m_vecSplitterGroup.insert(splitter.index(), splitter.index());
+        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index, static_cast<int>(UNDEFINED_SPLITTING_TARGET));
+        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index, static_cast<int>(splitter.index()));
       }
-      else if (*finditer - splitter.start() > -TOLERANCE)
+      else if (*finditer - splitter.start().totalNanoseconds() > -TOLERANCE)
       {
         // the start time is an existing entry
         // check
@@ -536,9 +536,9 @@ void FilterEvents::convertSplittersWorkspaceToVectors()
           throw std::runtime_error(errss.str());
         }
         // inset the stop time
-        m_vecSplitterTime.insert(finditer+1, splitter.stop());
+        m_vecSplitterTime.insert(finditer+1, splitter.stop().totalNanoseconds());
         // insert the target
-        m_vecSplitterTime.insert(split_index+1, splitter.index());
+        m_vecSplitterGroup.insert(m_vecSplitterGroup.begin() + split_index+1, splitter.index());
       }
       else
       {
@@ -1602,6 +1602,19 @@ void FilterEvents::generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<in
 
   return;
 }
+
+/// TODO:FIXME - ASAP
+void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec)
+{
+    return;
+}
+
+/// TODO:FIXME -ASAP
+void FilterEvents::mapSplitterTSPtoWorkspaces(const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec)
+{
+    return;
+}
+
 
 /** Get all filterable logs' names (double and integer)
  * @returns Vector of names of logs
