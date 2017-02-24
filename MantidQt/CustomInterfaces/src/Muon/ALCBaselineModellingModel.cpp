@@ -4,10 +4,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "Poco/ActiveResult.h"
@@ -86,7 +86,7 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // disable list
   for (size_t i = 0; i < ws->blocksize(); ++i) {
     for (auto it = sections.begin(); it != sections.end(); ++it) {
-      if (ws->dataX(0)[i] >= it->first && ws->dataX(0)[i] <= it->second) {
+      if (ws->x(0)[i] >= it->first && ws->x(0)[i] <= it->second) {
         toDisable[i] = false;
         break; // No need to check other sections
       }
@@ -103,7 +103,7 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // Disable chosen points
   for (size_t i = 0; i < ws->blocksize(); ++i) {
     if (toDisable[i]) {
-      ws->dataE(0)[i] = DISABLED_ERR;
+      ws->mutableE(0)[i] = DISABLED_ERR;
     }
   }
 }
@@ -117,7 +117,7 @@ void ALCBaselineModellingModel::enableDisabledPoints(
     MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs) {
   // Unwanted points were disabled by setting their errors to very high values.
   // We recover here the original errors stored in sourceWs
-  destWs->dataE(0) = sourceWs->readE(0);
+  destWs->mutableE(0) = sourceWs->e(0);
 }
 
 /**
@@ -126,7 +126,7 @@ void ALCBaselineModellingModel::enableDisabledPoints(
  */
 void ALCBaselineModellingModel::setErrorsAfterFit(MatrixWorkspace_sptr data) {
 
-  data->dataE(2) = data->readE(0);
+  data->mutableE(2) = data->e(0);
 }
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() {
