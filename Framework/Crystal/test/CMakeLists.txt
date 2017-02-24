@@ -10,7 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries ( CrystalTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             Crystal
             API
             DataHandling
@@ -23,7 +23,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES})
+            ${GTEST_LIBRARIES} )
   add_dependencies ( CrystalTest Algorithms CurveFitting )
   add_dependencies ( FrameworkTests CrystalTest )
   # Test data
@@ -32,4 +32,3 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )
 endif ()
-

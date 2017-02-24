@@ -162,26 +162,43 @@ void RotationSurface::init() {
                             udet.u = applyUCorrection(udet.u);
                           }
                         }
+                        updateViewRectForUCorrection();
+}
 
-                        double dU = fabs(m_u_max - m_u_min);
-                        double dV = fabs(m_v_max - m_v_min);
-                        double du = dU * 0.05;
-                        double dv = dV * 0.05;
-                        if (m_width_max > du && std::isfinite(m_width_max)) {
-                          if (du > 0 && !(dU >= m_width_max)) {
-                            m_width_max = dU;
-                          }
-                          du = m_width_max;
-                        }
-                        if (m_height_max > dv && std::isfinite(m_height_max)) {
-                          if (dv > 0 && !(dV >= m_height_max)) {
-                            m_height_max = dV;
-                          }
-                          dv = m_height_max;
-                        }
+/** Update the view rect to account for the U correction
+ */
+void RotationSurface::updateViewRectForUCorrection() {
+  const auto offsets = calculateViewRectOffsets();
+  const auto min = QPointF(m_u_min - offsets.first, m_v_min - offsets.second);
+  const auto max = QPointF(m_u_max + offsets.first, m_v_max + offsets.second);
+  m_viewRect = RectF(min, max);
+}
 
-                        m_viewRect = RectF(QPointF(m_u_min - du, m_v_min - dv),
-                                           QPointF(m_u_max + du, m_v_max + dv));
+/** Calculate UV offsets to the view rect
+ *
+ * @return a std::pair containing the u & v offsets for the view rect
+ */
+std::pair<double, double> RotationSurface::calculateViewRectOffsets() {
+  const auto dU = fabs(m_u_max - m_u_min);
+  const auto dV = fabs(m_v_max - m_v_min);
+  auto du = dU * 0.05;
+  auto dv = dV * 0.05;
+
+  if (m_width_max > du && std::isfinite(m_width_max)) {
+    if (du > 0 && !(dU >= m_width_max)) {
+      m_width_max = dU;
+    }
+    du = m_width_max;
+  }
+
+  if (m_height_max > dv && std::isfinite(m_height_max)) {
+    if (dv > 0 && !(dV >= m_height_max)) {
+      m_height_max = dV;
+    }
+    dv = m_height_max;
+  }
+
+  return std::make_pair(du, dv);
 }
 
 void RotationSurface::findUVBounds() {
@@ -308,6 +325,7 @@ void RotationSurface::setUCorrection(double umin, double umax) {
   }
   m_manual_u_correction = true;
   updateDetectors();
+  updateViewRectForUCorrection();
 }
 
 /**
@@ -316,6 +334,7 @@ void RotationSurface::setUCorrection(double umin, double umax) {
 void RotationSurface::setAutomaticUCorrection() {
   m_manual_u_correction = false;
   updateDetectors();
+  updateViewRectForUCorrection();
 }
 
 } // MantidWidgets

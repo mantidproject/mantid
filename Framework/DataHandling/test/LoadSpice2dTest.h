@@ -78,31 +78,31 @@ public:
                      36864 + Mantid::DataHandling::LoadSpice2D::nMonitors);
 
     // Test the size of the data vectors
-    TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 2);
-    TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 1);
-    TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 1);
+    TS_ASSERT_EQUALS((ws2d->x(0).size()), 2);
+    TS_ASSERT_EQUALS((ws2d->y(0).size()), 1);
+    TS_ASSERT_EQUALS((ws2d->e(0).size()), 1);
 
     double tolerance(1e-04);
     int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(ws2d->dataX(0 + nmon)[0], 5.93, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(2 + nmon)[0], 5.93, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(192 + nmon)[0], 5.93, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0 + nmon)[0], 5.93, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(2 + nmon)[0], 5.93, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 5.93, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataY(0 + nmon)[0], 318.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(2 + nmon)[0], 109.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(192 + nmon)[0], 390.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0 + nmon)[0], 318.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(2 + nmon)[0], 109.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(192 + nmon)[0], 390.0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataE(0 + nmon)[0], 17.8325, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(2 + nmon)[0], 10.4403, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(192 + nmon)[0], 19.7484, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0 + nmon)[0], 17.8325, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(2 + nmon)[0], 10.4403, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(192 + nmon)[0], 19.7484, tolerance);
 
     // check monitor
-    TS_ASSERT_DELTA(ws2d->dataY(0)[0], 29205906.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[0], 5404.2488, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[0], 29205906.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[0], 5404.2488, tolerance);
 
     // check timer
-    TS_ASSERT_DELTA(ws2d->dataY(1)[0], 3600.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(1)[0], 0.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(1)[0], 3600.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(1)[0], 0.0, tolerance);
 
     // Check instrument
     //----------------------------------------------------------------------
@@ -206,15 +206,15 @@ public:
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
     // Test the size of the data vectors
-    TS_ASSERT_EQUALS((ws2d->dataX(0).size()), 2);
-    TS_ASSERT_EQUALS((ws2d->dataY(0).size()), 1);
-    TS_ASSERT_EQUALS((ws2d->dataE(0).size()), 1);
+    TS_ASSERT_EQUALS((ws2d->x(0).size()), 2);
+    TS_ASSERT_EQUALS((ws2d->y(0).size()), 1);
+    TS_ASSERT_EQUALS((ws2d->e(0).size()), 1);
 
     double tolerance(1e-04);
     int nmon = Mantid::DataHandling::LoadSpice2D::nMonitors;
-    TS_ASSERT_DELTA(ws2d->dataX(0 + nmon)[0], 4.5, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(2 + nmon)[0], 4.5, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(192 + nmon)[0], 4.5, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0 + nmon)[0], 4.5, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(2 + nmon)[0], 4.5, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
   void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {

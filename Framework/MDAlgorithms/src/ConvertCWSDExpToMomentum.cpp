@@ -1,16 +1,18 @@
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -36,6 +38,9 @@ void ConvertCWSDExpToMomentum::init() {
       make_unique<WorkspaceProperty<ITableWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
       "Name of table workspace for data file names in the experiment.");
+
+  declareProperty(make_unique<FileProperty>(
+      "InstrumentFilename", "", FileProperty::OptionalLoad, ".xml"));
 
   declareProperty(
       "DetectorSampleDistanceShift", 0.0,
@@ -615,6 +620,13 @@ ConvertCWSDExpToMomentum::loadSpiceData(const std::string &filename,
     loader->setProperty("ShiftedDetectorDistance", m_detSampleDistanceShift);
     loader->setProperty("DetectorCenterXShift", m_detXShift);
     loader->setProperty("DetectorCenterYShift", m_detYShift);
+
+    // TODO/FIXME - This is not a nice solution for detector geometry
+    std::string idffile = getPropertyValue("InstrumentFilename");
+    if (idffile.size() > 0) {
+      loader->setProperty("InstrumentFilename", idffile);
+      loader->setProperty("DetectorGeometry", "512, 512");
+    }
 
     double wavelength = getProperty("UserDefinedWavelength");
 

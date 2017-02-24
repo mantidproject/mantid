@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
 import stresstesting
 
-from mantid.api import MatrixWorkspace, mtd
+from mantid.api import FileFinder, MatrixWorkspace, mtd
 import mantid.simpleapi as ms
 
 import math
@@ -45,6 +45,25 @@ class VesuvioTests(unittest.TestCase):
         self.assertTrue(mtd.doesExist(self.ws_name))
 
     #================== Success cases ================================
+
+    def test_filename_accepts_full_filepath(self):
+        diff_mode = "FoilOut"
+        rawfile = FileFinder.getFullPath("EVS14188.raw")
+        self._run_load(rawfile, "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_filename_no_path(self):
+        diff_mode = "FoilOut"
+        self._run_load("EVS14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
+
+    def test_filename_accepts_run_and_ext(self):
+        diff_mode = "FoilOut"
+        self._run_load("14188.raw", "3", diff_mode)
+        self.assertTrue(mtd.doesExist('evs_raw'))
+        self.assertEquals(mtd['evs_raw'].getNumberHistograms(), 1)
 
     def test_load_with_back_scattering_spectra_produces_correct_workspace_using_double_difference(self):
         diff_mode = "DoubleDifference"

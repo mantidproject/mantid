@@ -147,6 +147,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         load_opts = dict()
         if self._instrument_name == 'VESUVIO':
             load_opts['Mode'] = 'FoilOut'
+            load_opts['LoadMonitors'] = True
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                self._ipf_filename,
