@@ -230,6 +230,7 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
             result.params = params
             result.errors = errors
             result.sum_err_sq = sum_err_sq
+            # If the fit has failed, also set the runtime to NaN
             result.runtime = t_end - t_start if not np.isnan(chi2) else np.nan
             print("Result object: {0}".format(result))
             results_problem_start.append(result)
