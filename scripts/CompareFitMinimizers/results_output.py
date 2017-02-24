@@ -142,7 +142,7 @@ def save_table_to_file(table_data, errors, group_name, metric_type, file_extensi
                          version=BENCHMARK_VERSION_STR, metric_type=metric_type, group_name=group_name))
 
     if file_extension == 'html':
-        rst_content = '.. include:: ' + str(os.path.join(SCRIPT_DIR, 'Definitions/color_definitions.txt'))
+        rst_content = '.. include:: ' + str(os.path.join(SCRIPT_DIR, 'color_definitions.txt'))
         rst_content += '\n' + table_data
         table_data = publish_string(rst_content, writer_name='html')
 
