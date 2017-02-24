@@ -83,6 +83,10 @@ mantid_defaultsave_dir_init = ConfigService.Instance()['defaultsave.directory']
 # Run this before each test is executed
 doctest_global_setup = """
 from mantid.simpleapi import *
+from mantid.kernel import ConfigService as _cfg
+_cfg.Instance()['datasearch.directories'] = '{datasearch_init}'
+_cfg.Instance()['defaultsave.directory'] = '{defaultsave_init}'
+
 # doctest.py examines the global scope for future imports
 # and uses the sames ones in the executing scope. We don't want the
 # Python-3 style behaviour in the docs yet.
@@ -93,18 +97,15 @@ try:
     del unicode_literals
 except NameError:
     pass
-"""
+""".format(datasearch_init=mantid_datasearch_dirs_init,
+           defaultsave_init=mantid_defaultsave_dir_init)
 
 # Run this after each test group has executed
 doctest_global_cleanup = """
 from mantid.api import FrameworkManager
-from mantid.kernel import ConfigService as cfg
-
 FrameworkManager.Instance().clear()
-cfg.Instance()['datasearch.directories'] = '{datasearch_init}'
-cfg['defaultsave.directory'] = '{defaultsave_init}'
-""".format(datasearch_init=mantid_datasearch_dirs_init,
-           defaultsave_init=mantid_defaultsave_dir_init)
+
+"""
 
 # -- Options for pngmath --------------------------------------------------
 
