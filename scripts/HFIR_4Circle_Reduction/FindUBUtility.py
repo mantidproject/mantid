@@ -19,7 +19,7 @@ class AddScansForUBDialog(QtGui.QDialog):
         initialization
         :param parent: main GUI, reductionControl
         """
-        super(AddScansForUBDialog, self).__init__(self)
+        super(AddScansForUBDialog, self).__init__(parent)
         self._myParent = parent
 
         # set up UI
@@ -50,10 +50,8 @@ class AddScansForUBDialog(QtGui.QDialog):
         add all the scans list in the 'plainTextEdit_scanList'
         :return:
         """
-        scans_str = str(self.ui.plainTextEdit_scanList.getPaintContext())
+        scans_str = str(self.ui.plainTextEdit_scanList.toPlainText())
         scan_list = guiutility.parse_integer_list(scans_str)
-
-        XXX
         self._myParent.add_scans_ub_table(scan_list)
 
         return
@@ -177,7 +175,7 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         else:
             if self.ui.checkBox_selectNuclearPeaks.isChecked():
                 status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_nuclearPeaksTolerance],
-                                                                 allow_bank=False)
+                                                                 allow_blank=False)
                 if not status:
                     raise RuntimeError(ret_obj)
                 hkl_tol = ret_obj[0]

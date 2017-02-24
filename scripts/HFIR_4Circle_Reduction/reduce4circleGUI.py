@@ -136,8 +136,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_save_roi)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peak)
+        self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
+                     self.do_add_ub_peaks)
+        # self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
+        #              self.do_add_ub_peak)
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                      self.do_cal_ub_matrix)
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
@@ -150,8 +152,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_ub_peaks)
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
-        self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_peaks)
+        # self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
+        #              self.do_select_all_peaks)
         self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
                      self.do_view_data_3d)
         self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
@@ -172,6 +174,13 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_lattice)
+
+        self.connect(self.ui.radioButton_ubAdvancedSelection, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectAllScans, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectNoScan, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -377,9 +386,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
-        self.ui.checkBox_loadHKLfromFile.setChecked(True)
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
+        self.ui.radioButton_ubSelectNoScan.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -638,6 +647,32 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def add_scans_ub_table(self, scan_list):
+        """
+
+        :param scan_list:
+        :return:
+        """
+        # TODO/FIXME/ISSUE/NOW - consider to refactor with do_add_peaks_for_ub() and
+        # get experiment number
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        if not status:
+            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            return
+
+        # switch to tab-3
+        # self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
+
+        # prototype for a new thread
+        self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_list))
+        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_list)
+        self._addUBPeaksThread.start()
+
+        # set the flag/notification where the indexing (HKL) from
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+
+        return
+
     def do_add_roi(self):
         """ Add region of interest to 2D image
         :return:
@@ -671,10 +706,24 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_add_ub_peaks(self):
+        """
+        Launch dialog to add UB peaks
+        :return:
+        """
+        import FindUBUtility
+
+        # FIXME/TODO/NOW/ISSUE - to init()
+        self._addUBPeaksDialog = FindUBUtility.AddScansForUBDialog(self)
+        self._addUBPeaksDialog.show()
+
+        return
+
     def do_add_ub_peak(self):
         """ Add current to ub peaks
         :return:
         """
+        # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
         # Add peak
         status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                          self.ui.lineEdit_scanNumber])
@@ -2258,19 +2307,33 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        if not self._ubPeakTableFlag:
-            # turn to deselect all
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
-            # all peaks are subjected to select
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        else:
-            # only nuclear peaks to get selected
-            self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
-        # END-IF-ELSE
+        if self.ui.radioButton_ubSelectAllScans.isChecked() and self._ubPeakTableFlag != 0:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(True)
+            self._ubPeakTableFlag = 0
+        elif self.ui.radioButton_ubSelectNoScan.isChecked() and self._ubPeakTableFlag != 1:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(False)
+            self._ubPeakTableFlag = 1
+        elif self.ui.radioButton_ubAdvancedSelection.isChecked() and self._ubPeakTableFlag != 2:
+            # advanced
+            import FindUBUtility
+            self._selectUBScanDialog = FindUBUtility.SelectUBMatrixScansDialog(self)
+            self._selectUBScanDialog.show()
+            self._ubPeakTableFlag = 2
+        # END-IF
 
-        # revert the flag
-        self._ubPeakTableFlag = not self._ubPeakTableFlag
+        # if not self._ubPeakTableFlag:
+        #     # turn to deselect all
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
+        #     # all peaks are subjected to select
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # else:
+        #     # only nuclear peaks to get selected
+        #     self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
+        # # END-IF-ELSE
+        #
+        # # revert the flag
+        # self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 

@@ -620,7 +620,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         # TODO/FIXME/ISSUE/NOW - define all the _colIndex???
 
         self.setColumnWidth(self._colIndexSpiceHKL, 240)
-        self.setColumnWidth(self._colIndexSpiceHKL, 240)
+        self.setColumnWidth(self._colIndexCalculatedHKL, 240)
         self.setColumnWidth(4, 240)
 
         return
