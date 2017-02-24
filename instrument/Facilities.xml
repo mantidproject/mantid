@@ -512,6 +512,9 @@
 	<technique>Neutron Diffraction</technique>
 	<technique>Single Crystal Diffraction</technique>
 	<technique>Protein Crystallography</technique>
+    <livedata>
+      <connection name="event" address="bl11b-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="TOPAZ" beamline="12">

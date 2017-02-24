@@ -13,9 +13,9 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QSpinBox>
 
 #include <boost/lexical_cast.hpp>

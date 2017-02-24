@@ -1,5 +1,6 @@
 #pylint: disable=redefined-outer-name,unused-argument,anomalous-backslash-in-string,too-many-arguments
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from types import *
 import re
@@ -142,7 +143,7 @@ def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSam
 if __name__ == '__main__':
     #	AList=git_list("1-3 15-150-10 42-44")
     G_LIST = git_list("44429+44453")
-    print G_LIST
-    print get_sample_list(EXPR_FILE.basefile, "1000 1245-1268 1308-1400-10", direct=EXPR_FILE.RawDir)
-    print get_sample_list(EXPR_FILE.basefile, "s41256 1-5 10 15-30-3", direct=EXPR_FILE.RawDir)
-# print get_list_int("1-3 15-150  42-44")
+    print(G_LIST)
+    print(get_sample_list(EXPR_FILE.basefile, "1000 1245-1268 1308-1400-10", direct=EXPR_FILE.RawDir))
+    print(get_sample_list(EXPR_FILE.basefile, "s41256 1-5 10 15-30-3", direct=EXPR_FILE.RawDir))
+# print(get_list_int("1-3 15-150  42-44"))

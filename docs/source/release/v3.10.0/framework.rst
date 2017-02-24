@@ -16,6 +16,13 @@ New
 Improved
 ########
 
+- :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+
+Bug Fixes
+#########
+
+- Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
 
 Deprecated
 ##########
@@ -57,6 +64,7 @@ Python
       3.0
       3.0
 
+- Exposed more `SpectrumInfo` functionality to Python.
 
 
 Python Algorithms

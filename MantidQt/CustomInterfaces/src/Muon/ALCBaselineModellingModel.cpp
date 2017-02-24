@@ -4,10 +4,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "Poco/ActiveResult.h"
@@ -86,7 +86,8 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // disable list
   for (size_t i = 0; i < ws->blocksize(); ++i) {
     for (auto it = sections.begin(); it != sections.end(); ++it) {
-      if (ws->mutableX(0)[i] >= it->first && ws->mutableX(0)[i] <= it->second) {
+
+      if (ws->x(0)[i] >= it->first && ws->x(0)[i] <= it->second) {
         toDisable[i] = false;
         break; // No need to check other sections
       }

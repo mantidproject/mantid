@@ -92,7 +92,9 @@ except NameError:
 # Run this after each test group has executed
 doctest_global_cleanup = """
 from mantid.api import FrameworkManager
+from mantid.kernel import ConfigService
 FrameworkManager.Instance().clear()
+ConfigService.Instance().reset()
 """
 
 # -- Options for pngmath --------------------------------------------------

@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from types import *
 import math
@@ -14,7 +15,7 @@ def load(outputArea, pathtofile, EXPR_FILE, add=False):
     # try:
     #		fin=open(pathtofile,"r")
     #	except:
-    #		print 'WARNING!!!!!!!  '+pathtofile+' NOT FOUND'
+    #		print('WARNING!!!!!!!  '+pathtofile+' NOT FOUND')
     #		raise
     #	else:
     #		fin.close()
@@ -60,9 +61,9 @@ def sets_drange(wkspc, EXPR_FILE):
         xend = str(x_data[last] * float(CropRange[1]))
         datbin = math.exp(math.log(x_data[last] / x_data[0]) / last) - 1
         if datbin > float(EXPR_FILE.Bining[i]):
-            print 'WARNING: Rebining in *pref file ' + EXPR_FILE.Bining[
-                i] + ' is lower than diffraction focusing rebining step'
-            print 'WARNING: Rebining Kept to be ' + str(datbin) + ' for bank ' + str(i + 1)
+            print('WARNING: Rebining in *pref file ' + EXPR_FILE.Bining[
+                i] + ' is lower than diffraction focusing rebining step')
+            print('WARNING: Rebining Kept to be ' + str(datbin) + ' for bank ' + str(i + 1))
             EXPR_FILE.Bining[i] = str(datbin)
         Drange = xbegin + ",-" + EXPR_FILE.Bining[i] + "," + xend
         EXPR_FILE.Drange.append(Drange)
@@ -93,7 +94,7 @@ def removeallpromptpulses(wkspace):
 
 
 if __name__ == '__main__':
-    print get_sample_list("1000 1245-1268 1308-1400-10")
+    print(get_sample_list("1000 1245-1268 1308-1400-10"))
 # CorrectVana(VanFile,EmptyFile,AcalibFile,1)
 # normalizeall(SampleDatFile,AcalibFile)
 # rearrangeallbanks(OutputFile,"")

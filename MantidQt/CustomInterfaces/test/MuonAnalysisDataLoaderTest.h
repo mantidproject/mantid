@@ -1,9 +1,9 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -196,7 +196,8 @@ public:
       // Check that each period has number of spectra = number of groups
       TS_ASSERT_EQUALS(matrixWS->getNumberHistograms(), grouping.groups.size());
       // Check that each period has been corrected for dead time
-      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y().rawData().at(0),
+
+      TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y()[0],
                       i == 0 ? 84.1692 : 16.0749, 0.0001);
     }
   }
