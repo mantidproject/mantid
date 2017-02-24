@@ -60,7 +60,8 @@ public:
   }
 
   void test_fit() {
-    std::vector<double> eTestData = {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
+    std::vector<double> eTestData = {10.0, 1.0, 1.41, 10.0, 10.0,
+                                     1.73, 2.0, 2.5,  10.0};
     std::vector<double> yTestData = {100, 1, 2, 100, 100, 3, 4, 5, 100};
     std::vector<double> xTestData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
@@ -147,7 +148,7 @@ public:
 };
 
 class ALCBaselineModellingModelTestPerformance : public CxxTest::TestSuite {
-// ALCBaselineModellingModelPerformance *m_model;
+  // ALCBaselineModellingModelPerformance *m_model;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -162,17 +163,14 @@ public:
   ALCBaselineModellingModelTestPerformance() {
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
-  void setUp() override { 
-	m_model = new ALCBaselineModellingModel();
-	xTestData= {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
-    	yTestData= {100, 1, 2, 100, 100, 3, 4, 5, 100};
-    	eTestData= {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
- }
+  void setUp() override {
+    m_model = new ALCBaselineModellingModel();
+    xTestData = {10.0, 1.0, 1.41, 10.0, 10.0, 1.73, 2.0, 2.5, 10.0};
+    yTestData = {100, 1, 2, 100, 100, 3, 4, 5, 100};
+    eTestData = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  }
 
   void tearDown() override { delete m_model; }
-
-
 
   void test_setData() {
 
@@ -202,15 +200,12 @@ public:
 
     MatrixWorkspace_const_sptr corrected = m_model->correctedData();
     ITableWorkspace_sptr parameters = m_model->parameterTable();
-
   }
 
-
-
 private:
-    ALCBaselineModellingModel *m_model;
-    std::vector<double> eTestData;
-    std::vector<double> yTestData; 
-    std::vector<double> xTestData;
+  ALCBaselineModellingModel *m_model;
+  std::vector<double> eTestData;
+  std::vector<double> yTestData;
+  std::vector<double> xTestData;
 };
 #endif /* MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODELTEST_H_ */

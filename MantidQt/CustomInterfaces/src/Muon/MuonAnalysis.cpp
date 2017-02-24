@@ -1758,12 +1758,12 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
       const auto &yData = matrix_workspace->y(0);
 
       if (min.isEmpty())
-        params["YAxisMin"] =
-            QString::number(*min_element(yData.rawData().begin(), yData.rawData().end()));
+        params["YAxisMin"] = QString::number(
+            *min_element(yData.rawData().begin(), yData.rawData().end()));
 
       if (max.isEmpty())
-        params["YAxisMax"] =
-            QString::number(*max_element(yData.rawData().begin(), yData.rawData().end()));
+        params["YAxisMax"] = QString::number(
+            *max_element(yData.rawData().begin(), yData.rawData().end()));
     }
   }
 
