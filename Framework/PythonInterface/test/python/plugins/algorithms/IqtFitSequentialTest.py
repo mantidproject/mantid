@@ -8,7 +8,7 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 class IqtFitSequentialTest(unittest.TestCase):
 
     _iqt_ws = None
-    _function = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity=1,Tau=0.0247558;ties=(f1.Intensity=1-f0.A0)'
+    _function = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=ExpDecay,Height=1,Lifetime=0.0247558;ties=(f1.Height=1-f0.A0)'
 
     def setUp(self):
         self._iqt_ws = Load(Filename='iris26176_graphite002_iqt.nxs',
@@ -59,8 +59,8 @@ class IqtFitSequentialTest(unittest.TestCase):
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEquals('f0.A0',text_axis.label(0))
-        self.assertEquals('f1.Intensity',text_axis.label(1))
-        self.assertEquals('f1.Tau',text_axis.label(2))
+        self.assertEquals('f1.Height',text_axis.label(1))
+        self.assertEquals('f1.Lifetime',text_axis.label(2))
 
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
@@ -96,24 +96,24 @@ class IqtFitSequentialTest(unittest.TestCase):
         # Check row data
         row = tableWS.row(0)
         self.assertEquals(round(row['axis-1'], 6),  0.483619)
-        self.assertEquals(round(row['f1.Intensity'], 6), 0.966343)
-        self.assertEquals(round(row['f1.Tau'], 7), 0.0287487)
+        self.assertEquals(round(row['f1.Height'], 6), 0.966344)
+        self.assertEquals(round(row['f1.Lifetime'], 7), 0.0287491)
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
         a0 = matrixWS.readY(0)
-        self.assertEquals(round(a0[0], 7), 0.0336568)
-        self.assertEquals(round(a0[-1],7), 0.0182410)
+        self.assertEquals(round(a0[0], 7), 0.0336564)
+        self.assertEquals(round(a0[-1],7), 0.0182411)
 
-        # Check f1.Intensity
-        intensity = matrixWS.readY(1)
-        self.assertEquals(round(intensity[0], 6), 0.966343)
-        self.assertEquals(round(intensity[-1],6), 0.981759)
+        # Check f1.Height
+        height = matrixWS.readY(1)
+        self.assertEquals(round(height[0], 6), 0.966344)
+        self.assertEquals(round(height[-1],6), 0.981759)
 
-        # Check f1.Tau
-        tau = matrixWS.readY(2)
-        self.assertEquals(round(tau[0], 7), 0.0287487)
-        self.assertEquals(round(tau[-1],7), 0.0034430)
+        # Check f1.Lifetime
+        lifetime = matrixWS.readY(2)
+        self.assertEquals(round(lifetime[0], 7), 0.0287491)
+        self.assertEquals(round(lifetime[-1],7), 0.0034427)
 
 
     def _validate_group_values(self, groupWS):
@@ -124,11 +124,11 @@ class IqtFitSequentialTest(unittest.TestCase):
         self.assertEquals(round(data[-1],6), 0.039044)
         # Check Calc
         calc = sub_ws.readY(1)
-        self.assertEquals(round(calc[0], 6), 0.870523)
-        self.assertEquals(round(calc[-1],6), 0.033887)
+        self.assertEquals(round(calc[0], 6), 0.870524)
+        self.assertEquals(round(calc[-1],6), 0.033886)
         # Check Diff
         diff = sub_ws.readY(2)
-        self.assertEquals(round(diff[0], 6),-0.073454)
+        self.assertEquals(round(diff[0], 6),-0.073455)
         self.assertEquals(round(diff[-1],6), 0.005157)
 
     def _validate_sample_log_values(self, matrixWS):

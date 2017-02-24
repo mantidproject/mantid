@@ -9,6 +9,7 @@
 #include "MantidKernel/make_unique.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidBeamline/SpectrumInfo.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
@@ -35,8 +36,8 @@ public:
       : m_workspace(makeDefaultWorkspace()), m_grouped(makeDefaultWorkspace()) {
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    m_workspaceNoInstrument.init(numberOfHistograms, numberOfBins + 1,
-                                 numberOfBins);
+    m_workspaceNoInstrument.initialize(numberOfHistograms, numberOfBins + 1,
+                                       numberOfBins);
 
     // Workspace has 5 detectors, 1 and 4 are masked, 4 and 5 are monitors.
     m_grouped.getSpectrum(GroupOfDets2And3).setDetectorIDs({2, 3}); // no mask
@@ -51,7 +52,8 @@ public:
   }
 
   void test_constructor() {
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(*makeWorkspace(3)));
+    Beamline::SpectrumInfo specInfo(3);
+    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
   }
 
   void test_sourcePosition() {
@@ -113,7 +115,7 @@ public:
   void test_isMasked_unthreaded() {
     size_t count = 1000;
     auto ws = makeWorkspace(count);
-    SpectrumInfo info(*ws);
+    const auto &info = ws->spectrumInfo();
     for (size_t i = 0; i < count; ++i)
       TS_ASSERT_EQUALS(info.isMasked(i), i % 2 == 0);
   }
@@ -121,7 +123,7 @@ public:
   void test_isMasked_threaded() {
     int count = 1000;
     auto ws = makeWorkspace(count);
-    SpectrumInfo info(*ws);
+    const auto &info = ws->spectrumInfo();
     // This attempts to test threading, but probably it is not really exercising
     // much.
     PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
@@ -159,6 +161,16 @@ public:
     // Monitors
     TS_ASSERT_THROWS(spectrumInfo.twoTheta(3), std::logic_error);
     TS_ASSERT_THROWS(spectrumInfo.twoTheta(4), std::logic_error);
+  }
+
+  void test_phi() {
+    const auto &spectrumInfo = m_workspace.spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.phi(0), -1.570796, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.phi(1), 0.0, 1e-6);
+    TS_ASSERT_DELTA(spectrumInfo.phi(2), 1.570796, 1e-6);
+    // Monitors
+    TS_ASSERT_THROWS(spectrumInfo.phi(3), std::logic_error);
+    TS_ASSERT_THROWS(spectrumInfo.phi(4), std::logic_error);
   }
 
   void test_twoTheta_grouped() {
@@ -414,12 +426,22 @@ public:
 
   void test_no_detector() {
     const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
-    TS_ASSERT_THROWS(spectrumInfo.detector(0), std::out_of_range);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     Kernel::Exception::NotFoundError);
+  }
+
+  void test_no_detector_twice() {
+    // Regression test: Make sure that *repeated* access also fails.
+    const auto &spectrumInfo = m_workspaceNoInstrument.spectrumInfo();
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS(spectrumInfo.detector(0),
+                     Kernel::Exception::NotFoundError);
   }
 
   void test_ExperimentInfo_basics() {
     const ExperimentInfo expInfo(m_workspace);
-    const SpectrumInfo spectrumInfo(expInfo);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
@@ -429,16 +451,16 @@ public:
 
   void test_ExperimentInfo_from_grouped() {
     const ExperimentInfo expInfo(m_grouped);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 5);
-    const SpectrumInfo spectrumInfo(expInfo);
-    // We construct from a grouped workspace, but since that information is lost
-    // when constructing expInfo, so we should just see the masking of the
-    // underlying detectors.
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 5);
+    // We construct from a grouped workspace (via ISpectrum), but grouping is
+    // now stored in Beamline::SpectrumInfo as part of ExperimentInfo, so we
+    // should also see the grouping here.
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets2And3), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And2), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets1And4), true);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfDets4And5), false);
+    TS_ASSERT_EQUALS(spectrumInfo.isMasked(GroupOfAllDets), false);
   }
 
   void test_ExperimentInfo_grouped() {
@@ -449,27 +471,23 @@ public:
     // we have no control over the order and thus cannot write asserts.
     det2group_map mapping{{1, {1, 2}}};
     expInfo.cacheDetectorGroupings(mapping);
-    const SpectrumInfo spectrumInfo(expInfo);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    const auto &spectrumInfo = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.size(), 1);
     TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), false);
 
     mapping = {{1, {1, 4}}};
     expInfo.cacheDetectorGroupings(mapping);
-    const SpectrumInfo spectrumInfo2(expInfo);
-    TS_ASSERT_EQUALS(expInfo.numberOfDetectorGroups(), 1);
+    const auto &spectrumInfo2 = expInfo.spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo2.size(), 1);
     TS_ASSERT_EQUALS(spectrumInfo2.isMasked(0), true);
   }
 
-  void test_grouping_in_ExperimentInfo_ignored_for_MatrixWorkspace() {
+  void test_cacheDetectorGroupings_fails_for_MatrixWorkspace() {
+    // This is actually testing a method of MatrixWorkspace but SpectrumInfo
+    // needs to be able to rely on this.
     det2group_map mapping{{1, {1, 2}}};
-    m_workspace.cacheDetectorGroupings(mapping);
-    TS_ASSERT_EQUALS(m_workspace.numberOfDetectorGroups(), 5);
-    const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(0), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(1), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(2), false);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(3), true);
-    TS_ASSERT_EQUALS(spectrumInfo.isMasked(4), false);
+    TS_ASSERT_THROWS(m_workspace.cacheDetectorGroupings(mapping),
+                     std::runtime_error);
   }
 
 private:
@@ -499,7 +517,7 @@ private:
     WorkspaceTester ws;
     size_t numberOfHistograms = 5;
     size_t numberOfBins = 1;
-    ws.init(numberOfHistograms, numberOfBins + 1, numberOfBins);
+    ws.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = true;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");
@@ -524,7 +542,7 @@ public:
   SpectrumInfoTestPerformance() : m_workspace() {
     size_t numberOfHistograms = 10000;
     size_t numberOfBins = 1;
-    m_workspace.init(numberOfHistograms, numberOfBins, numberOfBins - 1);
+    m_workspace.initialize(numberOfHistograms, numberOfBins + 1, numberOfBins);
     bool includeMonitors = false;
     bool startYNegative = true;
     const std::string instrumentName("SimpleFakeInstrument");

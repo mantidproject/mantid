@@ -1,0 +1,29 @@
+=====================
+Reflectometry Changes
+=====================
+
+.. contents:: Table of Contents
+   :local:
+
+Algorithms
+----------
+
+* :ref:`algm-SpecularReflectionPositionCorrect2 <algm-SpecularReflectionPositionCorrect2> - fixed a bug where entering
+  an invalid detector or sample name would cause a segmentation fault.
+
+ConvertToReflectometryQ
+-----------------------
+
+
+Reflectometry Reduction Interface
+---------------------------------
+
+ISIS Reflectometry (Polref)
+###########################
+
+ISIS Reflectometry
+##################
+
+|
+
+`Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Reflectometry%22>`__

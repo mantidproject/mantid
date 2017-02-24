@@ -116,11 +116,13 @@ void SampleTransmission::calculate() {
   switch (wavelengthBinning) {
   // Single
   case 0: {
-    QStringList params;
-    params << m_uiForm.spSingleLow->text() << m_uiForm.spSingleWidth->text()
-           << m_uiForm.spSingleHigh->text();
-    QString binString = params.join(",");
-    transCalcAlg->setProperty("WavelengthRange", binString.toStdString());
+    // Convert values to binning params using the 'C' locale.
+    std::ostringstream binning;
+    binning.imbue(std::locale::classic());
+    binning << m_uiForm.spSingleLow->value() << ','
+            << m_uiForm.spSingleWidth->value() << ','
+            << m_uiForm.spSingleHigh->value();
+    transCalcAlg->setProperty("WavelengthRange", binning.str());
     break;
   }
 
@@ -171,7 +173,7 @@ void SampleTransmission::algorithmComplete(bool error) {
           "CalculatedSampleTransmission");
 
   // Fill the output table
-  double scattering = ws->dataY(1)[0];
+  double scattering = ws->y(1)[0];
   QTreeWidgetItem *scatteringItem = new QTreeWidgetItem();
   scatteringItem->setText(0, "Scattering");
   scatteringItem->setText(1, QString::number(scattering));
@@ -182,8 +184,7 @@ void SampleTransmission::algorithmComplete(bool error) {
   m_uiForm.twResults->addTopLevelItem(transmissionItem);
   transmissionItem->setExpanded(true);
 
-  std::vector<double> transmissionData = ws->dataY(0);
-  Statistics stats = getStatistics(transmissionData);
+  Statistics stats = getStatistics(ws->y(0).rawData());
 
   QMap<QString, double> transmissionStats;
   transmissionStats["Min"] = stats.minimum;

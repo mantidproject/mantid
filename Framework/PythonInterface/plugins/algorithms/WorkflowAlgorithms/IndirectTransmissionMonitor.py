@@ -96,8 +96,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         except IndexError:
             # If that fails just get the first spectrum which is a detector
+            spectrumInfo = workspace.spectrumInfo()
             for spec_idx in range(workspace.getNumberHistograms()):
-                if not workspace.getDetector(spec_idx).isMonitor():
+                if not spectrumInfo.isMonitor(spec_idx):
                     detector_1_idx = spec_idx
                     logger.information('Got index of first detector in workspace: %d' % (detector_1_idx))
                     break

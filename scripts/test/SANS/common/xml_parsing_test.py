@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -41,7 +42,7 @@ class XMLParsingTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(len(results) == 10)
-        for key, value in results.items():
+        for key, value in list(results.items()):
             self.assertTrue(value == ("monitor"+str(key)))
 
     def test_that_monitors_can_be_found_v2(self):
@@ -58,7 +59,7 @@ class XMLParsingTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(len(results) == 2)
-        for key, value in results.items():
+        for key, value in list(results.items()):
             self.assertTrue(value == ("monitor"+str(key)))
 
     def test_that_get_valid_to_date_from_idf_string(self):

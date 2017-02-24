@@ -2,6 +2,7 @@
 
 # pylint: disable=too-few-public-methods
 
+from __future__ import (absolute_import, division, print_function)
 import json
 import pickle
 import inspect

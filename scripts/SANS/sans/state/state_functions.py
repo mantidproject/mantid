@@ -1,5 +1,6 @@
 """Set of general purpose functions which are related to the SANSState approach."""
 
+from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, OutputParts, DetectorType)
 from sans.common.constants import (ALL_PERIODS, REDUCED_WORKSPACE_NAME_IN_LOGS, EMPTY_NAME, REDUCED_CAN_TAG)
@@ -157,7 +158,7 @@ def validation_message(error_message, instruction, variables):
     @return: a formatted validation message string.
     """
     message = ""
-    for key, value in variables.items():
+    for key, value in sorted(variables.items()):
         message += "{0}: {1}\n".format(key, value)
     message += instruction
     return {error_message: message}
@@ -251,8 +252,8 @@ def set_detector_names(state, ipf_path):
                             hab_keyword: "high-angle-detector-short-name"}
 
     names_to_search = []
-    names_to_search.extend(detector_names.values())
-    names_to_search.extend(detector_names_short.values())
+    names_to_search.extend(list(detector_names.values()))
+    names_to_search.extend(list(detector_names_short.values()))
 
     found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search, str)
 

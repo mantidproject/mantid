@@ -40,7 +40,6 @@ public:
 
     const size_t detectorIndex = 0; // detector workspace index.
     const double ei = 12;           // MeV
-    auto detector = ws->getDetector(detectorIndex);
 
     const double L1 = source->getPos().distance(sample->getPos());
 

@@ -74,8 +74,11 @@ The value of the momentum transfer :math:`Q` is contained in the loaded data
     drow=params.row(6)
     DiffCoeff = params.row(6)["Value"]
     Tau = params.row(7)["Value"]
-    if abs(DiffCoeff-2.2)/2.2 < 0.1 and abs(Tau-1.99)/1.99 < 0.1:
+    if abs(DiffCoeff-2.1)/2.1 < 0.1 and abs(Tau-1.85)/1.85 < 0.1:
         print("Optimal parameters within 10% of expected values")
+    else:
+        print(DiffCoeff, Tau, chi2)
+
 
 **Example - Global fit to a synthetic signal:**
 

@@ -98,7 +98,7 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
     IDetector_const_sptr det =
         boost::dynamic_pointer_cast<const IDetector>(component);
     if (det) {
-      if (!det->isMonitor()) {
+      if (!m_instrument->isMonitor(det->getID())) {
         return det;
       }
     } // (is a detector)

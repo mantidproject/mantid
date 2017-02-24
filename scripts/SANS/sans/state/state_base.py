@@ -1,13 +1,14 @@
-﻿
-# pylint: disable=too-few-public-methods, invalid-name
+#pylint: disable=too-few-public-methods, invalid-name
 
 """ Fundamental classes and Descriptors for the State mechanism."""
+from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 import copy
 import inspect
 from functools import (partial)
+from six import string_types, with_metaclass
 
-from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int)
+from mantid.kernel import (PropertyManager, std_vector_dbl, std_vector_str, std_vector_int, std_vector_long)
 
 
 # ---------------------------------------------------------------
@@ -22,7 +23,7 @@ def is_positive(value):
 
 
 def is_positive_or_none(value):
-    return value >= 0 or value is None
+    return value is None or value >= 0
 
 
 def all_list_elements_are_of_specific_type_and_not_empty(value, comparison_type,
@@ -268,9 +269,8 @@ class ClassTypeListParameter(TypedParameter):
 # ------------------------------------------------
 # StateBase
 # ------------------------------------------------
-class StateBase(object):
+class StateBase(with_metaclass(ABCMeta, object)):
     """ The fundamental base of the SANS State"""
-    __metaclass__ = ABCMeta
 
     @property
     def property_manager(self):
@@ -293,7 +293,7 @@ def rename_descriptor_names(cls):
     :param cls: The class with the TypedParameters
     :return: The class with the TypedParameters
     """
-    for attribute_name, attribute_value in cls.__dict__.items():
+    for attribute_name, attribute_value in list(cls.__dict__.items()):
         if isinstance(attribute_value, TypedParameter):
             attribute_value.name = '_{0}#{1}'.format(type(attribute_value).__name__, attribute_name)
     return cls
@@ -331,7 +331,7 @@ def is_string_vector(value):
 
 
 def is_int_vector(value):
-    return isinstance(value, std_vector_int)
+    return isinstance(value, std_vector_int) or isinstance(value, std_vector_long)
 
 
 def get_module_and_class_name(instance):
@@ -366,7 +366,7 @@ def provide_class(instance):
 
 
 def is_class_type_parameter(value):
-    return isinstance(value, basestring) and class_type_parameter_id in value
+    return isinstance(value, string_types) and class_type_parameter_id in value
 
 
 def is_vector_with_class_type_parameter(value):
@@ -437,7 +437,7 @@ def convert_state_to_dict(instance):
     descriptor_values, descriptor_types = get_descriptor_values(instance)
     # Add the descriptors to a dict
     state_dict = dict()
-    for key, value in descriptor_values.items():
+    for key, value in list(descriptor_values.items()):
         # If the value is a SANSBaseState then create a dict from it
         # If the value is a dict, then we need to check what the sub types are
         # If the value is a ClassTypeParameter, then we need to encode it
@@ -448,7 +448,7 @@ def convert_state_to_dict(instance):
         elif isinstance(value, dict):
             # If we have a dict, then we need to watch out since a value in the dict might be a State
             sub_dictionary = {}
-            for key_sub, val_sub in value.items():
+            for key_sub, val_sub in list(value.items()):
                 if isinstance(val_sub, StateBase):
                     sub_dictionary_value = val_sub.property_manager
                 else:
@@ -486,7 +486,7 @@ def set_state_from_property_manager(instance, property_manager):
         if k_element != STATE_NAME and k_element != STATE_MODULE:
             setattr(inst, k_element, v_element)
 
-    keys = property_manager.keys()
+    keys = list(property_manager.keys())
     for key in keys:
         value = property_manager.getProperty(key).value
         # There are four scenarios that need to be considered
@@ -508,7 +508,7 @@ def set_state_from_property_manager(instance, property_manager):
             setattr(instance, key, sub_state)
         elif type(value) is PropertyManager:
             # We must be dealing with an actual dict descriptor
-            sub_dict_keys = value.keys()
+            sub_dict_keys = list(value.keys())
             dict_element = {}
             # We need to watch out if a value of the dictionary is a sub state
             for sub_dict_key in sub_dict_keys:

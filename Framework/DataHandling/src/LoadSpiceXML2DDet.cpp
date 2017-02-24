@@ -227,11 +227,19 @@ void LoadSpiceXML2DDet::processInputs() {
   m_detXMLFileName = getPropertyValue("Filename");
   m_detXMLNodeName = getPropertyValue("DetectorLogName");
   std::vector<size_t> vec_pixelgeom = getProperty("DetectorGeometry");
-  if (vec_pixelgeom.size() != 2) {
-    throw std::runtime_error("Input pixels geometry is not correct in format.");
+  if (vec_pixelgeom.size() == 2) {
+    m_numPixelX = vec_pixelgeom[0];
+    m_numPixelY = vec_pixelgeom[1];
+  } else if (vec_pixelgeom.size() == 0) {
+    m_numPixelX = 0;
+    m_numPixelY = 0;
+  } else {
+    throw std::runtime_error("Input pixels geometry is not correct in format. "
+                             "It either has 2 integers or left empty to get "
+                             "determined automatically.");
   }
-  m_numPixelX = vec_pixelgeom[0];
-  m_numPixelY = vec_pixelgeom[1];
+  g_log.debug() << "User input poixels numbers: " << m_numPixelX << ", "
+                << m_numPixelY << "\n";
 
   m_loadInstrument = getProperty("LoadInstrument");
 
@@ -318,8 +326,12 @@ void LoadSpiceXML2DDet::exec() {
 
   // Create output workspace
   MatrixWorkspace_sptr outws;
-  outws = createMatrixWorkspace(vec_xmlnode, m_numPixelX, m_numPixelY,
-                                m_detXMLNodeName, m_loadInstrument);
+  if (m_numPixelX * m_numPixelY > 0)
+    outws = createMatrixWorkspace(vec_xmlnode, m_numPixelX, m_numPixelY,
+                                  m_detXMLNodeName, m_loadInstrument);
+  else
+    outws = createMatrixWorkspaceVersion2(vec_xmlnode, m_detXMLNodeName,
+                                          m_loadInstrument);
 
   // Set up log for loading instrument
   bool can_set_instrument = setupSampleLogs(outws);
@@ -454,6 +466,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     const size_t &numpixely, const std::string &detnodename,
     const bool &loadinstrument) {
 
+  // TODO FIXME - If version 2 works, then this version will be discarded
+
   // Create matrix workspace
   MatrixWorkspace_sptr outws;
 
@@ -512,8 +526,8 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // in Y direction
         if (veccounts.size() != numpixely) {
           std::stringstream errss;
-          errss << "Row " << i_col << " contains " << veccounts.size()
-                << " items other than " << numpixely
+          errss << "[Version 1] Row " << i_col << " contains "
+                << veccounts.size() << " items other than " << numpixely
                 << " counts specified by user.";
           throw std::runtime_error(errss.str());
         }
@@ -521,27 +535,25 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         // scan per column
         for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
           double counts = atof(veccounts[j_row].c_str());
+          size_t rowIndex, columnIndex;
 
           if (loadinstrument) {
             // the detector ID and ws index are set up in column-major too!
-            size_t wsindex = i_col * numpixelx + j_row;
-            //  size_t wsindex = j_row * numpixely + icol;
-            // size_t wsindex = icol * numpixelx + j_row;
-            outws->dataX(wsindex)[0] = static_cast<double>(wsindex);
-            outws->dataY(wsindex)[0] = counts;
-            if (counts > 0)
-              outws->dataE(wsindex)[0] = sqrt(counts);
-            else
-              outws->dataE(wsindex)[0] = 1.0;
-
+            rowIndex = i_col * numpixelx + j_row;
+            columnIndex = 0;
           } else {
-            outws->dataX(j_row)[i_col] = static_cast<double>(j_row);
-            outws->dataY(j_row)[i_col] = counts;
-            if (counts > 0)
-              outws->dataE(j_row)[i_col] = sqrt(counts);
-            else
-              outws->dataE(j_row)[i_col] = 1.0;
+            rowIndex = j_row;
+            columnIndex = i_col;
           }
+
+          outws->mutableX(rowIndex)[columnIndex] =
+              static_cast<double>(columnIndex);
+          outws->mutableY(rowIndex)[columnIndex] = counts;
+
+          if (counts > 0)
+            outws->mutableE(rowIndex)[columnIndex] = sqrt(counts);
+          else
+            outws->mutableE(rowIndex)[columnIndex] = 1.0;
 
           // record max count
           if (counts > max_counts) {
@@ -573,10 +585,16 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()
                       << " (int) value = " << ivalue << "\n";
       } else {
+        std::string str_value(nodevalue);
+        if (nodename.compare("start_time") == 0) {
+          // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
+          str_value = nodevalue;
+          str_value.replace(10, 1, "T");
+          g_log.debug() << "Replace start_time " << nodevalue
+                        << " by Mantid time format " << str_value << "\n";
+        }
         outws->mutableRun().addProperty(
-            new PropertyWithValue<std::string>(nodename, nodevalue));
-        g_log.debug() << "Log name / xml node : " << xmlnode.getName()
-                      << " (string) value = " << nodevalue << "\n";
+            new PropertyWithValue<std::string>(nodename, str_value));
       }
     }
   }
@@ -590,6 +608,214 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   }
 
   g_log.notice() << "Maximum detector count on it is " << max_counts << "\n";
+
+  return outws;
+}
+
+/** create the output matrix workspace without knowledge of detector geometry
+ *
+ */
+MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
+    const std::vector<SpiceXMLNode> &vecxmlnode, const std::string &detnodename,
+    const bool &loadinstrument) {
+
+  // Create matrix workspace
+  MatrixWorkspace_sptr outws;
+
+  // Go through all XML nodes to process
+  size_t numxmlnodes = vecxmlnode.size();
+  bool parsedDet = false;
+  double max_counts = 0.;
+
+  // define log value map
+  std::map<std::string, std::string> str_log_map;
+  std::map<std::string, double> dbl_log_map;
+  std::map<std::string, int> int_log_map;
+
+  for (size_t n = 0; n < numxmlnodes; ++n) {
+    // Process node for detector's count
+    const SpiceXMLNode &xmlnode = vecxmlnode[n];
+    if (xmlnode.getName().compare(detnodename) == 0) {
+      // Get node value string (256x256 as a whole)
+      const std::string detvaluestr = xmlnode.getValue();
+
+      outws = this->parseDetectorNode(detvaluestr, loadinstrument, max_counts);
+
+      // Set flag
+      parsedDet = true;
+    } else {
+      // Parse to log: because there is no start time.  so all logs are single
+      // value type
+      const std::string nodename = xmlnode.getName();
+      const std::string nodevalue = xmlnode.getValue();
+      if (xmlnode.isDouble()) {
+        double dvalue = atof(nodevalue.c_str());
+        dbl_log_map.emplace(nodename, dvalue);
+      } else if (xmlnode.isInteger()) {
+        int ivalue = atoi(nodevalue.c_str());
+        int_log_map.emplace(nodename, ivalue);
+      } else {
+        if (nodename.compare("start_time") == 0) {
+          // replace 2015-01-17 13:36:45 by  2015-01-17T13:36:45
+          std::string str_value(nodevalue);
+          str_value.replace(10, 1, "T");
+          g_log.debug() << "Replace start_time " << nodevalue
+                        << " by Mantid time format " << str_value << "\n";
+          str_log_map.emplace(nodename, str_value);
+        } else
+          str_log_map.emplace(nodename, nodevalue);
+      } // END-IF-ELSE (node value type)
+    }   // END-IF-ELSE (detector-node or log node)
+  }     // END-FOR (xml nodes)
+
+  // Add the property to output workspace
+  for (std::map<std::string, std::string>::iterator miter = str_log_map.begin();
+       miter != str_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<std::string>(miter->first, miter->second));
+  }
+  for (std::map<std::string, int>::iterator miter = int_log_map.begin();
+       miter != int_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<int>(miter->first, miter->second));
+  }
+  for (std::map<std::string, double>::iterator miter = dbl_log_map.begin();
+       miter != dbl_log_map.end(); ++miter) {
+    outws->mutableRun().addProperty(
+        new PropertyWithValue<double>(miter->first, miter->second));
+  }
+
+  // Raise exception if no detector node is found
+  if (!parsedDet) {
+    std::stringstream errss;
+    errss << "Unable to find an XML node of name " << detnodename
+          << ". Unable to load 2D detector XML file.";
+    throw std::runtime_error(errss.str());
+  }
+
+  g_log.notice() << "Maximum detector count on it is " << max_counts << "\n";
+
+  return outws;
+}
+
+/**
+ */
+API::MatrixWorkspace_sptr
+LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
+                                     bool loadinstrument, double &max_counts) {
+  // Split to lines
+  std::vector<std::string> vecLines;
+  boost::split(vecLines, detvaluestr, boost::algorithm::is_any_of("\n"));
+  g_log.debug() << "There are " << vecLines.size() << " lines"
+                << "\n";
+
+  // determine the number of pixels at X direction (bear in mind that the XML
+  // file records data in column major)
+  size_t num_empty_line = 0;
+  size_t num_weird_line = 0;
+  for (size_t iline = 0; iline < vecLines.size(); ++iline) {
+    if (vecLines[iline].size() == 0)
+      ++num_empty_line;
+    else if (vecLines[iline].size() < 100)
+      ++num_weird_line;
+  }
+  size_t num_pixel_x = vecLines.size() - num_empty_line - num_weird_line;
+  g_log.information() << "There are " << num_empty_line << " lines and "
+                      << num_weird_line << " lines are not regular.\n";
+
+  // read the first line to determine the number of pixels at X direction
+  size_t first_regular_line = 0;
+  if (vecLines[first_regular_line].size() < 100)
+    ++first_regular_line;
+  std::vector<std::string> veccounts;
+  boost::split(veccounts, vecLines[first_regular_line],
+               boost::algorithm::is_any_of(" \t"));
+  size_t num_pixel_y = veccounts.size();
+
+  // create output workspace
+  MatrixWorkspace_sptr outws;
+
+  if (loadinstrument) {
+    size_t numspec = num_pixel_x * num_pixel_y;
+    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+  } else {
+    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", num_pixel_y,
+                                            num_pixel_x, num_pixel_x));
+  }
+
+  // XML file records data in the order of column-major
+  // FIXME - This may waste the previous result by parsing first line
+  size_t i_col = 0;
+  max_counts = 0;
+  for (size_t i = first_regular_line; i < vecLines.size(); ++i) {
+    std::string &line = vecLines[i];
+
+    // skip empty lines
+    if (line.size() < 100)
+      continue;
+
+    // Skip empty line
+    if (line.empty()) {
+      g_log.debug() << "\tFound empty Line at " << i << "\n";
+      continue;
+    }
+
+    // Check whether it exceeds boundary
+    if (i_col == num_pixel_x) {
+      std::stringstream errss;
+      errss << "Number of non-empty rows (" << i_col + 1
+            << ") in detector data "
+            << "exceeds user defined geometry size " << num_pixel_x << ".";
+      throw std::runtime_error(errss.str());
+    }
+
+    // Split line
+    std::vector<std::string> veccounts;
+    boost::split(veccounts, line, boost::algorithm::is_any_of(" \t"));
+
+    // check number of counts per column should not exceeds number of pixels
+    // in Y direction
+    if (veccounts.size() != num_pixel_y) {
+      std::stringstream errss;
+      errss << "Row " << i_col << " contains " << veccounts.size()
+            << " items other than " << num_pixel_y
+            << " counts specified by user.";
+      throw std::runtime_error(errss.str());
+    }
+
+    // scan per column
+    for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
+      double counts = atof(veccounts[j_row].c_str());
+      size_t rowIndex, columnIndex;
+
+      if (loadinstrument) {
+        // the detector ID and ws index are set up in column-major too!
+        rowIndex = i_col * num_pixel_x + j_row;
+        columnIndex = 0;
+      } else {
+        rowIndex = j_row;
+        columnIndex = i_col;
+      }
+
+      outws->mutableX(rowIndex)[columnIndex] = static_cast<double>(columnIndex);
+      outws->mutableY(rowIndex)[columnIndex] = counts;
+
+      if (counts > 0)
+        outws->mutableE(rowIndex)[columnIndex] = sqrt(counts);
+      else
+        outws->mutableE(rowIndex)[columnIndex] = 1.0;
+
+      // record max count
+      if (counts > max_counts) {
+        max_counts = counts;
+      }
+    }
+
+    // Update column index (i.e., column number)
+    i_col += 1;
+  } // END-FOR (i-vec line)
 
   return outws;
 }
@@ -713,8 +939,9 @@ void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
   size_t numspec = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
     double ki = 2. * M_PI / wavelength;
-    dataws->dataX(iws)[0] = ki;
-    dataws->dataX(iws)[1] = ki + 0.00001;
+    auto &x = dataws->mutableX(iws);
+    x[0] = ki;
+    x[1] = ki + 0.00001;
   }
 
   dataws->getAxis(0)->setUnit("Momentum");

@@ -1,4 +1,4 @@
-﻿"""
+"""
     Defines functions that can be used to inspect the properties of a
     function call. For example
 
@@ -11,6 +11,8 @@ from __future__ import (absolute_import, division,
 import opcode
 import inspect
 import sys
+import dis
+from six import PY3
 
 #-------------------------------------------------------------------------------
 def replace_signature(func, varnames):
@@ -58,19 +60,6 @@ def customise_func(func, name, signature, docstring):
     return func
 
 #-------------------------------------------------------------------------------
-
-if sys.version_info[0] >= 3:
-  def opcode_from_bytecode(bc):
-      """Return the opcode from the given single bytecode
-      """
-      return bc
-else:
-  def opcode_from_bytecode(bc):
-      """Return the opcode from the given single bytecode str
-      """
-      return ord(bc)
-
-#-------------------------------------------------------------------------------
 def decompile(code_object):
     """
     Taken from
@@ -91,7 +80,7 @@ def decompile(code_object):
 
     Outputs:
     =========     =====================================================================
-    instructions  a list of offsets, op_codes, names, arguments, argument_type,
+    instructions  a list of offsets, op_codes, names, arguments,
                   argument_value which can be deconstructed to find out various things
                   about a function call.
 
@@ -101,49 +90,46 @@ def decompile(code_object):
     i = f.f_lasti  # index of the last attempted instruction in byte code
     ins = decompile(f.f_code)
     """
-    code = code_object.co_code
-    variables = code_object.co_cellvars + code_object.co_freevars
     instructions = []
-    n = len(code)
-    i = 0
-    e = 0
-    while i < n:
-        i_offset = i
-        i_opcode = opcode_from_bytecode(code[i])
-        i = i + 1
-        if i_opcode >= opcode.HAVE_ARGUMENT:
-            i_argument = opcode_from_bytecode(code[i]) + (opcode_from_bytecode(code[i+1]) << (4*2)) + e
-            i = i + 2
-            if i_opcode == opcode.EXTENDED_ARG:
-                e = iarg << 16
+
+    if PY3:
+        for ins in dis.get_instructions(code_object):
+            instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
+    else:
+        code = code_object.co_code
+        variables = code_object.co_cellvars + code_object.co_freevars
+        n = len(code)
+        i = 0
+        e = 0
+        while i < n:
+            i_offset = i
+            i_opcode = ord(code[i])
+            i = i + 1
+            if i_opcode >= opcode.HAVE_ARGUMENT:
+                i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
+                i = i + 2
+                if i_opcode == opcode.EXTENDED_ARG:
+                    e = i_argument << 16
+                else:
+                    e = 0
+                if i_opcode in opcode.hasconst:
+                    i_arg_value = repr(code_object.co_consts[i_argument])
+                elif i_opcode in opcode.hasname:
+                    i_arg_value = code_object.co_names[i_argument]
+                elif i_opcode in opcode.hasjrel:
+                    i_arg_value = repr(i + i_argument)
+                elif i_opcode in opcode.haslocal:
+                    i_arg_value = code_object.co_varnames[i_argument]
+                elif i_opcode in opcode.hascompare:
+                    i_arg_value = opcode.cmp_op[i_argument]
+                elif i_opcode in opcode.hasfree:
+                    i_arg_value = variables[i_argument]
+                else:
+                    i_arg_value = i_argument
             else:
-                e = 0
-            if i_opcode in opcode.hasconst:
-                i_arg_value = repr(code_object.co_consts[i_argument])
-                i_arg_type = 'CONSTANT'
-            elif i_opcode in opcode.hasname:
-                i_arg_value = code_object.co_names[i_argument]
-                i_arg_type = 'GLOBAL VARIABLE'
-            elif i_opcode in opcode.hasjrel:
-                i_arg_value = repr(i + i_argument)
-                i_arg_type = 'RELATIVE JUMP'
-            elif i_opcode in opcode.haslocal:
-                i_arg_value = code_object.co_varnames[i_argument]
-                i_arg_type = 'LOCAL VARIABLE'
-            elif i_opcode in opcode.hascompare:
-                i_arg_value = opcode.cmp_op[i_argument]
-                i_arg_type = 'COMPARE OPERATOR'
-            elif i_opcode in opcode.hasfree:
-                i_arg_value = variables[i_argument]
-                i_arg_type = 'FREE VARIABLE'
-            else:
-                i_arg_value = i_argument
-                i_arg_type = 'OTHER'
-        else:
-            i_argument = None
-            i_arg_value = None
-            i_arg_type = None
-        instructions.append( (i_offset, i_opcode, opcode.opname[i_opcode], i_argument, i_arg_type, i_arg_value) )
+                i_argument = None
+                i_arg_value = None
+            instructions.append( (i_offset, i_opcode, opcode.opname[i_opcode], i_argument, i_arg_value) )
     return instructions
 
 #-------------------------------------------------------------------------------
@@ -161,7 +147,8 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_TRUE_DIVIDE','INPLACE_FLOOR_DIVIDE',
                         'INPLACE_MODULO', 'INPLACE_ADD', 'INPLACE_SUBTRACT',
                         'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
-                        'INPLACE_OR', 'COMPARE_OP'])
+                        'INPLACE_OR', 'COMPARE_OP',
+                        'CALL_FUNCTION_EX'])
 #--------------------------------------------------------------------------------------
 
 def process_frame(frame):
@@ -187,13 +174,13 @@ def process_frame(frame):
     start_offset = 0
 
     for index, instruction in enumerate(ins_stack):
-        (offset, op, name, argument, argtype, argvalue) = instruction
+        (offset, op, name, argument, argvalue) = instruction
         if name in __operator_names:
             call_function_locs[start_offset] = (start_index, index)
             start_index = index
             start_offset = offset
 
-    (offset, op, name, argument, argtype, argvalue) = ins_stack[-1]
+    (offset, op, name, argument, argvalue) = ins_stack[-1]
     # Append the index of the last entry to form the last boundary
     call_function_locs[start_offset] = (start_index, len(ins_stack)-1)
 
@@ -212,14 +199,14 @@ def process_frame(frame):
     output_var_names = []
     max_returns = []
     last_func_offset = call_function_locs[last_i][0]
-    (offset, op, name, argument, argtype, argvalue) = ins_stack[last_func_offset + 1]
+    (offset, op, name, argument, argvalue) = ins_stack[last_func_offset + 1]
     if name == 'POP_TOP':  # no return values
         pass
     if name == 'STORE_FAST' or name == 'STORE_NAME': # one return value
         output_var_names.append(argvalue)
     if name == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign
         for index in range(argvalue):
-            (offset_, op_, name_, argument_, argtype_, argvalue_) = ins_stack[last_func_offset + 2 +index]
+            (offset_, op_, name_, argument_, argvalue_) = ins_stack[last_func_offset + 2 +index]
             output_var_names.append(argvalue_)
     max_returns = len(output_var_names)
     if name == 'DUP_TOP': # Many Return Values, Many equal signs
@@ -231,13 +218,13 @@ def process_frame(frame):
         count = 0
         max_returns = 0 # Must count the max_returns ourselves in this case
         while count < len(ins_stack[call_function_locs[i][0]:call_function_locs[i][1]]):
-            (offset_, op_, name_, argument_, argtype_, argvalue_) = ins[call_function_locs[i][0]+count]
+            (offset_, op_, name_, argument_, argvalue_) = ins[call_function_locs[i][0]+count]
             if name_ == 'UNPACK_SEQUENCE': # Many Return Values, One equal sign
                 hold = []
                 if argvalue_ > max_returns:
                     max_returns = argvalue_
                 for index in range(argvalue_):
-                    (_offset_, _op_, _name_, _argument_, _argtype_, _argvalue_) = ins[call_function_locs[i][0] + count+1+index]
+                    (_offset_, _op_, _name_, _argument_, _argvalue_) = ins[call_function_locs[i][0] + count+1+index]
                     hold.append(_argvalue_)
                 count = count + argvalue_
                 output_var_names.append(hold)

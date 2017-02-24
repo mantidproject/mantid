@@ -2,7 +2,9 @@
 
 """ Defines the state of the reduction."""
 
+from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
+from six import (with_metaclass)
 import copy
 
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
@@ -17,9 +19,7 @@ from sans.state.automatic_setters import (automatic_setters)
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
-class StateReductionBase(object):
-    __metaclass__ = ABCMeta
-
+class StateReductionBase(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def get_merge_strategy(self):
         pass
@@ -95,11 +95,11 @@ def setup_detectors_from_ipf(reduction_info, data_info):
                       DetectorType.to_string(DetectorType.HAB): "high-angle-detector-name"}
 
     names_to_search = []
-    names_to_search.extend(detector_names.values())
+    names_to_search.extend(list(detector_names.values()))
 
     found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search, str)
 
-    for detector_type in reduction_info.detector_names.keys():
+    for detector_type in list(reduction_info.detector_names.keys()):
         try:
             detector_name_tag = detector_names[detector_type]
             detector_name = found_detector_names[detector_name_tag]

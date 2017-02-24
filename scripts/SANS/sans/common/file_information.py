@@ -2,6 +2,7 @@
 
 # pylint: disable=too-few-public-methods, invalid-name
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
@@ -10,6 +11,8 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType)
+
+from six import with_metaclass
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -198,8 +201,8 @@ def get_isis_nexus_info(file_name):
     """
     try:
         with h5.File(file_name) as h5_file:
-            keys = h5_file.keys()
-            is_isis_nexus = u"raw_data_1" in keys
+            keys = list(h5_file.keys())
+            is_isis_nexus = "raw_data_1" in keys
             if is_isis_nexus:
                 first_entry = h5_file["raw_data_1"]
                 period_group = first_entry["periods"]
@@ -235,7 +238,7 @@ def get_instrument_name_for_isis_nexus(file_name):
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
-        keys = h5_file.keys()
+        keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         # Open instrument group
         instrument_group = first_entry["instrument"]
@@ -256,7 +259,7 @@ def get_top_level_nexus_entry(file_name, entry_name):
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
-        keys = h5_file.keys()
+        keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
         entry = top_level[entry_name]
         value = entry[0]
@@ -282,11 +285,11 @@ def get_event_mode_information(file_name):
     """
     with h5.File(file_name) as h5_file:
         # Open first entry
-        keys = h5_file.keys()
+        keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         # Open instrument group
         is_event_mode = False
-        for value in first_entry.values():
+        for value in list(first_entry.values()):
             if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
                 is_event_mode = True
                 break
@@ -579,9 +582,7 @@ def get_instrument(instrument_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSFileInformation(object):
-    __metaclass__ = ABCMeta
-
+class SANSFileInformation(with_metaclass(ABCMeta, object)):
     def __init__(self, file_name):
         self._file_name = file_name
 
