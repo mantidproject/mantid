@@ -136,10 +136,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_save_roi)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peak)
+        self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
+                     self.do_add_ub_peaks)
+        # self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
+        #              self.do_add_ub_peak)
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                      self.do_cal_ub_matrix)
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
@@ -152,8 +152,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_ub_peaks)
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
-        self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_peaks)
+        # self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
+        #              self.do_select_all_peaks)
         self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
                      self.do_view_data_3d)
         self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
@@ -167,10 +167,20 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
+        self.connect(self.ui.pushButton_refineUBCalIndex, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub_cal_indexed_peaks)
+
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_lattice)
+
+        self.connect(self.ui.radioButton_ubAdvancedSelection, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectAllScans, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectNoScan, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -227,7 +237,6 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
                      self.do_integrate_single_scan)
-                     # self.do_integrate_per_pt)  # integrate single peak
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_normalization)  # calculate the normalized data again
         self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
@@ -362,6 +371,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indexFrom.addItem('By calculation')
         self.ui.comboBox_indexFrom.addItem('From SPICE')
 
+        self.ui.comboBox_hklType.clear()
+        self.ui.comboBox_hklType.addItem('SPICE')
+        self.ui.comboBox_hklType.addItem('Calculated')
+
         # normalization to peak
         self.ui.comboBox_ptCountType.clear()
         self.ui.comboBox_ptCountType.addItem('Time')
@@ -373,9 +386,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
-        self.ui.checkBox_loadHKLfromFile.setChecked(True)
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
+        self.ui.radioButton_ubSelectNoScan.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -424,8 +437,8 @@ class MainWindow(QtGui.QMainWindow):
                 peak_info.set_hkl(0., 0., 0.)
             else:
                 # set from table
-                miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
-                peak_info.set_hkl_np_array(numpy.array(miller_index))
+                spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
+                peak_info.set_hkl_np_array(numpy.array(spice_hkl))
             # END-IF-ELSE
 
             peak_info_list.append(peak_info)
@@ -634,6 +647,32 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def add_scans_ub_table(self, scan_list):
+        """
+
+        :param scan_list:
+        :return:
+        """
+        # TODO/FIXME/ISSUE/NOW - consider to refactor with do_add_peaks_for_ub() and
+        # get experiment number
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        if not status:
+            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            return
+
+        # switch to tab-3
+        # self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
+
+        # prototype for a new thread
+        self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_list))
+        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_list)
+        self._addUBPeaksThread.start()
+
+        # set the flag/notification where the indexing (HKL) from
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+
+        return
+
     def do_add_roi(self):
         """ Add region of interest to 2D image
         :return:
@@ -667,10 +706,24 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_add_ub_peaks(self):
+        """
+        Launch dialog to add UB peaks
+        :return:
+        """
+        import FindUBUtility
+
+        # FIXME/TODO/NOW/ISSUE - to init()
+        self._addUBPeaksDialog = FindUBUtility.AddScansForUBDialog(self)
+        self._addUBPeaksDialog.show()
+
+        return
+
     def do_add_ub_peak(self):
         """ Add current to ub peaks
         :return:
         """
+        # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
         # Add peak
         status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                          self.ui.lineEdit_scanNumber])
@@ -712,6 +765,73 @@ class MainWindow(QtGui.QMainWindow):
 
         # set the flag/notification where the indexing (HKL) from
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+
+        return
+
+    def do_add_k_shift_vector(self):
+        """ Add a k-shift vector
+        :return:
+        """
+        # parse the k-vector
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
+                                                    allow_blank=False)
+        if status is False:
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+            return
+        else:
+            k_x, k_y, k_z = ret_obj
+
+        # add to controller
+        k_index = self._myControl.add_k_shift_vector(k_x, k_y, k_z)
+
+        # add to table and combo-box
+        self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
+
+        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
+        self.ui.comboBox_kVectors.addItem(combo_message)
+
+        return
+
+    def do_apply_k_shift(self):
+        """ Apply k-shift to selected reflections
+        :return:
+        """
+        # get the selected scans
+        scan_list = list()
+        selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        for row_index in selected_row_numbers:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+            scan_list.append(scan_number)
+
+        # get the k-vector
+        k_shift_message = str(self.ui.comboBox_kVectors.currentText())
+        k_index = int(k_shift_message.split(':')[0])
+
+        # set to controller
+        self._myControl.set_k_shift(scan_list, k_index)
+
+        # set to table
+        for row_index in selected_row_numbers:
+            self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
+
+        return
+
+    def do_apply_roi(self):
+        """ Save current selection of region of interest
+        :return:
+        """
+        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
+        # at the very beginning, the lower left and upper right are same
+        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
+            return
+
+        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        assert status, str(par_val_list)
+        exp_number = par_val_list[0]
+        scan_number = par_val_list[1]
+
+        self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
 
         return
 
@@ -917,7 +1037,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for i_row in range(num_rows):
-            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.])
+            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.], is_spice_hkl=False)
+
+        return
 
     def do_clear_merge_table(self):
         """
@@ -1043,54 +1165,50 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_find_peak(self):
+    def find_peak_in_scan(self , scan_number, load_spice_hkl):
         """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status is True:
-            exp_no, scan_no = ret_obj
+            exp_no = ret_obj
         else:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # merge peak if necessary
-        if self._myControl.has_merged_data(exp_no, scan_no) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [])
+        if self._myControl.has_merged_data(exp_no, scan_number) is False:
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [])
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
         # Find peak
-        status, err_msg = self._myControl.find_peak(exp_no, scan_no)
+        status, err_msg = self._myControl.find_peak(exp_no, scan_number)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # Get information from the latest (integrated) peak
-        if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
-            # This is the first time that in the workflow to get HKL from MD workspace
-            peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-            assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
-            # try:
-            #     peak_info.retrieve_hkl_from_spice_table()
-            # except RuntimeError as run_err:
-            #     self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
-        # END-IF
+        # if load_spice_hkl:
+        #     # This is the first time that in the workflow to get HKL from MD workspace
+        #     peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        #     assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+        # # END-IF
 
         # Set up correct values to table tableWidget_peaksCalUB
-        peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-        h, k, l = peak_info.get_spice_hkl()
-        self.ui.lineEdit_H.setText('%.2f' % h)
-        self.ui.lineEdit_K.setText('%.2f' % k)
-        self.ui.lineEdit_L.setText('%.2f' % l)
+        peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+
+        if load_spice_hkl:
+            h, k, l = peak_info.get_hkl()
+            hkl = (h, k, l)
+        else:
+            hkl = ()
 
         q_x, q_y, q_z = peak_info.get_peak_centre()
-        self.ui.lineEdit_sampleQx.setText('%.5E' % q_x)
-        self.ui.lineEdit_sampleQy.setText('%.5E' % q_y)
-        self.ui.lineEdit_sampleQz.setText('%.5E' % q_z)
+        vec_q = (q_x, q_y, q_z)
 
-        return
+        return hkl, vec_q
 
     def do_show_single_peak_integration(self):
         """ show the details of integrating a single peak
@@ -1477,7 +1595,8 @@ class MainWindow(QtGui.QMainWindow):
             if status is True:
                 hkl_value = ret_obj[0]
                 hkl_error = ret_obj[1]
-                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, hkl_error)
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, is_spice_hkl=False,
+                                                       error=hkl_error)
             else:
                 err_msg += ret_obj + '\n'
         # END-FOR
@@ -1490,8 +1609,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromUB)
 
         # enable/disable push buttons
-        self.ui.pushButton_setHKL2Int.setEnabled(True)
-        self.ui.pushButton_undoSetToInteger.setEnabled(False)
+        # self.ui.pushButton_setHKL2Int.setEnabled(True)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(True)
 
         return
 
@@ -1926,6 +2045,28 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_refine_ub_cal_indexed_peaks(self):
+        """
+
+        :return:
+        """
+        # TODO/ISSUE/NOW - clean and implement
+
+        # refine UB matrix by indexed peak
+        peak_info_list = self._build_peak_info_list(zero_hkl=False, is_spice=False)
+
+        # Refine UB matrix
+        try:
+            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list)
+        except AssertionError as error:
+            self.pop_one_button_dialog(str(error))
+            return
+
+        # show result
+        self._show_refined_ub_result(is_spice=False)
+
+        return
+
     def do_refine_ub_lattice(self):
         """
         Calculate UB matrix constrained by lattice parameters
@@ -2062,8 +2203,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-        assert status, ret_obj
-        exp_number = ret_obj[0]
+        if not status:
+            raise RuntimeError(ret_obj)
+        else:
+            exp_number = ret_obj[0]
 
         # reset all rows back to SPICE HKL
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
@@ -2109,73 +2252,6 @@ class MainWindow(QtGui.QMainWindow):
         # set it to combo-box
         self.ui.comboBox_maskNames1.addItem(roi_name)
         self.ui.comboBox_maskNames2.addItem(roi_name)
-
-        return
-
-    def do_add_k_shift_vector(self):
-        """ Add a k-shift vector
-        :return:
-        """
-        # parse the k-vector
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
-                                                    allow_blank=False)
-        if status is False:
-            error_message = ret_obj
-            self.pop_one_button_dialog(error_message)
-            return
-        else:
-            k_x, k_y, k_z = ret_obj
-
-        # add to controller
-        k_index = self._myControl.add_k_shift_vector(k_x, k_y, k_z)
-
-        # add to table and combo-box
-        self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
-
-        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
-        self.ui.comboBox_kVectors.addItem(combo_message)
-
-        return
-
-    def do_apply_k_shift(self):
-        """ Apply k-shift to selected reflections
-        :return:
-        """
-        # get the selected scans
-        scan_list = list()
-        selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-        for row_index in selected_row_numbers:
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-            scan_list.append(scan_number)
-
-        # get the k-vector
-        k_shift_message = str(self.ui.comboBox_kVectors.currentText())
-        k_index = int(k_shift_message.split(':')[0])
-
-        # set to controller
-        self._myControl.set_k_shift(scan_list, k_index)
-
-        # set to table
-        for row_index in selected_row_numbers:
-            self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
-
-        return
-
-    def do_apply_roi(self):
-        """ Save current selection of region of interest
-        :return:
-        """
-        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
-        # at the very beginning, the lower left and upper right are same
-        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
-            return
-
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status, str(par_val_list)
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
 
         return
 
@@ -2231,19 +2307,33 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        if not self._ubPeakTableFlag:
-            # turn to deselect all
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
-            # all peaks are subjected to select
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        else:
-            # only nuclear peaks to get selected
-            self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
-        # END-IF-ELSE
+        if self.ui.radioButton_ubSelectAllScans.isChecked() and self._ubPeakTableFlag != 0:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(True)
+            self._ubPeakTableFlag = 0
+        elif self.ui.radioButton_ubSelectNoScan.isChecked() and self._ubPeakTableFlag != 1:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(False)
+            self._ubPeakTableFlag = 1
+        elif self.ui.radioButton_ubAdvancedSelection.isChecked() and self._ubPeakTableFlag != 2:
+            # advanced
+            import FindUBUtility
+            self._selectUBScanDialog = FindUBUtility.SelectUBMatrixScansDialog(self)
+            self._selectUBScanDialog.show()
+            self._ubPeakTableFlag = 2
+        # END-IF
 
-        # revert the flag
-        self._ubPeakTableFlag = not self._ubPeakTableFlag
+        # if not self._ubPeakTableFlag:
+        #     # turn to deselect all
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
+        #     # all peaks are subjected to select
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # else:
+        #     # only nuclear peaks to get selected
+        #     self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
+        # # END-IF-ELSE
+        #
+        # # revert the flag
+        # self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 
@@ -2358,19 +2448,27 @@ class MainWindow(QtGui.QMainWindow):
         Change to these HKL values is only related to GUI, i.e., the table
         :return:
         """
+        # get the current index source
+        hkl_type_str = str(self.ui.comboBox_hklType.currentText())
+        if hkl_type_str.lower().count('spice') > 0:
+            # set spice HKL to integer
+            is_spice = True
+        else:
+            is_spice = False
+
         # store the current value
         self.ui.tableWidget_peaksCalUB .store_current_indexing()
 
         # set the index to integer
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for row_index in range(num_rows):
-            m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index)
+            m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index, is_spice_hkl=is_spice)
             peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
-            self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, round_error)
+            self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
 
         # disable the set to integer button and enable the revert/undo button
-        self.ui.pushButton_setHKL2Int.setEnabled(False)
-        self.ui.pushButton_undoSetToInteger.setEnabled(True)
+        # self.ui.pushButton_setHKL2Int.setEnabled(False)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(True)
 
         return
 
@@ -2379,12 +2477,20 @@ class MainWindow(QtGui.QMainWindow):
         After the peaks' indexing are set to integer, undo the action (i.e., revert to the original value)
         :return:
         """
+        # get the column
+        hkl_type = str(self.ui.comboBox_hklType.currentText())
+        if hkl_type.lower().count('spice') > 0:
+            is_spice = True
+        else:
+            is_spice = False
+
         # restore the value
-        self.ui.tableWidget_peaksCalUB.restore_cached_indexing()
+        # FIXME/TODO/ISSUE/NOW - is_spice is a new parameter!
+        self.ui.tableWidget_peaksCalUB.restore_cached_indexing(is_spice)
 
         # enable and disable the buttons
-        self.ui.pushButton_setHKL2Int.setEnabled(True)
-        self.ui.pushButton_undoSetToInteger.setEnabled(False)
+        # self.ui.pushButton_setHKL2Int.setEnabled(True)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(False)
 
         return
 
@@ -3221,8 +3327,8 @@ class MainWindow(QtGui.QMainWindow):
         wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
 
         # Set to table
-        status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, -1, h, k, l, q_x, q_y, q_z, False, m1, wave_length, ''])
+        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1,
+                                                                  wave_length)
         if status is False:
             self.pop_one_button_dialog(err_msg)
 

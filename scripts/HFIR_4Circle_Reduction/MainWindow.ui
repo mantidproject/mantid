@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1536</width>
+    <width>1568</width>
     <height>1036</height>
    </rect>
   </property>
@@ -168,7 +168,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -1896,253 +1896,18 @@ p, li { white-space: pre-wrap; }
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_19">
             <item>
-             <widget class="QGroupBox" name="groupBox_7">
-              <property name="title">
-               <string>Add Peak</string>
-              </property>
-              <layout class="QGridLayout" name="gridLayout_2">
-               <item row="0" column="8">
-                <widget class="QLineEdit" name="lineEdit_H">
-                 <property name="maximumSize">
-                  <size>
-                   <width>60</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="6">
-                <spacer name="horizontalSpacer_4">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Preferred</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_scanNo">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Scan Number</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="4">
-                <widget class="QPushButton" name="pushButton_findPeak">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                   <weight>75</weight>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Find Peak</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="7">
-                <widget class="QLabel" name="label_31">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Miller Index</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLineEdit" name="lineEdit_scanNumber">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>60</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="18">
-                <widget class="QPushButton" name="pushButton_viewScan3D">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                   <weight>50</weight>
-                   <bold>false</bold>
-                  </font>
-                 </property>
-                 <property name="toolTip">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;View peak in 3D&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="text">
-                  <string>View Peak</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="11">
-                <widget class="QLineEdit" name="lineEdit_K">
-                 <property name="maximumSize">
-                  <size>
-                   <width>60</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="12">
-                <widget class="QLineEdit" name="lineEdit_L">
-                 <property name="maximumSize">
-                  <size>
-                   <width>60</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="5">
-                <widget class="QCheckBox" name="checkBox_loadHKLfromFile">
-                 <property name="font">
-                  <font>
-                   <pointsize>8</pointsize>
-                   <italic>true</italic>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Load HKL from Spice file</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="13">
-                <widget class="QLabel" name="label_7">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string> Q-Sample </string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="14">
-                <widget class="QLineEdit" name="lineEdit_sampleQx">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>120</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="16">
-                <widget class="QLineEdit" name="lineEdit_sampleQz">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>120</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="17">
-                <widget class="QPushButton" name="pushButton_addPeakToCalUB">
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                   <weight>75</weight>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Add Peak</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="15">
-                <widget class="QLineEdit" name="lineEdit_sampleQy">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>120</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>10</pointsize>
-                  </font>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_4">
                 <item>
-                 <widget class="UBMatrixPeakTable" name="tableWidget_peaksCalUB"/>
+                 <widget class="UBMatrixPeakTable" name="tableWidget_peaksCalUB">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -2161,6 +1926,22 @@ p, li { white-space: pre-wrap; }
                    </widget>
                   </item>
                   <item>
+                   <spacer name="horizontalSpacer_38">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
                    <widget class="QPushButton" name="pushButton_setHKL2Int">
                     <property name="font">
                      <font>
@@ -2171,6 +1952,9 @@ p, li { white-space: pre-wrap; }
                      <string>Set HKL To Integer</string>
                     </property>
                    </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="comboBox_hklType"/>
                   </item>
                   <item>
                    <widget class="QPushButton" name="pushButton_undoSetToInteger">
@@ -2241,25 +2025,16 @@ p, li { white-space: pre-wrap; }
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_8">
                 <item>
-                 <widget class="QPushButton" name="pushButton_selectAllPeaks">
-                  <property name="text">
-                   <string>Select All</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="checkBox_ubNuclearPeaks">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
+                 <widget class="QPushButton" name="pushButton_addUBScans">
                   <property name="font">
                    <font>
-                    <pointsize>9</pointsize>
-                    <italic>true</italic>
+                    <pointsize>10</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
                    </font>
                   </property>
                   <property name="text">
-                   <string>nuclear peaks</string>
+                   <string>Add Peaks</string>
                   </property>
                  </widget>
                 </item>
@@ -2280,6 +2055,98 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
+                 <spacer name="verticalSpacer_13">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="groupBox_24">
+                  <property name="title">
+                   <string>Peaks Filter</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_11">
+                   <item>
+                    <widget class="QRadioButton" name="radioButton_ubSelectAllScans">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Select all Peaks</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="radioButton_ubSelectNoScan">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>No Peak</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QRadioButton" name="radioButton_ubAdvancedSelection">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Advanced Setup</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="verticalSpacer_10">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                     <property name="sizeType">
+                      <enum>QSizePolicy::Ignored</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>20</width>
+                       <height>40</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QCheckBox" name="checkBox_hideUnselectedUBPeaks">
+                     <property name="font">
+                      <font>
+                       <pointsize>9</pointsize>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Hide Unselected</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="verticalSpacer_8">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -2296,7 +2163,32 @@ p, li { white-space: pre-wrap; }
                  </spacer>
                 </item>
                 <item>
+                 <widget class="Line" name="line_7">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_2">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Plot Scan 2D</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QPushButton" name="pushButton_plotSelectedData">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>120</width>
@@ -2305,12 +2197,46 @@ p, li { white-space: pre-wrap; }
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>120</width>
+                    <width>200</width>
                     <height>16777215</height>
                    </size>
                   </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
                   <property name="text">
-                   <string>Plot Scan</string>
+                   <string>Plot Scan 3D</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_viewScan3D">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                    <weight>50</weight>
+                    <bold>false</bold>
+                   </font>
+                  </property>
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;View peak in 3D&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
+                  <property name="text">
+                   <string>View Peak</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton">
+                  <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Show Spice File</string>
                   </property>
                  </widget>
                 </item>
@@ -2318,6 +2244,9 @@ p, li { white-space: pre-wrap; }
                  <spacer name="verticalSpacer_11">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Preferred</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -2329,6 +2258,12 @@ p, li { white-space: pre-wrap; }
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_deleteUBPeak">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>120</width>
@@ -2337,7 +2272,7 @@ p, li { white-space: pre-wrap; }
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>120</width>
+                    <width>200</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -2348,6 +2283,12 @@ p, li { white-space: pre-wrap; }
                 </item>
                 <item>
                  <widget class="QPushButton" name="pushButton_clearUBPeakTable">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="minimumSize">
                    <size>
                     <width>120</width>
@@ -2356,7 +2297,7 @@ p, li { white-space: pre-wrap; }
                   </property>
                   <property name="maximumSize">
                    <size>
-                    <width>120</width>
+                    <width>200</width>
                     <height>16777215</height>
                    </size>
                   </property>
@@ -2470,7 +2411,22 @@ p, li { white-space: pre-wrap; }
                       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Refine UB matrix by indexed peaks&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                      </property>
                      <property name="text">
-                      <string>Refine by Indexed</string>
+                      <string>Refine by SPICE HKL</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="pushButton_refineUBCalIndex">
+                     <property name="font">
+                      <font>
+                       <pointsize>8</pointsize>
+                      </font>
+                     </property>
+                     <property name="toolTip">
+                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:11pt;&quot;&gt;Refine UB matrix by indexed peaks&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                     </property>
+                     <property name="text">
+                      <string>Refine by Calculated HKL</string>
                      </property>
                     </widget>
                    </item>
@@ -2490,7 +2446,7 @@ p, li { white-space: pre-wrap; }
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>120</width>
+                       <width>200</width>
                        <height>100</height>
                       </size>
                      </property>
@@ -5398,7 +5354,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1536</width>
+     <width>1568</width>
      <height>25</height>
     </rect>
    </property>

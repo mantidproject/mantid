@@ -1126,7 +1126,7 @@ class CWSCDReductionControl(object):
         temp_index_ws = AnalysisDataService.retrieve(temp_index_ws_name)
 
         if num_peak_index == 0:
-            return False, 'No peak can be indexed.'
+            return False, 'No peak can be indexed: {0}.'.format(error)
         elif num_peak_index > 1:
             raise RuntimeError('Case for PeaksWorkspace containing more than 1 peak is not '
                                'considered. Contact developer for this issue.')

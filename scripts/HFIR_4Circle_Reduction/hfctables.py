@@ -489,15 +489,18 @@ class UBMatrixTable(tableBase.NTableWidget):
 # UB peak information table
 UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Pt', 'int'),
-                       ('H', 'float'),
-                       ('K', 'float'),
-                       ('L', 'float'),
-                       ('Q_x', 'float'),
-                       ('Q_y', 'float'),
-                       ('Q_z', 'float'),
+                       ('Spice HKL', 'str'),
+                       # ('H', 'float'),
+                       # ('K', 'float'),
+                       # ('L', 'float'),
+                       ('Calculated HKL', 'str'),
+                       # ('Q_x', 'float'),
+                       # ('Q_y', 'float'),
+                       # ('Q_z', 'float'),
+                       ('Q-Sample', 'str'),
                        ('Selected', 'checkbox'),
                        ('m1', 'float'),
-                       ('lambda', 'float'),  # wave length
+                       ('Wavelength', 'float'),  # wave length
                        ('Error', 'float')]
 
 
@@ -515,9 +518,33 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         tableBase.NTableWidget.__init__(self, parent)
 
         # define class variables
-        self._storedHKL = dict()
+        self._cachedSpiceHKL = dict()
+
+        # class variables for column indexes
+        self._colIndexSpiceHKL = 2
+        self._colIndexCalculatedHKL = 3
+        # TODO/FIXME/ISSUE/NOW - Add more colIndex???
 
         return
+
+    def add_peak(self, scan_number, spice_hkl, q_sample, m1, wave_length):
+        """
+
+        :param scan_number:
+        :param spice_hkl:
+        :param q_sample:
+        :param m1:
+        :param wave_length:
+        :return:
+        """
+        # TODO/FIXME/ISSUE/NOW : Check!
+
+        # FIXME/TODO/NOW - make it a method to write formatted string?
+        spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
+        q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
+        self.append_row([scan_number, -1, spice_hkl_str, '', q_sample_str, False, m1, wave_length, ''])
+
+        return True, ''
 
     def get_exp_info(self, row_index):
         """
@@ -534,21 +561,28 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return scan_number, pt_number
 
-    def get_hkl(self, row_index):
+    def get_hkl(self, row_index, is_spice_hkl):
         """
         Get reflection's miller index
         :param row_index:
         :return:
         """
-        assert isinstance(row_index, int)
+        import guiutility
+        assert isinstance(row_index, int), 'blabla'
+        # TODO/ISSUE/NOW - clean
 
-        m_h = self.get_cell_value(row_index, 2)
-        m_k = self.get_cell_value(row_index, 3)
-        m_l = self.get_cell_value(row_index, 4)
+        if is_spice_hkl:
+            hkl_str = self.get_cell_value(row_index, self._colIndexSpiceHKL)
+        else:
+            hkl_str = self.get_cell_value(row_index, self._colIndexCalculatedHKL)
 
-        assert isinstance(m_h, float)
-        assert isinstance(m_k, float)
-        assert isinstance(m_l, float)
+        status, ret_obj = guiutility.parse_float_array(hkl_str)
+        if not status:
+            raise RuntimeError(ret_obj)
+        elif len(ret_obj) != 3:
+            raise RuntimeError('blabla')
+        else:
+            m_h, m_k, m_l = ret_obj
 
         return m_h, m_k, m_l
 
@@ -583,6 +617,12 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         self.init_setup(UB_Peak_Table_Setup)
         self._statusColName = 'Selected'
 
+        # TODO/FIXME/ISSUE/NOW - define all the _colIndex???
+
+        self.setColumnWidth(self._colIndexSpiceHKL, 240)
+        self.setColumnWidth(self._colIndexCalculatedHKL, 240)
+        self.setColumnWidth(4, 240)
+
         return
 
     def select_all_nuclear_peaks(self):
@@ -597,7 +637,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         for row_index in range(num_rows):
             # get the reading of HKL
             try:
-                hkl_tuple = self.get_hkl(row_index)
+                hkl_tuple = self.get_hkl(row_index, is_spice_hkl=True)
                 if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
                     self.select_row(row_index, status=True)
             except RuntimeError as error:
@@ -606,7 +646,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return error_message
 
-    def set_hkl(self, i_row, hkl, error=None):
+    def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
         """
         Set HKL to table
         :param i_row:
@@ -625,15 +665,25 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         else:
             raise AssertionError('HKL of type %s is not supported. Supported types include list, tuple '
                                  'and numpy array.' % type(hkl))
+        assert isinstance(is_spice_hkl, bool), 'new blabla'
 
         # get columns
-        i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
-        i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
-        i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))
+        # i_col_h = UB_Peak_Table_Setup.index(('H', 'float'))
+        # i_col_k = UB_Peak_Table_Setup.index(('K', 'float'))
+        # i_col_l = UB_Peak_Table_Setup.index(('L', 'float'))
+        #
+        # self.update_cell_value(i_row, i_col_h, hkl[0])
+        # self.update_cell_value(i_row, i_col_k, hkl[1])
+        # self.update_cell_value(i_row, i_col_l, hkl[2])
 
-        self.update_cell_value(i_row, i_col_h, hkl[0])
-        self.update_cell_value(i_row, i_col_k, hkl[1])
-        self.update_cell_value(i_row, i_col_l, hkl[2])
+        # FIXME/TODO/ISSUE/NOW - Clean!
+
+        hkl_str = '%.4f, %.4f, %.4f' % (hkl[0], hkl[1], hkl[2])
+
+        if is_spice_hkl:
+            self.update_cell_value(i_row, self._colIndexSpiceHKL, hkl_str)
+        else:
+            self.update_cell_value(i_row, self._colIndexCalculatedHKL, hkl_str)
 
         if error is not None:
             i_col_error = UB_Peak_Table_Setup.index(('Error', 'float'))
@@ -647,17 +697,17 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return:
         """
         # check first such that all the stored value are to be
-        stored_line_index = sorted(self._storedHKL.keys())
+        stored_line_index = sorted(self._cachedSpiceHKL.keys())
         assert len(stored_line_index) == self.rowCount(), 'The current rows and cached row counts do not match.'
 
         # restore
         for row_index in stored_line_index:
-            hkl = self._storedHKL[row_index]
-            self.set_hkl(row_index, hkl)
+            hkl = self._cachedSpiceHKL[row_index]
+            self.set_hkl(row_index, hkl, is_spice_hkl=True)
         # END-FOR
 
         # clear
-        self._storedHKL.clear()
+        self._cachedSpiceHKL.clear()
 
         return
 
@@ -667,13 +717,13 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return:
         """
         # clear the previous value
-        self._storedHKL.clear()
+        self._cachedSpiceHKL.clear()
 
         # store
         num_rows = self.rowCount()
         for row_index in range(num_rows):
-            peak_indexing = self.get_hkl(row_index)
-            self._storedHKL[row_index] = peak_indexing
+            peak_indexing = self.get_hkl(row_index, is_spice_hkl=True)
+            self._cachedSpiceHKL[row_index] = peak_indexing
         # END-FOR
 
         return
@@ -685,7 +735,8 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param k:
         :param l:
         """
-        assert isinstance(i_row, int)
+        raise NotImplementedError('I don\'t need this!')
+        assert isinstance(i_row, int), 'blabla'
 
         self.update_cell_value(i_row, 2, h)
         self.update_cell_value(i_row, 3, k)
