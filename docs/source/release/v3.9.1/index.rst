@@ -35,7 +35,6 @@ Changes in this version
 * `18915 <https://www.github.com/mantidproject/mantid/pull/18915>`_ Add missing parameter in function call in performance test
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
-* `18984 <https://github.com/mantidproject/mantid/pull/18984>`_ Fix bug in treatment of b tensors very small off-diagonal elements
 
 Summary of impact
 -----------------
@@ -65,8 +64,6 @@ Summary of impact
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpretation of list indices in GUI   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
-+-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-| 18984 | Set very small elements which are literally 0 to numerical zero (10e-15)          | Fix check for small values of b tensor      | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
