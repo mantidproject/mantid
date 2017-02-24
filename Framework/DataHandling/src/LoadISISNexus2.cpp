@@ -283,7 +283,7 @@ void LoadISISNexus2::exec() {
   // ticket #8697
   loadSampleData(local_workspace, entry);
   m_progress->report("Loading logs");
-  loadLogs(local_workspace, entry);
+  loadLogs(local_workspace);
 
   // Load first period outside loop
   m_progress->report("Loading data");
@@ -1117,10 +1117,8 @@ void LoadISISNexus2::loadSampleData(
 *   /raw_data_1/runlog group of the file. Call to this method must be done
 *   within /raw_data_1 group.
 *   @param ws :: The workspace to load the logs to.
-*   @param entry :: Nexus entry
 */
-void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws,
-                              NXEntry &entry) {
+void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
   IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusLogs", 0.0, 0.5);
   alg->setPropertyValue("Filename", this->getProperty("Filename"));
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
