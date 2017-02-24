@@ -2518,6 +2518,7 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
+                    print '[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number)
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
