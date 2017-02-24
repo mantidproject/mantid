@@ -136,8 +136,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_save_roi)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
         self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
                      self.do_add_ub_peak)
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
@@ -1118,54 +1116,50 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_find_peak(self):
+    def find_peak_in_scan(self , scan_number, load_spice_hkl):
         """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status is True:
-            exp_no, scan_no = ret_obj
+            exp_no = ret_obj
         else:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # merge peak if necessary
-        if self._myControl.has_merged_data(exp_no, scan_no) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [])
+        if self._myControl.has_merged_data(exp_no, scan_number) is False:
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [])
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
         # Find peak
-        status, err_msg = self._myControl.find_peak(exp_no, scan_no)
+        status, err_msg = self._myControl.find_peak(exp_no, scan_number)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # Get information from the latest (integrated) peak
-        if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
-            # This is the first time that in the workflow to get HKL from MD workspace
-            peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-            assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
-            # try:
-            #     peak_info.retrieve_hkl_from_spice_table()
-            # except RuntimeError as run_err:
-            #     self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
-        # END-IF
+        # if load_spice_hkl:
+        #     # This is the first time that in the workflow to get HKL from MD workspace
+        #     peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        #     assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+        # # END-IF
 
         # Set up correct values to table tableWidget_peaksCalUB
-        peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-        h, k, l = peak_info.get_hkl()
-        self.ui.lineEdit_H.setText('%.2f' % h)
-        self.ui.lineEdit_K.setText('%.2f' % k)
-        self.ui.lineEdit_L.setText('%.2f' % l)
+        peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+
+        if load_spice_hkl:
+            h, k, l = peak_info.get_hkl()
+            hkl = (h, k, l)
+        else:
+            hkl = ()
 
         q_x, q_y, q_z = peak_info.get_peak_centre()
-        self.ui.lineEdit_sampleQx.setText('%.5E' % q_x)
-        self.ui.lineEdit_sampleQy.setText('%.5E' % q_y)
-        self.ui.lineEdit_sampleQz.setText('%.5E' % q_z)
+        vec_q = (q_x, q_y, q_z)
 
-        return
+        return hkl, vec_q
 
     def do_show_single_peak_integration(self):
         """ show the details of integrating a single peak

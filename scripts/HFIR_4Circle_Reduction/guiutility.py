@@ -153,9 +153,13 @@ def parse_integer_list(array_str, expected_size=None):
     """ Parse a string to an array of integer separated by ','
     also, the format as 'a-b' is supported too
     :param array_str:
+    :param expected_size
     :return: boolean, list of floats/error message
     """
-    assert isinstance(array_str, str)
+    # check input type
+    assert isinstance(array_str, str), 'Input {0} must be a string but not a {1}'.format(array_str, type(array_str))
+
+    # remove space, tab and \n
     array_str = array_str.replace(' ', '')
     array_str = array_str.replace('\n', '')
     array_str = array_str.replace('\t ', '')
@@ -163,7 +167,6 @@ def parse_integer_list(array_str, expected_size=None):
     int_str_list = array_str.split(',')
     integer_list = list()
     for int_str in int_str_list:
-
         try:
             int_value = int(int_str)
             integer_list.append(int_value)
