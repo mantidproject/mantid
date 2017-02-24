@@ -1603,15 +1603,68 @@ void FilterEvents::generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<in
   return;
 }
 
-/// TODO:FIXME - ASAP
+
+/** Generate the splitter's time series property (log) the splitters workspace
+ * @brief FilterEvents::generateSplitterTSPalpha
+ * @param split_tsp_vec
+ */
 void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec)
 {
+  // clear vector to set up
+  split_tsp_vec.clear();
+
+  // initialize m_maxTargetIndex + 1 time series properties in integer
+  // TODO:FIXME - shall not use m_maxTargetIndex, because it is not set for SplittersWorkspace-type splitters
+  for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget)
+  {
+    Kernel::TimeSeriesProperty<int> *split_tsp = new Kernel::TimeSeriesProperty<int>("splitter");
+    split_tsp_vec.push_back(split_tsp);
+  }
+
+  for (SplittingInterval splitter : m_splitters)
+  {
+    int itarget = splitter.index();
+    split_tsp_vec[itarget]->addValue(splitter.start(), 1);
+    split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
+  }
+
     return;
 }
 
-/// TODO:FIXME -ASAP
+/** add the splitter TimeSeriesProperty logs to each workspace
+ * @brief FilterEvents::mapSplitterTSPtoWorkspaces
+ * @param split_tsp_vec
+ */
 void FilterEvents::mapSplitterTSPtoWorkspaces(const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec)
 {
+  if (m_useSplittersWorkspace)
+  {
+    // TODO:FIXME - need to find document for this feature
+    ;
+  }
+  else
+  {
+    // Either Table-type or Matrix-type splitters
+    for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size()); ++itarget)
+    {
+      // use itarget to find the workspace that is mapped
+      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+      ws_iter = m_outputWorkspacesMap.find(itarget);
+
+      // skip if an itarget does not have matched workspace
+      if (ws_iter == m_outputWorkspacesMap.end())
+      {
+        g_log.warning() << "iTarget " << itarget << " does not have any workspace associated.\n";
+        continue;
+      }
+
+      // get the workspace and add property
+      DataObjects::EventWorkspace_sptr outws = ws_iter->second;
+      outws->mutableRun().addProperty(split_tsp_vec[itarget]);
+    }
+
+  } // END-IF-ELSE (splitter-type)
+
     return;
 }
 
