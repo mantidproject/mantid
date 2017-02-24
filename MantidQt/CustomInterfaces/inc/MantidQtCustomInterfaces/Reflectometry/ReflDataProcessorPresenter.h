@@ -72,11 +72,11 @@ private:
   bool processGroupAsNonEventWS(int groupID, const GroupData &group);
 
   // Parse uniform even time slicing from input string
-  void parseUniformEven(const std::string &timeSlicing,
+  void parseUniformEven(const std::string &timeSlicing, double totalDuration,
                         std::vector<double> &startTimes,
                         std::vector<double> &stopTimes);
   // Parse uniform even time slicing from input string
-  void parseUniform(const std::string &timeSlicing,
+  void parseUniform(const std::string &timeSlicing, double totalDuration,
                     std::vector<double> &startTimes,
                     std::vector<double> &stopTimes);
   // Parse custom time slicing from input string

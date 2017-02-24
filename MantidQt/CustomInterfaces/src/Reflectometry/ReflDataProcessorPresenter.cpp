@@ -8,6 +8,7 @@
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/algorithm/string.hpp>
+#include <numeric>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -176,51 +177,37 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
   bool errors = false;
   bool multiRow = group.size() > 1;
-  size_t numSlices = INT_MAX;
+  size_t groupNumSlices = INT_MAX;
 
   std::vector<double> startTimes, stopTimes;
 
   // For custom slicing, the start/stop times are the same for all rows
-  if (timeSlicingType == "Custom") {
+  if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
-    numSlices = startTimes.size();
-  }
 
   for (const auto &row : group) {
 
-    // Vector containing data for this row
-    auto data = row.second;
-    // The run number
-    std::string runNo = row.second.at(0);
+    auto data = row.second;               // Vector containing data for this row
+    size_t numSlices;                     // Number of slices taken for this row
+    std::string runNo = row.second.at(0); // The run number
 
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
-      // For uniform slicing we need the total duration of the run
+      // For uniform slicing we need the total duration of the run pulse times
       std::string runName = "TOF_" + runNo;
       IEventWorkspace_const_sptr mws =
           AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
-      const auto minTime = mws->getSpectrum(0).getPulseTimeMin();
-      const auto maxTime = mws->getSpectrum(0).getPulseTimeMax();
+      const auto minTime = mws->getFirstPulseTime();
+      const auto maxTime = mws->getLastPulseTime();
       const auto totalDuration = maxTime - minTime;
       double totalDurationSec = totalDuration.seconds();
-      double sliceDuration;
 
-      // Determine slice duration and number of slices
-      if (timeSlicingType == "UniformEven") {
-        numSlices = std::stoi(timeSlicingValues);
-        sliceDuration = totalDurationSec / numSlices;
-      } else if (timeSlicingType == "Uniform") {
-        sliceDuration = std::stoi(timeSlicingValues);
-        numSlices = ceil(totalDurationSec / sliceDuration);
-        // For multiple rows, we only use common slices (lowest num of slices)
-        numSlices = std::min(numSlices, startTimes.size());
-      }
-
-      // Add the start/stop times
-      for (size_t i = 0; i < numSlices; i++) {
-        startTimes.push_back(sliceDuration * i);
-        stopTimes.push_back(sliceDuration * (i + 1));
-      }
+      if (timeSlicingType == "UniformEven")
+        parseUniformEven(timeSlicingValues, totalDurationSec, startTimes, stopTimes);
+      else if (timeSlicingType == "Uniform")
+        parseUniform(timeSlicingValues, totalDurationSec, startTimes, stopTimes);
     }
+
+    numSlices = startTimes.size();
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
@@ -234,12 +221,21 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
         return true;
       }
     }
+
+    // For uniform slicing with multiple rows only the minimum number of slices
+    // are common to each row
+    if (multiRow && timeSlicingType == "Uniform")
+      groupNumSlices = std::min(groupNumSlices, startTimes.size());
   }
 
   // Post-process (if needed)
   if (multiRow) {
-    for (size_t i = 0; i < numSlices; i++) {
 
+    // All slices are common for uniform even or custom slicing
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
+      groupNumSlices = startTimes.size();
+
+    for (size_t i = 0; i < groupNumSlices; i++) {
       GroupData groupNew;
       std::vector<std::string> data;
       for (const auto &row : group) {
@@ -292,35 +288,54 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
 /** Parses a string to extract uniform even time slicing
 *
 * @param timeSlicing :: The string to parse
+* @param totalDuration :: The duration between the min/max pulse times of the
+*event workspace being sliced
 * @param startTimes :: [output] A vector containing the start time for each
 *slice
 * @param stopTimes :: [output] A vector containing the stop time for each
 *slice
 */
 void ReflDataProcessorPresenter::parseUniformEven(
-    const std::string &timeSlicing, std::vector<double> &startTimes,
-    std::vector<double> &stopTimes) {
+    const std::string &timeSlicing, double totalDuration,
+    std::vector<double> &startTimes, std::vector<double> &stopTimes) {
 
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
+  size_t numSlices = std::stoi(timeSlicing);
+  double sliceDuration = totalDuration / numSlices;
+
+  // Add the start/stop times
+  startTimes = std::vector<double>(numSlices);
+  stopTimes = std::vector<double>(numSlices);
+  for (size_t i = 0; i < numSlices; i++) {
+    startTimes[i] = sliceDuration * i;
+    stopTimes[i] = sliceDuration * (i + 1);
+  }
 }
 
 /** Parses a string to extract uniform time slicing
 *
 * @param timeSlicing :: The string to parse
+* @param totalDuration :: The duration between the min/max pulse times of the
+*event workspace being sliced
 * @param startTimes :: [output] A vector containing the start time for each
 *slice
 * @param stopTimes :: [output] A vector containing the stop time for each
 *slice
 */
 void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
+                                              double totalDuration,
                                               std::vector<double> &startTimes,
                                               std::vector<double> &stopTimes) {
 
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
+  double sliceDuration = std::stod(timeSlicing);
+  size_t numSlices = ceil(totalDuration / sliceDuration);
+
+  // Add the start/stop times
+  startTimes = std::vector<double>(numSlices);
+  stopTimes = std::vector<double>(numSlices);
+  for (size_t i = 0; i < numSlices; i++) {
+    startTimes[i] = sliceDuration * i;
+    stopTimes[i] = sliceDuration * (i + 1);
+  }
 }
 
 /** Parses a string to extract custom time slicing
