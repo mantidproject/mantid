@@ -10,6 +10,7 @@ import sphinx_bootstrap_theme # checked at cmake time
 # mantid must be importable
 try:
     import mantid
+    from mantid import ConfigService
 except ImportError:
     sys.exit("Cannot import mantid module. Check Python path.")
 
@@ -74,6 +75,11 @@ pygments_style = 'sphinx'
 
 # -- Options for doctest --------------------------------------------------
 
+# Store certain config options so they can be restored to initial
+# settings after each test
+mantid_datasearch_dirs_init = ConfigService.Instance()['datasearch.directories']
+mantid_defaultsave_dir_init = ConfigService.Instance()['defaultsave.directory']
+
 # Run this before each test is executed
 doctest_global_setup = """
 from mantid.simpleapi import *
@@ -92,10 +98,13 @@ except NameError:
 # Run this after each test group has executed
 doctest_global_cleanup = """
 from mantid.api import FrameworkManager
-from mantid.kernel import ConfigService
+from mantid.kernel import ConfigService as cfg
+
 FrameworkManager.Instance().clear()
-ConfigService.Instance().reset()
-"""
+cfg.Instance()['datasearch.directories'] = '{datasearch_init}'
+cfg['defaultsave.directory'] = '{defaultsave_init}'
+""".format(datasearch_init=mantid_datasearch_dirs_init,
+           defaultsave_init=mantid_defaultsave_dir_init)
 
 # -- Options for pngmath --------------------------------------------------
 
@@ -159,13 +168,13 @@ html_show_sphinx = False
 html_show_copyright = False
 
 # -- Options for Epub output ---------------------------------------------------
-# This flag determines if a toc entry is inserted again at the beginning of its nested toc listing. 
-# This allows easier navigation to the top of a chapter, but can be confusing because it mixes entries of different depth in one list. 
+# This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.
+# This allows easier navigation to the top of a chapter, but can be confusing because it mixes entries of different depth in one list.
 # The default value is True.
 epub_tocdup = True
 
 #This setting control the scope of the epub table of contents
-epub_tocscope = 'includehidden' 
+epub_tocscope = 'includehidden'
 
 #The author of the document. This is put in the Dublin Core metadata. The default value is 'unknown'.
 epub_author = "The Mantid Project"
@@ -173,17 +182,17 @@ epub_author = "The Mantid Project"
 #The publisher of the document. This is put in the Dublin Core metadata. You may use any sensible string, e.g. the project homepage.
 epub_publisher = "The Mantid Project"
 
-#An identifier for the document. This is put in the Dublin Core metadata. 
-#For published documents this is the ISBN number, but you can also use an alternative scheme, e.g. the project homepage. 
+#An identifier for the document. This is put in the Dublin Core metadata.
+#For published documents this is the ISBN number, but you can also use an alternative scheme, e.g. the project homepage.
 #The default value is 'unknown'.
 epub_identifier = "www.mantidproject.org"
 
-#The publication scheme for the epub_identifier. This is put in the Dublin Core metadata. 
-#For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable. 
+#The publication scheme for the epub_identifier. This is put in the Dublin Core metadata.
+#For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable.
 #The default value is 'unknown'.
 epub_scheme='URL'
 
-#A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string. 
+#A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
 #The default value is 'unknown'.
 epub_uid = "Mantid Reference: " + version
 
