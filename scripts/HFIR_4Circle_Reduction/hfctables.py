@@ -625,10 +625,11 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
-    def select_all_nuclear_peaks(self):
+    def select_nuclear_peak_rows(self, tolerance):
         """
         select all nuclear peaks, i.e., set the flag on on 'select' for all rows if their HKL indicates that
         they are nuclear peaks
+        :param tolerance:
         :return: string as error message
         """
         num_rows = self.rowCount()
@@ -638,7 +639,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
             # get the reading of HKL
             try:
                 hkl_tuple = self.get_hkl(row_index, is_spice_hkl=True)
-                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2]):
+                if fourcircle_utility.is_peak_nuclear(hkl_tuple[0], hkl_tuple[1], hkl_tuple[2], tolerance):
                     self.select_row(row_index, status=True)
             except RuntimeError as error:
                 error_message += 'Unable to parse HKL of line %d due to %s.' % (row_index, str(error))
@@ -754,15 +755,15 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Status', 'str'),
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),  # Lorenzian corrected
+                  ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Mask', 'str'),  # '' for no mask
-                  ('Int Type', 'str'),  # integration type, Gaussian fit / simple summation
-                  ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
+                  # ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
                   ('HKL', 'str'),
                   # ('Index From', 'str'),  # source of HKL index, either SPICE or calculation
                   ('Motor', 'str'),
                   ('Motor Step', 'str'),
                   ('Wavelength', 'float'),
-                  ('Workspace', 'str'),
+                  # ('Workspace', 'str'),
                   ('K-Index', 'int'),
                   ('Select', 'checkbox')]
 
@@ -814,8 +815,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         peak_center = ''
         hkl = ''
 
-        new_row = [scan_number, status, intensity, corr_int, mask, integrate_type, peak_center, hkl,
-                   motor_name, motor_step, wave_length, ws_name, 0, False]
+        new_row = [scan_number, status, intensity, corr_int, integrate_type, mask, #peak_center,
+                   hkl, motor_name, motor_step, wave_length, 0, False]
 
         return new_row
 
@@ -872,6 +873,19 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # END-FOR
 
         return
+
+    def get_integration_type(self):
+        """
+
+        :return:
+        """
+        # TODO/FIXME/ISSUE/NOW
+        if self.rowCount() == 0:
+            raise RuntimeError('Empty table!')
+
+        integrate_type = self.get_cell_value(0, self._colIndexIntType)
+
+        return integrate_type
 
     def get_row_by_scan(self, scan_number):
         """
@@ -1195,16 +1209,16 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexIntensity = self.TableSetup.index(('Intensity', 'float'))
         self._colIndexCorrInt = self.TableSetup.index(('Corrected', 'float'))
         self._colIndexMask = self.TableSetup.index(('Mask', 'str'))
-        self._colIndexIntType = self.TableSetup.index(('Int Type', 'str'))
+        self._colIndexIntType = self.TableSetup.index(('Integrate', 'str'))
         self._colIndexStatus = self.TableSetup.index(('Status', 'str'))
         self._colIndexHKL = ProcessTableWidget.TableSetup.index(('HKL', 'str'))
-        self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
+        # self._colIndexPeak = self.TableSetup.index(('Peak', 'str'))
         # self._colIndexIndexFrom = self.TableSetup.index(('Index From', 'str'))
         self._colIndexMotor = ProcessTableWidget.TableSetup.index(('Motor', 'str'))
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
         self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
-        self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
+        # self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return
 

@@ -233,6 +233,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_show_workspaces)
         self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
                      self.do_show_integration_details)
+        self.connect(self.ui.pushButton_toggleIntegrateType, QtCore.SIGNAL('clicked()'),
+                     self.do_toggle_table_integration)
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -241,6 +243,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.evt_change_normalization)  # calculate the normalized data again
         self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
                      self.do_show_single_peak_integration)
+        self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_peak_integration_canvas)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -1049,6 +1053,13 @@ class MainWindow(QtGui.QMainWindow):
         # clear
         self.ui.tableWidget_mergeScans.remove_all_rows()
 
+    def do_clear_peak_integration_canvas(self):
+        """
+        TODO/ISSUE/ doc
+        :return:
+        """
+        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+
     def do_clear_survey(self):
         """
         Clear survey and survey table.
@@ -1445,6 +1456,13 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
             self.ui.tableWidget_covariance.set_matrix(int_peak_dict['covariance matrix'])
 
+            fit_param_dict = int_peak_dict['gauss parameters']
+            # {'A': 1208.4097237325959, 'x0': 32.175524426773507, 'B': 23.296505385975976, 's': 0.47196665622701633}
+            self.ui.lineEdit_peakBackground.setText('{0:.4f}'.format(fit_param_dict['B']))
+            self.ui.lineEdit_gaussA.setText('{0:.4f}'.format(fit_param_dict['A']))
+            self.ui.lineEdit_gaussSigma.setText('{0:.4f}'.format(fit_param_dict['s']))
+            self.ui.lineEdit_gaussB.setText('{0:.4f}'.format(fit_param_dict['B']))
+
             # plot fitted Gaussian
             fit_gauss_dict = int_peak_dict['gauss parameters']
         except KeyError as key_err:
@@ -1472,7 +1490,7 @@ class MainWindow(QtGui.QMainWindow):
         gauss_sigma = params['s']
         gauss_a = params['A']
         background = params['B']
-        info_str = 'bla bla bla'
+        info_str = 'Gaussian fit'
 
         # plot the data
         # make modelX and modelY for more fine grids
@@ -1486,7 +1504,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks tab-merged scans.
+        """ Integrate selected peaks tab-'scan processing'.
         If any scan is not merged, then it will merge the scan first.
         Integrate peaks from the table of merged peak.
         It will so the simple cuboid integration with region of interest and background subtraction.
@@ -2472,6 +2490,25 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_toggle_table_integration(self):
+        """
+        change the type
+        :return:
+        """
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        integrate_type = self.ui.tableWidget_mergeScans.get_integration_type()
+        if integrate_type != 'gaussian':
+            integrate_type = 'gaussian'
+
+        for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
+            intensity, error = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, 'gaussian')
+
+            self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity, error)
+
+        return
+
     def do_undo_ub_tab_hkl_to_integers(self):
         """
         After the peaks' indexing are set to integer, undo the action (i.e., revert to the original value)
@@ -2570,6 +2607,20 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_workDir.setText(work_dir)
 
         return
+
+    def select_ub_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None):
+        """ select scans in the UB matrix table
+        """
+        # TODO/FIXME/NOW/ISSUE - Docs and expanding to wavelength
+
+        if select_all:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(True)
+
+        elif nuclear_peaks:
+            self.ui.tableWidget_peaksCalUB.select_nuclear_peak_rows(hkl_tolerance)
+
+        else:
+            raise RuntimeError('Must pick up one option to do filter.')
 
     def set_ub_from_file(self):
         """ Get UB matrix from an Ascii file

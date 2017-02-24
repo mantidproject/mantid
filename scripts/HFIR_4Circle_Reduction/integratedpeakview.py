@@ -121,6 +121,8 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
             self.set_title(title)
         self.set_smart_y_limit(model_vec_y)
 
+        self.setXYLimit(xmin=vec_x[0] - 1., xmax=vec_x[-1] + 1.)
+
         return
 
     def remove_model(self):

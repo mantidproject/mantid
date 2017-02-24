@@ -41,16 +41,24 @@ def estimate_background(pt_intensity_dict, bg_pt_list):
     """
     Estimate background value by average the integrated counts of some Pt.
     :param pt_intensity_dict:
-    :param bg_pt_list: list of Pt. that are used to calculate background
+    :param bg_pt_list: Pt. for the first N and last M Pt.
     :return:
     """
     # Check
-    assert isinstance(pt_intensity_dict, dict)
-    assert isinstance(bg_pt_list, list) and len(bg_pt_list) > 0
+    assert isinstance(pt_intensity_dict, dict), 'blabla'
+    assert (isinstance(bg_pt_list, tuple) or isinstance(bg_pt_list, list)) and len(bg_pt_list) > 0,\
+        'background points {0} must be a 2-element tuple or list but not a {1}.'.format(bg_pt_list, type(bg_pt_list))
 
-    # Sum over all Pt.
+    # from bg_pt_list
     bg_sum = 0.
-    for bg_pt in bg_pt_list:
+    background_points = list()
+    pt_list = sorted(pt_intensity_dict.keys())
+    left_bgs = pt_list[0:bg_pt_list[0]]
+    background_points.extend(left_bgs)
+    right_bgs = pt_list[-bg_pt_list[1]:]
+    background_points.extend(right_bgs)
+
+    for bg_pt in background_points:
         assert bg_pt in pt_intensity_dict, 'Pt. %d is not calculated.' % bg_pt
         bg_sum += pt_intensity_dict[bg_pt]
 
@@ -256,8 +264,8 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     print '[DB] Overall Gaussian error = ', gauss_error
     print '[DB] Gaussian fitted parameters = ', gauss_parameters
     print '[DB] Gaussian covariance matrix = ', cov_matrix
-    # function parameters (in order): x0, sigma, a, b
 
+    # function parameters (in order): x0, sigma, a, b
     # construct parameter dictionary and error dictionary
     gauss_parameter_dict = dict()
     gauss_error_dict = dict()
@@ -267,12 +275,17 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     gauss_parameter_dict['A'] = gauss_parameters[2]
     gauss_parameter_dict['B'] = gauss_parameters[3]
 
-    gauss_error_dict['x02'] = cov_matrix[0, 0]
-    gauss_error_dict['s2'] = cov_matrix[1, 1]
-    gauss_error_dict['A2'] = cov_matrix[2, 2]
-    gauss_error_dict['B2'] = cov_matrix[3, 3]
-    gauss_error_dict['s_A'] = cov_matrix[1, 2]
-    gauss_error_dict['A_s'] = cov_matrix[2, 1]
+    if str(cov_matrix).count('inf') > 0:
+        # gaussian fit fails
+        cov_matrix = None
+    else:
+        # good
+        gauss_error_dict['x02'] = cov_matrix[0, 0]
+        gauss_error_dict['s2'] = cov_matrix[1, 1]
+        gauss_error_dict['A2'] = cov_matrix[2, 2]
+        gauss_error_dict['B2'] = cov_matrix[3, 3]
+        gauss_error_dict['s_A'] = cov_matrix[1, 2]
+        gauss_error_dict['A_s'] = cov_matrix[2, 1]
 
     return gauss_parameter_dict, gauss_error_dict, cov_matrix
 
@@ -300,8 +313,9 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
         raise RuntimeError('Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}'
                            ''.format(parameter_dict.keys(), key_err))
 
-    # I = A\times s\times\sqrt{2\pi}
-    peak_intensity = gauss_a * gauss_sigma * numpy.sqrt(2/numpy.pi)
+    # I = A\times s\times\sqrt{2 pi}
+    peak_intensity = gauss_a * gauss_sigma * numpy.sqrt(2. * numpy.pi)
+    print '[DB] Gaussian Peak Intensity: A * S * sqrt(2 Pi) == ', gauss_a, gauss_sigma, ' --> peak intensity = ', peak_intensity
 
     # calculate error
     # \sigma_I^2 = 2\pi (A^2\cdot \sigma_s^2 + \sigma_A^2\cdot s^2 + 2\cdot A\cdot s\cdot \sigma_{As})
@@ -473,7 +487,7 @@ def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
 
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
-                                intensity_scale_factor, background_pt_list):
+                                intensity_scale_factor, background_pt_tuple):
     """
     Integrate peak with the full version including
     1. simple summation
@@ -547,10 +561,13 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['motor positions'] = motor_pos_vec
     peak_int_dict['pt intensities'] = pt_intensity_vec
 
+    # get motor step per pt.
+    motor_step_dict = get_motor_step_for_intensity(motor_pos_dict)
+
     # calculate the intensity with background removed and correct intensity by background value
-    averaged_background = estimate_background(integrated_pt_dict, background_pt_list)
+    averaged_background = estimate_background(integrated_pt_dict, background_pt_tuple)
     simple_intensity, simple_intensity_error = simple_integrate_peak(integrated_pt_dict, averaged_background,
-                                                                     motor_pos_dict)
+                                                                     motor_step_dict)
     peak_int_dict['simple intensity'] = simple_intensity
     peak_int_dict['simple error'] = simple_intensity_error
     peak_int_dict['simple background'] = averaged_background
@@ -561,15 +578,24 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['gauss errors'] = errors
     peak_int_dict['covariance matrix'] = covariance_matrix
 
-    # calculate intensity with method 2
-    intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
-    peak_int_dict['intensity 2'] = intensity_m2
-    peak_int_dict['error 2'] = error_m2
+    if covariance_matrix is None:
+        # gaussian fit fails
+        peak_int_dict['intensity 2'] = ''
+        peak_int_dict['error 2'] = ''
 
-    # calculate gaussian
-    intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
-    peak_int_dict['gauss intensity'] = intensity_gauss
-    peak_int_dict['gauss error'] = intensity_gauss_error
+        peak_int_dict['gauss intensity'] = ''
+        peak_int_dict['gauss error'] = ''
+
+    else:
+        # calculate intensity with method 2
+        intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
+        peak_int_dict['intensity 2'] = intensity_m2
+        peak_int_dict['error 2'] = error_m2
+
+        # calculate gaussian
+        intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
+        peak_int_dict['gauss intensity'] = intensity_gauss
+        peak_int_dict['gauss error'] = intensity_gauss_error
 
     return peak_int_dict
 
@@ -614,17 +640,18 @@ def get_motor_step_for_intensity(motor_pos_dict):
     # get step dictionary
     motor_step_dict = dict()
 
-    for i_pt, pt in enumerate(pt_list):
+    for i_pt in range(len(pt_list)):
         if i_pt == 0:
             # first motor position
-            motor_step = motor_pos_dict[1] - motor_pos_dict[0]
+            motor_step = motor_pos_dict[pt_list[1]] - motor_pos_dict[pt_list[0]]
         elif i_pt == len(pt_list) - 1:
             # last motor position
-            motor_step = motor_pos_dict[-1] - motor_pos_dict[-2]
+            motor_step = motor_pos_dict[pt_list[-1]] - motor_pos_dict[pt_list[-2]]
         else:
             # regular
-            motor_step = 0.5 * (motor_step_dict[i_pt+1] - motor_step_dict[i_pt-1])
-        motor_step_dict[i_pt] = motor_step
+            motor_step = 0.5 * (motor_pos_dict[pt_list[i_pt+1]] - motor_pos_dict[pt_list[i_pt-1]])
+        pt = pt_list[i_pt]
+        motor_step_dict[pt] = motor_step
 
     return motor_step_dict
 
@@ -656,5 +683,7 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
         motor_step_i = motor_step_dict[pt]
         sum_intensity += (intensity - bg_value) * motor_step_i
         error_2 += numpy.sqrt(intensity) * motor_step_i
+
+        print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
 
     return sum_intensity, error_2

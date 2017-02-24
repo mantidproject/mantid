@@ -115,7 +115,7 @@ class IntegratePeaksThread(QThread):
     mergeMsgSignal = QtCore.pyqtSignal(int, int, int, str)
 
     def __init__(self, main_window, exp_number, scan_tuple_list, mask_det, mask_name, norm_type, num_pt_bg_left,
-                 num_pt_bg_right):
+                 num_pt_bg_right, scale_factor=1.000):
         """
 
         :param main_window:
@@ -152,6 +152,7 @@ class IntegratePeaksThread(QThread):
         self._selectedMaskName = mask_name
         self._numBgPtLeft = num_pt_bg_left
         self._numBgPtRight = num_pt_bg_right
+        self._scaleFactor = scale_factor
 
         # link signals
         self.peakMergeSignal.connect(self._mainWindow.update_merge_value)
@@ -240,6 +241,7 @@ class IntegratePeaksThread(QThread):
                 self._mainWindow.controller.check_generate_mask_workspace(self._expNumber, scan_number,
                                                                           self._selectedMaskName)
 
+            bkgd_pt_list = (self._numBgPtLeft, self._numBgPtRight)
             # integrate peak
             try:
                 status, ret_obj = self._mainWindow.controller.integrate_scan_peaks(exp=self._expNumber,
@@ -249,7 +251,9 @@ class IntegratePeaksThread(QThread):
                                                                                    merge_peaks=False,
                                                                                    use_mask=self._maskDetector,
                                                                                    normalization=self._normalizeType,
-                                                                                   mask_ws_name=self._selectedMaskName)
+                                                                                   mask_ws_name=self._selectedMaskName,
+                                                                                   scale_factor=self._scaleFactor,
+                                                                                   background_pt_tuple=bkgd_pt_list)
             except ValueError as val_err:
                 status = False
                 ret_obj = 'Unable to integrate scan {0} due to {1}.'.format(scan_number, str(val_err))
@@ -264,18 +268,21 @@ class IntegratePeaksThread(QThread):
                 self.mergeMsgSignal.emit(self._expNumber, scan_number, 0, error_msg)
                 continue
 
-            # calculate background value
-            background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
-            avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
+            intensity1 = pt_dict['simple intensity']
+            intensity3 = pt_dict['gauss intensity']
 
-            # correct intensity by background value
-            intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
+            # # calculate background value
+            # background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
+            # avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
+            #
+            # # correct intensity by background value
+            # intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
             peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_peak_centre()
 
             # emit signal to main app for peak intensity value
             mode = 1
             # center_i
-            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity_i), list(peak_centre), mode)
+            self.peakMergeSignal.emit(self._expNumber, scan_number, float(intensity1), list(peak_centre), mode)
         # END-FOR
 
         # terminate the process

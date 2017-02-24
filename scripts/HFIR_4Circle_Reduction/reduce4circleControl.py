@@ -1165,8 +1165,8 @@ class CWSCDReductionControl(object):
                                            ''.format(mask_name, type(mask_name))
         assert isinstance(normalization, str), 'Normalization type {0} must be a string but not a {1}.' \
                                                ''.format(normalization, type(normalization))
-        assert isinstance(scale_factor, float), 'Scale factor {0} must be a float but not a {1}.' \
-                                                ''.format(scale_factor, type(scale_factor))
+        assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
+            'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
         assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
         print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
@@ -1198,15 +1198,14 @@ class CWSCDReductionControl(object):
                                                                              mask_workspace_name=mask_ws_name,
                                                                              norm_type=normalization,
                                                                              intensity_scale_factor=scale_factor,
-                                                                             background_pt_list=background_pt_tuple)
+                                                                             background_pt_tuple=background_pt_tuple)
 
         return int_peak_dict
-
 
     def integrate_scan_peaks(self, exp, scan, peak_radius, peak_centre,
                              merge_peaks=True, use_mask=False,
                              normalization='', mask_ws_name=None,
-                             scale_factor=1):
+                             scale_factor=1.00, background_pt_tuple=None):
         """
         :param exp:
         :param scan:
@@ -1227,75 +1226,82 @@ class CWSCDReductionControl(object):
         assert len(peak_centre) == 3
         assert isinstance(merge_peaks, bool)
 
-        # get spice file
-        spice_table_name = get_spice_table_name(exp, scan)
-        if AnalysisDataService.doesExist(spice_table_name) is False:
-            self.download_spice_file(exp, scan, False)
-            self.load_spice_scan_file(exp, scan)
+        peak_int_dict= self.integrate_scan_peak(exp_number=exp, scan_number=scan, peak_centre=peak_centre,
+                                                mask_name=mask_ws_name, normalization=normalization,
+                                                scale_factor=scale_factor, background_pt_tuple=background_pt_tuple)
 
-        # get MD workspace name
-        status, pt_list = self.get_pt_numbers(exp, scan)
-        assert status, str(pt_list)
-        md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
 
-        peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
-                                          peak_centre[2])
 
-        # mask workspace
-        if use_mask:
-            if mask_ws_name is None:
-                # get default mask workspace name
-                mask_ws_name = get_mask_ws_name(exp, scan)
-            elif not AnalysisDataService.doesExist(mask_ws_name):
-                # the appointed mask workspace has not been loaded
-                # then load it from saved mask
-                self.check_generate_mask_workspace(exp, scan, mask_ws_name)
-
-            assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-                                                                '' % mask_ws_name
-
-            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
-        else:
-            mask_ws_name = ''
-            integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
-
-        # normalization
-        norm_by_mon = False
-        norm_by_time = False
-        if normalization == 'time':
-            norm_by_time = True
-        elif normalization == 'monitor':
-            norm_by_mon = True
-
-        # integrate peak of a scan
-        mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-                                        OutputWorkspace=integrated_peak_ws_name,
-                                        PeakRadius=peak_radius,
-                                        PeakCentre=peak_centre_str,
-                                        MergePeaks=merge_peaks,
-                                        NormalizeByMonitor=norm_by_mon,
-                                        NormalizeByTime=norm_by_time,
-                                        MaskWorkspace=mask_ws_name,
-                                        ScaleFactor=scale_factor)
-
-        # process the output workspace
-        pt_dict = dict()
-        out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
-        num_peaks = out_peak_ws.rowCount()
-
-        for i_peak in xrange(num_peaks):
-            peak_i = out_peak_ws.getPeak(i_peak)
-            run_number_i = peak_i.getRunNumber() % 1000
-            intensity_i = peak_i.getIntensity()
-            pt_dict[run_number_i] = intensity_i
-        # END-FOR
-
+        #
+        # # get spice file
+        # spice_table_name = get_spice_table_name(exp, scan)
+        # if AnalysisDataService.doesExist(spice_table_name) is False:
+        #     self.download_spice_file(exp, scan, False)
+        #     self.load_spice_scan_file(exp, scan)
+        #
+        # # get MD workspace name
+        # status, pt_list = self.get_pt_numbers(exp, scan)
+        # assert status, str(pt_list)
+        # md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
+        #
+        # peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
+        #                                   peak_centre[2])
+        #
+        # # mask workspace
+        # if use_mask:
+        #     if mask_ws_name is None:
+        #         # get default mask workspace name
+        #         mask_ws_name = get_mask_ws_name(exp, scan)
+        #     elif not AnalysisDataService.doesExist(mask_ws_name):
+        #         # the appointed mask workspace has not been loaded
+        #         # then load it from saved mask
+        #         self.check_generate_mask_workspace(exp, scan, mask_ws_name)
+        #
+        #     assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
+        #                                                         '' % mask_ws_name
+        #
+        #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
+        # else:
+        #     mask_ws_name = ''
+        #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
+        #
+        # # normalization
+        # norm_by_mon = False
+        # norm_by_time = False
+        # if normalization == 'time':
+        #     norm_by_time = True
+        # elif normalization == 'monitor':
+        #     norm_by_mon = True
+        #
+        # # integrate peak of a scan
+        # mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
+        #                                 OutputWorkspace=integrated_peak_ws_name,
+        #                                 PeakRadius=peak_radius,
+        #                                 PeakCentre=peak_centre_str,
+        #                                 MergePeaks=merge_peaks,
+        #                                 NormalizeByMonitor=norm_by_mon,
+        #                                 NormalizeByTime=norm_by_time,
+        #                                 MaskWorkspace=mask_ws_name,
+        #                                 ScaleFactor=scale_factor)
+        #
+        # # process the output workspace
+        #  pt_dict = dict()
+        # out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
+        # num_peaks = out_peak_ws.rowCount()
+        #
+        # for i_peak in xrange(num_peaks):
+        #     peak_i = out_peak_ws.getPeak(i_peak)
+        #     run_number_i = peak_i.getRunNumber() % 1000
+        #     intensity_i = peak_i.getIntensity()
+        #     pt_dict[run_number_i] = intensity_i
+        # # END-FOR
+        #
         # store the data into peak info
         if (exp, scan) not in self._myPeakInfoDict:
             raise RuntimeError('Exp %d Scan %d is not recorded in PeakInfo-Dict' % (exp, scan))
-        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(pt_dict)
+        self._myPeakInfoDict[(exp, scan)].set_pt_intensity(peak_int_dict)
 
-        return True, pt_dict
+        return True, peak_int_dict
 
     @staticmethod
     def gauss_correction_peak_intensity(pt_dict):

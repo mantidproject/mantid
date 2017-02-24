@@ -148,7 +148,6 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         self.connect(self.ui.pushButton_selectScans, QtCore.SIGNAL('clicked()'),
                      self.do_select_scans)
 
-
         self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
                      self.do_quit)
 
@@ -173,10 +172,24 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
             self._myParent.select_ub_scans(select_all=True)
 
         else:
+            select_args = dict()
+
             if self.ui.checkBox_selectNuclearPeaks.isChecked():
                 status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_nuclearPeaksTolerance],
                                                                  allow_blank=False)
                 if not status:
                     raise RuntimeError(ret_obj)
                 hkl_tol = ret_obj[0]
-                self._myParent.select_ub_scans(hkl_tol)
+                select_args['nuclear_peaks'] = True
+                select_args['hkl_tolerance'] = hkl_tol
+
+            if self.ui.checkBox_wavelength.isChecked():
+                # wave length selection
+                # TODO/FIXME/ISSUE/NOW - Implement ASAP
+                pass
+
+            # select with filters
+            # select with filters
+            self._myParent.select_ub_scans(**select_args)
+
+        return
