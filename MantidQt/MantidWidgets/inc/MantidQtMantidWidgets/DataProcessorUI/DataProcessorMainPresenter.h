@@ -44,33 +44,6 @@ public:
   /// Notify this receiver that something changed in the ADS
   virtual void notifyADSChanged() { ; };
 
-  /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-    UNUSED_ARG(prompt);
-    UNUSED_ARG(title);
-    UNUSED_ARG(defaultValue);
-    return std::string();
-  };
-  virtual bool askUserYesNo(std::string prompt, std::string title) {
-    UNUSED_ARG(prompt);
-    UNUSED_ARG(title);
-    return false;
-  };
-  virtual void giveUserWarning(std::string prompt, std::string title) {
-    UNUSED_ARG(prompt);
-    UNUSED_ARG(title);
-  };
-  virtual void giveUserCritical(std::string prompt, std::string title) {
-    UNUSED_ARG(prompt);
-    UNUSED_ARG(title);
-  };
-  virtual std::string runPythonAlgorithm(const std::string &algorithm) {
-    UNUSED_ARG(algorithm);
-    return std::string();
-  };
-
   /// Return global options for pre-processing as a string
   virtual std::string getPreprocessingOptionsAsString() const {
     return std::string();

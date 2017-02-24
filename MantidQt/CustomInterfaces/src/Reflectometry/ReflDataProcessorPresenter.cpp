@@ -112,10 +112,10 @@ void ReflDataProcessorPresenter::process() {
   }
 
   if (!allGroupsWereEvent)
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "Some groups could not be processed as event workspaces", "Warning");
   if (errors)
-    m_mainPresenter->giveUserWarning("Some errors were encountered when "
+    m_view->giveUserWarning("Some errors were encountered when "
                                      "reducing table. Some groups may not have "
                                      "been fully processed.",
                                      "Warning");
@@ -287,7 +287,7 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
   }
 
   if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
+    m_view->giveUserCritical("Error parsing time slices",
                                       "Time slicing error");
 }
 
@@ -429,7 +429,7 @@ void ReflDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -503,7 +503,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +

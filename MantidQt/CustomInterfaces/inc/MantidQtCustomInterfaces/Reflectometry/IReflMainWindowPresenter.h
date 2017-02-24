@@ -46,19 +46,15 @@ public:
   virtual std::string getStitchOptions(int group) const = 0;
   /// Time-slicing
   virtual std::string getTimeSlicingOptions(int group) const = 0;
-  /// Dialog/Prompt methods
-  virtual std::string askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) = 0;
-  virtual bool askUserYesNo(const std::string &prompt,
-                            const std::string &title) = 0;
-  virtual void giveUserWarning(const std::string &prompt,
-                               const std::string &title) = 0;
+  /// Dialog to print error message
   virtual void giveUserCritical(const std::string &prompt,
                                 const std::string &title) = 0;
+  /// Dialog to print information
   virtual void giveUserInfo(const std::string &prompt,
                             const std::string &title) = 0;
+  /// Run a python algorithm
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
+  /// Set the instrument name
   virtual void setInstrumentName(const std::string &instName) const = 0;
 };
 }

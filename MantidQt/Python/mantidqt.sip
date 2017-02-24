@@ -1556,6 +1556,9 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
 void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
 void setInstrumentList(const std::string &instruments, const std::string &defaultInstrument);
 
+signals:
+void runPythonCode(const QString &);
+
 private:
 QDataProcessorWidget(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 };
@@ -1567,12 +1570,6 @@ class DataProcessorMainPresenter
 %End
 public:
 DataProcessorMainPresenter();
-
-virtual std::string askUserString(const std::string &prompt, const std::string &title, const std::string &defaultValue);
-virtual bool askUserYesNo(std::string prompt, std::string title);
-virtual void giveUserWarning(std::string prompt, std::string title);
-virtual void giveUserCritical(std::string prompt, std::string title);
-virtual std::string runPythonAlgorithm(const std::string &algorithm);
 
 virtual std::string getPreprocessingOptionsAsString() const;
 virtual std::string getProcessingOptions() const;

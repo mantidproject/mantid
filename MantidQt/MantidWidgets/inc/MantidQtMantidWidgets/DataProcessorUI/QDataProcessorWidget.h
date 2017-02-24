@@ -79,6 +79,13 @@ public:
 
   // Dialog/Prompt methods
   std::string requestNotebookPath() override;
+  /// Dialog/Prompt methods
+  std::string askUserString(const std::string &prompt, const std::string &title,
+                            const std::string &defaultValue) override;
+  bool askUserYesNo(std::string prompt, std::string title) override;
+  void giveUserWarning(std::string prompt, std::string title) override;
+  void giveUserCritical(std::string prompt, std::string title) override;
+  std::string runPythonAlgorithm(const std::string &pythonCode) override;
 
   // Settings
   void saveSettings(const std::map<std::string, QVariant> &options) override;
@@ -137,6 +144,7 @@ private:
 
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
+  void runPythonAlgorithm(const QString &pythonCode);
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);

@@ -6,8 +6,10 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
-#include <qabstractitemmodel.h>
 #include <boost/algorithm/string.hpp>
+#include <qabstractitemmodel.h>
+#include <qinputdialog.h>
+#include <qmessagebox.h>
 
 namespace {
 const QString DataProcessorSettingsGroup =
@@ -470,6 +472,83 @@ void QDataProcessorWidget::clearProgress() { ui.progressBar->reset(); }
 void QDataProcessorWidget::accept(DataProcessorMainPresenter *mainPresenter) {
 
   m_presenter->accept(mainPresenter);
+}
+
+/** Shows a critical error dialog
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+*/
+void QDataProcessorWidget::giveUserCritical(std::string prompt,
+                                            std::string title) {
+
+  QMessageBox::critical(this, QString::fromStdString(title),
+                        QString::fromStdString(prompt), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+/** Shows a warning dialog
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+*/
+void QDataProcessorWidget::giveUserWarning(std::string prompt,
+                                           std::string title) {
+
+  QMessageBox::warning(this, QString::fromStdString(title),
+                       QString::fromStdString(prompt), QMessageBox::Ok,
+                       QMessageBox::Ok);
+}
+
+/** Asks the user a Yes/No question
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+* @returns a boolean true if Yes, false if No
+*/
+bool QDataProcessorWidget::askUserYesNo(std::string prompt, std::string title) {
+
+  auto response = QMessageBox::question(
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  if (response == QMessageBox::Yes) {
+    return true;
+  }
+  return false;
+}
+
+/** Asks the user to enter a string.
+*
+* @param prompt : The prompt to appear on the dialog
+* @param title : The text for the title bar of the dialog
+* @param defaultValue : The default value entered.
+* @returns The user's string if submitted, or an empty string
+*/
+std::string
+QDataProcessorWidget::askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) {
+
+  bool ok;
+  QString text = QInputDialog::getText(
+      this, QString::fromStdString(title), QString::fromStdString(prompt),
+      QLineEdit::Normal, QString::fromStdString(defaultValue), &ok);
+  if (ok)
+    return text.toStdString();
+  return "";
+}
+
+/** Runs python code
+*
+* @param pythonCode :: the python code to run
+* @return :: output from execution
+*/
+std::string QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
+
+	QString output = runPythonCode(QString::fromStdString(pythonCode));
+	return output.toStdString();
+
+	emit runPythonAlgorithm(QString::fromStdString(pythonCode));
 }
 
 } // namespace MantidWidgets

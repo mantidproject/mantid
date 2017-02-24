@@ -385,65 +385,6 @@ std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
   return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
 }
 
-/**
-Tells the view to show an critical error dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserCritical(std::string prompt,
-                                            std::string title) {
-
-  m_mainPresenter->giveUserCritical(prompt, title);
-}
-
-/**
-Tells the view to show a warning dialog
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-*/
-void ReflRunsTabPresenter::giveUserWarning(std::string prompt,
-                                           std::string title) {
-
-  m_mainPresenter->giveUserWarning(prompt, title);
-}
-
-/**
-Tells the view to ask the user a Yes/No question
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@returns a boolean true if Yes, false if No
-*/
-bool ReflRunsTabPresenter::askUserYesNo(std::string prompt, std::string title) {
-
-  return m_mainPresenter->askUserYesNo(prompt, title);
-}
-
-/**
-Tells the view to ask the user to enter a string.
-@param prompt : The prompt to appear on the dialog
-@param title : The text for the title bar of the dialog
-@param defaultValue : The default value entered.
-@returns The user's string if submitted, or an empty string
-*/
-std::string
-ReflRunsTabPresenter::askUserString(const std::string &prompt,
-                                    const std::string &title,
-                                    const std::string &defaultValue) {
-
-  return m_mainPresenter->askUserString(prompt, title, defaultValue);
-}
-
-/**
-Tells the main presenter to run an algorithm as python code
-* @param pythonCode : [input] The algorithm as python code
-* @return : The result of the execution
-*/
-std::string
-ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
-
-  return m_mainPresenter->runPythonAlgorithm(pythonCode);
-}
-
 /** Changes the current instrument in the data processor widget. Also updates
  * the config service and prints an information message
 */

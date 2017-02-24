@@ -249,7 +249,7 @@ void GenericDataProcessorPresenter::process() {
         progressReporter.report();
 
       } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
+        m_view->giveUserCritical(ex.what(), "Error");
         progressReporter.clear();
         return;
       }
@@ -263,7 +263,7 @@ void GenericDataProcessorPresenter::process() {
         postProcessGroup(newGroup);
         progressReporter.report();
       } catch (std::exception &ex) {
-        m_mainPresenter->giveUserCritical(ex.what(), "Error");
+        m_view->giveUserCritical(ex.what(), "Error");
         progressReporter.clear();
         return;
       }
@@ -845,7 +845,7 @@ void GenericDataProcessorPresenter::saveTable() {
 Press changes to a new item in the ADS
 */
 void GenericDataProcessorPresenter::saveTableAs() {
-  const std::string userString = m_mainPresenter->askUserString(
+  const std::string userString = m_view->askUserString(
       "Save As", "Enter a workspace name:", "Workspace");
   if (!userString.empty()) {
     m_wsName = userString;
@@ -858,7 +858,7 @@ Start a new, untitled table
 */
 void GenericDataProcessorPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_mainPresenter->askUserYesNo(
+    if (!m_view->askUserYesNo(
             "Your current table has unsaved changes. Are you "
             "sure you want to discard them?",
             "Start New Table?"))
@@ -876,7 +876,7 @@ Open a table from the ADS
 */
 void GenericDataProcessorPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_mainPresenter->askUserYesNo(
+    if (!m_view->askUserYesNo(
             "Your current table has unsaved changes. Are you "
             "sure you want to discard them?",
             "Open Table?"))
@@ -889,7 +889,7 @@ void GenericDataProcessorPresenter::openTable() {
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_mainPresenter->giveUserCritical("Could not open workspace: " + toOpen,
+    m_view->giveUserCritical("Could not open workspace: " + toOpen,
                                       "Error");
     return;
   }
@@ -908,7 +908,7 @@ void GenericDataProcessorPresenter::openTable() {
     m_view->showTable(m_manager->getModel());
     m_tableDirty = false;
   } catch (std::runtime_error &e) {
-    m_mainPresenter->giveUserCritical(
+    m_view->giveUserCritical(
         "Could not open workspace: " + std::string(e.what()), "Error");
   }
 }
@@ -927,8 +927,7 @@ void GenericDataProcessorPresenter::importTable() {
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
 
-  const std::string result =
-      m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  const std::string result = m_view->runPythonAlgorithm(pythonSrc.str());
 
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
@@ -948,7 +947,7 @@ void GenericDataProcessorPresenter::exportTable() {
   pythonSrc << "except:\n";
   pythonSrc << "  pass\n";
 
-  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  m_view->runPythonAlgorithm(pythonSrc.str());
 }
 
 /**
@@ -1103,7 +1102,7 @@ void GenericDataProcessorPresenter::plotRow() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -1144,7 +1143,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   }
 
   if (!notFound.empty())
-    m_mainPresenter->giveUserWarning(
+    m_view->giveUserWarning(
         "The following workspaces were not plotted because they were not "
         "found:\n" +
             boost::algorithm::join(notFound, "\n") +
@@ -1172,7 +1171,7 @@ void GenericDataProcessorPresenter::plotWorkspaces(
 
   pythonSrc << "base_graph.activeLayer().logLogAxes()\n";
 
-  m_mainPresenter->runPythonAlgorithm(pythonSrc.str());
+  m_view->runPythonAlgorithm(pythonSrc.str());
 }
 
 /** Shows the Refl Options dialog */
@@ -1306,7 +1305,7 @@ ChildItems GenericDataProcessorPresenter::selectedChildren() const {
 bool GenericDataProcessorPresenter::askUserYesNo(
     const std::string &prompt, const std::string &title) const {
 
-  return m_mainPresenter->askUserYesNo(prompt, title);
+  return m_view->askUserYesNo(prompt, title);
 }
 
 /** Print warning message
@@ -1316,7 +1315,7 @@ bool GenericDataProcessorPresenter::askUserYesNo(
 void GenericDataProcessorPresenter::giveUserWarning(
     const std::string &prompt, const std::string &title) const {
 
-  m_mainPresenter->giveUserWarning(prompt, title);
+  m_view->giveUserWarning(prompt, title);
 }
 }
 }

@@ -60,6 +60,14 @@ public:
 
   // Dialog/Prompt methods
   virtual std::string requestNotebookPath() = 0;
+  /// Dialog/Prompt methods
+  virtual std::string askUserString(const std::string &prompt,
+                                    const std::string &title,
+                                    const std::string &defaultValue) = 0;
+  virtual bool askUserYesNo(std::string prompt, std::string title) = 0;
+  virtual void giveUserWarning(std::string prompt, std::string title) = 0;
+  virtual void giveUserCritical(std::string prompt, std::string title) = 0;
+  virtual std::string runPythonAlgorithm(const std::string &algorithm) = 0;
 
   // Settings
   virtual void saveSettings(const std::map<std::string, QVariant> &options) = 0;
