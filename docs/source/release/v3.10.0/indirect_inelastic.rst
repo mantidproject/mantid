@@ -14,11 +14,20 @@ Algorithms
 - A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
 - :ref:`LoadVesuvio <algm-LoadVesuvio> can now load NeXus files as well as raw files
 
+Data Reduction
+##############
+
+Calibration
+~~~~~~~~~~~
+
+- The range selector for resolution files is now dependent on the range of the spectrum, not the limit in the IPF
+
+
 Data Analysis
 #############
 
-Conv Fit
-~~~~~~~~
+ConvFit
+~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
 
