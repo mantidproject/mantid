@@ -127,6 +127,16 @@ def print_group_results_tables(minimizers, results_per_test, problems_obj, group
 
 
 def save_table_to_file(table_data, errors, group_name, metric_type, file_extension):
+    """
+    Saves a group results table or overall results table to a given file type.
+
+    :param table_data: the results table
+    :param errors: whether to use observational errors
+    :param group_name: name of this group of problems (example 'NIST "lower difficulty"', or
+                         'Neutron data')
+    :param metric_type: the test type of the table data (e.g. runtime, accuracy)
+    :param file_extension: the file type extension (e.g. html)
+    """
     file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
                  .format(weighted=weighted_suffix_string(errors),
                          version=BENCHMARK_VERSION_STR, metric_type=metric_type, group_name=group_name))
