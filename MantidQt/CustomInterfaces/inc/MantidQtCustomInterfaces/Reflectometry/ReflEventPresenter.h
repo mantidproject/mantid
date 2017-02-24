@@ -44,8 +44,6 @@ public:
   /// Destructor
   ~ReflEventPresenter() override;
 
-  /// Returns global options for time slicing
-  std::string getTimeSlicingOptions() const override;
   /// Returns time-slicing values
   std::string getTimeSlicingValues() const override;
   /// Returns time-slicing type

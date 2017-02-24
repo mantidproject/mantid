@@ -77,7 +77,6 @@ public:
   std::map<std::string, std::string> getPreprocessingOptions() const override;
   std::string getProcessingOptions() const override;
   std::string getPostprocessingOptions() const override;
-  std::string getTimeSlicingOptions() const override;
   std::string getTimeSlicingValues() const override;
   std::string getTimeSlicingType() const override;
 

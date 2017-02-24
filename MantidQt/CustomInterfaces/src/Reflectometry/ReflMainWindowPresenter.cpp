@@ -79,20 +79,6 @@ std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
   return m_settingsPresenter->getStitchOptions(group);
 }
 
-/** Returns global time-slicing options
-*
-* @param group :: Index of the group in 'Event Handling' tab from which to get
-*the options
-* @return :: Global time-slicing options
-*/
-std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
-
-  checkEventPtrValid(m_eventPresenter);
-
-  // Request global time-slicing options to 'Event Handling' presenter
-  return m_eventPresenter->getTimeSlicingOptions(group);
-}
-
 /** Returns time-slicing values
 *
 * @param group :: Index of the group in 'Event Handling' tab from which to get

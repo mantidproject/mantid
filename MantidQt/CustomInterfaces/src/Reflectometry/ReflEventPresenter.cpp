@@ -16,14 +16,6 @@ ReflEventPresenter::ReflEventPresenter(IReflEventView *view) : m_view(view) {}
 */
 ReflEventPresenter::~ReflEventPresenter() {}
 
-/** Returns the time-slicing options
-* @return :: The time-slicing options
-*/
-std::string ReflEventPresenter::getTimeSlicingOptions() const {
-
-  return m_view->getTimeSlices();
-}
-
 /** Returns the time-slicing values
 * @return :: The time-slicing values
 */

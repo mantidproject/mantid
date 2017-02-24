@@ -48,14 +48,6 @@ IReflEventPresenter *QtReflEventView::getPresenter() const {
   return m_presenter.get();
 }
 
-/** Returns the number of time slices
-* @return :: The number of time slices
-*/
-std::string QtReflEventView::getTimeSlices() const {
-
-  return m_ui.customEdit->text().toStdString();
-}
-
 /** Returns the time slicing value(s) obtained from the selected widget
 * @return :: Time slicing values
 */

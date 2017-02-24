@@ -45,8 +45,6 @@ public:
   /// Returns the presenter managing this view
   IReflEventPresenter *getPresenter() const override;
 
-  /// Returns the number of time slices
-  std::string getTimeSlices() const override;
   /// Returns time-slicing values
   std::string getTimeSlicingValues() const override;
   /// Returns time-slicing type
