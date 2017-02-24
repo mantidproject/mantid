@@ -155,7 +155,7 @@ private:
   void executeCode(const ScriptCode &code, const Script::ExecutionMode mode);
 
   void toggleComment(bool addComment);
-  
+
   QSplitter *m_splitter;
   ScriptEditor *m_editor;
   ScriptOutputDisplay *m_messages;
