@@ -322,6 +322,7 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
             return "validateWorkspaceToWorkspace"
 
         def validate(self):
+            self.tolerance = 1e-1
             return self._wrk_1, self._wrk_2
 
 # ----------------------------------------------------------------------------------------------------------------
