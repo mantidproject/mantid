@@ -1575,10 +1575,10 @@ public:
     IFunction_sptr out = fit.getProperty("Function");
     // test that all parameters are non-negative
     TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6666, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.001);
-    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.0001);
-    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.0001);
+    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6666, 0.004);
+    TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
+    TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
+    TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.004);
     TS_ASSERT_DELTA(out->getParameter("SigmaSquared"), 99.935, 0.1);
     TS_ASSERT_DELTA(out->getParameter("Gamma"), 0.05, 0.05);
     TS_ASSERT_DELTA(out->getParameter("X0"), 49.984, 0.1);
