@@ -26,18 +26,6 @@ public:
 
   ReflEventPresenterTest() {}
 
-  void test_slicing_options() {
-    MockEventView mockView;
-    ReflEventPresenter presenter(&mockView);
-
-    EXPECT_CALL(mockView, getTimeSlices())
-        .Times(Exactly(1))
-        .WillOnce(Return("MultiDetectorAnalysis"));
-    presenter.getTimeSlicingOptions();
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void test_get_slicing_values() {
     MockEventView mockView;
     ReflEventPresenter presenter(&mockView);

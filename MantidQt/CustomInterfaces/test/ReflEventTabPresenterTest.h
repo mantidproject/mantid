@@ -26,25 +26,6 @@ public:
 
   ReflEventTabPresenterTest() {}
 
-  void test_slicing_options() {
-    MockEventPresenter presenter_1;
-    MockEventPresenter presenter_2;
-    std::vector<IReflEventPresenter *> settingsPresenters;
-    settingsPresenters.push_back(&presenter_1);
-    settingsPresenters.push_back(&presenter_2);
-    ReflEventTabPresenter presenter(settingsPresenters);
-
-    EXPECT_CALL(presenter_1, getTimeSlicingOptions()).Times(1);
-    EXPECT_CALL(presenter_2, getTimeSlicingOptions()).Times(0);
-    presenter.getTimeSlicingOptions(0);
-    EXPECT_CALL(presenter_1, getTimeSlicingOptions()).Times(0);
-    EXPECT_CALL(presenter_2, getTimeSlicingOptions()).Times(1);
-    presenter.getTimeSlicingOptions(1);
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_1));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&presenter_2));
-  }
-
   void test_get_slicing_values() {
     MockEventPresenter presenter_1;
     MockEventPresenter presenter_2;
