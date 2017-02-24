@@ -56,7 +56,6 @@ public:
 
     MatrixWorkspace_const_sptr modelData = m_model->data();
 
-
     TS_ASSERT_EQUALS(modelData->x(0), data->x(0));
     TS_ASSERT_EQUALS(modelData->y(0), data->y(0));
     TS_ASSERT_EQUALS(modelData->e(0), data->e(0));
@@ -98,14 +97,12 @@ public:
       TS_ASSERT_EQUALS(corrected->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(corrected->blocksize(), 9);
 
-
       TS_ASSERT_DELTA(corrected->y(0)[0], 97.86021, 1E-5);
       TS_ASSERT_DELTA(corrected->y(0)[2], -0.13979, 1E-5);
       TS_ASSERT_DELTA(corrected->y(0)[5], 0.86021, 1E-5);
       TS_ASSERT_DELTA(corrected->y(0)[8], 97.86021, 1E-5);
 
       TS_ASSERT_EQUALS(corrected->e(0), data->e(0));
-
     }
 
     ITableWorkspace_sptr parameters = m_model->parameterTable();

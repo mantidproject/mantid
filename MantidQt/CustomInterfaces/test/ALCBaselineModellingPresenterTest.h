@@ -138,11 +138,9 @@ public:
     MatrixWorkspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size);
 
-
     ws->setHistogram(0, Points(size, LinearGenerator(1, 1)),
                      Counts(size, LinearGenerator(1 + deltaY, 1)),
                      CountStandardDeviations(size, 1));
-
 
     return ws;
   }

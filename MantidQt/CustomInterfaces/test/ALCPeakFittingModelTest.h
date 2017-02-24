@@ -59,7 +59,6 @@ public:
                        Counts{0.00, 0.01, 0.02, 0.37, 1.00, 0.37, 0.01, 0.00},
                        CountStandardDeviations(8, 0));
 
-
     m_model->setData(data);
 
     IFunction_const_sptr func =
