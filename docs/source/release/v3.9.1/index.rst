@@ -41,6 +41,8 @@ Changes in this version
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
 * `18972 <https://www.github.com/mantidproject/mantid/pull/18972>`_ Fix reading dead time data in Muon interface
 * `18979 <https://www.github.com/mantidproject/mantid/pull/18979>`_ Fix delete confirmations in workspace dock
+* `18995 <https://www.github.com/mantidproject/mantid/pull/18995>`_ Add bank43 to TOPAZ IDF this run cycle
+
 
 Summary of impact
 -----------------
@@ -82,6 +84,8 @@ Summary of impact
 | 18972 | Loads data with/without dead-time correction as per user request                  | Clear data cache after option is updated    | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18979 | Brings back delete confirmation dialog on removing workspace                      | Propagate setting to relevant objects       | **medium**   |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18995 | Mantid now recognises bank 43 of TOPAZ                                            | Update IDF                                  | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
