@@ -216,6 +216,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, aw);
   m_exploreMantid->init();
+  m_exploreMantid->enableDeletePrompt(
+      appWindow()->isDeleteWorkspacePromptEnabled());
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
   actionCopyRowToTable = new QAction(this);
@@ -292,6 +294,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this,
           SLOT(menuMantidMatrixAboutToShow()));
 
+  connect(m_appWindow, SIGNAL(configModified(void)), this,
+          SLOT(configModified(void)));
   init();
 }
 
@@ -2700,6 +2704,11 @@ void MantidUI::formatLogName(QString &label, const QString &wsName) {
   if (!wsName.isEmpty()) {
     label = wsName + "-" + label;
   }
+}
+
+void MantidUI::configModified() {
+  m_exploreMantid->enableDeletePrompt(
+      appWindow()->isDeleteWorkspacePromptEnabled());
 }
 
 std::string MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,
