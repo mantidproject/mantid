@@ -155,10 +155,7 @@ private:
   void executeCode(const ScriptCode &code, const Script::ExecutionMode mode);
 
   void toggleComment(bool addComment);
-  // Replaces the currently selected text in the editor
-  inline void replaceSelectedText(const ScriptEditor *editor,
-                                  const QString &text);
-
+  
   QSplitter *m_splitter;
   ScriptEditor *m_editor;
   ScriptOutputDisplay *m_messages;
