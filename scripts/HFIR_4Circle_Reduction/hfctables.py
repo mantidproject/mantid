@@ -755,6 +755,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
                   ('Status', 'str'),
                   ('Intensity', 'float'),
                   ('Corrected', 'float'),  # Lorenzian corrected
+                  ('Error', 'float'),
                   ('Integrate', 'str'),  # integration type, Gaussian fit / simple summation
                   ('Mask', 'str'),  # '' for no mask
                   # ('Peak', 'str'),  # peak center can be either HKL or Q depending on the unit
@@ -779,6 +780,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexScan = None
         self._colIndexIntensity = None
         self._colIndexCorrInt = None
+        self._colIndexErrorBar = None
         self._colIndexMask = None
         self._colIndexIntType = None
         self._colIndexHKL = None
@@ -807,6 +809,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         intensity = None
         corr_int = None
+        error = None
         mask = ''
         integrate_type = 'sum'
         motor_name = None
@@ -815,7 +818,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         peak_center = ''
         hkl = ''
 
-        new_row = [scan_number, status, intensity, corr_int, integrate_type, mask, #peak_center,
+        new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask, #peak_center,
                    hkl, motor_name, motor_step, wave_length, 0, False]
 
         return new_row
@@ -1130,7 +1133,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_peak_intensity(self, row_number, peak_intensity, lorentz_corrected, integrate_method):
+    def set_peak_intensity(self, row_number, peak_intensity, correctd_intensity, standard_error, integrate_method):
         """ Set peak intensity to a row or scan
         Requirement: Either row number or scan number must be given
         Guarantees: peak intensity is set
@@ -1140,19 +1143,18 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param integrate_method: must be '', sum or gaussian for simple counts summation or Gaussian fit, respectively
         :return:
         """
+        # TODO/ISSUE/...
         # check requirements
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
-        assert integrate_method in ['', 'sum', 'gaussian'], 'Peak integration method must be in ' \
+        assert integrate_method in ['', 'simple', 'gaussian'], 'Peak integration method must be in ' \
                                                             '[Not defined, simple sum, gaussian fit]'
 
-        if lorentz_corrected:
-            col_index = self._colIndexCorrInt
-        else:
-            col_index = self._colIndexIntensity
-
+        self.update_cell_value(row_number, self._colIndexIntensity, peak_intensity)
         self.update_cell_value(row_number, self._colIndexIntType, integrate_method)
+        self.update_cell_value(row_number, self._colIndexCorrInt, correctd_intensity)
+        self.update_cell_value(row_number, self._colIndexErrorBar, standard_error)
 
-        return self.update_cell_value(row_number, col_index, peak_intensity)
+        return
 
     def set_status(self, row_number, status):
         """
@@ -1218,6 +1220,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexMotorStep = ProcessTableWidget.TableSetup.index(('Motor Step', 'str'))
         self._colIndexWaveLength = self.TableSetup.index(('Wavelength', 'float'))
         self._colIndexKIndex = self.TableSetup.index(('K-Index', 'int'))
+        self._colIndexErrorBar = self.TableSetup.index(('Error', 'float'))
         # self._colIndexWorkspace = self.TableSetup.index(('Workspace', 'str'))
 
         return

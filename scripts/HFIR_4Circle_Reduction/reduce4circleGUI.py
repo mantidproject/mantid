@@ -3197,57 +3197,61 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def ui_apply_lorentz_correction_mt(self):
-        """
-        Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
-        at the UI level
-        :return:
-        """
-        # get experiment number
-        exp_number = int(self.ui.lineEdit_exp.text())
-
-        # select rows
-        selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-
-        # apply for each row selected for Lorentz correction
-        error_message = ''
-        for row_number in selected_rows:
-            # get scan number
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            # get peak information object
-            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
-            if peak_info_obj is None:
-                error_message += 'Unable to get peak information from scan %d\n' % scan_number
-                continue
-            # get intensity
-            peak_intensity = peak_info_obj.get_intensity()
-            # get Q-vector of the peak center and calculate |Q| from it
-            q = peak_info_obj.get_peak_centre_v3d().norm()
-            # get wave length
-            wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
-            self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
-            # get motor step (choose from omega, phi and chi)
-            try:
-                motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
-            except RuntimeError as run_err:
-                self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
-                continue
-            except AssertionError as ass_err:
-                self.ui.tableWidget_mergeScans.set_status(row_number, str(ass_err))
-                continue
-            # set motor information (the moving motor)
-            self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
-            motor_step = motor_move_tup[1]
-            # apply the Lorentz correction to the intensity
-            corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
-
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True,
-                                                              integrate_method='sum')
-            self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
-        # END-FOR (row_number)
-
-        if len(error_message) > 0:
-            self.pop_one_button_dialog(error_message)
+    # def ui_apply_lorentz_correction_mt(self):
+    #     """
+    #     Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
+    #     at the UI level
+    #     :return:
+    #     """
+    #     # get experiment number
+    #     exp_number = int(self.ui.lineEdit_exp.text())
+    #
+    #     # select rows
+    #     selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+    #
+    #     # apply for each row selected for Lorentz correction
+    #     error_message = ''
+    #     for row_number in selected_rows:
+    #         # get scan number
+    #         scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+    #         # get peak information object
+    #         peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+    #         if peak_info_obj is None:
+    #             error_message += 'Unable to get peak information from scan %d\n' % scan_number
+    #             continue
+    #         # get intensity
+    #         peak_intensity = peak_info_obj.get_intensity(simple_sum=True, lorentz_corrected=True)
+    #         # self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
+    #
+    #         # # get Q-vector of the peak center and calculate |Q| from it
+    #         # peak_center_q = peak_info_obj.get_peak_centre_v3d().norm()
+    #         # # get wave length
+    #         wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
+    #         self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
+    #         # # get motor step (choose from omega, phi and chi)
+    #         try:
+    #             motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
+    #         except RuntimeError as run_err:
+    #             self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
+    #             continue
+    #         except AssertionError as ass_err:
+    #             self.ui.tableWidget_mergeScans.set_status(row_number, str(ass_err))
+    #             continue
+    #         # set motor information (the moving motor)
+    #         self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
+    #         motor_step = motor_move_tup[1]
+    #         # # apply the Lorentz correction to the intensity
+    #         # # corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
+    #
+    #         # FIXME - Later need to
+    #         self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity, lorentz_corrected=True,
+    #                                                           standard_error=
+    #                                                           integrate_method='sum')
+    #         self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
+    #     # END-FOR (row_number)
+    #
+    #     if len(error_message) > 0:
+    #         self.pop_one_button_dialog(error_message)
 
         return
 
@@ -3573,6 +3577,7 @@ class MainWindow(QtGui.QMainWindow):
         :param mode:
         :return:
         """
+        print '[DB...BAT] Update merged value: ', exp_number, scan_number, sig_value, peak_centre, mode
         # Process signals according to mode
         if mode == 0:
             # start of processing one peak
@@ -3605,35 +3610,46 @@ class MainWindow(QtGui.QMainWindow):
                 # reset intensity to 0.
                 intensity = 0.
                 is_error = True
+                int_std_dev = 0.
+            else:
+                int_std_dev = numpy.sqrt(intensity)
 
             if len(peak_centre) != 3:
                 self.pop_one_button_dialog('Peak centre %s is not correct.' % str(peak_centre))
                 return
 
             # set the calculated peak intensity to _peakInfoDict
-            status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
-            if status:
-                # set the value to table
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
-                                                                  peak_intensity=intensity,
-                                                                  lorentz_corrected=False,
-                                                                  integrate_method='sum')
-                self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
-                                                               peak_centre=peak_centre)
-                if is_error:
-                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
-                else:
-                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Good')
+            # TODO/FIXME - Refactor! by setting all the table value!
+            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+            intensity0, error0 = peak_info.get_intensity(0, False)
+            corrected0, error0 = peak_info.get_intensity(0, True)
 
-            else:
-                self._errorMessageEnsemble += error_msg + '\n'
-                self.ui.tableWidget_mergeScans.set_status(row_number, error_msg)
+            # status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
+            # if status:
+            #     # set the value to table
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
+                                                              peak_intensity=intensity0,
+                                                              correctd_intensity=corrected0,
+                                                              standard_error=error0,
+                                                              integrate_method='simple')
+
+            #
+            #     # self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
+            #     #                                                peak_centre=peak_centre)
+            #     if is_error:
+            #         self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
+            #     else:
+            #         self.ui.tableWidget_mergeScans.set_status(row_number, 'Good')
+            #
+            # else:
+            #     self._errorMessageEnsemble += error_msg + '\n'
+            #     self.ui.tableWidget_mergeScans.set_status(row_number, error_msg)
 
         elif mode == 2:
             # get signal from the end of all selected scans being integrated
 
             # apply Lorentz correction
-            self.ui_apply_lorentz_correction_mt()
+            # self.ui_apply_lorentz_correction_mt()
 
             # set progress bar
             progress = int(sig_value+0.5)

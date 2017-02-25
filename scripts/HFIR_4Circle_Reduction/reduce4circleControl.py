@@ -188,16 +188,6 @@ class CWSCDReductionControl(object):
 
         return
 
-    @staticmethod
-    def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
-        """ Apply lorentz correction to intensity """
-        # calculate theta
-        sin_theta = q * wavelength/(4*math.pi)
-        theta = math.asin(sin_theta)
-        corrected_intensity = peak_intensity * math.sin(2*theta) * step_omega
-
-        return corrected_intensity
-
     def find_peak(self, exp_number, scan_number, pt_number_list=None):
         """ Find 1 peak in sample Q space for UB matrix
         :param exp_number:
@@ -563,8 +553,8 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
+        assert isinstance(exp_number, int), 'blabla'
+        assert isinstance(scan_number, int), 'blabla'
 
         # get SPICE table
         spice_table_name = get_spice_table_name(exp_number, scan_number)

@@ -49,6 +49,9 @@ class PeakProcessRecord(object):
 
         self._myIntensity = 0.
         self._mySigma = 0.
+        self._gaussIntensity = 0.
+        self._gaussStdDev = 0.
+        self._lorenzFactor = 1.
 
         return
 
@@ -267,23 +270,76 @@ class PeakProcessRecord(object):
 
         return
 
-    def get_intensity(self):
+    @property
+    def lorentz_correction_factor(self):
+        """
+
+        :return:
+        """
+        return self._lorenzFactor
+
+    @lorentz_correction_factor.setter
+    def lorentz_correction_factor(self, factor):
+        """
+
+        :param factor:
+        :return:
+        """
+        self._lorenzFactor = factor
+
+        return
+
+    def set_motor(self, motor_name, motor_step, motor_std_dev):
+        """
+
+        :param motor_name:
+        :param motor_step:
+        :param motor_std_dev:
+        :return:
+        """
+        self._movingMotorTuple = (motor_name, motor_step, motor_std_dev)
+
+    def set_integration(self, peak_integration_dict):
+        """
+
+        :param peak_integration_dict:
+        :return:
+        """
+        self._integrationDict = peak_integration_dict
+
+    def get_intensity(self, algorithm_type, lorentz_corrected):
         """ Get current peak intensity
         :return:
         """
-        return self._myIntensity
+        print '[DB...BAT] Keys: ', self._integrationDict.keys()
+        if algorithm_type == 0 or algorithm_type.startswith('simple'):
+            # simple
+            intensity = self._integrationDict['simple intensity']
+            std_dev = self._integrationDict['simple error']
+        elif algorithm_type == 2 or algorithm_type.count('gauss') > 0:
+            # gaussian
+            intensity = self._integrationDict['gauss intensity']
+            std_dev = self._integrationDict['gauss error']
+        else:
+            raise RuntimeError('Type {0} not supported yet.')
 
-    def set_intensity(self, peak_intensity):
-        """ Set peak intensity
-        :param peak_intensity:
-        :return:
-        """
-        assert isinstance(peak_intensity, float), 'Input peak intensity %s is not a float.' % str(peak_intensity)
-        assert peak_intensity >= -0., 'Input peak intensity %f is negative.' % peak_intensity
+        if lorentz_corrected:
+            intensity *= lorentz_corrected
+            std_dev *= lorentz_corrected
 
-        self._myIntensity = peak_intensity
+        return intensity, std_dev
 
-        return
+    # def set_intensity(self, peak_intensity):
+    #     """ Set peak intensity
+    #     :param peak_intensity:
+    #     :return:
+    #     """
+    #     assert isinstance(peak_intensity, float), 'Input peak intensity %s is not a float.' % str(peak_intensity)
+    #     assert peak_intensity >= -0., 'Input peak intensity %f is negative.' % peak_intensity
+    #
+    #     self._myIntensity = peak_intensity
+    #
+    #     return
 
     def set_pt_intensity(self, pt_intensity_dict):
         """

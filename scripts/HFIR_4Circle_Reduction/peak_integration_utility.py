@@ -1,8 +1,34 @@
 # Utility methods to do peak integration
 import numpy
+import math
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
+
+
+def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
+    """ Apply lorentz correction to intensity """
+    # calculate theta
+    sin_theta = q * wavelength / (4 * numpy.pi)
+    theta = math.asin(sin_theta)
+    corrected_intensity = peak_intensity * numpy.sin(2 * theta) * step_omega
+
+    return corrected_intensity
+
+
+def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
+    """
+
+    :param q_sample:
+    :param wavelength:
+    :param motor_step:
+    :return:
+    """
+    sin_theta = q_sample * wavelength / (4 * numpy.pi)
+    theta = math.asin(sin_theta)
+    factor = numpy.sin(2 * theta) * motor_step
+
+    return factor
 
 
 def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,

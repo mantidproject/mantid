@@ -262,6 +262,7 @@ class IntegratePeaksThread(QThread):
             if status:
                 # get PT dict
                 pt_dict = ret_obj
+                self.set_integrated_peak_info(scan_number, pt_dict)
             else:
                 # integration failed
                 error_msg = str(ret_obj)
@@ -269,7 +270,10 @@ class IntegratePeaksThread(QThread):
                 continue
 
             intensity1 = pt_dict['simple intensity']
-            intensity3 = pt_dict['gauss intensity']
+            # print '[DB] Scan {0} Intensity = {1}.'.format(scan_number, intensity1)
+            # intensity3 = pt_dict['gauss intensity']
+
+
 
             # # calculate background value
             # background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
@@ -291,3 +295,41 @@ class IntegratePeaksThread(QThread):
         # self._mainWindow.ui.tableWidget_mergeScans.select_all_rows(False)
 
         return
+
+    def set_integrated_peak_info(self, scan_number, peak_integration_dict):
+        """
+
+        :return:
+        """
+        import peak_integration_utility
+
+        peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)  #exp_number, scan_number)
+
+        # get Q-vector of the peak center and calculate |Q| from it
+        peak_center_q = peak_info_obj.get_peak_centre_v3d().norm()
+        # get wave length
+        wavelength = self._mainWindow.controller.get_wave_length(self._expNumber, [scan_number])
+
+        # get motor step (choose from omega, phi and chi)
+        try:
+            motor_move_tup = self._mainWindow.controller.get_motor_step(self._expNumber, scan_number)
+            motor_name, motor_step, motor_std_dev = motor_move_tup
+        except RuntimeError as run_err:
+            return str(run_err)
+        except AssertionError as ass_err:
+            return str(ass_err)
+
+        # calculate lorentz correction
+        lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
+                                                                                      motor_step)
+
+        peak_info_obj.lorentz_factor = lorentz_factor
+        peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
+
+        peak_info_obj.set_integration(peak_integration_dict)
+
+        # set motor information (the moving motor)
+        # self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
+        # motor_step = motor_move_tup[1]
+        # apply the Lorentz correction to the intensity
+        # corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
