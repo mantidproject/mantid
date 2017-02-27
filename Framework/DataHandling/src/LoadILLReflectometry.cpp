@@ -499,7 +499,6 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
  */
 void LoadILLReflectometry::placeDetector() {
   g_log.debug() << "Move the detector bank \n";
-
   std::string thetaIn = getPropertyValue("Theta");
   double theta = getProperty("ThetaUserDefined");
   if (theta == EMPTY_DBL()) {
@@ -516,7 +515,6 @@ void LoadILLReflectometry::placeDetector() {
   // ConvertToReflectometryQ
   m_localWorkspace->mutableRun().addProperty("stheta",
                                              double(twotheta_rad / 2.));
-
   auto dist = dynamic_cast<PropertyWithValue<double> *>(
       m_localWorkspace->run().getProperty("det.value"));
   double distance = *dist / 1000.0; // convert to meter
@@ -610,8 +608,8 @@ void LoadILLReflectometry::placeDetector() {
 
   */
 
+  const std::string componentName = "bank";
   try {
-    const std::string componentName = "bank";
     V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
     V3D newpos(distance * sin(twotheta_rad), pos.Y(),
                distance * cos(twotheta_rad));
@@ -621,9 +619,9 @@ void LoadILLReflectometry::placeDetector() {
     Quat rotation(2. * theta, axis);
     m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
   } catch (std::runtime_error &e) {
-    g_log.information()
-        << "Unable to move D17, errors might be due to the instrument definition file "
-        << e.what() << '\n';
+    throw std::runtime_error("Unable to move D17 " + componentName +
+                             " of the instrument definition file " + e.what() +
+                             '\n');
   }
 }
 } // namespace DataHandling

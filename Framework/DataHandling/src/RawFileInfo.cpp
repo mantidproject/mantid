@@ -93,6 +93,10 @@ void RawFileInfo::init() {
                   "If this is true, the parameters from the RPB struct are "
                   "placed into a TableWorkspace called Raw_RPB",
                   Direction::Input);
+  declareProperty("GetSampleParameters", false,
+                  "If this is true, the parameters from the SPB struct are "
+                  "placed into a TableWorkspace called Raw_SPB. ",
+                  Direction::Input);
   declareProperty("RunTitle", std::string(""),
                   "The run title from the HDR struct", Direction::Output);
   declareProperty("RunHeader", std::string(""), "The run header",
@@ -189,6 +193,77 @@ void RawFileInfo::exec() {
       << std::string(isis_raw.rpb.r_endtime, 8) << isis_raw.rpb.r_prop;
 
     setProperty("RunParameterTable", run_table);
+  }
+
+  bool getSampleParameters = getProperty("GetSampleParameters");
+  if (getSampleParameters) {
+    declareProperty(make_unique<WorkspaceProperty<API::ITableWorkspace>>(
+                        "SampleParameterTable", "Raw_SPB", Direction::Output),
+                    "The name of the TableWorkspace in which to store the list "
+                    "of sample parameters");
+
+    API::ITableWorkspace_sptr sample_table =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    sample_table->addColumn("int", "e_posn"); //< sample changer position
+    sample_table->addColumn(
+        "int", "e_type"); //< sample type (1=sample+can,2=empty can)
+    sample_table->addColumn("int", "e_geom"); //< sample geometry
+    sample_table->addColumn(
+        "double", "e_thick"); //< sample thickness normal to sample (mm)
+    sample_table->addColumn("double", "e_height"); //< sample height (mm)
+    sample_table->addColumn("double", "e_width");  //< sample width (mm)
+    sample_table->addColumn("double",
+                            "e_omega");         //< omega sample angle (degrees)
+    sample_table->addColumn("double", "e_chi"); //< chi sample angle (degrees)
+    sample_table->addColumn("double", "e_phi"); //< phi sample angle (degrees)
+    sample_table->addColumn(
+        "double", "e_scatt"); //< scattering geometry (1=trans, 2 =reflect)
+    sample_table->addColumn(
+        "double",
+        "e_xscatt"); //< sample coherent scattering cross section (barn)
+    sample_table->addColumn("double",
+                            "samp_cs_inc"); //< sample incoherent cross section
+    sample_table->addColumn("double",
+                            "samp_cs_abs"); //< sample absorption cross section
+    sample_table->addColumn("double",
+                            "e_dens"); //< sample number density (atoms.A-3)
+    sample_table->addColumn("double", "e_canthick"); //< can wall thickness (mm)
+    sample_table->addColumn(
+        "double",
+        "e_canxsect"); //< can coherent scattering cross section (barn)
+    sample_table->addColumn("double", "can_cs_inc"); //< dunno
+    sample_table->addColumn("double", "can_cs_abs"); //< dunno
+    sample_table->addColumn("double",
+                            "can_nd"); //< can number density (atoms.A-3)
+    sample_table->addColumn("str",
+                            "e_name"); //< sample name of chemical formula
+    sample_table->addColumn("int", "e_equip");  //< dunno
+    sample_table->addColumn("int", "e_eqname"); //< dunno
+
+    const auto nameLength = static_cast<int>(strlen(isis_raw.spb.e_name));
+    std::string name(isis_raw.spb.e_name, nameLength);
+
+    API::TableRow t = sample_table->appendRow();
+    t << isis_raw.spb.e_posn << isis_raw.spb.e_type << isis_raw.spb.e_geom
+      << static_cast<double>(isis_raw.spb.e_thick)
+      << static_cast<double>(isis_raw.spb.e_height)
+      << static_cast<double>(isis_raw.spb.e_width)
+      << static_cast<double>(isis_raw.spb.e_omega)
+      << static_cast<double>(isis_raw.spb.e_chi)
+      << static_cast<double>(isis_raw.spb.e_phi)
+      << static_cast<double>(isis_raw.spb.e_scatt)
+      << static_cast<double>(isis_raw.spb.e_xscatt)
+      << static_cast<double>(isis_raw.spb.samp_cs_inc)
+      << static_cast<double>(isis_raw.spb.samp_cs_abs)
+      << static_cast<double>(isis_raw.spb.e_dens)
+      << static_cast<double>(isis_raw.spb.e_canthick)
+      << static_cast<double>(isis_raw.spb.e_canxsect)
+      << static_cast<double>(isis_raw.spb.can_cs_inc)
+      << static_cast<double>(isis_raw.spb.can_cs_abs)
+      << static_cast<double>(isis_raw.spb.can_nd) << name
+      << isis_raw.spb.e_equip << isis_raw.spb.e_eqname;
+
+    setProperty("SampleParameterTable", sample_table);
   }
 
   // This is not going to be a slow algorithm
