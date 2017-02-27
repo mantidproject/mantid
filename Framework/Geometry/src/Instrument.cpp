@@ -1259,6 +1259,13 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     return pmap;
 
   const auto &baseInstr = m_map ? *m_instr : *this;
+
+  // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
+  // Beamline::DetectorInfo::isEquivalent.
+  constexpr double d_max = 1e-9;
+  constexpr double L = 1000.0;
+  constexpr double safety_factor = 2.0;
+  const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
   for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
     const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
     if (m_detectorInfo->isMasked(i)) {
@@ -1288,12 +1295,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
     }
 
-    // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
-    // Beamline::DetectorInfo::isEquivalent.
-    constexpr double d_max = 1e-9;
-    constexpr double L = 1000.0;
-    constexpr double safety_factor = 2.0;
-    constexpr double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
     if ((relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
             .vec()
             .norm() >= imag_norm_max)

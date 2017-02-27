@@ -63,15 +63,15 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   // d \approx theta * L.
   // The norm of the imaginary part of the quaternion can give the angle:
   // x^2 + y^2 + z^2 = (sin(theta/2))^2.
+  constexpr double d_max = 1e-9;
+  constexpr double L = 1000.0;
+  constexpr double safety_factor = 2.0;
+  const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
   if (!(m_rotations == other.m_rotations) &&
       !std::equal(m_rotations->begin(), m_rotations->end(),
                   other.m_rotations->begin(),
-                  [](const Eigen::Quaterniond &a, const Eigen::Quaterniond &b) {
-                    constexpr double d_max = 1e-9;
-                    constexpr double L = 1000.0;
-                    constexpr double safety_factor = 2.0;
-                    constexpr double imag_norm_max =
-                        sin(d_max / (2.0 * L * safety_factor));
+                  [imag_norm_max](const Eigen::Quaterniond &a,
+                                  const Eigen::Quaterniond &b) {
                     return (a * b.conjugate()).vec().norm() < imag_norm_max;
                   }))
     return false;
