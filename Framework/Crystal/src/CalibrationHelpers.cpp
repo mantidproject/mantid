@@ -41,9 +41,9 @@ void CalibrationHelpers::updateSourceParams(
 *
 * @param newInstrument The instrument whose parameter map will be changed to
 *reflect the new source position
-* @param L0 The distance from source to sample( should be positive)
-* @param newSampPos     The  new sample position
-* @param  pmapOld     The Parameter map from the original instrument(not
+* @param L0 The distance from source to sample (should be positive)
+* @param newSampPos The relative shift for the new sample position
+* @param pmapOld The Parameter map from the original instrument (not
 *NewInstrument). "Clones" relevant information into the newInstrument's
 *parameter map.
 */
