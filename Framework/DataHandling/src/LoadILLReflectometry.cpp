@@ -390,10 +390,25 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     if (!chop1_speed) {
       g_log.debug() << "Warning: chop1_speed is null.\n";
     } else {
-      // thanks to Miguel Gonzales/ILL for this TOF formula
       t_TOF2 = -1.e+6 * 60.0 *
                (*POFF - 45.0 + *chop2_phase - *chop1_phase + *open_offset) /
                (2.0 * 360 * *chop1_speed);
+      /*
+      ;Determine wavelength (in angstroms) from TOF channels --> lambda[t]
+      (using RB)
+      temp1 = cosmos_anal_correctdistance(peakref, parref.x_min,
+      parref.pixeldensity, parref.tofd)
+      if normal_run then begin
+         temp2 = abs(temp1 - cosmos_anal_correctdistance(peakdir, pardir.x_min,
+      pardir.pixeldensity, pardir.tofd))
+         ' Difference in corrected TOF distance between direct and reflect beams
+      is ' temp2
+         if (temp2 / temp1) gt 0.01 then ' Run no. ' runno ': Different TOF
+      distances from direct and reflect runs.'
+      endif
+      lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
+      parref.channelwidth + parref.delay) / temp1)
+      */
     }
     g_log.debug() << "t_TOF2 : " << t_TOF2 << '\n';
 
@@ -503,10 +518,12 @@ void LoadILLReflectometry::placeDetector() {
   double theta = getProperty("ThetaUserDefined");
   if (theta == EMPTY_DBL()) {
     const std::string name = thetaIn + ".value";
+    // error message without this check would be: Unknown property search object
+    // "name" and thus not be meaningful
     if (m_localWorkspace->run().hasProperty(name)) {
       theta = m_localWorkspace->run().getPropertyValueAsType<double>(name);
     } else {
-      throw std::runtime_error("Theta is not defined");
+      throw std::runtime_error("Theta (san or dan option) is not defined");
     }
   }
   g_log.debug() << "2Theta " << 2. * theta << " degrees\n";
@@ -609,20 +626,14 @@ void LoadILLReflectometry::placeDetector() {
   */
 
   const std::string componentName = "bank";
-  try {
-    V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-    V3D newpos(distance * sin(twotheta_rad), pos.Y(),
-               distance * cos(twotheta_rad));
-    m_loader.moveComponent(m_localWorkspace, componentName, newpos);
-    // apply a local rotation to stay perpendicular to the beam
-    const V3D axis(0.0, 1.0, 0.0);
-    Quat rotation(2. * theta, axis);
-    m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error("Unable to move D17 " + componentName +
-                             " of the instrument definition file " + e.what() +
-                             '\n');
-  }
+  V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
+  V3D newpos(distance * sin(twotheta_rad), pos.Y(),
+             distance * cos(twotheta_rad));
+  m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+  // apply a local rotation to stay perpendicular to the beam
+  const V3D axis(0.0, 1.0, 0.0);
+  Quat rotation(2. * theta, axis);
+  m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 } // namespace DataHandling
 } // namespace Mantid

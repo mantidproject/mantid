@@ -6,7 +6,7 @@
 #include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-// Attention: LoadHelper includes "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h" // Attention: LoadHelper will include this header?? No
 #include "MantidKernel/Unit.h"
 
@@ -17,7 +17,6 @@ class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   std::string m_dataFile{"ILLD17-161876-Ni.nxs"};
   LoadILLReflectometry loader;
-  Mantid::DataHandling::LoadHelper m_loader;
 
 public:
   // Name of the output workspace
@@ -57,12 +56,10 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2);
-    double channelWidth =
-        m_loader.getPropertyFromRun<double>(output, "channel_width");
-    TS_ASSERT_EQUALS(channelWidth, 57.0);
-    double analyserAngle =
-        m_loader.getPropertyFromRun<double>(output, "dan.value");
-    TS_ASSERT_EQUALS(analyserAngle, 3.1909999847412109);
+    TS_ASSERT_EQUALS(
+        output->run().getPropertyValueAsType<double>("channel_width"), 57.0);
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("dan.value"),
+                     3.1909999847412109);
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
   }
@@ -80,17 +77,16 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", outWSName);
-    loader.setPropertyValue("Theta", "san");
-    //loader.setPropertyValue("ThetaUserDefined", 0.5);
-    //TS_ASSERT_THROWS_ANYTHING(loader.execute(););
-    //TS_ASSERT(loader.isExecuted());
+    loader.setPropertyValue("ThetaUserDefined", "0.5");
+    TS_ASSERT_THROWS_ANYTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
   }
 
   void testWavelengthD17() {
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", outWSName);
-    loader.setPropertyValue("XUnit", "Wavelength");
+    // "XUnit" = "Wavelength" is default
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
     MatrixWorkspace_sptr output =
@@ -130,20 +126,19 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", m_dataFile);
     loader.setPropertyValue("OutputWorkspace", outWSName);
-    loader.setPropertyValue("Theta", "san");
+    // Theta = "san" is default
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
     MatrixWorkspace_sptr output =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     TS_ASSERT(output);
     // Compare angles in rad
-    double sampleAngle =
-        m_loader.getPropertyFromRun<double>(output, "san.value");
     const auto &spectrumInfo = output->spectrumInfo();
     // Check twoTheta between two center detectors 128 and 129 using workspace
     // indices
-    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(130) * 180.0 / M_PI,
-                               2. * sampleAngle);
+    TS_ASSERT_LESS_THAN_EQUALS(
+        spectrumInfo.twoTheta(130) * 180.0 / M_PI,
+        2. * output->run().getPropertyValueAsType<double>("san.value"));
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
   }
