@@ -1216,6 +1216,13 @@ bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     throw;
+  } catch (...) {
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false;
+    notificationCenter().postNotification(new ErrorNotification(
+        this, "UNKNOWN Exception caught from processGroups"));
+    throw;
   }
 
   // Check for a cancellation request in case the concrete algorithm doesn't
