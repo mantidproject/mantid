@@ -470,6 +470,14 @@ void ExperimentInfo::populateInstrumentParameters() {
 
   std::map<const IComponent *, RTP> rtpParams;
 
+  // In this loop position and rotation parameters are inserted into the
+  // temporary map paramMapForPosAndRot. In the subsequent loop, after all
+  // parameters have been parsed, we update positions and rotations in
+  // DetectorInfo and the temporary map goes out of scope. The main reason for
+  // this is that ParameterMap will then take care of assembling parameters for
+  // individual position or rotation components into a vector or quaternion. In
+  // particular, we cannot directly change DetectorInfo since the order of
+  // rotation components is not guarenteed.
   for (const auto &item : paramInfoFromIDF) {
     const auto &nameComp = item.first;
     const auto &paramInfo = item.second;
