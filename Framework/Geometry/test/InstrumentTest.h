@@ -539,7 +539,7 @@ public:
     const auto bank2 = baseInstrument->getComponentByName("bank2");
     const auto bank3 = baseInstrument->getComponentByName("bank3");
     const V3D bankOffset{0.1, 0.2, 0.3};
-    const V3D bankEpsilon{5e-7, 5e-7, 5e-7};
+    const V3D bankEpsilon{5e-10, 5e-10, 5e-10};
     const V3D bankAxis{0, 0, 1};
     const Quat bankRot(90.0, bankAxis);
     auto pmap = boost::make_shared<ParameterMap>();
@@ -565,10 +565,10 @@ public:
                   .isApprox(Eigen::Vector3d(0.0002, -0.008, 15.0), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
-    const V3D detEpsilon{5e-7, 5e-7, 5e-7};
+    const V3D detEpsilon{5e-10, 5e-10, 5e-10};
     const V3D detAxis{0.2, 0.4, 13.3};
     const Quat detRot(42.0, detAxis);
-    const Quat detRotEps(0.0001, detAxis);
+    const Quat detRotEps(1e-11, detAxis);
 
     detInfo->setPosition(0, detInfo->position(0) + toVector3d(detOffset));
     detInfo->setRotation(18, toQuaterniond(detRot) * detInfo->rotation(18));
@@ -628,7 +628,7 @@ public:
         toVector3d(V3D{scalex * pitch, scaley * pitch, 5.0}), 1e-12));
 
     const V3D detOffset{0.2, 0.3, 0.4};
-    const V3D detEpsilon{5e-7, 5e-7, 5e-7};
+    const V3D detEpsilon{5e-10, 5e-10, 5e-10};
 
     detInfo->setPosition(2, detInfo->position(2) + toVector3d(detEpsilon));
     // 2 bank parameters, det pos/rot is in DetectorInfo
