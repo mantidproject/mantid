@@ -1,14 +1,14 @@
 #include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
 
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
-#include <QLineEdit>
 #include "qwt_plot_curve.h"
+#include <QLineEdit>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -481,10 +481,10 @@ QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
   curve = new QwtPlotCurve();
 
   using Mantid::MantidVec;
-  const MantidVec &dataX = workspace->readX(workspaceIndex);
-  const MantidVec &dataY = workspace->readY(workspaceIndex);
+  auto &dataX = workspace->x(workspaceIndex);
+  auto &dataY = workspace->y(workspaceIndex);
 
-  curve->setData(&dataX[0], &dataY[0],
+  curve->setData(dataX.rawData().data(), dataY.rawData().data(),
                  static_cast<int>(workspace->blocksize()));
   curve->attach(m_uiForm.plotWindow);
 

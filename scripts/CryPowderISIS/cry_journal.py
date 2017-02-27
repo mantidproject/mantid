@@ -1,5 +1,6 @@
 #pylint: disable=unused-variable
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from getcycle import *
 import time
@@ -16,10 +17,10 @@ def get_journal(instrument='HRPD', ini=0, end=1):
         [date_ini, time_ini] = wksp.getRun().get('run_start').value.split('T')
         (date_fin, time_fin) = wksp.getRun().get('run_end').value.split('T')
         if i == ini:
-            print '---- %s ---------------------------------------------------------------------------' % (date_ini)
+            print('---- %s ---------------------------------------------------------------------------' % (date_ini))
         if date_fin != date_ini:
-            print '---- %s ---------------------------------------------------------------------------' % (date_fin)
-        print '%5d| %s| %6.2f|%s' % (i, time_ini, wksp.getRun().getProtonCharge(), wksp.getTitle())
+            print('---- %s ---------------------------------------------------------------------------' % (date_fin))
+        print('%5d| %s| %6.2f|%s' % (i, time_ini, wksp.getRun().getProtonCharge(), wksp.getTitle()))
 
 
 # make sure we have a strptime function!
@@ -39,8 +40,8 @@ def get_runtime(instrument='HRPD', runno=0):
     except AttributeError:
         from strptime import strptime
 
-    # print strptime("31 Nov 00", "%d %b %y")
-    # print strptime("1 Jan 70 1:30am", "%d %b %y %I:%M%p")
+    # print(strptime("31 Nov 00", "%d %b %y"))
+    # print(strptime("1 Jan 70 1:30am", "%d %b %y %I:%M%p"))
     return (time.mktime(strptime(fin, "%Y-%m-%dT%H:%M:%S")) - time.mktime(strptime(ini, "%Y-%m-%dT%H:%M:%S"))) / 3600
 
 
@@ -57,8 +58,8 @@ def get_runtime_file(fname):
     except AttributeError:
         from strptime import strptime
 
-    # print strptime("31 Nov 00", "%d %b %y")
-    # print strptime("1 Jan 70 1:30pm", "%d %b %y %I:%M%p")
+    # print(strptime("31 Nov 00", "%d %b %y"))
+    # print(strptime("1 Jan 70 1:30pm", "%d %b %y %I:%M%p"))
     return (time.mktime(strptime(fin, "%Y-%m-%dT%H:%M:%S")) - time.mktime(strptime(ini, "%Y-%m-%dT%H:%M:%S"))) / 3600
 
 

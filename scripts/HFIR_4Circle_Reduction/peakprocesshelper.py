@@ -52,8 +52,9 @@ class PeakProcessRecord(object):
 
         return
 
-    def calculate_peak_center(self):
+    def calculate_peak_center(self, allow_bad_monitor=True):
         """ Calculate peak's center by averaging the peaks found and stored in PeakWorkspace
+        :param allow_bad_monitor: if specified as True, then a bad monitor (zero) is allowed and set the value to 1.
         :return:
         """
         # Go through the peak workspaces to calculate peak center with weight (monitor and counts)
@@ -88,12 +89,16 @@ class PeakProcessRecord(object):
             det_counts = spice_table_ws.cell(row_index, det_col_index)
             monitor_counts = spice_table_ws.cell(row_index, monitor_col_index)
             if monitor_counts < 1.:
-                # skip zero-count
-                continue
+                # bad monitor counts
+                if allow_bad_monitor:
+                    monitor_counts = 1
+                else:
+                    continue
             # convert q sample from V3D to ndarray
             q_i = peak_i.getQSampleFrame()
             q_array = numpy.array([q_i.X(), q_i.Y(), q_i.Z()])
             # calculate weight
+            print '[DB] Peak {0}: detector counts = {1}, Monitor counts = {2}.'.format(i_peak, det_counts, monitor_counts)
             weight_i = float(det_counts)/float(monitor_counts)
             # contribute to total
             weight_sum += weight_i
@@ -102,7 +107,11 @@ class PeakProcessRecord(object):
             peak_i.setIntensity(det_counts)
         # END-FOR (i_peak)
 
-        self._avgPeakCenter = q_sample_sum/weight_sum
+        try:
+            print '[DB] calculate value error: sum(Q-sample) = {0}, sum(weight) = {1}.'.format(q_sample_sum, weight_sum)
+            self._avgPeakCenter = q_sample_sum/weight_sum
+        except Exception as e:
+            raise RuntimeError('Unable to calculate average peak center due to value error as {0}.'.format(e))
 
         return
 
