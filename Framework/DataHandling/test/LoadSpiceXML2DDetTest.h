@@ -119,7 +119,7 @@ public:
     // check start_time and end_time
     TS_ASSERT(outws->run().hasProperty("start_time"));
     std::string start_time = outws->run().getProperty("start_time")->value();
-    TS_ASSERT_EQUALS(start_time, "2015-01-17 13:36:45");
+    TS_ASSERT_EQUALS(start_time, "2015-01-17T13:36:45");
 
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038");
@@ -161,6 +161,10 @@ public:
         AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    for (auto property : outws->run().getProperties()) {
+      std::cout << property->name() << ": " << property->value() << "\n";
+    }
 
     // test signal value on various pixels
     // pixel at (256, 1): column 1
@@ -579,6 +583,103 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038C");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test with loading instrument without Spice scan Table and WITHOUT
+   * user-specified detector
+   * geometry, while the 2theta value is from sample
+   *    sample log
+   *  Testing includes:
+   *  1. Load the instrument without Spice Table;
+   *  2. Check the positions of detectors.
+   *    (a) at center pixel, 2-theta = 42.797
+   * This should have the same result as unti test
+   * "test_loadDataUsingSampleLogValue"
+   * @brief Load data and instrument with sample log value
+   */
+  void test_loadDataWithoutSpecifyingDetectorGeometry() {
+    // initialize the algorithm
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    // set up properties
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038F"));
+    std::vector<size_t> geometryvec;
+    geometryvec.push_back(0);
+    geometryvec.push_back(0);
+    loader.setProperty("DetectorGeometry", geometryvec);
+    loader.setProperty("LoadInstrument", true);
+    loader.setProperty("ShiftedDetectorDistance", 0.);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038F"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    // Value
+    // test signal value on various pixels
+    // pixel at (256, 1): column 1
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    // pixel at (254, 256): colun 256
+    TS_ASSERT_DELTA(outws->readY(255 * 256 + 138)[0], 2.0, 0.00001);
+
+    // Instrument
+    TS_ASSERT(outws->getInstrument());
+
+    // get 2theta from workspace
+    double twotheta_raw =
+        atof(outws->run().getProperty("_2theta")->value().c_str());
+
+    Kernel::Property *raw_property = outws->run().getProperty("2theta");
+    Kernel::TimeSeriesProperty<double> *twotheta_property =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(raw_property);
+    TS_ASSERT(twotheta_property);
+    double twotheta_log = twotheta_property->valuesAsVector()[0];
+    // 2-theta = 42.797
+
+    TS_ASSERT_EQUALS(twotheta_raw, twotheta_log);
+
+    // check the center of the detector
+    const auto &spectrumInfo = outws->spectrumInfo();
+
+    // check the center position
+    size_t center_row = 115 - 1;
+    size_t center_col = 128 - 1;
+    size_t center_ws_index = 256 * center_col + center_row;
+    const auto center_det_pos = spectrumInfo.position(center_ws_index);
+    TS_ASSERT_DELTA(center_det_pos.Y(), 0., 0.00000001);
+    double sample_center_distance = spectrumInfo.l2(center_ws_index);
+    // TS_ASSERT_DELTA(center_det_pos.X(), )
+    TS_ASSERT_DELTA(sample_center_distance, 0.3750, 0.0000001);
+    double sample_center_angle = spectrumInfo.twoTheta(center_ws_index);
+    TS_ASSERT_DELTA(sample_center_angle * 180. / M_PI, twotheta_log, 0.0001);
+
+    size_t ll_ws_index = 0;
+    const auto ll_det_pos = spectrumInfo.position(ll_ws_index);
+    double ll_sample_r = spectrumInfo.l2(ll_ws_index);
+    TS_ASSERT_DELTA(ll_sample_r, 0.37597, 0.001);
+
+    size_t lu_ws_index = 255; // row = 255, col = 1
+    const auto lu_det_pos = spectrumInfo.position(lu_ws_index);
+    double lu_sample_r = spectrumInfo.l2(lu_ws_index);
+    TS_ASSERT_DELTA(lu_sample_r, 0.37689, 0.001);
+
+    TS_ASSERT_DELTA(ll_det_pos.X(), lu_det_pos.X(), 0.000001);
+    TS_ASSERT(ll_det_pos.Y() + lu_det_pos.Y() > 0);
+
+    TS_ASSERT(ll_det_pos.X() > center_det_pos.X());
+
+    // Clean
+    AnalysisDataService::Instance().remove("Exp0335_S0038F");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Create SPICE scan table workspace
    * @brief createSpiceScanTable
    * @return

@@ -5,6 +5,12 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+Algorithms
+----------
+
+* :ref:`algm-SpecularReflectionPositionCorrect2 <algm-SpecularReflectionPositionCorrect2> - fixed a bug where entering
+  an invalid detector or sample name would cause a segmentation fault.
+
 ConvertToReflectometryQ
 -----------------------
 
