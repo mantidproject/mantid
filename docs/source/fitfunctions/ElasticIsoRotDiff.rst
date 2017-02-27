@@ -56,11 +56,7 @@ following model:
 .. testcode:: ExampleElasticIsoRotDiff
 
     import numpy as np
-    import scipy
-    if int(scipy.__version__.split('.')[1]) < 18:
-        from scipy.special import sph_jn as jn
-    else:
-        from scipy.special import spherical_jn as jn
+    from scipy.special import sph_jn
     """Generate resolution function with the following properties:
     1. Normal distribution along the energy axis, same for all Q-values
     2. FWHM = 0.005 meV
@@ -94,7 +90,7 @@ following model:
         noise = dataY*np.random.random(nE)*0.1 # noise is up to 10% of the elastic signal
         background = np.random.random()+np.random.random()*dataX  # linear background
         background = (0.01*H*max(dataY)) * (background/max(np.abs(background))) # up to 1% of H
-        j0 = jn(0,Q*R)[0][0]
+        j0 = sph_jn(0,Q*R)[0][0]
         qdataY=np.append(qdataY, H*j0**2*(dataY+noise) + background)
     # Create data workspace
     data=CreateWorkspace(np.tile(dataX,nQ), qdataY, NSpec=nQ, UnitX="deltaE",

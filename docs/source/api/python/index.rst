@@ -20,7 +20,7 @@ Reference
 .. toctree::
    :hidden:
 
-   changes
+   changes <changes>
 
 Matplotlib-like plotting interface
 ----------------------------------
