@@ -224,7 +224,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
         g_log.debug() << indent_str << nxname << " opened.\n";
 
         if (parent_class == "NXData" || parent_class == "NXMonitor" ||
-            std::string(nxname) == "data") {
+            std::string(nxname) == "data" || parent_class.empty()) {
           g_log.debug() << indent_str << "skipping " << parent_class << " ("
                         << nxname << ")\n";
           /* nothing */
