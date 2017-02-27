@@ -440,6 +440,7 @@ set ( TEST_FILES
 	LoadRawSpectrum0Test.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
+	LoadSpecTest.h
 	LoadSPETest.h
 	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h

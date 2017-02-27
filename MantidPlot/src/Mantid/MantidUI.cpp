@@ -216,6 +216,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
 
   m_exploreMantid = boost::make_shared<QWorkspaceDockView>(this, aw);
   m_exploreMantid->init();
+  m_exploreMantid->enableDeletePrompt(
+      appWindow()->isDeleteWorkspacePromptEnabled());
   m_exploreAlgorithms = new AlgorithmDockWidget(this, aw);
 
   actionCopyRowToTable = new QAction(this);
@@ -292,6 +294,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   connect(menuMantidMatrix, SIGNAL(aboutToShow()), this,
           SLOT(menuMantidMatrixAboutToShow()));
 
+  connect(m_appWindow, SIGNAL(configModified(void)), this,
+          SLOT(configModified(void)));
   init();
 }
 
@@ -455,9 +459,15 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
 
   try {
     if (!wsNames.isEmpty()) {
-      for (auto &ws : wsNames) {
-        deleteWorkspace(ws);
+      auto alg = createAlgorithm("DeleteWorkspaces");
+      alg->setLogging(false);
+      std::vector<std::string> vecWsNames;
+      vecWsNames.reserve(wsNames.size());
+      foreach (auto wsName, wsNames) {
+        vecWsNames.push_back(wsName.toStdString());
       }
+      alg->setProperty("WorkspaceList", vecWsNames);
+      executeAlgorithmAsync(alg);
     } else if ((m &&
                 (strcmp(m->metaObject()->className(), "MantidMatrix") == 0)) &&
                !m->workspaceName().isEmpty()) {
@@ -1294,7 +1304,7 @@ Table *MantidUI::createDetectorTable(
     QList<QVariant> &colValues = tableColValues[row];
     size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
     colValues << QVariant(static_cast<double>(wsIndex));
-    const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
+    const double dataY0(ws->y(wsIndex)[0]), dataE0(ws->e(wsIndex)[0]);
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
@@ -2696,6 +2706,11 @@ void MantidUI::formatLogName(QString &label, const QString &wsName) {
   }
 }
 
+void MantidUI::configModified() {
+  m_exploreMantid->enableDeletePrompt(
+      appWindow()->isDeleteWorkspacePromptEnabled());
+}
+
 std::string MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,
                                      bool useAbsoluteDate,
                                      Mantid::Kernel::DateAndTime start) {
@@ -2786,9 +2801,9 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
   // t->askOnCloseEvent(false);
 
   for (int i = 0; i < no_cols; i++) {
-    const Mantid::MantidVec &dataX = workspace->readX(indexList[i]);
-    const Mantid::MantidVec &dataY = workspace->readY(indexList[i]);
-    const Mantid::MantidVec &dataE = workspace->readE(indexList[i]);
+    const auto &dataXPoints = workspace->points(indexList[i]);
+    const auto &dataY = workspace->y(indexList[i]);
+    const auto &dataE = workspace->e(indexList[i]);
 
     const int kY = (c + 1) * i + 1;
     const int kX = (c + 1) * i;
@@ -2802,11 +2817,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
       t->setColName(kErr, "ES" + QString::number(indexList[i]));
     }
     for (int j = 0; j < numRows; j++) {
-      if (isHistogram && binCentres) {
-        t->setCell(j, kX, (dataX[j] + dataX[j + 1]) / 2);
-      } else {
-        t->setCell(j, kX, dataX[j]);
-      }
+      t->setCell(j, kX, dataXPoints[j]);
       t->setCell(j, kY, dataY[j]);
 
       if (errs)
@@ -2816,7 +2827,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
       int iRow = numRows;
       t->addRows(1);
       if (i == 0)
-        t->setCell(iRow, 0, dataX[iRow]);
+        t->setCell(iRow, 0, dataXPoints[iRow]);
       t->setCell(iRow, kY, 0);
       if (errs)
         t->setCell(iRow, kErr, 0);
@@ -3615,8 +3626,8 @@ Table *MantidUI::createTableFromBins(
       t->setColName(kErr, "EB" + QString::number(bins[i]));
     }
     for (int j = j0; j <= j1; j++) {
-      const Mantid::MantidVec &dataY = workspace->readY(j);
-      const Mantid::MantidVec &dataE = workspace->readE(j);
+      const auto &dataY = workspace->y(j);
+      const auto &dataE = workspace->e(j);
 
       if (i == 0) {
         // Get the X axis values from the vertical axis of the workspace

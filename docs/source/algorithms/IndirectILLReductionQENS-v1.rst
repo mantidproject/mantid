@@ -14,12 +14,14 @@ It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTr
 
 Multiple File Reduction
 ~~~~~~~~~~~~~~~~~~~~~~~
-The algorithm is capable of running over multiple files.
-Run property needs to be specified following the syntax in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
+
+The algorithm is capable of running over multiple files.  Run property
+needs to be specified following the syntax in :py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 When ``SumRuns=True``, all the runs will be merged while loading.
-Note, for **Range** and **Stepped Range**, ``SumRuns`` will be ignored.
-Use **Added Range** and **Added Stepped Range** instead (see `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_).
-For ``BackgroundRun``, ``CalibrationRun`` and ``AlignmentRun`` all the runs will be automatically summed.
+Note, for **Range** and **Stepped Range**, ``SumRuns`` will be
+ignored.  Use **Added Range** and **Added Stepped Range** instead (see
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``, ``CalibrationRun``
+and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~

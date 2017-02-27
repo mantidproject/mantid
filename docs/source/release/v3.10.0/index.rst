@@ -1,6 +1,6 @@
-==========================
+===========================
 Mantid 3.10.0 Release Notes
-==========================
+===========================
 
 .. figure:: ../../images/ReleaseUnderConstruction.jpg
    :class: screenshot

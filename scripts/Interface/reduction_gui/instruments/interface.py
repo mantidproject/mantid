@@ -236,7 +236,7 @@ class InstrumentInterface(object):
         f = open(log_path, 'w')
         reduction = self.scripter.to_xml()
         f.write("<Report>\n")
-        f.write(reduction)
+        f.write(str(reduction))
         f.write("<ErrorReport>")
         f.write(trace)
         f.write("</ErrorReport>")

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -61,6 +62,14 @@ public:
 private:
   void init() override;
   void exec() override;
+
+  /// Helper method for reading the number of spectra from the file
+  size_t readNumberOfSpectra(std::ifstream &file) const;
+  /// Helper method for reading a line from the file
+  void readLine(const std::string &line, std::vector<double> &buffer) const;
+  /// Helper method for reading a single histogram
+  void readHistogram(const std::vector<double> &input,
+                     HistogramData::Histogram &histogram) const;
 
   /// Allowed values for the cache property
   std::vector<std::string> m_seperator_options;

@@ -37,7 +37,7 @@ Kappa and these are defined as
 fitting a single peak it is not recommended to refine both Alpha0 and
 Alpha1 at the same time since these two parameters will effectively be
 100% correlated because the wavelength over a single peak is likely
-effectively constant*.
+effectively constant*. All parameters are constrained to be non-negative.
 
 The pseudo-Voigt function is defined as a linear combination of a
 Lorentzian and Gaussian and is a computational efficient way of
