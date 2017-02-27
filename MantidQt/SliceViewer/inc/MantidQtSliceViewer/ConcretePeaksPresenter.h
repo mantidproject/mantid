@@ -85,7 +85,6 @@ private:
   EditMode m_editMode;
   /// Can we add to this peaks workspace
   bool m_hasAddPeaksMode;
-  bool m_initMappingTransform; // whether to use default transformation or not
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views
