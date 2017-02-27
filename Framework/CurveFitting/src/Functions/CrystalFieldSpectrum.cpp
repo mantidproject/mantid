@@ -78,9 +78,12 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
     return;
   }
   m_dirty = false;
+  auto peakShape = getAttribute("PeakShape").asString();
   auto xVec = getAttribute("FWHMX").asVector();
   auto yVec = getAttribute("FWHMY").asVector();
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+  auto defaultFWHM = getAttribute("FWHM").asDouble();
+  bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
@@ -88,12 +91,9 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
   m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
   auto maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks);
-  if (maxNPeaks > spectrum.nFunctions()) {
-    buildTargetFunction();
-  } else {
-    CrystalFieldUtils::updateSpectrumFunction(spectrum, values, m_nPeaks, 0,
-                                              xVec, yVec, fwhmVariation);
-  }
+  CrystalFieldUtils::updateSpectrumFunction(
+      spectrum, peakShape, values, m_nPeaks, 0, xVec, yVec, fwhmVariation,
+      defaultFWHM, fixAllPeaks);
   storeReadOnlyAttribute("NPeaks", Attribute(static_cast<int>(m_nPeaks)));
 }
 
@@ -138,6 +138,7 @@ std::string CrystalFieldSpectrum::asString() const {
   // Print parameters of the important peaks only
   const CompositeFunction &spectrum =
       dynamic_cast<const CompositeFunction &>(*m_target);
+  size_t nPeakParams = 0;
   for (size_t ip = 0; ip < m_nPeaks; ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print peak's atributes
@@ -150,21 +151,25 @@ std::string CrystalFieldSpectrum::asString() const {
     }
     // Print peak's parameters
     for (size_t i = 0; i < peak.nParams(); i++) {
+      ++nPeakParams;
       const ParameterTie *tie = peak.getTie(i);
       if (!tie || !tie->isDefault()) {
         ostr << ",f" << ip << "." << peak.parameterName(i) << '='
              << peak.getParameter(i);
       }
-      auto constraint = writeConstraint(i);
+    }
+  } // for peaks
+
+  for (size_t i = 0; i < nPeakParams; ++i) {
+      auto constraint = writeConstraint(i + m_nOwnParams);
       if (!constraint.empty()) {
         constraints.push_back(constraint);
       }
-      auto tieStr = writeTie(i);
+      auto tieStr = m_target->writeTie(i);
       if (!tieStr.empty()) {
         ties.push_back(tieStr);
       }
-    }
-  } // for peaks
+  }
 
   // print constraints
   if (!constraints.empty()) {

@@ -7,6 +7,7 @@
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
 #include <sstream>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -20,6 +21,18 @@ DECLARE_CONSTRAINT(BoundaryConstraint)
 
 // using namespace Kernel;
 using namespace API;
+
+/// Default constructor
+BoundaryConstraint::BoundaryConstraint()
+      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(""),
+        m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
+        m_upperBound(-DBL_MAX) {}
+
+/// Constructor with no boundary arguments
+/// @param paramName :: The parameter name
+BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
+      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(paramName),
+        m_hasLowerBound(false), m_hasUpperBound(false) {}
 
 /** Constructor with boundary arguments
  * @param fun :: The function

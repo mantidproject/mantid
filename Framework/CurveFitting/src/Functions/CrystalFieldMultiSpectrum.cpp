@@ -376,10 +376,11 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   ham += hz;
 
   auto temperatures = getAttribute("Temperatures").asVector();
+  auto fwhms = getAttribute("FWHMs").asVector();
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
     for (size_t i = 0; i < temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i], i);
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i], fwhms[i], i);
     }
   } catch (std::out_of_range &) {
     buildTargetFunction();
@@ -391,7 +392,7 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
 void CrystalFieldMultiSpectrum::updateSpectrum(
     API::IFunction &spectrum, int nre, const DoubleFortranVector &en,
     const ComplexFortranMatrix &wf, const ComplexFortranMatrix &ham,
-    double temperature, size_t iSpec) const {
+    double temperature, double fwhm, size_t iSpec) const {
   switch (m_physprops[iSpec]) {
   case HeatCapacity: {
     auto &heatcap = dynamic_cast<CrystalFieldHeatCapacity &>(spectrum);
@@ -418,12 +419,14 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
   }
   default:
     auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
+    auto peakShape = IFunction::getAttribute("PeakShape").asString();
+    bool fixAllPeaks = getAttribute("FixAllPeaks").asBool();
     FunctionValues values;
     calcExcitations(nre, en, wf, temperature, values, iSpec);
     auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
     m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-        composite, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
-        fwhmVariation);
+        composite, peakShape, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
+        fwhmVariation, fwhm, fixAllPeaks);
   }
 }
 

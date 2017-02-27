@@ -226,7 +226,7 @@ void FunctionGenerator::addConstraint(std::unique_ptr<API::IConstraint> ic) {
     m_source->addConstraint(std::move(ic));
   } else {
     checkTargetFunction();
-    ic->reset(m_target.get(), i - m_nOwnParams);
+    //ic->reset(m_target.get(), i - m_nOwnParams);
     m_target->addConstraint(std::move(ic));
   }
 }

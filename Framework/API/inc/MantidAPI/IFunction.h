@@ -471,6 +471,8 @@ public:
   virtual ParameterTie *getTie(size_t i) const = 0;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie) = 0;
+  /// Write a parameter tie to a string
+  virtual std::string writeTie(size_t iParam) const;
   //@}
 
   /** @name Constraints */
@@ -483,6 +485,8 @@ public:
   virtual IConstraint *getConstraint(size_t i) const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName) = 0;
+  /// Write a parameter constraint to a string
+  virtual std::string writeConstraint(size_t iParam) const;
   //@}
 
   /** @name Attributes */
@@ -568,11 +572,6 @@ protected:
   /// A read-only ("mutable") attribute can be stored in a const method
   void storeReadOnlyAttribute(const std::string &name,
                               const API::IFunction::Attribute &value) const;
-
-  /// Write a parameter tie to a string
-  virtual std::string writeTie(size_t iParam) const;
-  /// Write a parameter constraint to a string
-  virtual std::string writeConstraint(size_t iParam) const;
 
   friend class ParameterTie;
   friend class CompositeFunction;

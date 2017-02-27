@@ -66,7 +66,7 @@ private:
                       const DoubleFortranVector &en,
                       const ComplexFortranMatrix &wf,
                       const ComplexFortranMatrix &ham, double temperature,
-                      size_t i) const;
+                      double fwhm, size_t i) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
                        const ComplexFortranMatrix &wf, double temperature,

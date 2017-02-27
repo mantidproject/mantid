@@ -100,6 +100,43 @@ inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
   peak.setFwhm(fwhm);
 }
 
+API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
+                                   double intensity,
+                                   const std::vector<double> &xVec,
+                                   const std::vector<double> &yVec,
+                                   double fwhmVariation, double defaultFWHM,
+                                   bool isGood, bool fixAllPeaks) {
+  auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
+  auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
+  if (!peak) {
+    throw std::runtime_error("A peak function is expected.");
+  }
+  bool useDefaultFWHM = xVec.empty();
+  if (isGood) {
+    peak->setCentre(centre);
+    peak->setIntensity(intensity);
+    if (useDefaultFWHM) {
+      peak->setFwhm(defaultFWHM);
+    } else {
+      auto fwhm = calculateWidth(centre, xVec, yVec);
+      if (fwhm > 0.0) {
+        peak->setFwhm(fwhm);
+        setWidthConstraint(*peak, fwhm, fwhmVariation);
+      } else {
+        ignorePeak(*peak, defaultFWHM);
+      }
+    }
+    peak->fixCentre();
+    peak->fixIntensity();
+  } else {
+    ignorePeak(*peak, defaultFWHM);
+  }
+  if (fixAllPeaks) {
+    peak->fixAll();
+  }
+  return peak;
+}
+
 /// Populates a spectrum with peaks of type given by peakShape argument.
 /// @param spectrum :: A composite function that is a collection of peaks.
 /// @param peakShape :: A shape of each peak as a name of an IPeakFunction.
@@ -181,39 +218,55 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
 /// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @return :: The new number of fitted peaks.
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
+                              const std::string &peakShape,
                               const FunctionValues &centresAndIntensities,
                               size_t nOriginalPeaks, size_t iFirst,
                               const std::vector<double> &xVec,
                               const std::vector<double> &yVec,
-                              double fwhmVariation) {
+                              double fwhmVariation, double defaultFWHM,
+                              bool fixAllPeaks) {
   size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
   size_t maxNPeaks = calculateMaxNPeaks(nGoodPeaks);
+  size_t nFunctions = spectrum.nFunctions();
   bool mustUpdateWidth = !xVec.empty();
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = spectrum.getFunction(i + iFirst);
-    auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
-    if (i < nGoodPeaks) {
-      auto centre = centresAndIntensities.getCalculated(i);
-      peak.setCentre(centre);
-      peak.setIntensity(centresAndIntensities.getCalculated(i + nGoodPeaks));
-      if (mustUpdateWidth) {
-        auto fwhm = peak.fwhm();
-        auto expectedFwhm = calculateWidth(centre, xVec, yVec);
-        if (expectedFwhm <= 0.0) {
-          ignorePeak(peak, fwhm);
-        } else if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
-          peak.setFwhm(expectedFwhm);
-          setWidthConstraint(peak, expectedFwhm, fwhmVariation);
+    if (i < nFunctions) {
+      auto fun = spectrum.getFunction(i + iFirst);
+      auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
+      if (i < nGoodPeaks) {
+        auto centre = centresAndIntensities.getCalculated(i);
+        peak.setCentre(centre);
+        peak.setIntensity(centresAndIntensities.getCalculated(i + nGoodPeaks));
+        if (mustUpdateWidth) {
+          auto fwhm = peak.fwhm();
+          auto expectedFwhm = calculateWidth(centre, xVec, yVec);
+          if (expectedFwhm <= 0.0) {
+            ignorePeak(peak, fwhm);
+          } else if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
+            peak.setFwhm(expectedFwhm);
+            setWidthConstraint(peak, expectedFwhm, fwhmVariation);
+          }
+        }
+        peak.unfixIntensity();
+        peak.fixIntensity();
+      } else {
+        peak.setHeight(0.0);
+        if (i > nOriginalPeaks) {
+          peak.fixAll();
         }
       }
-      peak.unfixIntensity();
-      peak.fixIntensity();
     } else {
-      peak.setHeight(0.0);
-      if (i > nOriginalPeaks) {
-        peak.fixAll();
+      bool isGood = i < nGoodPeaks;
+      double centre = 0.0;
+      double intensity = 0.0;
+      if (isGood) {
+        centre = centresAndIntensities.getCalculated(i);
+        intensity = centresAndIntensities.getCalculated(i + nGoodPeaks);
       }
+      auto peakPtr =
+          createPeak(peakShape, centre, intensity, xVec, yVec, fwhmVariation,
+                     defaultFWHM, isGood, fixAllPeaks);
     }
   }
   return nGoodPeaks;
