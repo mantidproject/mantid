@@ -2457,6 +2457,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         exp_number = int(self.ui.lineEdit_exp.text())
+        # FIXME/TODO/ISSUE/NOW - Need to toggle among 3 options
 
         integrate_type = self.ui.tableWidget_mergeScans.get_integration_type()
         if integrate_type != 'gaussian':
@@ -2464,9 +2465,11 @@ class MainWindow(QtGui.QMainWindow):
 
         for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
-            intensity, error = self._myControl.get_peaks_integrated_intensities(exp_number, scan_number, 'gaussian')
+            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+            intensity1, error1 = peak_info_obj.get_intensity(integrate_type, False)
+            intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
 
-            self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity, error)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
 
         return
 
