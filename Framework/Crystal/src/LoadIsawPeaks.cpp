@@ -231,7 +231,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    SCDCalibratePanels::fixUpBankParameterMap(
+    CalibrationHelpers::fixUpBankParameterMap(
         bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
   }
   return startChar;

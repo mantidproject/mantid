@@ -56,7 +56,7 @@ const std::string SCDCalibratePanels::category() const {
  * @param Roty   The angle in degrees for rotating around the y-axis
  * @param Rotz   The angle in degrees for rotating around the z-axis
  */
-void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
+DLLExport void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
                                            double &Roty, double &Rotz) {
   Quat R(Q);
   R.normalize();
@@ -647,110 +647,6 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("ColFilename", OUTPUTS);
   setPropertyGroup("RowFilename", OUTPUTS);
   setPropertyGroup("TofFilename", OUTPUTS);
-}
-
-void SCDCalibratePanels::updateBankParams(
-    boost::shared_ptr<const Geometry::IComponent> bank_const,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "x", pos.X());
-    pmap->addDouble(bank_const.get(), "y", pos.Y());
-    pmap->addDouble(bank_const.get(), "z", pos.Z());
-    pmap->addV3D(bank_const.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), ("rot"));
-  if (rot) {
-    pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-  }
-
-  vector<double> scalex = pmapSv->getDouble(bank_const->getName(), "scalex");
-  vector<double> scaley = pmapSv->getDouble(bank_const->getName(), "scaley");
-  if (!scalex.empty()) {
-    pmap->addDouble(bank_const.get(), "scalex", scalex[0]);
-  }
-  if (!scaley.empty()) {
-    pmap->addDouble(bank_const.get(), "scaley", scaley[0]);
-  }
-
-  boost::shared_ptr<const Geometry::IComponent> parent =
-      bank_const->getParent();
-  if (parent) {
-    updateBankParams(parent, pmap, pmapSv);
-  }
-}
-
-
-void SCDCalibratePanels::fixUpBankParameterMap(
-    const vector<string> bankNames,
-    boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
-    const Quat rot, double const detWScale, double const detHtScale,
-    boost::shared_ptr<const ParameterMap> const pmapOld, bool rotCenters) {
-  boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
-
-  for (const auto &bankName : bankNames) {
-
-    boost::shared_ptr<const IComponent> bank1 =
-        newInstrument->getComponentByName(bankName);
-    boost::shared_ptr<const Geometry::RectangularDetector> bank =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
-            bank1); // Component
-    updateBankParams(bank, pmap, pmapOld);
-
-    Quat RelRot = bank->getRelativeRot();
-    Quat newRelRot = rot * RelRot;
-    double rotx, roty, rotz;
-    Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
-
-    pmap->addRotationParam(bank.get(), string("rotx"), rotx);
-    pmap->addRotationParam(bank.get(), string("roty"), roty);
-    pmap->addRotationParam(bank.get(), string("rotz"), rotz);
-    pmap->addQuat(bank.get(), "rot",
-                  newRelRot); // Should not have had to do this???
-    //---------Rotate center of bank ----------------------
-    V3D Center = bank->getPos();
-    V3D Center_orig(Center);
-    if (rotCenters)
-      rot.rotate(Center);
-
-    V3D pos1 = bank->getRelativePos();
-
-    pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X() +
-                                                             Center.X() -
-                                                             Center_orig.X());
-    pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y() +
-                                                             Center.Y() -
-                                                             Center_orig.Y());
-    pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z() +
-                                                             Center.Z() -
-                                                             Center_orig.Z());
-
-    Quat2RotxRotyRotz(rot, rotx, roty, rotz);
-
-    vector<double> oldScalex =
-        pmap->getDouble(bank->getName(), string("scalex"));
-    vector<double> oldScaley =
-        pmap->getDouble(bank->getName(), string("scaley"));
-
-    double scalex, scaley;
-    if (!oldScalex.empty())
-      scalex = oldScalex[0] * detWScale;
-    else
-      scalex = detWScale;
-
-    if (!oldScaley.empty())
-      scaley = oldScaley[0] * detHtScale;
-    else
-      scaley = detHtScale;
-
-    pmap->addDouble(bank.get(), string("scalex"), scalex);
-    pmap->addDouble(bank.get(), string("scaley"), scaley);
-    // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<'\n';
-  } // For @ bank
 }
 
 void writeXmlParameter(ofstream &ostream, const string &name,

@@ -35,6 +35,19 @@ public:
   static void fixUpSampleAndSourcePositions(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
       double const L0, Kernel::V3D const newSampPos, API::DetectorInfo &detectorInfo);
+
+  static void fixUpBankParameterMap(
+      std::vector<std::string> const bankNames,
+      boost::shared_ptr<const Geometry::Instrument> newInstrument,
+      Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
+      double const detHtScale,
+      boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
+      bool rotCenters);
+
+  static void
+  updateBankParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
+                   boost::shared_ptr<Geometry::ParameterMap> pmap,
+                   boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 };
 
 } // namespace Crystal

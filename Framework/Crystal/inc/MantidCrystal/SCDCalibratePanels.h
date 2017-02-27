@@ -70,64 +70,7 @@ public:
   static void Quat2RotxRotyRotz(const Kernel::Quat Q, double &Rotx,
                                 double &Roty, double &Rotz);
 
-  /**
-   *  Updates the ParameterMap for NewInstrument to reflect the changes in the
-   *  associated panel information
-   *
-   *  @param bankNames      The names of the banks(panels) that will be updated
-   *
-   *  @param newInstrument  The instrument whose parameter map will be changed
-   *                         to reflect the new values below
-   *
-   *  @param  pos           The quantity to be added to the current relative
-   *                        position, from old NewInstrument, of the banks in
-   *bankNames.
-   *  @param rot            The quantity to be added to the current relative
-   *                        rotations, from old NewInstrument, of the banks in
-   *bankNames.
-   *
-   *  @param  detWScale     The factor to multiply the current detector width,
-   *                        from old NewInstrument, by to get the new detector
-   *width
-   *                        for the banks in bankNames.
-   *
-   *  @param   detHtScale  The factor to multiply the current detector height,
-   *                        from old NewInstrument, by to get the new detector
-   *height
-   *                        for the banks in bankNames.
-   *
-   *   @param  pmapOld      The Parameter map from the original instrument( not
-   *                        NewInstrument). "Clones" relevant information into
-   *the
-   *                        NewInstrument's parameter map.
-   *
-   *   @param rotCenters Rotate the centers of the panels(the same amount)
-   *with the
-   *                        rotation of panels around their center
-   */
-  static void fixUpBankParameterMap(
-      std::vector<std::string> const bankNames,
-      boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
-      double const detHtScale,
-      boost::shared_ptr<const Geometry::ParameterMap> const pmapOld,
-      bool rotCenters);
 
-  /**
-   *  Copies positional entries in pmapSv to pmap starting at bank_const
-   *  and parents.
-   *
-   *  @param  bank_const  the starting component for copying entries.
-   *
-   *  @param pmap         the Parameter Map to be updated
-   *
-   *  @param pmapSv       the original Parameter Map
-   *
-   */
-  static void
-  updateBankParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
-                   boost::shared_ptr<Geometry::ParameterMap> pmap,
-                   boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
 
 private:
