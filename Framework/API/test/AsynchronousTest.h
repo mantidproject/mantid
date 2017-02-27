@@ -15,7 +15,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace std;
 
-#define NofLoops 10
+namespace {
+constexpr int NO_OF_LOOPS = 10;
+}
 
 class AsyncAlgorithm : public Algorithm {
 public:
@@ -41,13 +43,13 @@ public:
 
   void exec() override {
     Poco::Thread *thr = Poco::Thread::current();
-    for (int i = 0; i < NofLoops; i++) {
+    for (int i = 0; i < NO_OF_LOOPS; i++) {
       result = i;
       if (thr)
         thr->sleep(1);
-      progress(double(i) / NofLoops); // send progress notification
-      interruption_point();           // check for a termination request
-      if (throw_exception && i == NofLoops / 2)
+      progress(double(i) / NO_OF_LOOPS); // send progress notification
+      interruption_point();              // check for a termination request
+      if (throw_exception && i == NO_OF_LOOPS / 2)
         throw std::runtime_error("Exception thrown");
     }
   }
@@ -97,8 +99,8 @@ public:
     result.wait();
     generalChecks(alg, true, true, true, false);
     TS_ASSERT(result.available())
-    TS_ASSERT_EQUALS(count, NofLoops)
-    TS_ASSERT_EQUALS(alg.result, NofLoops - 1)
+    TS_ASSERT_EQUALS(count, NO_OF_LOOPS)
+    TS_ASSERT_EQUALS(alg.result, NO_OF_LOOPS - 1)
   }
 
   void testCancel() {
@@ -108,7 +110,7 @@ public:
     alg.cancel();
     result.wait();
     generalChecks(alg, false, true, false, true);
-    TS_ASSERT_LESS_THAN(alg.result, NofLoops - 1)
+    TS_ASSERT_LESS_THAN(alg.result, NO_OF_LOOPS - 1)
   }
 
   void testException() {
@@ -118,7 +120,7 @@ public:
     Poco::ActiveResult<bool> result = alg.executeAsync();
     result.wait();
     generalChecks(alg, false, true, false, true);
-    TS_ASSERT_LESS_THAN(alg.result, NofLoops - 1)
+    TS_ASSERT_LESS_THAN(alg.result, NO_OF_LOOPS - 1)
     TS_ASSERT_EQUALS(errorNotificationMessage, "Exception thrown")
   }
 
@@ -132,8 +134,8 @@ public:
     result.wait();
     generalChecks(alg, true, true, true, false);
     TS_ASSERT(result.available())
-    // There are 2 * NofLoops because there are two child workspaces
-    TS_ASSERT_EQUALS(count, NofLoops * 2)
+    // There are 2 * NO_OF_LOOPS because there are two child workspaces
+    TS_ASSERT_EQUALS(count, NO_OF_LOOPS * 2)
     // The parent algorithm is not executed directly, so the result remains 0
     TS_ASSERT_EQUALS(alg.result, 0)
   }
