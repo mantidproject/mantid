@@ -419,7 +419,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         theta = (dangle - dangle0) * math.pi / 180.0 / 2.0 + ((direct_beam_pix - ref_pix) * pixel_width) / (2.0 * det_distance)
         if theta < 0:
             logger.warning("The calculated scattering angle is negative: taking absolute value")
-            theta = -theta
+            theta = abs(theta)
         angle_offset = self.getProperty("AngleOffset").value
         return theta + angle_offset
 
