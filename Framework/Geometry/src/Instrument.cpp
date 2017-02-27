@@ -1279,8 +1279,8 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       // Note the unusual order, see Component.cpp
       relRot = invParentRot * relRot;
     }
-    // Tolerance 1e-6 m. Is this a good value?
-    if ((relPos - toVector3d(parDet->getRelativePos())).norm() > 1e-6) {
+    // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
+    if ((relPos - toVector3d(parDet->getRelativePos())).norm() >= 1e-9) {
       if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(parDet))
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
                                  "parameters for RectangularDetectorPixel are "
@@ -1288,8 +1288,15 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
     }
 
-    if (!(relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
-             .isApprox(Eigen::Quaterniond::Identity(), 1e-6))
+    // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
+    // Beamline::DetectorInfo::isEquivalent.
+    constexpr double d_max = 1e-9;
+    constexpr double L = 1000.0;
+    constexpr double safety_factor = 2.0;
+    constexpr double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+    if ((relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
+            .vec()
+            .norm() >= imag_norm_max)
       pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
   }
   return pmap;
