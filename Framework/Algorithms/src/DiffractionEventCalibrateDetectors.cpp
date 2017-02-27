@@ -186,10 +186,8 @@ double DiffractionEventCalibrateDetectors::intensity(
   const MantidVec &yValues = outputW->readY(0);
   auto it = std::max_element(yValues.begin(), yValues.end());
   double peakHeight = *it;
-  if (peakHeight == 0) {
-    movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
+  if (peakHeight == 0)
     return -0.000;
-  }
   double peakLoc = outputW->readX(0)[it - yValues.begin()];
 
   IAlgorithm_sptr fit_alg;
@@ -291,7 +289,12 @@ void DiffractionEventCalibrateDetectors::exec() {
   const std::string rb_params = getProperty("Params");
 
   // Get some stuff from the input workspace
-  Instrument_const_sptr inst = inputW->getInstrument();
+  // We make a copy of the instrument since we will be moving detectors in
+  // `inputW` but want to access original positions (etc.) via `detList` below.
+  const auto &baseInstr = inputW->getInstrument()->baseInstrument();
+  auto pmap = boost::make_shared<ParameterMap>(
+      *inputW->getInstrument()->getParameterMap());
+  Instrument_const_sptr inst = boost::make_shared<Instrument>(baseInstr, pmap);
 
   // Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector>> detList;
