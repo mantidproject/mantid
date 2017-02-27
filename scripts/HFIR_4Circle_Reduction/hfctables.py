@@ -521,9 +521,12 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         self._cachedSpiceHKL = dict()
 
         # class variables for column indexes
-        self._colIndexSpiceHKL = 2
-        self._colIndexCalculatedHKL = 3
-        # TODO/FIXME/ISSUE/NOW - Add more colIndex???
+        self._colIndexScan = None
+        self._colIndexSpiceHKL = None
+        self._colIndexCalculatedHKL = None
+        self._colIndexQSample = None
+        self._colIndexWavelength = None
+        self._colIndexError = None
 
         return
 
@@ -537,14 +540,39 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param wave_length:
         :return:
         """
-        # TODO/FIXME/ISSUE/NOW : Check!
+        # check inputs
+        assert isinstance(scan_number, int), 'Scan number integer'
+        assert len(spice_hkl) == 3, 'Spice HKL'
+        assert len(q_sample) == 3, 'Q-sample'
+        assert isinstance(m1, float) or m1 is None, 'm1'
+        assert isinstance(wave_length, float) or wave_length is None, 'wave length'
 
-        # FIXME/TODO/NOW - make it a method to write formatted string?
-        spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
-        q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
+        # spice_hkl_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(spice_hkl[0], spice_hkl[1], spice_hkl[2])
+        # q_sample_str = '{0:.4f}, {1:.4f}, {2:.4f}'.format(q_sample[0], q_sample[1], q_sample[2])
+        spice_hkl_str = self.format_array(spice_hkl)
+        q_sample_str = self.format_array(q_sample)
         self.append_row([scan_number, -1, spice_hkl_str, '', q_sample_str, False, m1, wave_length, ''])
 
         return True, ''
+
+    @staticmethod
+    def format_array(array):
+        """
+        output a formatted array with limited precision of float
+        :param array:
+        :return:
+        """
+        format_str = ''
+        for index, number in enumerate(array):
+            if index > 0:
+                format_str += ', '
+            if isinstance(number, float):
+                format_str += '{0:.4f}'.format(number)
+            else:
+                format_str += '{0}'.format(number)
+        # END-FOR
+
+        return format_str
 
     def get_exp_info(self, row_index):
         """
@@ -597,6 +625,20 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return scan_number, pt_number
 
+    def get_selected_scans(self):
+        """
+        get the scan numbers that are selected
+        :return:
+        """
+        selected_rows = self.get_selected_rows(True)
+
+        scan_list = list()
+        for i_row in selected_rows:
+            scan_number = self.get_cell_value(i_row, self._colIndexScan)
+            scan_list.append(scan_number)
+
+        return scan_list
+
     def is_selected(self, row_index):
         """ Check whether a row is selected.
         :param row_index:
@@ -615,10 +657,17 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return:
         """
         self.init_setup(UB_Peak_Table_Setup)
-        self._statusColName = 'Selected'
+        self.set_status_column_name('Selected')
 
-        # TODO/FIXME/ISSUE/NOW - define all the _colIndex???
+        # define all the _colIndex
+        self._colIndexScan = self._myColumnNameList.index('Scan')
+        self._colIndexSpiceHKL = self._myColumnNameList.index('Spice HKL')
+        self._colIndexCalculatedHKL = self._myColumnNameList.index('Calculated HKL')
+        self._colIndexQSample = self._myColumnNameList.index('Q-Sample')
+        self._colIndexWavelength = self._myColumnNameList.index('Wavelength')
+        self._colIndexError = self._myColumnNameList.index('Error')
 
+        # set up the width of some columns
         self.setColumnWidth(self._colIndexSpiceHKL, 240)
         self.setColumnWidth(self._colIndexCalculatedHKL, 240)
         self.setColumnWidth(4, 240)
@@ -646,6 +695,33 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         # END-FOR
 
         return error_message
+
+    def select_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None,
+                     wave_length=None, wave_length_tolerance=None):
+        """
+        select scans in the UB matrix table
+        :param select_all:
+        :param nuclear_peaks:
+        :param hkl_tolerance:
+        :param wave_length:
+        :param wave_length_tolerance:
+        :return:
+        """
+        if select_all:
+            # select all
+            self.select_all_rows(True)
+
+        elif nuclear_peaks or wave_length_tolerance is not None:
+            # using filters
+            if nuclear_peaks:
+                self.select_nuclear_peak_rows(hkl_tolerance)
+            if wave_length_tolerance is not None:
+                self.select_rows_by_column_value(self._colIndexWavelength, wave_length, wave_length_tolerance,
+                                                 keep_current_selection=True)
+        else:
+            raise RuntimeError('Must pick up one option to do filter.')
+
+        return
 
     def set_hkl(self, i_row, hkl, is_spice_hkl, error=None):
         """
@@ -736,12 +812,10 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param k:
         :param l:
         """
-        raise NotImplementedError('I don\'t need this!')
-        assert isinstance(i_row, int), 'blabla'
+        assert isinstance(i_row, int), 'row number {0} must be an integer but not a {1}.' \
+                                       ''.format(i_row, type(i_row))
 
-        self.update_cell_value(i_row, 2, h)
-        self.update_cell_value(i_row, 3, k)
-        self.update_cell_value(i_row, 4, l)
+        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
 
         return
 
@@ -1133,25 +1207,35 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
         return
 
-    def set_peak_intensity(self, row_number, peak_intensity, correctd_intensity, standard_error, integrate_method):
-        """ Set peak intensity to a row or scan
-        Requirement: Either row number or scan number must be given
+    def set_peak_intensity(self, row_number, peak_intensity, corrected_intensity, standard_error, integrate_method):
+        """
+        Set peak intensity to a row in the table
         Guarantees: peak intensity is set
         :param row_number:
         :param peak_intensity:
-        :param lorentz_corrected:
-        :param integrate_method: must be '', sum or gaussian for simple counts summation or Gaussian fit, respectively
+        :param corrected_intensity:
+        :param standard_error:
+        :param integrate_method: must be '', simple or gaussian for simple counts summation or Gaussian fit, respectively
         :return:
         """
-        # TODO/ISSUE/...
+        """
+        Requirement: Either row number or scan number must be given
+        :param row_number:
+        :param peak_intensity:
+        :param lorentz_corrected:
+        :param integrate_method:
+        :return:
+        """
         # check requirements
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
-        assert integrate_method in ['', 'simple', 'gaussian'], 'Peak integration method must be in ' \
-                                                            '[Not defined, simple sum, gaussian fit]'
+        assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
+                                                  ''.format(integrate_method, type(integrate_method))
+        if integrate_method in ['', 'simple', 'gaussian']:
+            raise RuntimeError('Peak integration method must be in ['' (Not defined), simple sum, gaussian fit]')
 
         self.update_cell_value(row_number, self._colIndexIntensity, peak_intensity)
         self.update_cell_value(row_number, self._colIndexIntType, integrate_method)
-        self.update_cell_value(row_number, self._colIndexCorrInt, correctd_intensity)
+        self.update_cell_value(row_number, self._colIndexCorrInt, corrected_intensity)
         self.update_cell_value(row_number, self._colIndexErrorBar, standard_error)
 
         return

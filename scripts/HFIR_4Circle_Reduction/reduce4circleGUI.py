@@ -34,6 +34,7 @@ from multi_threads_helpers import *
 import optimizelatticewindow as ol_window
 import viewspicedialog
 import peak_integration_utility
+import FindUBUtility
 
 # import line for the UI python class
 from ui_MainWindow import Ui_MainWindow
@@ -67,6 +68,7 @@ class MainWindow(QtGui.QMainWindow):
         self._my3DWindow = None
         self._refineConfigWindow = None
         self._peakIntegrationInfoWindow = None
+        self._addUBPeaksDialog = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -715,62 +717,61 @@ class MainWindow(QtGui.QMainWindow):
         Launch dialog to add UB peaks
         :return:
         """
-        import FindUBUtility
+        if self._addUBPeaksDialog is None:
+            self._addUBPeaksDialog = FindUBUtility.AddScansForUBDialog(self)
 
-        # FIXME/TODO/NOW/ISSUE - to init()
-        self._addUBPeaksDialog = FindUBUtility.AddScansForUBDialog(self)
         self._addUBPeaksDialog.show()
 
         return
 
-    def do_add_ub_peak(self):
-        """ Add current to ub peaks
-        :return:
-        """
-        # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
-        # Add peak
-        status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                         self.ui.lineEdit_scanNumber])
-        if status is False:
-            self.pop_one_button_dialog(int_list)
-            return
-        exp_no, scan_no = int_list
-
-        # Get HKL from GUI
-        status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
-                                                        self.ui.lineEdit_K,
-                                                        self.ui.lineEdit_L])
-        if status is False:
-            err_msg = float_list
-            self.pop_one_button_dialog(err_msg)
-            return
-        h, k, l = float_list
-
-        try:
-            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
-        except AssertionError as ass_err:
-            self.pop_one_button_dialog(str(ass_err))
-            return
-
-        assert isinstance(peak_info_obj, r4c.PeakProcessRecord)
-        peak_info_obj.set_hkl(h, k, l)
-        self.set_ub_peak_table(peak_info_obj)
-
-        # Clear
-        self.ui.lineEdit_scanNumber.setText('')
-
-        self.ui.lineEdit_sampleQx.setText('')
-        self.ui.lineEdit_sampleQy.setText('')
-        self.ui.lineEdit_sampleQz.setText('')
-
-        self.ui.lineEdit_H.setText('')
-        self.ui.lineEdit_K.setText('')
-        self.ui.lineEdit_L.setText('')
-
-        # set the flag/notification where the indexing (HKL) from
-        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
-
-        return
+    # def do_add_ub_peak(self):
+    #     """ Add current to ub peaks
+    #     :return:
+    #     """
+    #     # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
+    #     # Add peak
+    #     status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+    #                                                      self.ui.lineEdit_scanNumber])
+    #     if status is False:
+    #         self.pop_one_button_dialog(int_list)
+    #         return
+    #     exp_no, scan_no = int_list
+    #
+    #     # Get HKL from GUI
+    #     status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
+    #                                                     self.ui.lineEdit_K,
+    #                                                     self.ui.lineEdit_L])
+    #     if status is False:
+    #         err_msg = float_list
+    #         self.pop_one_button_dialog(err_msg)
+    #         return
+    #     h, k, l = float_list
+    #
+    #     try:
+    #         peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
+    #     except AssertionError as ass_err:
+    #         self.pop_one_button_dialog(str(ass_err))
+    #         return
+    #
+    #     assert isinstance(peak_info_obj, r4c.PeakProcessRecord)
+    #     peak_info_obj.set_hkl(h, k, l)
+    #     self.set_ub_peak_table(peak_info_obj)
+    #
+    #     # Clear
+    #     self.ui.lineEdit_scanNumber.setText('')
+    #
+    #     self.ui.lineEdit_sampleQx.setText('')
+    #     self.ui.lineEdit_sampleQy.setText('')
+    #     self.ui.lineEdit_sampleQz.setText('')
+    #
+    #     self.ui.lineEdit_H.setText('')
+    #     self.ui.lineEdit_K.setText('')
+    #     self.ui.lineEdit_L.setText('')
+    #
+    #     # set the flag/notification where the indexing (HKL) from
+    #     self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+    #
+    #     return
 
     def do_add_k_shift_vector(self):
         """ Add a k-shift vector
@@ -2608,20 +2609,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def select_ub_scans(self, select_all=False, nuclear_peaks=False, hkl_tolerance=None):
-        """ select scans in the UB matrix table
-        """
-        # TODO/FIXME/NOW/ISSUE - Docs and expanding to wavelength
-
-        if select_all:
-            self.ui.tableWidget_peaksCalUB.select_all_rows(True)
-
-        elif nuclear_peaks:
-            self.ui.tableWidget_peaksCalUB.select_nuclear_peak_rows(hkl_tolerance)
-
-        else:
-            raise RuntimeError('Must pick up one option to do filter.')
-
     def set_ub_from_file(self):
         """ Get UB matrix from an Ascii file
         :return:
@@ -2743,6 +2730,7 @@ class MainWindow(QtGui.QMainWindow):
         # check whether the integration information table
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = XX
+            # TODO/ISSUE/NOW/FIXME - CONTINUE FROM HERE TO IMPLEMENT A NEW WINDOW
 
     def do_show_spice_file(self):
         """
@@ -2785,8 +2773,9 @@ class MainWindow(QtGui.QMainWindow):
         try:
             scan_number = int(str(self.ui.lineEdit_run.text()))
         except ValueError as val_err:
-            self.pop_one_button_dialog('Scan number %s in raw-data-view-tab is invalid. Error: %s'
-                                       '' % str(self.ui.lineEdit_run.text()), str(val_err))
+            error_msg = 'Scan number {0} in raw-data-view-tab is invalid. FYI: {1}.' \
+                        ''.format(self.ui.lineEdit_run.text(), val_err)
+            self.pop_one_button_dialog(error_msg)
             return
 
         # get spice file
@@ -2980,10 +2969,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_view_data_3d(self):
         """
-        View merged scan data in 3D after FindPeaks
+        View merged scan data in 3D after FindPeaks.
         :return:
         """
         # get experiment and scan number
+        scan_number = self.ui.tableWidget_peaksCalUB.get_selected_scans()
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanNumber])
         if status:
@@ -3292,7 +3282,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Experiment
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
-        save_dict['lineEdit_scanNumber'] = self.ui.lineEdit_scanNumber.text()
 
         # Lattice
         save_dict['lineEdit_a'] = str(self.ui.lineEdit_a.text())
@@ -3578,6 +3567,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         print '[DB...BAT] Update merged value: ', exp_number, scan_number, sig_value, peak_centre, mode
+
         # Process signals according to mode
         if mode == 0:
             # start of processing one peak
@@ -3591,59 +3581,47 @@ class MainWindow(QtGui.QMainWindow):
 
         elif mode == 1:
             # receive signal from the end of processing one peak: complete the row
-            # get row number
+            # get the peak object
+            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+
+            # get row number to set up the table
             try:
                 row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
             except RuntimeError as run_err:
-                self.pop_one_button_dialog(str(run_err))
-                return
+                raise RuntimeError('Unable to find scan {0} in Peak-Processing table due to {1}.'
+                                   ''.format(scan_number, run_err))
 
-            # gather values for updating
-            intensity = sig_value
+            # get peak: simple summation intensity
+            intensity, int_std_dev = peak_info_obj.get_intensity('simple intensity', False)
 
             # check intensity value
             is_error = False
             if intensity < 0:
                 # set to status
-                error_msg = 'Negative intensity: %.3f' % intensity
+                error_msg = 'Negative intensity (simple): %.3f' % intensity
                 self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=error_msg)
                 # reset intensity to 0.
                 intensity = 0.
                 is_error = True
                 int_std_dev = 0.
-            else:
-                int_std_dev = numpy.sqrt(intensity)
 
-            if len(peak_centre) != 3:
-                self.pop_one_button_dialog('Peak centre %s is not correct.' % str(peak_centre))
-                return
-
-            # set the calculated peak intensity to _peakInfoDict
-            # TODO/FIXME - Refactor! by setting all the table value!
-            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-            intensity0, error0 = peak_info.get_intensity(0, False)
-            corrected0, error0 = peak_info.get_intensity(0, True)
+            # get the corrected value
+            corrected_intensity = intensity * peak_info_obj.lorentz_correction_factor
+            corrected_std_dev = int_std_dev * peak_info_obj.lorentz_correction_factor
 
             # status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
             # if status:
             #     # set the value to table
             self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
-                                                              peak_intensity=intensity0,
-                                                              correctd_intensity=corrected0,
-                                                              standard_error=error0,
+                                                              peak_intensity=intensity,
+                                                              corrected_intensity=corrected_intensity,
+                                                              standard_error=corrected_std_dev,
                                                               integrate_method='simple')
 
-            #
-            #     # self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
-            #     #                                                peak_centre=peak_centre)
-            #     if is_error:
-            #         self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
-            #     else:
-            #         self.ui.tableWidget_mergeScans.set_status(row_number, 'Good')
-            #
-            # else:
-            #     self._errorMessageEnsemble += error_msg + '\n'
-            #     self.ui.tableWidget_mergeScans.set_status(row_number, error_msg)
+            if is_error:
+                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integration Error')
+            else:
+                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integrated')
 
         elif mode == 2:
             # get signal from the end of all selected scans being integrated
@@ -3744,5 +3722,22 @@ class MainWindow(QtGui.QMainWindow):
         self.set_ub_peak_table(peak_info)
 
         return
+
+    @property
+    def ub_matrix_processing_table(self):
+        """
+        return the handler to the UB matrix
+        :return:
+        """
+        return self.ui.tableWidget_peaksCalUB
+
+    @property
+    def working_directory(self):
+        """
+        return the current working directory
+        :return:
+        """
+        return self._myControl._workDir
+
 
     # END-OF-DEFINITION (MainWindow)

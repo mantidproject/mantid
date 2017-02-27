@@ -40,10 +40,10 @@ class PeakProcessRecord(object):
         self._spiceHKL = None                        # spice HKL
         self._prevHKL = numpy.array([0., 0., 0.])    # previous HKL
 
+        # peak center and PeaksWorkspace
         self._avgPeakCenter = None
         self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
-        self._ptIntensityDict = None
 
         self._myLastPeakUB = None
 
@@ -52,6 +52,13 @@ class PeakProcessRecord(object):
         self._gaussIntensity = 0.
         self._gaussStdDev = 0.
         self._lorenzFactor = 1.
+
+        # peak integration result
+        self._integrationDict = None
+        self._ptIntensityDict = None
+
+        # some motor/goniometer information for further correction
+        self._movingMotorTuple = None
 
         return
 
@@ -109,6 +116,36 @@ class PeakProcessRecord(object):
 
         return
 
+    def get_intensity(self, algorithm_type, lorentz_corrected):
+        """
+        get the integrated intensity with specified integration algorithm and whether
+        the result should be corrected by Lorentz correction factor
+        :param algorithm_type:
+        :param lorentz_corrected:
+        :return:
+        """
+        try:
+            if algorithm_type == 0 or algorithm_type.startswith('simple'):
+                # simple
+                intensity = self._integrationDict['simple intensity']
+                std_dev = self._integrationDict['simple error']
+            elif algorithm_type == 2 or algorithm_type.count('gauss') > 0:
+                # gaussian
+                intensity = self._integrationDict['gauss intensity']
+                std_dev = self._integrationDict['gauss error']
+            else:
+                raise RuntimeError('Type {0} not supported yet.')
+        except KeyError as key_err:
+            err_msg = 'Some key(s) does not exist in dictionary with keys {0}. FYI: {1}' \
+                      ''.format(self._integrationDict.keys(), key_err)
+            raise RuntimeError(err_msg)
+
+        if lorentz_corrected:
+            intensity *= lorentz_corrected
+            std_dev *= lorentz_corrected
+
+        return intensity, std_dev
+
     def get_peak_centre(self):
         """ get weighted peak centre
         :return: Qx, Qy, Qz (3-double-tuple)
@@ -152,6 +189,30 @@ class PeakProcessRecord(object):
 
         return ret_hkl
 
+    def get_sigma(self):
+        """ Get peak intensity's sigma
+        :return:
+        """
+        return self._mySigma
+
+    def get_experiment_info(self):
+        """
+
+        :return: 2-tuple of integer as experiment number
+        """
+        return self._myExpNumber, self._myScanNumber
+
+    def get_sample_frame_q(self, peak_index):
+        """
+        Get Q in sample frame
+        :return: 3-tuple of floats as Qx, Qy, Qz
+        """
+        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
+        peak = peak_ws.getPeak(peak_index)
+        q_sample = peak.getQSampleFrame()
+
+        return q_sample.getX(), q_sample.getY(), q_sample.getZ()
+
     def get_weighted_peak_centres(self):
         """ Get the peak centers found in peak workspace.
         Guarantees: the peak centers and its weight (detector counts) are exported
@@ -177,6 +238,28 @@ class PeakProcessRecord(object):
         # END-FOR
 
         return peak_center_list, peak_intensity_list
+
+    @property
+    def lorentz_correction_factor(self):
+        """
+
+        :return:
+        """
+        if self._lorenzFactor is None:
+            raise RuntimeError('Lorentz factor has not been calculated yet.')
+        return self._lorenzFactor
+
+    @lorentz_correction_factor.setter
+    def lorentz_correction_factor(self, factor):
+        """
+        get lorenz factor
+        :param factor:
+        :return:
+        """
+        assert isinstance(factor, float), 'Lorentz correction factor'
+        self._lorenzFactor = factor
+
+        return
 
     def retrieve_hkl_from_spice_table(self):
         """ Get averaged HKL from SPICE table
@@ -270,76 +353,37 @@ class PeakProcessRecord(object):
 
         return
 
-    @property
-    def lorentz_correction_factor(self):
-        """
-
-        :return:
-        """
-        return self._lorenzFactor
-
-    @lorentz_correction_factor.setter
-    def lorentz_correction_factor(self, factor):
-        """
-
-        :param factor:
-        :return:
-        """
-        self._lorenzFactor = factor
-
-        return
-
     def set_motor(self, motor_name, motor_step, motor_std_dev):
         """
-
+        set motor step information
         :param motor_name:
         :param motor_step:
         :param motor_std_dev:
         :return:
         """
+        assert isinstance(motor_name, str), 'Motor name {0} must be a string but not {1}.' \
+                                            ''.format(motor_name, type(motor_name))
+        assert isinstance(motor_step, float), 'Motor float {0} must be a string but not {1}.' \
+                                              ''.format(motor_step, type(motor_step))
+        assert isinstance(motor_std_dev, float), 'Standard deviation type must be float'
+
         self._movingMotorTuple = (motor_name, motor_step, motor_std_dev)
+
+        return
 
     def set_integration(self, peak_integration_dict):
         """
-
+        set the integration result by information stored in a dictionary
         :param peak_integration_dict:
         :return:
         """
+        assert isinstance(peak_integration_dict, dict),\
+            'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
+            ''.format(peak_integration_dict, type(peak_integration_dict))
+
         self._integrationDict = peak_integration_dict
 
-    def get_intensity(self, algorithm_type, lorentz_corrected):
-        """ Get current peak intensity
-        :return:
-        """
-        print '[DB...BAT] Keys: ', self._integrationDict.keys()
-        if algorithm_type == 0 or algorithm_type.startswith('simple'):
-            # simple
-            intensity = self._integrationDict['simple intensity']
-            std_dev = self._integrationDict['simple error']
-        elif algorithm_type == 2 or algorithm_type.count('gauss') > 0:
-            # gaussian
-            intensity = self._integrationDict['gauss intensity']
-            std_dev = self._integrationDict['gauss error']
-        else:
-            raise RuntimeError('Type {0} not supported yet.')
-
-        if lorentz_corrected:
-            intensity *= lorentz_corrected
-            std_dev *= lorentz_corrected
-
-        return intensity, std_dev
-
-    # def set_intensity(self, peak_intensity):
-    #     """ Set peak intensity
-    #     :param peak_intensity:
-    #     :return:
-    #     """
-    #     assert isinstance(peak_intensity, float), 'Input peak intensity %s is not a float.' % str(peak_intensity)
-    #     assert peak_intensity >= -0., 'Input peak intensity %f is negative.' % peak_intensity
-    #
-    #     self._myIntensity = peak_intensity
-    #
-    #     return
+        return
 
     def set_pt_intensity(self, pt_intensity_dict):
         """
@@ -353,12 +397,6 @@ class PeakProcessRecord(object):
 
         return
 
-    def get_sigma(self):
-        """ Get peak intensity's sigma
-        :return:
-        """
-        return self._mySigma
-
     def set_sigma(self, sigma):
         """ set peak intensity's sigma
         :return:
@@ -368,24 +406,6 @@ class PeakProcessRecord(object):
         self._mySigma = sigma
 
         return
-
-    def get_experiment_info(self):
-        """
-
-        :return: 2-tuple of integer as experiment number
-        """
-        return self._myExpNumber, self._myScanNumber
-
-    def get_sample_frame_q(self, peak_index):
-        """
-        Get Q in sample frame
-        :return: 3-tuple of floats as Qx, Qy, Qz
-        """
-        peak_ws = AnalysisDataService.retrieve(self._myPeakWorkspaceName)
-        peak = peak_ws.getPeak(peak_index)
-        q_sample = peak.getQSampleFrame()
-
-        return q_sample.getX(), q_sample.getY(), q_sample.getZ()
 
 
 def build_pt_spice_table_row_map(spice_table_ws):

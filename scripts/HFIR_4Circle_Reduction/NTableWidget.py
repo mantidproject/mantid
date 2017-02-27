@@ -31,6 +31,7 @@ class NTableWidget(QtGui.QTableWidget):
         self._editableList = list()
 
         self._statusColName = 'Status'
+        self._colIndexSelect = None
 
         return
 
@@ -266,6 +267,23 @@ class NTableWidget(QtGui.QTableWidget):
 
         return error_message
 
+    def revert_selection(self):
+        """
+        revert the selection of rows
+        :return:
+        """
+        # check
+        if self._colIndexSelect is None:
+            raise RuntimeError('Column for selection is not defined yet. Unable to revert selection')
+
+        num_rows = self.rowCount()
+        for i_row in range(num_rows):
+            curr_selection = self.get_cell_value(i_row, self._colIndexSelect)
+            self.update_cell_value(i_row, self._colIndexSelect, not curr_selection)
+        # END-FOR
+
+        return
+
     def select_all_rows(self, status):
         """
         Purpose: select or deselect all rows in the table if applied
@@ -316,6 +334,41 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def select_rows_by_column_value(self, column_index, target_value, value_tolerance,
+                                    keep_current_selection):
+        """
+        select row
+        :param column_index:
+        :param target_value:
+        :param value_tolerance:
+        :param keep_current_selection:
+        :return:
+        """
+        # check inputs
+        assert isinstance(column_index, int) and 0 <= column_index < self.columnCount(),\
+            'Column index {0} must be an integer (now {1}) and in range (0, {2}]' \
+            ''.format(column_index, type(column_index), self.columnCount())
+        if self._colIndexSelect is None:
+            raise RuntimeError('Column for selection is never set up.')
+
+        # loop over lines
+        num_rows = self.rowCount()
+        for i_row in range(num_rows):
+            if keep_current_selection and self.get_cell_value(i_row, self._colIndexSelect) is False:
+                # in case to keep and based on current selection, and this row is not selected, skip
+                continue
+
+            value_i = self.get_cell_value(i_row, column_index)
+            if isinstance(target_value, str) and value_i == target_value:
+                # in case of string
+                self.update_cell_value(i_row, self._colIndexSelect, True)
+            elif (isinstance(target_value, float) or isinstance(target_value, int)) and abs(value_i - target_value) < value_tolerance:
+                # in case of integer or float, then test with consideration of tolerance
+                self.update_cell_value(i_row, self._colIndexSelect, True)
+        # END-FOR
+
+        return
+
     def set_check_box(self, row, col, state):
         """ function to add a new select checkbox to a cell in a table row
         won't add a new checkbox if one already exists
@@ -352,10 +405,15 @@ class NTableWidget(QtGui.QTableWidget):
         # check
         assert isinstance(name, str), 'Given status column name must be an integer,' \
                                       'but not %s.' % str(type(name))
-        assert name in self._myColumnNameList
+        if name not in self._myColumnNameList:
+            raise RuntimeError('Input selection/status name {0} is not in column names list {1}.'
+                               ''.format(name, self._myColumnNameList))
 
         # set value
         self._statusColName = name
+
+        # set the column index
+        self._colIndexSelect = self._myColumnNameList.index(name)
 
         return
 

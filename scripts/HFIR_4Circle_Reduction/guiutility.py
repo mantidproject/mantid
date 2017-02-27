@@ -41,6 +41,46 @@ def convert_str_to_matrix(matrix_str, matrix_shape):
     return matrix
 
 
+def import_scans_text_file(file_name):
+    """
+    import a plain text file containing a list of scans
+    :param file_name:
+    :return:
+    """
+    # check inputs
+    assert isinstance(file_name, str), 'File name {0} must be a string but not of type {1}.' \
+                                       ''.format(file_name, type(file_name))
+    if os.path.exists(file_name) is False:
+        raise RuntimeError('File {0} does not exist.'.format(file_name))
+
+    # import file
+    scan_file = open(file_name, 'r')
+    raw_lines = scan_file.readline()
+    scan_file.close()
+
+    # parse
+    scans_str = ''
+    for raw_line in raw_lines:
+        # get a clean line and skip empty line
+        line = raw_line.strip()
+        if len(line) == 0:
+            continue
+
+        # skip comment line
+        if line.startswith('#'):
+            continue
+
+        # form the string
+        scans_str += line
+    # END-FOR
+
+    # convert scans (in string) to list of integers
+    scan_list = parse_integer_list(scans_str)
+    scan_list.sort()
+
+    return scan_list
+
+
 def map_to_color(data_array, base_color, change_color_flag):
     """ Map 1-D data to color list
     :param data_array:

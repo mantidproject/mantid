@@ -1,9 +1,9 @@
 #pylint: disable=W0403,R0913,R0902
-
 from PyQt4 import QtCore
 from PyQt4.QtCore import QThread
 
 import reduce4circleControl as r4c
+import peak_integration_utility
 
 
 class AddPeaksThread(QThread):
@@ -140,8 +140,8 @@ class IntegratePeaksThread(QThread):
         assert isinstance(mask_name, str), 'Name of mask must be a string but not %s.' % str(type(mask_name))
         assert isinstance(norm_type, str), 'Normalization type must be a string but not %s.' \
                                            '' % str(type(norm_type))
-        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0
-        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0
+        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0, 'blalba'
+        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0, 'blabla'
 
         # set values
         self._mainWindow = main_window
@@ -270,17 +270,6 @@ class IntegratePeaksThread(QThread):
                 continue
 
             intensity1 = pt_dict['simple intensity']
-            # print '[DB] Scan {0} Intensity = {1}.'.format(scan_number, intensity1)
-            # intensity3 = pt_dict['gauss intensity']
-
-
-
-            # # calculate background value
-            # background_pt_list = pt_number_list[:self._numBgPtLeft] + pt_number_list[-self._numBgPtRight:]
-            # avg_bg_value = self._mainWindow.controller.estimate_background(pt_dict, background_pt_list)
-            #
-            # # correct intensity by background value
-            # intensity_i = self._mainWindow.controller.simple_integrate_peak(pt_dict, avg_bg_value)
             peak_centre = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number).get_peak_centre()
 
             # emit signal to main app for peak intensity value
@@ -298,12 +287,14 @@ class IntegratePeaksThread(QThread):
 
     def set_integrated_peak_info(self, scan_number, peak_integration_dict):
         """
-
+        set the integrated peak information including
+        * calculate Lorentz correction
+        * add the integration result dictionary
+        * add motor step information
         :return:
         """
-        import peak_integration_utility
-
-        peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)  #exp_number, scan_number)
+        # get peak information
+        peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
 
         # get Q-vector of the peak center and calculate |Q| from it
         peak_center_q = peak_info_obj.get_peak_centre_v3d().norm()
@@ -324,12 +315,9 @@ class IntegratePeaksThread(QThread):
                                                                                       motor_step)
 
         peak_info_obj.lorentz_factor = lorentz_factor
+        # set motor
         peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
-
+        # set peak integration dictionary
         peak_info_obj.set_integration(peak_integration_dict)
 
-        # set motor information (the moving motor)
-        # self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
-        # motor_step = motor_move_tup[1]
-        # apply the Lorentz correction to the intensity
-        # corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
+        return

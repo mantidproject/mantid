@@ -58,10 +58,11 @@ class AddScansForUBDialog(QtGui.QDialog):
 
     def do_add_single_scan(self):
         """
-
+        add single scan to refine UB matrix
         :return:
         """
-        # TODO/ISSUE/NOW - Implement!
+        scan_number = int(self.ui.lineEdit_scanNumber.text())
+        self._myParent.add_scans_ub_table([scan_number])
 
         return
 
@@ -147,6 +148,10 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         # define event handling methods
         self.connect(self.ui.pushButton_selectScans, QtCore.SIGNAL('clicked()'),
                      self.do_select_scans)
+        self.connect(self.ui.pushButton_revertCurrentSelection, QtCore.SIGNAL('clicked()'),
+                     self.do_revert_selection)
+        self.connect(self.ui.pushButton_exportSelectedScans, QtCore.SIGNAL('clicked()'),
+                     self.do_export_selected_scans)
 
         self.connect(self.ui.pushButton_quit, QtCore.SIGNAL('clicked()'),
                      self.do_quit)
@@ -159,6 +164,44 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
         :return:
         """
         self.close()
+
+        return
+
+    def do_export_selected_scans(self):
+        """
+        export selected scans to a file
+        :return:
+        """
+        # get the scans
+        scans_list = self._myParent.ub_matrix_processing_table.get_selected_scans()
+        scans_list.sort()
+
+        # form the output string
+        output_str = '# Exp = {0}.\n'.format(self._myParent.current_exp_number)
+        for scan in scans_list:
+            output_str += '{0}, '.format(scan)
+
+        # trim the last
+        output_str = output_str[:-2]
+
+        # get the output file name
+        file_filter = 'Text Files (*.dat);;All Files (*.*)'
+        file_name = str(QtGui.QFileDialog.getSaveFileName(self, 'File to export selected scans',
+                        self._myParent.working_directory, file_filter))
+
+        # write file
+        out_file = open(file_name, 'w')
+        out_file.write(output_str)
+        out_file.close()
+
+        return
+
+    def do_revert_selection(self):
+        """
+        revert the current selection of the UB table
+        :return:
+        """
+        self._myParent.ub_matrix_processing_table.revert_selection()
 
         return
 
@@ -185,11 +228,18 @@ class SelectUBMatrixScansDialog(QtGui.QDialog):
 
             if self.ui.checkBox_wavelength.isChecked():
                 # wave length selection
-                # TODO/FIXME/ISSUE/NOW - Implement ASAP
-                pass
+                status, ret_obj = guiutility.parse_float_editors([self.ui.lineEdit_wavelength,
+                                                                  self.ui.lineEdit_wavelengthTolerance],
+                                                                 allow_blank=False)
+                if status:
+                    wave_length, wave_length_tol = ret_obj
+                    select_args['wavelength'] = wave_length
+                    select_args['wavelength_tolerance'] = wave_length_tol
+                else:
+                    select_args['wavelength'] = None
 
             # select with filters
-            # select with filters
-            self._myParent.select_ub_scans(**select_args)
+            self._myParent.ub_matrix_processing_table.select_scans(**select_args)
+        # END-IF-ELSE
 
         return

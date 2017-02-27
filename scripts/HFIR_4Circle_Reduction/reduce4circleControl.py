@@ -1334,7 +1334,6 @@ class CWSCDReductionControl(object):
 
         return peak_intensity, gauss_bkgd, info_str
 
-
     @staticmethod
     def load_scan_survey_file(csv_file_name):
         """ Load scan survey from a csv file

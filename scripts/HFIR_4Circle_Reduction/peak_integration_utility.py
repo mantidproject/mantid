@@ -63,6 +63,55 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_
     return integral, error
 
 
+def calculate_penalty(model_vec_y, exp_vec_y):
+    """
+    calculate the penalty/cost of the model to experimental data
+    say: error = 1/(N-1)sqrt(\sum(y_i - m_i)**2)
+    :param mode_vec_y:
+    :param exp_vec_y:
+    :return:
+    """
+    # check inputs
+    assert isinstance(model_vec_y, numpy.ndarray), 'Model vec Y cannot be {0}.' \
+                                                   ''.format(type(model_vec_y))
+    assert isinstance(exp_vec_y, numpy.ndarray), 'Experimental vec Y cannot be {0}.' \
+                                                 ''.format(type(exp_vec_y))
+    if model_vec_y.shape != exp_vec_y.shape or len(model_vec_y) <= 1:
+        raise RuntimeError('Model and experimental data array do not match! Or too short!')
+
+    # calculate
+    diff_y = model_vec_y - exp_vec_y
+
+    diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
+    numpy.power(diff_y, 2, out=diff_y2)
+
+    cost = numpy.sqrt(diff_y2.sum()) / (len(model_vec_y) - 1.)
+
+    return cost
+
+
+def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
+    """
+    :except: raise RuntimeError if
+    :param integrated_pt_dict:
+    :param motor_pos_dict:
+    :return: motor_pos_vec, pt_intensity_vec
+    """
+    pt_list = sorted(integrated_pt_dict.keys())
+
+    if len(motor_pos_dict) != len(pt_list):
+        raise RuntimeError('Integrated Pt intensities does not match motor positions')
+
+    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
+
+    for i_pt, pt in enumerate(pt_list):
+        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
+        motor_pos_vec[i_pt] = motor_pos_dict[pt]
+
+    return motor_pos_vec, pt_intensity_vec
+
+
 def estimate_background(pt_intensity_dict, bg_pt_list):
     """
     Estimate background value by average the integrated counts of some Pt.
@@ -91,61 +140,6 @@ def estimate_background(pt_intensity_dict, bg_pt_list):
     avg_bg = float(bg_sum) / len(bg_pt_list)
 
     return avg_bg
-
-
-def get_moving_motor_information(spice_table_name):
-    """
-
-    :param spice_table_name:
-    :return:
-    """
-    table = AnalysisDataService.retrieve(spice_table_name)
-
-    col_names = table.getColumnNames()
-    pt_index = col_names.index('Pt.')
-    omega_index = col_names.index('omega')
-    chi_index = col_names.index('chi')
-    phi_index = col_names.index('phi')
-
-    col_tup_dict = {'omega': omega_index, 'phi': phi_index, 'chi': chi_index}
-
-    std_list = list()
-    motor_vector_dict = dict()
-    for motor in col_tup_dict:
-        motor_index = col_tup_dict[motor]
-        motor_vector = numpy.array(table.column(motor_index))
-        motor_vector_dict[motor] = motor_vector
-        std_list.append((motor_vector.std(), motor))
-    std_list.sort()
-    moving_motor = std_list[-1][1]
-    pt_list = table.column(pt_index)
-
-    motor_pos_dict = dict()
-    for i_m in range(len(pt_list)):
-        motor_pos_dict[pt_list[i_m]] = motor_vector_dict[moving_motor][i_m]
-
-    return moving_motor, motor_pos_dict
-
-
-def gaussian_linear_background(x, x0, sigma, a, b):
-    """
-    Gaussian + linear background: y = a * exp( -(x-x0)**2/2*sigma**2 ) + b
-    :param x:
-    :param x0:
-    :param sigma:
-    :param a: maximum value
-    :param b: linear background
-    :return:
-    """
-    # gaussian + linear background
-
-    print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
-    return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
-
-
-def gaussian(x, a, b, c):
-    # pure gaussian
-    return c*numpy.exp(-(x-a)**2/(2. * b * b))
 
 
 def find_gaussian_start_values_by_observation(vec_x, vec_y):
@@ -190,13 +184,11 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
     assert isinstance(vec_y, numpy.ndarray), 'Input vec_y must be a numpy.ndarray but not a {0}.'.format(vec_y)
     assert isinstance(vec_e, numpy.ndarray), 'Input vec_e must be a numpy.ndarray but not a {0}.'.format(vec_e)
 
-    print '[DB] Vec X: ', vec_x
-    print '[DB] Vec Y: ', vec_y
-    print '[DB] Vec e: ', vec_e
-    print '[DB] Start values: ', start_value_list
-    print '[DB] Find start value by fit: ', find_start_value_by_fit
-
-    # TODO/DEBUG/NOW/ - FROM HERE!
+    # print '[DB] Vec X: ', vec_x
+    # print '[DB] Vec Y: ', vec_y
+    # print '[DB] Vec e: ', vec_e
+    # print '[DB] Start values: ', start_value_list
+    # print '[DB] Find start value by fit: ', find_start_value_by_fit
 
     # starting value
     if isinstance(start_value_list, list):
@@ -209,14 +201,13 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
         # get result
         start_value_list = [start_x0, start_sigma, start_a, 0.0]
 
-        print '[DB] Start value by fit: ', start_value_list
+        # print '[DB] Start value by fit: ', start_value_list
 
     else:
         # guess starting value via observation
         start_value_list = find_gaussian_start_values_by_observation(vec_x, vec_y)
 
-        print '[DB] Start value by observation: ', start_value_list
-
+        # print '[DB] Start value by observation: ', start_value_list
     # END-IF-ELSE
 
     """
@@ -236,14 +227,9 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     print 'Covariance matrix: ', fit2_cov_matrix
 
-    # calculate error as (model Y - obs Y)**2/wi
-    # this is a bad way to calculate error!
-    # TODO/FIXME/NOW - Need a correct way to calculate the error AND/OR penalty!
-    diff_y = model_vec_y - vec_y
-    diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
-    error = numpy.power(diff_y, 2, out=diff_y2)/len(diff_y)
+    cost = calculate_penalty(model_vec_y, vec_y)
 
-    return error, fit2_coeff, fit2_cov_matrix
+    return cost, fit2_coeff, fit2_cov_matrix
 
 
 def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
@@ -306,6 +292,7 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
         cov_matrix = None
     else:
         # good
+        assert isinstance(cov_matrix, numpy.ndarray), 'Covarance matrix must be a numpy array'
         gauss_error_dict['x02'] = cov_matrix[0, 0]
         gauss_error_dict['s2'] = cov_matrix[1, 1]
         gauss_error_dict['A2'] = cov_matrix[2, 2]
@@ -314,6 +301,61 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
         gauss_error_dict['A_s'] = cov_matrix[2, 1]
 
     return gauss_parameter_dict, gauss_error_dict, cov_matrix
+
+
+def get_moving_motor_information(spice_table_name):
+    """
+
+    :param spice_table_name:
+    :return:
+    """
+    table = AnalysisDataService.retrieve(spice_table_name)
+
+    col_names = table.getColumnNames()
+    pt_index = col_names.index('Pt.')
+    omega_index = col_names.index('omega')
+    chi_index = col_names.index('chi')
+    phi_index = col_names.index('phi')
+
+    col_tup_dict = {'omega': omega_index, 'phi': phi_index, 'chi': chi_index}
+
+    std_list = list()
+    motor_vector_dict = dict()
+    for motor in col_tup_dict:
+        motor_index = col_tup_dict[motor]
+        motor_vector = numpy.array(table.column(motor_index))
+        motor_vector_dict[motor] = motor_vector
+        std_list.append((motor_vector.std(), motor))
+    std_list.sort()
+    moving_motor = std_list[-1][1]
+    pt_list = table.column(pt_index)
+
+    motor_pos_dict = dict()
+    for i_m in range(len(pt_list)):
+        motor_pos_dict[pt_list[i_m]] = motor_vector_dict[moving_motor][i_m]
+
+    return moving_motor, motor_pos_dict
+
+
+def gaussian_linear_background(x, x0, sigma, a, b):
+    """
+    Gaussian + linear background: y = a * exp( -(x-x0)**2/2*sigma**2 ) + b
+    :param x:
+    :param x0:
+    :param sigma:
+    :param a: maximum value
+    :param b: linear background
+    :return:
+    """
+    # gaussian + linear background
+
+    print '[DB] Input x0 = ', x0, ', sigma = ', sigma, ', a = ', a, ', b = ', b
+    return a * numpy.exp(-(x - x0) ** 2 / (2. * sigma ** 2)) + b
+
+
+def gaussian(x, a, b, c):
+    # pure gaussian
+    return c*numpy.exp(-(x-a)**2/(2. * b * b))
 
 
 def gaussian_peak_intensity(parameter_dict, error_dict):
@@ -489,28 +531,6 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     return True, pt_dict
 
 
-def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
-    """
-    :except: raise RuntimeError if
-    :param integrated_pt_dict:
-    :param motor_pos_dict:
-    :return: motor_pos_vec, pt_intensity_vec
-    """
-    pt_list = sorted(integrated_pt_dict.keys())
-
-    if len(motor_pos_dict) != len(pt_list):
-        raise RuntimeError('Integrated Pt intensities does not match motor positions')
-
-    pt_intensity_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-    motor_pos_vec = numpy.ndarray(shape=(len(pt_list), ), dtype='float')
-
-    for i_pt, pt in enumerate(pt_list):
-        pt_intensity_vec[i_pt] = integrated_pt_dict[pt]
-        motor_pos_vec[i_pt] = motor_pos_dict[pt]
-
-    return motor_pos_vec, pt_intensity_vec
-
-
 def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_ws_name,
                                 peak_center, mask_workspace_name, norm_type,
                                 intensity_scale_factor, background_pt_tuple):
@@ -606,19 +626,26 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
 
     if covariance_matrix is None:
         # gaussian fit fails
-        peak_int_dict['intensity 2'] = ''
-        peak_int_dict['error 2'] = ''
+        peak_int_dict['intensity 2'] = None
+        peak_int_dict['error 2'] = None
 
-        peak_int_dict['gauss intensity'] = ''
-        peak_int_dict['gauss error'] = ''
+        peak_int_dict['gauss intensity'] = None
+        peak_int_dict['gauss error'] = None
 
     else:
         # calculate intensity with method 2
-        intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'], motor_pos_dict)
+        motor_pos_center = parameters['x0']
+        motor_pos_sigma = parameters['s']
+        intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'],
+                                                       motor_step_dict,
+                                                       peak_center=motor_pos_center,
+                                                       peak_sigma=motor_pos_sigma,
+                                                       motor_pos_dict=motor_pos_dict,
+                                                       sigma_range=2.)
         peak_int_dict['intensity 2'] = intensity_m2
         peak_int_dict['error 2'] = error_m2
 
-        # calculate gaussian
+        # calculate gaussian (method 3)
         intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
         peak_int_dict['gauss intensity'] = intensity_gauss
         peak_int_dict['gauss error'] = intensity_gauss_error
@@ -682,12 +709,17 @@ def get_motor_step_for_intensity(motor_pos_dict):
     return motor_step_dict
 
 
-def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
+def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_center=None,
+                          peak_sigma=None, motor_pos_dict=None, sigma_range=2.):
     """
     A simple approach to integrate peak in a cuboid with background removed.
     :param pt_intensity_dict:
     :param bg_value:
     :param motor_step_dict:
+    :param peak_center:
+    :param peak_sigma:
+    :param motor_pos_dict:
+    :param sigma_range:
     :return:
     """
     # check
@@ -696,7 +728,11 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
     assert isinstance(bg_value, float) and bg_value >= 0., 'Background value {0} must be a non-negative float.' \
                                                            ''.format(bg_value)
     assert isinstance(motor_step_dict, dict), 'Motor steps {0} must be given as a dictionary of Pt but not a {1}.' \
-                                             ''.format(motor_step_dict, type(motor_step_dict))
+                                              ''.format(motor_step_dict, type(motor_step_dict))
+
+    if peak_center is not None:
+        assert peak_sigma is not None and motor_pos_dict is not None and sigma_range is not None,\
+            'Must be specified'
 
     pt_list = pt_intensity_dict.keys()
     pt_list.sort()
@@ -705,11 +741,20 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict):
     sum_intensity = 0.
     error_2 = 0.
     for pt in pt_list:
+        # check the motor position if required
+        if peak_center is not None:
+            motor_pos = motor_pos_dict[pt]
+            if abs(motor_pos - peak_center) > sigma_range * peak_sigma:
+                # peak is out of range
+                continue
+        # END-IF
+
         intensity = pt_intensity_dict[pt]
         motor_step_i = motor_step_dict[pt]
         sum_intensity += (intensity - bg_value) * motor_step_i
         error_2 += numpy.sqrt(intensity) * motor_step_i
 
         print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
+    # END-FOR
 
     return sum_intensity, error_2
