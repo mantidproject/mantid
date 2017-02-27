@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -440,7 +441,7 @@ void OptimizeCrystalPlacement::exec() {
 
   auto NewInstrument = boost::make_shared<Geometry::Instrument>(Inst, pmap_new);
 
-  SCDCalibratePanels::fixUpSourceParameterMap(NewInstrument, L0, newSampPos,
+  CalibrationHelpers::fixUpSourceParameterMap(NewInstrument, L0, newSampPos,
                                               pmap_old);
 
   for (int i = 0; i < OutPeaks->getNumberPeaks(); i++)

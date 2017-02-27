@@ -4,6 +4,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -135,7 +136,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    SCDCalibratePanels::fixUpSourceParameterMap(instr, L1 / 100, sampPos,
+    CalibrationHelpers::fixUpSourceParameterMap(instr, L1 / 100, sampPos,
                                                 parMap);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
