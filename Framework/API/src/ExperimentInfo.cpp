@@ -177,6 +177,18 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
+void clearPositionAndRotationsParameters(ParameterMap &pmap,
+                                         const IDetector &det) {
+  pmap.clearParametersByName(ParameterMap::pos(), &det);
+  pmap.clearParametersByName(ParameterMap::posx(), &det);
+  pmap.clearParametersByName(ParameterMap::posy(), &det);
+  pmap.clearParametersByName(ParameterMap::posz(), &det);
+  pmap.clearParametersByName(ParameterMap::rot(), &det);
+  pmap.clearParametersByName(ParameterMap::rotx(), &det);
+  pmap.clearParametersByName(ParameterMap::roty(), &det);
+  pmap.clearParametersByName(ParameterMap::rotz(), &det);
+}
+
 std::unique_ptr<Beamline::DetectorInfo>
 makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   if (newInstr.hasDetectorInfo()) {
@@ -211,14 +223,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
       // account (if no DetectorInfo is set in the ParameterMap).
       positions.emplace_back(toVector3d(det->getPos()));
       rotations.emplace_back(toQuaterniond(det->getRotation()));
-      pmap->clearParametersByName(ParameterMap::pos(), det.get());
-      pmap->clearParametersByName(ParameterMap::posx(), det.get());
-      pmap->clearParametersByName(ParameterMap::posy(), det.get());
-      pmap->clearParametersByName(ParameterMap::posz(), det.get());
-      pmap->clearParametersByName(ParameterMap::rot(), det.get());
-      pmap->clearParametersByName(ParameterMap::rotx(), det.get());
-      pmap->clearParametersByName(ParameterMap::roty(), det.get());
-      pmap->clearParametersByName(ParameterMap::rotz(), det.get());
+      clearPositionAndRotationsParameters(*pmap, *det);
       // Note that scalex and scaley also affect positions when set for a
       // RectangularDetector, but those are not parameters of the detector
       // itself so they are not cleared.
