@@ -2821,6 +2821,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
         m_dataTimeZero); // won't be used, but property is mandatory
     groupAlg->setPropertyValue("DetectorGroupingTable", groupingName);
     groupAlg->setPropertyValue("OutputWorkspace", outputEntry.name());
+	// add xmin and xmax here=> setProperty
+
     groupAlg->execute();
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +

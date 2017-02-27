@@ -368,6 +368,9 @@ Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
   // We don't want workspace in the ADS so far
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed");
+  alg->setProperty("StartX", 0.10);
+  alg->setProperty("EndX", 10.0);
+
   alg->execute();
   return alg->getProperty("OutputWorkspace");
 }

@@ -45,6 +45,10 @@ void MuonRemoveExpDecay::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
+  declareProperty("XStart", EMPTY_DBL(),
+	  "The lower limit for fitting the background (an X value).");
+  declareProperty("XEnd", EMPTY_DBL(),
+	  "The upper limit for fitting the background (an X value).");
 }
 
 /** Executes the algorithm
@@ -105,9 +109,9 @@ void MuonRemoveExpDecay::exec() {
     outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
 
     // do scaling and subtract 1
-    const double normConst = calNormalisationConst(outputWS, spectra[i]);
+	const double normConst =  calNormalisationConst(outputWS, spectra[i]);
     outputWS->mutableY(specNum) /= normConst;
-    outputWS->mutableY(specNum) -= 1.0;
+	outputWS->mutableY(specNum) -=  1.0;
     outputWS->mutableE(specNum) /= normConst;
 
     prog.report();
@@ -178,6 +182,36 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
   fit->setProperty("WorkspaceIndex", wsIndex);
   fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
   fit->setProperty("Ties", "A1=0.0");
+
+  
+  double startX = getProperty("XStart");//startX and EndX
+  double endX   = getProperty("XEnd");
+  if (!isEmpty(startX) && !isEmpty(endX)) {
+	  if (startX < endX)
+	  {
+		  g_log.information() << "Xmin = "<<startX<<",  Xmax = "<<endX<< '\n';
+
+		  fit->setProperty("StartX", startX);
+		  fit->setProperty("EndX", endX);
+	  }
+	  else if(startX>endX)
+	  {
+		  g_log.warning() << "Xmin is larger than Xmax, swapping the parameters." << '\n';
+		  fit->setProperty("StartX", endX);
+		  fit->setProperty("EndX", startX);
+	  }
+	  else
+	  {
+		  throw std::runtime_error("Xmin = Xmax, there is no data to apply the algorithm to.");
+	  }
+  }
+  else if (!isEmpty(startX) && isEmpty(endX) || isEmpty(startX) && !isEmpty(endX))
+  {
+	  throw std::runtime_error("Both the min and max need to be defined, or neither are defined");
+  }
+  else {
+	  g_log.information() << "Xmin and Xmax are not defined, using all of the data"<< '\n';
+  }
   fit->execute();
 
   std::string fitStatus = fit->getProperty("OutputStatus");
@@ -216,6 +250,64 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
 
   return retVal;
 }
+/*
+double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
+	int wsIndex) {
+	double retVal = 1.0;
 
+	API::IAlgorithm_sptr fit;
+	fit = createChildAlgorithm("Fit", -1, -1, true);
+
+	std::stringstream ss;
+	ss << "name=LinearBackground,A0=" << ws->y(wsIndex)[0] << ",A1=" << 0.0
+		<< ",ties=(A1=0.0)";
+	std::string function = ss.str();
+
+	fit->setPropertyValue("Function", function);
+	fit->setProperty("InputWorkspace", ws);
+	fit->setProperty("WorkspaceIndex", wsIndex);
+	fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
+	fit->setProperty("Ties", "A1=0.0");
+	fit->execute();
+
+	std::string fitStatus = fit->getProperty("OutputStatus");
+	API::IFunction_sptr result = fit->getProperty("Function");
+	std::vector<std::string> paramnames = result->getParameterNames();
+
+	// Check order of names
+	if (paramnames[0].compare("A0") != 0) {
+		g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0]
+			<< '\n';
+		throw std::invalid_argument(
+			"Parameters are out of order @ 0, should be A0");
+	}
+	if (paramnames[1].compare("A1") != 0) {
+		g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
+			<< '\n';
+		throw std::invalid_argument(
+			"Parameters are out of order @ 0, should be A1");
+	}
+
+	if (!fitStatus.compare("success")) {
+		const double A0 = result->getParameter(0);
+
+		if (A0 < 0) {
+			g_log.warning() << "When trying to fit Asymmetry normalisation constant "
+				"this constant comes out negative."
+				<< "To proceed Asym norm constant set to 1.0\n";
+		}
+		else {
+			retVal = A0;
+		}
+	}
+	else {
+		g_log.warning() << "Fit falled. Status = " << fitStatus
+			<< "\nFor workspace index " << wsIndex
+			<< "\nAsym norm constant set to 1.0\n";
+	}
+
+	return retVal;
+}
+*/
 } // namespace Algorithm
 } // namespace Mantid

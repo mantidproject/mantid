@@ -97,6 +97,8 @@ void MuonProcess::init() {
       "Params used for rebinning. If empty - rebinning is not done.");
   declareProperty("Xmin", EMPTY_DBL(), "Minimal X value to include");
   declareProperty("Xmax", EMPTY_DBL(), "Maximal X value to include");
+  declareProperty("StartX", EMPTY_DBL(), "Minimal X value to remove exp from");
+  declareProperty("EndX", EMPTY_DBL(), "Maximal X value to remove exp from");
 
   std::vector<std::string> allowedTypes{"PairAsymmetry", "GroupAsymmetry",
                                         "GroupCounts"};
@@ -181,8 +183,10 @@ void MuonProcess::exec() {
       asymCalc = Mantid::Kernel::make_unique<MuonGroupCountsCalculator>(
           allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
     } else if (outputType == "GroupAsymmetry") {
+		const double startX = getProperty("StartX");
+		const double endX = getProperty("EndX");
       asymCalc = Mantid::Kernel::make_unique<MuonGroupAsymmetryCalculator>(
-          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex);
+          allPeriodsWS, summedPeriods, subtractedPeriods, groupIndex,startX,endX);
     } else if (outputType == "PairAsymmetry") {
       int first = getProperty("PairFirstIndex");
       int second = getProperty("PairSecondIndex");

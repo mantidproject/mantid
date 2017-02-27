@@ -35,7 +35,7 @@ public:
   MuonGroupAsymmetryCalculator(const API::WorkspaceGroup_sptr inputWS,
                                const std::vector<int> summedPeriods,
                                const std::vector<int> subtractedPeriods,
-                               const int groupIndex);
+                               const int groupIndex, const double xMin=EMPTY_DBL(),const double xMax=EMPTY_DBL() );
   /// Performs group asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
 
@@ -43,6 +43,9 @@ private:
   /// Removes exponential decay from the workspace
   API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
                                            const int index) const;
+  API::MatrixWorkspace_sptr removeExpDecay(const API::Workspace_sptr &inputWS,
+	  const int index, const double startX, const double endX) const;
+  const double m_xMin, m_xMax;
 };
 
 } // namespace WorkflowAlgorithms
