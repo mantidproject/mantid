@@ -10,32 +10,6 @@ namespace Mantid {
 namespace Crystal {
 
 /**
- * Copies positional entries in pmapSv to pmap starting at bank_const and
- * parents.
- * @param bankConst  the starting component for copying entries.
- * @param pmap the Parameter Map to be updated
- * @param pmapSv the original Parameter Map
- */
-void CalibrationHelpers::updateSourceParams(
-    boost::shared_ptr<const Geometry::IComponent> bankConst,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  std::vector<V3D> posv = pmapSv->getV3D(bankConst->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bankConst.get(), "x", pos.X());
-    pmap->addDouble(bankConst.get(), "y", pos.Y());
-    pmap->addDouble(bankConst.get(), "z", pos.Z());
-    pmap->addV3D(bankConst.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bankConst.get(), "rot");
-  if (rot)
-    pmap->addQuat(bankConst.get(), "rot", rot->value<Quat>());
-}
-
-/**
 * Updates the ParameterMap for NewInstrument to reflect the position of the
 *source.
 *
@@ -49,10 +23,9 @@ void CalibrationHelpers::updateSourceParams(
 */
 void CalibrationHelpers::fixUpSourceParameterMap(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
-    const V3D newSampPos, boost::shared_ptr<const ParameterMap> const pmapOld) {
+    const V3D newSampPos) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
   IComponent_const_sptr source = newInstrument->getSource();
-  updateSourceParams(source, pmap, pmapOld);
 
   IComponent_const_sptr sample = newInstrument->getSample();
   V3D SamplePos = sample->getPos();

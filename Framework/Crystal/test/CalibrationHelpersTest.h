@@ -40,8 +40,7 @@ public:
 
     // Make a first move
 
-    const auto &pmapOld = boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
-    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew, pmapOld);
+    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew);
 
     // Old workspace has sample unchanged
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
@@ -56,8 +55,7 @@ public:
 
     auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
     const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
-    const auto &pmapNew = boost::make_shared<ParameterMap>(wsNew->instrumentParameters());
-    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew2, pmapNew);
+    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew2);
 
     // Old workspace has sample unchanged
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);

@@ -136,8 +136,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    CalibrationHelpers::fixUpSourceParameterMap(instr, L1 / 100, sampPos,
-                                                parMap);
+    CalibrationHelpers::fixUpSourceParameterMap(instr, L1 / 100, sampPos);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");

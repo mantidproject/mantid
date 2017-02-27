@@ -31,14 +31,9 @@ namespace Crystal {
 */
 class DLLExport CalibrationHelpers {
 public:
-  static void
-  updateSourceParams(boost::shared_ptr<const Geometry::IComponent> bankConst,
-                     boost::shared_ptr<Geometry::ParameterMap> pmap,
-                     boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
   static void fixUpSourceParameterMap(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      double const L0, Kernel::V3D const newSampPos,
-      boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
+      double const L0, Kernel::V3D const newSampPos);
 };
 
 } // namespace Crystal
