@@ -1010,8 +1010,8 @@ const DetectorInfo &ExperimentInfo::detectorInfo() const {
   if (!m_detectorInfoWrapper) {
     std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
     if (!m_detectorInfoWrapper)
-      m_detectorInfoWrapper =
-          Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument());
+      m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+          *m_detectorInfo, getInstrument(), m_parmap.get());
   }
   return *m_detectorInfoWrapper;
 }
@@ -1019,25 +1019,8 @@ const DetectorInfo &ExperimentInfo::detectorInfo() const {
 /** Return a non-const reference to the DetectorInfo object. Not thread safe.
  */
 DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
-  populateIfNotLoaded();
-  // No locking here since this non-const method is not thread safe.
-
-  // We get the non-const ParameterMap reference *first* such that no copy is
-  // triggered unless really necessary. The call to `instrumentParameters`
-  // releases the old m_detectorInfoWrapper to drop the reference count to the
-  // ParameterMap by 1 (DetectorInfo contains a parameterized Instrument, so the
-  // reference count to the ParameterMap is at least 2 if m_detectorInfoWrapper
-  // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
-  // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
-  // triggered.
-  m_spectrumInfoWrapper = nullptr;
-  auto pmap = &instrumentParameters();
-  // Here `getInstrument` creates a parameterized instrument, increasing the
-  // reference count to the ParameterMap. This has do be done *after* getting
-  // the ParameterMap.
-  m_detectorInfoWrapper =
-      Kernel::make_unique<DetectorInfo>(*m_detectorInfo, getInstrument(), pmap);
-  return *m_detectorInfoWrapper;
+  return const_cast<DetectorInfo &>(
+      static_cast<const ExperimentInfo &>(*this).detectorInfo());
 }
 
 /** Return a reference to the SpectrumInfo object.
@@ -1051,9 +1034,11 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     std::lock_guard<std::mutex> lock{m_spectrumInfoMutex};
     if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
       cacheDefaultDetectorGrouping();
-    if (!m_spectrumInfoWrapper)
-      m_spectrumInfoWrapper =
-          Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
+    if (!m_spectrumInfoWrapper) {
+      static_cast<void>(detectorInfo());
+      m_spectrumInfoWrapper = Kernel::make_unique<SpectrumInfo>(
+          *m_spectrumInfo, *this, *m_detectorInfoWrapper);
+    }
   }
   // Rebuild any spectrum definitions that are out of date. Accessing
   // `API::SpectrumInfo` will rebuild invalid spectrum definitions as it
@@ -1089,27 +1074,8 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
 /** Return a non-const reference to the SpectrumInfo object. Not thread safe.
  */
 SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
-  populateIfNotLoaded();
-  // Creating SpectrumInfo with a non-const reference to a MatrixWorkspace will
-  // call ExperimentInfo::mutableDetectorInfo() which will later be used by
-  // modifications. This will trigger a copy if required. Note that the
-  // following happens internally:
-  // 1. make_unique creates a new SpectrumInfo, which calls
-  // ExperimentInfo::mutableDetectorInfo(). In the latter method, the reference
-  // count to the ParameterMap is typically not 1, so
-  // invalidateInstrumentReferences() is called.
-  // 2. invalidateInstrumentReferences() resets m_spectrumInfoWrapper, releasing
-  // any parameterized detectors and thus dropping any unneeded references to
-  // the ParameterMap.
-  // 3. Construction of SpectrumInfo continues and the result is assigned to
-  // m_spectrumInfoWrapper.
-
-  // No locking here since this non-const method is not thread safe.
-  if (!m_spectrumInfo) // this should happen only if not MatrixWorkspace
-    cacheDefaultDetectorGrouping();
-  m_spectrumInfoWrapper =
-      Kernel::make_unique<SpectrumInfo>(*m_spectrumInfo, *this);
-  return *m_spectrumInfoWrapper;
+  return const_cast<SpectrumInfo &>(
+      static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
 /// Sets the SpectrumDefinition for all spectra.

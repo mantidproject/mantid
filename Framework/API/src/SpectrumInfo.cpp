@@ -14,18 +14,11 @@ namespace Mantid {
 namespace API {
 
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           const ExperimentInfo &experimentInfo)
+                           const ExperimentInfo &experimentInfo,
+                           DetectorInfo &detectorInfo)
     : m_experimentInfo(experimentInfo),
-      m_detectorInfo(experimentInfo.detectorInfo()),
+      m_detectorInfo(detectorInfo),
       m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
-
-SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-                           ExperimentInfo &experimentInfo)
-    : m_experimentInfo(experimentInfo),
-      m_mutableDetectorInfo(&experimentInfo.mutableDetectorInfo()),
-      m_detectorInfo(*m_mutableDetectorInfo), m_spectrumInfo(spectrumInfo),
-      m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
 // Defined as default in source for forward declaration with std::unique_ptr.
@@ -159,7 +152,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
  * Currently this simply sets the mask flags for the underlying detectors. */
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
   for (const auto detIndex : getDetectorIndices(index))
-    m_mutableDetectorInfo->setMasked(detIndex, masked);
+    m_detectorInfo.setMasked(detIndex, masked);
 }
 
 /// Return a const reference to the detector or detector group of the spectrum
