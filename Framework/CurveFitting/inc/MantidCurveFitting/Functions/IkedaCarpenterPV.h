@@ -84,6 +84,9 @@ private:
   void convertVoigtToPseudo(const double &voigtSigmaSq,
                             const double &voigtGamma, double &H,
                             double &eta) const;
+
+  /// constrain all parameters to be non-negative
+  void lowerConstraint0(std::string paramName);
 };
 
 } // namespace Functions
