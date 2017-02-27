@@ -171,10 +171,10 @@ void DetectorInfo::setRotation(const size_t index,
 /** Set the absolute position of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
- * typically still influence detector positions. */
+ * typically still influence detector positions. Note that this method will be
+ * removed once ComponentInfo::setPosition is available. */
 void DetectorInfo::setPosition(const Geometry::IComponent &comp,
                                const Kernel::V3D &pos) {
-
   if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
     const auto index = indexOf(det->getID());
     m_detectorInfo.setPosition(index, Kernel::toVector3d(pos));
@@ -210,7 +210,8 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
 /** Set the absolute rotation of the component `comp`. Not thread safe.
  *
  * This may or may not be a detector. Even if it is not a detector it will
- * typically still influence detector positions rotations. */
+ * typically still influence detector positions rotations. Note that this method
+ * will be removed once ComponentInfo::setRotation is available. */
 void DetectorInfo::setRotation(const Geometry::IComponent &comp,
                                const Kernel::Quat &rot) {
   if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
