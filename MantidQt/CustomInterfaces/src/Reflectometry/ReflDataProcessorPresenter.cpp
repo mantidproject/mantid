@@ -188,26 +188,15 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   for (const auto &row : group) {
 
     auto data = row.second;               // Vector containing data for this row
-    size_t numSlices;                     // Number of slices taken for this row
     std::string runNo = row.second.at(0); // The run number
 
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
-      // For uniform slicing we need the total duration of the run pulse times
-      std::string runName = "TOF_" + runNo;
-      IEventWorkspace_const_sptr mws =
-          AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
-      const auto minTime = mws->getFirstPulseTime();
-      const auto maxTime = mws->getLastPulseTime();
-      const auto totalDuration = maxTime - minTime;
-      double totalDurationSec = totalDuration.seconds();
-
-      if (timeSlicingType == "UniformEven")
-        parseUniformEven(timeSlicingValues, totalDurationSec, startTimes, stopTimes);
-      else if (timeSlicingType == "Uniform")
-        parseUniform(timeSlicingValues, totalDurationSec, startTimes, stopTimes);
+      const std::string runName = "TOF_" + runNo;
+      parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
+                   stopTimes);
     }
 
-    numSlices = startTimes.size();
+    size_t numSlices = startTimes.size();
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
@@ -285,49 +274,46 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
   return errors;
 }
 
-/** Parses a string to extract uniform even time slicing
-*
-* @param timeSlicing :: The string to parse
-* @param totalDuration :: The duration between the min/max pulse times of the
-*event workspace being sliced
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
-*/
-void ReflDataProcessorPresenter::parseUniformEven(
-    const std::string &timeSlicing, double totalDuration,
-    std::vector<double> &startTimes, std::vector<double> &stopTimes) {
-
-  size_t numSlices = std::stoi(timeSlicing);
-  double sliceDuration = totalDuration / numSlices;
-
-  // Add the start/stop times
-  startTimes = std::vector<double>(numSlices);
-  stopTimes = std::vector<double>(numSlices);
-  for (size_t i = 0; i < numSlices; i++) {
-    startTimes[i] = sliceDuration * i;
-    stopTimes[i] = sliceDuration * (i + 1);
-  }
-}
-
 /** Parses a string to extract uniform time slicing
 *
 * @param timeSlicing :: The string to parse
-* @param totalDuration :: The duration between the min/max pulse times of the
-*event workspace being sliced
+* @param slicingType :: The type of uniform slicing being used
+* @param wsName :: The name of the workspace to be sliced
 * @param startTimes :: [output] A vector containing the start time for each
 *slice
 * @param stopTimes :: [output] A vector containing the stop time for each
 *slice
 */
 void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
-                                              double totalDuration,
+                                              const std::string &slicingType,
+                                              const std::string &wsName,
                                               std::vector<double> &startTimes,
                                               std::vector<double> &stopTimes) {
 
-  double sliceDuration = std::stod(timeSlicing);
-  size_t numSlices = ceil(totalDuration / sliceDuration);
+  IEventWorkspace_sptr mws;
+  if (AnalysisDataService::Instance().doesExist(wsName)) {
+    mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
+  } else {
+    m_mainPresenter->giveUserCritical("Workspace to slice not found: " + wsName,
+                                      "Time slicing error");
+    return;
+  }
+
+  const auto minTime = mws->getFirstPulseTime();
+  const auto maxTime = mws->getLastPulseTime();
+  const auto totalDuration = maxTime - minTime;
+  double totalDurationSec = totalDuration.seconds();
+  double sliceDuration = .0;
+  size_t numSlices = 0;
+ 
+  if (slicingType == "UniformEven") {
+    numSlices = std::stoi(timeSlicing);
+    sliceDuration = totalDurationSec / numSlices;
+  }
+  else if (slicingType == "Uniform") {
+    sliceDuration = std::stod(timeSlicing);
+    numSlices = ceil(totalDurationSec / sliceDuration);
+  }
 
   // Add the start/stop times
   startTimes = std::vector<double>(numSlices);
@@ -496,45 +482,42 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
-  // if uniform slicing is empty plot normally
+  // If slicing values are empty plot normally
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
   }
 
+  const auto items = m_manager->selectedData();
+
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-  size_t numSlices;
 
-  // No. of slices can be predetermined with uniform even or custom slicing
-  if (timeSlicingType == "UniformEven")
-    parseUniformEven(timeSlicingValues, .0, startTimes, stopTimes);
-  else if (timeSlicingType == "Custom")
+  // Num of slices can be predetermined with uniform even or custom slicing
+  if (timeSlicingType == "UniformEven") {
+    const std::string wsName =
+        getReducedWorkspaceName(items.at(0).at(0), "TOF_");
+    parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
+                 stopTimes);
+  } else if (timeSlicingType == "Custom") {
     parseCustom(timeSlicingValues, startTimes, stopTimes);
-  numSlices = startTimes.size();
+  }
+
+  size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
   std::set<std::string> notFound;
 
-  const auto items = m_manager->selectedData();
-
   for (const auto &item : items) {
     for (const auto &run : item.second) {
 
-      // Num slices for each ws in uniform slicing must be separately determined
       if (timeSlicingType == "Uniform") {
-        // We need the duration between first/last pulses to get no. of slices
+        // Num slices for each ws in uniform slicing are separately determined
         const std::string wsName = getReducedWorkspaceName(run.second, "TOF_");
-        IEventWorkspace_const_sptr mws =
-            AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
-        const auto minTime = mws->getFirstPulseTime();
-        const auto maxTime = mws->getLastPulseTime();
-        const auto totalDuration = maxTime - minTime;
-        double totalDurationSec = totalDuration.seconds();
-        parseUniform(timeSlicingValues, totalDurationSec, startTimes,
+        parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
                      stopTimes);
         numSlices = startTimes.size();
       }
@@ -594,23 +577,27 @@ void ReflDataProcessorPresenter::plotGroup() {
     return;
   }
 
+  const auto items = m_manager->selectedData();
+
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-  size_t numSlices;
 
   // No. of slices can be predetermined with uniform even or custom slicing
-  if (timeSlicingType == "UniformEven")
-    parseUniformEven(timeSlicingValues, .0, startTimes, stopTimes);
-  else if (timeSlicingType == "Custom")
+  if (timeSlicingType == "UniformEven") {
+    const std::string wsName =
+        getReducedWorkspaceName(items.at(0).at(0), "TOF_");
+    parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
+                 stopTimes);
+  } else if (timeSlicingType == "Custom") {
     parseCustom(timeSlicingValues, startTimes, stopTimes);
-  numSlices = startTimes.size();
+  }
+
+  size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
   std::set<std::string> notFound;
-
-  const auto items = m_manager->selectedData();
 
   for (const auto &item : items) {
 
@@ -622,18 +609,10 @@ void ReflDataProcessorPresenter::plotGroup() {
         numSlices = INT_MAX;
 
         for (const auto &run : item.second) {
-          // We need the duration between first/last pulses to get no. of slices
           const std::string wsName =
               getReducedWorkspaceName(run.second, "TOF_");
-          IEventWorkspace_const_sptr mws =
-              AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
-                  wsName);
-          const auto minTime = mws->getFirstPulseTime();
-          const auto maxTime = mws->getLastPulseTime();
-          const auto totalDuration = maxTime - minTime;
-          double totalDurationSec = totalDuration.seconds();
-          parseUniform(timeSlicingValues, totalDurationSec, startTimes,
-            stopTimes);
+          parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
+                       stopTimes);
           numSlices = std::min(numSlices, startTimes.size());
         }
       }

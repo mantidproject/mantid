@@ -71,12 +71,10 @@ private:
   // Process a group of runs which are not event workspaces
   bool processGroupAsNonEventWS(int groupID, const GroupData &group);
 
-  // Parse uniform even time slicing from input string
-  void parseUniformEven(const std::string &timeSlicing, double totalDuration,
-                        std::vector<double> &startTimes,
-                        std::vector<double> &stopTimes);
-  // Parse uniform even time slicing from input string
-  void parseUniform(const std::string &timeSlicing, double totalDuration,
+
+  // Parse uniform / uniform even time slicing from input string
+  void parseUniform(const std::string &timeSlicing,
+                    const std::string &slicingType, const std::string &wsName,
                     std::vector<double> &startTimes,
                     std::vector<double> &stopTimes);
   // Parse custom time slicing from input string
