@@ -10,6 +10,7 @@
 ################################################################################
 import csv
 import random
+import os
 
 from fourcircle_utility import *
 from peakprocesshelper import PeakProcessRecord
@@ -24,8 +25,9 @@ from mantid.kernel import V3D
 
 DebugMode = True
 
-DET_X_SIZE = 256
-DET_Y_SIZE = 256
+# TODO - changed without configuration
+DET_X_SIZE = 512
+DET_Y_SIZE = 512
 
 MAX_SCAN_NUMBER = 100000
 
@@ -748,6 +750,7 @@ class CWSCDReductionControl(object):
         raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
+        print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
         array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
@@ -1472,17 +1475,23 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
+        # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+        new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+        if os.path.exists(new_idf_name) is False:
+            raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           DetectorGeometry='256,256',
+                                           # FIXME - Need UI input
+                                           DetectorGeometry='512,512',
+                                           InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
         except RuntimeError as run_err:
             return False, str(run_err)
 
         # Add data storage
-        assert AnalysisDataService.doesExist(pt_ws_name)
+        assert AnalysisDataService.doesExist(pt_ws_name), 'blabla'
         raw_matrix_ws = AnalysisDataService.retrieve(pt_ws_name)
         self._add_raw_workspace(exp_no, scan_no, pt_no, raw_matrix_ws)
 
@@ -1510,9 +1519,27 @@ class CWSCDReductionControl(object):
         # get the workspace
         ws_name_list = ''
         for i_ws, ws_name in enumerate(scan_md_ws_list):
+            # build the input MDWorkspace list
             if i_ws != 0:
                 ws_name_list += ', '
             ws_name_list += ws_name
+
+            # rebin the MDEventWorkspace to make all MDEventWorkspace have same MDGrid
+            md_ws = AnalysisDataService.retrieve(ws_name)
+            frame = md_ws.getDimension(0).getMDFrame().name()
+
+            if frame == 'HKL':
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='H,-10,10,1',
+                                     AlignedDim1='K,-10,10,1',
+                                     AlignedDim2='L,-10,10,1',
+                                     OutputWorkspace=ws_name)
+            else:
+                mantidsimple.SliceMD(InputWorkspace=ws_name,
+                                     AlignedDim0='Q_sample_x,-10,10,1',
+                                     AlignedDim1='Q_sample_y,-10,10,1',
+                                     AlignedDim2='Q_sample_z,-10,10,1',
+                                     OutputWorkspace=ws_name)
         # END-FOR
 
         # merge
@@ -1692,6 +1719,13 @@ class CWSCDReductionControl(object):
                 # set up the user-defined wave length
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
+                # TODO/FIXME/NOW - Should get a flexible way to define IDF or no IDF
+                # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+                new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+                if os.path.exists(new_idf_name) is False:
+                    raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
+                alg_args['InstrumentFilename'] = new_idf_name
 
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)

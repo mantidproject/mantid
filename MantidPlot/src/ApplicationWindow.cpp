@@ -5338,6 +5338,8 @@ void ApplicationWindow::readSettings() {
   settings.endGroup();
   settings.endGroup();
   // END Mantid Muon interface one time only change
+
+  emit configModified();
 }
 
 void ApplicationWindow::saveSettings() {

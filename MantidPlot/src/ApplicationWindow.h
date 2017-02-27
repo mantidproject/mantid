@@ -1123,6 +1123,7 @@ public slots:
 signals:
   void modified();
   void shutting_down();
+  void configModified();
 
 protected:
   bool event(QEvent *e) override;

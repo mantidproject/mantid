@@ -162,6 +162,7 @@ void RotationSurface::init() {
                             udet.u = applyUCorrection(udet.u);
                           }
                         }
+                        updateViewRectForUCorrection();
 }
 
 /** Update the view rect to account for the U correction
