@@ -61,13 +61,10 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18875 | Displays all of instrument when U correction applied                              | Apply U correction in appropriate all places| **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-<<<<<<< HEAD
-=======
 | 18884 | Allows Vesuvio to Load NeXus files from current cycle                             | Use Load not LoadRaw in algorithm           | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18888 | Fixes batch reduction for LOQ at ISIS                                             | Checks correctly for userfile in batch run  | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
->>>>>>> origin/release-v3.9
 | 18891 | Fixes bug in gd_prtn_chrg for chunked data                                        | Recalculate proton charge just prior to use | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18907 | Allows IMAT to use general file finding mechanism                                 | Facilities file update                      | **low**      |
@@ -78,9 +75,6 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpretation of list indices in GUI   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-<<<<<<< HEAD
-| 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
-=======
 | 18927 | Allow Vesuvio to sum runs in diffraction reduction                                | Fix incorrect assignment in loop            | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18955 | Avoid possible crash in algorithm monitor dialog                                  | Check for null pointer                      | **low**      |
@@ -88,7 +82,6 @@ Summary of impact
 | 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18972 | Loads data with/without dead-time correction as per user request                  | Clear data cache after option is updated    | **low**      |
->>>>>>> origin/release-v3.9
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18979 | Brings back delete confirmation dialog on removing workspace                      | Propagate setting to relevant objects       | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
