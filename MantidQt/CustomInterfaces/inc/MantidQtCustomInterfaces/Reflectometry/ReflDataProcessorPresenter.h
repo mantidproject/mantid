@@ -61,7 +61,7 @@ private:
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix,
-                                            double startTime, double stopTime);
+                                            size_t index);
   // Loads a group of runs
   bool loadGroup(const GroupData &group);
   // Process a group of runs which are event workspaces

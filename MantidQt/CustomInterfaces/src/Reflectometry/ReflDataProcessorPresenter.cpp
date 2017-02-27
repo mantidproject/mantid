@@ -503,8 +503,8 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
   }
 
+  std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-  std::vector<double> startTimes, stopTimes; // Unused, but needed for parsing
   size_t numSlices;
 
   // No. of slices can be predetermined with uniform even or custom slicing
@@ -569,20 +569,17 @@ void ReflDataProcessorPresenter::plotRow() {
 *
 * @param groupData : The data in a given group
 * @param prefix : A prefix to be appended to the generated ws name
-* @param startTime : start time of the slice
-* @param stopTime : stop time of the slice
+* @param index : The index of the slice
 * @returns : The name of the workspace
 */
 std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData, const std::string &prefix, double startTime,
-    double stopTime) {
+    const GroupData &groupData, const std::string &prefix, size_t index) {
 
   std::vector<std::string> outputNames;
 
   for (const auto &data : groupData) {
-    outputNames.push_back(getReducedWorkspaceName(data.second) + "_" +
-                          std::to_string((int)startTime) + "_" +
-                          std::to_string((int)stopTime));
+    outputNames.push_back(getReducedWorkspaceName(data.second) + "_slice_" +
+                          std::to_string(index));
   }
   return prefix + boost::join(outputNames, "_");
 }
@@ -599,10 +596,14 @@ void ReflDataProcessorPresenter::plotGroup() {
 
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+  size_t numSlices;
 
-  if (timeSlicingType == "Custom")
+  // No. of slices can be predetermined with uniform even or custom slicing
+  if (timeSlicingType == "UniformEven")
+    parseUniformEven(timeSlicingValues, .0, startTimes, stopTimes);
+  else if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
-  size_t numSlices = startTimes.size();
+  numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
@@ -615,10 +616,32 @@ void ReflDataProcessorPresenter::plotGroup() {
 
     if (item.second.size() > 1) {
 
+      // For uniform slicing, we must parse through each workspace to find the
+      // minimum number of slices
+      if (timeSlicingType == "Uniform") {
+        numSlices = INT_MAX;
+
+        for (const auto &run : item.second) {
+          // We need the duration between first/last pulses to get no. of slices
+          const std::string wsName =
+              getReducedWorkspaceName(run.second, "TOF_");
+          IEventWorkspace_const_sptr mws =
+              AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                  wsName);
+          const auto minTime = mws->getFirstPulseTime();
+          const auto maxTime = mws->getLastPulseTime();
+          const auto totalDuration = maxTime - minTime;
+          double totalDurationSec = totalDuration.seconds();
+          parseUniform(timeSlicingValues, totalDurationSec, startTimes,
+            stopTimes);
+          numSlices = std::min(numSlices, startTimes.size());
+        }
+      }
+
       for (size_t slice = 0; slice < numSlices; slice++) {
 
-        const std::string wsName = getPostprocessedWorkspaceName(
-            item.second, "IvsQ_", startTimes[slice], stopTimes[slice]);
+        const std::string wsName =
+            getPostprocessedWorkspaceName(item.second, "IvsQ_", slice);
 
         if (AnalysisDataService::Instance().doesExist(wsName))
           workspaces.insert(wsName);
