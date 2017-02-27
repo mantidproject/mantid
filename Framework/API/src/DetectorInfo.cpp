@@ -192,6 +192,8 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
       m_sourcePos = m_source->getPos();
     if (m_sample)
       m_samplePos = m_sample->getPos();
+    if (m_source && m_sample)
+      m_L1 = m_sourcePos.distance(m_samplePos);
     // Detector positions are currently not cached, the cached pointers to
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
@@ -234,6 +236,8 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
       m_sourcePos = m_source->getPos();
     if (m_sample)
       m_samplePos = m_sample->getPos();
+    if (m_source && m_sample)
+      m_L1 = m_sourcePos.distance(m_samplePos);
     // Detector positions and rotations are currently not cached, the cached
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
