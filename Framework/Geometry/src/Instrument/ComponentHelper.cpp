@@ -48,9 +48,8 @@ void moveComponent(const IComponent &comp, ParameterMap &pmap,
   auto parent = comp.getParent();
   if (parent) {
     newPos -= parent->getPos();
-    Quat rot = parent->getRotation();
-    rot.inverse();
-    rot.rotate(newPos);
+    Quat rotInv = parent->getRotation().inverse();
+    rotInv.rotate(newPos);
   }
 
   // Add a parameter for the new position
@@ -78,9 +77,8 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     // Find the corresponding relative position
     auto parent = comp.getParent();
     if (parent) {
-      Quat rot0 = parent->getRotation();
-      rot0.inverse();
-      newRot = rot0 * rot;
+      Quat rot0Inv = parent->getRotation().inverse();
+      newRot = rot0Inv * rot;
     }
   } else if (rotType == Relative) {
     const Quat &Rot0 = comp.getRelativeRot();

@@ -280,8 +280,7 @@ const V3D ObjComponent::factorOutComponentPosition(const V3D &point) const {
 const V3D ObjComponent::takeOutRotation(V3D point) const {
   // Get the total rotation of this component and calculate the inverse (reverse
   // rotation)
-  Quat unRotate = this->getRotation();
-  unRotate.inverse();
+  Quat unRotate = this->getRotation().inverse();
   // Now rotate our point by the angle calculated above
   unRotate.rotate(point);
 

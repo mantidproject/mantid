@@ -311,15 +311,13 @@ void LoadIsawDetCal::exec() {
       const auto comp = inst->getComponentByName(detname);
       const auto parent = comp->getParent();
       if (parent) {
-        Quat rot0 = parent->getRelativeRot();
-        rot0.inverse();
-        Rot *= rot0;
+        Quat rot0Inv = parent->getRelativeRot().inverse();
+        Rot *= rot0Inv;
       }
       const auto grandparent = parent->getParent();
       if (grandparent) {
-        Quat rot0 = grandparent->getRelativeRot();
-        rot0.inverse();
-        Rot *= rot0;
+        Quat rot0Inv = grandparent->getRelativeRot().inverse();
+        Rot *= rot0Inv;
       }
 
       if (inputW) {
@@ -393,15 +391,13 @@ void LoadIsawDetCal::exec() {
 
       const auto parent = comp->getParent();
       if (parent) {
-        Quat rot0 = parent->getRelativeRot();
-        rot0.inverse();
-        Rot = Rot * rot0;
+        Quat rot0Inv = parent->getRelativeRot().inverse();
+        Rot *= rot0Inv;
       }
       const auto grandparent = parent->getParent();
       if (grandparent) {
-        Quat rot0 = grandparent->getRelativeRot();
-        rot0.inverse();
-        Rot = Rot * rot0;
+        Quat rot0Inv = grandparent->getRelativeRot().inverse();
+        Rot *= rot0Inv;
       }
 
       if (inputW) {

@@ -212,9 +212,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     Up.normalize();
     ToSamp.normalize();
     Quat thisRot(Base, Up, ToSamp);
-    Quat bankRot(bank->getRotation());
-    bankRot.inverse();
-    Quat dRot = thisRot * bankRot;
+    Quat bankRotInv(bank->getRotation().inverse());
+    Quat dRot = thisRot * bankRotInv;
 
     auto bankR =
         boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bank);
