@@ -243,24 +243,6 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
 */
 Geometry::ParameterMap &ExperimentInfo::instrumentParameters() {
   populateIfNotLoaded();
-  // TODO: Here duplicates cow_ptr. Figure out if there's a better way
-
-  // Use a double-check for sharing so that we only
-
-  // enter the critical region if absolutely necessary
-  if (!m_parmap.unique()) {
-    std::lock_guard<std::recursive_mutex> lock(m_mutex);
-    // Check again because another thread may have taken copy
-    // and dropped reference count since previous check
-    if (!m_parmap.unique()) {
-      m_spectrumInfoWrapper = nullptr;
-      m_detectorInfoWrapper = nullptr;
-    }
-    if (!m_parmap.unique()) {
-      ParameterMap_sptr oldData = m_parmap;
-      m_parmap = boost::make_shared<ParameterMap>(*oldData);
-    }
-  }
   return *m_parmap;
 }
 
@@ -1048,6 +1030,7 @@ DetectorInfo &ExperimentInfo::mutableDetectorInfo() {
   // is not nullptr: 1 from the ExperimentInfo, 1 from DetectorInfo). If then
   // the ExperimentInfo is not the sole owner of the ParameterMap a copy is
   // triggered.
+  m_spectrumInfoWrapper = nullptr;
   auto pmap = &instrumentParameters();
   // Here `getInstrument` creates a parameterized instrument, increasing the
   // reference count to the ParameterMap. This has do be done *after* getting
