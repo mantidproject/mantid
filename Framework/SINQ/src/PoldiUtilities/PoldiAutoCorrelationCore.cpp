@@ -118,7 +118,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      *  - d-resolution deltaD, which results directly from deltaT
      *  - number of time bins for each copper cycle
      */
-    auto &timeData = m_countData->x(0);
+    const auto &timeData = m_countData->x(0);
 
     m_logger.information() << "  Setting time data...\n";
     m_deltaT = timeData[1] - timeData[0];

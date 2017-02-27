@@ -323,14 +323,14 @@ public:
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
 
-    auto &qValues = output->x(0);
+    const auto &qValues = output->x(0);
     // qvalues should be reversed.
     TS_ASSERT_EQUALS(qValues[0], Conversions::dToQ(dValues[3]));
     TS_ASSERT_EQUALS(qValues[1], Conversions::dToQ(dValues[2]));
     TS_ASSERT_EQUALS(qValues[2], Conversions::dToQ(dValues[1]));
     TS_ASSERT_EQUALS(qValues[3], Conversions::dToQ(dValues[0]));
 
-    auto &outputIntensities = output->y(0);
+    const auto &outputIntensities = output->y(0);
     // intensities are not reversed, they should be reversed already.
     TS_ASSERT_EQUALS(outputIntensities[0], intensities[0]);
     TS_ASSERT_EQUALS(outputIntensities[1], intensities[1]);

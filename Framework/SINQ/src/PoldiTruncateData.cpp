@@ -68,7 +68,7 @@ void PoldiTruncateData::setTimeBinWidthFromWorkspace(
         "Workspace does not contain any data. Aborting.");
   }
 
-  auto &xData = workspace->x(0);
+  const auto &xData = workspace->x(0);
 
   if (xData.size() < 2) {
     throw std::invalid_argument(

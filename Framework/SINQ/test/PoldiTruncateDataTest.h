@@ -177,7 +177,7 @@ public:
     // number of histograms does not change
     TS_ASSERT_EQUALS(cropped->getNumberHistograms(), 1);
 
-    auto &xData = cropped->x(0);
+    const auto &xData = cropped->x(0);
 
     TS_ASSERT_EQUALS(xData.size(), 500);
 
@@ -207,7 +207,7 @@ public:
     // number of histograms does not change
     TS_ASSERT_EQUALS(cropped->getNumberHistograms(), 1);
 
-    auto &xData = cropped->x(0);
+    const auto &xData = cropped->x(0);
 
     TS_ASSERT_EQUALS(xData.size(), 100);
 
@@ -226,7 +226,7 @@ public:
 
     MatrixWorkspace_sptr below = truncate.getWorkspaceBelowX(workspace, 1497.0);
 
-    auto &x = below->x(0);
+    const auto &x = below->x(0);
 
     TS_ASSERT_EQUALS(x.size(), 500);
     TS_ASSERT_EQUALS(x.front(), 0.0);
@@ -239,7 +239,7 @@ public:
 
     MatrixWorkspace_sptr above = truncate.getWorkspaceAboveX(workspace, 1500.0);
 
-    auto &x = above->x(0);
+    const auto &x = above->x(0);
 
     TS_ASSERT_EQUALS(x.size(), 100);
     TS_ASSERT_EQUALS(x.front(), 1500.0);

@@ -96,8 +96,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace);
     TS_ASSERT_EQUALS(data->getNumberHistograms(), 1);
-    auto &X = data->x(0);
-    auto &Y = data->y(0);
+    const auto &X = data->x(0);
+    const auto &Y = data->y(0);
     double dSum = std::accumulate(Y.cbegin(), Y.cend(), 0.);
     TS_ASSERT_EQUALS(dSum, 198812);
 
