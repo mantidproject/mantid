@@ -1631,7 +1631,8 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
  * Fill map with instrument parameter first set in xml file
  * Where this is appropriate a parameter value is dependent on values in a log
  * entry
- * @param paramMap Map to populate
+ * @param paramMap Map to populate (except for position and rotation parameters)
+ * @param paramMapForPosAndRot Map to populate with positions and rotations
  * @param name The name of the parameter
  * @param paramInfo A reference to the object describing this parameter
  * @param runData A reference to the run object, which stores log value entries
