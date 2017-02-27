@@ -177,7 +177,7 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
                                const Kernel::V3D &pos) {
   if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
     const auto index = indexOf(det->getID());
-    m_detectorInfo.setPosition(index, Kernel::toVector3d(pos));
+    setPosition(index, pos);
   } else {
     // This will go badly wrong if the parameter map in the component is not
     // identical to ours, but there does not seem to be a way to check?
@@ -203,8 +203,7 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     const auto delta = pos - oldPos;
     for (const auto &det : dets) {
       const auto index = indexOf(det->getID());
-      m_detectorInfo.setPosition(index,
-                                 Kernel::toVector3d(position(index) + delta));
+      setPosition(index, position(index) + delta);
     }
   }
 }
@@ -218,7 +217,7 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
                                const Kernel::Quat &rot) {
   if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
     const auto index = indexOf(det->getID());
-    m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rot));
+    setRotation(index, rot);
   } else {
     // This will go badly wrong if the parameter map in the component is not
     // identical to ours, but there does not seem to be a way to check?
@@ -246,11 +245,10 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     m_instrument->getDetectorsInBank(dets, *comp.getBaseComponent());
     for (const auto &det : dets) {
       const auto index = indexOf(det->getID());
-      m_detectorInfo.setRotation(
-          index, Kernel::toQuaterniond(delta * rotation(index)));
+      setRotation(index, delta * rotation(index));
       auto relativePos = position(index) - pos;
       delta.rotate(relativePos);
-      m_detectorInfo.setPosition(index, Kernel::toVector3d(relativePos + pos));
+      setPosition(index, relativePos + pos);
     }
   }
 }
