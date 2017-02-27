@@ -1250,7 +1250,9 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 /// DetectorInfo (masking, positions, rotations).
 boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+  // Information will be stored directly in pmap so we do not need DetectorInfo.
   pmap->setDetectorInfo(nullptr);
+  // Instrument is only needed for DetectorInfo access so it is not needed.
   pmap->setInstrument(nullptr);
 
   if (!hasDetectorInfo())
