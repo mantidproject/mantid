@@ -2,7 +2,6 @@
 #define SCDCALIBRATEPANELS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidKernel/Quat.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -132,9 +131,10 @@ public:
   *the
   *                        NewInstrument's parameter map.
    */
-  static void fixUpSamplePosition(
+  static void fixUpSourceParameterMap(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      double const L0, Kernel::V3D const newSampPos, API::DetectorInfo &detectorInfo);
+      double const L0, Kernel::V3D const newSampPos,
+      boost::shared_ptr<const Geometry::ParameterMap> const pmapOld);
 
   /**
    *  Copies positional entries in pmapSv to pmap starting at bank_const
@@ -151,6 +151,19 @@ public:
   updateBankParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
                    boost::shared_ptr<Geometry::ParameterMap> pmap,
                    boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
+
+  /**
+   *  Copies positional entries in pmapSv to pmap starting at bank_const
+   *  and parents.
+   *  @param  bank_const  the starting component for copying entries.
+   *  @param pmap        the Parameter Map to be updated
+   *  @param pmapSv       the original Parameter Map
+   *
+   */
+  static void
+  updateSourceParams(boost::shared_ptr<const Geometry::IComponent> bank_const,
+                     boost::shared_ptr<Geometry::ParameterMap> pmap,
+                     boost::shared_ptr<const Geometry::ParameterMap> pmapSv);
 
 private:
   void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
