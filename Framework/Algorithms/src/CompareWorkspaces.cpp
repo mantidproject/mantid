@@ -764,7 +764,8 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
   }
 
   if (!ws1->detectorInfo().isEquivalent(ws2->detectorInfo())) {
-    recordMismatch("DetectorInfo mismatch");
+    recordMismatch("DetectorInfo mismatch (position differences larger than "
+                   "1e-9 m or other difference found)");
     return false;
   }
 
