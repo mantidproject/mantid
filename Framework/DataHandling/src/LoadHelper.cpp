@@ -6,7 +6,7 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
