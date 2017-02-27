@@ -10,6 +10,7 @@ Algorithms
 
 * :ref:`algm-SpecularReflectionPositionCorrect2 <algm-SpecularReflectionPositionCorrect2> - fixed a bug where entering
   an invalid detector or sample name would cause a segmentation fault.
+* The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``DetectorCorrectionType``, which specifies whether detector positions should be corrected by a vertical shift (default) or by a rotation around the sample position.
 
 ConvertToReflectometryQ
 -----------------------
