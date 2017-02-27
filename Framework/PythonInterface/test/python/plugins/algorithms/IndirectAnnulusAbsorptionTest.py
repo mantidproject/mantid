@@ -1,12 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import LoadNexusProcessed, IndirectAnnulusAbsorption
 from mantid.api import *
 
 
 class IndirectAnnulusAbsorptionTest(unittest.TestCase):
-
     def setUp(self):
         """
         Loads the reduced container and sample files.
@@ -17,7 +16,6 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
 
         self._can_ws = can_ws
         self._red_ws = red_ws
-
 
     def _test_workspaces(self, corrected, factor_group):
         """
@@ -39,7 +37,6 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
             y_unit = ws.YUnitLabel()
             self.assertEqual(y_unit, 'Attenuation factor')
 
-
     def test_sample_corrections_only(self):
         """
         Tests corrections for the sample only.
@@ -48,11 +45,11 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
                                                     SampleChemicalFormula='H2-O',
                                                     Events=200,
-                                                    UseCanCorrections=False)
+                                                    UseCanCorrections=False,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
-
 
     def test_sample_and_can_subtraction(self):
         """
@@ -63,11 +60,11 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
                                                     SampleChemicalFormula='H2-O',
                                                     CanWorkspace=self._can_ws,
                                                     Events=200,
-                                                    UseCanCorrections=False)
+                                                    UseCanCorrections=False,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
-
 
     def test_sample_and_can_subtraction_with_scale(self):
         """
@@ -80,11 +77,11 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
                                                     CanWorkspace=self._can_ws,
                                                     CanScaleFactor=0.8,
                                                     Events=200,
-                                                    UseCanCorrections=False)
+                                                    UseCanCorrections=False,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 1)
         self._test_workspaces(corrected, fact)
-
 
     def test_sample_and_can_corrections(self):
         """
@@ -97,7 +94,8 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
                                                     CanChemicalFormula='V',
                                                     CanScaleFactor=0.8,
                                                     Events=200,
-                                                    UseCanCorrections=True)
+                                                    UseCanCorrections=True,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -108,15 +106,16 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         """
 
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
-                                       SampleChemicalFormula='H2-O',
-                                       SampleDensityType='Number Density',
-                                       SampleDensity=0.5,
-                                       CanWorkspace=self._can_ws,
-                                       CanChemicalFormula='V',
-                                       CanDensityType='Number Density',
-                                       CanDensity=0.5,
-                                       Events = 200,
-                                       UseCanCorrections = True)
+                                                    SampleChemicalFormula='H2-O',
+                                                    SampleDensityType='Number Density',
+                                                    SampleDensity=0.5,
+                                                    CanWorkspace=self._can_ws,
+                                                    CanChemicalFormula='V',
+                                                    CanDensityType='Number Density',
+                                                    CanDensity=0.5,
+                                                    Events=200,
+                                                    UseCanCorrections=True,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
@@ -127,18 +126,20 @@ class IndirectAnnulusAbsorptionTest(unittest.TestCase):
         """
 
         corrected, fact = IndirectAnnulusAbsorption(SampleWorkspace=self._red_ws,
-                                       SampleChemicalFormula='H2-O',
-                                       SampleDensityType='Mass Density',
-                                       SampleDensity=0.5,
-                                       CanWorkspace=self._can_ws,
-                                       CanChemicalFormula='V',
-                                       CanDensityType='Mass Density',
-                                       CanDensity=0.5,
-                                       Events = 200,
-                                       UseCanCorrections = True)
+                                                    SampleChemicalFormula='H2-O',
+                                                    SampleDensityType='Mass Density',
+                                                    SampleDensity=0.5,
+                                                    CanWorkspace=self._can_ws,
+                                                    CanChemicalFormula='V',
+                                                    CanDensityType='Mass Density',
+                                                    CanDensity=0.5,
+                                                    Events=200,
+                                                    UseCanCorrections=True,
+                                                    Version=1)
 
         self.assertEqual(fact.size(), 2)
         self._test_workspaces(corrected, fact)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -62,6 +62,7 @@
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "SelectionMoveResizer.h"
+#include "Spectrogram.h"
 #include <ColorButton.h>
 
 #include "Mantid/MantidMDCurve.h"
@@ -1856,6 +1857,39 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</multiLayer>");
 
   return tsv.outputLines();
+}
+
+std::vector<std::string> MultiLayer::getWorkspaceNames() {
+  std::vector<std::string> names;
+  std::string name;
+  MantidMatrixCurve *mmc;
+  Spectrogram *spec;
+  for (auto graph : graphsList) {
+    for (int i = 0; i < graph->getNumCurves(); ++i) {
+      auto item = graph->plotItem(i);
+
+      switch (item->rtti()) {
+      case QwtPlotItem::Rtti_PlotUserItem:
+        mmc = dynamic_cast<MantidMatrixCurve *>(item);
+        if (!mmc)
+          continue;
+
+        name = mmc->workspaceName().toStdString();
+        names.push_back(name);
+        break;
+      case QwtPlotItem::Rtti_PlotSpectrogram:
+        spec = dynamic_cast<Spectrogram *>(item);
+        if (!spec)
+          continue;
+
+        name = spec->workspaceName();
+        names.push_back(name);
+        break;
+      }
+    }
+  }
+
+  return names;
 }
 
 /**

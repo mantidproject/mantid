@@ -5,16 +5,16 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include <iosfwd>
 
 namespace Mantid {
-namespace DatHandling {
+namespace DataHandling {
 
 class DLLExport SaveOpenGenieAscii : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  SaveOpenGenieAscii();
+  SaveOpenGenieAscii() = default;
+  ~SaveOpenGenieAscii() = default;
 
   /// Algorithm's name
   const std::string name() const override { return "SaveOpenGenieAscii"; }
@@ -33,44 +33,64 @@ public:
   }
 
 private:
+  /// Typedef of a tuple containing the name, type and value as strings
+  using OutputBufferEntry = std::tuple<std::string, std::string, std::string>;
+
   /// Initialisation code
   void init() override;
 
   /// Execution code
   void exec() override;
 
-  // write file header
-  void writeFileHeader(std::ofstream &outfile);
+  inline void addToOutputBuffer(const std::string &outName,
+                                const std::string &outType,
+                                const std::string &outVal) {
+    m_outputVector.push_back(OutputBufferEntry(outName, outType, outVal));
+  }
 
-  /// Uses AxisHeader and WriteAxisValues to write out file
-  void axisToFile(const std::string alpha, const std::string singleSpc,
-                  const std::string fourspc, int nBins, bool isHistogram);
+  /// Adds ENGINX related data which is required for OpenGenie
+  void applyEnginxFormat();
 
-  /// Generates the header for the axis which saves to file
-  std::string getAxisHeader(const std::string alpha,
-                            const std::string singleSpc,
-                            const std::string fourspc, int nBins);
+  /// Calculate delta x/y/z from the log files for ENGINX
+  void calculateXYZDelta(const std::string &unit,
+                         const Kernel::Property *values);
 
-  /// Reads if alpha is e then reads the E values accordingly
-  std::string getAxisValues(std::string alpha, int bin,
-                            const std::string singleSpc);
+  /// Converts XYE data to a tuple containing the OPENGENIE string and store
+  /// it into the output buffer
+  template <typename T>
+  void convertWorkspaceData(const T &histoData, const char &axis);
 
-  /// Generates the header which saves to the openGenie file
-  void getSampleLogs(std::string fourspc);
+  /// Determines the ENGIN-X bank from the detectors IDs present
+  void determineEnginXBankId();
 
-  /// sort and write out the sample logs
-  void writeSampleLogs(std::ofstream &outfile);
+  /// Parses and stores appropriate output logs into the output buffer
+  void getSampleLogs();
 
-  /// add ntc field which is required for OpenGenie
-  void addNtc(const std::string fourspc, int nBins);
+  /// Validates that workspace is focused and not empty
+  void inputValidation();
 
-  /// apply enginX format field which is required for OpenGenie
-  void applyEnginxFormat(const std::string fourspc);
+  /// Attempts to open the user specified file path as an output stream
+  void openFileStream(std::ofstream &stream);
 
-  /// Vector to safe sample log
-  std::vector<std::string> logVector;
-  /// Workspace
-  API::MatrixWorkspace_sptr ws;
+  /// Stores fields that aren't found in the WS but required by OpenGenie
+  void storeEmptyFields();
+
+  /// Stores parameters from the workspace which are required for OpenGenie
+  void storeWorkspaceInformation();
+
+  /// sorts and writes out the data portion of the file
+  void writeDataToFile(std::ofstream &outfile);
+
+  /// Output buffer which holds the tuples to be written
+  std::vector<OutputBufferEntry> m_outputVector;
+  /// Workspace to save
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// Output type - String
+  const std::string m_stringType = "String";
+  /// Output type - Float
+  const std::string m_floatType = "Float";
+  /// Output type - Integer
+  const std::string m_intType = "Integer";
 };
 }
 }

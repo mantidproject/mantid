@@ -291,11 +291,9 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
 }
 
 /**
- * Updates function prior to running a fit
+ * Requests checks and updates prior to running a fit
  */
-void MuonFitPropertyBrowser::fit() {
-  emit functionUpdateAndFitRequested(false);
-}
+void MuonFitPropertyBrowser::fit() { emit preFitChecksRequested(false); }
 
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -385,10 +383,10 @@ void MuonFitPropertyBrowser::runSequentialFit() {
 }
 
 /**
- * Update function prior to running a sequential fit
+ * Requests checks and updates prior to running a sequential fit
  */
 void MuonFitPropertyBrowser::sequentialFit() {
-  emit functionUpdateAndFitRequested(true);
+  emit preFitChecksRequested(true);
 }
 
 /**
@@ -530,9 +528,6 @@ void MuonFitPropertyBrowser::setFunction(const IFunction_sptr func) {
  * @param wsNames :: [input] List of workspace names to fit
  */
 void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
-  // Extend base class behaviour
-  IWorkspaceFitControl::setWorkspaceNames(wsNames);
-
   m_workspacesToFit.clear();
   std::transform(wsNames.begin(), wsNames.end(),
                  std::back_inserter(m_workspacesToFit),
@@ -580,6 +575,15 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
       widget->setVisible(enabled);
     }
   }
+}
+
+/**
+ * The pre-fit checks have been successfully completed. Continue by emitting a
+ * signal to update the function and request the fit.
+ * @param sequential :: [input] Whether fit is sequential or not
+ */
+void MuonFitPropertyBrowser::continueAfterChecks(bool sequential) {
+  emit functionUpdateAndFitRequested(sequential);
 }
 
 /**

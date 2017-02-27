@@ -34,9 +34,11 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return "Workflow\\MIDAS;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs an energy transfer reduction for ILL indirect inelastic data.'
+        return 'Performs an energy transfer reduction for ILL indirect inelastic data.' \
+               'This algorithm is deprecated (20-Nov-2016). Use IndirectILLReductionQENS instead.'
 
     def PyInit(self):
+
         # Input options
         self.declareProperty(FileProperty('Run', '',
                                           action=FileAction.Load,
@@ -108,6 +110,9 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
+        self.log().error('This algorithm is deprecated (20-Nov-2016). '
+                         'Use IndirectILLReductionQENS instead.')
+
         self.log().information('IndirectILLreduction')
 
         run_path = self.getPropertyValue('Run')
@@ -122,7 +127,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
 
-        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
+        LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace, Version=1)
 
         instrument = mtd[self._raw_workspace].getInstrument()
         self._instrument_name = instrument.getName()

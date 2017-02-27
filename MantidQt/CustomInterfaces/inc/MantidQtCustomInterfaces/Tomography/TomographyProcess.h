@@ -38,15 +38,26 @@ public:
 
   // intentionally copy the vector
   void setup(const std::string &runnable, const std::vector<std::string> &args,
-             const std::string &allOpts) {
-    m_allArgs = allOpts;
+             const std::string &allOpts,
+             const std::string &workerName = "Mantid_Local") {
     m_runnable = QString::fromStdString(runnable);
     m_args = buildArguments(args);
+    m_allArgs = allOpts;
+    m_workerName = workerName;
   }
 
   std::string getRunnable() const { return m_runnable.toStdString(); }
   std::string getArgs() const { return m_allArgs; }
+  std::string getName() const { return m_workerName; }
 
+  /**
+   * This method must be called after the process has emitted started().
+   * Otherwise the returned PID is wrong, as it has not been assigned
+   * a PID from the OS.
+   *
+   * The PID here is read after the process emits started()
+   * by a connection to addJobToStatus() by the Presenter.
+   */
   qint64 getPID() const {
     auto pid = this->pid();
 
@@ -87,6 +98,7 @@ private:
   QStringList m_args;
 
   std::string m_allArgs;
+  std::string m_workerName;
 };
 } // CustomInterfaces
 } // MantidQt

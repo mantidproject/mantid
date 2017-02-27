@@ -1,5 +1,7 @@
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from CrystalField.energies import energies as CFEnergy
+from six import iteritems
 
 
 def _get_normalisation(nre, bnames):
@@ -170,7 +172,7 @@ def split2range(*args, **kwargs):
         if isinstance(args[ia], basestring) and args[ia].startswith('B'):
             argin['Parameters'].append(args[ia])
     # Parses the keyword arguments
-    for key, value in kwargs.iteritems():
+    for key, value in iteritems(kwargs):
         for ia in range(len(argnames)):
             if key == argnames[ia]:
                 argin[key] = value

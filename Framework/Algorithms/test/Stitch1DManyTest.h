@@ -133,6 +133,13 @@ public:
   static Stitch1DManyTest *createSuite() { return new Stitch1DManyTest(); }
   static void destroySuite(Stitch1DManyTest *suite) { delete suite; }
 
+  Stitch1DManyTest() {
+    auto ws1 = WorkspaceFactory::Instance().createTable();
+    auto ws2 = WorkspaceFactory::Instance().createTable();
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
+  }
+
   void test_init() {
     Stitch1DMany alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -145,8 +152,6 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1");
     alg.setProperty("Params", "0.1, 0.1, 1.8");
-    alg.setProperty("StartOverlaps", "0.8");
-    alg.setProperty("EndOverlaps", "1.1");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
@@ -175,30 +180,17 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
 
-  void test_throws_if_no_params() {
-    Stitch1DMany alg;
-    alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspaces", "ws1, ws2");
-    alg.setProperty("StartOverlaps", "-0.5, -0.6");
-    alg.setProperty("EndOverlaps", "0.5, 0.6");
-    alg.setPropertyValue("OutputWorkspace", "outws");
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-  }
-
   void test_workspace_types_differ_throws() {
     // One table workspace, one matrix workspace
     auto ws1 = createUniformWorkspace(0.1, 0.1, 1., 2.);
     auto ws2 = WorkspaceFactory::Instance().createTable();
-    AnalysisDataService::Instance().add("ws1", ws1);
-    AnalysisDataService::Instance().add("ws2", ws2);
+    AnalysisDataService::Instance().addOrReplace("ws1", ws1);
+    AnalysisDataService::Instance().addOrReplace("ws2", ws2);
     Stitch1DMany alg;
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("InputWorkspaces", "ws1, ws2");
     alg.setProperty("Params", "0.1");
-    alg.setProperty("StartOverlaps", "-0.5, -0.6");
-    alg.setProperty("EndOverlaps", "0.5, 0.6");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
@@ -222,8 +214,6 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "group1, group2");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setProperty("StartOverlaps", "0.8, 1.6");
-    alg.setProperty("EndOverlaps", "1.1, 1.8");
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
   }
@@ -259,10 +249,6 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspaces", "group1, group2, group3");
     alg.setProperty("Params", "0.1, 0.1, 2.6");
-    alg.setProperty("StartOverlaps", "0.8, 1.6");
-    alg.setProperty("EndOverlaps", "1.1, 1.9");
-    alg.setProperty("UseManualScaleFactor", "1");
-    alg.setProperty("ManualScaleFactor", 1.0);
     alg.setProperty("ScaleFactorFromPeriod", 4);
     alg.setPropertyValue("OutputWorkspace", "outws");
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);

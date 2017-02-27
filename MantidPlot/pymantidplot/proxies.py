@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module containing classes that act as proxies to the various MantidPlot gui objects that are
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
@@ -734,11 +734,12 @@ class SliceViewerWindowProxy(QtProxyObject):
         # Set the width.
         if not width is None:
             liner.setThickness(width)
+            liner.setPlanarWidth(width*0.5)
         else:
-            liner.setPlanarWidth(planar_width)
+            liner.setPlanarWidth(planar_width*0.5)
             if not thicknesses is None:
                 for d in xrange(len(thicknesses)):
-                    liner.setThickness(d, thicknesses[i])
+                    liner.setThickness(d, thicknesses[d])
         # Bins
         liner.setNumBins(num_bins)
         liner.apply()

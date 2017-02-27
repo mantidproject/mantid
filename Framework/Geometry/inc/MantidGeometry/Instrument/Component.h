@@ -3,21 +3,10 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+
 #include <string>
 #include <typeinfo>
 #include <vector>
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 namespace Poco {
 namespace XML {

@@ -88,6 +88,7 @@ _translations = {
     'Federico M Pouzols'      : 'Pouzols, Federico M',
     'FedeMPouzols'            : 'Pouzols, Federico M',
     'Federico Montesino Pouzols': 'Pouzols, Federico M',
+    'Fede'                    : 'Pouzols, Federico M',
     'Anton Piccardo-Selg'     : 'Piccardo-Selg, Anton',
     'Lottie Greenwood'        : 'Greenwood, Lottie',
     'Dan Nixon'               : 'Nixon, Dan',
@@ -128,11 +129,21 @@ _translations = {
     'DavidFair'               : 'Fairbrother, David',
     'Eltayeb Ahmed'           : 'Ahmed, Eltayeb',
     'Dimitar Tasev'           : 'Tasev, Dimitar',
+    'Dimitar Borislavov Tasev': 'Tasev, Dimitar',
     'Antti Soininen'          : 'Soininen, Antti',
+    'Antti Soininnen'         : 'Soininen, Antti',
     'Pranav Bahuguna'         : 'Bahuguna, Pranav',
     'Louise McCann'           : 'McCann, Louise',
     'louisemccann'            : 'McCann, Louise',
-    'Gagik Vardanyan'         : 'Vardanyan, Gagik'
+    'Gagik Vardanyan'         : 'Vardanyan, Gagik',
+    'Verena Reimund'          : 'Reimund, Verena',
+    'reimundILL'              : 'Reimund, Verena',
+    'Krzysztof Dymkowski'     : 'Dymkowski, Krzysztof',
+    'dymkowsk'                : 'Dymkowski, Krzysztof',
+    'Gemma Guest'             : 'Guest, Gemma',
+    'Anthony Lim'             : 'Lim, Anthony',
+    'AnthonyLim23'            : 'Lim, Anthony',
+    'CipPruteanu'             : 'Ciprian Pruteanu'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT

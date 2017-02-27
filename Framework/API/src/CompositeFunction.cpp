@@ -634,10 +634,10 @@ ParameterTie *CompositeFunction::getTie(size_t i) const {
  * Attaches a tie to this function. The attached tie is owned by the function.
  * @param tie :: A pointer to a new tie
  */
-void CompositeFunction::addTie(ParameterTie *tie) {
+void CompositeFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   size_t i = getParameterIndex(*tie);
   size_t iFun = functionIndex(i);
-  m_functions[iFun]->addTie(tie);
+  m_functions[iFun]->addTie(std::move(tie));
 }
 
 /**
@@ -659,10 +659,10 @@ void CompositeFunction::declareParameter(const std::string &name,
 /** Add a constraint
  *  @param ic :: Pointer to a constraint.
  */
-void CompositeFunction::addConstraint(IConstraint *ic) {
+void CompositeFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t i = getParameterIndex(*ic);
   size_t iFun = functionIndex(i);
-  getFunction(iFun)->addConstraint(ic);
+  getFunction(iFun)->addConstraint(std::move(ic));
 }
 
 /**

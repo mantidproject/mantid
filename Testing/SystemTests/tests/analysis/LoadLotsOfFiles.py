@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import copy
@@ -56,6 +56,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'PG3_9829_event.nxs',
                 'REF_M_9684_event.nxs',
                 'REF_M_9709_event.nxs',
+                'REF_M_24945_event.nxs',
+                'REF_M_24949_event.nxs',
                 'SANS2D_periodTests.csv',
                 'SANS2D_992_91A.csv',
                 'SANS2D_mask_batch.csv',
@@ -69,6 +71,7 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'testCansas1DMultiEntry.xml',
                 'Wish_Diffuse_Scattering_ISAW_UB.mat',
                 'WSH_test.dat',
+                'WISH00035991.raw',
                 'SANS2D_multiPeriodTests.csv',
                 'SANS2D_periodTests.csv',
                 'SANS2DTube_ZerroErrorFreeTest.txt',
@@ -90,7 +93,8 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt',
                 'USER_Larmor_163F_HePATest_r13038.txt',
                 'Vesuvio_IP_file_test.par',
-                'IP0004_10.par']
+                'IP0004_10.par',
+                'Crystalb3lypScratchAbins.out']
 
 EXPECTED_EXT = '.expected'
 
@@ -105,7 +109,8 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'.*\.irf',
                  r'.*\.hkl',
                  r'EVS.*\.raw',
-                 r'.*_pulseid\.dat']
+                 r'.*_pulseid\.dat',
+                 r'.*\.phonon']
 
 # This list stores files that will be loaded first.
 # Implemented as simple solution to avoid failures on

@@ -83,11 +83,12 @@ void SofQWPolygon::exec() {
       continue;
     }
 
-    IDetector_const_sptr det = inputWS->getDetector(i);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det = spectrumInfo.detector(i);
     double halfWidth(0.5 * m_thetaWidth);
     const double thetaLower = theta - halfWidth;
     const double thetaUpper = theta + halfWidth;
-    const double efixed = m_EmodeProperties.getEFixed(*det);
+    const double efixed = m_EmodeProperties.getEFixed(det);
 
     for (size_t j = 0; j < nenergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -116,7 +117,7 @@ void SofQWPolygon::exec() {
         PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
           specNumberMapping.push_back(
               outputWS->getSpectrum(qIndex - 1).getSpectrumNo());
-          detIDMapping.push_back(det->getID());
+          detIDMapping.push_back(det.getID());
         }
       }
     }

@@ -1098,7 +1098,7 @@ class ApplicationWindow: QMainWindow
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->metaObject()->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:
@@ -1262,8 +1262,8 @@ ApplicationWindow *sipqti_app()
   PyObject *mydict = PyModule_GetDict(me);
   PyObject *pyapp = PyDict_GetItemString(mydict,"app");
   Py_DECREF(me);
-  if (sipCanConvertToInstance(pyapp, sipClass_ApplicationWindow, SIP_NOT_NONE))
-    return (ApplicationWindow*) sipConvertToInstance(pyapp, sipClass_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
+  if (sipCanConvertToType(pyapp, sipType_ApplicationWindow, SIP_NOT_NONE))
+    return (ApplicationWindow*) sipConvertToType(pyapp, sipType_ApplicationWindow, NULL, SIP_NOT_NONE, NULL, &iserr);
   else
     return NULL;
 }
@@ -1467,7 +1467,7 @@ class MantidUI: QObject
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
 // Russell Taylor, 4/8/09: Change needed for mac build.
 //   Taken from main qtiplot svn revision 1187.
-sipClass=sipFindClass(sipCpp->metaObject()->className());
+sipType=sipFindType(sipCpp->metaObject()->className());
 %End
 
 public:

@@ -79,9 +79,9 @@ bool from_string(T &t, const std::string &s,
  */
 void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
                  double error, double wavelength, double dwavelength) {
-  MantidVec &X = ws->dataX(specID);
-  MantidVec &Y = ws->dataY(specID);
-  MantidVec &E = ws->dataE(specID);
+  auto &X = ws->mutableX(specID);
+  auto &Y = ws->mutableY(specID);
+  auto &E = ws->mutableE(specID);
   // The following is mostly to make Mantid happy by defining a histogram with
   // a single bin around the neutron wavelength
   X[0] = wavelength - dwavelength / 2.0;

@@ -1,4 +1,4 @@
-﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -465,8 +465,7 @@ class ISISReducer(Reducer):
         name += self.instrument.cur_detector().name('short')
         name += '_' + self.to_Q.output_type
         name += '_' + self.to_wavelen.get_range()
-        if self.to_Q.get_output_type() == "1D":
-            name += self.mask.get_phi_limits_tag()
+        name += self.mask.get_phi_limits_tag()
 
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()

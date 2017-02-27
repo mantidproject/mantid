@@ -1,13 +1,13 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <QTableWidget>
 #include <QMessageBox>
+#include <QTableWidget>
 
 namespace {
 // columns in the data table
@@ -109,11 +109,11 @@ void DataController::addWorkspaceSpectrum(
   flags ^= Qt::ItemIsEditable;
   cell->setFlags(flags);
 
-  const double startX = ws.readX(wsIndex).front();
+  const auto startX = ws.x(wsIndex).front();
   cell = new QTableWidgetItem(makeNumber(startX));
   m_dataTable->setItem(row, startXColumn, cell);
 
-  const double endX = ws.readX(wsIndex).back();
+  const auto endX = ws.x(wsIndex).back();
   cell = new QTableWidgetItem(makeNumber(endX));
   m_dataTable->setItem(row, endXColumn, cell);
 }

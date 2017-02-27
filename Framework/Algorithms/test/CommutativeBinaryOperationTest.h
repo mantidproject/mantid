@@ -26,7 +26,7 @@ public:
   int version() const override { return 1; }
   /// Algorithm's summary for identification overriding a virtual method
   const std::string summary() const override {
-    return "Sommutative binary operation helper.";
+    return "Commutative binary operation helper.";
   }
 
   std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,
@@ -72,17 +72,17 @@ public:
   void testcheckSizeCompatibility1D1D() {
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     MatrixWorkspace_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     MatrixWorkspace_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     MatrixWorkspace_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     MatrixWorkspace_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     CommutativeBinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -94,17 +94,17 @@ public:
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, true);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     MatrixWorkspace_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     MatrixWorkspace_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     MatrixWorkspace_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     MatrixWorkspace_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     MatrixWorkspace_sptr work_event1 =
         WorkspaceCreationHelper::createEventWorkspace(10, 1);
     MatrixWorkspace_sptr work_event2 =

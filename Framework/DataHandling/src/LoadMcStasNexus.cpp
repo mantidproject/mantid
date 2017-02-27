@@ -110,8 +110,8 @@ void LoadMcStasNexus::exec() {
       nxFile.readData<double>(axis1Name, axis1Values);
       nxFile.readData<double>(axis2Name, axis2Values);
 
-      const size_t axis1Length = axis1Values.size();
-      const size_t axis2Length = axis2Values.size();
+      const auto axis1Length = axis1Values.size();
+      const auto axis2Length = axis2Values.size();
       g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length
                     << '\n';
 
@@ -147,10 +147,12 @@ void LoadMcStasNexus::exec() {
       ws->setYUnit(axis2Name);
       ws->replaceAxis(1, axis2);
 
+      ws->mutableX(0) = axis1Values;
+
       for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
-        auto &dataY = ws->dataY(wsIndex);
-        auto &dataE = ws->dataE(wsIndex);
-        auto &dataX = ws->dataX(wsIndex);
+        auto &dataY = ws->mutableY(wsIndex);
+        auto &dataE = ws->mutableE(wsIndex);
+        ws->setSharedX(wsIndex, ws->sharedX(0));
 
         for (size_t j = 0; j < axis1Length; ++j) {
           // Data is stored in column-major order so we are translating to
@@ -158,7 +160,6 @@ void LoadMcStasNexus::exec() {
           const size_t fileDataIndex = j * axis2Length + wsIndex;
 
           dataY[j] = data[fileDataIndex];
-          dataX[j] = axis1Values[j];
           if (!errors.empty())
             dataE[j] = errors[fileDataIndex];
         }

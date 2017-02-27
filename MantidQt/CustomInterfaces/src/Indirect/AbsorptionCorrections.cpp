@@ -58,6 +58,16 @@ void AbsorptionCorrections::run() {
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
 
+  // General details
+
+  absCorAlgo->setProperty("DefaultBeamSize", m_uiForm.ckBeamSize->isChecked());
+  absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
+  absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
+  long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
+  absCorAlgo->setProperty("NumberWavelengths", wave);
+  long events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  absCorAlgo->setProperty("Events", events);
+
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
   if (useCan) {
@@ -155,8 +165,9 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
-    double elementSize = m_uiForm.spFlatElementSize->value();
-    alg->setProperty("ElementSize", elementSize);
+    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    alg->setProperty("SampleAngle", sampleAngle);
+
   } else if (shape == "Annulus") {
     double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
@@ -170,14 +181,12 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
 
-    long events = static_cast<long>(m_uiForm.spAnnEvents->value());
-    alg->setProperty("Events", events);
   } else if (shape == "Cylinder") {
     double sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
 
-    long events = static_cast<long>(m_uiForm.spCylEvents->value());
-    alg->setProperty("Events", events);
+    double sampleHeight = m_uiForm.spCylSampleHeight->value();
+    alg->setProperty("SampleHeight", sampleHeight);
   }
 }
 

@@ -979,6 +979,35 @@ void TiledWindow::populateMenu(QMenu *menu) {
   menu->addAction(actionClear);
 }
 
+MantidQt::API::IProjectSerialisable *
+TiledWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
+                             const int fileVersion) {
+  UNUSED_ARG(lines);
+  UNUSED_ARG(app);
+  UNUSED_ARG(fileVersion);
+  throw std::runtime_error("Not implemented");
+}
+
+std::vector<std::string> TiledWindow::getWorkspaceNames() {
+  std::vector<std::string> wsNames;
+  auto tiles = getAllTiles();
+
+  for (auto tile : tiles) {
+    auto widget = tile->widget();
+    auto names = widget->getWorkspaceNames();
+    std::copy(names.begin(), names.end(), std::back_inserter(wsNames));
+  }
+
+  return wsNames;
+}
+
+std::string TiledWindow::getWindowName() { return objectName().toStdString(); }
+
+std::string TiledWindow::saveToProject(ApplicationWindow *app) {
+  UNUSED_ARG(app);
+  return "";
+}
+
 /**
  * Check if a Tile can accept drops.
  * @param tile :: A tile to check.

@@ -1107,6 +1107,31 @@ std::string MdViewerWidget::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+std::vector<std::string> MdViewerWidget::getWorkspaceNames() {
+  auto server = pqActiveObjects::instance().activeServer();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  const auto sources = model->findItems<pqPipelineSource *>(server);
+
+  std::vector<std::string> workspaceNames;
+  for (auto source : sources) {
+    const auto proxy = source->getProxy();
+    const auto srcProxyName = proxy->GetXMLGroup();
+    if (srcProxyName == QString("sources")) {
+      std::string wsName(
+          vtkSMPropertyHelper(proxy, "WorkspaceName", true).GetAsString());
+      workspaceNames.push_back(wsName);
+    }
+  }
+
+  return workspaceNames;
+}
+
+std::string MdViewerWidget::getWindowName() {
+  return m_widgetName.toStdString();
+}
+
+std::string MdViewerWidget::getWindowType() { return "VSIWindow"; }
+
 /**
  * This function tells the current view to render the data, perform any
  * necessary checks on the view given the workspace type and update the

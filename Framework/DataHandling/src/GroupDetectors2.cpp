@@ -1,16 +1,17 @@
 #include "MantidDataHandling/GroupDetectors2.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
@@ -586,8 +587,9 @@ void GroupDetectors2::processGroupingWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
@@ -599,30 +601,16 @@ void GroupDetectors2::processGroupingWorkspace(
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
-      // translate to detectors
-      std::vector<detid_t> det_ids;
-      try {
-        const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-        Geometry::DetectorGroup_const_sptr detGroup =
-            boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-        if (detGroup) {
-          det_ids = detGroup->getDetectorIDs();
-
-        } else {
-          det_ids.push_back(det->getID());
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
-        }
-      } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-        // the detector was not found - don't add it
       }
     }
   }
@@ -654,8 +642,9 @@ void GroupDetectors2::processMatrixWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
 
@@ -666,29 +655,19 @@ void GroupDetectors2::processMatrixWorkspace(
     // get a reference to the set
     std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
-    // translate to detectors
-    std::vector<detid_t> det_ids;
-    try {
-      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-
-      Geometry::DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-
-      if (detGroup) {
-        det_ids = detGroup->getDetectorIDs();
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
+    // If the detector was not found or was not in a group, then ignore it.
+    if (spectrumInfo.spectrumDefinition(i).size() > 1) {
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
       }
-    } catch (const Mantid::Kernel::Exception::NotFoundError &) {
-      // the detector was not found - don't add it
     }
   }
 

@@ -7,7 +7,6 @@
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsView.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
-#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -110,6 +109,16 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     wrapWithQuotes(procInst);
     options.push_back("ProcessingInstructions=" + procInst);
   }
+
+  // Add start overlap
+  auto startOv = m_view->getStartOverlap();
+  if (!startOv.empty())
+    options.push_back("StartOverlap=" + startOv);
+
+  // Add end overlap
+  auto endOv = m_view->getEndOverlap();
+  if (!endOv.empty())
+    options.push_back("EndOverlap=" + endOv);
 
   return boost::algorithm::join(options, ",");
 }
@@ -224,6 +233,21 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
     options.push_back("ProcessingInstructions=" + procInst);
   }
 
+  // Add correction type
+  auto correctionType = m_view->getDetectorCorrectionType();
+  if (!correctionType.empty())
+    options.push_back("DetectorCorrectionType=" + correctionType);
+
+  // Add start overlap
+  auto startOv = m_view->getStartOverlap();
+  if (!startOv.empty())
+    options.push_back("StartOverlap=" + startOv);
+
+  // Add end overlap
+  auto endOv = m_view->getEndOverlap();
+  if (!endOv.empty())
+    options.push_back("EndOverlap=" + endOv);
+
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns();
   if (!transRuns.empty())
@@ -300,7 +324,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(7);
+  std::vector<std::string> defaults(6);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
@@ -319,8 +343,6 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
     defaults[5] = cPp[0];
-
-  defaults[6] = alg->getPropertyValue("ScaleFactor");
 
   m_view->setExpDefaults(defaults);
 }
@@ -343,27 +365,33 @@ void ReflSettingsPresenter::getInstDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values
-  std::vector<double> defaults(8);
-  defaults[0] = boost::lexical_cast<double>(
+  std::vector<double> defaults_double(8);
+  defaults_double[0] = boost::lexical_cast<double>(
       alg->getPropertyValue("NormalizeByIntegratedMonitors"));
-  defaults[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
-  defaults[2] = inst->getNumberParameter("MonitorIntegralMax")[0];
-  defaults[3] = inst->getNumberParameter("MonitorBackgroundMin")[0];
-  defaults[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
-  defaults[5] = inst->getNumberParameter("LambdaMin")[0];
-  defaults[6] = inst->getNumberParameter("LambdaMax")[0];
-  defaults[7] = inst->getNumberParameter("I0MonitorIndex")[0];
+  defaults_double[1] = inst->getNumberParameter("MonitorIntegralMin")[0];
+  defaults_double[2] = inst->getNumberParameter("MonitorIntegralMax")[0];
+  defaults_double[3] = inst->getNumberParameter("MonitorBackgroundMin")[0];
+  defaults_double[4] = inst->getNumberParameter("MonitorBackgroundMax")[0];
+  defaults_double[5] = inst->getNumberParameter("LambdaMin")[0];
+  defaults_double[6] = inst->getNumberParameter("LambdaMax")[0];
+  defaults_double[7] = inst->getNumberParameter("I0MonitorIndex")[0];
 
-  m_view->setInstDefaults(defaults);
+  std::vector<std::string> defaults_str(1);
+  defaults_str[0] = alg->getPropertyValue("DetectorCorrectionType");
+
+  m_view->setInstDefaults(defaults_double, defaults_str);
 }
 
-/** Generates and returns an instance of the ReflectometryReductionOne algorithm
+/** Generates and returns an instance of the ReflectometryReductionOneAuto
+* algorithm
+* @return :: ReflectometryReductionOneAuto algorithm
 */
 IAlgorithm_sptr ReflSettingsPresenter::createReductionAlg() {
   return AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
 }
 
 /** Creates and returns an example empty instrument given an instrument name
+* @return :: Empty instrument of a name
 */
 Instrument_const_sptr
 ReflSettingsPresenter::createEmptyInstrument(const std::string &instName) {

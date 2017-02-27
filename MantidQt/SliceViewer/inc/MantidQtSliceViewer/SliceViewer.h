@@ -13,9 +13,12 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
+#include "MantidQtSliceViewer/CoordinateTransform.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/NonOrthogonalOverlay.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
+#include "MantidQtSliceViewer/QwtScaleDrawNonOrthogonal.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <qwt_color_map.h>
@@ -86,7 +89,6 @@ public:
   Mantid::Kernel::VMD getSlicePoint() const { return m_slicePoint; }
   int getDimX() const;
   int getDimY() const;
-
   /// Methods for Python bindings
   QString getWorkspaceName() const;
   void setXYDim(int indexX, int indexY);
@@ -167,8 +169,10 @@ public slots:
   void helpPeaksViewer();
   void setFastRender(bool fast);
   void showInfoAt(double, double);
-
   // Change in view slots
+  void checkForHKLDimension();
+  void switchQWTRaster(bool useNonOrthogonal);
+  void switchAxis();
   void changedShownDim(int index, int dim, int oldDim);
   void updateDisplaySlot(int index, double value);
   void resetZoom();
@@ -196,7 +200,9 @@ public slots:
   void saveImage(const QString &filename = QString());
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
-
+  // Non Orthogonal
+  void setNonOrthogonalbtn();
+  void disableOrthogonalAnalysisTools(bool checked);
   // Synced checkboxes
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);
@@ -258,6 +264,12 @@ private:
   /// Extracts and applies the color scaling for the current slice
   void applyColorScalingForCurrentSliceIfRequired();
 
+  /// Apply the non orthogonal axis scale draw
+  void applyNonOrthogonalAxisScaleDraw();
+
+  /// Apply the orthogonal axis scale draw
+  void applyOrthogonalAxisScaleDraw();
+
 private:
   // -------------------------- Widgets ----------------------------
 
@@ -285,6 +297,11 @@ private:
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
   LineOverlay *m_overlayWSOutline;
 
+  // PeakOverlay * m_peakOverlay;
+
+  // NonOrthogonal Overlay for drawing axes
+  NonOrthogonalOverlay *m_nonOrthogonalOverlay;
+
   /// Object for running algorithms in the background
   MantidQt::API::AlgorithmRunner *m_algoRunner;
 
@@ -306,7 +323,7 @@ private:
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
   /// Data presenter
-  API::QwtRasterDataMD *m_data;
+  std::unique_ptr<API::QwtRasterDataMD> m_data;
 
   /// The X and Y dimensions being plotted
   Mantid::Geometry::IMDDimension_const_sptr m_X;
@@ -371,6 +388,16 @@ private:
   /// Logger
   Mantid::Kernel::Logger m_logger;
 
+  /// NonOrthogonal Fields
+  std::unique_ptr<CoordinateTransform> m_coordinateTransform;
+  bool m_firstNonOrthogonalWorkspaceOpen;
+  bool m_nonOrthogonalDefault; // sets whether nonOrthogonalview should be shown
+                               // as a default
+  bool m_oldDimNonOrthogonal; // sets whether previous dimensions were displayed
+  // as nonorthogonal, so if dims switch from orth -> nonOrth,
+  // then nonOrth should default be shown again
+  bool m_canSwitchScales; // stops qwtScaleDraw() from occuring in first set up
+
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<CompositePeaksPresenter> m_peaksPresenter;
 
@@ -390,6 +417,9 @@ private:
   static const QString NumEventsNormalizationKey;
 
   AspectRatioType m_aspectRatioType;
+  AspectRatioType m_lastRatioState;
+  QwtScaleDrawNonOrthogonal *m_nonOrthAxis0;
+  QwtScaleDrawNonOrthogonal *m_nonOrthAxis1;
 };
 
 } // namespace SliceViewer

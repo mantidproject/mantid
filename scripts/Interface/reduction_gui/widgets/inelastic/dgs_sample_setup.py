@@ -90,7 +90,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_edit)
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
-        self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
+        self._content.sample_edit = mantidqtpython.MantidQt.API.MWRunFiles()
         # Unfortunately, can only use live if default instrument = gui-set instrument
         if self._instrument_name == config.getInstrument().name():
             self._content.sample_edit.setProperty("liveButton","Show")

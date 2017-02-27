@@ -196,6 +196,7 @@ public slots:
   /// Overlay a workspace with the given name
   bool overlay(const QString &wsName);
   void clearPeakOverlays();
+  void clearAlignmentPlane();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
   void setShowPeakLabelsFlag(bool on);
@@ -249,7 +250,7 @@ protected:
   SimpleWidget *m_simpleDisplay;
 
   // Context menu actions
-  QAction *m_clearPeakOverlays;
+  QAction *m_clearPeakOverlays, *m_clearAlignment;
 
   /// The name of workspace that this window is associated with. The
   /// InstrumentActor holds a pointer to the workspace itself.

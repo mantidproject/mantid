@@ -90,6 +90,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/PluginFit.cpp
                    src/PolynomFitDialog.cpp
                    src/PolynomialFit.cpp
+                   src/ProjectSaveView.cpp
                    src/ProjectSerialiser.cpp
                    src/PythonScript.cpp
                    src/PythonScripting.cpp
@@ -286,7 +287,8 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PluginFit.h
                    src/PolynomFitDialog.h
                    src/PolynomialFit.h
-		    src/ProjectSerialiser.h
+                   src/ProjectSerialiser.h
+                   src/ProjectSaveView.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/QwtBarCurve.h
@@ -534,6 +536,8 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/PluginFit.h
                         src/PolynomFitDialog.h
                         src/PolynomialFit.h
+                        src/ProjectSaveView.h
+                        src/ProjectSerialiser.h
                         src/PythonScript.h
                         src/PythonScripting.h
                         src/QwtPieCurve.h
@@ -612,6 +616,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmDockWidget.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
+               src/ProjectSave.ui
                src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui

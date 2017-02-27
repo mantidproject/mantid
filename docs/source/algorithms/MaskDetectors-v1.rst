@@ -103,10 +103,13 @@ If a detector is masked, then the corresponding detector
 will be masked in the input *Workspace*.
 
 If the input *MaskedWorkspace* is a `Matrix Workspace <http://docs.mantidproject.org/nightly/concepts/MatrixWorkspace.html#matrixworkspace>`_ 
-the *MaskedWorkspace* can only have the same number of spectra as the target *Workspace* and the 
-information about masked spectra of the *MaskedWorkspace* 
-is copied to the target *Workspace*
+and the number of spectra in the source *MaskedWorkspace* is equal to the number 
+of spectra in the target *Workspace*, then workspace indicies of the source are
+used.
 
+If the numbers of spectra in *Workspace* and *MaskedWorkspace* are different,
+the algorithm extracts list of detector IDS from source workspace and uses them 
+to mask the corresponding spectra of the target workspace. 
 
 Definition of Mask
 ##################

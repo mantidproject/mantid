@@ -1,24 +1,26 @@
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/Sample.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/V3D.h"
 
-#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
@@ -29,11 +31,11 @@
 #include <QTextStream>
 #include <QUrl>
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
+#include <Poco/StringTokenizer.h>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
@@ -439,8 +441,8 @@ void SANSRunWindow::makeValidator(QLabel *const newValid, QWidget *control,
 void SANSRunWindow::initLocalPython() {
   // Import the SANS module and set the correct instrument
   QString result = runPythonCode(
-      "try:\n\timport isis_reducer\nexcept (ImportError,SyntaxError), "
-      "details:\tprint 'Error importing isis_reducer: ' + str(details)\n");
+      "try:\n\timport isis_reducer\nexcept (ImportError,SyntaxError) as "
+      "details:\tprint('Error importing isis_reducer: ' + str(details))\n");
   if (result.trimmed().isEmpty()) {
     m_have_reducemodule = true;
   } else {
@@ -793,7 +795,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString &pycode) {
   g_log.debug() << "Executing Python: " << pycode.toStdString() << '\n';
 
   const static QString PYTHON_SEP("C++runReduceScriptFunctionC++");
-  QString code_torun = pycode + ";print '" + PYTHON_SEP + "p'";
+  QString code_torun = pycode + ";print('" + PYTHON_SEP + "')";
   QString pythonOut = runPythonCode(code_torun).trimmed();
 
   QStringList allOutput = pythonOut.split(PYTHON_SEP);
@@ -844,9 +846,9 @@ bool SANSRunWindow::loadUserFile() {
   runReduceScriptFunction(pyCode);
 
   QString errors =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton())").trimmed();
+                              "ReductionSingleton()))").trimmed();
   // create a string list with a string for each line
   const QStringList allOutput = errors.split("\n");
   errors.clear();
@@ -869,29 +871,29 @@ bool SANSRunWindow::loadUserFile() {
   const double unit_conv(1000.);
   // Radius
   double dbl_param =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.min_radius")
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.min_radius)")
           .toDouble();
   m_uiForm.rad_min->setText(QString::number(dbl_param * unit_conv));
   dbl_param = runReduceScriptFunction(
-                  "print i.ReductionSingleton().mask.max_radius").toDouble();
+                  "print(i.ReductionSingleton().mask.max_radius)").toDouble();
   m_uiForm.rad_max->setText(QString::number(dbl_param * unit_conv));
   // EventsTime
   m_uiForm.l_events_binning->setText(
       getSettingWithDefault("events.binning", "").trimmed());
   // Wavelength
   m_uiForm.wav_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().to_wavelen.wav_low"));
+      "print(i.ReductionSingleton().to_wavelen.wav_low)"));
   m_uiForm.wav_max->setText(
       runReduceScriptFunction(
-          "print i.ReductionSingleton().to_wavelen.wav_high").trimmed());
+          "print(i.ReductionSingleton().to_wavelen.wav_high)").trimmed());
   const QString wav_step =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().to_wavelen.wav_step").trimmed();
+          "print(i.ReductionSingleton().to_wavelen.wav_step)").trimmed();
   setLimitStepParameter("wavelength", wav_step, m_uiForm.wav_dw,
                         m_uiForm.wav_dw_opt);
   // Q
   QString text =
-      runReduceScriptFunction("print i.ReductionSingleton().to_Q.binning");
+      runReduceScriptFunction("print(i.ReductionSingleton().to_Q.binning)");
   QStringList values = text.split(",");
   if (values.count() == 3) {
     m_uiForm.q_min->setText(values[0].trimmed());
@@ -905,9 +907,9 @@ bool SANSRunWindow::loadUserFile() {
 
   // Qxy
   m_uiForm.qy_max->setText(
-      runReduceScriptFunction("print i.ReductionSingleton().QXY2"));
+      runReduceScriptFunction("print(i.ReductionSingleton().QXY2)"));
   setLimitStepParameter(
-      "Qxy", runReduceScriptFunction("print i.ReductionSingleton().DQXY"),
+      "Qxy", runReduceScriptFunction("print(i.ReductionSingleton().DQXY)"),
       m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
 
   // The tramission line of the Limits section (read settings for sample and
@@ -916,22 +918,22 @@ bool SANSRunWindow::loadUserFile() {
 
   // The front rescale/shift section
   m_uiForm.frontDetRescale->setText(
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.scale").trimmed());
+                              "FRONT').rescaleAndShift.scale)").trimmed());
   m_uiForm.frontDetShift->setText(
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.shift").trimmed());
+                              "FRONT').rescaleAndShift.shift)").trimmed());
 
   QString fitScale =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitScale").trimmed();
+                              "FRONT').rescaleAndShift.fitScale)").trimmed();
   QString fitShift =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.fitShift").trimmed();
+                              "FRONT').rescaleAndShift.fitShift)").trimmed();
 
   if (fitScale == "True")
     m_uiForm.frontDetRescaleCB->setChecked(true);
@@ -944,39 +946,39 @@ bool SANSRunWindow::loadUserFile() {
     m_uiForm.frontDetShiftCB->setChecked(false);
 
   QString qRangeUserSelected =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().instrument.getDetector('"
-                              "FRONT').rescaleAndShift.qRangeUserSelected")
+                              "FRONT').rescaleAndShift.qRangeUserSelected)")
           .trimmed();
   if (qRangeUserSelected == "True") {
     m_uiForm.frontDetQrangeOnOff->setChecked(true);
     m_uiForm.frontDetQmin->setText(
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMin").trimmed());
+                                "'FRONT').rescaleAndShift.qMin)").trimmed());
     m_uiForm.frontDetQmax->setText(
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.qMax").trimmed());
+                                "'FRONT').rescaleAndShift.qMax)").trimmed());
   } else
     m_uiForm.frontDetQrangeOnOff->setChecked(false);
 
   // Monitor spectra
   m_uiForm.monitor_spec->setText(
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.get_incident_mon()")
+          "print(i.ReductionSingleton().instrument.get_incident_mon())")
           .trimmed());
   m_uiForm.trans_monitor->setText(
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc")
+          "print(i.ReductionSingleton().instrument.incid_mon_4_trans_calc)")
           .trimmed());
   m_uiForm.monitor_interp->setChecked(
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.is_interpolating_norm()")
+          "print(i.ReductionSingleton().instrument.is_interpolating_norm())")
           .trimmed() == "True");
   m_uiForm.trans_interp->setChecked(
       runReduceScriptFunction(
-          "print i.ReductionSingleton().transmission_calculator.interpolate")
+          "print(i.ReductionSingleton().transmission_calculator.interpolate)")
           .trimmed() == "True");
 
   // Transmission settings
@@ -984,12 +986,12 @@ bool SANSRunWindow::loadUserFile() {
 
   // Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.detector_file('rear')"));
+      "print(i.ReductionSingleton().instrument.detector_file('rear'))"));
   m_uiForm.front_direct_file->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.detector_file('front')"));
+      "print(i.ReductionSingleton().instrument.detector_file('front'))"));
 
   QString file = runReduceScriptFunction(
-      "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('REAR')");
+      "print(i.ReductionSingleton().prep_normalize.getPixelCorrFile('REAR'))");
   file = file.trimmed();
   // Check if the file name is set to Python's None object and then adjust the
   // controls if there is an empty entry
@@ -999,7 +1001,7 @@ bool SANSRunWindow::loadUserFile() {
   m_uiForm.floodRearFile->setEnabled(
       m_uiForm.enableRearFlood_ck->checkState() == Qt::Checked);
   file = runReduceScriptFunction(
-      "print i.ReductionSingleton().prep_normalize.getPixelCorrFile('FRONT')");
+      "print(i.ReductionSingleton().prep_normalize.getPixelCorrFile('FRONT'))");
   file = file.trimmed();
   m_uiForm.floodFrontFile->setFileTextWithSearch(file == "None" ? "" : file);
   m_uiForm.enableFrontFlood_ck->setChecked(!m_uiForm.floodFrontFile->isEmpty());
@@ -1009,13 +1011,13 @@ bool SANSRunWindow::loadUserFile() {
   // Scale factor
   dbl_param =
       runReduceScriptFunction(
-          "print i.ReductionSingleton()._corr_and_scale.rescale").toDouble();
+          "print(i.ReductionSingleton()._corr_and_scale.rescale)").toDouble();
   m_uiForm.scale_factor->setText(QString::number(dbl_param / 100.));
 
   // Sample offset if one has been specified
   dbl_param =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.SAMPLE_Z_CORR").toDouble();
+          "print(i.ReductionSingleton().instrument.SAMPLE_Z_CORR)").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param * unit_conv));
 
   // Centre coordinates
@@ -1024,36 +1026,36 @@ bool SANSRunWindow::loadUserFile() {
   // Set the beam finder specific settings
   setBeamFinderDetails();
   // get the scale factor1 for the beam centre to scale it correctly
-  dbl_param =
-      runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[0])")
+                  .toDouble();
   double dbl_paramsf =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center_scale_factor1()")
+          "print(i.ReductionSingleton().get_beam_center_scale_factor1())")
           .toDouble();
   m_uiForm.rear_beam_x->setText(QString::number(dbl_param * dbl_paramsf));
   // get scale factor2 for the beam centre to scale it correctly
   dbl_paramsf =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center_scale_factor2()")
+          "print(i.ReductionSingleton().get_beam_center_scale_factor2())")
           .toDouble();
-  dbl_param =
-      runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[1])")
+                  .toDouble();
   m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
-                  "print i.ReductionSingleton().get_beam_center('front')[0]")
+                  "print(i.ReductionSingleton().get_beam_center('front')[0])")
                   .toDouble();
   m_uiForm.front_beam_x->setText(QString::number(dbl_param * 1000.0));
   dbl_param = runReduceScriptFunction(
-                  "print i.ReductionSingleton().get_beam_center('front')[1]")
+                  "print(i.ReductionSingleton().get_beam_center('front')[1])")
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
   // Gravity switch
   QString param =
-      runReduceScriptFunction("print i.ReductionSingleton().to_Q.get_gravity()")
-          .trimmed();
+      runReduceScriptFunction(
+          "print(i.ReductionSingleton().to_Q.get_gravity())").trimmed();
   if (param == "True") {
     m_uiForm.gravity_check->setChecked(true);
   } else {
@@ -1063,14 +1065,14 @@ bool SANSRunWindow::loadUserFile() {
   // Read the extra length for the gravity correction
   const double extraLengthParam =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().to_Q.get_extra_length()").toDouble();
+          "print(i.ReductionSingleton().to_Q.get_extra_length())").toDouble();
   m_uiForm.gravity_extra_length_line_edit->setText(
       QString::number(extraLengthParam));
 
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.det_selection").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
 
   if (detName == "REAR" || detName == "MAIN") {
     m_uiForm.detbank_sel->setCurrentIndex(0);
@@ -1084,9 +1086,9 @@ bool SANSRunWindow::loadUserFile() {
 
   // Phi values
   m_uiForm.phi_min->setText(
-      runReduceScriptFunction("print i.ReductionSingleton().mask.phi_min"));
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.phi_min)"));
   m_uiForm.phi_max->setText(
-      runReduceScriptFunction("print i.ReductionSingleton().mask.phi_max"));
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.phi_max)"));
 
   // Masking table
   updateMaskTable();
@@ -1098,7 +1100,7 @@ bool SANSRunWindow::loadUserFile() {
   initializeBackgroundCorrection();
   retrieveBackgroundCorrection();
 
-  if (runReduceScriptFunction("print i.ReductionSingleton().mask.phi_mirror")
+  if (runReduceScriptFunction("print(i.ReductionSingleton().mask.phi_mirror)")
           .trimmed() == "True") {
     m_uiForm.mirror_phi->setChecked(true);
   } else {
@@ -1240,40 +1242,40 @@ void SANSRunWindow::updateMaskTable() {
 
   // Now add information from the mask file
   // Spectrum mask, "Rear" det
-  QString mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.spec_mask_r");
+  QString mask_string = runReduceScriptFunction(
+      "print (i.ReductionSingleton().mask.spec_mask_r)");
   addSpectrumMasksToTable(mask_string, reardet_name);
   //"Front" det
-  mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.spec_mask_f");
+  mask_string = runReduceScriptFunction(
+      "print (i.ReductionSingleton().mask.spec_mask_f)");
   addSpectrumMasksToTable(mask_string, frontdet_name);
 
   // Time masks
   mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.time_mask");
+      runReduceScriptFunction("print (i.ReductionSingleton().mask.time_mask)");
   addTimeMasksToTable(mask_string, "-");
   // Rear detector
   mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.time_mask_r");
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.time_mask_r)");
   addTimeMasksToTable(mask_string, reardet_name);
   // Front detectors
   mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.time_mask_f");
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.time_mask_f)");
   addTimeMasksToTable(mask_string, frontdet_name);
   // Rear detectors for SANS2D if monitor 4 in place (arm shadow detector)
   mask_string =
-      runReduceScriptFunction("print i.ReductionSingleton().mask.time_mask_f");
+      runReduceScriptFunction("print(i.ReductionSingleton().mask.time_mask_f)");
   addTimeMasksToTable(mask_string, frontdet_name);
 
   if (getInstrumentClass() == "SANS2D()") {
     QString arm_width =
-        runReduceScriptFunction("print i.ReductionSingleton().mask.arm_width");
+        runReduceScriptFunction("print(i.ReductionSingleton().mask.arm_width)");
     QString arm_angle =
-        runReduceScriptFunction("print i.ReductionSingleton().mask.arm_angle");
+        runReduceScriptFunction("print(i.ReductionSingleton().mask.arm_angle)");
     QString arm_x =
-        runReduceScriptFunction("print i.ReductionSingleton().mask.arm_x");
+        runReduceScriptFunction("print(i.ReductionSingleton().mask.arm_x)");
     QString arm_y =
-        runReduceScriptFunction("print i.ReductionSingleton().mask.arm_y");
+        runReduceScriptFunction("print(i.ReductionSingleton().mask.arm_y)");
     if (arm_width != "None" && arm_angle != "None") {
       int row = m_uiForm.mask_table->rowCount();
       m_uiForm.mask_table->insertRow(row);
@@ -1685,9 +1687,6 @@ void SANSRunWindow::setGeometryDetails() {
 
   const auto sampleWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-  Instrument_const_sptr instr = sampleWs->getInstrument();
-  const auto source = instr->getSource();
-
   // Moderator-monitor distance is common to LOQ and SANS2D.
   size_t monitorWsIndex = 0;
   const specnum_t monitorSpectrum = m_uiForm.monitor_spec->text().toInt();
@@ -1702,18 +1701,22 @@ void SANSRunWindow::setGeometryDetails() {
     return;
   }
 
-  const auto &dets = monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
-  if (dets.empty())
+  const auto &monitorDetectorIDs =
+      monitorWs->getSpectrum(monitorWsIndex).getDetectorIDs();
+  if (monitorDetectorIDs.empty())
     return;
 
   double dist_mm(0.0);
   QString colour("black");
-  try {
-    Mantid::Geometry::IDetector_const_sptr detector =
-        instr->getDetector(*dets.begin());
 
-    double unit_conv(1000.);
-    dist_mm = detector->getDistance(*source) * unit_conv;
+  const auto &detectorInfo = sampleWs->detectorInfo();
+
+  try {
+    const auto &detector = detectorInfo.detector(
+        detectorInfo.indexOf(*monitorDetectorIDs.begin()));
+    const double unit_conv(1000.);
+    const auto &source = sampleWs->getInstrument()->getSource();
+    dist_mm = detector.getDistance(*source) * unit_conv;
   } catch (std::runtime_error &) {
     colour = "red";
   }
@@ -1787,7 +1790,7 @@ void SANSRunWindow::setGeometryDetails() {
     }
 
     QString marked_dets =
-        runReduceScriptFunction("print i.GetMismatchedDetList(),").trimmed();
+        runReduceScriptFunction("print(i.GetMismatchedDetList()),").trimmed();
     trimPyMarkers(marked_dets);
     if (!marked_dets.isEmpty()) {
       QStringList detnames = marked_dets.split(",");
@@ -1817,14 +1820,8 @@ void SANSRunWindow::setGeometryDetails() {
 void SANSRunWindow::setSANS2DGeometry(
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
     int wscode) {
-  double unitconv = 1000.;
-
-  Instrument_const_sptr instr = workspace->getInstrument();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> sample =
-      instr->getSample();
-  boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-      instr->getSource();
-  double distance = source->getDistance(*sample) * unitconv;
+  const double unitconv = 1000.;
+  const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
   QLabel *dist_label(NULL);
@@ -1839,8 +1836,8 @@ void SANSRunWindow::setSANS2DGeometry(
 
   // get the tuple of log values and convert to a list of
   QString code_to_run =
-      QString("print ','.join([str(a) for a in "
-              "i.ReductionSingleton().instrument.getDetValues('%1')])")
+      QString("print(','.join([str(a) for a in "
+              "i.ReductionSingleton().instrument.getDetValues('%1')]))")
           .arg(QString::fromStdString(workspace->getName()));
 
   QStringList logvalues = runReduceScriptFunction(code_to_run).split(",");
@@ -2096,11 +2093,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
 
-  if (sample_workspace && (!sample_workspace->readX(0).empty())) {
-    m_uiForm.tof_min->setText(
-        QString::number(sample_workspace->readX(0).front()));
-    m_uiForm.tof_max->setText(
-        QString::number(sample_workspace->readX(0).back()));
+  if (sample_workspace && (!sample_workspace->x(0).empty())) {
+    m_uiForm.tof_min->setText(QString::number(sample_workspace->x(0).front()));
+    m_uiForm.tof_max->setText(QString::number(sample_workspace->x(0).back()));
   }
 
   // Set the geometry if the sample has been changed
@@ -2173,8 +2168,8 @@ bool SANSRunWindow::handleLoadButtonClick() {
 */
 void SANSRunWindow::readNumberOfEntries(const QString &RunStep,
                                         API::MWRunFiles *const output) {
-  QString periods = runReduceScriptFunction("print i.ReductionSingleton()." +
-                                            RunStep + ".periods_in_file");
+  QString periods = runReduceScriptFunction("print(i.ReductionSingleton()." +
+                                            RunStep + ".periods_in_file)");
   output->setNumberOfEntries(periods.toInt());
 }
 /** Construct the python code to perform the analysis using the
@@ -2467,8 +2462,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   // that is about to start
   py_code += "\n_user_settings_copy = "
              "copy.deepcopy(i.ReductionSingleton().user_settings)";
-  const QString verb = m_uiForm.verbose_check ? "True" : "False";
-  py_code += "\ni.SetVerboseMode(" + verb + ")";
+  py_code += "\ni.SetVerboseMode(False)";
   // Need to check which mode we're in
   if (runMode == SingleMode) {
     py_code += readSampleObjectGUIChanges();
@@ -2481,7 +2475,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
     py_code += reduceSingleRun();
     // output the name of the output workspace, this is returned up by the
     // runPythonCode() call below
-    py_code += "\nprint '" + PYTHON_SEP + "'+reduced+'" + PYTHON_SEP + "'";
+    py_code += "\nprint('" + PYTHON_SEP + "'+reduced+'" + PYTHON_SEP + "')";
   } else {
     // Have we got anything to reduce?
     if (m_uiForm.batch_table->rowCount() == 0) {
@@ -2537,9 +2531,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
     }
     py_code += "}";
 
-    if (m_uiForm.log_colette->isChecked()) {
-      py_code += ", verbose=True";
-    }
     py_code += ", reducer=i.ReductionSingleton().reference(),";
 
     py_code += "combineDet=";
@@ -2561,24 +2552,24 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
   if (runMode == SingleMode) {
     // update front rescale and fit values
     scale =
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.scale")
+                                "'FRONT').rescaleAndShift.scale)")
             .trimmed()
             .toDouble();
 
     shift =
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().instrument.getDetector("
-                                "'FRONT').rescaleAndShift.shift")
+                                "'FRONT').rescaleAndShift.shift)")
             .trimmed()
             .toDouble();
 
   } else {
-    scale = runReduceScriptFunction("print fit_settings['scale']")
+    scale = runReduceScriptFunction("print(fit_settings['scale'])")
                 .trimmed()
                 .toDouble();
-    shift = runReduceScriptFunction("print fit_settings['shift']")
+    shift = runReduceScriptFunction("print(fit_settings['shift'])")
                 .trimmed()
                 .toDouble();
   }
@@ -2768,11 +2759,11 @@ void SANSRunWindow::handleRunFindCentre() {
     beam_x = m_uiForm.rear_beam_x;
     beam_y = m_uiForm.rear_beam_y;
     coordinates_python_code =
-        "print i.ReductionSingleton().get_beam_center('rear')[0];print "
-        "i.ReductionSingleton().get_beam_center('rear')[1]";
+        "print(i.ReductionSingleton().get_beam_center('rear')[0]);print("
+        "i.ReductionSingleton().get_beam_center('rear')[1])";
   } else {
     coordinates_python_code =
-        "print i.ReductionSingleton().get_beam_center('front')[0];print "
+        "print(i.ReductionSingleton().get_beam_center('front')[0]);print("
         "i.ReductionSingleton().get_beam_center('front')[1]";
     m_uiForm.detbank_sel->setCurrentIndex(
         1); // FRONT selected -> detbank_sel <- FRONT
@@ -2895,9 +2886,9 @@ void SANSRunWindow::handleRunFindCentre() {
   runReduceScriptFunction(pyCode);
 
   QString errors =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().user_settings.execute(i."
-                              "ReductionSingleton())").trimmed();
+                              "ReductionSingleton()))").trimmed();
 
   g_centreFinderLog.notice() << result.toStdString() << "\n";
 
@@ -2982,7 +2973,7 @@ void SANSRunWindow::handleDefSaveClick() {
       saveCommand += (*alg) + "('" + m_outputWS + "','" + fname + "')\n";
   }
 
-  saveCommand += "print 'success'\n";
+  saveCommand += "print('success')\n";
   QString result = runPythonCode(saveCommand).trimmed();
 
   // Revert changes and delete the zero-free workspace
@@ -3104,7 +3095,7 @@ void SANSRunWindow::handleInstrumentChange() {
   // and don't want to set the instrument twice.
   const QString currentInstName =
       runPythonCode(
-          "print i.ReductionSingleton().get_instrument().versioned_name()")
+          "print(i.ReductionSingleton().get_instrument().versioned_name())")
           .trimmed();
   if (currentInstName != m_uiForm.inst_opt->currentText()) {
     QString pyCode("i.ReductionSingleton.clean(isis_reducer.ISISReducer)");
@@ -3115,10 +3106,10 @@ void SANSRunWindow::handleInstrumentChange() {
   // now update the GUI
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.cur_detector().name()");
+      "print(i.ReductionSingleton().instrument.cur_detector().name())");
   QString detectorSelection =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().instrument.det_selection").trimmed();
+          "print(i.ReductionSingleton().instrument.det_selection)").trimmed();
   int ind = m_uiForm.detbank_sel->findText(detect);
   // We set the detector selection only if nothing is set yet.
   // Previously, we didn't handle merged and both at this point
@@ -3328,14 +3319,14 @@ void SANSRunWindow::updateTransInfo(int state) {
 
   if (state == Qt::Checked) {
     _min->setEnabled(true);
-    _min->setText(
-        runReduceScriptFunction(
-            "print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
+    _min->setText(runReduceScriptFunction(
+                      "print(i.ReductionSingleton().instrument.WAV_RANGE_MIN)")
+                      .trimmed());
 
     _max->setEnabled(true);
-    _max->setText(
-        runReduceScriptFunction(
-            "print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
+    _max->setText(runReduceScriptFunction(
+                      "print(i.ReductionSingleton().instrument.WAV_RANGE_MAX)")
+                      .trimmed());
 
   } else {
     _min->setEnabled(false);
@@ -3428,8 +3419,8 @@ bool SANSRunWindow::assignMonitorRun(API::MWRunFiles &trans,
   }
   assignCom.append(")");
   // assign the workspace name to a Python variable and read back some details
-  QString pythonC = "t1, t2 = " + assignCom + ";print '" + PYTHON_SEP +
-                    "',t1,'" + PYTHON_SEP + "',t2";
+  QString pythonC = "t1, t2 = " + assignCom + ";print('" + PYTHON_SEP +
+                    "' + ' ' +  t1 + ' ' + '" + PYTHON_SEP + "' + ' ' + t2)";
   QString ws_names = runReduceScriptFunction(pythonC);
   if (ws_names.startsWith("error", Qt::CaseInsensitive)) {
     throw std::runtime_error("Couldn't load a transmission file");
@@ -3484,7 +3475,7 @@ bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
   run_info += "SCATTER_SAMPLE = " + assignCom;
   run_info += ";ws_name = SCATTER_SAMPLE if not isinstance(SCATTER_SAMPLE, "
               "tuple) else SCATTER_SAMPLE[0]";
-  run_info += ";print '" + PYTHON_SEP + "',ws_name";
+  run_info += ";print('" + PYTHON_SEP + "' + ' ' + ws_name)";
   run_info = runReduceScriptFunction(run_info);
   if (run_info.startsWith("error", Qt::CaseInsensitive)) {
     throw std::runtime_error("Couldn't load sample or can");
@@ -3510,7 +3501,7 @@ bool SANSRunWindow::assignDetBankRun(API::MWRunFiles &runFile,
 */
 void SANSRunWindow::fillDetectNames(QComboBox *output) {
   QString detsTuple = runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.listDetectors()");
+      "print(i.ReductionSingleton().instrument.listDetectors())");
 
   if (detsTuple.isEmpty()) { // this happens if the run Python signal hasn't yet
                              // been connected
@@ -3528,8 +3519,33 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
                              "to continue by selecting a valid instrument");
   }
 
-  output->setItemText(0, dets[1]);
-  output->setItemText(1, dets[3]);
+  // The setting of the detector here has been the cause of problems for
+  // (apparently years).
+  // The code assumes for the indices
+  // |     | LOQ                | SANS2D         | LARMOR                  |
+  // |-----|--------------------|----------------|-------------------------|
+  // |  0  | main-detector-bank | rear-detector  | DetectorBench           |
+  // |  1  | HAB                | front-detector | front-detector (unused) |
+  // |  2  | both               | both           | both                    |
+  // |  3  | merged             | merged         | merged                  |
+  // But the Python method above listDetectors will return the selected detector
+  // first,
+  // ie if HAB was selected on LOQ, then it would return
+  // ["HAB","main-detector-bank"]
+  // if main-detector-bank was selected on LOQ, then it would return
+  // ["main-detector-bank", "HAB"]
+  // which means we need to assign the names to the right slots.
+  QStringList detectorNames = {dets[1], dets[3]};
+  for (auto &name : detectorNames) {
+    if (name == "main-detector-bank" || name == "rear-detector" ||
+        name == "DetectorBench") {
+      output->setItemText(0, name);
+    }
+
+    if (name == "HAB" || name == "front-detector") {
+      output->setItemText(1, name);
+    }
+  }
 }
 /** Checks if the workspace is a group and returns the first member of group,
 * throws
@@ -3824,24 +3840,24 @@ void SANSRunWindow::transSelectorChanged(int currindex) {
 void SANSRunWindow::loadTransmissionSettings() {
 
   QString transMin =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "lambdaMin('SAMPLE')").trimmed();
+                              "lambdaMin('SAMPLE'))").trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck->setChecked(false);
   } else {
     m_uiForm.transFit_ck->setChecked(true);
     m_uiForm.trans_min->setText(transMin);
     m_uiForm.trans_max->setText(
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('SAMPLE')").trimmed());
+                                "calculator.lambdaMax('SAMPLE'))").trimmed());
   }
 
   QString text =
-      runReduceScriptFunction("print "
+      runReduceScriptFunction("print("
                               "i.ReductionSingleton().transmission_calculator."
-                              "fitMethod('SAMPLE')").trimmed();
+                              "fitMethod('SAMPLE'))").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt->setCurrentIndex(index);
@@ -3851,22 +3867,22 @@ void SANSRunWindow::loadTransmissionSettings() {
   else
     m_uiForm.transFitOnOff->setChecked(true);
 
-  transMin = runReduceScriptFunction("print "
+  transMin = runReduceScriptFunction("print("
                                      "i.ReductionSingleton().transmission_"
-                                     "calculator.lambdaMin('CAN')").trimmed();
+                                     "calculator.lambdaMin('CAN'))").trimmed();
   if (transMin == "None") {
     m_uiForm.transFit_ck_can->setChecked(false);
   } else {
     m_uiForm.transFit_ck_can->setChecked(true);
     m_uiForm.trans_min_can->setText(transMin);
     m_uiForm.trans_max_can->setText(
-        runReduceScriptFunction("print "
+        runReduceScriptFunction("print("
                                 "i.ReductionSingleton().transmission_"
-                                "calculator.lambdaMax('CAN')").trimmed());
+                                "calculator.lambdaMax('CAN'))").trimmed());
   }
-  text = runReduceScriptFunction("print "
+  text = runReduceScriptFunction("print("
                                  "i.ReductionSingleton().transmission_"
-                                 "calculator.fitMethod('CAN')").trimmed();
+                                 "calculator.fitMethod('CAN'))").trimmed();
   index = m_uiForm.trans_opt_can->findText(text, Qt::MatchFixedString);
   if (index >= 0) {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
@@ -3878,7 +3894,7 @@ void SANSRunWindow::loadTransmissionSettings() {
 
   bool separated =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().transmission_calculator.isSeparate()")
+          "print(i.ReductionSingleton().transmission_calculator.isSeparate())")
           .trimmed() == "True";
 
   m_uiForm.trans_selector_opt->setCurrentIndex(separated ? 1 : 0);
@@ -4002,10 +4018,10 @@ void SANSRunWindow::createZeroErrorFreeClone(QString &originalWorkspaceName,
       isValidWsForRemovingZeroErrors(originalWorkspaceName)) {
     // Run the python script which creates the cloned workspace
     QString pythonCode(
-        "print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
+        "print(i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += originalWorkspaceName + "',";
-    pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
+    pythonCode += " output_workspace_name='" + clonedWorkspaceName + "'))\n";
+    pythonCode += "print('" + m_constants.getPythonSuccessKeyword() + "')\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
     if (result != m_constants.getPythonSuccessKeyword()) {
@@ -4026,9 +4042,9 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString &clonedWorkspaceName) {
   if (workspaceExists(clonedWorkspaceName)) {
     // Run the python script which destroys the cloned workspace
     QString pythonCode(
-        "print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
-    pythonCode += clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
+        "print(i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
+    pythonCode += clonedWorkspaceName + "'))\n";
+    pythonCode += "print('" + m_constants.getPythonSuccessKeyword() + "')\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
     if (result != m_constants.getPythonSuccessKeyword()) {
@@ -4046,9 +4062,9 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString &clonedWorkspaceName) {
  */
 bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString &wsName) {
   QString pythonCode(
-      "\nprint i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
-  pythonCode += wsName + "')";
-  pythonCode += "\nprint '" + m_constants.getPythonSuccessKeyword() + "'";
+      "\nprint(i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
+  pythonCode += wsName + "'))";
+  pythonCode += "\nprint('" + m_constants.getPythonSuccessKeyword() + "')";
   QString result(runPythonCode(pythonCode, false));
   result = result.simplified();
   bool isValid = true;
@@ -4155,7 +4171,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   resetAllTransFields();
 
   // Read the Radius settings
-  QString transmissionRadiusRequest("\nprint i.GetTransmissionRadiusInMM()");
+  QString transmissionRadiusRequest("\nprint(i.GetTransmissionRadiusInMM())");
   QString resultTransmissionRadius(
       runPythonCode(transmissionRadiusRequest, false));
   resultTransmissionRadius = resultTransmissionRadius.simplified();
@@ -4166,13 +4182,13 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   }
 
   // Read the ROI settings
-  QString transmissionROIRequest("\nprint i.GetTransmissionROI()");
+  QString transmissionROIRequest("\nprint(i.GetTransmissionROI())");
   QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
   resultTransmissionROI = resultTransmissionROI.simplified();
   if (resultTransmissionROI != m_constants.getPythonEmptyKeyword()) {
     resultTransmissionROI =
-        runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" +
-                          resultTransmissionROI + ")",
+        runPythonCode("\nprint(i.ConvertFromPythonStringList(to_convert=" +
+                          resultTransmissionROI + "))",
                       false);
     this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
     this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
@@ -4180,20 +4196,20 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   }
 
   // Read the MASK settings
-  QString transmissionMaskRequest("\nprint i.GetTransmissionMask()");
+  QString transmissionMaskRequest("\nprint(i.GetTransmissionMask())");
   QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
   resultTransmissionMask = resultTransmissionMask.simplified();
   if (resultTransmissionMask != m_constants.getPythonEmptyKeyword()) {
     resultTransmissionMask =
-        runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" +
-                          resultTransmissionMask + ")",
+        runPythonCode("\nprint(i.ConvertFromPythonStringList(to_convert=" +
+                          resultTransmissionMask + "))",
                       false);
     this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
   }
 
   // Read the Transmission Monitor Spectrum Shift
   QString transmissionMonitorSpectrumShiftRequest(
-      "\nprint i.GetTransmissionMonitorSpectrumShift()");
+      "\nprint(i.GetTransmissionMonitorSpectrumShift())");
   QString resultTransmissionMonitorSpectrumShift(
       runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
   resultTransmissionMonitorSpectrumShift =
@@ -4208,7 +4224,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   // selected, then this takes precedence over
   // the radius, roi and mask settings
   QString transmissionMonitorSpectrumRequest(
-      "\nprint i.GetTransmissionMonitorSpectrum()");
+      "\nprint(i.GetTransmissionMonitorSpectrum())");
   QString resultTransmissionMonitorSpectrum(
       runPythonCode(transmissionMonitorSpectrumRequest, false));
   resultTransmissionMonitorSpectrum =
@@ -4371,16 +4387,17 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
     auto roi = m_uiForm.trans_roi_files_line_edit->text();
     if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
       roi = "'" + roi.simplified() + "'";
-      roi = runPythonCode(
-          "\nprint i.ConvertToPythonStringList(to_convert=" + roi + ")", false);
+      roi = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
+                              roi + "))",
+                          false);
       pythonCode += "i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
     }
     // Handle Mask
     auto mask = m_uiForm.trans_masking_line_edit->text();
     if (!mask.isEmpty()) {
       mask = "'" + mask.simplified() + "'";
-      mask = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" +
-                               mask + ")",
+      mask = runPythonCode("\nprint(i.ConvertToPythonStringList(to_convert=" +
+                               mask + "))",
                            false);
       pythonCode += "i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
     }
@@ -4546,29 +4563,30 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
   // from the ticket #5942 both detectors have center coordinates
   double dbl_param =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+          "print(i.ReductionSingleton().get_beam_center('rear')[0])")
+          .toDouble();
   // get the scale factor1 for the beam centre to scale it correctly
   double dbl_paramsf =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center_scale_factor1()")
+          "print(i.ReductionSingleton().get_beam_center_scale_factor1())")
           .toDouble();
   m_uiForm.rear_beam_x->setText(QString::number(dbl_param * dbl_paramsf));
   // get scale factor2 for the beam centre to scale it correctly
   dbl_paramsf =
       runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center_scale_factor2()")
+          "print(i.ReductionSingleton().get_beam_center_scale_factor2())")
           .toDouble();
-  dbl_param =
-      runReduceScriptFunction(
-          "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  dbl_param = runReduceScriptFunction(
+                  "print(i.ReductionSingleton().get_beam_center('rear')[1])")
+                  .toDouble();
   m_uiForm.rear_beam_y->setText(QString::number(dbl_param * dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
-                  "print i.ReductionSingleton().get_beam_center('front')[0]")
+                  "print(i.ReductionSingleton().get_beam_center('front')[0])")
                   .toDouble();
   m_uiForm.front_beam_x->setText(QString::number(dbl_param * 1000.0));
   dbl_param = runReduceScriptFunction(
-                  "print i.ReductionSingleton().get_beam_center('front')[1]")
+                  "print(i.ReductionSingleton().get_beam_center('front')[1])")
                   .toDouble();
   m_uiForm.front_beam_y->setText(QString::number(dbl_param * 1000.0));
 }
@@ -4583,7 +4601,7 @@ void SANSRunWindow::setBeamFinderDetails() {
   // Set the labels according to the instrument
   auto requiresAngle =
       runReduceScriptFunction(
-          "print i.is_current_workspace_an_angle_workspace()").simplified();
+          "print(i.is_current_workspace_an_angle_workspace())").simplified();
   QString labelPosition;
   if (requiresAngle == m_constants.getPythonTrueKeyword()) {
     labelPosition = "Current ( " + QString(QChar(0x03B2)) + " , y ) [";

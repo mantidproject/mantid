@@ -8,7 +8,7 @@ from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
 class IqtFitMultipleTest(unittest.TestCase):
 
     _iqt_ws = None
-    _function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=0.972332,Tau=0.0247558,Beta=1;ties=(f1.Intensity=1-f0.A0)'
+    _function = r'name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=StretchExp,Height=0.972332,Lifetime=0.0247558,Stretching=1;ties=(f1.Height=1-f0.A0)'
 
     def setUp(self):
         self._iqt_ws = Load(Filename='iris26176_graphite002_iqt.nxs',
@@ -57,9 +57,9 @@ class IqtFitMultipleTest(unittest.TestCase):
         text_axis = matrixWS.getAxis(1)
         self.assertTrue(text_axis.isText())
         self.assertEquals('f0.A0',text_axis.label(0))
-        self.assertEquals('f1.Intensity',text_axis.label(1))
-        self.assertEquals('f1.Tau',text_axis.label(2))
-        self.assertEquals('f1.Beta',text_axis.label(3))
+        self.assertEquals('f1.Height',text_axis.label(1))
+        self.assertEquals('f1.Lifetime',text_axis.label(2))
+        self.assertEquals('f1.Stretching',text_axis.label(3))
 
         # Check bin units
         self.assertEquals('MomentumTransfer', matrixWS.getAxis(0).getUnit().unitID())
@@ -95,8 +95,8 @@ class IqtFitMultipleTest(unittest.TestCase):
         # Check row data
         row = tableWS.row(0)
         self.assertEquals(round(row['axis-1'], 6),  0.483619)
-        self.assertEquals(round(row['f1.Intensity'], 6), 0.979517)
-        self.assertEquals(round(row['f1.Tau'], 6), 0.024672)
+        self.assertEquals(round(row['f1.Height'], 6), 0.979517)
+        self.assertEquals(round(row['f1.Lifetime'], 6), 0.024672)
 
     def _validate_matrix_values(self, matrixWS):
         # Check f0.A0
@@ -104,20 +104,20 @@ class IqtFitMultipleTest(unittest.TestCase):
         self.assertEquals(round(a0[0], 7), 0.0204827)
         self.assertEquals(round(a0[-1],7), 0.0229125)
 
-        # Check f1.Intensity
-        intensity = matrixWS.readY(1)
-        self.assertEquals(round(intensity[0], 6), 0.979517)
-        self.assertEquals(round(intensity[-1],6), 0.977088)
+        # Check f1.height
+        height = matrixWS.readY(1)
+        self.assertEquals(round(height[0], 6), 0.979517)
+        self.assertEquals(round(height[-1],6), 0.977088)
 
-        # Check f1.Tau
-        tau = matrixWS.readY(2)
-        self.assertEquals(round(tau[0], 6), 0.024672)
-        self.assertEquals(round(tau[-1],8), 0.00253487)
+        # Check f1.lifetime
+        lifetime = matrixWS.readY(2)
+        self.assertEquals(round(lifetime[0], 6), 0.024672)
+        self.assertEquals(round(lifetime[-1],8), 0.00253487)
 
-        # Check f1.Beta
-        beta = matrixWS.readY(3)
-        self.assertEquals(round(beta[0], 6), 0.781177)
-        self.assertEquals(round(beta[-1],6), 0.781177)
+        # Check f1.stretching
+        stretching = matrixWS.readY(3)
+        self.assertEquals(round(stretching[0], 6), 0.781177)
+        self.assertEquals(round(stretching[-1],6), 0.781177)
 
     def _validate_group_values(self, groupWS):
         sub_ws = groupWS.getItem(0)

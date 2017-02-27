@@ -1,10 +1,8 @@
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
@@ -13,8 +11,6 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 
 #include "Poco/DirectoryIterator.h"
@@ -22,9 +18,7 @@
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
 
-#include <iostream>
 #include <fstream>
-#include <istream>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -108,10 +102,9 @@ double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
   Mantid::Kernel::PropertyWithValue<double> *dp =
       dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  if (!dp) {
+  if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              pname + " as a floating point numeric value.");
-  }
   return *dp;
 }
 
@@ -272,31 +265,28 @@ void EQSANSLoad::getSourceSlitSize() {
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
   Mantid::Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit1Name + " as a time series property with "
                                          "floating point values.");
-  }
   int slit1 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit2Name + " as a time series property with "
                                          "floating point values.");
-  }
   int slit2 = static_cast<int>(dp->getStatistics().mean);
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit3Name + " as a time series property with "
                                          "floating point values.");
-  }
   int slit3 = static_cast<int>(dp->getStatistics().mean);
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
@@ -343,12 +333,13 @@ void EQSANSLoad::moveToBeamCenter() {
       dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
   int ny_pixels = static_cast<int>(
       dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
-  V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
+  const auto &detInfo = dataWS->detectorInfo();
+  const V3D pixel_first = detInfo.position(detInfo.indexOf(0));
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);
 
-  V3D pixel_last_x = dataWS->getInstrument()->getDetector(detIDx)->getPos();
-  V3D pixel_last_y = dataWS->getInstrument()->getDetector(detIDy)->getPos();
+  const V3D pixel_last_x = detInfo.position(detInfo.indexOf(detIDx));
+  const V3D pixel_last_y = detInfo.position(detInfo.indexOf(detIDy));
   double x_offset = (pixel_first.X() + pixel_last_x.X()) / 2.0;
   double y_offset = (pixel_first.Y() + pixel_last_y.Y()) / 2.0;
   double beam_ctr_x = 0.0;
@@ -416,10 +407,9 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
     readSourceSlitSize(line);
   }
 
-  if (use_config_mask) {
+  if (use_config_mask)
     dataWS->mutableRun().addProperty("rectangular_masks", m_mask_as_string,
                                      "pixels", true);
-  }
 
   dataWS->mutableRun().addProperty("low_tof_cut", m_low_TOF_cut, "microsecond",
                                    true);
@@ -430,10 +420,9 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
       " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut) +
       " microsec\n";
 
-  if (m_moderator_position != 0) {
+  if (m_moderator_position != 0)
     dataWS->mutableRun().addProperty("moderator_position", m_moderator_position,
                                      "mm", true);
-  }
 }
 
 void EQSANSLoad::exec() {
@@ -485,11 +474,10 @@ void EQSANSLoad::exec() {
     reductionManager->declareProperty(std::move(loadProp));
   }
 
-  if (!reductionManager->existsProperty("InstrumentName")) {
+  if (!reductionManager->existsProperty("InstrumentName"))
     reductionManager->declareProperty(
         make_unique<PropertyWithValue<std::string>>("InstrumentName",
                                                     "EQSANS"));
-  }
 
   // Output log
   m_output_message = "";
@@ -517,13 +505,12 @@ void EQSANSLoad::exec() {
       Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
       MatrixWorkspace_sptr monWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-      if ((monWSOutput) && (!monWS)) {
+      if ((monWSOutput) && (!monWS))
         // this was a group workspace - EQSansLoad does not support multi period
         // data yet
         throw Exception::NotImplementedError("The file contains multi period "
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
-      }
       declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                           "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
@@ -563,18 +550,16 @@ void EQSANSLoad::exec() {
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(dzName);
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-    if (!dp) {
+    if (!dp)
       throw std::runtime_error("Could not cast (interpret) the property " +
                                dzName + " as a time series property value.");
-    }
     sdd = dp->getStatistics().mean;
 
     // Modify SDD according to offset if given
     const double sample_det_offset =
         getProperty("SampleDetectorDistanceOffset");
-    if (!isEmpty(sample_det_offset)) {
+    if (!isEmpty(sample_det_offset))
       sdd += sample_det_offset;
-    }
   }
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
@@ -611,9 +596,8 @@ void EQSANSLoad::exec() {
     // Special case to force reading the beam center from the config file
     // We're adding this to be compatible with the original EQSANS load
     // written in python
-    if (m_center_x == 0.0 && m_center_y == 0.0) {
+    if (m_center_x == 0.0 && m_center_y == 0.0)
       setProperty("UseConfigBeam", true);
-    }
 
     readConfigFile(config_file);
   } else if (use_config) {

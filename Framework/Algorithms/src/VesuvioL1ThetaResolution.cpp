@@ -4,6 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -173,17 +174,19 @@ void VesuvioL1ThetaResolution::exec() {
   // Set up progress reporting
   Progress prog(this, 0.0, 1.0, numHist);
 
+  const auto &spectrumInfo = m_instWorkspace->spectrumInfo();
+
   // Loop for all detectors
   for (size_t i = 0; i < numHist; i++) {
     std::vector<double> l1;
     std::vector<double> theta;
-    IDetector_const_sptr det = m_instWorkspace->getDetector(i);
+    const auto &det = spectrumInfo.detector(i);
 
     // Report progress
     std::stringstream report;
-    report << "Detector " << det->getID();
+    report << "Detector " << det.getID();
     prog.report(report.str());
-    g_log.information() << "Detector ID " << det->getID() << '\n';
+    g_log.information() << "Detector ID " << det.getID() << '\n';
 
     // Do simulation
     calculateDetector(det, l1, theta);
@@ -220,7 +223,7 @@ void VesuvioL1ThetaResolution::exec() {
 
       auto &spec = m_l1DistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);
-      spec.addDetectorID(det->getID());
+      spec.addDetectorID(det.getID());
     }
 
     // Process data for theta distribution
@@ -234,7 +237,7 @@ void VesuvioL1ThetaResolution::exec() {
 
       auto &spec = m_thetaDistributionWs->getSpectrum(i);
       spec.setSpectrumNo(specNo);
-      spec.addDetectorID(det->getID());
+      spec.addDetectorID(det.getID());
     }
   }
 
@@ -347,7 +350,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
 /** Loads the instrument into a workspace.
  */
 void VesuvioL1ThetaResolution::calculateDetector(
-    IDetector_const_sptr detector, std::vector<double> &l1Values,
+    const IDetector &detector, std::vector<double> &l1Values,
     std::vector<double> &thetaValues) {
   const int numEvents = getProperty("NumEvents");
   l1Values.reserve(numEvents);
@@ -359,7 +362,7 @@ void VesuvioL1ThetaResolution::calculateDetector(
     sampleWidth = 4.0;
 
   // Get detector dimensions
-  Geometry::Object_const_sptr pixelShape = detector->shape();
+  Geometry::Object_const_sptr pixelShape = detector.shape();
   if (!pixelShape || !pixelShape->hasValidShape()) {
     throw std::invalid_argument("Detector pixel has no defined shape!");
   }
@@ -372,12 +375,12 @@ void VesuvioL1ThetaResolution::calculateDetector(
                 << '\n';
 
   // Scattering angle in rad
-  const double theta = m_instWorkspace->detectorTwoTheta(*detector);
+  const double theta = m_instWorkspace->detectorTwoTheta(detector);
   if (theta == 0.0)
     return;
 
   // Final flight path in cm
-  const double l1av = detector->getDistance(*m_sample) * 100.0;
+  const double l1av = detector.getDistance(*m_sample) * 100.0;
 
   const double x0 = l1av * sin(theta);
   const double y0 = l1av * cos(theta);

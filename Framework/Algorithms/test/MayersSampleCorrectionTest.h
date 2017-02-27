@@ -41,11 +41,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
-    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37666067, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37553044, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
-    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+    TS_ASSERT_DELTA(0.26633931, error.front(), delta);
+    TS_ASSERT_DELTA(0.26554012, error.back(), delta);
   }
 
   void test_Success_With_Just_Absorption_Correction() {
@@ -96,6 +96,8 @@ private:
     alg->initialize();
     alg->setProperty("InputWorkspace", inputWS);
     alg->setProperty("MultipleScattering", mscatOn);
+    alg->setProperty("MSEvents", 2000);
+    alg->setProperty("MSRuns", 5);
     alg->setPropertyValue("OutputWorkspace", "_unused_for_child");
     alg->execute();
     return alg;

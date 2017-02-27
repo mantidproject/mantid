@@ -10,11 +10,11 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -443,11 +443,10 @@ void MDNormDirectSC::calculateNormalization(
   }
   const double protonCharge = exptInfoZero.run().getProtonCharge();
 
-  const SpectrumInfo spectrumInfo(exptInfoZero);
+  const auto &spectrumInfo = exptInfoZero.spectrumInfo();
 
   // Mapping
-  const int64_t ndets =
-      static_cast<int64_t>(exptInfoZero.numberOfDetectorGroups());
+  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
   bool haveSA = false;
   API::MatrixWorkspace_const_sptr solidAngleWS =
       getProperty("SolidAngleWorkspace");
@@ -480,7 +479,7 @@ void MDNormDirectSC::calculateNormalization(
     // Get solid angle for this contribution
     double solid = protonCharge;
     if (haveSA) {
-      solid = solidAngleWS->readY(solidAngDetToIdx.find(detID)->second)[0] *
+      solid = solidAngleWS->y(solidAngDetToIdx.find(detID)->second)[0] *
               protonCharge;
     }
     // Compute final position in HKL

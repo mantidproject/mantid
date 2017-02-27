@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -66,7 +67,7 @@ int LoadILLIndirect::confidence(Kernel::NexusDescriptor &descriptor) const {
        (descriptor.pathExists("/entry0/instrument/Doppler/doppler_frequency") &&
         descriptor.pathExists("/entry0/dataSD/dataSD")) // IN16B old
        )) {
-    return 80;
+    return 70;
   } else {
     return 0;
   }
@@ -359,11 +360,7 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
     V3D newPos;
     newPos.spherical(newR, newTheta, phi);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(
-        *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
+    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

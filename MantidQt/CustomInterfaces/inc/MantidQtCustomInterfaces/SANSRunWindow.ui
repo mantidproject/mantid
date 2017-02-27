@@ -689,20 +689,6 @@
              <string>Options</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_20">
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="verbose_check">
-               <property name="text">
-                <string>Verbose</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="log_colette">
-               <property name="text">
-                <string>Log Colette cmds</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QCheckBox" name="plot_check">
                <property name="text">
@@ -787,7 +773,7 @@
                 <string>Select one or more file formats</string>
                </property>
                <property name="text">
-                <string>RKH</string>
+                <string>RKH (1D/2D)</string>
                </property>
               </widget>
              </item>
@@ -834,7 +820,7 @@
                 <string>Select one or more file formats</string>
                </property>
                <property name="text">
-                <string>CanSAS</string>
+                <string>CanSAS  (1D)</string>
                </property>
               </widget>
              </item>
@@ -859,7 +845,7 @@ Zero Error</string>
 The NXcanSAS format can be used to save 1D and 2D data. </string>
                </property>
                <property name="text">
-                <string>NXcanSAS</string>
+                <string>NXcanSAS  (1D/2D)</string>
                </property>
               </widget>
              </item>
@@ -876,7 +862,7 @@ The NXcanSAS format can be used to save 1D and 2D data. </string>
              <item row="3" column="1">
               <widget class="QCheckBox" name="saveNIST_Qxy_check">
                <property name="text">
-                <string>NIST Qxy</string>
+                <string>NIST Qxy(2D)</string>
                </property>
               </widget>
              </item>
@@ -4733,8 +4719,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>csv_filename</tabstop>
   <tabstop>csv_browse_btn</tabstop>
   <tabstop>batch_table</tabstop>
-  <tabstop>verbose_check</tabstop>
-  <tabstop>log_colette</tabstop>
   <tabstop>plot_check</tabstop>
   <tabstop>load_dataBtn</tabstop>
   <tabstop>oneDBtn</tabstop>

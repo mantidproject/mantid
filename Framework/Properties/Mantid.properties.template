@@ -128,6 +128,9 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 
+#Defines whether or not the sliceViewer will show NonOrthogonal view as a default
+sliceviewer.nonorthogonal=false
+
 # Network Timeouts (in seconds for various uses within Mantid)
 network.default.timeout = 30
 network.scriptrepo.timeout = 5

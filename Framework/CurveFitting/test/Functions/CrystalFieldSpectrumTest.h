@@ -180,22 +180,19 @@ public:
 
     auto i = fun->parameterIndex("f2.FWHM");
     auto tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "f2.FWHM=2.1")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 2.1);
     i = fun->parameterIndex("B60");
     tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "B60=0")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 0);
     i = fun->parameterIndex("BmolY");
     tie = fun->getTie(i);
-    TS_ASSERT(tie);
-    if (tie) {
-      TS_ASSERT_EQUALS(tie->asString(), "BmolY=0")
-    }
+    TS_ASSERT(!tie);
+    TS_ASSERT(fun->isFixed(i));
+    TS_ASSERT_EQUALS(fun->getParameter(i), 0);
 
     size_t nTies = 0;
     for (size_t i = 0; i < fun->nParams(); ++i) {
@@ -204,7 +201,7 @@ public:
         ++nTies;
       }
     }
-    TS_ASSERT_EQUALS(nTies, 11);
+    TS_ASSERT_EQUALS(nTies, 0);
   }
 
   void test_constraints() {

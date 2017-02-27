@@ -535,5 +535,15 @@ std::string SliceViewerWindow::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+std::string SliceViewerWindow::getWindowName() {
+  return "Slice Viewer (" + m_wsName + ")";
+}
+
+std::vector<std::string> SliceViewerWindow::getWorkspaceNames() {
+  return {m_ws->getName()};
+}
+
+std::string SliceViewerWindow::getWindowType() { return "SliceViewer"; }
+
 } // namespace SliceViewer
 } // namespace MantidQt

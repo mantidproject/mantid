@@ -1,15 +1,14 @@
 #ifndef CONVERTSPECTRUMAXIS2TEST_H_
 #define CONVERTSPECTRUMAXIS2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
-#include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData::detail;
@@ -343,15 +342,10 @@ public:
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     auto &pmap = testWS->instrumentParameters();
-
-    auto det0 = testWS->getDetector(0);
-    pmap.addDouble(det0.get(), "Efixed", 0.4);
-
-    auto det1 = testWS->getDetector(1);
-    pmap.addDouble(det1.get(), "Efixed", 0.1);
-
-    auto det2 = testWS->getDetector(2);
-    pmap.addDouble(det2.get(), "Efixed", 0.025);
+    const auto &spectrumInfo = testWS->spectrumInfo();
+    pmap.addDouble(&spectrumInfo.detector(0), "Efixed", 0.4);
+    pmap.addDouble(&spectrumInfo.detector(1), "Efixed", 0.1);
+    pmap.addDouble(&spectrumInfo.detector(2), "Efixed", 0.025);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();

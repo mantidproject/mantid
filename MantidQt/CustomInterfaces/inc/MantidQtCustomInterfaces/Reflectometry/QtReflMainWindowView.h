@@ -8,6 +8,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IReflEventTabPresenter;
 class IReflMainWindowPresenter;
 class IReflRunsTabPresenter;
 class IReflSettingsTabPresenter;
@@ -69,6 +70,8 @@ private:
   void initLayout() override;
   /// Creates the 'Runs' tab
   IReflRunsTabPresenter *createRunsTab();
+  /// Creates the 'Event Handling' tab
+  IReflEventTabPresenter *createEventTab();
   /// Creates the 'Settings' tab
   IReflSettingsTabPresenter *createSettingsTab();
   /// Creates the 'Save ASCII' tab

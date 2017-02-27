@@ -114,8 +114,7 @@ void RefinePowderInstrumentParameters3::exec() {
   parseTableWorkspaces();
 
   // 3. Set up main function for peak positions
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_positionFunc->initialize();
 
   // 3. Fit
@@ -1225,10 +1224,9 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          Constraints::BoundaryConstraint *bc =
-              new Constraints::BoundaryConstraint(
-                  function.get(), parname, lowerbound, upperbound, false);
-          function->addConstraint(bc);
+          auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
+              function.get(), parname, lowerbound, upperbound, false);
+          function->addConstraint(std::move(bc));
         }
       } else {
         // If fix.

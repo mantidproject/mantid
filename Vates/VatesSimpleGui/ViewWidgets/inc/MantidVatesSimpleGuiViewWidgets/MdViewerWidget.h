@@ -95,6 +95,12 @@ public:
   void loadFromProject(const std::string &lines) override;
   /// Save the state of the window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+  /// Returns the type of the window
+  std::string getWindowType() override;
 
 public slots:
   /// Seet MantidQt::API::VatesViewerInterface

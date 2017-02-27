@@ -3,13 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
-    PropertyMode, WorkspaceProperty
+    MultipleFileProperty, PropertyMode, WorkspaceProperty
 from mantid.simpleapi import AlignDetectors, CloneWorkspace, CompressEvents, \
     ConvertUnits, CreateGroupingWorkspace, CropWorkspace, DeleteWorkspace, DiffractionFocussing, \
-    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadDetectorsGroupingFile, LoadMask, \
-    LoadNexusProcessed, LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, \
-    PreprocessDetectorsToMD, Rebin, RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, \
-    SaveAscii, SaveFocusedXYE, SaveGSS, SaveNexusProcessed, mtd
+    Divide, EditInstrumentGeometry, GetIPTS, Load, LoadMask, LoadIsawDetCal, LoadNexusProcessed, \
+    LoadPreNexusLive, MaskDetectors, NormaliseByCurrent, PreprocessDetectorsToMD, Rebin, \
+    RenameWorkspace, ReplaceSpecialValues, RemovePromptPulse, SaveAscii, SaveFocusedXYE, \
+    SaveGSS, SaveNexusProcessed, mtd
 import os
 import numpy as np
 
@@ -99,7 +99,6 @@ class SNAPReduce(DataProcessorAlgorithm):
         return "Diffraction\\Reduction"
 
     def PyInit(self):
-
         validator = IntArrayBoundedValidator()
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("RunNumbers", values=[0], direction=Direction.Input,
@@ -126,7 +125,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         self.declareProperty(name="Calibration", defaultValue="Convert Units",
                              validator=StringListValidator(
-                                 ["Convert Units", "Calibration File"]),
+                                 ['Convert Units', 'Calibration File', 'DetCal File']),
                              direction=Direction.Input,
                              doc="The type of conversion to d_spacing to be used.")
 
@@ -134,6 +133,10 @@ class SNAPReduce(DataProcessorAlgorithm):
                                           direction=Direction.Input,
                                           action=FileAction.OptionalLoad),
                              doc="The calibration file to convert to d_spacing.")
+
+        self.declareProperty(MultipleFileProperty(name='DetCalFilename',
+                                                  extensions=['.detcal'], action=FileAction.OptionalLoad),
+                             'ISAW DetCal file')
 
         self.declareProperty(FloatArrayProperty("Binning", [0.5, -0.004, 7.0]),
                              "Min, Step, and Max of d-space bins.  Logarithmic binning is used if Step is negative.")
@@ -202,7 +205,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             if mask_workspace is None or len(mask_workspace) <= 0:
                 issues["MaskingWorkspace"] = "Must supply masking workspace"
         else:
-            raise RuntimeError("Masking value \"%s\" not supported" % masking)
+            raise ValueError("Masking value \"%s\" not supported" % masking)
 
         # cross check normalization
         normalization = self.getProperty("Normalization").value
@@ -218,30 +221,70 @@ class SNAPReduce(DataProcessorAlgorithm):
                 issues["NormalizationFilename"] = "Normalization=\"%s\" requires a filename" \
                                                   % normalization
         else:
-            raise RuntimeError(
-                "Normalization value \"%s\" not supported" % normalization)
+            raise ValueError("Normalization value \"%s\" not supported" % normalization)
+
+        # cross check method of converting to d-spacing
+        calibration = self.getProperty('Calibration').value
+        if calibration == 'Convert Units':
+            pass
+        elif calibration == 'Calibration File':
+            filename = self.getProperty('CalibrationFilename').value
+            if len(filename) <= 0:
+                issues['CalibrationFilename'] \
+                    = "Calibration=\"%s\" requires a filename" % calibration
+        elif calibration == 'DetCal File':
+            filenames = self.getProperty('DetCalFilename').value
+            if len(filenames) <= 0:
+                issues['DetCalFilename'] \
+                    = "Calibration=\"%s\" requires a filename" % calibration
+            if len(filenames) > 2:
+                issues['DetCalFilename'] \
+                    = "Calibration=\"%s\" requires one or two filenames" % calibration
+        else:
+            raise ValueError("Calibration value \"%s\" not supported" % calibration)
 
         return issues
+
+    def _alignAndFocus(self, params, calib, cal_File, group):
+        # loading the ISAW detcal file will override the default instrument
+        if calib == 'DetCal File':
+            LoadIsawDetCal(InputWorkspace='WS', Filename=cal_File)
+
+        if calib in ['Convert Units', 'DetCal File']:
+            ConvertUnits(InputWorkspace='WS',
+                         Target='dSpacing', OutputWorkspace='WS_d')
+        else:
+            self.log().notice("\n calibration file : %s" % cal_File)
+            AlignDetectors(InputWorkspace='WS', CalibrationFile=cal_File,
+                           Outputworkspace='WS_d')
+
+        Rebin(InputWorkspace='WS_d', Params=params, Outputworkspace='WS_d')
+
+        DiffractionFocussing(InputWorkspace='WS_d', GroupingWorkspace=group,
+                             PreserveEvents=False, OutputWorkspace='WS_red')
 
     def _getMaskWSname(self):
         masking = self.getProperty("Masking").value
         maskWSname = None
-        if masking == 'Custom - xml masking file':
-            maskWSname = 'CustomMask'
-            LoadMask(InputFile=self.getProperty('MaskingFilename').value,
-                     Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Horizontal':
-            maskWSname = 'HorizontalMask'
-            if not mtd.doesExist('HorizontalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Horizontal_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
-        elif masking == 'Vertical':
-            maskWSname = 'VerticalMask'
-            if not mtd.doesExist('VerticalMask'):
-                LoadMask(InputFile='/SNS/SNAP/shared/libs/Vertical_Mask.xml',
-                         Instrument='SNAP', OutputWorkspace=maskWSname)
+        maskFile = None
+
+        # none and workspace are special
+        if masking == 'None':
+            pass
         elif masking == "Masking Workspace":
             maskWSname = str(self.getProperty("MaskingWorkspace").value)
+
+        # deal with files
+        elif masking == 'Custom - xml masking file':
+            maskWSname = 'CustomMask'
+            maskFile = self.getProperty('MaskingFilename').value
+        elif masking == 'Horizontal' or masking == 'Vertical':
+            maskWSname = masking + 'Mask' # append the work 'Mask' for the wksp name
+            if not mtd.doesExist(maskWSname): # only load if it isn't already loaded
+                maskFile = '/SNS/SNAP/shared/libs/%s_Mask.xml' % masking
+
+        if maskFile is not None:
+            LoadMask(InputFile=maskFile, Instrument='SNAP', OutputWorkspace=maskWSname)
 
         return maskWSname
 
@@ -253,7 +296,7 @@ class SNAPReduce(DataProcessorAlgorithm):
 
             smooth_range = self.getProperty("SmoothingRange").value
 
-            peak_clip_WS = CloneWorkspace(WS)
+            peak_clip_WS = CloneWorkspace(InputWorkspace=WS, OutputWorkspace='peak_clip_WS')
             n_histo = peak_clip_WS.getNumberHistograms()
 
             x = peak_clip_WS.extractX()
@@ -265,7 +308,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                 peak_clip_WS.setY(h, self.peak_clip(y[h], win=window, decrese=True,
                                                     LLS=True, smooth_window=smooth_range))
                 peak_clip_WS.setE(h, e[h])
-            return peak_clip_WS
+            return 'peak_clip_WS'
         else: # other values are already held in normWS
             return normWS
 
@@ -311,33 +354,37 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         maskWSname = self._getMaskWSname()
 
+        # either type of file-based calibration is stored in the same variable
         calib = self.getProperty("Calibration").value
         if calib == "Calibration File":
             cal_File = self.getProperty("CalibrationFilename").value
+        elif calib == 'DetCal File':
+            cal_File = self.getProperty('DetCalFilename').value
+            cal_File = ','.join(cal_File)
+        else:
+            cal_File = None
 
         params = self.getProperty("Binning").value
         norm = self.getProperty("Normalization").value
 
         if norm == "From Processed Nexus":
             norm_File = self.getProperty("Normalization filename").value
-            normWS = LoadNexusProcessed(Filename=norm_File)
+            LoadNexusProcessed(Filename=norm_File, OutputWorkspace='normWS')
+            normWS = 'normWS'
         elif norm == "From Workspace":
-            normWS = self.getProperty("NormalizationWorkspace").value
+            normWS = str(self.getProperty("NormalizationWorkspace").value)
         else:
             normWS = None
 
-        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4_Grouping'}
-        group = self.getProperty("GroupDetectorsBy").value
+        group_to_real = {'Banks':'Group', 'Modules':'bank', '2_4 Grouping':'2_4Grouping'}
+        group = self.getProperty('GroupDetectorsBy').value
         real_name = group_to_real.get(group, group)
 
         if not mtd.doesExist(group):
-            if group == "2_4 Grouping":
-                group = real_name
-                LoadDetectorsGroupingFile(InputFile=r'/SNS/SNAP/shared/libs/SNAP_group_2_4.xml',
-                                          OutputWorkspace=group)
-            else:
-                CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
-                                        OutputWorkspace=group)
+            if group == '2_4 Grouping':
+                group = '2_4_Grouping'
+            CreateGroupingWorkspace(InstrumentName='SNAP', GroupDetectorsBy=real_name,
+                                    OutputWorkspace=group)
 
         Process_Mode = self.getProperty("ProcessingMode").value
 
@@ -351,42 +398,31 @@ class SNAPReduce(DataProcessorAlgorithm):
             self.log().information(str(self.get_IPTS_Local(r)))
             if self.getProperty("LiveData").value:
                 Tag = 'Live'
-                WS = LoadPreNexusLive(Instrument='SNAP')
+                LoadPreNexusLive(Instrument='SNAP', OutputWorkspace='WS')
             else:
-                WS = Load(Filename='SNAP' + str(r), Outputworkspace='WS')
-                WS = NormaliseByCurrent(InputWorkspace=WS,
-                                        Outputworkspace='WS')
+                Load(Filename='SNAP' + str(r), OutputWorkspace='WS')
+                NormaliseByCurrent(InputWorkspace='WS', OutputWorkspace='WS')
 
-            WS = CompressEvents(InputWorkspace=WS, Outputworkspace='WS')
-            WS = CropWorkspace(InputWorkspace='WS',
-                               OutputWorkspace='WS', XMax=50000)
-            WS = RemovePromptPulse(InputWorkspace=WS, OutputWorkspace='WS',
-                                   Width='1600', Frequency='60.4')
+            CompressEvents(InputWorkspace='WS', OutputWorkspace='WS')
+            CropWorkspace(InputWorkspace='WS', OutputWorkspace='WS', XMax=50000)
+            RemovePromptPulse(InputWorkspace='WS', OutputWorkspace='WS',
+                              Width='1600', Frequency='60.4')
 
             if maskWSname is not None:
-                WS = MaskDetectors(Workspace=WS, MaskedWorkspace=maskWSname)
+                MaskDetectors(Workspace='WS', MaskedWorkspace=maskWSname)
 
-            if calib == "Convert Units":
-                WS_d = ConvertUnits(InputWorkspace='WS',
-                                    Target='dSpacing', Outputworkspace='WS_d')
-            else:
-                self.log().notice("\n calibration file : %s" % cal_File)
-                WS_d = AlignDetectors(
-                    InputWorkspace='WS', CalibrationFile=cal_File, Outputworkspace='WS_d')
+            self._alignAndFocus(params, calib, cal_File, group)
 
-            WS_d = Rebin(InputWorkspace=WS_d, Params=params,
-                         Outputworkspace='WS_d')
-
-            WS_red = DiffractionFocussing(InputWorkspace=WS_d, GroupingWorkspace=group,
-                                          PreserveEvents=False)
-
-            normWS = self._generateNormalization(WS_red, norm, normWS)
+            normWS = self._generateNormalization('WS_red', norm, normWS)
             WS_nor = None
             if normWS is not None:
-                WS_nor = Divide(LHSWorkspace=WS_red, RHSWorkspace=normWS)
-                WS_nor = ReplaceSpecialValues(Inputworkspace=WS_nor,
-                                              NaNValue='0', NaNError='0',
-                                              InfinityValue='0', InfinityError='0')
+                WS_nor = 'WS_nor'
+                Divide(LHSWorkspace='WS_red', RHSWorkspace=normWS,
+                       OutputWorkspace='WS_nor')
+                ReplaceSpecialValues(Inputworkspace='WS_nor',
+                                     OutputWorkspace='WS_nor',
+                                     NaNValue='0', NaNError='0',
+                                     InfinityValue='0', InfinityError='0')
 
             new_Tag = Tag
             if len(prefix) > 0:
@@ -397,10 +433,10 @@ class SNAPReduce(DataProcessorAlgorithm):
                                                 OutputWorkspace='__SNAP_det_table')
             polar = np.degrees(det_table.column('TwoTheta'))
             azi = np.degrees(det_table.column('Azimuthal'))
-            EditInstrumentGeometry(Workspace="WS_red", L2=det_table.column('L2'),
+            EditInstrumentGeometry(Workspace='WS_red', L2=det_table.column('L2'),
                                    Polar=polar, Azimuthal=azi)
             if WS_nor is not None:
-                EditInstrumentGeometry(Workspace="WS_nor", L2=det_table.column('L2'),
+                EditInstrumentGeometry(Workspace='WS_nor', L2=det_table.column('L2'),
                                        Polar=polar, Azimuthal=azi)
             mtd.remove('__SNAP_det_table')
 

@@ -288,6 +288,7 @@ class Ui_SaveWindow(object):
             else:
                 if self.__has_mount_point:
                     try:
+                        print "mountpoint = ", self.__mountpoint
                         base_path = os.path.join(self.__mountpoint, 'NDX'+  self.__instrument, 'Instrument','logs','journal')
                         print "Loading journal from", base_path
                         main_journal_path = os.path.join(base_path, 'journal_main.xml')
@@ -305,7 +306,7 @@ class Ui_SaveWindow(object):
                                 user=root[i][1].text[0:root[i][1].text.find(',')]
                             else:
                                 user=root[i][1].text[0:root[i][1].text.find(' ')]
-                            SavePath = os.path.join('U:', user)
+                            SavePath = os.path.join('U:/', user)
                             self.lineEdit.setText(SavePath)
                         except LookupError:
                             print "Couldn't find user name in archives!"
