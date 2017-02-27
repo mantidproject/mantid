@@ -31,63 +31,58 @@ def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     return factor
 
 
-def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
-                                   error_a_sigma=None):
+# def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
+#                                    error_a_sigma=None):
+#     """
+#     calculate the peak intensity, which is the area under the peak
+#     if sigma == 1, then the integral is sqrt(pi);
+#     then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
+#     :param gauss_a:
+#     :param gauss_sigma:
+#     :param error_a_sq: error(a)**2
+#     :param error_sigma_sq: error(sigma)**2
+#     :param error_a_sigma: correlated error for a and sigma
+#     :return:
+#     """
+#     integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
+#
+#     if error_a_sq is not None:
+#         # calculate integral intensity error by propagation
+#         # check
+#         assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
+#         assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
+#                                                   ''.format(type(error_sigma_sq))
+#         assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
+#                                                  ''.format(type(error_a_sigma))
+#         # calculate
+#         error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sq
+#         error = numpy.sqrt(error2)
+#     else:
+#         error = numpy.sqrt(integral)
+#
+#     return integral, error
+
+
+def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     """
-    calculate the peak intensity, which is the area under the peak
-    if sigma == 1, then the integral is sqrt(pi);
-    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
-    :param gauss_a:
-    :param gauss_sigma:
-    :param error_a_sq: error(a)**2
-    :param error_sigma_sq: error(sigma)**2
-    :param error_a_sigma: correlated error for a and sigma
+    calculate the motor steps
+    :param motor_step_tolerance:
+    :param motor_pos_array:
     :return:
     """
-    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
+    assert isinstance(motor_pos_array, numpy.ndarray), 'Motor positions {0} must be given as a numpy array but not ' \
+                                                       'a {1}.'.format(motor_pos_array, type(motor_pos_array))
+    # need to check somewhere: assert len(pt_motor_dict) == len(pt_intensity_dict), 'blabla 3'
 
-    if error_a_sq is not None:
-        # calculate integral intensity error by propagation
-        # check
-        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
-        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
-                                                  ''.format(type(error_sigma_sq))
-        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
-                                                 ''.format(type(error_a_sigma))
-        # calculate
-        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sq
-        error = numpy.sqrt(error2)
-    else:
-        error = numpy.sqrt(integral)
+    motor_step_vector = motor_pos_array[1:] - motor_pos_array[:-1]
 
-    return integral, error
+    motor_step = numpy.average(motor_step_vector)
+    motor_step_std = motor_step_vector.std()
 
+    if motor_step_std > motor_step_tolerance:
+        raise RuntimeError('Step deviation too large. Cannot use average!')
 
-def calculate_penalty(model_vec_y, exp_vec_y):
-    """
-    calculate the penalty/cost of the model to experimental data
-    say: error = 1/(N-1)sqrt(\sum(y_i - m_i)**2)
-    :param mode_vec_y:
-    :param exp_vec_y:
-    :return:
-    """
-    # check inputs
-    assert isinstance(model_vec_y, numpy.ndarray), 'Model vec Y cannot be {0}.' \
-                                                   ''.format(type(model_vec_y))
-    assert isinstance(exp_vec_y, numpy.ndarray), 'Experimental vec Y cannot be {0}.' \
-                                                 ''.format(type(exp_vec_y))
-    if model_vec_y.shape != exp_vec_y.shape or len(model_vec_y) <= 1:
-        raise RuntimeError('Model and experimental data array do not match! Or too short!')
-
-    # calculate
-    diff_y = model_vec_y - exp_vec_y
-
-    diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
-    numpy.power(diff_y, 2, out=diff_y2)
-
-    cost = numpy.sqrt(diff_y2.sum()) / (len(model_vec_y) - 1.)
-
-    return cost
+    return motor_step
 
 
 def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
@@ -110,6 +105,33 @@ def convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict):
         motor_pos_vec[i_pt] = motor_pos_dict[pt]
 
     return motor_pos_vec, pt_intensity_vec
+
+
+def calculate_penalty(model_vec_y, exp_vec_y):
+    """
+    calculate the penalty/cost of the model to experimental data
+    say: error = 1/(N-1)sqrt(\sum(y_i - m_i)**2)
+    :param model_vec_y:
+    :param exp_vec_y:
+    :return:
+    """
+    # check inputs
+    assert isinstance(model_vec_y, numpy.ndarray), 'Model vec Y cannot be {0}.' \
+                                                   ''.format(type(model_vec_y))
+    assert isinstance(exp_vec_y, numpy.ndarray), 'Experimental vec Y cannot be {0}.' \
+                                                 ''.format(type(exp_vec_y))
+    if model_vec_y.shape != exp_vec_y.shape or len(model_vec_y) <= 1:
+        raise RuntimeError('Model and experimental data array do not match! Or too short!')
+
+    # calculate
+    diff_y = model_vec_y - exp_vec_y
+
+    diff_y2 = numpy.ndarray(shape=(len(diff_y),), dtype='float')
+    numpy.power(diff_y, 2, out=diff_y2)
+
+    cost = numpy.sqrt(diff_y2.sum()) / (len(model_vec_y) - 1.)
+
+    return cost
 
 
 def estimate_background(pt_intensity_dict, bg_pt_list):
@@ -303,6 +325,40 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     return gauss_parameter_dict, gauss_error_dict, cov_matrix
 
 
+def get_motor_step_for_intensity(motor_pos_dict):
+    """
+    get the motor step for each measurement Pts.
+    if it is the first or last Pt. then use the difference between this Pt and its nearest Pts as motor step
+    else use 1/2 as the motor step to its previous one and 1/2 as the motor step to its following one.
+    :param motor_pos_dict:
+    :return: dictionary of motor steps for calculating intensity
+    """
+    # check
+    assert isinstance(motor_pos_dict, dict), 'Input motor position must in dictionary.'
+
+    # get Pt list
+    pt_list = motor_pos_dict.keys()
+    pt_list.sort()
+
+    # get step dictionary
+    motor_step_dict = dict()
+
+    for i_pt in range(len(pt_list)):
+        if i_pt == 0:
+            # first motor position
+            motor_step = motor_pos_dict[pt_list[1]] - motor_pos_dict[pt_list[0]]
+        elif i_pt == len(pt_list) - 1:
+            # last motor position
+            motor_step = motor_pos_dict[pt_list[-1]] - motor_pos_dict[pt_list[-2]]
+        else:
+            # regular
+            motor_step = 0.5 * (motor_pos_dict[pt_list[i_pt+1]] - motor_pos_dict[pt_list[i_pt-1]])
+        pt = pt_list[i_pt]
+        motor_step_dict[pt] = motor_step
+
+    return motor_step_dict
+
+
 def get_moving_motor_information(spice_table_name):
     """
 
@@ -398,6 +454,38 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
                                                2 * gauss_a * gauss_sigma * error_a_s))
 
     return peak_intensity, intensity_error
+
+
+def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_sigma_sq=None,
+                                   error_a_sigma=None):
+    """
+    calculate the peak intensity, which is the area under the peak
+    if sigma == 1, then the integral is sqrt(pi);
+    then the value is sqrt(pi) * e^{-1/(2.*sigma**2)}
+    :param gauss_a:
+    :param gauss_sigma:
+    :param error_a_sq: error(a)**2
+    :param error_sigma_sq: error(sigma)**2
+    :param error_a_sigma: correlated error for a and sigma
+    :return:
+    """
+    integral = numpy.sqrt(2. * numpy.pi) * gauss_a * gauss_sigma
+
+    if error_a_sq is not None:
+        # calculate integral intensity error by propagation
+        # check
+        assert isinstance(error_a_sq, float), 'Error(a)**2 must be a float but not a {0}.'.format(type(error_a_sq))
+        assert isinstance(error_sigma_sq, float), 'Error(sigma)**2 must be a float but not a {0}.' \
+                                                  ''.format(type(error_sigma_sq))
+        assert isinstance(error_a_sigma, float), 'Error(a,sigma) must be a float but not a {0}.' \
+                                                 ''.format(type(error_a_sigma))
+        # calculate
+        error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2. * gauss_a * gauss_sigma * error_a_sigma
+        error = numpy.sqrt(error2)
+    else:
+        error = numpy.sqrt(integral)
+
+    return integral, error
 
 
 def get_finer_grid(vec_x, factor):
@@ -563,6 +651,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
                      'simple background': 0.,
                      'intensity 2': 0.,
                      'error 2': 0.,
+                     'pt_range': '',
                      'gauss intensity': 0.,
                      'gauss error': 0.,
                      'gauss background': 0.,
@@ -612,8 +701,9 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
 
     # calculate the intensity with background removed and correct intensity by background value
     averaged_background = estimate_background(integrated_pt_dict, background_pt_tuple)
-    simple_intensity, simple_intensity_error = simple_integrate_peak(integrated_pt_dict, averaged_background,
-                                                                     motor_step_dict)
+    simple_intensity, simple_intensity_error, pt_range = simple_integrate_peak(integrated_pt_dict, averaged_background,
+                                                                               motor_step_dict)
+    peak_int_dict['simple background'] = averaged_background
     peak_int_dict['simple intensity'] = simple_intensity
     peak_int_dict['simple error'] = simple_intensity_error
     peak_int_dict['simple background'] = averaged_background
@@ -636,14 +726,16 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         # calculate intensity with method 2
         motor_pos_center = parameters['x0']
         motor_pos_sigma = parameters['s']
-        intensity_m2, error_m2 = simple_integrate_peak(integrated_pt_dict, parameters['B'],
-                                                       motor_step_dict,
-                                                       peak_center=motor_pos_center,
-                                                       peak_sigma=motor_pos_sigma,
-                                                       motor_pos_dict=motor_pos_dict,
-                                                       sigma_range=2.)
+        intensity_m2, error_m2, pt_range = simple_integrate_peak(integrated_pt_dict, parameters['B'],
+                                                                 motor_step_dict,
+                                                                 peak_center=motor_pos_center,
+                                                                 peak_sigma=motor_pos_sigma,
+                                                                 motor_pos_dict=motor_pos_dict,
+                                                                 sigma_range=2.)
+
         peak_int_dict['intensity 2'] = intensity_m2
         peak_int_dict['error 2'] = error_m2
+        peak_int_dict['pt_range'] = pt_range
 
         # calculate gaussian (method 3)
         intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
@@ -651,62 +743,6 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         peak_int_dict['gauss error'] = intensity_gauss_error
 
     return peak_int_dict
-
-
-def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
-    """
-    calculate the motor steps
-    :param motor_step_tolerance:
-    :param motor_pos_array:
-    :return:
-    """
-    assert isinstance(motor_pos_array, numpy.ndarray), 'Motor positions {0} must be given as a numpy array but not ' \
-                                                       'a {1}.'.format(motor_pos_array, type(motor_pos_array))
-    # need to check somewhere: assert len(pt_motor_dict) == len(pt_intensity_dict), 'blabla 3'
-
-    motor_step_vector = motor_pos_array[1:] - motor_pos_array[:-1]
-
-    motor_step = numpy.average(motor_step_vector)
-    motor_step_std = motor_step_vector.std()
-
-    if motor_step_std > motor_step_tolerance:
-        raise RuntimeError('Step deviation too large. Cannot use average!')
-
-    return motor_step
-
-
-def get_motor_step_for_intensity(motor_pos_dict):
-    """
-    get the motor step for each measurement Pts.
-    if it is the first or last Pt. then use the difference between this Pt and its nearest Pts as motor step
-    else use 1/2 as the motor step to its previous one and 1/2 as the motor step to its following one.
-    :param motor_pos_dict:
-    :return: dictionary of motor steps for calculating intensity
-    """
-    # check
-    assert isinstance(motor_pos_dict, dict), 'Input motor position must in dictionary.'
-
-    # get Pt list
-    pt_list = motor_pos_dict.keys()
-    pt_list.sort()
-
-    # get step dictionary
-    motor_step_dict = dict()
-
-    for i_pt in range(len(pt_list)):
-        if i_pt == 0:
-            # first motor position
-            motor_step = motor_pos_dict[pt_list[1]] - motor_pos_dict[pt_list[0]]
-        elif i_pt == len(pt_list) - 1:
-            # last motor position
-            motor_step = motor_pos_dict[pt_list[-1]] - motor_pos_dict[pt_list[-2]]
-        else:
-            # regular
-            motor_step = 0.5 * (motor_pos_dict[pt_list[i_pt+1]] - motor_pos_dict[pt_list[i_pt-1]])
-        pt = pt_list[i_pt]
-        motor_step_dict[pt] = motor_step
-
-    return motor_step_dict
 
 
 def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_center=None,
@@ -740,6 +776,7 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
     # loop over Pt. to sum for peak's intensity
     sum_intensity = 0.
     error_2 = 0.
+    used_pt_list = list()
     for pt in pt_list:
         # check the motor position if required
         if peak_center is not None:
@@ -754,7 +791,16 @@ def simple_integrate_peak(pt_intensity_dict, bg_value, motor_step_dict, peak_cen
         sum_intensity += (intensity - bg_value) * motor_step_i
         error_2 += numpy.sqrt(intensity) * motor_step_i
 
+        used_pt_list.append(pt)
+
         print '[DB...BAT] Motor step size {0} = {1}'.format(pt, motor_step_i)
     # END-FOR
 
-    return sum_intensity, error_2
+    # convert the Pt to list
+    if len(used_pt_list) > 0:
+        used_pt_list.sort()
+        pt_list_range = '{0} - {1}'.format(used_pt_list[0], used_pt_list[-1])
+    else:
+        pt_list_range = 'N/A'
+
+    return sum_intensity, error_2, pt_list_range

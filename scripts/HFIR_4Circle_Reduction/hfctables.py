@@ -867,6 +867,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         self._colIndexKIndex = None
         self._colIndexWorkspace = None
 
+        # cache dictionaries
+        self._workspaceCacheDict = dict()
+
         return
 
     @staticmethod
@@ -910,7 +913,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
                                             ''.format(exp_number, type(exp_number))
         assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
                                              ''.format(scan_number, type(scan_number))
-        assert isinstance(ws_name, str), 'Workspace name {0} must be a string but not a {1}.'.format(ws_name, str(ws_name))
+        assert isinstance(ws_name, str), 'Workspace name {0} must be a string but not a {1}.' \
+                                         ''.format(ws_name, type(ws_name))
 
         # construct a row
         new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
@@ -1060,7 +1064,8 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param i_row:
         :return:
         """
-        return self.get_cell_value(i_row, self._colIndexWorkspace)
+        #  return self.get_cell_value(i_row, self._colIndexWorkspace)
+        return self._workspaceCacheDict[i_row]
 
     def get_scan_list(self, output_row_number=True):
         """
@@ -1230,8 +1235,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
         assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
                                                   ''.format(integrate_method, type(integrate_method))
-        if integrate_method in ['', 'simple', 'gaussian']:
-            raise RuntimeError('Peak integration method must be in ['' (Not defined), simple sum, gaussian fit]')
+        if integrate_method not in ['', 'simple', 'gaussian']:
+            raise RuntimeError('Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"'
+                               ', "gaussian"]'.format(integrate_method))
 
         self.update_cell_value(row_number, self._colIndexIntensity, peak_intensity)
         self.update_cell_value(row_number, self._colIndexIntType, integrate_method)
@@ -1278,7 +1284,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # Check
         assert isinstance(merged_md_name, str), 'Merged MDWorkspace name must be a string.'
 
-        self.update_cell_value(row_number, self._colIndexWorkspace, merged_md_name)
+        #  self.update_cell_value(row_number, self._colIndexWorkspace, merged_md_name)
+
+        self._workspaceCacheDict[row_number] = merged_md_name
 
         return
 

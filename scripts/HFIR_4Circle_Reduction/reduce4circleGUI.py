@@ -243,8 +243,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_integrate_single_scan)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.evt_change_normalization)  # calculate the normalized data again
-        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
-                     self.do_show_single_peak_integration)
+        # TODO/FIXME/NOW - Need to find out why I want this!
+        # self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
+        #              self.do_show_single_peak_integration)
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
 
@@ -1222,53 +1223,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return hkl, vec_q
 
-    def do_show_single_peak_integration(self):
-        """ show the details of integrating a single peak
-        by popping up a read-only dialog box
-        :return:
-        """
-        # TODO/ISSUE/NOW - Consider to replace the following part by method plot_model_data
-
-        # get the data from UI
-        try:
-            vec_x, vec_y = self.ui.graphicsView_integratedPeakView.get_raw_data()
-        except RuntimeError as run_error:
-            self.pop_one_button_dialog('{0}'.format(run_error))
-            return
-
-        print '[DB...BAT] vec_x: ', vec_x, ', vec_y: ', vec_y
-
-        # list of 2-tuple: integer (plot ID) and string (label)
-        # fit the Gaussian and calculate the peak intensity
-        vec_e = numpy.sqrt(vec_y)
-        error, fit_param, cov_matrix = peak_integration_utility.fit_gaussian_linear_background(vec_x, vec_y, vec_e)
-        x0, gauss_sigma, gauss_a, background = fit_param
-
-        peak_intensity = peak_integration_utility.calculate_peak_intensity_gauss(gauss_a, gauss_sigma)
-
-        # information
-        info_str = 'Intensity along Pt. is fit by Gaussian'
-
-        # plot the data
-        # make modelX and modelY for more fine grids
-        model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
-        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma, gauss_a, background)
-
-        # plot the model
-        self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
-
-        # set the value
-        self.ui.lineEdit_gaussianPeakIntensity.setText(str(peak_intensity))
-
-        self.ui.lineEdit_guassX0.setText('{0:.7f}'.format(x0))
-        self.ui.lineEdit_gaussA.setText('{0:.7f}'.format(gauss_a))
-        self.ui.lineEdit_gaussB.setText('{0:.7f}'.format(background))
-        self.ui.lineEdit_gaussSigma.setText('{0:.7f}'.format(gauss_sigma))
-
-        self.ui.tableWidget_covariance.set_matrix(cov_matrix)
-
-        return
-
     def do_export_to_fp(self):
         """ Export selected reflections to Fullprof single crystal data file for analysis
         :return:
@@ -1453,8 +1407,14 @@ class MainWindow(QtGui.QMainWindow):
         # set calculated values
         try:
             self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
+            self.ui.lineEdit_avgBackground.setText('{0:.7f}'.format(int_peak_dict['simple background']))
             self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
+            self.ui.lineEdit_ptRange.setText('{0}'.format(int_peak_dict['pt_range']))
             self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
+            if int_peak_dict['gauss error'] is None:
+                self.ui.lineEdit_errorIntensity3.setText('inf')
+            else:
+                self.ui.lineEdit_errorIntensity3.setText('{0:.7f}'.format(int_peak_dict['gauss error']))
             self.ui.tableWidget_covariance.set_matrix(int_peak_dict['covariance matrix'])
 
             fit_param_dict = int_peak_dict['gauss parameters']
