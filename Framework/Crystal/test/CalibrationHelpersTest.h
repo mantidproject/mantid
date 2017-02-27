@@ -28,21 +28,26 @@ public:
     // Create two identical workspaces
     const auto wsOld = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
     auto wsNew = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
-    // Sample is at the origin
-    const auto &positionOld = V3D(0, 0, 0);
-    TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionOld);
+
+    const auto &positionSampleOld = wsOld->detectorInfo().samplePosition();
+    const auto &positionSourceOld = wsOld->detectorInfo().sourcePosition();
 
     const auto &instNew = wsNew->getInstrument();
-    const double l1 = 1.0;
-    const auto &positionNew = V3D(1.0, 2.0, 3.0);
+    const double l1 = 10.0;
+    const double newZ = 3.0;
+    const auto &positionNew = V3D(1.0, 2.0, newZ);
 
     const auto &pmapOld = boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
     CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionNew, pmapOld);
 
     // Old workspace has sample unchanged
-    TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionOld);
+    TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
     // New workspace has sample at the new position
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionNew);
+    // Old workspace has source at the old position
+    TS_ASSERT_EQUALS(wsOld->detectorInfo().sourcePosition(), positionSourceOld);
+    // New workspace has source at the new position
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), V3D(1.0, 2.0, newZ - l1));
   }
 };
 
