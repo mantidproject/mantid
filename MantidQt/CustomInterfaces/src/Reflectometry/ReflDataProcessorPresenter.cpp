@@ -482,14 +482,16 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
+  const auto items = m_manager->selectedData();
+  if (items.size() == 0)
+    return;
+
   // If slicing values are empty plot normally
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
   }
-
-  const auto items = m_manager->selectedData();
 
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
@@ -570,14 +572,16 @@ std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
 /** Plots any currently selected groups */
 void ReflDataProcessorPresenter::plotGroup() {
 
-  // if uniform slicing is empty plot normally
+  const auto items = m_manager->selectedData();
+  if (items.size() == 0)
+    return;
+
+  // If slicing values are empty plot normally
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
   }
-
-  const auto items = m_manager->selectedData();
 
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
