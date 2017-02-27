@@ -167,7 +167,8 @@ public:
     TS_ASSERT_EQUALS(temp->getName(), bankname);
 
     // look for bank13 again - recursing just one level (should thwow)
-    TS_ASSERT_THROWS(instr->getComponentByName(bankname, 1), std::runtime_error);
+    TS_ASSERT_THROWS(instr->getComponentByName(bankname, 1),
+                     std::runtime_error);
   }
 
   //-----------------------------------------------------------------------------
