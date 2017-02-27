@@ -114,14 +114,14 @@ public:
     // Change of 1 um at distance 1000 m is caught.
     Eigen::Quaterniond qmin;
     qmin.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}),
-                           Eigen::Vector3d({1000, 1e-6, 0}));
+                           Eigen::Vector3d({1000, 1e-9, 0}));
     a.setRotation(0, qmin);
     TS_ASSERT(!a.isEquivalent(b));
 
     // Change of 0.1 um at distance 1000 m is allowed.
     Eigen::Quaterniond qepsilon;
     qepsilon.setFromTwoVectors(Eigen::Vector3d({1000, 0, 0}),
-                               Eigen::Vector3d({1000, 1e-7, 0}));
+                               Eigen::Vector3d({1000, 1e-10, 0}));
     a.setRotation(0, qepsilon);
     TS_ASSERT(a.isEquivalent(b));
   }
