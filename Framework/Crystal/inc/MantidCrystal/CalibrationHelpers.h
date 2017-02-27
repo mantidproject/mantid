@@ -32,9 +32,13 @@ namespace Crystal {
 */
 class DLLExport CalibrationHelpers {
 public:
+  static void Quat2RotxRotyRotz(const Kernel::Quat Q, double &Rotx,
+                                double &Roty, double &Rotz);
+
   static void fixUpSampleAndSourcePositions(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      double const L0, Kernel::V3D const newSampPos, API::DetectorInfo &detectorInfo);
+      double const L0, Kernel::V3D const newSampPos,
+      API::DetectorInfo &detectorInfo);
 
   static void fixUpBankParameterMap(
       std::vector<std::string> const bankNames,

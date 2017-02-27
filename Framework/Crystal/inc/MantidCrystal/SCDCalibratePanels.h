@@ -58,21 +58,6 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override;
 
-  /**
-   *  Refactors a rotation Q as a Rotation in x dir by Rotx * a Rotation in the
-   * y dir by Roty
-   *                                     * a rotation in the z direction by Rotz
-   *  @param Q  A rotation( a copy will be normalized)
-   *  @param Rotx       The angle in degrees for the rotation in x direction
-   *  @param Roty       The angle in degrees for the rotation in y direction
-   *  @param Rotz      The angle in degrees for the rotation in z direction
-   */
-  static void Quat2RotxRotyRotz(const Kernel::Quat Q, double &Rotx,
-                                double &Roty, double &Rotz);
-
-
-
-
 private:
   void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
                       boost::container::flat_set<std::string> &AllBankName,

@@ -10,6 +10,51 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Crystal {
 
+namespace {
+  constexpr double RAD_TO_DEG = 180. / M_PI;
+}
+
+/**
+ * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,
+ * corresponding to the order Mantid uses in calculating rotations
+ * @param Q The Quaternion. It will be normalized to represent a rotation
+ * @param Rotx The angle in degrees for rotating around the x-axis
+ * @param Roty The angle in degrees for rotating around the y-axis
+ * @param Rotz The angle in degrees for rotating around the z-axis
+ */
+void CalibrationHelpers::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
+                                           double &Roty, double &Rotz) {
+  Quat R(Q);
+  R.normalize();
+  V3D X(1, 0, 0);
+  V3D Y(0, 1, 0);
+  V3D Z(0, 0, 1);
+  R.rotate(X);
+  R.rotate(Y);
+  R.rotate(Z);
+  if (Z[1] != 0 || Z[2] != 0) {
+    double tx = atan2(-Z[1], Z[2]);
+    double tz = atan2(-Y[0], X[0]);
+    double cosy = Z[2] / cos(tx);
+    double ty = atan2(Z[0], cosy);
+    Rotx = (tx * RAD_TO_DEG);
+    Roty = (ty * RAD_TO_DEG);
+    Rotz = (tz * RAD_TO_DEG);
+  } else // roty = 90 0r 270 def
+  {
+    double k = 1;
+    if (Z[0] < 0)
+      k = -1;
+    double roty = k * 90;
+    double rotx = 0;
+    double rotz = atan2(X[2], Y[2]);
+
+    Rotx = (rotx * RAD_TO_DEG);
+    Roty = (roty * RAD_TO_DEG);
+    Rotz = (rotz * RAD_TO_DEG);
+  }
+}
+
 /**
  * Updates the ParameterMap for NewInstrument to reflect the position of the
  *source.
@@ -133,7 +178,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
     Quat RelRot = bank->getRelativeRot();
     Quat newRelRot = rot * RelRot;
     double rotx, roty, rotz;
-    SCDCalibratePanels::Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
+    Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
 
     pmap->addRotationParam(bank.get(), std::string("rotx"), rotx);
     pmap->addRotationParam(bank.get(), std::string("roty"), roty);
@@ -158,7 +203,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
                                 pos.Z() + pos1.Z() + Center.Z() -
                                     Center_orig.Z());
 
-    SCDCalibratePanels::Quat2RotxRotyRotz(rot, rotx, roty, rotz);
+    Quat2RotxRotyRotz(rot, rotx, roty, rotz);
 
     std::vector<double> oldScalex =
         pmap->getDouble(bank->getName(), std::string("scalex"));

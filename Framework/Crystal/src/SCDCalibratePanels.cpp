@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -33,10 +34,6 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
-namespace {
-constexpr double RAD_TO_DEG = 180. / M_PI;
-}
-
 const std::string SCDCalibratePanels::name() const {
   return "SCDCalibratePanels";
 }
@@ -45,48 +42,6 @@ int SCDCalibratePanels::version() const { return 1; }
 
 const std::string SCDCalibratePanels::category() const {
   return "Crystal\\Corrections";
-}
-
-/**
- * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,
- * corresponding to the order
- * Mantid uses in calculating rotations
- * @param Q      The Quaternion. It will be normalized to represent a rotation
- * @param Rotx   The angle in degrees for rotating around the x-axis
- * @param Roty   The angle in degrees for rotating around the y-axis
- * @param Rotz   The angle in degrees for rotating around the z-axis
- */
-DLLExport void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
-                                           double &Roty, double &Rotz) {
-  Quat R(Q);
-  R.normalize();
-  V3D X(1, 0, 0);
-  V3D Y(0, 1, 0);
-  V3D Z(0, 0, 1);
-  R.rotate(X);
-  R.rotate(Y);
-  R.rotate(Z);
-  if (Z[1] != 0 || Z[2] != 0) {
-    double tx = atan2(-Z[1], Z[2]);
-    double tz = atan2(-Y[0], X[0]);
-    double cosy = Z[2] / cos(tx);
-    double ty = atan2(Z[0], cosy);
-    Rotx = (tx * RAD_TO_DEG);
-    Roty = (ty * RAD_TO_DEG);
-    Rotz = (tz * RAD_TO_DEG);
-  } else // roty = 90 0r 270 def
-  {
-    double k = 1;
-    if (Z[0] < 0)
-      k = -1;
-    double roty = k * 90;
-    double rotx = 0;
-    double rotz = atan2(X[2], Y[2]);
-
-    Rotx = (rotx * RAD_TO_DEG);
-    Roty = (roty * RAD_TO_DEG);
-    Rotz = (rotz * RAD_TO_DEG);
-  }
 }
 
 //-----------------------------------------------------------------------------------------
@@ -684,7 +639,7 @@ void SCDCalibratePanels::saveXmlFile(
 
     double rotx, roty, rotz;
 
-    SCDCalibratePanels::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
+    CalibrationHelpers::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
     writeXmlParameter(oss3, "rotx", rotx);
     writeXmlParameter(oss3, "roty", roty);
     writeXmlParameter(oss3, "rotz", rotz);
