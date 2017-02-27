@@ -175,20 +175,15 @@ operator==(const TimeSeriesProperty<TYPE> &right) const {
 
   if (this->realSize() != right.realSize()) {
     return false;
-  }
-
-  { // so vectors can go out of scope
-    std::vector<DateAndTime> lhsTimes = this->timesAsVector();
-    std::vector<DateAndTime> rhsTimes = right.timesAsVector();
+  } else {
+    const std::vector<DateAndTime> lhsTimes = this->timesAsVector();
+    const std::vector<DateAndTime> rhsTimes = right.timesAsVector();
     if (!std::equal(lhsTimes.begin(), lhsTimes.end(), rhsTimes.begin())) {
       return false;
     }
-  }
 
-  {
-    // so vectors can go out of scope
-    std::vector<TYPE> lhsValues = this->valuesAsVector();
-    std::vector<TYPE> rhsValues = right.valuesAsVector();
+    const std::vector<TYPE> lhsValues = this->valuesAsVector();
+    const std::vector<TYPE> rhsValues = right.valuesAsVector();
     if (!std::equal(lhsValues.begin(), lhsValues.end(), rhsValues.begin())) {
       return false;
     }
