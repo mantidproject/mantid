@@ -184,10 +184,12 @@ void ConcretePeaksPresenter::reInitialize(IPeaksWorkspace_sptr peaksWS) {
  * @brief initialize inner components. Produces the views.
  */
 void ConcretePeaksPresenter::initialize() {
-
-  const bool transformSucceeded =
-      this->configureMappingTransform(m_initMappingTransform);
-
+	bool transformSucceeded = true;
+	if (!m_initMappingTransform) {
+		transformSucceeded = false;
+		transformSucceeded =
+			this->configureMappingTransform();
+	}
   // Make and register each peak widget.
   produceViews();
   changeShownDim(); // in case dimensions shown are not those expected by
@@ -274,20 +276,13 @@ bool ConcretePeaksPresenter::changeShownDim() {
  changes the chosen dimensions to plot.
  @return True if the mapping has succeeded.
  */
-bool ConcretePeaksPresenter::configureMappingTransform(
-    bool m_initMappingTransform) {
+bool ConcretePeaksPresenter::configureMappingTransform() {
   bool transformSucceeded = false;
   try {
-    if (m_initMappingTransform) {
-      auto temp = m_transformFactory->createDefaultTransform();
-      m_transform = temp;
-      m_initMappingTransform = false;
-    } else {
       std::string xLabel = m_viewFactory->getPlotXLabel();
       std::string yLabel = m_viewFactory->getPlotYLabel();
       auto temp = m_transformFactory->createTransform(xLabel, yLabel);
       m_transform = temp;
-    }
     showAll();
     transformSucceeded = true;
   } catch (Mantid::Geometry::PeakTransformException &) {

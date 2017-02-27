@@ -87,7 +87,7 @@ private:
   bool m_hasAddPeaksMode;
   bool m_initMappingTransform; // whether to use default transformation or not
   /// Configure peak transformations
-  bool configureMappingTransform(bool m_initMappingTransform = false);
+  bool configureMappingTransform();
   /// Hide all views
   void hideAll();
   /// Show all views
