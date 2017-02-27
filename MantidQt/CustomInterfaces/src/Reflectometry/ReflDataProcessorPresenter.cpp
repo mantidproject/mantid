@@ -499,16 +499,20 @@ void ReflDataProcessorPresenter::plotRow() {
   // if uniform slicing is empty plot normally
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
-    GenericDataProcessorPresenter::process();
+    GenericDataProcessorPresenter::plotRow();
     return;
   }
 
-  std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
+  std::vector<double> startTimes, stopTimes; // Unused, but needed for parsing
+  size_t numSlices;
 
-  if (timeSlicingType == "Custom")
+  // No. of slices can be predetermined with uniform even or custom slicing
+  if (timeSlicingType == "UniformEven")
+    parseUniformEven(timeSlicingValues, .0, startTimes, stopTimes);
+  else if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
-  size_t numSlices = startTimes.size();
+  numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
@@ -520,12 +524,26 @@ void ReflDataProcessorPresenter::plotRow() {
   for (const auto &item : items) {
     for (const auto &run : item.second) {
 
+      // Num slices for each ws in uniform slicing must be separately determined
+      if (timeSlicingType == "Uniform") {
+        // We need the duration between first/last pulses to get no. of slices
+        const std::string wsName = getReducedWorkspaceName(run.second, "TOF_");
+        IEventWorkspace_const_sptr mws =
+            AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
+        const auto minTime = mws->getFirstPulseTime();
+        const auto maxTime = mws->getLastPulseTime();
+        const auto totalDuration = maxTime - minTime;
+        double totalDurationSec = totalDuration.seconds();
+        parseUniform(timeSlicingValues, totalDurationSec, startTimes,
+                     stopTimes);
+        numSlices = startTimes.size();
+      }
+
       const std::string wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
         const std::string sliceName =
-            wsName + "_" + std::to_string((int)startTimes[slice]) + "_" +
-            std::to_string((int)stopTimes[slice]);
+            wsName + "_slice_" + std::to_string(slice);
         if (AnalysisDataService::Instance().doesExist(sliceName))
           workspaces.insert(sliceName);
         else
@@ -575,7 +593,7 @@ void ReflDataProcessorPresenter::plotGroup() {
   // if uniform slicing is empty plot normally
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
-    GenericDataProcessorPresenter::process();
+    GenericDataProcessorPresenter::plotGroup();
     return;
   }
 
