@@ -3,6 +3,7 @@
 
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -39,11 +40,32 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  LoadILLDiffraction();
 
 private:
   void init() override;
   void exec() override;
+
+  void loadDataDetails(NeXus::NXEntry&);
+  void loadDataScan(NeXus::NXEntry&);
+  void loadDetectorScan(NeXus::NXEntry&);
+  void loadStaticInstrument();
+  void loadMovingInstrument();
+  void loadMetadata();
+  void resolveInstrument(const std::string &);
+  void resolveScanType(){}
+  void initWorkspace();
+
+  std::string m_fileName;
+  std::string m_instName;
+  std::set<std::string> m_instNames;
+  LoadHelper m_loadHelper;
+  int m_numberScanPoints;
+  int m_numberDetectorsRead;
+  int m_numberDetectorsActual;
+  bool m_isDetectorScan;
   API::MatrixWorkspace_sptr m_outWorkspace;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace DataHandling
