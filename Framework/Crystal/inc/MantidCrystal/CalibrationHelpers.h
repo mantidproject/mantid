@@ -29,7 +29,7 @@ namespace Crystal {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CalibrationHelpers {
+class DLLExport CalibrationHelpers {
 public:
   static void
   updateSourceParams(boost::shared_ptr<const Geometry::IComponent> bankConst,
