@@ -16,8 +16,7 @@ namespace API {
 SpectrumInfo::SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
                            const ExperimentInfo &experimentInfo,
                            DetectorInfo &detectorInfo)
-    : m_experimentInfo(experimentInfo),
-      m_detectorInfo(detectorInfo),
+    : m_experimentInfo(experimentInfo), m_detectorInfo(detectorInfo),
       m_spectrumInfo(spectrumInfo), m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {}
 
