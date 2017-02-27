@@ -188,7 +188,6 @@ void ConcretePeaksPresenter::initialize() {
   produceViews();
   changeShownDim(); // in case dimensions shown are not those expected by
                     // default transformation
-
 }
 
 /**
@@ -271,10 +270,10 @@ bool ConcretePeaksPresenter::changeShownDim() {
 bool ConcretePeaksPresenter::configureMappingTransform() {
   bool transformSucceeded = false;
   try {
-      std::string xLabel = m_viewFactory->getPlotXLabel();
-      std::string yLabel = m_viewFactory->getPlotYLabel();
-      auto temp = m_transformFactory->createTransform(xLabel, yLabel);
-      m_transform = temp;
+    std::string xLabel = m_viewFactory->getPlotXLabel();
+    std::string yLabel = m_viewFactory->getPlotYLabel();
+    auto temp = m_transformFactory->createTransform(xLabel, yLabel);
+    m_transform = temp;
     showAll();
     transformSucceeded = true;
   } catch (Mantid::Geometry::PeakTransformException &) {
