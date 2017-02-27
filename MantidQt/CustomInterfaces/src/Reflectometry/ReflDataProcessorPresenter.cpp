@@ -116,9 +116,9 @@ void ReflDataProcessorPresenter::process() {
         "Some groups could not be processed as event workspaces", "Warning");
   if (errors)
     m_view->giveUserWarning("Some errors were encountered when "
-                                     "reducing table. Some groups may not have "
-                                     "been fully processed.",
-                                     "Warning");
+                            "reducing table. Some groups may not have "
+                            "been fully processed.",
+                            "Warning");
 
   progressReporter.clear();
 }
@@ -287,8 +287,7 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
   }
 
   if (startTimes.size() != stopTimes.size())
-    m_view->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
+    m_view->giveUserCritical("Error parsing time slices", "Time slicing error");
 }
 
 /** Loads an event workspace and puts it into the ADS

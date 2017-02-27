@@ -845,8 +845,8 @@ void GenericDataProcessorPresenter::saveTable() {
 Press changes to a new item in the ADS
 */
 void GenericDataProcessorPresenter::saveTableAs() {
-  const std::string userString = m_view->askUserString(
-      "Save As", "Enter a workspace name:", "Workspace");
+  const std::string userString =
+      m_view->askUserString("Save As", "Enter a workspace name:", "Workspace");
   if (!userString.empty()) {
     m_wsName = userString;
     saveTable();
@@ -858,10 +858,9 @@ Start a new, untitled table
 */
 void GenericDataProcessorPresenter::newTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo(
-            "Your current table has unsaved changes. Are you "
-            "sure you want to discard them?",
-            "Start New Table?"))
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Start New Table?"))
       return;
 
   m_manager->newTable(m_whitelist);
@@ -876,10 +875,9 @@ Open a table from the ADS
 */
 void GenericDataProcessorPresenter::openTable() {
   if (m_tableDirty && m_options["WarnDiscardChanges"].toBool())
-    if (!m_view->askUserYesNo(
-            "Your current table has unsaved changes. Are you "
-            "sure you want to discard them?",
-            "Open Table?"))
+    if (!m_view->askUserYesNo("Your current table has unsaved changes. Are you "
+                              "sure you want to discard them?",
+                              "Open Table?"))
       return;
 
   auto &ads = AnalysisDataService::Instance();
@@ -889,8 +887,7 @@ void GenericDataProcessorPresenter::openTable() {
     return;
 
   if (!ads.isValid(toOpen).empty()) {
-    m_view->giveUserCritical("Could not open workspace: " + toOpen,
-                                      "Error");
+    m_view->giveUserCritical("Could not open workspace: " + toOpen, "Error");
     return;
   }
 
