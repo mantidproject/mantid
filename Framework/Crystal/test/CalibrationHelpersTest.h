@@ -40,7 +40,7 @@ public:
 
     // Make a first move
 
-    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew);
+    CalibrationHelpers::fixUpSampleAndSourcePositions(instNew, l1, positionSampleNew, wsNew->mutableDetectorInfo());
 
     // Old workspace has sample unchanged
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
@@ -55,7 +55,7 @@ public:
 
     auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000, true);
     const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
-    CalibrationHelpers::fixUpSourceParameterMap(instNew, l1, positionSampleNew2);
+    CalibrationHelpers::fixUpSampleAndSourcePositions(instNew, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
 
     // Old workspace has sample unchanged
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);

@@ -1,6 +1,7 @@
 #ifndef MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
 #define MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -31,9 +32,9 @@ namespace Crystal {
 */
 class DLLExport CalibrationHelpers {
 public:
-  static void fixUpSourceParameterMap(
+  static void fixUpSampleAndSourcePositions(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      double const L0, Kernel::V3D const newSampPos);
+      double const L0, Kernel::V3D const newSampPos, API::DetectorInfo &detectorInfo);
 };
 
 } // namespace Crystal

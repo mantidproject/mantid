@@ -1,8 +1,7 @@
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidCrystal/CalibrationHelpers.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 
+using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
@@ -21,38 +20,28 @@ namespace Crystal {
 *NewInstrument). "Clones" relevant information into the newInstrument's
 *parameter map.
 */
-void CalibrationHelpers::fixUpSourceParameterMap(
+void CalibrationHelpers::fixUpSampleAndSourcePositions(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
-    const V3D newSampPos) {
+    const V3D newSampPos, DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
-  IComponent_const_sptr source = newInstrument->getSource();
 
+  IComponent_const_sptr source = newInstrument->getSource();
   IComponent_const_sptr sample = newInstrument->getSample();
-  V3D SamplePos = sample->getPos();
-  if (SamplePos != newSampPos) {
-    V3D newSampRelPos = newSampPos - SamplePos;
-    pmap->addPositionCoordinate(sample.get(), std::string("x"),
-                                newSampRelPos.X());
-    pmap->addPositionCoordinate(sample.get(), std::string("y"),
-                                newSampRelPos.Y());
-    pmap->addPositionCoordinate(sample.get(), std::string("z"),
-                                newSampRelPos.Z());
+
+  V3D samplePos = detectorInfo.samplePosition();
+  if (samplePos != newSampPos) {
+    detectorInfo.setPosition(*sample, newSampPos);
   }
   V3D sourceRelPos = source->getRelativePos();
-  V3D sourcePos = source->getPos();
+  V3D sourcePos = detectorInfo.sourcePosition();
   V3D parentSourcePos = sourcePos - sourceRelPos;
-  V3D source2sampleDir = SamplePos - source->getPos();
+  V3D source2sampleDir = samplePos - source->getPos();
 
   double scalee = L0 / source2sampleDir.norm();
-  V3D newsourcePos = sample->getPos() - source2sampleDir * scalee;
+  V3D newsourcePos = newSampPos - source2sampleDir * scalee;
   V3D newsourceRelPos = newsourcePos - parentSourcePos;
 
-  pmap->addPositionCoordinate(source.get(), std::string("x"),
-                              newsourceRelPos.X());
-  pmap->addPositionCoordinate(source.get(), std::string("y"),
-                              newsourceRelPos.Y());
-  pmap->addPositionCoordinate(source.get(), std::string("z"),
-                              newsourceRelPos.Z());
+  detectorInfo.setPosition(*source, newsourceRelPos);
 }
 
 } // namespace Crystal
