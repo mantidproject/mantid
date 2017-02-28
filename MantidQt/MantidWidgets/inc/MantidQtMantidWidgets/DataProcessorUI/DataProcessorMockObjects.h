@@ -82,7 +82,7 @@ public:
   ~MockMainPresenter() override {}
 
   // Notify
-  MOCK_METHOD0(notifyADSChanged, void());
+  MOCK_METHOD1(notifyADSChanged, void(const std::set<std::string> &));
 
   // Prompt methods
   MOCK_METHOD3(askUserString,
