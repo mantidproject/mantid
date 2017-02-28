@@ -144,7 +144,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_model->correctedData());
   }
 };
-
+/*
 class ALCBaselineModellingModelTestPerformance : public CxxTest::TestSuite {
   // ALCBaselineModellingModelPerformance *m_model;
 
@@ -205,5 +205,5 @@ private:
   std::vector<double> eTestData;
   std::vector<double> yTestData;
   std::vector<double> xTestData;
-};
+};*/
 #endif /* MANTID_CUSTOMINTERFACES_ALCBASELINEMODELLINGMODELTEST_H_ */

@@ -196,7 +196,6 @@ public:
       // Check that each period has number of spectra = number of groups
       TS_ASSERT_EQUALS(matrixWS->getNumberHistograms(), grouping.groups.size());
       // Check that each period has been corrected for dead time
-
       TS_ASSERT_DELTA(matrixWS->getSpectrum(0).y()[0],
                       i == 0 ? 84.1692 : 16.0749, 0.0001);
     }
@@ -363,5 +362,4 @@ private:
     }
   }
 };
-
 #endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_ */

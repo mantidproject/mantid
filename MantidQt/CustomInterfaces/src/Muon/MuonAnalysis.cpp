@@ -1296,7 +1296,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
   // Populate bin width info in Plot options
   double binWidth =
-      matrix_workspace->dataX(0)[1] - matrix_workspace->mutableX(0)[0];
+      matrix_workspace->x(0)[1] - matrix_workspace->x(0)[0];
   m_uiForm.optionLabelBinWidth->setText(
       QString("Data collected with histogram bins of %1 %2s")
           .arg(binWidth)
@@ -1759,11 +1759,11 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
 
       if (min.isEmpty())
         params["YAxisMin"] = QString::number(
-            *min_element(yData.rawData().begin(), yData.rawData().end()));
+            *min_element(yData.begin(), yData.end()));
 
       if (max.isEmpty())
         params["YAxisMax"] = QString::number(
-            *max_element(yData.rawData().begin(), yData.rawData().end()));
+            *max_element(yData.begin(), yData.end()));
     }
   }
 

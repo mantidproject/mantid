@@ -86,7 +86,6 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   // disable list
   for (size_t i = 0; i < ws->blocksize(); ++i) {
     for (auto it = sections.begin(); it != sections.end(); ++it) {
-
       if (ws->x(0)[i] >= it->first && ws->x(0)[i] <= it->second) {
         toDisable[i] = false;
         break; // No need to check other sections
