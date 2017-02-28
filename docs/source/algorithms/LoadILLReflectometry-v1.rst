@@ -9,13 +9,10 @@
 Description
 -----------
 
-Loads an ILL Reflectometry instrument NeXus file into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ with
-the given name.
+Loads an ILL Reflectometry instrument NeXus file into a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_.
 
-This loader reads the detector position from the NeXus file and places it at the right position.
+This loader updates the detector position according to NeXus file information.
 It supports both TOF and non TOF modes.
-
-To date this Loader only supports D17 data.
 
 Usage
 -----
@@ -27,11 +24,11 @@ Usage
    # Load ILL D17 data file into a workspace 2D.
    ws = Load('ILLD17_111686.nxs')
 
-   print "This workspace has", ws.getNumDims(), "dimensions and has", ws.getNumberHistograms(), "histograms."
+   print("This workspace has {} dimensions (spectra) and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
 
 Output:
 	
-	This workspace has 2 dimensions and has 258 histograms.
+	This workspace has 2 dimensions (spectra) and has 258 histograms.
 
 .. categories::
 

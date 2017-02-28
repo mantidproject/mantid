@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadILLReflectometry.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -9,8 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-//#include <algorithm>
-//#include <nexus/napi.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -176,7 +175,7 @@ void LoadILLReflectometry::exec() {
   if (descriptor.pathExists("/entry0/monitor1/time_of_flight")) {
     auto channel_width = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
-            "monitor1.time_of_flight_0")); /* PAR1[95] */
+            "monitor1.time_of_flight_0"));
     m_localWorkspace->mutableRun().addProperty<double>(
         "channel_width", *channel_width, true); // overwrite
     m_channelWidth = *channel_width;
@@ -194,7 +193,7 @@ void LoadILLReflectometry::exec() {
       xVals.push_back(dt);
     }
   }
-  g_log.debug() << "Channel width: " << m_channelWidth << '\n';
+  g_log.debug() << "Channel width: " << m_channelWidth << "\n"; // UNIT??cm supposed
   g_log.debug("Loading data...");
   loadData(firstEntry, monitorsData, xVals);
   const std::string unit = getPropertyValue("XUnit");
@@ -209,7 +208,6 @@ void LoadILLReflectometry::exec() {
     convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
                                                            m_localWorkspace);
     convertToWavelength->setPropertyValue("Target", "Wavelength");
-    convertToWavelength->setProperty("AlignBins", true);
     convertToWavelength->execute();
   }
   // Set the output workspace property
@@ -229,7 +227,7 @@ void LoadILLReflectometry::setInstrumentName(
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
-  boost::to_upper(m_instrumentName); // "D17" in file, keep it upper case.
+  boost::to_upper(m_instrumentName);
   g_log.debug() << "Instrument name : " + m_instrumentName << '\n';
 }
 
@@ -335,49 +333,37 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     // use Chopper1.phase
     auto chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty("Chopper1.phase"));
-
     auto tof_1 = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty("monitor1.time_of_flight_2"));
-
     auto POFF = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty("VirtualChopper.poff"));
-
     auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty("VirtualChopper.open_offset"));
-
     auto chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
             "VirtualChopper.chopper1_speed_average"));
-
     auto chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
             "VirtualChopper.chopper2_speed_average"));
-
     auto chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
         m_localWorkspace->run().getProperty(
             "VirtualChopper.chopper2_phase_average"));
 
     std::string chopper;
-
     if (*chop1_speed && *chop2_speed && *chop2_phase) {
       // virtual Chopper entries are valid
       chopper = "Virtual chopper";
     } else {
       // use Chopper values instead
-
       chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
           m_localWorkspace->run().getProperty("Chopper1.rotation_speed"));
-
       chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
           m_localWorkspace->run().getProperty("Chopper2.rotation_speed"));
-
       chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
           m_localWorkspace->run().getProperty("Chopper2.phase"));
-
       chopper = "Chopper";
     }
-
-    // major logging
+    // logging
     g_log.debug() << "TOF delay: " << *tof_1 << '\n';
     g_log.debug() << "Poff: " << *POFF << '\n';
     g_log.debug() << "Open offset: " << *open_offset << '\n';
@@ -386,35 +372,21 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     g_log.debug() << chopper << " 2 phase : " << *chop2_phase << '\n';
     g_log.debug() << chopper << " 2 speed : " << *chop2_speed << '\n';
 
+/*
+temp 1 = parref.tofd / cos(atan(((peakref – parref.x_min) * parref.pixeldensity - (c_params.pixels_x / 2.)-0.5) * c_params.pixelwidth, parref.tofd))
+//lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) * parref.channelwidth + parref.delay) / temp1)
+*/
     double t_TOF2 = 0.0;
     if (!chop1_speed) {
-      g_log.debug() << "Warning: chop1_speed is null.\n";
+      g_log.warning() << "Warning: chop1_speed is null.\n";
     } else {
       t_TOF2 = -1.e+6 * 60.0 *
                (*POFF - 45.0 + *chop2_phase - *chop1_phase + *open_offset) /
                (2.0 * 360 * *chop1_speed);
-      /*
-      ;Determine wavelength (in angstroms) from TOF channels --> lambda[t]
-      (using RB)
-      temp1 = cosmos_anal_correctdistance(peakref, parref.x_min,
-      parref.pixeldensity, parref.tofd)
-      if normal_run then begin
-         temp2 = abs(temp1 - cosmos_anal_correctdistance(peakdir, pardir.x_min,
-      pardir.pixeldensity, pardir.tofd))
-         ' Difference in corrected TOF distance between direct and reflect beams
-      is ' temp2
-         if (temp2 / temp1) gt 0.01 then ' Run no. ' runno ': Different TOF
-      distances from direct and reflect runs.'
-      endif
-      lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
-      parref.channelwidth + parref.delay) / temp1)
-      */
     }
     g_log.debug() << "t_TOF2 : " << t_TOF2 << '\n';
-
     // compute tof values
     xVals.reserve(m_localWorkspace->x(0).size());
-
     for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
          ++timechannelnumber) {
       double t_TOF1 =
@@ -440,11 +412,9 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
                                     std::vector<double> &xVals) {
 
   m_wavelength = entry.getFloat("wavelength");
-
   double ei = m_loader.calculateEnergy(m_wavelength);
   m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
                                                      true); // overwrite
-
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -526,7 +496,7 @@ void LoadILLReflectometry::placeDetector() {
       throw std::runtime_error("Theta (san or dan option) is not defined");
     }
   }
-  g_log.debug() << "2Theta " << 2. * theta << " degrees\n";
+  g_log.debug() << "Using " << thetaIn << " to calculate theta " << theta << " degrees\n";
   double twotheta_rad = (2. * theta) * M_PI / 180.0;
   // incident theta angle for being able to call the algorithm
   // ConvertToReflectometryQ

@@ -1,11 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 #define MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,16 +37,15 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string name() const override {
-    return "LoadILLReflectometry";
-  }
+  const std::string name() const override { return "LoadILLReflectometry"; }
   /// Algorithm's version for identification. @see Algorithm::version
-  int version() const override { return 1;}
+  int version() const override { return 1; }
   /// Algorithm's category for search and find. @see Algorithm::category
-  const std::string category() const override {return "DataHandling\\Nexus";}
+  const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
-    return "Loads an ILL reflectometry nexus file (instruments D17 and Figaro).";
+    return "Loads an ILL reflectometry nexus file (instruments D17 and "
+           "Figaro).";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
@@ -59,15 +55,18 @@ private:
   void exec() override;
 
   void initWorkspace(NeXus::NXEntry &entry,
-                     std::vector<std::vector<int>> monitorsData, const std::string &filename);
+                     std::vector<std::vector<int>> monitorsData,
+                     const std::string &filename);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
   void getXValues(std::vector<double> &xVals);
   void loadData(NeXus::NXEntry &entry,
-                                std::vector<std::vector<int>> monitorsData, std::vector<double> &xVals);
+                std::vector<std::vector<int>> monitorsData,
+                std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties(std::string nexusfilename);
-  std::vector<int>loadSingleMonitor(NeXus::NXEntry &entry, std::string monitor_data);
+  std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
+                                     std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void placeDetector();
@@ -75,14 +74,15 @@ private:
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */
-  std::string m_instrumentName; ///< Name of the instrument
+  std::string m_instrumentName;      ///< Name of the instrument
   size_t m_numberOfTubes{0};         // number of tubes - X
   size_t m_numberOfPixelsPerTube{0}; // number of pixels per tube - Y
   size_t m_numberOfChannels{0};      // time channels - Z
   size_t m_numberOfHistograms{0};
   double m_wavelength{0};
   double m_channelWidth{0};
-  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro"};
+  std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",
+                                                         "figaro"};
   Mantid::DataHandling::LoadHelper m_loader;
 };
 
