@@ -24,6 +24,7 @@
 
 #include <QFileDialog>
 #include <QHash>
+#include <QKeyEvent>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMessageBox>
@@ -1279,6 +1280,9 @@ void QWorkspaceDockView::popupContextMenu() {
     } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
+    } else {
+      // None of the above? -> not a workspace
+      return;
     }
     addClearMenuItems(menu, selectedWsName);
 
@@ -1560,6 +1564,15 @@ void QWorkspaceDockView::showColourFillPlot() {
   allWsNames.removeDuplicates();
 
   m_mantidUI->drawColorFillPlots(allWsNames);
+}
+
+void QWorkspaceDockView::keyPressEvent(QKeyEvent *e) {
+  switch (e->key()) {
+  case Qt::Key_Delete:
+  case Qt::Key_Backspace:
+    m_presenter->notifyFromView(ViewNotifiable::Flag::DeleteWorkspaces);
+    break;
+  }
 }
 
 void QWorkspaceDockView::onClickShowDetectorTable() {

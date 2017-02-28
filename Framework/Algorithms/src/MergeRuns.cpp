@@ -263,8 +263,7 @@ void MergeRuns::buildAdditionTables() {
         //  match the detector ID.
         // NOTE: This can be SUPER SLOW!
         for (outWI = 0; outWI < lhs_nhist; outWI++) {
-          std::set<detid_t> &outDets2 =
-              lhs->getSpectrum(outWI).getDetectorIDs();
+          const auto &outDets2 = lhs->getSpectrum(outWI).getDetectorIDs();
           // Another subset check
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(),
                             inDets.end())) {

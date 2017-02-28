@@ -116,7 +116,7 @@ void vtkSplatterPlotFactory::doCreate(
   }
   size_t num_boxes_to_use = static_cast<size_t>(
       m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
-  if (num_boxes_to_use >= m_sortedBoxes.size()) {
+  if (num_boxes_to_use > 0 && num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
 

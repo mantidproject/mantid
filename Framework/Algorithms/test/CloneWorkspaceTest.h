@@ -4,17 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CloneWorkspace.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -71,15 +71,14 @@ public:
         "Dx vectors should remain shared between spectra after CloneWorkspace",
         out->sharedDx(0), out->sharedDx(1));
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
+    // Best way to test this is to use the CompareWorkspaces algorithm
+    Mantid::Algorithms::CompareWorkspaces checker;
     checker.initialize();
     checker.setPropertyValue("Workspace1", "in");
     checker.setPropertyValue("Workspace2", "out");
     checker.execute();
 
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT(checker.getProperty("Result"));
   }
 
   void testExecEvent() {
@@ -95,15 +94,14 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
+    // Best way to test this is to use the CompareWorkspaces algorithm
+    Mantid::Algorithms::CompareWorkspaces checker;
     checker.initialize();
     checker.setPropertyValue("Workspace1", "in_event");
     checker.setPropertyValue("Workspace2", "out_event");
     checker.execute();
 
-    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"),
-                     checker.successString());
+    TS_ASSERT(checker.getProperty("Result"));
   }
 
   /** Test is not full, see CloneMDWorkspaceTest */

@@ -33,6 +33,8 @@ theoretical spectrum for the given atom which is a sum over all considered quant
 also produce a total spectrum for the whole considered system. Dynamical structure factor S is calculated for
 all atoms in the system. If needed  a user can also include in a simulation elevated temperature.
 
+A description about the implemented working equations can be found :ref:`here <DynamicalStructureFactorFromAbInitio>`.
+
 Abins is in constant development and suggestions
 how to make it better are very welcome. For any suggestions of enhancements please contact
 Krzysztof Dymkowski (krzysztof.dymkowski@stfc.ac.uk).

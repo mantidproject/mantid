@@ -45,8 +45,8 @@ class MeanTest(unittest.TestCase):
         b = CreateWorkspace(DataX=[1,2,3],DataY=[1,2,3],DataE=[1,1,1],UnitX='TOF')
         c = Mean(Workspaces='a,b')
         d = (a + b) / 2 # Do algorithm work manually for purposes of comparison.
-        message = CheckWorkspacesMatch(Workspace1=c, Workspace2=d)
-        self.assertEquals("Success!", message)
+        message = CompareWorkspaces(Workspace1=c, Workspace2=d)
+        self.assertTrue(message[0])
 
         # Clean-up
         DeleteWorkspace(a)

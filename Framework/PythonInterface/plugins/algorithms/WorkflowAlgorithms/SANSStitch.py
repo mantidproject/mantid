@@ -1,4 +1,4 @@
-﻿# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
+# pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
 from __future__ import (absolute_import, division, print_function)
 

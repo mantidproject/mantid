@@ -1,5 +1,6 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods,too-many-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods,too-many-public-methods
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import *
 from mantid import config
@@ -26,8 +27,8 @@ class ISISPowderDiffractionHrpd1(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False
@@ -179,8 +180,8 @@ class ISISPowderDiffractionHrpd2(stresstesting.MantidStressTest):
                 os.remove(path)
             cali_path = os.path.join(directories[0], "hrpd/test/cycle_09_2_no_existv/Calibration")
             shutil.rmtree(cali_path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False

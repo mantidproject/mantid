@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/make_cow.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid;
 using namespace Indexing;
@@ -67,6 +69,27 @@ public:
     TS_ASSERT_EQUALS(t.detectorIDs(0), std::vector<detid_t>{6});
     TS_ASSERT_EQUALS(t.detectorIDs(1), std::vector<detid_t>{7});
     TS_ASSERT_EQUALS(t.detectorIDs(2), std::vector<detid_t>{8});
+  }
+
+  void test_setSpectrumDefinitions_setting_nullptr_fails() {
+    // This might be supported in the future but is not needed now and might
+    // break some things, so we forbid this for now.
+    IndexInfo info(3);
+    Kernel::cow_ptr<std::vector<SpectrumDefinition>> defs{nullptr};
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
+  }
+
+  void test_setSpectrumDefinitions_size_mismatch() {
+    IndexInfo info(3);
+    const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
+    TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
+  }
+
+  void test_setSpectrumDefinitions() {
+    IndexInfo info(3);
+    const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
+    TS_ASSERT_THROWS_NOTHING(info.setSpectrumDefinitions(defs));
+    TS_ASSERT_EQUALS(info.spectrumDefinitions().get(), defs.get());
   }
 };
 

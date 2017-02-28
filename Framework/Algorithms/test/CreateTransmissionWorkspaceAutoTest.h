@@ -130,8 +130,7 @@ public:
                      i0MonitorIndex);
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart").at(0),
                      boost::lexical_cast<double>(pointDetectorStartStop.at(0)));
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop").at(0),
-                     boost::lexical_cast<double>(pointDetectorStartStop.at(1)));
+    TS_ASSERT_EQUALS(pointDetectorStartStop.size(), 1);
   }
 };
 

@@ -3,8 +3,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -129,6 +131,20 @@ void ReflectometryReductionOneAuto2::init() {
   // Theta
   declareProperty("ThetaIn", Mantid::EMPTY_DBL(), "Angle in degrees",
                   Direction::Input);
+
+  // Detector position correction type
+  const std::vector<std::string> correctionType{"VerticalShift",
+                                                "RotateAroundSample"};
+  auto correctionTypeValidator = boost::make_shared<CompositeValidator>();
+  correctionTypeValidator->add(
+      boost::make_shared<MandatoryValidator<std::string>>());
+  correctionTypeValidator->add(
+      boost::make_shared<StringListValidator>(correctionType));
+  declareProperty(
+      "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
+      "Whether detectors should be shifted vertically or rotated around the "
+      "sample position.",
+      Direction::Input);
 
   // Wavelength limits
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
@@ -304,7 +320,8 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
   return detectors;
 }
 
-/** Correct an instrument component vertically.
+/** Correct an instrument component by shifting it vertically or
+* rotating it around the sample.
 *
 * @param instructions :: processing instructions defining the detectors of
 * interest
@@ -326,6 +343,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
                                           detectorsOfInterest.end());
 
   const double theta = getProperty("ThetaIn");
+  const std::string correctionType = getProperty("DetectorCorrectionType");
 
   MatrixWorkspace_sptr corrected = inputWS;
 
@@ -334,6 +352,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
         createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
     alg->setProperty("TwoTheta", theta * 2);
+    alg->setProperty("DetectorCorrectionType", correctionType);
     alg->setProperty("DetectorComponentName", detector);
     alg->execute();
     corrected = alg->getProperty("OutputWorkspace");
@@ -500,7 +519,7 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 
     IAlgorithm_sptr calcRes = createChildAlgorithm("CalculateResolution");
     calcRes->setProperty("Workspace", inputWS);
-    calcRes->setProperty("TwoTheta", 2 * theta);
+    calcRes->setProperty("TwoTheta", theta);
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
@@ -691,6 +710,16 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   groupAlg->setProperty("OutputWorkspace", outputIvsQBinned);
   groupAlg->execute();
 
+  // Set other properties so they can be updated in the Reflectometry interface
+  setPropertyValue("ThetaIn", alg->getPropertyValue("ThetaIn"));
+  setPropertyValue("MomentumTransferMin",
+                   alg->getPropertyValue("MomentumTransferMin"));
+  setPropertyValue("MomentumTransferMax",
+                   alg->getPropertyValue("MomentumTransferMax"));
+  setPropertyValue("MomentumTransferStep",
+                   alg->getPropertyValue("MomentumTransferStep"));
+  setPropertyValue("ScaleFactor", alg->getPropertyValue("ScaleFactor"));
+
   if (!polarizationAnalysisOn) {
     // No polarization analysis. Reduction stops here
     setPropertyValue("OutputWorkspace", outputIvsQ);
@@ -743,6 +772,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   setPropertyValue("OutputWorkspace", outputIvsQ);
   setPropertyValue("OutputWorkspaceBinned", outputIvsQBinned);
   setPropertyValue("OutputWorkspaceWavelength", outputIvsLam);
+
   return true;
 }
 

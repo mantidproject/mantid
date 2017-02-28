@@ -21,16 +21,17 @@ detectors of interest. Only the detectors of interest will be corrected, the res
 will remain in the original position. Note that when :literal:`ProcessingInstructions` is not set, its value
 is inferred from other properties, depending on the value of :literal:`AnalysisMode`:
 
-* If :literal:`AnalysisMode = PointDetectorAnalaysis` the algorithm will search for :literal:`PointDetectorStart` and :literal:`PointDetectorStep` in the parameter file, and :literal:`ProcessingInstructions` will be set to :literal:`PointDetectorStart:PointDetectorEnd`.
+* If :literal:`AnalysisMode = PointDetectorAnalaysis` the algorithm will search for :literal:`PointDetectorStart` and :literal:`PointDetectorStop` in the parameter file, and :literal:`ProcessingInstructions` will be set to :literal:`PointDetectorStart:PointDetectorEnd`.
 * If :literal:`AnalysisMode = MultiDetectorAnalaysis` the algorithm will search for :literal:`MultiDetectorStart` in the parameter file and all of the spectra from this value onwards will be used.
 
 Note that ProcessingInstructions are workspace indices, not detector IDs. The first few workspaces may correspond
 to monitors, rather than detectors of interest. For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
 Once the algorithm determines the detectors of interest it corrects their positions according to :literal:`ThetaIn`,
-if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. If :literal:`ThetaIn` is not set, detectors
-will not be corrected. However, it is recommended to use this option to ensure that :ref:`algm-ReflectometryReductionOne`
-is able to convert from wavelength to momentum transfer properly.
+if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them
+vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
+If :literal:`ThetaIn` is not set, detectors will not be corrected. However, it is recommended to use this option to
+ensure that :ref:`algm-ReflectometryReductionOne` is able to convert from wavelength to momentum transfer properly.
 
 Next, the algorithm will try to populate input properties which have not been set. Specifically, it will search for
 :literal:`LambdaMin`, :literal:`LambdaMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,
@@ -141,19 +142,19 @@ Usage
     print "%.5f" % (IvsLam.readY(0)[176])
     print "%.5f" % (IvsQ_unbinned.readY(0)[106])
     print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[106])
-    print "%.5f" % (IvsQ.readY(0)[107])
+    print "%.5f" % (IvsQ.readY(0)[13])
+    print "%.5f" % (IvsQ.readY(0)[14])
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoSimple
 
-    0.56682
-    0.59735
-    0.57476
-    0.54633
-    0.00027
-    0.00027
+    0.00441
+    0.00462
+    0.63441
+    0.41079
+    0.44780
+    0.23690
 
 **Example - Basic reduction with a transmission run**
 
@@ -167,44 +168,44 @@ Output:
     print "%.5f" % (IvsLam.readY(0)[164])
     print "%.5f" % (IvsQ_unbinned.readY(0)[96])
     print "%.5f" % (IvsQ_unbinned.readY(0)[97])
-    print "%.5f" % (IvsQ.readY(0)[96])
-    print "%.5f" % (IvsQ.readY(0)[97])
+    print "%.5f" % (IvsQ.readY(0)[5])
+    print "%.5f" % (IvsQ.readY(0)[6])
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoTrans
 
-    0.36906
-    0.36906
-    1.05389
-    1.02234
-    0.00074
-    0.00069
+    0.00338
+    0.00338
+    1.16756
+    0.89144
+    1.46645
+    1.41351
 
 **Example - Reduction overriding some default values**
 
 .. testcode:: ExReflRedOneAutoOverload
 
     run = Load(Filename='INTER00013460.nxs')
-    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
+    IvsQ, IvsQ_unbinned, IvsLam = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, DetectorCorrectionType="RotateAroundSample", MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
     print "%.5f" % (IvsLam.readY(0)[175])
     print "%.5f" % (IvsLam.readY(0)[176])
     print "%.5f" % (IvsQ_unbinned.readY(0)[106])
     print "%.5f" % (IvsQ_unbinned.readY(0)[107])
-    print "%.5f" % (IvsQ.readY(0)[106])
-    print "%.5f" % (IvsQ.readY(0)[107])
+    print "%.5f" % (IvsQ.readY(0)[5])
+    print "%.5f" % (IvsQ.readY(0)[6])
 
 Output:
 
 .. testoutput:: ExReflRedOneAutoOverload
 
-    0.50401
-    0.52599
-    0.51160
-    0.48843
-    0.00027
-    0.00027
+    0.00441
+    0.00462
+    0.64241
+    0.41453
+    0.51028
+    0.52241
 
 .. categories::
 

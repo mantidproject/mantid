@@ -2,6 +2,8 @@
 
 # pylint: disable=invalid-name
 
+from __future__ import (absolute_import, division, print_function)
+
 try:
     import xml.etree.cElementTree as eTree
 except ImportError:
@@ -28,7 +30,7 @@ def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
     output = {}
     number_of_elements_to_search = len(names_to_search)
     for _, element in eTree.iterparse(ipf_file):
-        if element.tag == "parameter" and "name" in element.keys():
+        if element.tag == "parameter" and "name" in list(element.keys()):
             if element.get("name") in names_to_search:
                 sub_element = element.find("value")
                 value = sub_element.get("val")
@@ -53,7 +55,7 @@ def get_monitor_names_from_idf_file(idf_file):
     idname = "idname"
     id_tag = "id"
     for _, element in eTree.iterparse(idf_file):
-        if element.tag == get_tag(tag) and idname in element.keys():
+        if element.tag == get_tag(tag) and idname in list(element.keys()):
             name = element.get(idname)
             if "monitor" in name:
                 sub_element = element.find(get_tag(id_tag))

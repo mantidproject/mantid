@@ -75,6 +75,7 @@ void ConvertSpectrumAxis::exec() {
   const size_t nHist = inputWS->getNumberHistograms();
   const size_t nBins = inputWS->blocksize();
   const bool isHist = inputWS->isHistogramData();
+  auto &spectrumInfo = inputWS->spectrumInfo();
   size_t nxBins;
   if (isHist) {
     nxBins = nBins + 1;
@@ -84,10 +85,8 @@ void ConvertSpectrumAxis::exec() {
   if (unitTarget != "theta" && unitTarget != "signed_theta") {
     Kernel::Unit_sptr fromUnit = inputWS->getAxis(0)->unit();
     Kernel::Unit_sptr toUnit = UnitFactory::Instance().create(unitTarget);
-    IComponent_const_sptr source = inputWS->getInstrument()->getSource();
-    IComponent_const_sptr sample = inputWS->getInstrument()->getSample();
     std::vector<double> emptyVector;
-    const double l1 = source->getDistance(*sample);
+    const double l1 = spectrumInfo.l1();
     const std::string emodeStr = getProperty("EMode");
     int emode = 0;
     if (emodeStr == "Direct")
@@ -96,7 +95,6 @@ void ConvertSpectrumAxis::exec() {
       emode = 2;
     const double delta = 0.0;
     double efixed;
-    auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       double twoTheta, l1val, l2;

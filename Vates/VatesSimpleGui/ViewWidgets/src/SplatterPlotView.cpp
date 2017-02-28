@@ -472,9 +472,9 @@ void SplatterPlotView::createPeaksFilter() {
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
         .Set(g_defaultRepresentation);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
-        .Set(g_defaultOpacity);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity")
         .Set(g_defaultRadius);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity")
+        .Set(g_defaultOpacity);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc)) {

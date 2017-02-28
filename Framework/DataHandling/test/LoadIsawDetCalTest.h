@@ -29,20 +29,22 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
+namespace {
+void loadEmptyInstrument(const std::string &filename,
+                         const std::string &wsName) {
+  LoadEmptyInstrument loaderCAL;
+
+  loaderCAL.initialize();
+  loaderCAL.isInitialized();
+  loaderCAL.setPropertyValue("Filename", filename);
+  loaderCAL.setPropertyValue("OutputWorkspace", wsName);
+  loaderCAL.execute();
+  TS_ASSERT(loaderCAL.isExecuted());
+}
+}
+
 class LoadIsawDetCalTest : public CxxTest::TestSuite {
 public:
-  void loadEmptyInstrument(const std::string &filename,
-                           const std::string &wsName) {
-    LoadEmptyInstrument loaderCAL;
-
-    loaderCAL.initialize();
-    loaderCAL.isInitialized();
-    loaderCAL.setPropertyValue("Filename", filename);
-    loaderCAL.setPropertyValue("OutputWorkspace", wsName);
-    loaderCAL.execute();
-    TS_ASSERT(loaderCAL.isExecuted());
-  }
-
   void checkPosition(IComponent_const_sptr det, const double x, const double y,
                      const double z) {
     const auto detPos = det->getPos();
@@ -153,6 +155,33 @@ public:
     // Remove workspace
     AnalysisDataService::Instance().remove(wsName);
   }
+};
+
+class LoadIsawDetCalTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadIsawDetCalTestPerformance *createSuite() {
+    return new LoadIsawDetCalTestPerformance();
+  }
+  static void destroySuite(LoadIsawDetCalTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    loadEmptyInstrument("SNAP_Definition.xml", wsName);
+
+    testerCAL.initialize();
+    testerCAL.setPropertyValue("InputWorkspace", wsName);
+    testerCAL.setPropertyValue("Filename", inputFile);
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().remove(wsName); }
+
+  void testLoadIsawDetCalTestPerformance() { testerCAL.execute(); }
+
+private:
+  LoadIsawDetCal testerCAL;
+  const std::string inputFile = "SNAP_34172_low.DetCal, SNAP_34172_high.DetCal";
+  const std::string wsName = "testSNAP";
 };
 
 #endif /*DIFFRACTIONEVENTREADDETCALTEST_H_*/

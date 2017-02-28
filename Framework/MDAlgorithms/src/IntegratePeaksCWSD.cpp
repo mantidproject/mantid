@@ -2,6 +2,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -27,8 +28,7 @@ const signal_t THRESHOLD_SIGNAL = 0;
 IntegratePeaksCWSD::IntegratePeaksCWSD()
     : m_haveMultipleRun(false), m_useSinglePeakCenterFmUser(false),
       m_peakRadius(), m_doMergePeak(false), m_normalizeByMonitor(false),
-      m_normalizeByTime(false), m_scaleFactor(0), m_maskDets(false),
-      m_haveInputPeakWS(false) {}
+      m_normalizeByTime(false), m_scaleFactor(0), m_haveInputPeakWS(false) {}
 
 /** Initialize the algorithm's properties.
  */
@@ -107,12 +107,11 @@ void IntegratePeaksCWSD::exec() {
     mergePeaks();
 
   // Output
-  DataObjects::PeaksWorkspace_sptr outws;
-  if (m_useSinglePeakCenterFmUser) {
-    outws = createPeakworkspace(m_peakCenter, m_inputWS);
-  } else {
-    outws = createOutputs();
-  }
+  DataObjects::PeaksWorkspace_sptr outws =
+      (m_useSinglePeakCenterFmUser)
+          ? createPeakworkspace(m_peakCenter, m_inputWS)
+          : createOutputs();
+
   setProperty("OutputWorkspace", outws);
 }
 
@@ -146,11 +145,10 @@ void IntegratePeaksCWSD::processInputs() {
     m_useSinglePeakCenterFmUser = false;
   }
   m_doMergePeak = getProperty("MergePeaks");
-  if (m_haveInputPeakWS && m_peaksWS->getNumberPeaks() > 1 && m_doMergePeak) {
+  if (m_haveInputPeakWS && m_peaksWS->getNumberPeaks() > 1 && m_doMergePeak)
     throw std::invalid_argument(
         "It is not allowed to merge peaks when there are "
         "multiple peaks present in PeaksWorkspace.");
-  }
 
   m_normalizeByMonitor = getProperty("NormalizeByMonitor");
   m_normalizeByTime = getProperty("NormalizeByTime");
@@ -158,11 +156,10 @@ void IntegratePeaksCWSD::processInputs() {
     throw std::invalid_argument(
         "It is not allowed to select to be normalized both  "
         "by time and by monitor counts.");
-  if (m_doMergePeak && !(m_normalizeByMonitor || m_normalizeByTime)) {
+  if (m_doMergePeak && !(m_normalizeByMonitor || m_normalizeByTime))
     throw std::invalid_argument(
         "Either being normalized by time or being normalized "
         "by monitor must be selected if merge-peak is selected.");
-  }
   m_scaleFactor = getProperty("ScaleFactor");
 
   // monitor counts
@@ -174,26 +171,19 @@ void IntegratePeaksCWSD::processInputs() {
   // go through peak
   if (m_haveInputPeakWS)
     getPeakInformation();
-  if (m_runPeakCenterMap.size() > 1)
-    m_haveMultipleRun = true;
-  else
-    m_haveMultipleRun = false;
+  m_haveMultipleRun = (m_runPeakCenterMap.size() > 1);
 
   // peak related
   m_peakRadius = getProperty("PeakRadius");
-  if (m_peakRadius == EMPTY_DBL()) {
+  if (m_peakRadius == EMPTY_DBL())
     throw std::invalid_argument("Peak radius cannot be left empty.");
-  }
 
   // optional mask workspace
   std::string maskwsname = getPropertyValue("MaskWorkspace");
   if (!maskwsname.empty()) {
     // process mask workspace
-    m_maskDets = true;
     m_maskWS = getProperty("MaskWorkspace");
     vecMaskedDetID = processMaskWorkspace(m_maskWS);
-  } else {
-    m_maskDets = false;
   }
 }
 
@@ -375,12 +365,12 @@ std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
 
   // Add the detector IDs of all masked detector to a vector
   size_t numspec = maskws->getNumberHistograms();
+  const auto &specInfo = maskws->spectrumInfo();
   for (size_t iws = 0; iws < numspec; ++iws) {
-    Geometry::IDetector_const_sptr detector = maskws->getDetector(iws);
-    const MantidVec &vecY = maskws->readY(iws);
+    const auto &vecY = maskws->y(iws);
     if (vecY[0] > 0.1) {
       // vecY[] > 0 is masked.  det->isMasked() may not be reliable.
-      detid_t detid = detector->getID();
+      const detid_t detid = specInfo.detector(iws).getID();
       vecMaskedDetID.push_back(detid);
     }
   }

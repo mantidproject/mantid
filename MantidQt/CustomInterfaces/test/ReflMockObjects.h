@@ -72,6 +72,8 @@ class MockSettingsView : public IReflSettingsView {
 public:
   // Global options
   MOCK_CONST_METHOD0(getTransmissionOptions, std::string());
+  MOCK_CONST_METHOD0(getStartOverlap, std::string());
+  MOCK_CONST_METHOD0(getEndOverlap, std::string());
   MOCK_CONST_METHOD0(getReductionOptions, std::string());
   MOCK_CONST_METHOD0(getStitchOptions, std::string());
   MOCK_CONST_METHOD0(getAnalysisMode, std::string());
@@ -95,7 +97,9 @@ public:
   MOCK_CONST_METHOD0(getTransmissionRuns, std::string());
   MOCK_CONST_METHOD1(setPolarisationOptionsEnabled, void(bool));
   MOCK_CONST_METHOD1(setExpDefaults, void(const std::vector<std::string> &));
-  MOCK_CONST_METHOD1(setInstDefaults, void(const std::vector<double> &));
+  MOCK_CONST_METHOD2(setInstDefaults, void(const std::vector<double> &,
+                                           const std::vector<std::string> &));
+  MOCK_CONST_METHOD0(getDetectorCorrectionType, std::string());
   // Calls we don't care about
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override {
@@ -211,6 +215,7 @@ public:
   MOCK_CONST_METHOD1(getTransmissionOptions, std::string(int));
   MOCK_CONST_METHOD1(getReductionOptions, std::string(int));
   MOCK_CONST_METHOD1(getStitchOptions, std::string(int));
+  MOCK_CONST_METHOD1(setInstrumentName, void(const std::string &instName));
   MOCK_CONST_METHOD0(getInstrumentName, std::string());
   MOCK_METHOD3(askUserString,
                std::string(const std::string &, const std::string &,
@@ -222,9 +227,6 @@ public:
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
   // Other calls we don't care about
-  void setInstrumentName(const std::string &instName) const override {
-    UNUSED_ARG(instName);
-  }
   std::string getTimeSlicingOptions(int group) const override {
     UNUSED_ARG(group);
     return std::string();

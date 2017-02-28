@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-few-public-methods
+
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 
 from mantid.api import AnalysisDataService
@@ -96,8 +98,6 @@ class LARMORMultiPeriodEventModeLoading(stresstesting.MantidStressTest):
         number_of_workspaces = 4
         self._check_if_all_multi_period_workspaces_have_the_same_position(base_name, number_of_workspaces)
         self._clean_up(base_name, number_of_workspaces)
-        for element in mtd.getObjectNames():
-            print element
 
     def validate(self):
         return self.success

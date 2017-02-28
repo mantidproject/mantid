@@ -289,12 +289,12 @@ void ResNorm::previewSpecChanged(int value) {
               fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
-      fit->setX(0, fitWs->refX(1));
-      fit->dataY(0) = fitWs->readY(1);
-      fit->dataE(0) = fitWs->readE(1);
+      fit->setSharedX(0, fit->sharedX(1));
+      fit->setSharedY(0, fit->sharedY(1));
+      fit->setSharedE(0, fit->sharedE(1));
 
       for (size_t i = 0; i < fit->blocksize(); i++)
-        fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
+        fit->mutableY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
     }

@@ -333,7 +333,7 @@ public:
     std::vector<WorkspaceInfo> wsInfo;
 
     for (auto &name : workspaces) {
-      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10);
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceRand(10, true);
       WorkspaceCreationHelper::storeWS(name, ws);
       WorkspaceInfo info;
       info.name = name;

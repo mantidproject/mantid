@@ -13,6 +13,7 @@
 # The run numbers themselves may be specified as a comma separated list of
 # individual run numbers, or ranges specified with a colon separator.
 #
+from __future__ import (absolute_import, division, print_function)
 
 
 def LoadDictionary( *filenames, **kwargs ):
@@ -29,7 +30,7 @@ def LoadDictionary( *filenames, **kwargs ):
             words = line.split()
       # error check the number of values
             if len(words) < 2:
-                print "Syntax Error On Line: " + line
+                print("Syntax Error On Line: " + line)
       # set the value
             else:
                 (key, value) = words[0:2]

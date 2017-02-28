@@ -1,6 +1,4 @@
 #include "MantidDataHandling/LoadNXSPE.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DeltaEMode.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -9,10 +7,12 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/UnitFactory.h"
 
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "MantidNexus/NexusClasses.h"
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -36,6 +36,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::HistogramData::BinEdges;
 
 /**
  * Calculate the confidence in the string value. This is used for file
@@ -299,16 +300,17 @@ void LoadNXSPE::exec() {
                                 itdataend, iterrorend;
   auto &spectrumInfo = outputWS->mutableSpectrumInfo();
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
+  BinEdges edges(std::move(energies));
   for (std::size_t i = 0; i < numSpectra; ++i) {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
-    outputWS->dataX(i) = energies;
+    outputWS->setBinEdges(i, edges);
     if ((!std::isfinite(*itdata)) || (*itdata <= -1e10)) // masked bin
     {
       spectrumInfo.setMasked(i, true);
     } else {
-      outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
-      outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
+      outputWS->mutableY(i).assign(itdata, itdataend);
+      outputWS->mutableE(i).assign(iterror, iterrorend);
     }
     itdata = (itdataend);
     iterror = (iterrorend);
@@ -317,7 +319,7 @@ void LoadNXSPE::exec() {
 
   // If an instrument name is defined, load instrument parameter file for Emode
   // NB. LoadParameterFile must be used on a workspace with an instrument
-  if (!instrument_name.empty()) {
+  if (!instrument_name.empty() && instrument_name != "NXSPE") {
     std::string IDF_filename =
         ExperimentInfo::getInstrumentFilename(instrument_name);
     std::string instrument_parfile =

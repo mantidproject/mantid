@@ -1,23 +1,17 @@
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
@@ -92,13 +86,12 @@ void DgsConvertToEnergyTransfer::exec() {
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
+  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  } else {
+  else
     throw std::runtime_error("DgsConvertToEnergyTransfer cannot run without a "
                              "reduction PropertyManager.");
-  }
 
   MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
@@ -152,18 +145,16 @@ void DgsConvertToEnergyTransfer::exec() {
     double tZero = 0.0;
     if (useEiGuess) {
       incidentEnergy = eiGuess;
-      if (EMPTY_DBL() != tZeroGuess) {
+      if (EMPTY_DBL() != tZeroGuess)
         tZero = tZeroGuess;
-      }
     } else {
       if (!monWS) {
         g_log.notice() << "Trying to determine file name\n";
         std::string runFileName =
             inputWS->run().getProperty("Filename")->value();
-        if (runFileName.empty()) {
+        if (runFileName.empty())
           throw std::runtime_error("Cannot find run filename, therefore cannot "
                                    "find the initial energy");
-        }
 
         std::string loadAlgName;
         std::string fileProp;
@@ -192,13 +183,12 @@ void DgsConvertToEnergyTransfer::exec() {
         // the algorithm can return a group workspace if the file is multi
         // period
         monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-        if ((monWSOutput) && (!monWS)) {
+        if ((monWSOutput) && (!monWS))
           // this was a group workspace - DGSReduction does not support multi
           // period data yet
           throw Exception::NotImplementedError(
               "The file contains multi period data, support for this is not "
               "implemented in DGSReduction yet");
-        }
       }
 
       // Calculate Ei
@@ -250,8 +240,8 @@ void DgsConvertToEnergyTransfer::exec() {
     cbo->executeAsChildAlg();
     outputWS = cbo->getProperty("OutputWorkspace");
 
-    IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
-    V3D monPos = monDet->getPos();
+    const auto &specInfo = inputWS->spectrumInfo();
+    const V3D &monPos = specInfo.position(monIndex);
     std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
     IAlgorithm_sptr moveInstComp =
@@ -269,13 +259,11 @@ void DgsConvertToEnergyTransfer::exec() {
 
   if ("ISIS" == facility) {
     std::string detcalFile;
-    if (reductionManager->existsProperty("SampleDetCalFilename")) {
+    if (reductionManager->existsProperty("SampleDetCalFilename"))
       detcalFile = reductionManager->getPropertyValue("SampleDetCalFilename");
-    }
     // Try to get it from run object.
-    else {
+    else
       detcalFile = inputWS->run().getProperty("Filename")->value();
-    }
     if (!detcalFile.empty()) {
       const bool relocateDets =
           reductionManager->getProperty("RelocateDetectors");
@@ -522,9 +510,8 @@ void DgsConvertToEnergyTransfer::exec() {
   rebin->setProperty("InputWorkspace", outputWS);
   rebin->setProperty("OutputWorkspace", outputWS);
   rebin->setProperty("IgnoreBinErrors", true);
-  if (sofphieIsDistribution) {
+  if (sofphieIsDistribution)
     rebin->setProperty("PreserveEvents", false);
-  }
   rebin->executeAsChildAlg();
   outputWS = rebin->getProperty("OutputWorkspace");
 
@@ -564,9 +551,8 @@ void DgsConvertToEnergyTransfer::exec() {
   std::string oldGroupFile;
   std::string filePropMod = this->getProperty("AlternateGroupingTag");
   std::string fileProp = filePropMod + "OldGroupingFilename";
-  if (reductionManager->existsProperty(fileProp)) {
+  if (reductionManager->existsProperty(fileProp))
     oldGroupFile = reductionManager->getPropertyValue(fileProp);
-  }
   IAlgorithm_sptr remap = this->createChildAlgorithm("DgsRemap");
   remap->setProperty("InputWorkspace", outputWS);
   remap->setProperty("OutputWorkspace", outputWS);

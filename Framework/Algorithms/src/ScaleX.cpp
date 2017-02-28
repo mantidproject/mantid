@@ -3,11 +3,14 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ScaleX.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -228,24 +231,18 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS,
   if (m_parname.empty())
     return m_algFactor;
 
-  // Try and get factor from component. If we see a DetectorGroup use this will
+  // Try and get factor from component. If we see a DetectorGroup this will
   // use the first component
-  Geometry::IDetector_const_sptr det;
-  auto inst = inputWS->getInstrument();
-
-  const auto &ids = inputWS->getSpectrum(index).getDetectorIDs();
-  const size_t ndets(ids.size());
-  if (ndets > 0) {
-    try {
-      det = inst->getDetector(*ids.begin());
-    } catch (Exception::NotFoundError &) {
-      return 0.0;
-    }
-  } else
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index)) {
     return 0.0;
+  }
 
+  const auto &detectorInfo = inputWS->detectorInfo();
+  const auto detIndex = spectrumInfo.spectrumDefinition(index)[0].first;
+  const auto &det = detectorInfo.detector(detIndex);
   const auto &pmap = inputWS->constInstrumentParameters();
-  auto par = pmap.getRecursive(det->getComponentID(), m_parname);
+  auto par = pmap.getRecursive(det.getComponentID(), m_parname);
   if (par) {
     if (!m_combine)
       return par->value<double>();

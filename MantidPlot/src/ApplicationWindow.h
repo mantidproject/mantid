@@ -601,6 +601,7 @@ public slots:
 
   bool hidden(QWidget *window);
   void closeActiveWindow();
+  void closeSimilarWindows();
   void closeWindow(MdiSubWindow *window);
   void prepareToCloseMantid();
 
@@ -1122,6 +1123,7 @@ public slots:
 signals:
   void modified();
   void shutting_down();
+  void configModified();
 
 protected:
   bool event(QEvent *e) override;

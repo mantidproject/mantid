@@ -126,7 +126,7 @@ class SANSParameterTest(unittest.TestCase):
         test_class = SANSParameterTest.SANSParameterTestClass()
         test_class.my_string_parameter = "test"
         test_class.my_bool_parameter = True
-        keys = test_class.__dict__.keys()
+        keys = list(test_class.__dict__.keys())
         # We don't have a sensible name in the instance dictionary
         self.assertTrue("_BoolParameter#my_bool_parameter" in keys)
         self.assertTrue("_StringParameter#my_string_parameter" in keys)
@@ -135,7 +135,7 @@ class SANSParameterTest(unittest.TestCase):
         test_class = SANSParameterTest.SANSParameterTestClass2()
         test_class.my_string_parameter = "test"
         test_class.my_bool_parameter = True
-        keys = test_class.__dict__.keys()
+        keys = list(test_class.__dict__.keys())
         # We don't have a sensible name in the instance dictionary.
         # It will be rather stored as something like: _BoolParameter#2 etc.
         self.assertTrue("_BoolParameter#my_bool_parameter" not in keys)

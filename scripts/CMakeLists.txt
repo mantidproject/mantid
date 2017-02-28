@@ -3,7 +3,6 @@
 add_subdirectory(FilterEvents)
 add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
-add_subdirectory(lib1to2/gui)
 add_subdirectory(TofConverter)
 add_subdirectory(HFIR_4Circle_Reduction)
 
@@ -13,7 +12,6 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUIHFIRPowderReduction
   CompileUITofConverter
   CompileUIUI
-  CompileUILib1To2
   CompileUIHFIR_4Circle_Reduction
 )
 
@@ -23,7 +21,6 @@ set_property ( TARGET CompileUIFilterEvents PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUILib1To2 PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
 
 set ( TEST_PY_FILES
@@ -34,8 +31,6 @@ set ( TEST_PY_FILES
       test/DirectEnergyConversionTest.py
       test/ISISDirecInelasticConfigTest.py
       test/IndirectCommonTests.py
-      test/ISIS_Powder_AbstractInstTest.py
-      test/ISIS_Powder_PearlTest.py
       test/PyChopTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py

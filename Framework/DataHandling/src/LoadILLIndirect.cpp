@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadILLIndirect.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -359,11 +360,7 @@ void LoadILLIndirect::moveComponent(const std::string &componentName,
     V3D newPos;
     newPos.spherical(newR, newTheta, phi);
 
-    // g_log.debug() << tube->getName() << " : t = " << theta << " ==> t = " <<
-    // newTheta << "\n";
-    Geometry::ParameterMap &pmap = m_localWorkspace->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(
-        *component, pmap, newPos, Geometry::ComponentHelper::Absolute);
+    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

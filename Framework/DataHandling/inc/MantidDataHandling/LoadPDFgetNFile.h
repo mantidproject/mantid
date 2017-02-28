@@ -1,9 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
 #define MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -83,6 +83,8 @@ private:
 
   /// Set X and Y axis unit and lebel
   void setUnit(DataObjects::Workspace2D_sptr ws);
+
+  void checkSameSize(const std::vector<size_t> &numptsvec, size_t numsets);
 };
 
 } // namespace DataHandling

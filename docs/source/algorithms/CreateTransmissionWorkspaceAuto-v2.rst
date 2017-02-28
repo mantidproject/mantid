@@ -58,10 +58,10 @@ Output:
 
 .. testoutput:: ExCreateTransWSAutoSimple
 
-    0.3671
-    0.3684
-    0.3640
-    0.3578
+    0.0827
+    0.0859
+    0.0861
+    0.0869
 
     
 **Example - Create a transmission run, overriding some default parameters**
@@ -72,19 +72,19 @@ Output:
     trans = Load(Filename='INTER00013463.nxs')
     transWS = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0)
 
-    print "%.4f" % (transWS.readY(0)[26])
-    print "%.4f" % (transWS.readY(0)[27])
-    print "%.4f" % (transWS.readY(0)[28])
-    print "%.4f" % (transWS.readY(0)[29])
+    print "%.3f" % (transWS.readY(0)[26])
+    print "%.3f" % (transWS.readY(0)[27])
+    print "%.3f" % (transWS.readY(0)[28])
+    print "%.3f" % (transWS.readY(0)[29])
 
 Output:
 
 .. testoutput:: ExCreateTransWSAutoOverload
 
-    0.3638
-    0.3651
-    0.3607
-    0.3546
+    0.083
+    0.086
+    0.086
+    0.087
 
     
 **Example - Create a transmission run from two runs**
@@ -104,10 +104,10 @@ Output:
 
 .. testoutput:: ExCreateTransWSAutoTwo
 
-    0.0825
-    0.0860
-    0.0879
-    0.0879
+    0.0816
+    0.0841
+    0.0857
+    0.0862
 
 .. categories::
 

@@ -23,7 +23,7 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     SampleValidator validator;
     TS_ASSERT_EQUALS(
         validator.isValid(ws),

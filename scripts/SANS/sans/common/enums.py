@@ -50,7 +50,7 @@ def string_convertible(cls):
     @return: the class
     """
     def to_string(elements, convert_to_string):
-        for key, value in elements.items():
+        for key, value in list(elements.items()):
             if convert_to_string is value:
                 return key
         raise RuntimeError("Could not convert {0} to string. Unknown value.".format(convert_to_string))
@@ -58,14 +58,14 @@ def string_convertible(cls):
     def from_string(elements, convert_from_string):
         if PY3 and isinstance(convert_from_string, bytes):
             convert_from_string = convert_from_string.decode()
-        for key, value in elements.items():
+        for key, value in list(elements.items()):
             if convert_from_string == key:
                 return value
         raise RuntimeError("Could not convert {0} from string. Unknown value.".format(convert_from_string))
 
     # First get all enum/sub-class elements
     convertible_elements = {}
-    for attribute_name, attribute_value in cls.__dict__.items():
+    for attribute_name, attribute_value in list(cls.__dict__.items()):
         if isclass(attribute_value) and issubclass(attribute_value, cls):
             convertible_elements.update({attribute_name: attribute_value})
 

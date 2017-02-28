@@ -233,6 +233,7 @@ public:
   void test_correct_detector_position_INTER() {
     auto inter = loadRun("INTER00013460.nxs");
 
+    // Use the default correction type, which is a vertical shift
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
@@ -242,6 +243,7 @@ public:
     alg.setProperty("OutputWorkspace", "IvsQ");
     alg.setProperty("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setProperty("OutputWorkspaceWavelength", "IvsLam");
+    alg.setProperty("ProcessingInstructions", "3:4");
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
 
@@ -281,15 +283,17 @@ public:
                     std::tan(0.7 * 2 * M_PI / 180), 1e-4);
   }
 
-  void test_correct_detector_position_POLREF() {
+  void test_correct_detector_position_rotation_POLREF() {
     // Histograms in this run correspond to 'OSMOND' component
     auto polref = loadRun("POLREF00014966.raw");
 
+    // Correct by rotating detectors around the sample
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 1.5);
+    alg.setProperty("DetectorCorrectionType", "RotateAroundSample");
     alg.setProperty("AnalysisMode", "MultiDetectorAnalysis");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
@@ -315,27 +319,28 @@ public:
     TS_ASSERT_EQUALS(instIn->getComponentByName("lineardetector")->getPos(),
                      instOut->getComponentByName("lineardetector")->getPos());
 
-    // Only 'OSMOND' should have been moved vertically (along Z)
+    // Only 'OSMOND' should have been moved both vertically and in the beam
+    // direction (along X and Z)
 
     auto detectorIn = instIn->getComponentByName("OSMOND")->getPos();
     auto detectorOut = instOut->getComponentByName("OSMOND")->getPos();
 
-    TS_ASSERT_EQUALS(detectorIn.X(), detectorOut.X());
+    TS_ASSERT_DELTA(detectorOut.X(), 25.99589, 1e-5);
     TS_ASSERT_EQUALS(detectorIn.Y(), detectorOut.Y());
-    TS_ASSERT_DELTA(detectorOut.Z() /
-                        (detectorOut.X() - instOut->getSample()->getPos().X()),
-                    std::tan(1.5 * 2 * M_PI / 180), 1e-4);
+    TS_ASSERT_DELTA(detectorOut.Z(), 0.1570, 1e-5);
   }
 
-  void test_correct_detector_position_CRISP() {
+  void test_correct_detector_position_vertical_CRISP() {
     // Histogram in this run corresponds to 'point-detector' component
     auto polref = loadRun("CSP79590.raw");
 
+    // Correct by shifting detectors vertically
     ReflectometryReductionOneAuto2 alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", polref);
     alg.setProperty("ThetaIn", 0.25);
+    alg.setProperty("DetectorCorrectionType", "VerticalShift");
     alg.setProperty("CorrectionAlgorithm", "None");
     alg.setProperty("MomentumTransferStep", 0.01);
     alg.setProperty("OutputWorkspace", "IvsQ");
@@ -464,17 +469,14 @@ public:
     MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
     MatrixWorkspace_sptr outLam = alg.getProperty("OutputWorkspaceWavelength");
 
-    for (size_t i = 0; i < outQ->blocksize(); i++)
-      std::cout << outLam->x(0)[i] << "\n";
-
     TS_ASSERT_EQUALS(outQ->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(outQ->blocksize(), 8);
+    TS_ASSERT_EQUALS(outQ->blocksize(), 14);
     // X range in outLam
-    TS_ASSERT_DELTA(outLam->x(0)[0], 2.8257, 0.0001);
-    TS_ASSERT_DELTA(outLam->x(0)[7], 12.7158, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[0], 1.7924, 0.0001);
+    TS_ASSERT_DELTA(outLam->x(0)[7], 8.0658, 0.0001);
     // X range in outQ
-    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3403, 0.0001);
-    TS_ASSERT_DELTA(outQ->x(0)[7], 1.1345, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[0], 0.3353, 0.0001);
+    TS_ASSERT_DELTA(outQ->x(0)[7], 0.5962, 0.0001);
   }
 };
 

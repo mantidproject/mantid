@@ -175,6 +175,27 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
+
+    def test_reduction_with_vandium_iris(self):
+        """
+        Test to ensure that reduction with normalisation by vanadium works
+        """
+        wks = ISISIndirectDiffractionReduction(InputFiles=['IRS26176.RAW'],
+                                               VanadiumFiles=['IRS26173.RAW'],
+                                               Instrument='IRIS',
+                                               Mode='diffspec',
+                                               SpectraRange=[105, 112])
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(len(wks), 1)
+        self.assertEqual(wks.getNames()[0], 'iris26176_diffspec_red')
+
+        red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(red_ws.getNumberHistograms(), 1)
+        self.assertEquals(round(red_ws.readY(0)[1], 7), 0.0215684)
+        self.assertEquals(round(red_ws.readY(0)[-1], 7), 0.0022809)
+
     # ------------------------------------------Failure cases------------------------------------------
     def test_reduction_with_cal_file_osiris_diffonly_fails(self):
         """

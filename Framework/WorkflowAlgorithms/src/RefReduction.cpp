@@ -1,20 +1,20 @@
 #include "MantidWorkflowAlgorithms/RefReduction.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
+#include <algorithm>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -139,9 +139,9 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   const std::string dataRun = getPropertyValue("DataRun");
   IEventWorkspace_sptr evtWS = loadData(dataRun, polarization);
   // wrong entry name
-  if (!evtWS) {
+  if (!evtWS)
     return nullptr;
-  }
+
   MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
   MatrixWorkspace_sptr dataWSTof =
@@ -309,10 +309,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
   refAlg1->setProperty("ScatteringAngle", theta);
   refAlg1->executeAsChildAlg();
   MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
+  std::string polarizationTranslation(polarization);
+  std::replace(polarizationTranslation.begin(), polarizationTranslation.end(),
+               '-', '_');
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-      "OutputWorkspace_jc_" + polarization, "Lambda_" + polarization,
+      "OutputWorkspace_jc_" + polarizationTranslation, "Lambda_" + polarization,
       Direction::Output));
-  setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
+  setProperty("OutputWorkspace_jc_" + polarizationTranslation, outputWS2);
 
   // Conversion to Q
   IAlgorithm_sptr refAlg = createChildAlgorithm("RefRoi", 0.90, 0.95);
@@ -353,12 +356,13 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization) {
     std::string wsName = prefix + polarization;
     Poco::replaceInPlace(wsName, "entry", "");
     declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace_" + polarization, wsName, Direction::Output));
-    setProperty("OutputWorkspace_" + polarization, outputWS);
-    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
-        "OutputWorkspace2D_" + polarization, "2D_" + wsName,
+        "OutputWorkspace_" + polarizationTranslation, wsName,
         Direction::Output));
-    setProperty("OutputWorkspace2D_" + polarization, output2DWS);
+    setProperty("OutputWorkspace_" + polarizationTranslation, outputWS);
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "OutputWorkspace2D_" + polarizationTranslation, "2D_" + wsName,
+        Direction::Output));
+    setProperty("OutputWorkspace2D_" + polarizationTranslation, output2DWS);
   }
   m_output_message += "Reflectivity calculation completed\n";
   return outputWS;
@@ -522,8 +526,9 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
 
       // Move the detector to the right position
       if (instrument.compare("REF_M") == 0) {
-        double det_distance =
-            rawWS->getInstrument()->getDetector(0)->getPos().Z();
+        const auto &detInfo = rawWS->detectorInfo();
+        const size_t detIndex0 = detInfo.indexOf(0);
+        double det_distance = detInfo.position(detIndex0).Z();
         auto dp = rawWS->run().getTimeSeriesProperty<double>("SampleDetDis");
         double sdd = dp->getStatistics().mean / 1000.0;
         IAlgorithm_sptr mvAlg =
@@ -549,7 +554,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   double tofMin = getProperty("TOFMin");
   double tofMax = getProperty("TOFMax");
   if (isEmpty(tofMin) || isEmpty(tofMax)) {
-    const MantidVec &x = rawWS->readX(0);
+    const auto &x = rawWS->x(0);
     if (isEmpty(tofMin))
       tofMin = *std::min_element(x.begin(), x.end());
     if (isEmpty(tofMax))
@@ -583,7 +588,6 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   IAlgorithm_sptr normAlg =
       createChildAlgorithm("NormaliseByCurrent", 0.3, 0.35);
   normAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
-  // normAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
   normAlg->executeAsChildAlg();
   outputWS = normAlg->getProperty("OutputWorkspace");
 
@@ -595,7 +599,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   convAlg->executeAsChildAlg();
 
   // Rebin in wavelength
-  const MantidVec &x = outputWS->readX(0);
+  const auto &x = outputWS->x(0);
   double wlMin = *std::min_element(x.begin(), x.end());
   double wlMax = *std::max_element(x.begin(), x.end());
 
@@ -620,35 +624,31 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
   double dangle = getProperty("DetectorAngle");
   if (isEmpty(dangle)) {
     Mantid::Kernel::Property *prop = workspace->run().getProperty("DANGLE");
-    if (!prop) {
+    if (!prop)
       throw std::runtime_error("DetectorAngle property not given as input, and "
                                "could not find the log entry DANGLE either");
-    }
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-    if (!dp) {
+    if (!dp)
       throw std::runtime_error(
           "The log entry DANGLE could not"
           "be interpreted as a property of type time series of double");
-    }
     dangle = dp->getStatistics().mean;
   }
 
   double dangle0 = getProperty("DetectorAngle0");
   if (isEmpty(dangle0)) {
     Mantid::Kernel::Property *prop = workspace->run().getProperty("DANGLE0");
-    if (!prop) {
+    if (!prop)
       throw std::runtime_error("DetectorAngle0 property not given aas input, "
                                "and could not find the log entry DANGLE0 "
                                "either");
-    }
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-    if (!dp) {
+    if (!dp)
       throw std::runtime_error(
           "The log entry DANGLE0 could not "
           "be interpreted as a property of type time series of double values");
-    }
     dangle0 = dp->getStatistics().mean;
   }
 

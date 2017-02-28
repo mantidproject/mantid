@@ -3,17 +3,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveCanSAS1D2.h"
-#include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <fstream>
 #include <sstream>
@@ -265,21 +265,21 @@ public:
     TS_ASSERT_EQUALS(ws2d->getInstrument()->getName(), "IRIS");
 
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(ws2d->dataX(0).size(), 2000);
+    TS_ASSERT_EQUALS(ws2d->x(0).size(), 2000);
 
     // some of the data is only stored to 3 decimal places
     double tolerance(1e-04);
-    TS_ASSERT_DELTA(ws2d->dataX(0).front(), 56005, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0)[1000], 66005, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataX(0).back(), 75995, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0).front(), 56005, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0)[1000], 66005, tolerance);
+    TS_ASSERT_DELTA(ws2d->x(0).back(), 75995, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataY(0).front(), 0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0)[1000], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataY(0).back(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0).front(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0)[1000], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->y(0).back(), 0, tolerance);
 
-    TS_ASSERT_DELTA(ws2d->dataE(0).front(), 0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0)[1000], 1.0, tolerance);
-    TS_ASSERT_DELTA(ws2d->dataE(0).back(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0).front(), 0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0)[1000], 1.0, tolerance);
+    TS_ASSERT_DELTA(ws2d->e(0).back(), 0, tolerance);
   }
 
   void test_that_can_save_and_load_full_collimation_information() {
@@ -299,7 +299,7 @@ private:
                                     double expectedWidth,
                                     double expectedHeight) {
     // Create sample workspace
-    auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3);
+    auto wsIn = WorkspaceCreationHelper::create1DWorkspaceRand(3, true);
     auto axis = wsIn->getAxis(0);
     axis->unit() = UnitFactory::Instance().create("MomentumTransfer");
     axis->title() = "|Q|";

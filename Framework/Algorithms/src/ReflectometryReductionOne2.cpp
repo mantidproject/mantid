@@ -163,15 +163,13 @@ void ReflectometryReductionOne2::exec() {
   } else {
     // xUnitID == "TOF"
 
-    IvsLam = convertToWavelength(runWS);
-
     // Detector workspace
-    auto detectorWS = makeDetectorWS(IvsLam);
+    auto detectorWS = makeDetectorWS(runWS);
 
     // Normalization by direct beam (optional)
     Property *directBeamProperty = getProperty("RegionOfDirectBeam");
     if (!directBeamProperty->isDefault()) {
-      const auto directBeam = makeDirectBeamWS(IvsLam);
+      const auto directBeam = makeDirectBeamWS(runWS);
       detectorWS = divide(detectorWS, directBeam);
     }
 
@@ -186,7 +184,9 @@ void ReflectometryReductionOne2::exec() {
         !backgroundMaxProperty->isDefault()) {
       const bool integratedMonitors =
           getProperty("NormalizeByIntegratedMonitors");
-      const auto monitorWS = makeMonitorWS(IvsLam, integratedMonitors);
+      const auto monitorWS = makeMonitorWS(runWS, integratedMonitors);
+      if (!integratedMonitors)
+        detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
       IvsLam = divide(detectorWS, monitorWS);
     } else {
       IvsLam = detectorWS;
@@ -211,11 +211,11 @@ void ReflectometryReductionOne2::exec() {
   setProperty("OutputWorkspace", IvsQ);
 }
 
-/** Creates a direct beam workspace from an input workspace in wavelength. This
-* method should only be called if RegionOfDirectBeam is provided.
+/** Creates a direct beam workspace in wavelength from an input workspace in
+* TOF. This method should only be called if RegionOfDirectBeam is provided.
 *
-* @param inputWS :: the input workspace in wavelength
-* @return :: the monitor workspace
+* @param inputWS :: the input workspace in TOF
+* @return :: the direct beam workspace in wavelength
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
@@ -233,6 +233,8 @@ ReflectometryReductionOne2::makeDirectBeamWS(MatrixWorkspace_sptr inputWS) {
   groupDirectBeamAlg->execute();
   MatrixWorkspace_sptr directBeamWS =
       groupDirectBeamAlg->getProperty("OutputWorkspace");
+
+  directBeamWS = convertToWavelength(directBeamWS);
 
   return directBeamWS;
 }

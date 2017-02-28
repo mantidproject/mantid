@@ -38,7 +38,7 @@ class PeaksWorkspace;
 }
 
 namespace WorkspaceCreationHelper {
-/// Create a fibonacci series
+/// Create a Fibonacci series
 template <typename T> struct FibSeries {
 private:
   T x1; /// Initial value 1;
@@ -111,13 +111,20 @@ template <typename T> boost::shared_ptr<T> getWS(const std::string &name) {
   return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
 }
 
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size);
+/// Creates and returns point or bin based histograms with the data specified in
+/// parameters
+template <typename YType, typename EType>
+Mantid::HistogramData::Histogram createHisto(bool isHistogram, YType &&yAxis,
+                                             EType &&eAxis);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceRand(int size,
+                                                            bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
-create1DWorkspaceConstant(int size, double value, double error);
-Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size);
+create1DWorkspaceConstant(int size, double value, double error, bool isHisto);
+Mantid::DataObjects::Workspace2D_sptr create1DWorkspaceFib(int size,
+                                                           bool isHisto);
 Mantid::DataObjects::Workspace2D_sptr
 create1DWorkspaceConstantWithXerror(int size, double value, double error,
-                                    double xError);
+                                    double xError, bool isHisto = true);
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspace(int nhist,
                                                         int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr
@@ -145,7 +152,7 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist,
  * Filled with Y = 2.0 and E = sqrt(2.0)w
  */
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceBinned(int nhist, int nbins, double x0 = 0.0,
+create2DWorkspaceBinned(int nhist, int numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
@@ -182,9 +189,9 @@ create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
                                                        nY));
 
   for (int iSpec = 0; iSpec < nSpec; iSpec++) {
-    Mantid::MantidVec &X = ws->dataX(iSpec);
-    Mantid::MantidVec &Y = ws->dataY(iSpec);
-    Mantid::MantidVec &E = ws->dataE(iSpec);
+    auto &X = ws->mutableX(iSpec);
+    auto &Y = ws->mutableY(iSpec);
+    auto &E = ws->mutableE(iSpec);
     for (int i = 0; i < nY; i++) {
       double x = x0 + dx * i;
       X[i] = x;
@@ -331,11 +338,17 @@ createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
 /// Function to create a fixed RebinnedOutput workspace
 Mantid::DataObjects::RebinnedOutput_sptr createRebinnedOutputWorkspace();
 
+/// Populates a mutable reference from initializer list starting at user
+/// specified index
+template <typename T>
+void populateWsWithInitList(T &destination, size_t startingIndex,
+                            const std::initializer_list<double> &values);
+
 /// Create a simple peaks workspace containing the given number of peaks
 boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>
 createPeaksWorkspace(const int numPeaks = 2,
                      const bool createOrientedLattice = false);
-/**Build table workspace with preprocessed detectors for existign worksapce with
+/**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws);

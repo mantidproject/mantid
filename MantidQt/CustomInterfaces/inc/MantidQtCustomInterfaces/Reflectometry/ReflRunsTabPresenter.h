@@ -79,7 +79,7 @@ public:
   std::string getPostprocessingOptions() const override;
   std::string getTimeSlicingOptions() const override;
 
-protected:
+private:
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing
@@ -92,19 +92,22 @@ protected:
   IReflMainWindowPresenter *m_mainPresenter;
   /// The search implementation
   boost::shared_ptr<IReflSearcher> m_searcher;
+  /// The current transfer method
+  std::string m_currentTransferMethod;
+  /// Legacy transfer method
+  static const std::string LegacyTransferMethod;
+  /// Measure transfer method
+  static const std::string MeasureTransferMethod;
+
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void transfer();
   void pushCommands();
-
-private:
-  std::string m_currentTransferMethod;
-
-  static const std::string LegacyTransferMethod;
-  static const std::string MeasureTransferMethod;
-
+  /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
+  /// change the instrument
+  void changeInstrument();
 };
 }
 }

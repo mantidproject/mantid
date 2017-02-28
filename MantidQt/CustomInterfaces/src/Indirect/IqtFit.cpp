@@ -9,9 +9,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <QFileInfo>
 #include <QMenu>
-#include <math.h>
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
@@ -616,8 +614,8 @@ void IqtFit::setDefaultParameters(const QString &name) {
   double background = m_dblManager->value(m_properties["BackgroundA0"]);
   // intensity is always 1-background
   m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
-  auto x = m_iqtFInputWS->readX(0);
-  auto y = m_iqtFInputWS->readY(0);
+  auto x = m_iqtFInputWS->x(0);
+  auto y = m_iqtFInputWS->y(0);
   double tau = 0;
 
   if (x.size() > 4) {
@@ -944,31 +942,20 @@ void IqtFit::plotGuess(QtProperty *) {
       m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
-  std::vector<double> inputXData(nData);
+  const auto &xPoints = m_iqtFInputWS->points(0);
 
-  const Mantid::MantidVec &XValues = m_iqtFInputWS->readX(0);
+  std::vector<double> dataX(nData);
+  std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
 
-  const bool isHistogram = m_iqtFInputWS->isHistogramData();
-
-  for (size_t i = 0; i < nData; i++) {
-    if (isHistogram)
-      inputXData[i] =
-          0.5 * (XValues[binIndxLow + i] + XValues[binIndxLow + i + 1]);
-    else
-      inputXData[i] = XValues[binIndxLow + i];
-  }
-
-  FunctionDomain1DVector domain(inputXData);
+  FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
 
-  QVector<double> dataX;
-  QVector<double> dataY;
-
+  std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
-    dataX.append(inputXData[i]);
-    dataY.append(outputData.getCalculated(i));
+    dataY[i] = outputData.getCalculated(i);
   }
+
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
@@ -976,8 +963,8 @@ void IqtFit::plotGuess(QtProperty *) {
   createWsAlg->setLogging(false);
   createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
   createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX.toStdVector());
-  createWsAlg->setProperty("DataY", dataY.toStdVector());
+  createWsAlg->setProperty("DataX", dataX);
+  createWsAlg->setProperty("DataY", dataY);
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 

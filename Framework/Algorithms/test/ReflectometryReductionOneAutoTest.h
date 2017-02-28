@@ -358,8 +358,7 @@ public:
                      i0MonitorIndex);
     TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStart")[0],
                      boost::lexical_cast<double>(pointDetectorStartStop[0]));
-    TS_ASSERT_EQUALS(inst->getNumberParameter("PointDetectorStop")[0],
-                     boost::lexical_cast<double>(pointDetectorStartStop[1]));
+    TS_ASSERT_EQUALS(pointDetectorStartStop.size(), 1);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSQName);

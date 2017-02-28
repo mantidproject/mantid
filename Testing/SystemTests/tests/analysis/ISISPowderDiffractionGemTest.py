@@ -1,5 +1,6 @@
-﻿# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, \
     ITableWorkspace
 from mantid.simpleapi import *
@@ -34,8 +35,8 @@ class ISISPowderDiffractionGem(stresstesting.MantidStressTest):
             for files in filenames:
                 path = os.path.join(directories[0], files)
                 os.remove(path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False
@@ -209,8 +210,8 @@ class ISISPowderDiffractionGem2(stresstesting.MantidStressTest):
                 os.remove(path)
                 cali_path = os.path.join(directories[0], "GEM/test/Cycle_09_5_No_ExtV/Calibration")
             shutil.rmtree(cali_path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
+        except OSError as ose:
+            print('could not delete generated file : ', ose.filename)
 
     def runTest(self):
         self._success = False

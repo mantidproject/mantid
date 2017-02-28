@@ -137,7 +137,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
     prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
 
-    probs, results = zip(*prob_results)
+    probs, results = list(zip(*prob_results))
 
     if len(probs) != len(results):
         raise RuntimeError('probs : {0}, prob_results: {1}'.format(len(probs), len(results)))
@@ -230,7 +230,8 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True):
             result.params = params
             result.errors = errors
             result.sum_err_sq = sum_err_sq
-            result.runtime = t_end - t_start
+            # If the fit has failed, also set the runtime to NaN
+            result.runtime = t_end - t_start if not np.isnan(chi2) else np.nan
             print("Result object: {0}".format(result))
             results_problem_start.append(result)
 

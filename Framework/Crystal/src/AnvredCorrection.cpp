@@ -3,14 +3,12 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Fast_Exponential.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
@@ -164,9 +162,8 @@ void AnvredCorrection::exec() {
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
   // If sample not at origin, shift cached positions.
-  const V3D samplePos = m_inputWS->getInstrument()->getSample()->getPos();
-  const V3D pos = m_inputWS->getInstrument()->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
+  const auto &spectrumInfo = m_inputWS->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -174,28 +171,16 @@ void AnvredCorrection::exec() {
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = m_inputWS->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    // If no detector is found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
     // This is the scattered beam direction
     Instrument_const_sptr inst = m_inputWS->getInstrument();
-    V3D dir = det->getPos() - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     double depth = 0.2;
 
@@ -203,9 +188,9 @@ void AnvredCorrection::exec() {
 
     std::string bankName;
 
-    if (m_useScaleFactors) {
+    const auto &det = spectrumInfo.detector(i);
+    if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
-    }
 
     Mantid::Kernel::Units::Wavelength wl;
     auto points = m_inputWS->points(i);
@@ -234,9 +219,9 @@ void AnvredCorrection::exec() {
       } else {
         double value = this->getEventWeight(lambda, scattering);
 
-        if (m_useScaleFactors) {
+        if (m_useScaleFactors)
           scale_exec(bankName, lambda, depth, inst, pathlength, value);
-        }
+
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
@@ -276,9 +261,8 @@ void AnvredCorrection::execEvent() {
   // If sample not at origin, shift cached positions.
   Instrument_const_sptr inst = m_inputWS->getInstrument();
 
-  const V3D samplePos = inst->getSample()->getPos();
-  const V3D pos = inst->getSource()->getPos() - samplePos;
-  double L1 = pos.norm();
+  const auto &spectrumInfo = eventW->spectrumInfo();
+  double L1 = spectrumInfo.l1();
 
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over the spectra
@@ -289,27 +273,15 @@ void AnvredCorrection::execEvent() {
     // share bin boundaries, and leave Y and E nullptr
     correctionFactors->setHistogram(i, eventW->binEdges(i));
 
-    // Get detector position
-    IDetector_const_sptr det;
-    try {
-      det = eventW->getDetector(i);
-    } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
-    }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
+    // If no detector is found, skip onto the next spectrum
+    if (!spectrumInfo.hasDetectors(i))
       continue;
 
     // This is the scattered beam direction
-    V3D dir = det->getPos() - samplePos;
-    double L2 = dir.norm();
+    double L2 = spectrumInfo.l2(i);
     // Two-theta = polar angle = scattering angle = between +Z vector and the
     // scattered beam
-    double scattering = dir.angle(V3D(0.0, 0.0, 1.0));
+    double scattering = spectrumInfo.twoTheta(i);
 
     EventList el = eventW->getSpectrum(i);
     el.switchTo(WEIGHTED_NOTIME);
@@ -320,6 +292,7 @@ void AnvredCorrection::execEvent() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
+    const auto &det = spectrumInfo.detector(i);
     if (m_useScaleFactors)
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
@@ -329,15 +302,13 @@ void AnvredCorrection::execEvent() {
       // get the event's TOF
       double lambda = ev.tof();
 
-      if ("TOF" == unitStr) {
+      if ("TOF" == unitStr)
         lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
-      }
 
       double value = this->getEventWeight(lambda, scattering);
 
-      if (m_useScaleFactors) {
+      if (m_useScaleFactors)
         scale_exec(bankName, lambda, depth, inst, pathlength, value);
-      }
 
       ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
       ev.m_weight *= static_cast<float>(value);
@@ -346,9 +317,8 @@ void AnvredCorrection::execEvent() {
     correctionFactors->getSpectrum(i) += events;
 
     // When focussing in place, you can clear out old memory from the input one!
-    if (inPlace) {
+    if (inPlace)
       eventW->getSpectrum(i).clear();
-    }
 
     prog.report();
 
@@ -550,11 +520,11 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(IDetector_const_sptr det,
+void AnvredCorrection::scale_init(const IDetector &det,
                                   Instrument_const_sptr inst, double &L2,
                                   double &depth, double &pathlength,
                                   std::string &bankName) {
-  bankName = det->getParent()->getParent()->getName();
+  bankName = det.getParent()->getParent()->getName();
   // Distance to center of detector
   boost::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank

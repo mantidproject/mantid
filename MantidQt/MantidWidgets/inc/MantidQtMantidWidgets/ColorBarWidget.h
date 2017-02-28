@@ -49,7 +49,8 @@ public:
   enum CheckboxStrategy {
     ADD_AUTOSCALE_CURRENT_SLICE = 0,
     ADD_AUTOSCALE_ON_LOAD = 1,
-    ADD_AUTOSCALE_BOTH = 2
+    ADD_AUTOSCALE_BOTH = 2,
+    ADD_AUTOSCALE_NONE = 3
   };
 
   void updateColorMap();

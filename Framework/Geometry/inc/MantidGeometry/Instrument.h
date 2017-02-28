@@ -212,20 +212,6 @@ public:
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
   void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
 
-  // ----- Useful static functions ------
-  static double calcConversion(const double l1, const Kernel::V3D &beamline,
-                               const double beamline_norm,
-                               const Kernel::V3D &samplePos,
-                               const Kernel::V3D &detectorPos,
-                               const double offset);
-
-  static double
-  calcConversion(const double l1, const Kernel::V3D &beamline,
-                 const double beamline_norm, const Kernel::V3D &samplePos,
-                 const boost::shared_ptr<const Instrument> &instrument,
-                 const std::vector<detid_t> &detectors,
-                 const std::map<detid_t, double> &offsets);
-
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                double &beamline_norm,
                                Kernel::V3D &samplePos) const;
@@ -336,6 +322,17 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
+namespace Conversion {
+
+MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
+                                               const double twoTheta,
+                                               const double offset);
+
+double MANTID_GEOMETRY_DLL
+tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
+                    const std::vector<detid_t> &detectors,
+                    const std::map<detid_t, double> &offsets);
+}
 
 } // namespace Geometry
 } // Namespace Mantid

@@ -3,23 +3,21 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidDataHandling/MaskDetectors.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/SpectrumInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidGeometry/IDetector.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
@@ -88,12 +86,15 @@ public:
       BinEdges x(6, LinearGenerator(10.0, 1.0));
       Counts y(5, 1.0);
       CountStandardDeviations e(5, 1.0);
+      const auto &spectrumInfo = space2D->spectrumInfo();
+
       for (size_t j = 0; j < space2D->getNumberHistograms(); ++j) {
         space2D->setBinEdges(j, x);
         space2D->setCounts(j, y);
         space2D->setCountStandardDeviations(j, e);
         space2D->getSpectrum(j).setSpectrumNo(static_cast<int>(j + 1));
-        auto id = space2D->getDetector(j)->getID();
+        const auto &detector = spectrumInfo.detector(j);
+        auto id = detector.getID();
         space2D->getSpectrum(j).setDetectorID(id);
       }
     } else {
@@ -102,7 +103,7 @@ public:
       specspace->initialize(numspec, 1, 1);
       for (size_t i = 0; i < specspace->getNumberHistograms(); i++) {
         // default to use all the detectors
-        specspace->dataY(i)[0] = 0.0;
+        specspace->mutableY(i)[0] = 0.0;
       }
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
       // Does not have connection between instrument and spectra though has to
@@ -177,16 +178,16 @@ public:
   void check_outputWS(MatrixWorkspace_const_sptr &outputWS) {
     double ones = 1.0;
     double zeroes = 0.0;
-    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(0)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(1)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(1)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataY(2)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(2)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(3)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataE(3)[0], zeroes);
-    TS_ASSERT_EQUALS(outputWS->dataY(4)[0], ones);
-    TS_ASSERT_EQUALS(outputWS->dataE(4)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->y(0)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(0)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(1)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->e(1)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->y(2)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(2)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(3)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->e(3)[0], zeroes);
+    TS_ASSERT_EQUALS(outputWS->y(4)[0], ones);
+    TS_ASSERT_EQUALS(outputWS->e(4)[0], ones);
     const auto &spectrumInfo = outputWS->spectrumInfo();
     TS_ASSERT(spectrumInfo.isMasked(0));
     TS_ASSERT(!spectrumInfo.isMasked(1));
@@ -353,10 +354,10 @@ public:
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (masked_indices.count(i) == 1) {
         TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 0.0);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 0.0);
       } else {
         TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 1.0);
       }
     }
 
@@ -388,7 +389,7 @@ public:
     for (int i = 0; i < static_cast<int>(existingMask->getNumberHistograms());
          i++)
       if (masked_indices.count(i) == 1)
-        existingMask->dataY(i)[0] = 1.0;
+        existingMask->mutableY(i)[0] = 1.0;
 
     // 3. Set properties and execute
     MaskDetectors masker;
@@ -417,10 +418,10 @@ public:
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (masked_indices.count(i) == 1) {
         TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 0.0);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 0.0);
       } else {
         TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
-        TS_ASSERT_EQUALS(originalWS->readY(i)[0], 1.0);
+        TS_ASSERT_EQUALS(originalWS->y(i)[0], 1.0);
       }
     }
     AnalysisDataService::Instance().remove(inputWSName);
@@ -445,9 +446,9 @@ public:
 
     // Mask workspace index 0,3,4 in MaskWS. These will be maped to index 3,5 in
     // the test input
-    existingMask->dataY(0)[0] = 1.0;
-    existingMask->dataY(3)[0] = 1.0;
-    existingMask->dataY(4)[0] = 1.0;
+    existingMask->mutableY(0)[0] = 1.0;
+    existingMask->mutableY(3)[0] = 1.0;
+    existingMask->mutableY(4)[0] = 1.0;
 
     // Apply
     MaskDetectors masker;
@@ -511,7 +512,7 @@ public:
                   size_t n_dets) {
 
     for (size_t i = n_first_index; i < n_first_index + n_dets; i++) {
-      existingMask->dataY(i)[0] = 1.0;
+      existingMask->mutableY(i)[0] = 1.0;
     }
   }
   void test_MaskWorksForGroupedWSAllDet() {
@@ -559,18 +560,17 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 0 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
@@ -603,9 +603,9 @@ public:
             existingMaskName);
     // Mask workspace index 1,20,55 in MaskWS. These will converted maped to
     //  indexes 1,2,5 in the target workspace.
-    existingMask->dataY(10)[0] = 1.0;
-    existingMask->dataY(20)[0] = 1.0;
-    existingMask->dataY(55)[0] = 1.0;
+    existingMask->mutableY(10)[0] = 1.0;
+    existingMask->mutableY(20)[0] = 1.0;
+    existingMask->mutableY(55)[0] = 1.0;
 
     MatrixWorkspace_sptr inputWS =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -626,18 +626,17 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 1 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
@@ -697,18 +696,17 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      const auto &det = spectrumInfo.detector(i);
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 1 || i == 2 || i == 5) {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);
@@ -767,18 +765,18 @@ public:
     // Check masking
     const auto &spectrumInfo = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); ++i) {
-      IDetector_const_sptr det;
-      TS_ASSERT_THROWS_NOTHING(det = inputWS->getDetector(i));
+      const auto &det = spectrumInfo.detector(i);
+
       TS_ASSERT(spectrumInfo.hasDetectors(i));
       if (i == 2) {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), true);
       } else {
         TSM_ASSERT_EQUALS("Detector with id: " +
-                              boost::lexical_cast<std::string>(det->getID()) +
+                              boost::lexical_cast<std::string>(det.getID()) +
                               "; Spectra N: " +
                               boost::lexical_cast<std::string>(i),
                           spectrumInfo.isMasked(i), false);

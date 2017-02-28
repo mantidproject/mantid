@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -105,7 +106,7 @@ class StateTest(unittest.TestCase):
                            "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
                            "convert_to_q": MockStateConvertToQ()}
 
-        for key, value in default_entries.items():
+        for key, value in list(default_entries.items()):
             if key in entries:
                 value = entries[key]
             if value is not None:  # If the value is None, then don't set it

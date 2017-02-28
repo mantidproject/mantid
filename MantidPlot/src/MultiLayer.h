@@ -85,6 +85,9 @@ public:
              const QString &label = "", const char *name = 0, Qt::WFlags f = 0);
   ~MultiLayer() override;
 
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Graph"; }
+
   QSize minimumSizeHint() const override;
 
   QList<Graph *> layersList() { return graphsList; };

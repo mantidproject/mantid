@@ -69,17 +69,17 @@ public:
   void testcheckSizeCompatibility1D1D() {
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -90,18 +90,19 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
+    const bool isHistogram(true);
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     MatrixWorkspace_sptr work_inEvent1 =
         WorkspaceCreationHelper::createEventWorkspace(10, 1);
     // will not pass x array does not match

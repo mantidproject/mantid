@@ -437,8 +437,9 @@ ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_sptr inputWs,
 
   // Move the parent component of the selected detectors
   std::set<std::string> componentsToMove;
+  const auto &instrument = inputWs->getInstrument();
   for (const auto &id : detectorIDs) {
-    auto detector = inputWs->getDetectorByID(id);
+    auto detector = instrument->getDetector(id);
     auto parent = detector->getParent();
     if (parent) {
       auto parentType = parent->type();

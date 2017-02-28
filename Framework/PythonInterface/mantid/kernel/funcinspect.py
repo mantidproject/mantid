@@ -1,4 +1,4 @@
-﻿"""
+"""
     Defines functions that can be used to inspect the properties of a
     function call. For example
 

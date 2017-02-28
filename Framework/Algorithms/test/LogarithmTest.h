@@ -30,7 +30,7 @@ public:
 
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::create1DWorkspaceFib(sizex);
+        WorkspaceCreationHelper::create1DWorkspaceFib(sizex, true);
     AnalysisDataService::Instance().add("test_inLn", work_in1);
 
     Logarithm alg;
