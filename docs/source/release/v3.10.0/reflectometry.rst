@@ -15,6 +15,8 @@ Reflectometry Reduction Interface
 ISIS Reflectometry (Polref)
 ###########################
 
+- Added three more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even, Uniform and Log Value. Only the first two are functional however for now.
+
 ISIS Reflectometry
 ##################
 
