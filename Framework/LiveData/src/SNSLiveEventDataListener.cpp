@@ -87,7 +87,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // documented anywhere and this lack of documentation is deliberate.
   int keepPausedEvents;
   if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
-                                          keepPausedEvents)) {
+                                         keepPausedEvents)) {
     m_keepPausedEvents = bool(keepPausedEvents);
   } else {
     // If the property hasn't been set, assume false
@@ -1333,9 +1333,9 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 }
 
 /// Adds an event to the workspace
-void SNSLiveEventDataListener::appendEvent(const uint32_t pixelId,
-                                           const double tof,
-                                           const Mantid::Kernel::DateAndTime pulseTime)
+void SNSLiveEventDataListener::appendEvent(
+    const uint32_t pixelId, const double tof,
+    const Mantid::Kernel::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
