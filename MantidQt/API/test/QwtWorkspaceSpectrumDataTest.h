@@ -5,8 +5,12 @@
 #include <limits>
 #include <QRgb>
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
+using namespace Mantid::HistogramData;
 
 class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws;
@@ -15,12 +19,11 @@ public:
   void setUp() override {
     ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
     for (size_t i = 0; i < 3; i++) {
-      for (size_t j = 0; j < 5; j++)
-        ws->mutableX(i)[j] = double(i) + double(j);
-      for (size_t j = 0; j < 4; j++) {
-        ws->mutableY(i)[j] = double(i) + double(j) * 2;
-        ws->mutableE(i)[j] = double(i) + double(j) * 3;
-      }
+      double index = static_cast<double>(i);
+      ws->setHistogram(
+        i, BinEdges(5, LinearGenerator(index, 1)),
+        Counts(4, LinearGenerator(index, 2)),
+        CountStandardDeviations(4, LinearGenerator(index, 3)));
     }
   }
 
