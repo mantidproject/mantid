@@ -1,5 +1,6 @@
 #pylint: disable=W0403,R0902
-import numpy
+import time
+import random
 from fourcircle_utility import *
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
@@ -51,7 +52,7 @@ class PeakProcessRecord(object):
         self._mySigma = 0.
         self._gaussIntensity = 0.
         self._gaussStdDev = 0.
-        self._lorenzFactor = 1.
+        self._lorenzFactor = None
 
         # peak integration result
         self._integrationDict = None
@@ -60,6 +61,10 @@ class PeakProcessRecord(object):
         # some motor/goniometer information for further correction
         self._movingMotorTuple = None
 
+        # Figure print
+        self._fingerPrint = '{0:.7f}.{1}'.format(time.time(), random.randint(0, 10000000))
+
+        print '[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).'.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
         return
 
     def calculate_peak_center(self):
@@ -124,6 +129,11 @@ class PeakProcessRecord(object):
         :param lorentz_corrected:
         :return:
         """
+        # check
+        if self._integrationDict is None:
+            raise RuntimeError('PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup.'
+                               ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
+
         try:
             if algorithm_type == 0 or algorithm_type.startswith('simple'):
                 # simple
@@ -246,7 +256,8 @@ class PeakProcessRecord(object):
         :return:
         """
         if self._lorenzFactor is None:
-            raise RuntimeError('Lorentz factor has not been calculated yet.')
+            raise RuntimeError('Lorentz factor has not been calculated for Exp {0} Scan {1} ({2} | {3}).'
+                               ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
         return self._lorenzFactor
 
     @lorentz_correction_factor.setter
@@ -268,7 +279,7 @@ class PeakProcessRecord(object):
         """
         # get SPICE table
         spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
-        assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for exp %d scan %d cannot be found.' \
+        assert AnalysisDataService.doesExist(spice_table_name), 'Spice table for Exp %d Scan %d cannot be found.' \
                                                                 '' % (self._myExpNumber, self._myScanNumber)
 
         spice_table_ws = AnalysisDataService.retrieve(spice_table_name)
@@ -380,6 +391,9 @@ class PeakProcessRecord(object):
         assert isinstance(peak_integration_dict, dict),\
             'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
             ''.format(peak_integration_dict, type(peak_integration_dict))
+
+        print '[DB...BAT] Exp {0} Scan {1}  ({2}) has integrated dictionary set up.' \
+              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint)
 
         self._integrationDict = peak_integration_dict
 

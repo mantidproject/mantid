@@ -1407,10 +1407,15 @@ class MainWindow(QtGui.QMainWindow):
         # set calculated values
         try:
             self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
+            self.ui.lineEdit_errorIntensity1.setText('{0:.7f}'.format(int_peak_dict['simple error']))
             self.ui.lineEdit_avgBackground.setText('{0:.7f}'.format(int_peak_dict['simple background']))
             self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
+            if int_peak_dict['error 2'] is None:
+                self.ui.lineEdit_errorIntensity2.setText('inf')
+            else:
+                self.ui.lineEdit_errorIntensity2.setText('{0:.7f}'.format(int_peak_dict['error 2']))
             self.ui.lineEdit_ptRange.setText('{0}'.format(int_peak_dict['pt_range']))
-            self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format((int_peak_dict['gauss intensity'])))
+            self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format(int_peak_dict['gauss intensity']))
             if int_peak_dict['gauss error'] is None:
                 self.ui.lineEdit_errorIntensity3.setText('inf')
             else:

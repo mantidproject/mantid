@@ -28,6 +28,9 @@ def calculate_lorentz_correction_factor(q_sample, wavelength, motor_step):
     theta = math.asin(sin_theta)
     factor = numpy.sin(2 * theta) * motor_step
 
+    print '[DB...BAT Lorentz] Q-sample = {0}, wavelength = {1}, motor step = {2}, theta = {3} --> factor = {4}.' \
+          ''.format(q_sample, wavelength, motor_step, theta, factor)
+
     return factor
 
 
@@ -741,6 +744,9 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
         peak_int_dict['gauss intensity'] = intensity_gauss
         peak_int_dict['gauss error'] = intensity_gauss_error
+
+        print '[DB...BATBAT] Gaussian error = ', intensity_gauss_error
+    # END-IF-ELSE
 
     return peak_int_dict
 

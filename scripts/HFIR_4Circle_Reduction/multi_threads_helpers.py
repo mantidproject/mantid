@@ -263,6 +263,10 @@ class IntegratePeaksThread(QThread):
                 # get PT dict
                 pt_dict = ret_obj
                 self.set_integrated_peak_info(scan_number, pt_dict)
+                # information setup include
+                # - lorentz correction factor
+                # - peak integration dictionary
+                # - motor information: peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
             else:
                 # integration failed
                 error_msg = str(ret_obj)
@@ -293,6 +297,9 @@ class IntegratePeaksThread(QThread):
         * add motor step information
         :return:
         """
+        print '[DB...BAT] Set Integrated Peak Info is called for exp {0} scan {1}.' \
+              ''.format(self._expNumber, scan_number)
+
         # get peak information
         peak_info_obj = self._mainWindow.controller.get_peak_info(self._expNumber, scan_number)
 
