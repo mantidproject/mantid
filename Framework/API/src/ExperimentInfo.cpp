@@ -413,7 +413,6 @@ void adjustPositionsFromScaleFactor(DetectorInfo &detectorInfo,
     throw std::runtime_error("Need parametrized instrument for updating "
                              "positions from scale factors");
   const auto &parComp = instrument.getComponentByID(component);
-  // Scale affects pixel positions, but we also add the parameter below.
   const auto &det = dynamic_cast<const RectangularDetector &>(*parComp);
   double ScaleX = 1.0;
   double ScaleY = 1.0;
