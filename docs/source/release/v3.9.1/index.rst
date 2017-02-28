@@ -9,8 +9,8 @@ Mantid 3.9.1 Release Notes
 
 This is a patch release that corrects some significant issues since :ref:`version 3.9.0 <v3.9.0>`.
 
-There is no common theme to the fixes contained in this patch, rather it is collection of small but significant fixes. Please see below
-for the full list of changes.
+There is no common theme to the fixes contained in this patch, rather it is collection of small but 
+significant fixes. Please see below for the full list of changes.
 
 Citation
 --------
