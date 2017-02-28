@@ -1,6 +1,5 @@
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
-import mantid.simpleapi as api
 
 from mantid.api import *
 from mantid.kernel import *
@@ -29,7 +28,12 @@ class SortXAxis(PythonAlgorithm):
         output_ws = self.getPropertyValue('OutputWorkspace')
 
         num_specs = input_ws.getNumberHistograms()
-        api.CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
+
+        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        clone_alg.setProperty("InputWorkspace", input_ws)
+        clone_alg.setProperty("OutputWorkspace", output_ws)
+        clone_alg.execute()
+        output_ws = clone_alg.getProperty("OutputWorkspace").value
 
         for i in range(0, num_specs):
             x_data = input_ws.readX(i)
@@ -46,9 +50,9 @@ class SortXAxis(PythonAlgorithm):
             y_ordered = y_data[indexes]
             e_ordered = e_data[indexes]
 
-            mtd[output_ws].setX(i, x_ordered)
-            mtd[output_ws].setY(i, y_ordered)
-            mtd[output_ws].setE(i, e_ordered)
+            output_ws.setX(i, x_ordered)
+            output_ws.setY(i, y_ordered)
+            output_ws.setE(i, e_ordered)
 
         self.setProperty('OutputWorkspace', output_ws)
 

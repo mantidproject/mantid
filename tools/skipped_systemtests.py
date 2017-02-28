@@ -5,7 +5,7 @@ import datetime
 import requests # python-requests
 
 URL = "http://builds.mantidproject.org/job/master_systemtests"
-PLATFORMS=['rhel7','rhel6', 'osx', 'win7', 'ubuntu']
+PLATFORMS=['rhel7','osx', 'win7', 'ubuntu', 'ubuntu-16.04']
 
 
 class TestCase(object):

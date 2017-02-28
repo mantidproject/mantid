@@ -1,20 +1,20 @@
 #include "MantidSINQ/PoldiPeakSearch.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
 
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "boost/bind.hpp"
-#include <list>
 #include <algorithm>
+#include <list>
 #include <numeric>
 #include <queue>
 
@@ -32,6 +32,7 @@ DECLARE_ALGORITHM(PoldiPeakSearch)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using HistogramData::HistogramY;
 
 PoldiPeakSearch::PoldiPeakSearch()
     : API::Algorithm(), m_minimumDistance(0), m_doubleMinimumDistance(0),
@@ -47,7 +48,8 @@ PoldiPeakSearch::PoldiPeakSearch()
   * @param correlationCounts :: Vector with correlation counts.
   * @return Vector with sum of neighboring correlation counts.
   */
-MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts) const {
+MantidVec
+PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
   /* Since the first and last element in a list don't have two neighbors, they
    *are excluded from the calculation
    * and the result vector's size is reduced by two. Also, the algorithm does
@@ -556,8 +558,8 @@ void PoldiPeakSearch::exec() {
   g_log.information() << "PoldiPeakSearch:\n";
 
   Workspace2D_sptr correlationWorkspace = getProperty("InputWorkspace");
-  MantidVec correlationQValues = correlationWorkspace->readX(0);
-  MantidVec correlatedCounts = correlationWorkspace->readY(0);
+  auto &correlationQValues = correlationWorkspace->x(0);
+  auto &correlatedCounts = correlationWorkspace->y(0);
   g_log.information() << "   Auto-correlation data read.\n";
 
   Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
@@ -583,12 +585,12 @@ void PoldiPeakSearch::exec() {
 
   g_log.information() << "   Parameters set.\n";
 
-  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts);
+  MantidVec summedNeighborCounts = getNeighborSums(correlatedCounts.rawData());
   g_log.information() << "   Neighboring counts summed, contains "
                       << summedNeighborCounts.size() << " data points.\n";
 
   std::list<MantidVec::const_iterator> peakPositionsSummed =
-      findPeaks(summedNeighborCounts.begin(), summedNeighborCounts.end());
+      findPeaks(summedNeighborCounts.cbegin(), summedNeighborCounts.cend());
   g_log.information() << "   Peaks detected in summed spectrum: "
                       << peakPositionsSummed.size() << '\n';
 
@@ -610,13 +612,13 @@ void PoldiPeakSearch::exec() {
    * along with the Q-values.
    */
   std::vector<PoldiPeak_sptr> peakCoordinates =
-      getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
-               peakPositionsCorrelation, correlationQValues, xUnit);
+      getPeaks(correlatedCounts.cbegin(), correlatedCounts.cend(),
+               peakPositionsCorrelation, correlationQValues.rawData(), xUnit);
   g_log.information()
       << "   Extracted peak positions in Q and intensity guesses.\n";
 
-  UncertainValue backgroundWithSigma =
-      getBackgroundWithSigma(peakPositionsCorrelation, correlatedCounts);
+  UncertainValue backgroundWithSigma = getBackgroundWithSigma(
+      peakPositionsCorrelation, correlatedCounts.rawData());
   g_log.information() << "   Calculated average background and deviation: "
                       << UncertainValueIO::toString(backgroundWithSigma)
                       << '\n';
