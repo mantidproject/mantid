@@ -52,7 +52,7 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
  * Here "equivalent" implies equality of all member, except for positions and
  * rotations, which are treated specially:
  * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
- * - Rotations that imply relative position changes of less than 1 um = 1e-6 m
+ * - Rotations that imply relative position changes of less than 1 nm = 1e-9 m
  *   with a rotation center that is 1000 m away are considered equivalent.
  * Note that in both cases the actual limit may be lower, but it is guarenteed
  * that any LARGER differences are NOT considered equivalent. */
