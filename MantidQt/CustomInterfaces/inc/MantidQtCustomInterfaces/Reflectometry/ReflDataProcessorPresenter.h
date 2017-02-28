@@ -81,9 +81,10 @@ private:
                    std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
   // Parse log value time slicing from input string
+  /*
   void parseLogValue(const std::string &timeSlicing,
                      std::vector<double> &startTimes,
-                     std::vector<double> &stopTimes);
+                     std::vector<double> &stopTimes);*/
 
   // Load a run as event workspace
   bool loadEventRun(const std::string &runNo);

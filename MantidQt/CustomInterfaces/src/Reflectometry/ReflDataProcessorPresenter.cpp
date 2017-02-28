@@ -311,7 +311,7 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
     sliceDuration = totalDurationSec / numSlices;
   } else if (slicingType == "Uniform") {
     sliceDuration = std::stod(timeSlicing);
-    numSlices = ceil(totalDurationSec / sliceDuration);
+    numSlices = size_t(ceil(totalDurationSec / sliceDuration));
   }
 
   // Add the start/stop times
@@ -369,13 +369,12 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
 *slice
 * @param stopTimes :: [output] A vector containing the stop time for each
 *slice
-*/
 void ReflDataProcessorPresenter::parseLogValue(const std::string &timeSlicing,
                                                std::vector<double> &startTimes,
                                                std::vector<double> &stopTimes) {
 
   // Not implemented yet!
-}
+}*/
 
 /** Loads an event workspace and puts it into the ADS
 *
