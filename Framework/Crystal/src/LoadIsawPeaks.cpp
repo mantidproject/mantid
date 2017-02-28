@@ -136,7 +136,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    CalibrationHelpers::fixUpSampleAndSourcePositions(instr, L1 / 100, sampPos, detectorInfo);
+    CalibrationHelpers::fixUpSampleAndSourcePositions(instr, L1 / 100, sampPos,
+                                                      detectorInfo);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
@@ -229,13 +230,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    CalibrationHelpers::fixUpBankPositionsAndSizes(bankNames,
-                                                   instr,
-                                                   dPos,
-                                                   dRot,
-                                                   DetWScale,
-                                                   DetHtScale,
-                                                   false,
+    CalibrationHelpers::fixUpBankPositionsAndSizes(bankNames, instr, dPos, dRot,
+                                                   DetWScale, DetHtScale, false,
                                                    detectorInfo);
   }
   return startChar;
@@ -301,7 +297,8 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
 
-  std::string s = ApplyCalibInfo(in, "", instr, tempWS->mutableDetectorInfo(), T0);
+  std::string s =
+      ApplyCalibInfo(in, "", instr, tempWS->mutableDetectorInfo(), T0);
   outWS->setInstrument(instr);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of

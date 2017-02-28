@@ -1,7 +1,6 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidCrystal/CalibrationHelpers.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -11,7 +10,7 @@ namespace Mantid {
 namespace Crystal {
 
 namespace {
-  constexpr double RAD_TO_DEG = 180. / M_PI;
+constexpr double RAD_TO_DEG = 180. / M_PI;
 }
 
 /**
@@ -63,9 +62,7 @@ void CalibrationHelpers::quatToRotxRotyRotz(const Quat Q, double &Rotx,
  *reflect the new source position
  * @param L0 The distance from source to sample (should be positive)
  * @param newSampPos The relative shift for the new sample position
- * @param pmapOld The Parameter map from the original instrument (not
- *NewInstrument). "Clones" relevant information into the newInstrument's
- *parameter map.
+ * @param detectorInfo DetectorInfo for the workspace being updated
  */
 void CalibrationHelpers::fixUpSampleAndSourcePositions(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
@@ -109,19 +106,20 @@ void CalibrationHelpers::fixUpSampleAndSourcePositions(
  *bankNames.
  * @param rotCenters Rotate the centers of the panels(the same amount) with the
  *rotation of panels around their center
+ * @param detectorInfo DetectorInfo object for the
  */
 void CalibrationHelpers::fixUpBankPositionsAndSizes(
     const std::vector<std::string> bankNames,
     boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
-    const Quat rot, double const detWScale, double const detHtScale, bool rotCenters, DetectorInfo &detectorInfo) {
+    const Quat rot, double const detWScale, double const detHtScale,
+    bool rotCenters, DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   for (const auto &bankName : bankNames) {
     boost::shared_ptr<const IComponent> bank1 =
         newInstrument->getComponentByName(bankName);
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
-            bank1);
+        boost::dynamic_pointer_cast<const RectangularDetector>(bank1);
 
     Quat RelRot = bank->getRelativeRot();
     Quat newRelRot = rot * RelRot;
@@ -142,8 +140,10 @@ void CalibrationHelpers::fixUpBankPositionsAndSizes(
     quatToRotxRotyRotz(rot, rotx, roty, rotz);
 
     // TODO: Use ResizeRectangularDetectorHelper from PR #18906
-    std::vector<double> oldScalex = pmap->getDouble(bank->getName(), std::string("scalex"));
-    std::vector<double> oldScaley = pmap->getDouble(bank->getName(), std::string("scaley"));
+    std::vector<double> oldScalex =
+        pmap->getDouble(bank->getName(), std::string("scalex"));
+    std::vector<double> oldScaley =
+        pmap->getDouble(bank->getName(), std::string("scaley"));
 
     double scalex, scaley;
     if (!oldScalex.empty())
