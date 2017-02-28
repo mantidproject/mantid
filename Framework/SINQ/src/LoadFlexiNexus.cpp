@@ -7,7 +7,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
 
 #include <boost/algorithm/string.hpp>
@@ -24,6 +23,9 @@ using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace ::NeXus;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
@@ -165,15 +167,13 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   // x can be bin edges or points, depending on branching above
   auto x = Kernel::make_cow<HistogramData::HistogramX>(xData);
   for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
-    Mantid::MantidVec &Y = ws->dataY(wsIndex);
-    for (int j = 0; j < spectraLength; j++) {
-      Y[j] = data[spectraLength * wsIndex + j];
-    }
-    // Create and fill another vector for the errors, containing sqrt(count)
-    Mantid::MantidVec &E = ws->dataE(wsIndex);
-    std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->setX(wsIndex, x);
-    // Xtof		ws->getAxis(1)->spectraNo(i)= i;
+    auto beg = data.begin() + spectraLength * wsIndex;
+    auto end = beg + spectraLength;
+    if (static_cast<size_t>(spectraLength) == xData.size())
+      ws->setHistogram(wsIndex, Points(x), Counts(beg, end));
+    else
+      ws->setHistogram(wsIndex, BinEdges(x), Counts(beg, end));
+
     ws->getSpectrum(wsIndex)
         .setSpectrumNo(static_cast<specnum_t>(yData[wsIndex]));
     ws->getSpectrum(wsIndex)
