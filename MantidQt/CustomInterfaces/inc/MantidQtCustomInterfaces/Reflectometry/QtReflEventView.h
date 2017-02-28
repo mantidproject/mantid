@@ -54,7 +54,6 @@ public slots:
   /// Enable / disable slicing option entry fields
   void toggleSlicingOptions() const;
 
-
 private:
   /// Initialise the interface
   void initLayout();

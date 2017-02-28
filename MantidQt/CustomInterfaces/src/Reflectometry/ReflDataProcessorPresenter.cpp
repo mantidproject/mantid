@@ -305,12 +305,11 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   double totalDurationSec = totalDuration.seconds();
   double sliceDuration = .0;
   size_t numSlices = 0;
- 
+
   if (slicingType == "UniformEven") {
     numSlices = std::stoi(timeSlicing);
     sliceDuration = totalDurationSec / numSlices;
-  }
-  else if (slicingType == "Uniform") {
+  } else if (slicingType == "Uniform") {
     sliceDuration = std::stod(timeSlicing);
     numSlices = ceil(totalDurationSec / sliceDuration);
   }
@@ -341,19 +340,17 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
 
   std::vector<double> times;
   std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
-    [](const std::string &astr) { return std::stod(astr); });
+                 [](const std::string &astr) { return std::stod(astr); });
 
   size_t numTimes = times.size();
 
   if (numTimes == 1) {
     startTimes.push_back(0);
     stopTimes.push_back(times[0]);
-  }
-  else if (numTimes == 2) {
+  } else if (numTimes == 2) {
     startTimes.push_back(times[0]);
     stopTimes.push_back(times[1]);
-  }
-  else {
+  } else {
     for (size_t i = 0; i < numTimes - 1; i++) {
       startTimes.push_back(times[i]);
       stopTimes.push_back(times[i + 1]);
@@ -498,8 +495,8 @@ void ReflDataProcessorPresenter::plotRow() {
 
   // Num of slices can be predetermined with uniform even or custom slicing
   if (timeSlicingType == "UniformEven") {
-    const std::string wsName =
-        getReducedWorkspaceName(items.at(0).at(0), "TOF_");
+    const auto &row = items.at(0).at(0);
+    const std::string wsName = getReducedWorkspaceName(row, "TOF_");
     parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
                  stopTimes);
   } else if (timeSlicingType == "Custom") {

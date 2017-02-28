@@ -67,13 +67,10 @@ std::string QtReflEventView::getTimeSlicingValues() const {
   return values;
 }
 
-/** Returns the type of time slicing that was selected 
+/** Returns the type of time slicing that was selected
 * @return :: Time slicing type
 */
-std::string QtReflEventView::getTimeSlicingType() const {
-
-  return m_sliceType;
-}
+std::string QtReflEventView::getTimeSlicingType() const { return m_sliceType; }
 
 /** Enable slicing option entries for checked button and disable all others.
 */
