@@ -60,10 +60,6 @@ private:
   void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse,
                     double radius);
-
-  /// Set the spectrum on the workspace from a signal array
-  void setSpectrum(Mantid::DataObjects::Workspace2D_sptr ws, size_t index,
-                   const std::vector<double> &signal) const;
 };
 
 } // namespace Mantid
