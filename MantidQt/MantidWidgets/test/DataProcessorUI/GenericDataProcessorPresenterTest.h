@@ -386,7 +386,7 @@ public:
 
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -414,7 +414,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace")).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace")).Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -440,13 +440,13 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // The user hits "save as" but cancels when choosing a name
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return(""));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
 
     // The user hits "save as" and and enters "Workspace" for a name
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveAsFlag);
@@ -482,7 +482,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice with no rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -537,7 +537,7 @@ public:
     rowlist[0].insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" twice, with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -594,7 +594,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the second, third, and fourth row
     // selected.
@@ -647,7 +647,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the first group selected.
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -696,7 +696,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "append row" once, with the first group selected.
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -744,7 +744,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     std::set<int> grouplist;
     grouplist.insert(0);
@@ -798,7 +798,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with no rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -842,7 +842,7 @@ public:
     rowlist[0].insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -891,7 +891,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the first three rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -933,7 +933,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete group" with no groups selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -982,7 +982,7 @@ public:
     grouplist.insert(1);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "delete row" with the second row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -1032,7 +1032,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1113,7 +1113,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1205,7 +1205,7 @@ public:
     createMultiPeriodTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1287,7 +1287,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first two rows
     // selected
@@ -1299,7 +1299,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
         .WillRepeatedly(Return(std::string()));
@@ -1370,7 +1370,7 @@ public:
     createTOFWorkspace("TOF_12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1459,7 +1459,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1534,7 +1534,7 @@ public:
     presenter.accept(&mockMainPresenter);
 
     // We should receive an error
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(1);
 
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
@@ -1558,7 +1558,7 @@ public:
     presenter.accept(&mockMainPresenter);
 
     // Because we to open twice, get an error twice
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(2);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(2);
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(2)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -1610,7 +1610,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user will decide not to discard their changes
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1618,13 +1618,13 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
@@ -1650,7 +1650,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user will decide not to discard their changes
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1658,13 +1658,13 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
@@ -1694,7 +1694,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1708,7 +1708,7 @@ public:
     presenter.notify(DataProcessorPresenter::DeleteRowFlag);
 
     // The user will decide not to discard their changes when asked
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1719,7 +1719,7 @@ public:
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
@@ -1747,7 +1747,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendGroupFlag);
 
     // The user saves
-    EXPECT_CALL(mockMainPresenter, askUserString(_, _, "Workspace"))
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
         .Times(1)
         .WillOnce(Return("Workspace"));
     presenter.notify(DataProcessorPresenter::SaveFlag);
@@ -1761,7 +1761,7 @@ public:
     presenter.notify(DataProcessorPresenter::DeleteGroupFlag);
 
     // The user will decide not to discard their changes when asked
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
 
@@ -1772,7 +1772,7 @@ public:
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     // The user tries to create a new table again, and does not get bothered
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     AnalysisDataService::Instance().remove("Workspace");
@@ -1802,7 +1802,7 @@ public:
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
 
     // Then hits "new table", and decides to discard
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(true));
     presenter.notify(DataProcessorPresenter::NewTableFlag);
@@ -1838,13 +1838,13 @@ public:
 
     // and tries to open a workspace, but gets prompted and decides not to
     // discard
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(false));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // the user does it again, but discards
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _))
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -1856,7 +1856,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    EXPECT_CALL(mockMainPresenter, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
@@ -1991,7 +1991,7 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     std::map<int, std::set<int>> selection;
     std::set<int> expected;
@@ -2133,7 +2133,7 @@ public:
     selection[0].insert(0);
     selection[0].insert(1);
 
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(2)
         .WillRepeatedly(Return(selection));
@@ -2220,7 +2220,7 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
@@ -2255,7 +2255,7 @@ public:
     rowlist[1].insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits "clear selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -2759,7 +2759,7 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
-    EXPECT_CALL(mockMainPresenter,
+    EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm("try:\n  algm = LoadTBLDialog()\n  print "
                                    "algm.getPropertyValue(\"OutputWorkspace\")"
                                    "\nexcept:\n  pass\n"));
@@ -2778,7 +2778,7 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
-    EXPECT_CALL(mockMainPresenter,
+    EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm(
                     "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n"));
     presenter.notify(DataProcessorPresenter::ExportTableFlag);
@@ -2811,7 +2811,7 @@ public:
     rowlist[0].insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -2846,7 +2846,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // Append an empty row to our table
     presenter.notify(DataProcessorPresenter::AppendRowFlag);
     // Attempt to plot the empty row (should result in critical warning)
@@ -2881,7 +2881,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(2)
         .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // Open up our table with one row
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
     // Append an empty row to the table
@@ -2916,7 +2916,7 @@ public:
     grouplist.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _));
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _));
     // The user hits "plot groups" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3111,7 +3111,7 @@ public:
     createTOFWorkspace("12346", "12346");
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -3181,7 +3181,7 @@ public:
     rowlist[0].insert(1);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3196,7 +3196,7 @@ public:
         "base_graph)\nbase_graph = plotSpectrum(\"IvsQ_binned_TOF_12346\", 0, "
         "True, window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
@@ -3228,7 +3228,7 @@ public:
     std::set<int> group = {0};
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserWarning(_, _)).Times(0);
     // The user hits "plot rows" with the first row selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -3242,7 +3242,7 @@ public:
         "plotSpectrum(\"IvsQ_TOF_12345_TOF_12346\", 0, True, window = "
         "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
-    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    EXPECT_CALL(mockDataProcessorView, runPythonAlgorithm(pythonCode)).Times(1);
     presenter.notify(DataProcessorPresenter::PlotGroupFlag);
 
     // Tidy up
@@ -3308,7 +3308,7 @@ public:
     grouplist.insert(0);
 
     // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
