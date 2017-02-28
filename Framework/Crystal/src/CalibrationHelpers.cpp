@@ -92,49 +92,6 @@ void CalibrationHelpers::fixUpSampleAndSourcePositions(
 }
 
 /**
- *  Copies positional entries in pmapSv to pmap starting at bank_const and
- *parents.
- *
- *  @param bank_const  the starting component for copying entries.
- *  @param pmap the Parameter Map to be updated
- *  @param pmapSv the original Parameter Map
- *
- */
-void CalibrationHelpers::updateBankParams(
-    boost::shared_ptr<const Geometry::IComponent> bank_const,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  std::vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "x", pos.X());
-    pmap->addDouble(bank_const.get(), "y", pos.Y());
-    pmap->addDouble(bank_const.get(), "z", pos.Z());
-    pmap->addV3D(bank_const.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), ("rot"));
-  if (rot) {
-    pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-  }
-
-  std::vector<double> scalex = pmapSv->getDouble(bank_const->getName(), "scalex");
-  std::vector<double> scaley = pmapSv->getDouble(bank_const->getName(), "scaley");
-  if (!scalex.empty()) {
-    pmap->addDouble(bank_const.get(), "scalex", scalex[0]);
-  }
-  if (!scaley.empty()) {
-    pmap->addDouble(bank_const.get(), "scaley", scaley[0]);
-  }
-
-  boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
-  if (parent) {
-    updateBankParams(parent, pmap, pmapSv);
-  }
-}
-
-/**
  * Updates the ParameterMap for newInstrument to reflect the changes in the
  *associated panel information
  *
@@ -150,17 +107,13 @@ void CalibrationHelpers::updateBankParams(
  * @param detHtScale The factor to multiply the current detector height, from
  *old NewInstrument, by to get the new detector height for the banks in
  *bankNames.
- * @param pmapOld The Parameter map from the original instrument(not
- *newInstrument). "Clones" relevant information into the NewInstrument's
- *parameter map.
  * @param rotCenters Rotate the centers of the panels(the same amount) with the
  *rotation of panels around their center
  */
 void CalibrationHelpers::fixUpBankParameterMap(
     const std::vector<std::string> bankNames,
     boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
-    const Quat rot, double const detWScale, double const detHtScale,
-    boost::shared_ptr<const ParameterMap> const pmapOld, bool rotCenters) {
+    const Quat rot, double const detWScale, double const detHtScale, bool rotCenters) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   for (const auto &bankName : bankNames) {
@@ -169,8 +122,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
         newInstrument->getComponentByName(bankName);
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
         boost::dynamic_pointer_cast<const RectangularDetector>(
-            bank1); // Component
-    updateBankParams(bank, pmap, pmapOld);
+            bank1);
 
     Quat RelRot = bank->getRelativeRot();
     Quat newRelRot = rot * RelRot;
@@ -180,8 +132,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
     pmap->addRotationParam(bank.get(), std::string("rotx"), rotx);
     pmap->addRotationParam(bank.get(), std::string("roty"), roty);
     pmap->addRotationParam(bank.get(), std::string("rotz"), rotz);
-    pmap->addQuat(bank.get(), "rot",
-                  newRelRot); // Should not have had to do this???
+    pmap->addQuat(bank.get(), "rot", newRelRot); // Should not have had to do this???
     //---------Rotate center of bank ----------------------
     V3D Center = bank->getPos();
     V3D Center_orig(Center);

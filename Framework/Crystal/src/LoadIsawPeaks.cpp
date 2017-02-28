@@ -116,8 +116,6 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
                                           DetectorInfo &detectorInfo,
                                           double &T0) {
 
-  ParameterMap_sptr parMap = instr->getParameterMap();
-
   while (in.good() && (startChar.empty() || startChar != "7")) {
     readToEndOfLine(in, true);
     startChar = getWord(in, false);
@@ -231,8 +229,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    CalibrationHelpers::fixUpBankParameterMap(
-        bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
+    CalibrationHelpers::fixUpBankParameterMap(bankNames, instr, dPos, dRot, DetWScale, DetHtScale, false);
   }
   return startChar;
 }

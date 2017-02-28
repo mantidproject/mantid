@@ -89,14 +89,10 @@ public:
     const auto &newRot = Quat(1.0, 0.0, 0.0, 0.0);
     const double heightScale = 1.0;
     const double widthScale = 1.0;
-    const auto &pmapOld =
-        boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
-
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
     CalibrationHelpers::fixUpBankParameterMap(bankNames, instNew, newPos,
-                                              newRot, heightScale, widthScale,
-                                              pmapOld, false);
+                                              newRot, heightScale, widthScale, false);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
@@ -123,12 +119,9 @@ public:
     const auto &newRot = Quat(1.0, 0.0, 0.0, 0.0);
     const double heightScale = 2.0;
     const double widthScale = 3.0;
-    const auto &pmapOld =
-        boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
 
     CalibrationHelpers::fixUpBankParameterMap(bankNames, instNew, newPos,
-                                              newRot, heightScale, widthScale,
-                                              pmapOld, false);
+                                              newRot, heightScale, widthScale, false);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
@@ -156,14 +149,11 @@ public:
     const auto &newRot = Quat(0.2, 0.2, 0.2, 0.2);
     const double heightScale = 1.0;
     const double widthScale = 1.0;
-    const auto &pmapOld =
-        boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
 
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
     CalibrationHelpers::fixUpBankParameterMap(bankNames, instNew, newPos,
-                                              newRot, heightScale, widthScale,
-                                              pmapOld, false);
+                                              newRot, heightScale, widthScale, false);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
@@ -191,14 +181,11 @@ public:
     const auto &newRot = Quat(0.2, 0.2, 0.2, 0.2);
     const double heightScale = 2.0;
     const double widthScale = 3.0;
-    const auto &pmapOld =
-        boost::make_shared<ParameterMap>(wsOld->instrumentParameters());
 
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
     CalibrationHelpers::fixUpBankParameterMap(bankNames, instNew, newPos,
-                                              newRot, heightScale, widthScale,
-                                              pmapOld, false);
+                                              newRot, heightScale, widthScale, false);
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
