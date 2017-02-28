@@ -362,20 +362,6 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
                                       "Time slicing error");
 }
 
-/** Parses a string to extract log value time slicing
-*
-* @param timeSlicing :: The string to parse
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
-void ReflDataProcessorPresenter::parseLogValue(const std::string &timeSlicing,
-                                               std::vector<double> &startTimes,
-                                               std::vector<double> &stopTimes) {
-
-  // Not implemented yet!
-}*/
-
 /** Loads an event workspace and puts it into the ADS
 *
 * @param runNo :: the run number as a string
