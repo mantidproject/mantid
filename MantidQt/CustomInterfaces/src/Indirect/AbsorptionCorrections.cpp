@@ -40,7 +40,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changeSampleDensityUnit(int)));
   connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
-    SLOT(changeCanDensityUnit(int)));
+          SLOT(changeCanDensityUnit(int)));
 }
 
 void AbsorptionCorrections::setup() {}
@@ -387,8 +387,7 @@ void AbsorptionCorrections::changeCanDensityUnit(int index) {
 
   if (index == 0) {
     m_uiForm.spCanDensity->setSuffix(" g/cm3");
-  }
-  else {
+  } else {
     m_uiForm.spCanDensity->setSuffix(" 1/Å3");
   }
 }
