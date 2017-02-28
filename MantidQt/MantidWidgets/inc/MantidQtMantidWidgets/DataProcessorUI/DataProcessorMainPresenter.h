@@ -41,8 +41,11 @@ class DataProcessorMainPresenter {
 public:
   virtual ~DataProcessorMainPresenter(){};
 
-  /// Notify this receiver that something changed in the ADS
-  virtual void notifyADSChanged() { ; };
+  /// Notify this receiver with the list of table workspaces in the ADS that can
+  /// be loaded into the interface
+  virtual void notifyADSChanged(const std::set<std::string> &workspaceList) {
+    UNUSED_ARG(workspaceList);
+  };
 
   /// Return global options for pre-processing as a string
   virtual std::string getPreprocessingOptionsAsString() const {

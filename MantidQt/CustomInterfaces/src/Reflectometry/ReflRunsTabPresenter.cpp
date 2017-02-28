@@ -342,10 +342,17 @@ ReflRunsTabPresenter::getTransferStrategy() {
   }
 }
 
-/**
-Used to tell the presenter something has changed in the ADS
+/** Used to tell the presenter something has changed in the ADS
+*
+* @param workspaceList :: the list of table workspaces in the ADS that could be
+* loaded into the interface
 */
-void ReflRunsTabPresenter::notifyADSChanged() { pushCommands(); }
+void ReflRunsTabPresenter::notifyADSChanged(
+    const std::set<std::string> &workspaceList) {
+
+  UNUSED_ARG(workspaceList);
+  pushCommands();
+}
 
 /** Requests global pre-processing options as a string. Options are supplied by
 * the main

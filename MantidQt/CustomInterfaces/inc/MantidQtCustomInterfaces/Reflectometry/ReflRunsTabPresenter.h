@@ -65,7 +65,7 @@ public:
   ~ReflRunsTabPresenter() override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notifyADSChanged() override;
+  void notifyADSChanged(const std::set<std::string> &workspaceList) override;
   /// Global options (inherited from DataProcessorMainPresenter)
   std::string getPreprocessingOptionsAsString() const override;
   std::string getProcessingOptions() const override;

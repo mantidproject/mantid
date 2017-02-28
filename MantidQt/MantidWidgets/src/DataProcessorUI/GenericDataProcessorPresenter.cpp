@@ -961,7 +961,7 @@ void GenericDataProcessorPresenter::addHandle(
 
   m_workspaceList.insert(name);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notifyADSChanged();
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -970,7 +970,7 @@ Handle ADS remove events
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
   m_workspaceList.erase(name);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notifyADSChanged();
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -979,7 +979,7 @@ Handle ADS clear events
 void GenericDataProcessorPresenter::clearADSHandle() {
   m_workspaceList.clear();
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notifyADSChanged();
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -996,7 +996,7 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
   m_workspaceList.erase(oldName);
   m_workspaceList.insert(newName);
   m_view->setTableList(m_workspaceList);
-  m_mainPresenter->notifyADSChanged();
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /**
@@ -1261,7 +1261,7 @@ void GenericDataProcessorPresenter::accept(
   m_mainPresenter = mainPresenter;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
-  m_mainPresenter->notifyADSChanged();
+  m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
 
 /** Returs the list of valid workspaces currently in the ADS

@@ -1576,7 +1576,7 @@ virtual std::string getProcessingOptions() const;
 virtual std::string getPostprocessingOptions() const;
 virtual std::string getTimeSlicingOptions() const;
 
-virtual void notifyADSChanged();
+virtual void notifyADSChanged(const std::set<std::string> &);
 };
 
 class DataProcessorAppendRowCommand
