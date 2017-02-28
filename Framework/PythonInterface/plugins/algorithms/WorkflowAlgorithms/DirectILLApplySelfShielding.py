@@ -4,9 +4,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
-                        PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+                        PropertyMode, WorkspaceGroupProperty, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (CreateSingleValuedWorkspace, Minus, Multiply)
+from mantid.simpleapi import (ApplyPaalmanPingsCorrection, ConvertUnits, CreateSingleValuedWorkspace, Minus, Multiply)
 
 
 def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
@@ -19,6 +19,7 @@ def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
         CanWorkspace=ecWS,
         CanScaleFactor=ecScaling,
         OutputWorkspace=correctedWSName,
+        RebinCanToSample=False,
         EnableLogging=algorithmLogging)
     return correctedWS
 
@@ -31,6 +32,7 @@ def _applySelfShieldingCorrectionsNoEC(ws, correctionsWS, wsNames,
         SampleWorkspace=ws,
         CorrectionsWorkspace=correctionsWS,
         OutputWorkspace=correctedWSName,
+        RebinCanToSample=False,
         EnableLogging=algorithmLogging)
     return correctedWS
 
@@ -97,8 +99,33 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             mainWS = self._subtractEC(mainWS, ecWS, wsNames, wsCleanup, subalgLogging)
             self._finalize(mainWS, wsCleanup)
             return
-        else:
-            raise RuntimeError('Self-shielding corrections not implemented yet.')
+        # With Paalman-Pings corrections.
+        wavelengthWSName = wsNames.withSuffix('in_wavelength')
+        wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
+                                    OutputWorkspace=wavelengthWSName,
+                                    Target='Wavelength',
+                                    EMode='Direct',
+                                    EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        if ecWS:
+            ecScaling = self.getProperty(common.PROP_EC_SCALING).value
+            wavelengthECWSName = wsNames.withSuffix('ec_in_wavelength')
+            wavelengthECWS = \
+                ConvertUnits(InputWorkspace=ecWS,
+                             OutputWorkspace=wavelengthECWSName,
+                             Target='Wavelength',
+                             EMode='Direct',
+                             EnableLogging=subalgLogging)
+            correctedWS = _applySelfShieldingCorrections(wavelengthWS, wavelengthECWS, ecScaling, selfShieldingWS, wsNames, subalgLogging)
+            wsCleanup.cleanup(wavelengthECWS)
+        else:  # No ecWS
+            correctedWS = _applySelfShieldingCorrectionsNoEC(wavelenghtWS, selfShieldingWS, wsNames, subalgLogging)
+        wsCleanup.cleanup(wavelengthWS)
+        correctedWS = ConvertUnits(InputWorkspace=correctedWS,
+                                   Target='TOF',
+                                   EMode='Direct',
+                                   EnableLogging=subalgLogging)
+        self._finalize(correctedWS, wsCleanup)
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
@@ -151,7 +178,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                                  'shielding is applied) for empty container.')
         self.setPropertyGroup(common.PROP_EC_SCALING,
                               common.PROPGROUP_EC)
-        self.declareProperty(MatrixWorkspaceProperty(
+        self.declareProperty(WorkspaceGroupProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
             direction=Direction.Input,
