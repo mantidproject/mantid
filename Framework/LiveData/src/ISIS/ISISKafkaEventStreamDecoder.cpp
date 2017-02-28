@@ -412,7 +412,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
-  time_t runStartTime = runMsg->start_time();
+  auto runStartTime = static_cast<time_t>(runMsg->start_time());
   char timeString[32];
   strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
   m_runStart.setFromISO8601(timeString, false);
