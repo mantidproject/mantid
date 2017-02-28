@@ -118,22 +118,17 @@ def _loadFiles(inputFilename, wsNames, wsCleanup, algorithmLogging):
     return mergedWS
 
 
-def _normalizeToMonitor(ws, monWS, monEPPWS, sigmaMultiplier, monIndex,
+def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
                         wsNames, wsCleanup, algorithmLogging):
     """Normalize to monitor counts."""
     normalizedWSName = wsNames.withSuffix('normalized_to_monitor')
     normalizationFactorWsName = wsNames.withSuffix('normalization_factor_monitor')
-    eppRow = monEPPWS.row(monIndex)
-    sigma = eppRow['Sigma']
-    centre = eppRow['PeakCentre']
-    begin = centre - sigmaMultiplier * sigma
-    end = centre + sigmaMultiplier * sigma
     normalizedWS, normalizationFactorWS = NormaliseToMonitor(InputWorkspace=ws,
                                                              OutputWorkspace=normalizedWSName,
                                                              MonitorWorkspace=monWS,
                                                              MonitorWorkspaceIndex=monIndex,
-                                                             IntegrationRangeMin=begin,
-                                                             IntegrationRangeMax=end,
+                                                             IntegrationRangeMin=integrationBegin,
+                                                             IntegrationRangeMax=integrationEnd,
                                                              NormFactorWS=normalizationFactorWsName,
                                                              EnableLogging=algorithmLogging)
     wsCleanup.cleanup(normalizationFactorWS)
@@ -536,7 +531,17 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 sigmaMultiplier = \
                     self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
                 monIndex = self._monitorIndex(monWS)
-                normalizedWS = _normalizeToMonitor(mainWS, monWS, monEPPWS, sigmaMultiplier, monIndex, wsNames, wsCleanup,
+                eppRow = monEPPWS.row(monIndex)
+                if eppRow['FitStatus'] != 'success':
+                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over the entire TOF range for normalisation.')
+                    begin = monWS.dataX(monIndex)[0]
+                    end = monWS.dataX(monIndex)[-1]
+                else:
+                    sigma = eppRow['Sigma']
+                    centre = eppRow['PeakCentre']
+                    begin = centre - sigmaMultiplier * sigma
+                    end = centre + sigmaMultiplier * sigma
+                normalizedWS = _normalizeToMonitor(mainWS, monWS, monIndex, begin, end, wsNames, wsCleanup,
                                                    subalgLogging)
             elif normalisationMethod == common.NORM_METHOD_TIME:
                 normalizedWS = _normalizeToTime(mainWS, wsNames, wsCleanup, subalgLogging)
