@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty, 
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode, WorkspaceProperty, 
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
@@ -27,12 +27,21 @@ def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
     """Return a table workspace containing information used for detector diagnostics."""
     PLOT_TYPE_X = 1
     PLOT_TYPE_Y = 2
-    reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
-                                         EnableLogging=algorithmLogging)
-    reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
-    reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
-    reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
-    reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
+    if mtd.doesExist(reportWSName):
+        reportWS = mtd[reportWSName]
+    else:
+        reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
+                                             EnableLogging=algorithmLogging)
+    existingColumnNames = reportWS.getColumnNames()
+    if not 'WorkspaceIndex' in existingColumnNames:
+        reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
+    if not 'ElasticIntensity' in existingColumnNames:
+        reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
+    if not 'FlatBkg' in existingColumnNames:
+        reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
+    if not 'Diagnosed' in existingColumnNames:
+        reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
+    reportWS.setRowCount(0)
     for i in range(elasticIntensityWS.getNumberHistograms()):
         elasticIntensity = elasticIntensityWS.readY(i)[0]
         bkg = bkgWS.readY(i)[0]
