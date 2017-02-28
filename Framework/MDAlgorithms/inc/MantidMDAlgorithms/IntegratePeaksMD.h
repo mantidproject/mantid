@@ -47,9 +47,6 @@ private:
   /// Calculate if this Q is on a detector
   bool detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
 
-  void setSpectrum(Mantid::DataObjects::Workspace2D_sptr ws, size_t index,
-                   const std::vector<double> &signal) const;
-
   /// Instrument reference
   Geometry::Instrument_const_sptr inst;
 };

@@ -8,23 +8,25 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -130,7 +132,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
-  const bool histogramForm = wksp->isHistogramData();
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -145,8 +146,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get tof and counts
-    const auto &xVals = wksp->x(i);
-    const auto &yVals = wksp->y(i);
+    const auto &xVals = wksp->points(i);
+    const auto &yVals = wksp->counts(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -163,14 +164,14 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
       const double &yVal = yVals[j];
       if (yVal > 0) // TODO, is this condition right?
       {
-        // Tof from point data
-        double tof = xVals[j];
-        if (histogramForm) {
-          // Tof is the centre point
-          tof = (tof + xVals[j + 1]) / 2;
-        }
+        /* // Tof from point data */
+        /* double tof = xVals[j]; */
+        /* if (histogramForm) { */
+        /*   // Tof is the centre point */
+        /*   tof = (tof + xVals[j + 1]) / 2; */
+        /* } */
 
-        double val = unitConverter.convertUnits(tof);
+        double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim) {
           buffer[dim] = locCoord[dim]; // TODO. Looks un-necessary to me. Can't
@@ -488,8 +489,11 @@ void IntegrateEllipsoids::exec() {
         boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
 
-    setOutputWorkspaceData(wsProfile2D,
-                           {{principalaxis1, principalaxis2, principalaxis3}});
+    // set output workspace
+    Points points(principalaxis1.size(), LinearGenerator(0, 1));
+    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
 
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
@@ -552,8 +556,12 @@ void IntegrateEllipsoids::exec() {
             boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
-        setOutputWorkspaceData(
-            wsProfile2D, {{principalaxis1, principalaxis2, principalaxis3}});
+
+        // set output workspace
+        Points points(principalaxis1.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+        wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+        wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
       }
     }
   }
@@ -569,19 +577,6 @@ void IntegrateEllipsoids::exec() {
                                     BackgroundOuterRadiusVector, true);
 
   setProperty("OutputWorkspace", peak_ws);
-}
-
-void IntegrateEllipsoids::setOutputWorkspaceData(
-    Workspace2D_sptr ws, const PrincipleAxes &axes) const {
-
-  size_t index = 0;
-  for (auto &axis : axes) {
-    auto &x = ws->mutableX(index);
-    std::iota(x.begin(), x.end(), static_cast<int>(axis.size()));
-    ws->setCounts(index, axis);
-    ws->setCountVariances(index, axis);
-    ++index;
-  }
 }
 
 /**

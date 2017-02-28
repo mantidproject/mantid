@@ -15,6 +15,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
+using namespace Mantid::HistogramData;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -501,8 +502,7 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     throw std::runtime_error("Failed to create output matrix workspace.");
 
   // Set data
-  outws->setPoints(0, vecX);
-  outws->setCounts(0, vecY);
+  outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
 
   auto &dataE = outws->mutableE(0);
   std::transform(vecY.begin(), vecY.end(), dataE.begin(),

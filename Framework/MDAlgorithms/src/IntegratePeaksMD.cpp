@@ -1,25 +1,26 @@
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDAlgorithms/GSLFunctions.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeSpherical.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidDataObjects/CoordTransformDistance.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/Utils.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Utils.h"
+#include "MantidMDAlgorithms/GSLFunctions.h"
 
 #include <algorithm>
 #include <cmath>
@@ -37,6 +38,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::HistogramData;
 
 /** Initialize the algorithm's properties.
  */
@@ -399,7 +401,8 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                                       static_cast<coord_t>(cylinderLength),
                                       signal, errorSquared, signal_fit);
 
-      setSpectrum(wsProfile2D, i, signal_fit);
+      Points points(signal_fit.size(), LinearGenerator(0, 1));
+      wsProfile2D->setHistogram(i, points, Counts(signal_fit));
 
       // Integrate around the background radius
       if (BackgroundOuterRadius > PeakRadius) {
@@ -413,7 +416,8 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
             signal_fit);
 
-        setSpectrum(wsProfile2D, i, signal_fit);
+        Points points(signal_fit.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(i, points, Counts(signal_fit));
 
         // Evaluate the signal inside "BackgroundInnerRadius"
         signal_t interiorSignal = 0;
@@ -452,19 +456,18 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {
-        setSpectrum(wsProfile2D, i, signal_fit);
+        Points points(signal_fit.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(i, points, Counts(signal_fit));
       }
 
       if (profileFunction.compare("NoFit") == 0) {
         signal = 0.;
         auto &y = wsProfile2D->y(i);
         // sum signal between range
-        signal = std::accumulate(y.begin() + peakMin, y.begin() + peakMax, 0.);
+        signal = y.sum(peakMin, peakMax);
         // sum background outside of range
-        background_total =
-            std::accumulate(y.begin(), y.begin() + peakMin, background_total);
-        background_total =
-            std::accumulate(y.begin() + peakMax, y.end(), background_total);
+        background_total += y.sum(0, peakMin);
+        background_total += y.sum(peakMax);
         errorSquared = std::fabs(signal);
       } else {
         API::IAlgorithm_sptr findpeaks =
@@ -534,21 +537,18 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             FunctionFactory::Instance().createInitialized(fun_str.str());
         boost::shared_ptr<const CompositeFunction> fun =
             boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
-        const auto &x = wsProfile2D->x(i);
-        wsFit2D->mutableX(i) = x;
-        wsDiff2D->mutableX(i) = x;
+        const auto x = wsProfile2D->x(i);
+        wsFit2D->setSharedX(i, wsProfile2D->sharedX(i));
+        wsDiff2D->setSharedX(i, wsProfile2D->sharedX(i));
 
         FunctionDomain1DVector domain(x.rawData());
         FunctionValues yy(domain);
         fun->function(domain, yy);
-
-        const auto &yValues = wsProfile2D->y(i);
-        auto &fit2DY = wsFit2D->mutableY(i);
-        auto &diff2DY = wsDiff2D->mutableY(i);
         auto funcValues = yy.toVector();
-        fit2DY = funcValues;
-        std::transform(yValues.begin(), yValues.end(), funcValues.begin(),
-                       diff2DY.begin(), std::minus<double>());
+
+        wsFit2D->mutableY(i) = funcValues;
+        wsDiff2D->setSharedY(i, wsProfile2D->sharedY(i));
+        wsDiff2D->mutableY(i) -= funcValues;
 
         // Calculate intensity
         signal = 0.0;
@@ -625,24 +625,6 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
   // Save the output
   setProperty("OutputWorkspace", peakWS);
-}
-
-/**
- * Set the values on a single spectrum in the given workspace
- *
- * This will set the x values to be the range 0 to n where n is the number of
- * points. y will be set to the signal values. e will be set to sqrt(y).
- *
- * @param ws :: the workspace to set the spectrum on
- * @param index :: the workspace index to set the values on
- * @param signal :: the signal array to set on the y values to
- */
-void IntegratePeaksMD::setSpectrum(Workspace2D_sptr ws, size_t index,
-                                   const std::vector<double> &signal) const {
-  auto &x = ws->mutableX(index);
-  std::iota(x.begin(), x.end(), 0);
-  ws->setCounts(index, signal);
-  ws->setCountVariances(index, signal);
 }
 
 /** Calculate if this Q is on a detector

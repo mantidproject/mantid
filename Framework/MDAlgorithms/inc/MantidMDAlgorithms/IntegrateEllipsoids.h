@@ -47,10 +47,6 @@ private:
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);
 
-  /// set data on output workspace
-  void setOutputWorkspaceData(DataObjects::Workspace2D_sptr ws,
-                              const PrincipleAxes &axes) const;
-
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 

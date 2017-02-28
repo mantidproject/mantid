@@ -1,7 +1,8 @@
 #include "MantidMDAlgorithms/IntegrateFlux.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <boost/make_shared.hpp>
@@ -12,6 +13,7 @@ namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using namespace Mantid::HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateFlux)
@@ -113,22 +115,11 @@ IntegrateFlux::createOutputWorkspace(const API::MatrixWorkspace &inputWS,
   double xMin = inputWS.getXMin();
   double xMax = inputWS.getXMax();
   double dx = (xMax - xMin) / static_cast<double>(nX - 1);
-  auto &X = ws->mutableX(0);
+  const auto &x = ws->x(0);
 
-  // x-values are equally spaced between the min and max tof in the first flux
-  // spectrum
-  std::vector<double> xValues(X.size(), xMin);
-  std::partial_sum(xValues.begin(), xValues.end(), X.begin(),
-                   [dx](double sum, double value) {
-                     UNUSED_ARG(value);
-                     return sum + dx;
-                   });
-
-  // share the xs for all spectra
-  auto xRef = ws->refX(0);
-  for (size_t sp = 1; sp < nSpec; ++sp) {
-    ws->setX(sp, xRef);
-  }
+  ws->setPoints(0, Points(x.size(), LinearGenerator(xMin, dx)));
+  for (size_t sp = 1; sp < nSpec; ++sp)
+    ws->setSharedX(sp, ws->sharedX(0));
 
   return ws;
 }
@@ -231,22 +222,12 @@ void IntegrateFlux::integrateSpectraHistograms(
   size_t nSpec = inputWS.getNumberHistograms();
   assert(nSpec == integrWS.getNumberHistograms());
 
-  bool isDistribution = inputWS.isDistribution();
-
   auto &X = integrWS.x(0);
 
-  // loop overr the spectra and integrate
+  // loop over the spectra and integrate
   for (size_t sp = 0; sp < nSpec; ++sp) {
     auto &inX = inputWS.x(sp);
-    auto inY = inputWS.y(sp); // make a copy
-
-    // if it's a distribution y's must be multiplied by the bin widths
-    if (isDistribution) {
-      std::vector<double> xDiff(inX.size());
-      std::adjacent_difference(inX.begin(), inX.end(), xDiff.begin());
-      std::transform(xDiff.begin() + 1, xDiff.end(), inY.begin(), inY.begin(),
-                     std::multiplies<double>());
-    }
+    auto inY = inputWS.counts(sp); // make a copy
 
     // integral at the first point is always 0
     auto outY = integrWS.mutableY(sp).begin();
