@@ -164,13 +164,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
       const double &yVal = yVals[j];
       if (yVal > 0) // TODO, is this condition right?
       {
-        /* // Tof from point data */
-        /* double tof = xVals[j]; */
-        /* if (histogramForm) { */
-        /*   // Tof is the centre point */
-        /*   tof = (tof + xVals[j + 1]) / 2; */
-        /* } */
-
         double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim) {
