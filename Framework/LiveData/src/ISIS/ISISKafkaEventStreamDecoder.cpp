@@ -120,11 +120,10 @@ using Kernel::DateAndTime;
 ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic)
-    : m_broker(broker), m_eventTopic(eventTopic),
-      m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
-      m_interrupt(false), m_localEvents(), m_specToIdx(), m_runStart(),
-      m_runNumber(-1), m_thread(), m_capturing(false), m_exception(),
-      m_extractWaiting(false) {}
+    : m_broker(broker), m_eventTopic(eventTopic), m_runInfoTopic(runInfoTopic),
+      m_spDetTopic(spDetTopic), m_interrupt(false), m_localEvents(),
+      m_specToIdx(), m_runStart(), m_runNumber(-1), m_thread(),
+      m_capturing(false), m_exception(), m_extractWaiting(false) {}
 
 /**
  * Destructor.
@@ -305,7 +304,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       auto nSEEvents = seData.size();
 
       std::lock_guard<std::mutex> lock(m_mutex);
-      auto &periodBuffer = *m_localEvents[frameData->period()];
+      if (frameData->period() < 0)
+        throw std::runtime_error(
+            "ISISKafkaEventStreamDecoder::captureImplExcept() - "
+            "Negative period number in event message. Producer error, unable "
+            "to continue");
+      auto &periodBuffer =
+          *m_localEvents[static_cast<size_t>(frameData->period())];
       auto &mutableRunInfo = periodBuffer.mutableRun();
       mutableRunInfo.getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
           ->addValue(pulseTime, frameData->proton_charge());
