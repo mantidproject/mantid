@@ -304,14 +304,14 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   const auto totalDuration = maxTime - minTime;
   double totalDurationSec = totalDuration.seconds();
   double sliceDuration = .0;
-  size_t numSlices = 0;
+  int numSlices = 0;
 
   if (slicingType == "UniformEven") {
     numSlices = std::stoi(timeSlicing);
-    sliceDuration = totalDurationSec / static_cast<double>(numSlices);
+    sliceDuration = totalDurationSec / numSlices;
   } else if (slicingType == "Uniform") {
     sliceDuration = std::stod(timeSlicing);
-    numSlices = static_cast<size_t>(ceil(totalDurationSec / sliceDuration));
+    numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
   }
 
   // Add the start/stop times
