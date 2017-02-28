@@ -170,10 +170,6 @@ public:
     TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
                       uniquePeriods.size());
 
-    const bool hasProtonChargeByPeriod = run.hasProperty("run_title");
-    TSM_ASSERT("Should have extracted proton_charge_by_period log.",
-               hasProtonChargeByPeriod);
-
     std::vector<double> protonChargeByPeriod =
         run.getPropertyValueAsType<std::vector<double>>(
             "proton_charge_by_period");
