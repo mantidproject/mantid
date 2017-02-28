@@ -11,6 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
@@ -291,10 +292,8 @@ void DiffractionEventCalibrateDetectors::exec() {
   // Get some stuff from the input workspace
   // We make a copy of the instrument since we will be moving detectors in
   // `inputW` but want to access original positions (etc.) via `detList` below.
-  const auto &baseInstr = inputW->getInstrument()->baseInstrument();
-  auto pmap = boost::make_shared<ParameterMap>(
-      *inputW->getInstrument()->getParameterMap());
-  Instrument_const_sptr inst = boost::make_shared<Instrument>(baseInstr, pmap);
+  const auto &dummyW = create<EventWorkspace>(*inputW, 1);
+  Instrument_const_sptr inst = dummyW->getInstrument();
 
   // Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector>> detList;
