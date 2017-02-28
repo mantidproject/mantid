@@ -70,12 +70,21 @@ public:
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
+  bool isMonitor(const std::pair<size_t, size_t> index) const;
   bool isMasked(const size_t index) const;
+  bool isMasked(const std::pair<size_t, size_t> index) const;
   void setMasked(const size_t index, bool masked);
+  void setMasked(const std::pair<size_t, size_t> index, bool masked);
   Eigen::Vector3d position(const size_t index) const;
+  Eigen::Vector3d position(const std::pair<size_t, size_t> index) const;
   Eigen::Quaterniond rotation(const size_t index) const;
+  Eigen::Quaterniond rotation(const std::pair<size_t, size_t> index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
+  void setPosition(const std::pair<size_t, size_t> index,
+                   const Eigen::Vector3d &position);
   void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
+  void setRotation(const std::pair<size_t, size_t> index,
+                   const Eigen::Quaterniond &rotation);
 
 private:
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};

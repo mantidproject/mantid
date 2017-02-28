@@ -70,8 +70,18 @@ bool DetectorInfo::isMonitor(const size_t index) const {
   return m_detectorInfo.isMonitor(index);
 }
 
+/// Returns true if the detector is a monitor.
+bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> index) const {
+  return m_detectorInfo.isMonitor(index);
+}
+
 /// Returns true if the detector is masked.
 bool DetectorInfo::isMasked(const size_t index) const {
+  return m_detectorInfo.isMasked(index);
+}
+
+/// Returns true if the detector is masked.
+bool DetectorInfo::isMasked(const std::pair<size_t, size_t> index) const {
   return m_detectorInfo.isMasked(index);
 }
 
@@ -87,8 +97,38 @@ double DetectorInfo::l2(const size_t index) const {
     return position(index).distance(sourcePosition()) - l1();
 }
 
+/** Returns L2 (distance from sample to spectrum).
+ *
+ * For monitors this is defined such that L1+L2 = source-detector distance,
+ * i.e., for a monitor in the beamline between source and sample L2 is negative.
+ */
+double DetectorInfo::l2(const std::pair<size_t, size_t> index) const {
+  if (!isMonitor(index))
+    return position(index).distance(samplePosition());
+  else
+    return position(index).distance(sourcePosition()) - l1();
+}
+
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const size_t index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+
+  const auto sampleDetVec = position(index) - samplePos;
+  return sampleDetVec.angle(beamLine);
+}
+
+/// Returns 2 theta (scattering angle w.r.t. to beam direction).
+double DetectorInfo::twoTheta(const std::pair<size_t, size_t> index) const {
   if (isMonitor(index))
     throw std::logic_error(
         "Two theta (scattering angle) is not defined for monitors.");
@@ -133,8 +173,43 @@ double DetectorInfo::signedTwoTheta(const size_t index) const {
   return angle;
 }
 
+/// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
+double
+DetectorInfo::signedTwoTheta(const std::pair<size_t, size_t> index) const {
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
+
+  if (beamLine.nullVector()) {
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "Source and sample are at same position!");
+  }
+  // Get the instrument up axis.
+  const auto &instrumentUpAxis =
+      m_instrument->getReferenceFrame()->vecPointingUp();
+
+  const auto sampleDetVec = position(index) - samplePos;
+  double angle = sampleDetVec.angle(beamLine);
+
+  const auto cross = beamLine.cross_prod(sampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
+}
+
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
+  return Kernel::toV3D(m_detectorInfo.position(index));
+}
+
+/// Returns the position of the detector with given index.
+Kernel::V3D
+DetectorInfo::position(const std::pair<size_t, size_t> index) const {
   return Kernel::toV3D(m_detectorInfo.position(index));
 }
 
@@ -143,8 +218,20 @@ Kernel::Quat DetectorInfo::rotation(const size_t index) const {
   return Kernel::toQuat(m_detectorInfo.rotation(index));
 }
 
+/// Returns the rotation of the detector with given index.
+Kernel::Quat
+DetectorInfo::rotation(const std::pair<size_t, size_t> index) const {
+  return Kernel::toQuat(m_detectorInfo.rotation(index));
+}
+
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
+  m_detectorInfo.setMasked(index, masked);
+}
+
+/// Set the mask flag of the detector with given index. Not thread safe.
+void DetectorInfo::setMasked(const std::pair<size_t, size_t> index,
+                             bool masked) {
   m_detectorInfo.setMasked(index, masked);
 }
 
@@ -163,8 +250,20 @@ void DetectorInfo::setPosition(const size_t index,
   m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
 }
 
+/// Set the absolute position of the detector with given index. Not thread safe.
+void DetectorInfo::setPosition(const std::pair<size_t, size_t> index,
+                               const Kernel::V3D &position) {
+  m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
+}
+
 /// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
+                               const Kernel::Quat &rotation) {
+  m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
+}
+
+/// Set the absolute rotation of the detector with given index. Not thread safe.
+void DetectorInfo::setRotation(const std::pair<size_t, size_t> index,
                                const Kernel::Quat &rotation) {
   m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
 }

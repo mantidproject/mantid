@@ -86,19 +86,59 @@ size_t DetectorInfo::size() const {
   return m_isMasked->size();
 }
 
-/// Returns true if the detector is a monitor.
+/// Returns true if the detector with given index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return (*m_isMonitor)[index];
 }
 
-/// Returns true if the detector is masked.
+/// Returns true if the detector with given index is a monitor.
+bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> index) const {
+  return (*m_isMonitor)[index.first];
+}
+
+/// Returns true if the detector with given index is masked.
 bool DetectorInfo::isMasked(const size_t index) const {
   return (*m_isMasked)[index];
+}
+
+/// Returns true if the detector with given index is masked.
+bool DetectorInfo::isMasked(const std::pair<size_t, size_t> index) const {
+  return (*m_isMasked)[index.first];
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const size_t index, bool masked) {
   m_isMasked.access()[index] = masked;
+}
+
+/// Set the mask flag of the detector with given index. Not thread safe.
+void DetectorInfo::setMasked(const std::pair<size_t, size_t> index,
+                             bool masked) {
+  m_isMasked.access()[index.first] = masked;
+}
+
+/// Returns the position of the detector with given index.
+Eigen::Vector3d
+DetectorInfo::position(const std::pair<size_t, size_t> index) const {
+  return (*m_positions)[index.first];
+}
+
+/// Returns the rotation of the detector with given index.
+Eigen::Quaterniond
+DetectorInfo::rotation(const std::pair<size_t, size_t> index) const {
+  return (*m_rotations)[index.first];
+}
+
+/// Set the position of the detector with given index.
+void DetectorInfo::setPosition(const std::pair<size_t, size_t> index,
+                               const Eigen::Vector3d &position) {
+  m_positions.access()[index.first] = position;
+}
+
+/// Set the rotation of the detector with given index.
+void DetectorInfo::setRotation(const std::pair<size_t, size_t> index,
+                               const Eigen::Quaterniond &rotation) {
+  m_rotations.access()[index.first] = rotation.normalized();
 }
 
 } // namespace Beamline
