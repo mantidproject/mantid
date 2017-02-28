@@ -288,11 +288,11 @@ public:
   }
 
   void test_sum_vector() {
-      const FixedLengthVectorTester data{0.1, 0.2, 0.4};
-      TS_ASSERT_DELTA(data.sum(), 0.7, 1e-6);
-      TS_ASSERT_DELTA(data.sum(1), 0.6, 1e-6);
-      TS_ASSERT_DELTA(data.sum(0, 2), 0.3, 1e-6);
-      TS_ASSERT_DELTA(data.sum(0, 2, 10.0), 10.3, 1e-6);
+    const FixedLengthVectorTester data{0.1, 0.2, 0.4};
+    TS_ASSERT_DELTA(data.sum(), 0.7, 1e-6);
+    TS_ASSERT_DELTA(data.sum(1), 0.6, 1e-6);
+    TS_ASSERT_DELTA(data.sum(0, 2), 0.3, 1e-6);
+    TS_ASSERT_DELTA(data.sum(0, 2, 10.0), 10.3, 1e-6);
   }
 };
 
