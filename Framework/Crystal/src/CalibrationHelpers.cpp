@@ -22,8 +22,8 @@ namespace {
  * @param Roty The angle in degrees for rotating around the y-axis
  * @param Rotz The angle in degrees for rotating around the z-axis
  */
-void CalibrationHelpers::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
-                                           double &Roty, double &Rotz) {
+void CalibrationHelpers::quatToRotxRotyRotz(const Quat Q, double &Rotx,
+                                            double &Roty, double &Rotz) {
   Quat R(Q);
   R.normalize();
   V3D X(1, 0, 0);
@@ -119,10 +119,8 @@ void CalibrationHelpers::updateBankParams(
     pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
   }
 
-  std::vector<double> scalex =
-      pmapSv->getDouble(bank_const->getName(), "scalex");
-  std::vector<double> scaley =
-      pmapSv->getDouble(bank_const->getName(), "scaley");
+  std::vector<double> scalex = pmapSv->getDouble(bank_const->getName(), "scalex");
+  std::vector<double> scaley = pmapSv->getDouble(bank_const->getName(), "scaley");
   if (!scalex.empty()) {
     pmap->addDouble(bank_const.get(), "scalex", scalex[0]);
   }
@@ -130,18 +128,17 @@ void CalibrationHelpers::updateBankParams(
     pmap->addDouble(bank_const.get(), "scaley", scaley[0]);
   }
 
-  boost::shared_ptr<const Geometry::IComponent> parent =
-      bank_const->getParent();
+  boost::shared_ptr<const Geometry::IComponent> parent = bank_const->getParent();
   if (parent) {
     updateBankParams(parent, pmap, pmapSv);
   }
 }
 
 /**
- *  Updates the ParameterMap for NewInstrument to reflect the changes in the
+ * Updates the ParameterMap for newInstrument to reflect the changes in the
  *associated panel information
  *
- * @param bankNames The names of the banks(panels) that will be updated
+ * @param bankNames The names of the banks (panels) that will be updated
  * @param newInstrument The instrument whose parameter map will be changed to
  *reflect the new values below
  * @param pos The quantity to be added to the current relative position, from
@@ -178,7 +175,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
     Quat RelRot = bank->getRelativeRot();
     Quat newRelRot = rot * RelRot;
     double rotx, roty, rotz;
-    Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
+    quatToRotxRotyRotz(newRelRot, rotx, roty, rotz);
 
     pmap->addRotationParam(bank.get(), std::string("rotx"), rotx);
     pmap->addRotationParam(bank.get(), std::string("roty"), roty);
@@ -193,22 +190,14 @@ void CalibrationHelpers::fixUpBankParameterMap(
 
     V3D pos1 = bank->getRelativePos();
 
-    pmap->addPositionCoordinate(bank.get(), std::string("x"),
-                                pos.X() + pos1.X() + Center.X() -
-                                    Center_orig.X());
-    pmap->addPositionCoordinate(bank.get(), std::string("y"),
-                                pos.Y() + pos1.Y() + Center.Y() -
-                                    Center_orig.Y());
-    pmap->addPositionCoordinate(bank.get(), std::string("z"),
-                                pos.Z() + pos1.Z() + Center.Z() -
-                                    Center_orig.Z());
+    pmap->addPositionCoordinate(bank.get(), std::string("x"), pos.X() + pos1.X() + Center.X() - Center_orig.X());
+    pmap->addPositionCoordinate(bank.get(), std::string("y"), pos.Y() + pos1.Y() + Center.Y() - Center_orig.Y());
+    pmap->addPositionCoordinate(bank.get(), std::string("z"), pos.Z() + pos1.Z() + Center.Z() - Center_orig.Z());
 
-    Quat2RotxRotyRotz(rot, rotx, roty, rotz);
+    quatToRotxRotyRotz(rot, rotx, roty, rotz);
 
-    std::vector<double> oldScalex =
-        pmap->getDouble(bank->getName(), std::string("scalex"));
-    std::vector<double> oldScaley =
-        pmap->getDouble(bank->getName(), std::string("scaley"));
+    std::vector<double> oldScalex = pmap->getDouble(bank->getName(), std::string("scalex"));
+    std::vector<double> oldScaley = pmap->getDouble(bank->getName(), std::string("scaley"));
 
     double scalex, scaley;
     if (!oldScalex.empty())

@@ -32,8 +32,8 @@ namespace Crystal {
 */
 class DLLExport CalibrationHelpers {
 public:
-  static void Quat2RotxRotyRotz(const Kernel::Quat Q, double &Rotx,
-                                double &Roty, double &Rotz);
+  static void quatToRotxRotyRotz(const Kernel::Quat Q, double &Rotx,
+                                 double &Roty, double &Rotz);
 
   static void fixUpSampleAndSourcePositions(
       boost::shared_ptr<const Geometry::Instrument> newInstrument,

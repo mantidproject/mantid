@@ -639,7 +639,7 @@ void SCDCalibratePanels::saveXmlFile(
 
     double rotx, roty, rotz;
 
-    CalibrationHelpers::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
+    CalibrationHelpers::quatToRotxRotyRotz(RelRot, rotx, roty, rotz);
     writeXmlParameter(oss3, "rotx", rotx);
     writeXmlParameter(oss3, "roty", roty);
     writeXmlParameter(oss3, "rotz", rotz);
