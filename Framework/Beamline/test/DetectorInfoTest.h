@@ -46,7 +46,7 @@ public:
   }
 
   void test_comparison_length() {
-    const DetectorInfo length0;
+    const DetectorInfo length0{};
     const DetectorInfo length1(PosVec(1), RotVec(1));
     TS_ASSERT(length0.isEquivalent(length0));
     TS_ASSERT(length1.isEquivalent(length1));
