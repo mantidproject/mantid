@@ -174,14 +174,12 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   return *m_lastDetector[thread];
 }
 
-std::vector<size_t> SpectrumInfo::getDetectorIndices(const size_t index) const {
-  std::vector<size_t> detIndices;
-  for (const auto &def : spectrumDefinition(index))
-    detIndices.push_back(def.first);
-  if (detIndices.empty())
+const SpectrumDefinition &
+SpectrumInfo::getDetectorIndices(const size_t index) const {
+  if (spectrumDefinition(index).size() == 0)
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");
-  return detIndices;
+  return spectrumDefinition(index);
 }
 
 } // namespace API
