@@ -23,10 +23,9 @@ public:
     for (size_t i = 0; i < 3; i++) {
       double index = static_cast<double>(i);
       ax1->setValue(i, 10.0 + index);
-      ws->setHistogram(
-          i, BinEdges(5, LinearGenerator(index, 1)),
-          Counts(4, LinearGenerator(index, 2)),
-          CountStandardDeviations(4, LinearGenerator(index, 3)));
+      ws->setHistogram(i, BinEdges(5, LinearGenerator(index, 1)),
+                       Counts(4, LinearGenerator(index, 2)),
+                       CountStandardDeviations(4, LinearGenerator(index, 3)));
     }
   }
 

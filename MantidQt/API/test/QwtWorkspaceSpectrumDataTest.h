@@ -20,10 +20,9 @@ public:
     ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
     for (size_t i = 0; i < 3; i++) {
       double index = static_cast<double>(i);
-      ws->setHistogram(
-        i, BinEdges(5, LinearGenerator(index, 1)),
-        Counts(4, LinearGenerator(index, 2)),
-        CountStandardDeviations(4, LinearGenerator(index, 3)));
+      ws->setHistogram(i, BinEdges(5, LinearGenerator(index, 1)),
+                       Counts(4, LinearGenerator(index, 2)),
+                       CountStandardDeviations(4, LinearGenerator(index, 3)));
     }
   }
 
