@@ -409,7 +409,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace")).Times(0);
+    EXPECT_CALL(mockDataProcessorView, askUserString(_, _, "Workspace"))
+        .Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -2720,7 +2721,7 @@ public:
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 
-	std::map<int, std::set<int>> rowlist;
+    std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(2)
