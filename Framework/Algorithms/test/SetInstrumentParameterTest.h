@@ -151,15 +151,20 @@ public:
   }
 
   void test_bool() {
-    std::string paramName = "TestParam";
-    std::string paramType = "Bool";
-    std::string paramValue = "true";
+    const std::string paramName = "TestParam";
+    const std::string paramType = "Bool";
+    const std::map<std::string, bool> paramValues = {
+        {"true", true},   {"TRUE", true},   {"True", true},   {"1", true},
+        {"false", false}, {"FALSE", false}, {"False", false}, {"0", false}};
 
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 3);
 
-    ExecuteAlgorithm(ws, "", "", paramName, paramValue, paramType);
-    TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0]);
+    for (const auto &value : paramValues) {
+      ExecuteAlgorithm(ws, "", "", paramName, value.first, paramType);
+      TS_ASSERT(ws->getInstrument()->getBoolParameter(paramName)[0] ==
+                value.second);
+    }
   }
 
   MatrixWorkspace_sptr
