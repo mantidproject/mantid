@@ -110,14 +110,13 @@ void CalibrationHelpers::fixUpSampleAndSourcePositions(
  * @param rotCenters Rotate the centers of the panels(the same amount) with the
  *rotation of panels around their center
  */
-void CalibrationHelpers::fixUpBankParameterMap(
+void CalibrationHelpers::fixUpBankPositionsAndSizes(
     const std::vector<std::string> bankNames,
     boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
-    const Quat rot, double const detWScale, double const detHtScale, bool rotCenters) {
+    const Quat rot, double const detWScale, double const detHtScale, bool rotCenters, DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   for (const auto &bankName : bankNames) {
-
     boost::shared_ptr<const IComponent> bank1 =
         newInstrument->getComponentByName(bankName);
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
@@ -129,24 +128,20 @@ void CalibrationHelpers::fixUpBankParameterMap(
     double rotx, roty, rotz;
     quatToRotxRotyRotz(newRelRot, rotx, roty, rotz);
 
-    pmap->addRotationParam(bank.get(), std::string("rotx"), rotx);
-    pmap->addRotationParam(bank.get(), std::string("roty"), roty);
-    pmap->addRotationParam(bank.get(), std::string("rotz"), rotz);
-    pmap->addQuat(bank.get(), "rot", newRelRot); // Should not have had to do this???
+    detectorInfo.setRotation(*bank, newRelRot);
     //---------Rotate center of bank ----------------------
-    V3D Center = bank->getPos();
-    V3D Center_orig(Center);
+    V3D center = bank->getPos();
+    V3D centerOrig(center);
     if (rotCenters)
-      rot.rotate(Center);
+      rot.rotate(center);
 
     V3D pos1 = bank->getRelativePos();
 
-    pmap->addPositionCoordinate(bank.get(), std::string("x"), pos.X() + pos1.X() + Center.X() - Center_orig.X());
-    pmap->addPositionCoordinate(bank.get(), std::string("y"), pos.Y() + pos1.Y() + Center.Y() - Center_orig.Y());
-    pmap->addPositionCoordinate(bank.get(), std::string("z"), pos.Z() + pos1.Z() + Center.Z() - Center_orig.Z());
+    detectorInfo.setPosition(*bank, pos + pos1 + center - centerOrig);
 
     quatToRotxRotyRotz(rot, rotx, roty, rotz);
 
+    // TODO: Use ResizeRectangularDetectorHelper from PR #18906
     std::vector<double> oldScalex = pmap->getDouble(bank->getName(), std::string("scalex"));
     std::vector<double> oldScaley = pmap->getDouble(bank->getName(), std::string("scaley"));
 
@@ -163,8 +158,7 @@ void CalibrationHelpers::fixUpBankParameterMap(
 
     pmap->addDouble(bank.get(), std::string("scalex"), scalex);
     pmap->addDouble(bank.get(), std::string("scaley"), scaley);
-    // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<'\n';
-  } // For @ bank
+  }
 }
 
 } // namespace Crystal

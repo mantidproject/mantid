@@ -40,12 +40,11 @@ public:
       double const L0, Kernel::V3D const newSampPos,
       API::DetectorInfo &detectorInfo);
 
-  static void fixUpBankParameterMap(
+  static void fixUpBankPositionsAndSizes(
       std::vector<std::string> const bankNames,
       boost::shared_ptr<const Geometry::Instrument> newInstrument,
       Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
-      double const detHtScale,
-      bool rotCenters);
+      double const detHtScale, bool rotCenters, API::DetectorInfo &detectorInfo);
 };
 
 } // namespace Crystal
