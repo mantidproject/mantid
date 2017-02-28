@@ -376,7 +376,7 @@ void AbsorptionCorrections::changeSampleDensityUnit(int index) {
   if (index == 0) {
     m_uiForm.spSampleDensity->setSuffix(" g/cm3");
   } else {
-    m_uiForm.spSampleDensity->setSuffix(" 1/Å3");
+    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
   }
 }
 
@@ -388,7 +388,7 @@ void AbsorptionCorrections::changeCanDensityUnit(int index) {
   if (index == 0) {
     m_uiForm.spCanDensity->setSuffix(" g/cm3");
   } else {
-    m_uiForm.spCanDensity->setSuffix(" 1/Å3");
+    m_uiForm.spCanDensity->setSuffix(" 1/A3");
   }
 }
 
