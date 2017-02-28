@@ -376,13 +376,11 @@ public:
   void testSaveNew() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
 
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
@@ -395,18 +393,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testSaveExisting() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -420,18 +415,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testSaveAs() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -462,18 +454,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -514,18 +503,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecify() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -569,18 +555,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecifyPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -624,18 +607,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendRowSpecifyGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -676,18 +656,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -723,18 +700,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testAppendGroupSpecifyPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter.getWhiteList());
@@ -778,18 +752,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowNone() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -819,18 +790,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowSingle() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -866,18 +834,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteRowPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -913,18 +878,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -957,18 +919,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testDeleteGroupPlural() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceThreeGroups("TestWorkspace",
                                         presenter.getWhiteList());
@@ -1006,7 +965,6 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testProcess() {
@@ -1526,12 +1484,10 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // We should receive an error
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(1);
@@ -1544,18 +1500,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testBadWorkspaceLength() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Because we to open twice, get an error twice
     EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(2);
@@ -1587,18 +1540,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterAppendRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row"
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1630,18 +1580,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterAppendGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append group"
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
@@ -1670,18 +1617,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterDeleteRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1725,18 +1669,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAfterDeleteGroup() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append group" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
@@ -1778,18 +1719,15 @@ public:
     AnalysisDataService::Instance().remove("Workspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveAndDiscard() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // User hits "append row" a couple of times
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
@@ -1812,18 +1750,15 @@ public:
     presenter.notify(DataProcessorPresenter::NewTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPromptSaveOnOpen() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
 
@@ -1860,18 +1795,15 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testExpandSelection() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2069,18 +2001,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testGroupRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2160,18 +2089,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testGroupRowsNothingSelected() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     auto ws = createWorkspace("TestWorkspace", presenter.getWhiteList());
     TableRow row = ws->appendRow();
@@ -2231,18 +2157,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testClearRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2299,18 +2222,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2332,18 +2252,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyEmptySelection() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // The user hits "copy selected" with the second and third rows selected
     EXPECT_CALL(mockDataProcessorView, setClipboard(std::string())).Times(1);
@@ -2353,18 +2270,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCopyRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2392,18 +2306,15 @@ public:
     presenter.notify(DataProcessorPresenter::CopySelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCutRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2436,18 +2347,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(2, RunCol), "24682");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testCutRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2482,18 +2390,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(0, RunCol), "24682");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2540,18 +2445,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(1, GroupCol), "0");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteNewRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2594,18 +2496,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(4, OptionsCol), "abc");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2661,18 +2560,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(2, OptionsCol), "def");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteNewRows() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2726,18 +2622,15 @@ public:
     TS_ASSERT_EQUALS(ws->String(5, OptionsCol), "def");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPasteEmptyClipboard() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Empty clipboard
     EXPECT_CALL(mockDataProcessorView, getClipboard())
@@ -2747,18 +2640,15 @@ public:
     presenter.notify(DataProcessorPresenter::PasteSelectedFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testImportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
     EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm("try:\n  algm = LoadTBLDialog()\n  print "
                                    "algm.getPropertyValue(\"OutputWorkspace\")"
@@ -2766,37 +2656,31 @@ public:
     presenter.notify(DataProcessorPresenter::ImportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testExportTable() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
     EXPECT_CALL(mockDataProcessorView,
                 runPythonAlgorithm(
                     "try:\n  algm = SaveTBLDialog()\nexcept:\n  pass\n"));
     presenter.notify(DataProcessorPresenter::ExportTableFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotRowWarn() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -2826,19 +2710,17 @@ public:
     AnalysisDataService::Instance().remove("TOF_12345");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
-    std::map<int, std::set<int>> rowlist;
+
+	std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(2)
@@ -2852,18 +2734,15 @@ public:
     // Attempt to plot the empty row (should result in critical warning)
     presenter.notify(DataProcessorPresenter::PlotRowFlag);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupWithEmptyRow() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -2891,18 +2770,15 @@ public:
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("TOF_12345");
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupWarn() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     createTOFWorkspace("TOF_12345", "12345");
@@ -2932,18 +2808,15 @@ public:
     AnalysisDataService::Instance().remove("TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNamesNoTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -2975,18 +2848,15 @@ public:
                      "TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNamesWithTrans() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceWithTrans("TestWorkspace",
                                       presenter.getWhiteList());
@@ -3021,19 +2891,16 @@ public:
                      "TOF_12345_TRANS_11115_TOF_12346_TRANS_11116");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testWorkspaceNameWrongData() {
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspaceWithTrans("TestWorkspace",
                                       presenter.getWhiteList());
@@ -3054,7 +2921,6 @@ public:
     TS_ASSERT_THROWS_ANYTHING(presenter.getPostprocessedWorkspaceName(group));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   /// Tests the reduction when no pre-processing algorithms are given
@@ -3161,12 +3027,10 @@ public:
   void testPlotRowPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -3205,18 +3069,15 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testPlotGroupPythonCode() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
         createReflectometryWhiteList(), createReflectometryPreprocessMap(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
@@ -3250,7 +3111,6 @@ public:
     AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testNoPostProcessing() {
@@ -3259,11 +3119,9 @@ public:
 
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     MockProgressableView mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
                                             createReflectometryProcessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter.accept(&mockMainPresenter);
 
     // Calls that should throw
     TS_ASSERT_THROWS_ANYTHING(
