@@ -7,8 +7,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property,
                            StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
-                              Divide, GroupDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
+from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
+                              Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
 import numpy
 from scipy import constants
 
@@ -138,6 +138,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
         # Get input workspace.
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
+
+        mainWS = self._applyDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Vanadium normalization.
         # TODO Absolute normalization.
