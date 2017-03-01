@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/LiveListener.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <Poco/ActiveMethod.h>
 #include <Poco/Void.h>

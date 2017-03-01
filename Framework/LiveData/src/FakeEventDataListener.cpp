@@ -1,12 +1,12 @@
 #include "MantidLiveData/FakeEventDataListener.h"
-#include "MantidLiveData/Exception.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/WriteLock.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/Exception.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -38,8 +38,7 @@ FakeEventDataListener::~FakeEventDataListener() {
   delete m_rand;
 }
 
-bool FakeEventDataListener::connect(
-    const Poco::Net::SocketAddress &) {
+bool FakeEventDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
@@ -136,10 +135,10 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
-    m_buffer->getSpectrum(0)
-        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
-    m_buffer->getSpectrum(1)
-        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(0).addEventQuickly(
+        DataObjects::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(1).addEventQuickly(
+        DataObjects::TofEvent(m_rand->nextValue()));
   }
 }
 } // namespace LiveData

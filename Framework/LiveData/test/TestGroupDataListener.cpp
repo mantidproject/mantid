@@ -1,10 +1,10 @@
 #include "TestGroupDataListener.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -20,8 +20,7 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   this->createWorkspace();
 }
 
-bool TestGroupDataListener::connect(
-    const Poco::Net::SocketAddress &) {
+bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing.
   return true;
 }

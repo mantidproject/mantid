@@ -2,11 +2,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -52,8 +52,7 @@ TestDataListener::TestDataListener()
 /// Destructor
 TestDataListener::~TestDataListener() { delete m_rand; }
 
-bool TestDataListener::connect(
-    const Poco::Net::SocketAddress &) {
+bool TestDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
