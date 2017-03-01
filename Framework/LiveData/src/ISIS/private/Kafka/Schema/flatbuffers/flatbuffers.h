@@ -1,3 +1,4 @@
+// clang-format off
 /*
  * Copyright 2014 Google Inc. All rights reserved.
  *
@@ -1395,3 +1396,4 @@ volatile __attribute__((weak)) const char *flatbuffer_version_string =
 }  // namespace flatbuffers
 
 #endif  // FLATBUFFERS_H_
+// clang-format on

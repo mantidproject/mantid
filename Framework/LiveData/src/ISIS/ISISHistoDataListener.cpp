@@ -89,8 +89,7 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
   * required for the connection
   *  @return True if the connection was successfully established
   */
-bool ISISHistoDataListener::connect(
-    const Poco::Net::SocketAddress &address) {
+bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
 
   m_daeName = address.toString();
   // remove the port part

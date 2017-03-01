@@ -1,9 +1,9 @@
 #include "MantidLiveData/FileEventDataListener.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
+#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -83,8 +83,7 @@ FileEventDataListener::~FileEventDataListener() {
   delete m_chunkload;
 }
 
-bool FileEventDataListener::connect(
-    const Poco::Net::SocketAddress &) {
+bool FileEventDataListener::connect(const Poco::Net::SocketAddress &) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
