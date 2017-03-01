@@ -271,7 +271,7 @@ def display_name_for_minimizers(names):
 
 def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     """
-    Calculate what width in ascii characters we need for an RST table.
+    Calculate ascii character width needed for an RST table, using the length of the longest table cell.
 
     @param columns_txt :: list of the contents of the column headers
     @param items_link :: the test names used for summary tables
