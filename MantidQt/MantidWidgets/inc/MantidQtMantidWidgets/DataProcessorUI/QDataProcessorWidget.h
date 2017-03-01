@@ -104,7 +104,7 @@ public:
   void setSelection(const std::set<int> &groups) override;
   void setTableList(const QSet<QString> &tables) override;
   void setInstrumentList(const QString &instruments,
-                         const QString &defaultInstrument);
+                         const QString &defaultInstrument) override;
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;
