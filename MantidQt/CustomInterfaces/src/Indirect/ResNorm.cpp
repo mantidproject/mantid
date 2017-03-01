@@ -47,6 +47,7 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Post Plot and Save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 }
 
 void ResNorm::setup() {}
@@ -298,6 +299,19 @@ void ResNorm::previewSpecChanged(int value) {
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
     }
+  }
+}
+
+/**
+* Plot the current spectrum in the miniplot
+*/
+
+void ResNorm::plotCurrentPreview() {
+  if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
+    plotSpectrum(m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+  }
+  if (m_uiForm.ppPlot->hasCurve("Resolution")) {
+    plotSpectrum(m_uiForm.dsResolution->getCurrentDataName(), 0);
   }
 }
 
