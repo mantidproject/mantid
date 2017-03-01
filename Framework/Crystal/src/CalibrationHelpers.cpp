@@ -68,11 +68,11 @@ void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
  *rotation of panels around their center
  * @param detectorInfo DetectorInfo object for the
  */
-void adjustBankPositionsAndSizes(
-    const std::vector<std::string> bankNames,
-    const Instrument &newInstrument, const V3D pos,
-    const Quat rot, double const detWScale, double const detHtScale,
-    DetectorInfo &detectorInfo) {
+void adjustBankPositionsAndSizes(const std::vector<std::string> bankNames,
+                                 const Instrument &newInstrument, const V3D pos,
+                                 const Quat rot, double const detWScale,
+                                 double const detHtScale,
+                                 DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {

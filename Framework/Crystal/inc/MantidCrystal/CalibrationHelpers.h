@@ -34,16 +34,17 @@ namespace Crystal {
 */
 namespace CalibrationHelpers {
 
-DLLExport void adjustUpSampleAndSourcePositions(
-    const Geometry::Instrument &newInstrument,
-    double const L0, Kernel::V3D const newSampPos,
-    API::DetectorInfo &detectorInfo);
+DLLExport void
+adjustUpSampleAndSourcePositions(const Geometry::Instrument &newInstrument,
+                                 double const L0, Kernel::V3D const newSampPos,
+                                 API::DetectorInfo &detectorInfo);
 
-DLLExport void adjustBankPositionsAndSizes(
-    std::vector<std::string> const bankNames,
-    const Geometry::Instrument &newInstrument,
-    Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
-    double const detHtScale, API::DetectorInfo &detectorInfo);
+DLLExport void
+adjustBankPositionsAndSizes(std::vector<std::string> const bankNames,
+                            const Geometry::Instrument &newInstrument,
+                            Kernel::V3D const pos, Kernel::Quat const rot,
+                            double const detWScale, double const detHtScale,
+                            API::DetectorInfo &detectorInfo);
 
 } // namespace CalibrationHelpers
 } // namespace Crystal

@@ -136,8 +136,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(*instr, L1 / 100, sampPos,
-                                                         detectorInfo);
+    CalibrationHelpers::adjustUpSampleAndSourcePositions(*instr, L1 / 100,
+                                                         sampPos, detectorInfo);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
@@ -230,8 +230,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(bankNames, *instr, dPos, dRot,
-                                                    DetWScale, DetHtScale, detectorInfo);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instr, dPos, dRot, DetWScale, DetHtScale, detectorInfo);
   }
   return startChar;
 }
