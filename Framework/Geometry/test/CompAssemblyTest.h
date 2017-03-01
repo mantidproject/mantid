@@ -166,7 +166,7 @@ public:
     TS_ASSERT(bool(temp));
     TS_ASSERT_EQUALS(temp->getName(), bankname);
 
-    // look for bank13 again - recursing just one level (should thwow)
+    // look for bank13 again - recursing just one level (should fail)
     temp = instr->getComponentByName(bankname, 1);
     TS_ASSERT(!bool(temp));
   }

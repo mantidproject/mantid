@@ -256,7 +256,6 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
 * '/'s, rather than the whole search.
 * In particular, nlevels=1, would force cname to be a full path name.
 * @returns A shared pointer to the component
-* @throw std::runtime_error if the component name does not exist
 */
 boost::shared_ptr<const IComponent>
 CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
