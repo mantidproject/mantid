@@ -14,49 +14,8 @@ namespace CalibrationHelpers {
 constexpr double RAD_TO_DEG = 180. / M_PI;
 
 /**
- * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,
- * corresponding to the order Mantid uses in calculating rotations
- * @param Q The Quaternion. It will be normalized to represent a rotation
- * @param Rotx The angle in degrees for rotating around the x-axis
- * @param Roty The angle in degrees for rotating around the y-axis
- * @param Rotz The angle in degrees for rotating around the z-axis
- */
-void quatToRotxRotyRotz(const Quat Q, double &Rotx, double &Roty,
-                        double &Rotz) {
-  Quat R(Q);
-  R.normalize();
-  V3D X(1, 0, 0);
-  V3D Y(0, 1, 0);
-  V3D Z(0, 0, 1);
-  R.rotate(X);
-  R.rotate(Y);
-  R.rotate(Z);
-  if (Z[1] != 0 || Z[2] != 0) {
-    double tx = atan2(-Z[1], Z[2]);
-    double tz = atan2(-Y[0], X[0]);
-    double cosy = Z[2] / cos(tx);
-    double ty = atan2(Z[0], cosy);
-    Rotx = (tx * RAD_TO_DEG);
-    Roty = (ty * RAD_TO_DEG);
-    Rotz = (tz * RAD_TO_DEG);
-  } else // roty = 90 0r 270 def
-  {
-    double k = 1;
-    if (Z[0] < 0)
-      k = -1;
-    double roty = k * 90;
-    double rotx = 0;
-    double rotz = atan2(X[2], Y[2]);
-
-    Rotx = (rotx * RAD_TO_DEG);
-    Roty = (roty * RAD_TO_DEG);
-    Rotz = (rotz * RAD_TO_DEG);
-  }
-}
-
-/**
- * Updates the ParameterMap for NewInstrument to reflect the position of the
- *source.
+ * Updates the DetectorInfo for the workspace containing newInstrument to
+ *reflect the position of the source
  *
  * @param newInstrument The instrument whose parameter map will be changed to
  *reflect the new source position
@@ -64,12 +23,15 @@ void quatToRotxRotyRotz(const Quat Q, double &Rotx, double &Roty,
  * @param newSampPos The relative shift for the new sample position
  * @param detectorInfo DetectorInfo for the workspace being updated
  */
-void fixUpSampleAndSourcePositions(
-    boost::shared_ptr<const Instrument> newInstrument, double const L0,
-    const V3D newSampPos, DetectorInfo &detectorInfo) {
+void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
+                                      double const L0, const V3D newSampPos,
+                                      DetectorInfo &detectorInfo) {
 
-  IComponent_const_sptr source = newInstrument->getSource();
-  IComponent_const_sptr sample = newInstrument->getSample();
+  if (L0 <= 0)
+    throw std::runtime_error("L0 is negative, must be positive.");
+
+  IComponent_const_sptr source = newInstrument.getSource();
+  IComponent_const_sptr sample = newInstrument.getSample();
 
   const V3D &oldSourceToSampleDir =
       detectorInfo.samplePosition() - detectorInfo.sourcePosition();
@@ -87,7 +49,7 @@ void fixUpSampleAndSourcePositions(
 }
 
 /**
- * Updates the ParameterMap for newInstrument to reflect the changes in the
+ * Updates DetectorInfo for newInstrument to reflect the changes in the
  *associated panel information
  *
  * @param bankNames The names of the banks (panels) that will be updated
@@ -106,16 +68,16 @@ void fixUpSampleAndSourcePositions(
  *rotation of panels around their center
  * @param detectorInfo DetectorInfo object for the
  */
-void fixUpBankPositionsAndSizes(
+void adjustBankPositionsAndSizes(
     const std::vector<std::string> bankNames,
-    boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
+    const Instrument &newInstrument, const V3D pos,
     const Quat rot, double const detWScale, double const detHtScale,
     DetectorInfo &detectorInfo) {
-  boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
+  boost::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
   for (const auto &bankName : bankNames) {
     boost::shared_ptr<const IComponent> bank1 =
-        newInstrument->getComponentByName(bankName);
+        newInstrument.getComponentByName(bankName);
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
         boost::dynamic_pointer_cast<const RectangularDetector>(bank1);
 

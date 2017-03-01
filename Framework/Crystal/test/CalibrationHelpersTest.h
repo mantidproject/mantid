@@ -44,19 +44,27 @@ public:
     const auto &positionSampleNew = V3D(1.0, 2.0, newZ);
     const auto &positionSourceNew = V3D(1.0, 2.0, newZ - l1);
 
+    // Check what happens if l1 is negative
+    TS_ASSERT_THROWS(
+        CalibrationHelpers::adjustUpSampleAndSourcePositions(
+            *instNew, -l1, positionSampleNew, wsNew->mutableDetectorInfo()),
+        std::runtime_error);
+
     // Make a first move
 
-    CalibrationHelpers::fixUpSampleAndSourcePositions(
-        instNew, l1, positionSampleNew, wsNew->mutableDetectorInfo());
+    CalibrationHelpers::adjustUpSampleAndSourcePositions(
+        *instNew, l1, positionSampleNew, wsNew->mutableDetectorInfo());
 
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
     TS_ASSERT_EQUALS(wsOld->detectorInfo().sourcePosition(), positionSourceOld);
     TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().X(), positionSourceNew.X());
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Y(), positionSourceNew.Y());
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(), positionSourceNew.Z());
-
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().X(),
+                     positionSourceNew.X());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Y(),
+                     positionSourceNew.Y());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(),
+                     positionSourceNew.Z());
 
     // Make a second move - here the old and new workspaces have different
     // positions
@@ -64,8 +72,8 @@ public:
     auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         2, 1000, true);
     const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
-    CalibrationHelpers::fixUpSampleAndSourcePositions(
-        instNew, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
+    CalibrationHelpers::adjustUpSampleAndSourcePositions(
+        *instNew, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
 
     TS_ASSERT_EQUALS(wsNew2->detectorInfo().samplePosition(),
                      positionSampleOld);
@@ -86,8 +94,9 @@ public:
     const double widthScale = 1.0;
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
-    CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+        detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);
@@ -114,8 +123,9 @@ public:
     const double heightScale = 2.0;
     const double widthScale = 3.0;
 
-    CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+        detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).X(),
                      heightScale * oldPosLastBank1.X());
@@ -143,8 +153,9 @@ public:
     const double heightScale = 1.0;
     const double widthScale = 1.0;
 
-    CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+        detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      oldPosFirstBank1);
@@ -174,8 +185,9 @@ public:
 
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
-    CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
+        detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);

@@ -425,8 +425,8 @@ void OptimizeCrystalPlacement::exec() {
                  Results["SampleZOffset"]);
 
   auto &detectorInfo = outPeaks->mutableDetectorInfo();
-  CalibrationHelpers::fixUpSampleAndSourcePositions(
-      peaks->getInstrument(), detectorInfo.l1(), newSampPos, detectorInfo);
+  CalibrationHelpers::adjustUpSampleAndSourcePositions(
+      *peaks->getInstrument(), detectorInfo.l1(), newSampPos, detectorInfo);
 
   Matrix<double> GonTilt =
       PeakHKLErrors::RotationMatrixAboutRegAxis(Results["GonRotx"], 'x') *

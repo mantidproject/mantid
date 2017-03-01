@@ -34,17 +34,14 @@ namespace Crystal {
 */
 namespace CalibrationHelpers {
 
-DLLExport void quatToRotxRotyRotz(const Kernel::Quat Q, double &Rotx,
-                                  double &Roty, double &Rotz);
-
-DLLExport void fixUpSampleAndSourcePositions(
-    boost::shared_ptr<const Geometry::Instrument> newInstrument,
+DLLExport void adjustUpSampleAndSourcePositions(
+    const Geometry::Instrument &newInstrument,
     double const L0, Kernel::V3D const newSampPos,
     API::DetectorInfo &detectorInfo);
 
-DLLExport void fixUpBankPositionsAndSizes(
+DLLExport void adjustBankPositionsAndSizes(
     std::vector<std::string> const bankNames,
-    boost::shared_ptr<const Geometry::Instrument> newInstrument,
+    const Geometry::Instrument &newInstrument,
     Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
     double const detHtScale, API::DetectorInfo &detectorInfo);
 

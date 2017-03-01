@@ -635,14 +635,13 @@ void SCDCalibratePanels::saveXmlFile(
     boost::shared_ptr<const IComponent> bank =
         instrument.getComponentByName(bankName);
 
-    Quat RelRot = bank->getRelativeRot();
+    Quat relRot = bank->getRelativeRot();
 
-    double rotx, roty, rotz;
+    std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
 
-    CalibrationHelpers::quatToRotxRotyRotz(RelRot, rotx, roty, rotz);
-    writeXmlParameter(oss3, "rotx", rotx);
-    writeXmlParameter(oss3, "roty", roty);
-    writeXmlParameter(oss3, "rotz", rotz);
+    writeXmlParameter(oss3, "rotx", relRotAngles[0]);
+    writeXmlParameter(oss3, "roty", relRotAngles[1]);
+    writeXmlParameter(oss3, "rotz", relRotAngles[2]);
 
     V3D pos1 = bank->getRelativePos();
     writeXmlParameter(oss3, "x", pos1.X());
