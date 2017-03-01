@@ -46,7 +46,7 @@ Improved
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
 LiveData
-########
+--------
 
 - A new live listener for event data at ISIS, `ISISKafkaEventListener`, has been added. This is currently being tested on a limited number of beamlines.
 
