@@ -280,7 +280,7 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     """
 
     # The length of the longest header (minimizer name)
-    max_header = len(max(col for col in columns_txt))
+    max_header = len(max((col for col in columns_txt), key=len))
     # The value of the longest (once formatted) value in the table
     max_value = max(("%.4g" % cell for cell in np.nditer(cells)), key=len)
     # The length of the longest link reference (angular bracket content present in summary tables)
