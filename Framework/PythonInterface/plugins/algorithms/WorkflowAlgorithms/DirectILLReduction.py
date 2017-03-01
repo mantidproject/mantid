@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
-                        MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+                        MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property,
                            StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
@@ -124,6 +124,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
+        progress = Progress(self, 0.0, 1.0, 9)
         report = common.Report()
         subalgLogging = False
         if self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON:
@@ -137,16 +138,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # data throughout the algorithm.
 
         # Get input workspace.
+        progress.report('Loading inputs')
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
+        progress.report('Applying diagnostics')
         mainWS = self._applyDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Vanadium normalization.
         # TODO Absolute normalization.
+        progress.report('Normalising to vanadium')
         mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup,
                                        subalgLogging)
 
         # Convert units from TOF to energy.
+        progress.report('Converting to energy')
         mainWS = self._convertTOFToDeltaE(mainWS, wsNames, wsCleanup,
                                           subalgLogging)
 
@@ -155,22 +160,27 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                      wsCleanup, subalgLogging)
 
         # Rebinning.
+        progress.report('Rebinning in energy')
         mainWS = self._rebinInW(mainWS, wsNames, wsCleanup, report,
                                 subalgLogging)
 
         # Detector efficiency correction.
+        progress.report('Correcting detector efficiency')
         mainWS = self._correctByDetectorEfficiency(mainWS, wsNames,
                                                    wsCleanup, subalgLogging)
 
+        progress.report('Grouping detectors')
         mainWS = self._groupDetectors(mainWS, wsNames, wsCleanup,
                                       subalgLogging)
 
         self._outputWSConvertedToTheta(mainWS, wsNames, wsCleanup,
                                        subalgLogging)
 
+        progress.report('Converting to q')
         mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, subalgLogging)
         mainWS = self._transpose(mainWS, wsNames, wsCleanup, subalgLogging)
         self._finalize(mainWS, wsCleanup, report)
+        progress.report('Done')
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""

@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntMandatoryValidator, Property, StringArrayProperty, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateSingleValuedWorkspace, 
@@ -197,6 +197,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
+        progress = Progress(self, 0.0, 1.0, 8)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
@@ -208,33 +209,41 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         # data throughout the algorithm.
 
         # Get input workspace.
+        progress.report('Loading inputs')
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
+        progress.report('Correcting TOF')
         mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Extract monitors to a separate workspace.
+        progress.report('Extracting monitors')
         mainWS, monWS = self._separateMons(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Normalisation to monitor/time, if requested.
+        progress.report('Normalising to monitor/time')
         monWS = self._flatBkgMon(monWS, wsNames, wsCleanup, subalgLogging)
         monEPPWS = self._createEPPWSMon(monWS, wsNames, wsCleanup, subalgLogging)
         mainWS = self._normalize(mainWS, monWS, monEPPWS, wsNames, wsCleanup, subalgLogging)
 
         # Time-independent background.
+        progress.report('Calculating backgrounds')
         mainWS, bkgWS = self._flatBkgDet(mainWS, wsNames, wsCleanup, subalgLogging)
         wsCleanup.cleanupLater(bkgWS)
 
         # Find elastic peak positions.
+        progress.report('Calculating EPPs')
         detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, subalgLogging)
         wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         # Calibrate incident energy, if requested.
+        progress.report('Calibrating incident energy')
         mainWS, monWS = self._calibrateEi(mainWS, detEPPWS, monWS, monEPPWS,
                                           wsNames, wsCleanup, report,
                                           subalgLogging)
         wsCleanup.cleanupLater(monWS)
 
         self._finalize(mainWS, wsCleanup)
+        progress.report('Done')
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""

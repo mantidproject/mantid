@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
-                        MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
+                        MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator, Property, StringListValidator
 from mantid.simpleapi import ComputeCalibrationCoefVan
 
@@ -33,14 +33,18 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
+        progress = Progress(self, 0.0, 1.0, 3)
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
         wsNames = common.NameSource(wsNamePrefix, cleanupMode)
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
+        progress.report('Loading inputs')
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
         eppWS = self.getProperty(common.PROP_EPP_WS).value
+
+        progress.report('Integrating')
         if not self.getProperty(common.PROP_TEMPERATURE).isDefault:
             temperature = self.getProperty(common.PROP_TEMPERATURE).value
         else:
@@ -58,6 +62,8 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                                   Temperature=temperature,
                                                   EnableLogging=subalgLogging)
         self.setProperty(common.PROP_OUTPUT_WS, calibrationWS)
+        wsCleanup.finalCleanup()
+        progress.report('Done')
 
     def PyInit(self):
         inputWorkspaceValidator = CompositeValidator()

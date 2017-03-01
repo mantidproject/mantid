@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
-                        PropertyMode, WorkspaceGroupProperty, WorkspaceProperty, WorkspaceUnitValidator)
+                        Progress, PropertyMode, WorkspaceGroupProperty, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
 from mantid.simpleapi import (ApplyPaalmanPingsCorrection, ConvertUnits, CreateSingleValuedWorkspace, Minus, Multiply)
 
@@ -84,6 +84,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
+        progress = Progress(self, 0.0, 1.0, 3)
         subalgLogging = False
         if self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON:
             subalgLogging = True
@@ -92,14 +93,19 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         wsNames = common.NameSource(wsNamePrefix, cleanupMode)
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
+        progress.report('Loading inputs')
         mainWS = self._inputWS(wsCleanup)
         ecWS = self.getProperty(common.PROP_EC_WS).value
         selfShieldingWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
         if ecWS and not selfShieldingWS:
+            progress.setNumSteps(3)
+            progress.report('Subtracting container')
             mainWS = self._subtractEC(mainWS, ecWS, wsNames, wsCleanup, subalgLogging)
             self._finalize(mainWS, wsCleanup)
+            progress.report('Done')
             return
         # With Paalman-Pings corrections.
+        progress.report('Applying corrections')
         wavelengthWSName = wsNames.withSuffix('in_wavelength')
         wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
                                     OutputWorkspace=wavelengthWSName,
@@ -126,6 +132,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                                    EMode='Direct',
                                    EnableLogging=subalgLogging)
         self._finalize(correctedWS, wsCleanup)
+        progress.report('Done')
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""

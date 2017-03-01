@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, PropertyMode, WorkspaceProperty, 
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty, 
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
@@ -222,6 +222,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
+        progress = Progress(self, 0.0, 1.0, 4)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
@@ -230,16 +231,20 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
         # Get input workspace.
+        progress.report('Loading inputs')
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
         # Apply user mask.
+        progress.report('Applying hard mask')
         mainWS = self._applyUserMask(mainWS, wsNames,
                                      wsCleanup, subalgLogging)
 
         # Detector diagnostics, if requested.
+        progress.report('Diagnosing detectors')
         mainWS = self._detDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
+        progress.report('Done')
 
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
