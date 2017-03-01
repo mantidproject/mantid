@@ -5,6 +5,15 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+Concepts
+--------
+
+Configurations
+##############
+
+- The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
+
+
 Algorithms
 ----------
 
