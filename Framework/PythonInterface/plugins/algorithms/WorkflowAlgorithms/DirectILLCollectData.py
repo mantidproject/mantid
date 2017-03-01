@@ -460,6 +460,11 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Create an EPP table for a detector workspace."""
+        eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
+        noOutputEPP = self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault
+        if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_OFF and noOutputEPP:
+            # No epp table needed.
+            return None
         detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
         if not detEPPInWS:
             detEPPWS = _findEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
