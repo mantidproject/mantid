@@ -157,13 +157,11 @@ public:
    * is throw.
    * @param value :: The value of the element.
    */
- template <typename T>
- double convertToDouble(const T &value) const {
+  template <typename T> double convertToDouble(const T &value) const {
     typedef
-        typename std::conditional<std::is_convertible<double, T>::value,
-                                  T, InconvertibleToDoubleType>::type
-            DoubleType;
-    return boost::numeric_cast<double,DoubleType>(value);
+        typename std::conditional<std::is_convertible<double, T>::value, T,
+                                  InconvertibleToDoubleType>::type DoubleType;
+    return boost::numeric_cast<double, DoubleType>(value);
   }
 
   /**
