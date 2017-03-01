@@ -1,5 +1,6 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -11,7 +12,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
@@ -195,6 +195,10 @@ void LoadIsawDetCal::exec() {
     }
   }
 
+  auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  auto &detectorInfo = expInfoWS->mutableDetectorInfo();
+  std::vector<ComponentScaling> rectangularDetectorScalings;
+
   while (std::getline(input, line)) {
     if (line[0] == '7') {
       double mL1, mT0;
@@ -202,33 +206,26 @@ void LoadIsawDetCal::exec() {
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
       if (instname.compare("WISH") == 0)
-        center(0.0, 0.0, -0.01 * mL1, "undulator", ws);
+        center(0.0, 0.0, -mL1, "undulator", ws, detectorInfo);
       else
-        center(0.0, 0.0, -0.01 * mL1, "moderator", ws);
+        center(0.0, 0.0, -mL1, "moderator", ws, detectorInfo);
       // mT0 and time of flight are both in microsec
       if (inputW) {
         API::Run &run = inputW->mutableRun();
         // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
         if (run.hasProperty("T0")) {
           double T0IDF = run.getPropertyValueAsType<double>("T0");
-          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           alg1->setProperty("Offset", mT0 - T0IDF);
-          alg1->executeAsChildAlg();
-          inputW = alg1->getProperty("OutputWorkspace");
-          // set T0 in the run parameters
-          run.addProperty<double>("T0", mT0, true);
         } else {
-          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           alg1->setProperty("Offset", mT0);
-          alg1->executeAsChildAlg();
-          inputW = alg1->getProperty("OutputWorkspace");
-          // set T0 in the run parameters
-          run.addProperty<double>("T0", mT0, true);
         }
+        alg1->executeAsChildAlg();
+        inputW = alg1->getProperty("OutputWorkspace");
+        // set T0 in the run parameters
+        run.addProperty<double>("T0", mT0, true);
       }
     }
 
@@ -262,75 +259,21 @@ void LoadIsawDetCal::exec() {
     if (matchingDetector != detList.end()) {
       det = *matchingDetector;
     }
+
+    V3D rX(base_x, base_y, base_z);
+    V3D rY(up_x, up_y, up_z);
+
     if (det) {
       detname = det->getName();
-      IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
-      alg1->setProperty<Workspace_sptr>("Workspace", ws);
-      alg1->setProperty("ComponentName", detname);
-      // Convert from cm to m
-      alg1->setProperty("ScaleX", 0.01 * width / det->xsize());
-      alg1->setProperty("ScaleY", 0.01 * height / det->ysize());
-      alg1->executeAsChildAlg();
+      center(x, y, z, detname, ws, detectorInfo);
 
-      // Convert from cm to m
-      x *= 0.01;
-      y *= 0.01;
-      z *= 0.01;
-      center(x, y, z, detname, ws);
+      ComponentScaling detScaling;
+      detScaling.scaleX = CM_TO_M * width / det->xsize();
+      detScaling.scaleY = CM_TO_M * height / det->ysize();
+      detScaling.componentName = detname;
+      rectangularDetectorScalings.push_back(detScaling);
 
-      // These are the ISAW axes
-      V3D rX(base_x, base_y, base_z);
-      rX.normalize();
-      V3D rY(up_x, up_y, up_z);
-      rY.normalize();
-      // V3D rZ=rX.cross_prod(rY);
-
-      // These are the original axes
-      const V3D oX(1., 0., 0.);
-      const V3D oY(0., 1., 0.);
-
-      // Axis that rotates X
-      V3D ax1 = oX.cross_prod(rX);
-      // Rotation angle from oX to rX
-      const double angle1 = oX.angle(rX) * DegreesPerRadian;
-      // Create the first quaternion
-      Quat Q1(angle1, ax1);
-
-      // Now we rotate the original Y using Q1
-      V3D roY = oY;
-      Q1.rotate(roY);
-      // Find the axis that rotates oYr onto rY
-      V3D ax2 = roY.cross_prod(rY);
-      const double angle2 = roY.angle(rY) * DegreesPerRadian;
-      Quat Q2(angle2, ax2);
-
-      // Final = those two rotations in succession; Q1 is done first.
-      Quat Rot = Q2 * Q1;
-
-      // Then find the corresponding relative position
-      const auto comp = inst->getComponentByName(detname);
-      const auto parent = comp->getParent();
-      if (parent) {
-        Quat rot0 = parent->getRelativeRot();
-        rot0.inverse();
-        Rot *= rot0;
-      }
-      const auto grandparent = parent->getParent();
-      if (grandparent) {
-        Quat rot0 = grandparent->getRelativeRot();
-        rot0.inverse();
-        Rot *= rot0;
-      }
-
-      if (inputW) {
-        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      } else if (inputP) {
-        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      }
+      doRotation(rX, rY, detectorInfo, det);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
@@ -350,71 +293,18 @@ void LoadIsawDetCal::exec() {
       comp = children[0];
     }
     if (comp) {
-      // Omitted resizing tubes
-
-      // Convert from cm to m
-      x *= 0.01;
-      y *= 0.01;
-      z *= 0.01;
+      // Omitted scaling tubes
       detname = comp->getFullName();
-      center(x, y, z, detname, ws);
+      center(x, y, z, detname, ws, detectorInfo);
 
-      // These are the ISAW axes
-      V3D rX(base_x, base_y, base_z);
-      rX.normalize();
-      V3D rY(up_x, up_y, up_z);
-      rY.normalize();
-      // V3D rZ=rX.cross_prod(rY);
-
-      // These are the original axes
-      const V3D oX(1., 0., 0.);
-      const V3D oY(0., 1., 0.);
-
-      // Axis that rotates X
-      V3D ax1 = oX.cross_prod(rX);
-      // Rotation angle from oX to rX
-      double angle1 = oX.angle(rX) * DegreesPerRadian;
-      // TODO: find out why this is needed for WISH
-      if (instname == "WISH")
-        angle1 += 180.0;
-      // Create the first quaternion
-      Quat Q1(angle1, ax1);
-
-      // Now we rotate the original Y using Q1
-      V3D roY = oY;
-      Q1.rotate(roY);
-      // Find the axis that rotates oYr onto rY
-      V3D ax2 = roY.cross_prod(rY);
-      const double angle2 = roY.angle(rY) * DegreesPerRadian;
-      Quat Q2(angle2, ax2);
-
-      // Final = those two rotations in succession; Q1 is done first.
-      Quat Rot = Q2 * Q1;
-
-      const auto parent = comp->getParent();
-      if (parent) {
-        Quat rot0 = parent->getRelativeRot();
-        rot0.inverse();
-        Rot = Rot * rot0;
-      }
-      const auto grandparent = parent->getParent();
-      if (grandparent) {
-        Quat rot0 = grandparent->getRelativeRot();
-        rot0.inverse();
-        Rot = Rot * rot0;
-      }
-
-      if (inputW) {
-        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      } else if (inputP) {
-        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-        // Set or overwrite "rot" instrument parameter.
-        pmap.addQuat(comp.get(), "rot", Rot);
-      }
+      bool doWishCorrection =
+          (instname == "WISH"); // TODO: find out why this is needed for WISH
+      doRotation(rX, rY, detectorInfo, comp, doWishCorrection);
     }
   }
+
+  // Do this last, to avoid the issue of invalidating DetectorInfo
+  applyScalings(ws, rectangularDetectorScalings);
 
   setProperty("InputWorkspace", ws);
 }
@@ -427,39 +317,24 @@ void LoadIsawDetCal::exec() {
  * @param z :: The shift along the Z-axis
  * @param detname :: The detector name
  * @param ws :: The workspace
+ * @param detectorInfo :: The detector info object for the workspace
  */
-
 void LoadIsawDetCal::center(const double x, const double y, const double z,
-                            const std::string &detname,
-                            API::Workspace_sptr ws) {
+                            const std::string &detname, API::Workspace_sptr ws,
+                            API::DetectorInfo &detectorInfo) {
 
   Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
-    std::ostringstream mess;
-    mess << "Component with name " << detname << " was not found.";
-    g_log.error(mess.str());
-    throw std::runtime_error(mess.str());
+    throw std::runtime_error("Component with name " + detname +
+                             " was not found.");
   }
 
-  using namespace Geometry::ComponentHelper;
-  const TransformType positionType = Absolute;
-  const V3D position(x, y, z);
+  const V3D position(x * CM_TO_M, y * CM_TO_M, z * CM_TO_M);
 
   // Do the move
-  MatrixWorkspace_sptr inputW =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
-                                             positionType);
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, position,
-                                             positionType);
-  }
+  detectorInfo.setPosition(*comp, position);
 }
 
 /**
@@ -513,6 +388,86 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
     filenamesFromPropertyUnraveld.push_back(filename2);
 
   return filenamesFromPropertyUnraveld;
+}
+
+/**
+ * Perform the rotation for the calibration
+ *
+ * @param rX the vector of (base_x, base_y, base_z) from the calibration file
+ * @param rY the vector of (up_x, up_y, up_z) from the calibration file
+ * @param detectorInfo the DetectorInfo object from the workspace
+ * @param comp the component to rotate
+ * @param doWishCorrection if true apply a special correction for WISH
+ */
+void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
+                                boost::shared_ptr<const IComponent> comp,
+                                bool doWishCorrection) {
+  // These are the ISAW axes
+  rX.normalize();
+  rY.normalize();
+
+  // These are the original axes
+  const V3D oX(1., 0., 0.);
+  const V3D oY(0., 1., 0.);
+
+  // Axis that rotates X
+  V3D ax1 = oX.cross_prod(rX);
+  // Rotation angle from oX to rX
+  double angle1 = oX.angle(rX) * DegreesPerRadian;
+  if (doWishCorrection)
+    angle1 += 180.0;
+  // Create the first quaternion
+  Quat Q1(angle1, ax1);
+
+  // Now we rotate the original Y using Q1
+  V3D roY = oY;
+  Q1.rotate(roY);
+  // Find the axis that rotates oYr onto rY
+  V3D ax2 = roY.cross_prod(rY);
+  const double angle2 = roY.angle(rY) * DegreesPerRadian;
+  Quat Q2(angle2, ax2);
+
+  // Final = those two rotations in succession; Q1 is done first.
+  Quat Rot = Q2 * Q1;
+
+  // Then find the corresponding relative position
+  const auto parent = comp->getParent();
+  if (parent) {
+    Quat rot0 = parent->getRelativeRot();
+    rot0.inverse();
+    Rot *= rot0;
+  }
+  const auto grandparent = parent->getParent();
+  if (grandparent) {
+    Quat rot0 = grandparent->getRelativeRot();
+    rot0.inverse();
+    Rot *= rot0;
+  }
+
+  detectorInfo.setRotation(*comp.get(), Rot);
+}
+
+/**
+ * Apply the scalings from the calibration file. This is called after doing the
+ *moves and rotations associated with the calibration, to avoid the problem of
+ *invalidation DetectorInfo after writing to the parameter map.
+ *
+ * @param ws the input workspace
+ * @param rectangularDetectorScalings a vector containing a component ID, and
+ *values for scalex and scaley
+ */
+void LoadIsawDetCal::applyScalings(
+    Workspace_sptr &ws,
+    const std::vector<ComponentScaling> &rectangularDetectorScalings) {
+
+  for (const auto &scaling : rectangularDetectorScalings) {
+    IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
+    alg1->setProperty<Workspace_sptr>("Workspace", ws);
+    alg1->setProperty("ComponentName", scaling.componentName);
+    alg1->setProperty("ScaleX", scaling.scaleX);
+    alg1->setProperty("ScaleY", scaling.scaleY);
+    alg1->executeAsChildAlg();
+  }
 }
 
 } // namespace Algorithm

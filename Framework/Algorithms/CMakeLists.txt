@@ -90,6 +90,7 @@ set ( SRC_FILES
 	src/CylinderAbsorption.cpp
 	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
+	src/DeleteWorkspaces.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
 	src/DetectorEfficiencyCorUser.cpp
@@ -404,6 +405,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CylinderAbsorption.h
 	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
+	inc/MantidAlgorithms/DeleteWorkspaces.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
 	inc/MantidAlgorithms/DetectorEfficiencyCorUser.h
@@ -731,6 +733,7 @@ set ( TEST_FILES
 	CylinderAbsorptionTest.h
 	DeleteLogTest.h
 	DeleteWorkspaceTest.h
+	DeleteWorkspacesTest.h
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
 	DetectorEfficiencyVariationTest.h

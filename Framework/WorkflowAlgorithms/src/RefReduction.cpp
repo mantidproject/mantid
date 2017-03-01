@@ -554,7 +554,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   double tofMin = getProperty("TOFMin");
   double tofMax = getProperty("TOFMax");
   if (isEmpty(tofMin) || isEmpty(tofMax)) {
-    const MantidVec &x = rawWS->readX(0);
+    const auto &x = rawWS->x(0);
     if (isEmpty(tofMin))
       tofMin = *std::min_element(x.begin(), x.end());
     if (isEmpty(tofMax))
@@ -599,7 +599,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
   convAlg->executeAsChildAlg();
 
   // Rebin in wavelength
-  const MantidVec &x = outputWS->readX(0);
+  const auto &x = outputWS->x(0);
   double wlMin = *std::min_element(x.begin(), x.end());
   double wlMax = *std::max_element(x.begin(), x.end());
 

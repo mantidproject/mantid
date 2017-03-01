@@ -550,7 +550,7 @@ void InstrumentWidgetMaskTab::setProperties() {
   m_userEditing = false;
 
   // bounding rect property
-  QtProperty *boundingRectGroup = m_groupManager->addProperty("Bounging Rect");
+  QtProperty *boundingRectGroup = m_groupManager->addProperty("Bounding Rect");
   m_browser->addProperty(boundingRectGroup);
   m_left = addDoubleProperty("left");
   m_top = addDoubleProperty("top");
