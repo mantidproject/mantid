@@ -60,8 +60,6 @@ public:
 
   /** Connect to the specified address and start listening/buffering
    * @param address The IP address and port to contact
-   * @param args A ConnectionArgs object used to supply additional arguments
-   * required for the connection
    * @return True if the connection was successfully established
    */
   virtual bool connect(const Poco::Net::SocketAddress &address) = 0;
