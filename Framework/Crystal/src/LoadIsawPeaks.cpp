@@ -231,8 +231,7 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     const std::vector<std::string> bankNames{bankName};
 
     CalibrationHelpers::fixUpBankPositionsAndSizes(bankNames, instr, dPos, dRot,
-                                                   DetWScale, DetHtScale, false,
-                                                   detectorInfo);
+                                                   DetWScale, DetHtScale, detectorInfo);
   }
   return startChar;
 }

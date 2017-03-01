@@ -49,14 +49,14 @@ public:
     CalibrationHelpers::fixUpSampleAndSourcePositions(
         instNew, l1, positionSampleNew, wsNew->mutableDetectorInfo());
 
-    // Old workspace has sample unchanged
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
-    // New workspace has sample at the new position
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
-    // Old workspace has source at the old position
     TS_ASSERT_EQUALS(wsOld->detectorInfo().sourcePosition(), positionSourceOld);
-    // New workspace has source at the new position
     TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().X(), positionSourceNew.X());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Y(), positionSourceNew.Y());
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(), positionSourceNew.Z());
+
 
     // Make a second move - here the old and new workspaces have different
     // positions
@@ -67,16 +67,12 @@ public:
     CalibrationHelpers::fixUpSampleAndSourcePositions(
         instNew, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
 
-    // Old workspace has sample unchanged
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
-    // New workspace has sample at the new position
     TS_ASSERT_EQUALS(wsNew2->detectorInfo().samplePosition(),
                      positionSampleOld);
-    // Old workspace has source at the old position
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
-    // New workspace has source at the new position
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
     TS_ASSERT_EQUALS(wsNew2->detectorInfo().sourcePosition(),
                      positionSourceOld);
+    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
   }
 
   void test_fixUpBankParameterMap_applies_move_to_rectangular_detectors() {
@@ -91,8 +87,7 @@ public:
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
     CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, false,
-        detectorInfoWsNew);
+        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);
@@ -120,8 +115,7 @@ public:
     const double widthScale = 3.0;
 
     CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, false,
-        detectorInfoWsNew);
+        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).X(),
                      heightScale * oldPosLastBank1.X());
@@ -150,8 +144,7 @@ public:
     const double widthScale = 1.0;
 
     CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, false,
-        detectorInfoWsNew);
+        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      oldPosFirstBank1);
@@ -182,8 +175,7 @@ public:
     std::vector<std::string> bankNames = {"bank1", "bank3"};
 
     CalibrationHelpers::fixUpBankPositionsAndSizes(
-        bankNames, instNew, newPos, newRot, heightScale, widthScale, false,
-        detectorInfoWsNew);
+        bankNames, instNew, newPos, newRot, heightScale, widthScale, detectorInfoWsNew);
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);

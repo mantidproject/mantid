@@ -21,8 +21,8 @@ constexpr double RAD_TO_DEG = 180. / M_PI;
  * @param Roty The angle in degrees for rotating around the y-axis
  * @param Rotz The angle in degrees for rotating around the z-axis
  */
-void quatToRotxRotyRotz(const Quat Q, double &Rotx,
-                                            double &Roty, double &Rotz) {
+void quatToRotxRotyRotz(const Quat Q, double &Rotx, double &Roty,
+                        double &Rotz) {
   Quat R(Q);
   R.normalize();
   V3D X(1, 0, 0);
@@ -60,32 +60,30 @@ void quatToRotxRotyRotz(const Quat Q, double &Rotx,
  *
  * @param newInstrument The instrument whose parameter map will be changed to
  *reflect the new source position
- * @param L0 The distance from source to sample (should be positive)
+ * @param L0 The new distance from source to sample (should be positive)
  * @param newSampPos The relative shift for the new sample position
  * @param detectorInfo DetectorInfo for the workspace being updated
  */
 void fixUpSampleAndSourcePositions(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
     const V3D newSampPos, DetectorInfo &detectorInfo) {
-  boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   IComponent_const_sptr source = newInstrument->getSource();
   IComponent_const_sptr sample = newInstrument->getSample();
+
+  const V3D &oldSourceToSampleDir =
+      detectorInfo.samplePosition() - detectorInfo.sourcePosition();
+  const double oldL1 = detectorInfo.l1();
 
   V3D samplePos = detectorInfo.samplePosition();
   if (samplePos != newSampPos) {
     detectorInfo.setPosition(*sample, newSampPos);
   }
-  V3D sourceRelPos = source->getRelativePos();
-  V3D sourcePos = detectorInfo.sourcePosition();
-  V3D parentSourcePos = sourcePos - sourceRelPos;
-  V3D source2sampleDir = samplePos - source->getPos();
 
-  double scalee = L0 / source2sampleDir.norm();
-  V3D newsourcePos = newSampPos - source2sampleDir * scalee;
-  V3D newsourceRelPos = newsourcePos - parentSourcePos;
+  double scalee = L0 / oldL1;
+  V3D newSourcePos = newSampPos - oldSourceToSampleDir * scalee;
 
-  detectorInfo.setPosition(*source, newsourceRelPos);
+  detectorInfo.setPosition(*source, newSourcePos);
 }
 
 /**
@@ -112,7 +110,7 @@ void fixUpBankPositionsAndSizes(
     const std::vector<std::string> bankNames,
     boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
     const Quat rot, double const detWScale, double const detHtScale,
-    bool rotCenters, DetectorInfo &detectorInfo) {
+    DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
 
   for (const auto &bankName : bankNames) {
@@ -121,23 +119,16 @@ void fixUpBankPositionsAndSizes(
     boost::shared_ptr<const Geometry::RectangularDetector> bank =
         boost::dynamic_pointer_cast<const RectangularDetector>(bank1);
 
-    Quat RelRot = bank->getRelativeRot();
-    Quat newRelRot = rot * RelRot;
-    double rotx, roty, rotz;
-    quatToRotxRotyRotz(newRelRot, rotx, roty, rotz);
+    Quat relRot = bank->getRelativeRot();
+    Quat parentRot = bank->getParent()->getRotation();
+    Quat newRelRot = parentRot * rot * relRot;
 
     detectorInfo.setRotation(*bank, newRelRot);
-    //---------Rotate center of bank ----------------------
-    V3D center = bank->getPos();
-    V3D centerOrig(center);
-    if (rotCenters)
-      rot.rotate(center);
 
-    V3D pos1 = bank->getRelativePos();
+    V3D rotatedPos = V3D(pos);
+    bank->getParent()->getRotation().rotate(rotatedPos);
 
-    detectorInfo.setPosition(*bank, pos + pos1 + center - centerOrig);
-
-    quatToRotxRotyRotz(rot, rotx, roty, rotz);
+    detectorInfo.setPosition(*bank, bank->getPos() + rotatedPos);
 
     // TODO: Use ResizeRectangularDetectorHelper from PR #18906
     std::vector<double> oldScalex =
