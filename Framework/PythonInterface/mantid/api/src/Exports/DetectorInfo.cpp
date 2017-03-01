@@ -5,6 +5,10 @@ using Mantid::API::DetectorInfo;
 using namespace boost::python;
 
 void export_DetectorInfo() {
+  // WARNING DetectorInfo is work in progress and not ready for exposing more of
+  // its functionality to Python, and should not yet be used in user scripts. DO
+  // NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
+  // Instrument-2.0.
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "

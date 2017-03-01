@@ -472,5 +472,11 @@ void MuonAnalysisDataLoader::updateCache() const {
   }
 }
 
+void MuonAnalysisDataLoader::clearCache() {
+  if (!m_loadedDataCache.empty()) {
+    m_loadedDataCache.clear();
+  }
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -10,20 +10,20 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/ListValidator.h"
 
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
-#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
+#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
-#include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
 #include "boost/make_shared.hpp"
 
@@ -886,8 +886,8 @@ PoldiFitPeaks2D::getQSpectrum(const FunctionDomain1D &domain,
   MatrixWorkspace_sptr ws1D = WorkspaceFactory::Instance().create(
       "Workspace2D", 1, domain.size(), values.size());
 
-  MantidVec &xData = ws1D->dataX(0);
-  MantidVec &yData = ws1D->dataY(0);
+  auto &xData = ws1D->mutableX(0);
+  auto &yData = ws1D->mutableY(0);
   size_t offset = values.size() - 1;
   for (size_t i = 0; i < values.size(); ++i) {
     xData[offset - i] = Conversions::dToQ(domain[i]);
@@ -1137,7 +1137,7 @@ void PoldiFitPeaks2D::setDeltaTFromWorkspace(
     throw std::invalid_argument("MatrixWorkspace does not contain any data.");
   }
 
-  MantidVec xData = matrixWorkspace->readX(0);
+  auto &xData = matrixWorkspace->x(0);
 
   if (xData.size() < 2) {
     throw std::invalid_argument(
@@ -1146,7 +1146,7 @@ void PoldiFitPeaks2D::setDeltaTFromWorkspace(
 
   // difference between first and second x-value is assumed to be the bin
   // width.
-  setDeltaT(matrixWorkspace->readX(0)[1] - matrixWorkspace->readX(0)[0]);
+  setDeltaT(matrixWorkspace->x(0)[1] - matrixWorkspace->x(0)[0]);
 }
 
 /**
