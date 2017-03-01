@@ -647,7 +647,8 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", 4.0))
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -656,7 +657,8 @@ public:
     // Get back the saved workspace
     Workspace2D_sptr output;
     TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieveWS<Workspace2D>("out"));
+        output =
+            AnalysisDataService::Instance().retrieveWS<Workspace2D>("out"));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
     TS_ASSERT_EQUALS(output->blocksize(), 1)
     const std::array<double, 5> correctAnswers{{6, 26, 46, 66, 86}};
