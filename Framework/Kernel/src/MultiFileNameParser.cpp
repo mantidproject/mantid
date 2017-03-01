@@ -560,7 +560,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int from,
   if (numberOfFiles > limit) {
     std::stringstream sstream;
     sstream << "The range from " << orderedFrom << " to " << orderedTo
-            << " step " << stepSize << ", would genetate " << numberOfFiles
+            << " with step " << stepSize << ", would generate " << numberOfFiles
             << " files.  "
             << "This is greater then the current limit of " << limit << ".  "
             << "This limit can be configured in the Mantid.user.properties "
