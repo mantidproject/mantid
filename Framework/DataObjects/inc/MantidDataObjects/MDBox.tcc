@@ -579,6 +579,7 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
         valAndErrorPair newPair;
         newPair.first = static_cast<signal_t>(it.getSignal());
         newPair.second = static_cast<signal_t>(it.getErrorSquared());
+        vals.emplace_back(std::move(newPair));
       }
     }
     // Sort based on signal values
