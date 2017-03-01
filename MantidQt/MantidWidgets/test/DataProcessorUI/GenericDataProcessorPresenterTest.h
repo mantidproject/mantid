@@ -1002,7 +1002,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1083,7 +1083,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1175,7 +1175,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1261,7 +1261,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, askUserYesNo(_, _)).Times(0);
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1340,7 +1340,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -1429,7 +1429,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
@@ -3178,7 +3178,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
         .Times(2)
-        .WillRepeatedly(Return(std::string()));
+        .WillRepeatedly(Return(QString()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));

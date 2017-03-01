@@ -12,7 +12,7 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 
-#include <set>
+#include <QSet>
 
 using GroupData = std::map<int, std::vector<std::string>>;
 
@@ -211,7 +211,7 @@ private:
   void addCommands();
 
   // List of workspaces the user can open
-  std::set<std::string> m_workspaceList;
+  QSet<QString> m_workspaceList;
 
   void addHandle(const std::string &name,
                  Mantid::API::Workspace_sptr workspace) override;

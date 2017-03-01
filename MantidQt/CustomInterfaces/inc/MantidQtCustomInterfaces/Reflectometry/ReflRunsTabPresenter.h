@@ -65,12 +65,12 @@ public:
   ~ReflRunsTabPresenter() override;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
-  void notifyADSChanged(const std::set<std::string> &workspaceList) override;
+  void notifyADSChanged(const QSet<QString> &workspaceList) override;
   /// Global options (inherited from DataProcessorMainPresenter)
-  std::string getPreprocessingOptionsAsString() const override;
-  std::string getProcessingOptions() const override;
-  std::string getPostprocessingOptions() const override;
-  std::string getTimeSlicingOptions() const override;
+  QString getPreprocessingOptionsAsString() const override;
+  QString getProcessingOptions() const override;
+  QString getPostprocessingOptions() const override;
+  QString getTimeSlicingOptions() const override;
 
 private:
   /// The search model

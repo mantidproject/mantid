@@ -42,15 +42,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
   };
-  std::string name() override { return std::string("Delete Group"); }
-  std::string icon() override { return std::string("://delete_group.png"); }
-  std::string tooltip() override {
-    return std::string("Deletes selected group");
+  QString name() override { return QString("Delete Group"); }
+  QString icon() override { return QString("://delete_group.png"); }
+  QString tooltip() override {
+    return QString("Deletes selected group");
   }
-  std::string whatsthis() override {
-    return std::string("Deletes the selected groups");
+  QString whatsthis() override {
+    return QString("Deletes the selected groups");
   }
-  std::string shortcut() override { return std::string(); }
+  QString shortcut() override { return QString(); }
 };
 }
 }

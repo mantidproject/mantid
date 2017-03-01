@@ -41,15 +41,15 @@ public:
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PasteSelectedFlag);
   };
-  std::string name() override { return std::string("Paste Selected"); }
-  std::string icon() override { return std::string("://paste.png"); }
-  std::string tooltip() override { return std::string("Paste selected"); }
-  std::string whatsthis() override {
-    return std::string("Pastes the contents of the clipboard into the selected "
+  QString name() override { return QString("Paste Selected"); }
+  QString icon() override { return QString("://paste.png"); }
+  QString tooltip() override { return QString("Paste selected"); }
+  QString whatsthis() override {
+    return QString("Pastes the contents of the clipboard into the selected "
                        "rows. If no rows are selected, new ones are added at "
                        "the end");
   }
-  std::string shortcut() override { return std::string("Ctrl+V"); }
+  QString shortcut() override { return QString("Ctrl+V"); }
 };
 }
 }

@@ -85,7 +85,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
-                         "<b>Override <samp>" + processor.name() +
+                         "<b>Override <samp>" +
+                             QString::fromStdString(processor.name()) +
                              "</samp> properties</b><br /><i>optional</i><br "
                              "/>This column allows you to "
                              "override the properties used when executing "
@@ -190,7 +191,7 @@ void GenericDataProcessorPresenter::acceptViews(
     if (m_manager->isValidModel(
             boost::dynamic_pointer_cast<ITableWorkspace>(ws),
             m_whitelist.size()))
-      m_workspaceList.insert(name);
+      m_workspaceList.insert(QString::fromStdString(name));
   }
   observeAdd();
   observePostDelete();
@@ -291,12 +292,14 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   // Global pre-processing options as a map where keys are column
   // name and values are pre-processing options as a string
   const std::map<std::string, std::string> preprocessingOptionsMap =
-      convertStringToMap(m_mainPresenter->getPreprocessingOptionsAsString());
+      convertStringToMap(
+          m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
   // Global processing options as a string
-  const std::string processingOptions = m_mainPresenter->getProcessingOptions();
+  const std::string processingOptions =
+      m_mainPresenter->getProcessingOptions().toStdString();
   // Global post-processing options as a string
   const std::string postprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions();
+      m_mainPresenter->getPostprocessingOptions().toStdString();
 
   auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
       m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
@@ -354,7 +357,8 @@ void GenericDataProcessorPresenter::postProcessGroup(
   alg->setProperty(m_postprocessor.outputProperty(), outputWSName);
 
   // Global post-processing options
-  const std::string options = m_mainPresenter->getPostprocessingOptions();
+  const std::string options =
+      m_mainPresenter->getPostprocessingOptions().toStdString();
 
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
@@ -613,8 +617,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions =
-        convertStringToMap(m_mainPresenter->getPreprocessingOptionsAsString());
+    globalOptions = convertStringToMap(
+        m_mainPresenter->getPreprocessingOptionsAsString().toStdString());
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
@@ -649,7 +653,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   }
 
   // Global processing options as a string
-  std::string options = m_mainPresenter->getProcessingOptions();
+  std::string options = m_mainPresenter->getProcessingOptions().toStdString();
 
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(options);
@@ -959,7 +963,7 @@ void GenericDataProcessorPresenter::addHandle(
   if (!m_manager->isValidModel(workspace, m_columns))
     return;
 
-  m_workspaceList.insert(name);
+  m_workspaceList.insert(QString::fromStdString(name));
   m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
@@ -968,7 +972,7 @@ void GenericDataProcessorPresenter::addHandle(
 Handle ADS remove events
 */
 void GenericDataProcessorPresenter::postDeleteHandle(const std::string &name) {
-  m_workspaceList.erase(name);
+  m_workspaceList.remove(QString::fromStdString(name));
   m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
@@ -990,11 +994,11 @@ void GenericDataProcessorPresenter::renameHandle(const std::string &oldName,
 
   // if a workspace with oldName exists then replace it for the same workspace
   // with newName
-  if (m_workspaceList.find(oldName) == m_workspaceList.end())
+  if (!m_workspaceList.contains(QString::fromStdString(oldName)))
     return;
 
-  m_workspaceList.erase(oldName);
-  m_workspaceList.insert(newName);
+  m_workspaceList.remove(QString::fromStdString(oldName));
+  m_workspaceList.insert(QString::fromStdString(newName));
   m_view->setTableList(m_workspaceList);
   m_mainPresenter->notifyADSChanged(m_workspaceList);
 }
@@ -1005,11 +1009,11 @@ Handle ADS replace events
 void GenericDataProcessorPresenter::afterReplaceHandle(
     const std::string &name, Mantid::API::Workspace_sptr workspace) {
   // Erase it
-  m_workspaceList.erase(name);
+  m_workspaceList.remove(QString::fromStdString(name));
 
   // If it's a table workspace, bring it back
   if (m_manager->isValidModel(workspace, m_columns))
-    m_workspaceList.insert(name);
+    m_workspaceList.insert(QString::fromStdString(name));
 
   m_view->setTableList(m_workspaceList);
 }
@@ -1072,7 +1076,12 @@ void GenericDataProcessorPresenter::setInstrumentList(
     const std::vector<std::string> &instruments,
     const std::string &defaultInstrument) {
 
-  m_view->setInstrumentList(instruments, defaultInstrument);
+  std::string instrList;
+  for (const auto &instr : instruments)
+    instrList += instr;
+
+  m_view->setInstrumentList(QString::fromStdString(instrList),
+                            QString::fromStdString(defaultInstrument));
 }
 
 /** Plots any currently selected rows */

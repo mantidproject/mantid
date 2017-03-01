@@ -6,7 +6,6 @@
 #include "MantidQtMantidWidgets/HintingLineEditFactory.h"
 
 #include <QWidget>
-#include <boost/algorithm/string.hpp>
 #include <qabstractitemmodel.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -185,15 +184,15 @@ void QDataProcessorWidget::showTable(
 Set the list of tables the user is offered to open
 @param tables : the names of the tables in the ADS
 */
-void QDataProcessorWidget::setTableList(const std::set<std::string> &tables) {
+void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
   ui.menuOpenTable->clear();
   for (auto it = tables.begin(); it != tables.end(); ++it) {
     QAction *openTable =
-        ui.menuOpenTable->addAction(QString::fromStdString(*it));
+        ui.menuOpenTable->addAction(*it);
     openTable->setIcon(QIcon("://worksheet.png"));
 
     // Map this action to the table name
-    m_openMap->setMapping(openTable, QString::fromStdString(*it));
+    m_openMap->setMapping(openTable, *it);
     // When repeated corrections happen the QMessageBox from openTable()
     // method in ReflMainViewPresenter will be called multiple times
     // when 'no' is clicked.
@@ -340,33 +339,19 @@ Set the list of available instruments to process
 @param instruments : The list of instruments available
 @param defaultInstrument : The instrument to have selected by default
 */
-void QDataProcessorWidget::setInstrumentList(
-    const std::vector<std::string> &instruments,
-    const std::string &defaultInstrument) {
+void QDataProcessorWidget::setInstrumentList(const QString &instruments,
+                                             const QString &defaultInstrument) {
+
   ui.comboProcessInstrument->clear();
 
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
-    ui.comboProcessInstrument->addItem(instrument);
+  QStringList instrList = instruments.split(",");
+  for (auto it = instrList.begin(); it != instrList.end(); ++it) {
+    ui.comboProcessInstrument->addItem((*it).trimmed());
   }
 
-  int index = ui.comboProcessInstrument->findData(
-      QString::fromStdString(defaultInstrument), Qt::DisplayRole);
+  int index =
+      ui.comboProcessInstrument->findData(defaultInstrument, Qt::DisplayRole);
   ui.comboProcessInstrument->setCurrentIndex(index);
-}
-
-/**
-Set the list of available instruments to process
-@param instruments : The list of instruments available as a comma-separated
-string
-@param defaultInstrument : The instrument to have selected by default
-*/
-void QDataProcessorWidget::setInstrumentList(
-    const std::string &instruments, const std::string &defaultInstrument) {
-
-  std::vector<std::string> instr;
-  boost::split(instr, instruments, boost::is_any_of(","));
-  m_presenter->setInstrumentList(instr, defaultInstrument);
 }
 
 /**

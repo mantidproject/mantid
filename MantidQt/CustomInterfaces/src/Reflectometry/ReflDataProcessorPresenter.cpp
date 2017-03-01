@@ -49,7 +49,8 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  std::string timeSlicing =
+      m_mainPresenter->getTimeSlicingOptions().toStdString();
   if (timeSlicing.empty()) {
     GenericDataProcessorPresenter::process();
     return;
@@ -392,7 +393,9 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
 void ReflDataProcessorPresenter::plotRow() {
 
   // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  std::string timeSlicing =
+      m_mainPresenter->getTimeSlicingOptions().toStdString();
+
   if (timeSlicing.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
@@ -466,7 +469,9 @@ std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
 void ReflDataProcessorPresenter::plotGroup() {
 
   // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
+  std::string timeSlicing =
+      m_mainPresenter->getTimeSlicingOptions().toStdString();
+
   if (timeSlicing.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;

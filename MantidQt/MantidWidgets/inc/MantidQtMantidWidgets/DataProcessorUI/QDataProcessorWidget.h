@@ -102,11 +102,9 @@ public:
 
   // Settor methods
   void setSelection(const std::set<int> &groups) override;
-  void setTableList(const std::set<std::string> &tables) override;
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         const std::string &defaultInstrument) override;
-  void setInstrumentList(const std::string &instruments,
-                         const std::string &defaultInstrument);
+  void setTableList(const QSet<QString> &tables) override;
+  void setInstrumentList(const QString &instruments,
+                         const QString &defaultInstrument);
   void
   setOptionsHintStrategy(MantidQt::MantidWidgets::HintStrategy *hintStrategy,
                          int column) override;

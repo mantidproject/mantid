@@ -4,6 +4,8 @@
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h"
 
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class DataProcessorProcessingAlgorithm
@@ -42,9 +44,9 @@ public:
       const std::string &name, const std::vector<std::string> &prefix,
       const std::set<std::string> &blacklist = std::set<std::string>());
   // Delegating constructor
-  DataProcessorProcessingAlgorithm(const std::string &name,
-                                   const std::string &prefix,
-                                   const std::string &blacklist = "");
+  DataProcessorProcessingAlgorithm(const QString &name,
+                                   const QString &prefix,
+                                   const QString &blacklist = "");
   // Destructor
   virtual ~DataProcessorProcessingAlgorithm();
   // The number of output properties

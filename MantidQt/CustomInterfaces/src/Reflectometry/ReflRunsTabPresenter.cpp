@@ -348,7 +348,7 @@ ReflRunsTabPresenter::getTransferStrategy() {
 * loaded into the interface
 */
 void ReflRunsTabPresenter::notifyADSChanged(
-    const std::set<std::string> &workspaceList) {
+    const QSet<QString> &workspaceList) {
 
   UNUSED_ARG(workspaceList);
   pushCommands();
@@ -359,37 +359,43 @@ void ReflRunsTabPresenter::notifyADSChanged(
 * presenter
 * @return :: Global pre-processing options
 */
-std::string ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
+QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
 
   std::string optionsStr =
       "Transmission Run(s), " +
       m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 
-  return optionsStr;
+  return QString::fromStdString(optionsStr);
 }
 
 /** Requests global processing options. Options are supplied by the main
 * presenter
 * @return :: Global processing options
 */
-std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getProcessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getReductionOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global post-processing options. Options are supplied by the main
 * presenter
 * @return :: Global post-processing options
 */
-std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getPostprocessingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getStitchOptions(m_view->getSelectedGroup()));
 }
 
 /** Requests global time-slicing options. Options are supplied by the main
 * presenter
 * @return :: Global time-slicing options
 */
-std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
-  return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
+QString ReflRunsTabPresenter::getTimeSlicingOptions() const {
+
+  return QString::fromStdString(
+      m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup()));
 }
 
 /** Changes the current instrument in the data processor widget. Also updates

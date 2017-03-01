@@ -3,6 +3,9 @@
 
 #include "MantidKernel/System.h"
 
+#include <QSet>
+#include <QString>
+
 namespace MantidQt {
 namespace MantidWidgets {
 /** @class DataProcessorMainPresenter
@@ -43,22 +46,18 @@ public:
 
   /// Notify this receiver with the list of table workspaces in the ADS that can
   /// be loaded into the interface
-  virtual void notifyADSChanged(const std::set<std::string> &workspaceList) {
+  virtual void notifyADSChanged(const QSet<QString> &workspaceList) {
     UNUSED_ARG(workspaceList);
   };
 
   /// Return global options for pre-processing as a string
-  virtual std::string getPreprocessingOptionsAsString() const {
-    return std::string();
-  };
+  virtual QString getPreprocessingOptionsAsString() const { return QString(); };
   /// Return global options for reduction
-  virtual std::string getProcessingOptions() const { return std::string(); };
+  virtual QString getProcessingOptions() const { return QString(); };
   /// Return global options for post-processing
-  virtual std::string getPostprocessingOptions() const {
-    return std::string();
-  };
+  virtual QString getPostprocessingOptions() const { return QString(); };
   /// Return global options for time-slicing
-  virtual std::string getTimeSlicingOptions() const { return std::string(); };
+  virtual QString getTimeSlicingOptions() const { return QString(); };
 };
 }
 }

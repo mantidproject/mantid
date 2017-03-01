@@ -36,10 +36,10 @@ DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
 * @param blacklist : The list of properties we don't want to show, as a string
 */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm(
-    const std::string &name, const std::string &prefix,
-    const std::string &blacklist)
-    : DataProcessorPostprocessingAlgorithm(name, prefix,
-                                           convertStringToSet(blacklist)) {}
+    const QString &name, const QString &prefix, const QString &blacklist)
+    : DataProcessorPostprocessingAlgorithm(
+          name.toStdString(), prefix.toStdString(),
+          convertStringToSet(blacklist.toStdString())) {}
 
 /** Default constructor: no algorithm defined */
 DataProcessorPostprocessingAlgorithm::DataProcessorPostprocessingAlgorithm()

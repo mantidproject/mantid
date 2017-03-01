@@ -50,9 +50,8 @@ public:
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
   MOCK_METHOD1(setModel, void(const std::string &));
-  MOCK_METHOD1(setTableList, void(const std::set<std::string> &));
-  MOCK_METHOD2(setInstrumentList,
-               void(const std::vector<std::string> &, const std::string &));
+  MOCK_METHOD1(setTableList, void(const QSet<QString> &));
+  MOCK_METHOD2(setInstrumentList, void(const QString &, const QString &));
   MOCK_METHOD2(setOptionsHintStrategy,
                void(MantidQt::MantidWidgets::HintStrategy *, int));
 
@@ -94,12 +93,12 @@ public:
   MOCK_METHOD1(runPythonAlgorithm, std::string(const std::string &));
 
   // Global options
-  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, std::string());
-  MOCK_CONST_METHOD0(getProcessingOptions, std::string());
-  MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
+  MOCK_CONST_METHOD0(getPreprocessingOptionsAsString, QString());
+  MOCK_CONST_METHOD0(getProcessingOptions, QString());
+  MOCK_CONST_METHOD0(getPostprocessingOptions, QString());
 
   // Methods we don't care about
-  std::string getTimeSlicingOptions() const override { return std::string(); };
+  QString getTimeSlicingOptions() const override { return QString(); };
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {

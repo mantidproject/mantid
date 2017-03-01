@@ -4,7 +4,8 @@
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include <map>
-#include <string>
+
+#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -42,9 +43,8 @@ public:
   // Destructor
   virtual ~DataProcessorPreprocessMap();
   // Add a column to pre-process
-  void addElement(const std::string &column, const std::string &algorithm,
-                  const std::string &prefix = "",
-                  const std::string &blacklist = "");
+  void addElement(const QString &column, const QString &algorithm,
+                  const QString &prefix = "", const QString &blacklist = "");
   // Returns a map where keys are columns and values pre-processing algorithms
   std::map<std::string, DataProcessorPreprocessingAlgorithm> asMap() const;
 

@@ -20,7 +20,6 @@
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 %Include qwttypes.sip
-%Include stdtypes.sip
 
 %ModuleHeaderCode
 #include "MantidQtAPI/PythonSystemHeader.h"
@@ -1500,7 +1499,7 @@ class DataProcessorWhiteList
 %End
 public:
 DataProcessorWhiteList();
-void addElement(const std::string &, const std::string &, const std::string &, bool, const std::string &);
+void addElement(const QString &, const QString &, const QString &, bool, const QString &);
 };
 
 class DataProcessorPreprocessMap
@@ -1510,7 +1509,7 @@ class DataProcessorPreprocessMap
 %End
 public:
 DataProcessorPreprocessMap();
-void addElement(const std::string &, const std::string &, const std::string &, const std::string &);
+void addElement(const QString &, const QString &, const QString &, const QString &);
 };
 
 class DataProcessorProcessingAlgorithm
@@ -1519,7 +1518,7 @@ class DataProcessorProcessingAlgorithm
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 %End
 public:
-DataProcessorProcessingAlgorithm(const std::string &, const std::string &, const std::string &);
+DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &);
 };
 
 class DataProcessorPostprocessingAlgorithm
@@ -1528,7 +1527,7 @@ class DataProcessorPostprocessingAlgorithm
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 %End
 public:
-DataProcessorPostprocessingAlgorithm(const std::string &, const std::string &, const std::string &);
+DataProcessorPostprocessingAlgorithm(const QString &, const QString &, const QString &);
 };
 
 class QDataProcessorWidget : QWidget
@@ -1554,7 +1553,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
                      const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &,
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
-void setInstrumentList(const std::string &instruments, const std::string &defaultInstrument);
+void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
 
 signals:
 void runPythonCode(const QString &);
@@ -1571,12 +1570,12 @@ class DataProcessorMainPresenter
 public:
 DataProcessorMainPresenter();
 
-virtual std::string getPreprocessingOptionsAsString() const;
-virtual std::string getProcessingOptions() const;
-virtual std::string getPostprocessingOptions() const;
-virtual std::string getTimeSlicingOptions() const;
+virtual QString getPreprocessingOptionsAsString() const;
+virtual QString getProcessingOptions() const;
+virtual QString getPostprocessingOptions() const;
+virtual QString getTimeSlicingOptions() const;
 
-virtual void notifyADSChanged(const std::set<std::string> &);
+virtual void notifyADSChanged(const QSet<QString> &);
 };
 
 class DataProcessorAppendRowCommand
@@ -1587,11 +1586,11 @@ class DataProcessorAppendRowCommand
 public:
 DataProcessorAppendRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorAppendRowCommand();
@@ -1606,11 +1605,11 @@ class DataProcessorAppendGroupCommand
 public:
 DataProcessorAppendGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorAppendGroupCommand();
@@ -1625,11 +1624,11 @@ class DataProcessorClearSelectedCommand
 public:
 DataProcessorClearSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorClearSelectedCommand();
@@ -1644,11 +1643,11 @@ class DataProcessorCopySelectedCommand
 public:
 DataProcessorCopySelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorCopySelectedCommand();
@@ -1663,11 +1662,11 @@ class DataProcessorCutSelectedCommand
 public:
 DataProcessorCutSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorCutSelectedCommand();
@@ -1682,11 +1681,11 @@ class DataProcessorDeleteGroupCommand
 public:
 DataProcessorDeleteGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorDeleteGroupCommand();
@@ -1701,11 +1700,11 @@ class DataProcessorDeleteRowCommand
 public:
 DataProcessorDeleteRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorDeleteRowCommand();
@@ -1720,11 +1719,11 @@ class DataProcessorExpandCommand
 public:
 DataProcessorExpandCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorExpandCommand();
@@ -1739,11 +1738,11 @@ class DataProcessorExportTableCommand
 public:
 DataProcessorExportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorExportTableCommand();
@@ -1758,11 +1757,11 @@ class DataProcessorGroupRowsCommand
 public:
 DataProcessorGroupRowsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorGroupRowsCommand();
@@ -1777,11 +1776,11 @@ class DataProcessorImportTableCommand
 public:
 DataProcessorImportTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorImportTableCommand();
@@ -1796,11 +1795,11 @@ class DataProcessorNewTableCommand
 public:
 DataProcessorNewTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorNewTableCommand();
@@ -1815,11 +1814,11 @@ class DataProcessorOpenTableCommand
 public:
 DataProcessorOpenTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorOpenTableCommand();
@@ -1834,11 +1833,11 @@ class DataProcessorOptionsCommand
 public:
 DataProcessorOptionsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorOptionsCommand();
@@ -1853,11 +1852,11 @@ class DataProcessorPasteSelectedCommand
 public:
 DataProcessorPasteSelectedCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorPasteSelectedCommand();
@@ -1872,11 +1871,11 @@ class DataProcessorPlotGroupCommand
 public:
 DataProcessorPlotGroupCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorPlotGroupCommand();
@@ -1891,11 +1890,11 @@ class DataProcessorPlotRowCommand
 public:
 DataProcessorPlotRowCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorPlotRowCommand();
@@ -1910,11 +1909,11 @@ class DataProcessorProcessCommand
 public:
 DataProcessorProcessCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorProcessCommand();
@@ -1929,11 +1928,11 @@ class DataProcessorSaveTableCommand
 public:
 DataProcessorSaveTableCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorSaveTableCommand();
@@ -1948,11 +1947,11 @@ class DataProcessorSaveTableAsCommand
 public:
 DataProcessorSaveTableAsCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorSaveTableAsCommand();
@@ -1967,11 +1966,11 @@ class DataProcessorSeparatorCommand
 public:
 DataProcessorSeparatorCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorSeparatorCommand();
@@ -1984,13 +1983,13 @@ class DataProcessorWorkspaceCommand
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorWorkspaceCommand.h"
 %End
 public:
-DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &, const std::string &);
+DataProcessorWorkspaceCommand(const MantidQt::MantidWidgets::QDataProcessorWidget &, const QString &);
 void execute();
-std::string name();
-std::string icon();
-std::string tooltip();
-std::string whatsthis();
-std::string shortcut();
+QString name();
+QString icon();
+QString tooltip();
+QString whatsthis();
+QString shortcut();
 
 private:
 DataProcessorWorkspaceCommand();

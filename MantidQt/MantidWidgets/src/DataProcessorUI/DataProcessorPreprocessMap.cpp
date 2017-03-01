@@ -19,13 +19,13 @@ DataProcessorPreprocessMap::~DataProcessorPreprocessMap() {}
 * @param blacklist :: the list of algorithm properties to black list, as a
 * string
 */
-void DataProcessorPreprocessMap::addElement(const std::string &column,
-                                            const std::string &algorithm,
-                                            const std::string &prefix,
-                                            const std::string &blacklist) {
+void DataProcessorPreprocessMap::addElement(const QString &column,
+                                            const QString &algorithm,
+                                            const QString &prefix,
+                                            const QString &blacklist) {
 
-  m_map[column] =
-      DataProcessorPreprocessingAlgorithm(algorithm, prefix, blacklist);
+  m_map[column.toStdString()] = DataProcessorPreprocessingAlgorithm(
+      algorithm.toStdString(), prefix.toStdString(), blacklist.toStdString());
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms
