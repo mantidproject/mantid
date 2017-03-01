@@ -205,8 +205,7 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
   if (confOffset < 0) {
     std::ostringstream os;
     os << "No messages are yet available on the Kafka brokers for this "
-          "topic: '"
-       << m_topicName << "'";
+          "topic: '" << m_topicName << "'";
     throw std::runtime_error(os.str());
   }
   if (error) {

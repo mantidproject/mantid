@@ -383,8 +383,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec="
-       << nspec << ", ndet=" << nudet;
+          "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer

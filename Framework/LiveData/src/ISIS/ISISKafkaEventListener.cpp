@@ -48,8 +48,7 @@ void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
     startNow = false;
   } else if (startTime != 0) {
     g_log.warning() << "KafkaLiveListener does not currently support starting "
-                       "from arbitrary time."
-                    << std::endl;
+                       "from arbitrary time." << std::endl;
   }
   m_decoder->startCapture(startNow);
 }

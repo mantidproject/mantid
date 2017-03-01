@@ -135,10 +135,10 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
-    m_buffer->getSpectrum(0).addEventQuickly(
-        DataObjects::TofEvent(m_rand->nextValue()));
-    m_buffer->getSpectrum(1).addEventQuickly(
-        DataObjects::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(0)
+        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(1)
+        .addEventQuickly(DataObjects::TofEvent(m_rand->nextValue()));
   }
 }
 } // namespace LiveData
