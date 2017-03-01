@@ -103,6 +103,13 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+/** Check if an active parameter i is actually active
+ * @param i :: Index of a parameter.
+ */
+bool IFunction::isActive(size_t i) const {
+  return !(isFixed(i) || getTie(i) != nullptr);
+}
+
 /**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
@@ -114,13 +121,12 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
 void IFunction::tie(const std::string &parName, const std::string &expr,
                     bool isDefault) {
   auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
-  this->fix(getParameterIndex(*ti));
   if (!isDefault && ti->isConstant()) {
     setParameter(parName, ti->eval());
+    fix(getParameterIndex(*ti));
   } else {
     addTie(std::move(ti));
   }
-  //  return ti.get();
 }
 
 /**
@@ -172,6 +178,157 @@ std::string IFunction::writeTie(size_t iParam) const {
     tieStream << parameterName(iParam) << "=" << getParameter(iParam);
   }
   return tieStream.str();
+}
+
+/**
+ * Attaches a tie to this ParamFunction. The attached tie is owned by the
+ * ParamFunction.
+ * @param tie :: A pointer to a new tie
+ */
+void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
+  auto iPar = getParameterIndex(*tie);
+  bool found = false;
+  for (auto &m_tie : m_ties) {
+    auto mPar = getParameterIndex(*m_tie);
+    if (mPar == iPar) {
+      found = true;
+      m_tie = std::move(tie);
+      break;
+    }
+  }
+  if (!found) {
+    m_ties.push_back(std::move(tie));
+  }
+}
+
+/**
+ * Apply the ties.
+ */
+void IFunction::applyTies() {
+  for (auto &m_tie : m_ties) {
+    m_tie->eval();
+  }
+}
+
+/**
+ * Used to find ParameterTie for a parameter i
+ */
+class ReferenceEqual {
+  /// The function that has the tie
+  const IFunction &m_fun;
+  /// index to find
+  const size_t m_i;
+
+public:
+  /// Constructor
+  explicit ReferenceEqual(const IFunction &fun, size_t i) : m_fun(fun), m_i(i) {}
+  /// Bracket operator
+  /// @param p :: the element you are looking for
+  /// @return True if found
+  template <class T> bool operator()(const std::unique_ptr<T> &p) {
+    return m_fun.getParameterIndex(*p) == m_i;
+  }
+};
+
+/** Removes i-th parameter's tie if it is tied or does nothing.
+ * @param i :: The index of the tied parameter.
+ * @return True if successfull
+ */
+bool IFunction::removeTie(size_t i) {
+  if (i >= nParams()) {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
+  if (it != m_ties.end()) {
+    m_ties.erase(it);
+    unfix(i);
+    return true;
+  }
+  unfix(i);
+  return false;
+}
+
+/** Get tie of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the tie
+ */
+ParameterTie *IFunction::getTie(size_t i) const {
+  if (i >= nParams()) {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
+  if (it != m_ties.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove all ties
+ */
+void IFunction::clearTies() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    unfix(i);
+  }
+  m_ties.clear();
+}
+
+/** Add a constraint
+ *  @param ic :: Pointer to a constraint.
+ */
+void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
+  size_t iPar = ic->getIndex();
+  bool found = false;
+  for (auto &constraint : m_constraints) {
+    if (constraint->getIndex() == iPar) {
+      found = true;
+      constraint = std::move(ic);
+      break;
+    }
+  }
+  if (!found) {
+    m_constraints.push_back(std::move(ic));
+  }
+}
+
+/** Get constraint of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the constraint or NULL
+ */
+IConstraint *IFunction::getConstraint(size_t i) const {
+  if (i >= nParams()) {
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  }
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                         ReferenceEqual(*this, i));
+  if (it != m_constraints.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove a constraint
+ * @param parName :: The name of a parameter which constarint to remove.
+ */
+void IFunction::removeConstraint(const std::string &parName) {
+  size_t iPar = parameterIndex(parName);
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+    if (iPar == (**it).getIndex()) {
+      m_constraints.erase(it);
+      break;
+    }
+  }
+}
+
+/// Remove all constraints.
+void IFunction::clearConstraints() {
+  m_constraints.clear();
+}
+
+
+void IFunction::setUpForFit() {
+  for (auto &constraint : m_constraints) {
+    constraint->setParamToSatisfyConstraint();
+  }
 }
 
 /// Write a parameter constraint to a string
@@ -636,8 +793,7 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
-  if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter " +
+  if (!isActive(i)) {    throw std::runtime_error("Attempt to use an inactive parameter " +
                              parameterName(i));
   }
   return getParameter(i);

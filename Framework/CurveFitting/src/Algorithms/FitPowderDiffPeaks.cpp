@@ -3102,7 +3102,7 @@ string getFunctionInfo(IFunction_sptr function) {
   outss << "Number of Parameters = " << numpars << '\n';
   for (size_t i = 0; i < numpars; ++i)
     outss << parnames[i] << " = " << function->getParameter(i)
-          << ", \t\tFitted = " << !function->isFixed(i) << '\n';
+          << ", \t\tFitted = " << function->isActive(i) << '\n';
 
   return outss.str();
 }

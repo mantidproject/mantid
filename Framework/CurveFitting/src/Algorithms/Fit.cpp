@@ -193,13 +193,13 @@ void Fit::createOutput() {
     size_t np = m_function->nParams();
     size_t ia = 0;
     for (size_t i = 0; i < np; i++) {
-      if (m_function->isFixed(i))
+      if (!m_function->isActive(i))
         continue;
       Mantid::API::TableRow row = covariance->appendRow();
       row << m_function->parameterName(i);
       size_t ja = 0;
       for (size_t j = 0; j < np; j++) {
-        if (m_function->isFixed(j))
+        if (!m_function->isActive(j))
           continue;
         if (j == i)
           row << 100.0;

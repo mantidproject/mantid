@@ -15,12 +15,6 @@ namespace {
 Kernel::Logger g_log("ParamFunction");
 }
 
-/// Destructor
-ParamFunction::~ParamFunction() {
-  m_ties.clear();
-  m_constraints.clear();
-}
-
 /** Sets a new value to the i-th parameter.
  *  @param i :: The parameter index
  *  @param value :: The new value
@@ -263,152 +257,10 @@ void ParamFunction::unfix(size_t i) {
   m_isFixed[i] = false;
 }
 
-/**
- * Attaches a tie to this ParamFunction. The attached tie is owned by the
- * ParamFunction.
- * @param tie :: A pointer to a new tie
- */
-void ParamFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-  size_t iPar = tie->getIndex();
-  bool found = false;
-  for (auto &m_tie : m_ties) {
-    if (m_tie->getIndex() == iPar) {
-      found = true;
-      m_tie = std::move(tie);
-      break;
-    }
-  }
-  if (!found) {
-    m_ties.push_back(std::move(tie));
-  }
-}
-
-/**
- * Apply the ties.
- */
-void ParamFunction::applyTies() {
-  for (auto &m_tie : m_ties) {
-    m_tie->eval();
-  }
-}
-
-/**
- * Used to find ParameterTie for a parameter i
- */
-class ReferenceEqual {
-  /// index to find
-  const size_t m_i;
-
-public:
-  /// Constructor
-  explicit ReferenceEqual(size_t i) : m_i(i) {}
-  /// Bracket operator
-  /// @param p :: the element you are looking for
-  /// @return True if found
-  template <class T> bool operator()(const std::unique_ptr<T> &p) {
-    return p->getIndex() == m_i;
-  }
-};
-
-/** Removes i-th parameter's tie if it is tied or does nothing.
- * @param i :: The index of the tied parameter.
- * @return True if successfull
- */
-bool ParamFunction::removeTie(size_t i) {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
-  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(i));
-  if (it != m_ties.end()) {
-    m_ties.erase(it);
-    unfix(i);
-    return true;
-  }
-  unfix(i);
-  return false;
-}
-
-/** Get tie of parameter number i
- * @param i :: The index of a declared parameter.
- * @return A pointer to the tie
- */
-ParameterTie *ParamFunction::getTie(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
-  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(i));
-  if (it != m_ties.cend()) {
-    return it->get();
-  }
-  return nullptr;
-}
-
-/** Remove all ties
- */
-void ParamFunction::clearTies() {
-  for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
-  }
-  m_ties.clear();
-}
-
-/** Add a constraint
- *  @param ic :: Pointer to a constraint.
- */
-void ParamFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
-  size_t iPar = ic->getIndex();
-  bool found = false;
-  for (auto &constraint : m_constraints) {
-    if (constraint->getIndex() == iPar) {
-      found = true;
-      constraint = std::move(ic);
-      break;
-    }
-  }
-  if (!found) {
-    m_constraints.push_back(std::move(ic));
-  }
-}
-
-/** Get constraint of parameter number i
- * @param i :: The index of a declared parameter.
- * @return A pointer to the constraint or NULL
- */
-IConstraint *ParamFunction::getConstraint(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
-  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
-                         ReferenceEqual(i));
-  if (it != m_constraints.cend()) {
-    return it->get();
-  }
-  return nullptr;
-}
-
-/** Remove a constraint
- * @param parName :: The name of a parameter which constarint to remove.
- */
-void ParamFunction::removeConstraint(const std::string &parName) {
-  size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getIndex()) {
-      m_constraints.erase(it);
-      break;
-    }
-  }
-}
-
-void ParamFunction::setUpForFit() {
-  for (auto &constraint : m_constraints) {
-    constraint->setParamToSatisfyConstraint();
-  }
-}
-
 /// Nonvirtual member which removes all declared parameters
 void ParamFunction::clearAllParameters() {
-  m_ties.clear();
-  m_constraints.clear();
+  clearTies();
+  clearConstraints();
   m_parameters.clear();
   m_parameterNames.clear();
   m_parameterDescriptions.clear();

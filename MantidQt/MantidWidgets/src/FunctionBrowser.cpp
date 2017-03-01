@@ -644,7 +644,7 @@ void FunctionBrowser::addAttributeAndParameterProperties(
       double value = fun->getParameter(i);
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
-      if (fun->isFixed(i)) {
+      if (!fun->isActive(i)) {
         auto tie = fun->getTie(i);
         if (tie) {
           addTieProperty(ap.prop, QString::fromStdString(tie->asString()));

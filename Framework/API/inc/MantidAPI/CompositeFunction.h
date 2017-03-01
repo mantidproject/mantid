@@ -130,8 +130,6 @@ public:
   std::string nameOfActive(size_t i) const override;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i) const override;
-  /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -149,11 +147,7 @@ public:
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
-  /// Add a new tie
-  void addTie(std::unique_ptr<ParameterTie> tie) override;
 
-  /// Overwrite IFunction methods
-  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter
   IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit

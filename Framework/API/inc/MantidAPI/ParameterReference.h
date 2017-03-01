@@ -5,14 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFunction.h"
-
-namespace mu {
-class Parser;
-}
 
 namespace Mantid {
 namespace API {
+class IFunction;
 /**
     A reference to a parameter in a function. To uniquely identify a parameter
     in a composite function
@@ -51,14 +47,14 @@ public:
   double getParameter() const;
   IFunction *getFunction() const;
   bool isDefault() const;
+  bool isParameterOf(const IFunction *fun) const;
   virtual ~ParameterReference() = default;
 
 private:
   IFunction *m_function; ///< pointer to the function
   std::size_t m_index;   ///< parameter index
   /// Flag to mark as default the value of an object associated with this
-  /// reference:
-  /// a tie or a constraint.
+  /// reference: a tie or a constraint.
   bool m_isDefault;
 };
 

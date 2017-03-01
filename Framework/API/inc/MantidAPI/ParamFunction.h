@@ -50,8 +50,6 @@ class MANTID_API_DLL ParamFunction : public virtual IFunction {
 public:
   /// Default constructor
   ParamFunction() {}
-  /// Virtual destructor
-  ~ParamFunction() override;
 
   /// Set i-th parameter
   void setParameter(size_t, const double &value,
@@ -98,29 +96,6 @@ public:
   /// Get the containing function
   IFunction_sptr getContainingFunction(IFunction_sptr fun);
 
-  /// Apply the ties
-  void applyTies() override;
-  /// Remove all ties
-  void clearTies() override;
-  void removeTie(const std::string &parName) override {
-    IFunction::removeTie(parName);
-  }
-  /// Removes i-th parameter's tie
-  bool removeTie(size_t i) override;
-  /// Get the tie of i-th parameter
-  ParameterTie *getTie(size_t i) const override;
-  /// Add a new tie
-  void addTie(std::unique_ptr<ParameterTie> tie) override;
-
-  /// Add a constraint to function
-  void addConstraint(std::unique_ptr<IConstraint> ic) override;
-  /// Get constraint of i-th parameter
-  IConstraint *getConstraint(size_t i) const override;
-  /// Remove a constraint
-  void removeConstraint(const std::string &parName) override;
-  /// Set parameters to satisfy constraints
-  void setUpForFit() override;
-
 protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
@@ -141,10 +116,6 @@ private:
   std::vector<double> m_parameters;
   /// Keeps parameter errors
   std::vector<double> m_errors;
-  /// Holds parameter ties as <parameter index,tie pointer>
-  std::vector<std::unique_ptr<ParameterTie>> m_ties;
-  /// Holds the constraints added to function
-  std::vector<std::unique_ptr<IConstraint>> m_constraints;
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
   /// parameter descriptions

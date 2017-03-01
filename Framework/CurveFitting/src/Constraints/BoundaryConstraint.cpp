@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
 #include <sstream>

@@ -7,7 +7,9 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/ParameterTie.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Unit.h"
 
@@ -33,9 +35,6 @@ class ProgressBase;
 namespace API {
 class Workspace;
 class MatrixWorkspace;
-class ParameterTie;
-class IConstraint;
-class ParameterReference;
 class FunctionHandler;
 
 /** This is an interface to a fitting function - a semi-abstarct class.
@@ -449,7 +448,7 @@ public:
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i) const;
   /// Check if an active parameter i is actually active
-  virtual bool isActive(size_t i) const { return !isFixed(i); }
+  virtual bool isActive(size_t i) const;
   //@}
 
   /** @name Ties */
@@ -460,17 +459,17 @@ public:
   /// Add several ties
   virtual void addTies(const std::string &ties, bool isDefault = false);
   /// Apply the ties
-  virtual void applyTies() = 0;
+  virtual void applyTies();
   /// Removes the tie off a parameter
   virtual void removeTie(const std::string &parName);
   /// Remove all ties
-  virtual void clearTies() = 0;
+  virtual void clearTies();
   /// Removes i-th parameter's tie
-  virtual bool removeTie(size_t i) = 0;
+  virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
-  virtual ParameterTie *getTie(size_t i) const = 0;
+  virtual ParameterTie *getTie(size_t i) const;
   /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(std::unique_ptr<ParameterTie> tie) = 0;
+  virtual void addTie(std::unique_ptr<ParameterTie> tie);
   /// Write a parameter tie to a string
   virtual std::string writeTie(size_t iParam) const;
   //@}
@@ -480,13 +479,15 @@ public:
   /// Add a list of conatraints from a string
   virtual void addConstraints(const std::string &str, bool isDefault = false);
   /// Add a constraint to function
-  virtual void addConstraint(std::unique_ptr<IConstraint> ic) = 0;
+  virtual void addConstraint(std::unique_ptr<IConstraint> ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint *getConstraint(size_t i) const = 0;
+  virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
-  virtual void removeConstraint(const std::string &parName) = 0;
+  virtual void removeConstraint(const std::string &parName);
   /// Write a parameter constraint to a string
   virtual std::string writeConstraint(size_t iParam) const;
+  /// Remove all constraints.
+  virtual void clearConstraints();
   //@}
 
   /** @name Attributes */
@@ -511,7 +512,7 @@ public:
   //@}
 
   /// Set up the function for a fit.
-  virtual void setUpForFit() = 0;
+  virtual void setUpForFit();
   /// Get number of values for a given domain.
   virtual size_t getValuesSize(const FunctionDomain &domain) const;
   /// Get number of domains required by this function
@@ -593,6 +594,10 @@ private:
   boost::shared_ptr<Kernel::Matrix<double>> m_covar;
   /// The chi-squared of the last fit
   double m_chiSquared;
+  /// Holds parameter ties as <parameter index,tie pointer>
+  std::vector<std::unique_ptr<ParameterTie>> m_ties;
+  /// Holds the constraints added to function
+  std::vector<std::unique_ptr<IConstraint>> m_constraints;
 };
 
 /// shared pointer to the function base class

@@ -334,16 +334,6 @@ std::string CompositeFunction::descriptionOfActive(size_t i) const {
  * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
-bool CompositeFunction::isActive(size_t i) const {
-  size_t iFun = functionIndex(i);
-  return m_functions[iFun]->isActive(i - m_paramOffsets[iFun]);
-}
-
-/**
- * query to see in the function is active
- * @param i :: The index of a declared parameter
- * @return true if parameter i is active
- */
 bool CompositeFunction::isFixed(size_t i) const {
   size_t iFun = functionIndex(i);
   return m_functions[iFun]->isFixed(i - m_paramOffsets[iFun]);
@@ -600,12 +590,14 @@ void CompositeFunction::applyTies() {
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->applyTies();
   }
+  IFunction::applyTies();
 }
 
 /**
  * Clear the ties.
  */
 void CompositeFunction::clearTies() {
+  IFunction::clearTies();
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->clearTies();
   }
@@ -616,9 +608,13 @@ void CompositeFunction::clearTies() {
  * @return True if successfull
  */
 bool CompositeFunction::removeTie(size_t i) {
-  size_t iFun = functionIndex(i);
-  bool res = m_functions[iFun]->removeTie(i - m_paramOffsets[iFun]);
-  return res;
+  bool foundAndRemovedTie = IFunction::removeTie(i);
+  if (!foundAndRemovedTie) {
+    size_t iFun = functionIndex(i);
+    bool res = m_functions[iFun]->removeTie(i - m_paramOffsets[iFun]);
+    return res;
+  }
+  return foundAndRemovedTie;
 }
 
 /** Get the tie of i-th parameter
@@ -626,18 +622,12 @@ bool CompositeFunction::removeTie(size_t i) {
  * @return A pointer to the tie.
  */
 ParameterTie *CompositeFunction::getTie(size_t i) const {
-  size_t iFun = functionIndex(i);
-  return m_functions[iFun]->getTie(i - m_paramOffsets[iFun]);
-}
-
-/**
- * Attaches a tie to this function. The attached tie is owned by the function.
- * @param tie :: A pointer to a new tie
- */
-void CompositeFunction::addTie(std::unique_ptr<ParameterTie> tie) {
-  size_t i = getParameterIndex(*tie);
-  size_t iFun = functionIndex(i);
-  m_functions[iFun]->addTie(std::move(tie));
+  auto tie = IFunction::getTie(i);
+  if (tie == nullptr) {
+    size_t iFun = functionIndex(i);
+    tie = m_functions[iFun]->getTie(i - m_paramOffsets[iFun]);
+  }
+  return tie;
 }
 
 /**
@@ -656,19 +646,11 @@ void CompositeFunction::declareParameter(const std::string &name,
       "CompositeFunction cannot not have its own parameters.");
 }
 
-/** Add a constraint
- *  @param ic :: Pointer to a constraint.
- */
-void CompositeFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
-  size_t i = getParameterIndex(*ic);
-  size_t iFun = functionIndex(i);
-  getFunction(iFun)->addConstraint(std::move(ic));
-}
-
 /**
  * Prepare the function for a fit.
  */
 void CompositeFunction::setUpForFit() {
+  IFunction::setUpForFit();
   // set up the member functions
   for (size_t i = 0; i < nFunctions(); i++) {
     getFunction(i)->setUpForFit();
@@ -706,17 +688,27 @@ void CompositeFunction::setUpForFit() {
 /// @param i :: the index
 /// @return A pointer to the constraint
 IConstraint *CompositeFunction::getConstraint(size_t i) const {
-  size_t iFun = functionIndex(i);
-  return m_functions[iFun]->getConstraint(i - m_paramOffsets[iFun]);
+  auto constraint = IFunction::getConstraint(i);
+  if (constraint == nullptr) {
+    size_t iFun = functionIndex(i);
+    constraint = m_functions[iFun]->getConstraint(i - m_paramOffsets[iFun]);
+  }
+  return constraint;
 }
 
 /** Remove a constraint
  * @param parName :: The name of a parameter which constarint to remove.
  */
 void CompositeFunction::removeConstraint(const std::string &parName) {
-  size_t iPar = parameterIndex(parName);
-  size_t iFun = functionIndex(iPar);
-  getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
+  auto i = parameterIndex(parName);
+  auto constraint = IFunction::getConstraint(i);
+  if (constraint != nullptr) {
+    IFunction::removeConstraint(parName);
+  } else {
+    size_t iPar = parameterIndex(parName);
+    size_t iFun = functionIndex(iPar);
+    getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
+  }
 }
 
 /** Checks if a constraint has been explicitly set

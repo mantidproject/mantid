@@ -170,108 +170,17 @@ FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
   return m_target->getParameterIndex(ref) + m_nOwnParams;
 }
 
-/// Tie a parameter to other parameters (or a constant)
-void FunctionGenerator::tie(const std::string &parName, const std::string &expr,
-                            bool isDefault) {
-  if (isSourceName(parName)) {
-    m_source->tie(parName, expr, isDefault);
-  } else {
-    checkTargetFunction();
-    m_target->tie(parName, expr, isDefault);
-  }
-}
-
-/// Apply the ties
-void FunctionGenerator::applyTies() {
-  m_source->applyTies();
-  updateTargetFunction();
-  if (m_target) {
-    m_target->applyTies();
-  }
-}
-
-/// Remove all ties
-void FunctionGenerator::clearTies() {
-  m_source->clearTies();
-  if (m_target) {
-    m_target->clearTies();
-  }
-}
-
-/// Removes i-th parameter's tie
-bool FunctionGenerator::removeTie(size_t i) {
-  if (i < m_nOwnParams) {
-    return m_source->removeTie(i);
-  } else {
-    checkTargetFunction();
-    return m_target->removeTie(i - m_nOwnParams);
-  }
-}
-
-/// Get the tie of i-th parameter
-ParameterTie *FunctionGenerator::getTie(size_t i) const {
-  if (i < m_nOwnParams) {
-    return m_source->getTie(i);
-  } else {
-    checkTargetFunction();
-    return m_target->getTie(i - m_nOwnParams);
-  }
-}
-
-/// Add a constraint to function
-void FunctionGenerator::addConstraint(std::unique_ptr<API::IConstraint> ic) {
-  auto i = ic->getIndex();
-  if (i < m_nOwnParams) {
-    ic->reset(m_source.get(), i);
-    m_source->addConstraint(std::move(ic));
-  } else {
-    checkTargetFunction();
-    //ic->reset(m_target.get(), i - m_nOwnParams);
-    m_target->addConstraint(std::move(ic));
-  }
-}
-
-/// Get constraint of i-th parameter
-IConstraint *FunctionGenerator::getConstraint(size_t i) const {
-  if (i < m_nOwnParams) {
-    return m_source->getConstraint(i);
-  } else {
-    checkTargetFunction();
-    return m_target->getConstraint(i - m_nOwnParams);
-  }
-}
-
-/// Remove a constraint
-void FunctionGenerator::removeConstraint(const std::string &parName) {
-  if (isSourceName(parName)) {
-    m_source->removeConstraint(parName);
-  } else {
-    checkTargetFunction();
-    m_target->removeConstraint(parName);
-  }
-}
-
 /// Set up the function for a fit.
-void FunctionGenerator::setUpForFit() { updateTargetFunction(); }
+void FunctionGenerator::setUpForFit() {
+  updateTargetFunction();
+  IFunction::setUpForFit();
+}
 
 /// Declare a new parameter
 void FunctionGenerator::declareParameter(const std::string &, double,
                                          const std::string &) {
   throw Kernel::Exception::NotImplementedError(
       "FunctionGenerator cannot not have its own parameters.");
-}
-
-/// Add a new tie. Derived classes must provide storage for ties
-void FunctionGenerator::addTie(std::unique_ptr<API::ParameterTie> tie) {
-  size_t i = getParameterIndex(*tie);
-  if (i < m_nOwnParams) {
-    m_source->addTie(std::move(tie));
-  } else {
-    checkTargetFunction();
-    tie->reset(m_target.get(), tie->getIndex() - m_nOwnParams,
-               tie->isDefault());
-    m_target->addTie(std::move(tie));
-  }
 }
 
 /// Returns the number of attributes associated with the function
