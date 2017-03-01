@@ -9,9 +9,9 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Crystal {
 
-namespace {
+namespace CalibrationHelpers {
+
 constexpr double RAD_TO_DEG = 180. / M_PI;
-}
 
 /**
  * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,
@@ -21,7 +21,7 @@ constexpr double RAD_TO_DEG = 180. / M_PI;
  * @param Roty The angle in degrees for rotating around the y-axis
  * @param Rotz The angle in degrees for rotating around the z-axis
  */
-void CalibrationHelpers::quatToRotxRotyRotz(const Quat Q, double &Rotx,
+void quatToRotxRotyRotz(const Quat Q, double &Rotx,
                                             double &Roty, double &Rotz) {
   Quat R(Q);
   R.normalize();
@@ -64,7 +64,7 @@ void CalibrationHelpers::quatToRotxRotyRotz(const Quat Q, double &Rotx,
  * @param newSampPos The relative shift for the new sample position
  * @param detectorInfo DetectorInfo for the workspace being updated
  */
-void CalibrationHelpers::fixUpSampleAndSourcePositions(
+void fixUpSampleAndSourcePositions(
     boost::shared_ptr<const Instrument> newInstrument, double const L0,
     const V3D newSampPos, DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument->getParameterMap();
@@ -108,7 +108,7 @@ void CalibrationHelpers::fixUpSampleAndSourcePositions(
  *rotation of panels around their center
  * @param detectorInfo DetectorInfo object for the
  */
-void CalibrationHelpers::fixUpBankPositionsAndSizes(
+void fixUpBankPositionsAndSizes(
     const std::vector<std::string> bankNames,
     boost::shared_ptr<const Instrument> newInstrument, const V3D pos,
     const Quat rot, double const detWScale, double const detHtScale,
@@ -161,5 +161,6 @@ void CalibrationHelpers::fixUpBankPositionsAndSizes(
   }
 }
 
+} // namespace CalibrationHelpers
 } // namespace Crystal
 } // namespace Mantid

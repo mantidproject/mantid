@@ -7,7 +7,9 @@
 namespace Mantid {
 namespace Crystal {
 
-/** CalibrationHelpers : TODO: DESCRIPTION
+/** CalibrationHelpers : This contains helper methods to move source, sample and
+  detector positions/rotations for an instrument according to some calibration
+  information.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,24 +32,24 @@ namespace Crystal {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalibrationHelpers {
-public:
-  static void quatToRotxRotyRotz(const Kernel::Quat Q, double &Rotx,
-                                 double &Roty, double &Rotz);
+namespace CalibrationHelpers {
 
-  static void fixUpSampleAndSourcePositions(
-      boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      double const L0, Kernel::V3D const newSampPos,
-      API::DetectorInfo &detectorInfo);
+DLLExport void quatToRotxRotyRotz(const Kernel::Quat Q, double &Rotx,
+                               double &Roty, double &Rotz);
 
-  static void fixUpBankPositionsAndSizes(
-      std::vector<std::string> const bankNames,
-      boost::shared_ptr<const Geometry::Instrument> newInstrument,
-      Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
-      double const detHtScale, bool rotCenters,
-      API::DetectorInfo &detectorInfo);
-};
+DLLExport void fixUpSampleAndSourcePositions(
+    boost::shared_ptr<const Geometry::Instrument> newInstrument,
+    double const L0, Kernel::V3D const newSampPos,
+    API::DetectorInfo &detectorInfo);
 
+DLLExport void fixUpBankPositionsAndSizes(
+    std::vector<std::string> const bankNames,
+    boost::shared_ptr<const Geometry::Instrument> newInstrument,
+    Kernel::V3D const pos, Kernel::Quat const rot, double const detWScale,
+    double const detHtScale, bool rotCenters,
+    API::DetectorInfo &detectorInfo);
+
+} // namespace CalibrationHelpers
 } // namespace Crystal
 } // namespace Mantid
 

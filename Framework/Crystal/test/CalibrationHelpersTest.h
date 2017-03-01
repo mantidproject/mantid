@@ -12,8 +12,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Crystal::CalibrationHelpers;
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
