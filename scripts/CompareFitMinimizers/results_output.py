@@ -441,8 +441,8 @@ def format_cell_value_rst(value, width=None, color_scale=None, items_link=None):
             color = color_scale[-1][1]
         value_text = " :{0}:`{1:.4g}`".format(color, value)
 
-    if width:
-        value_text.ljust(width, ' ')
+    if width is not None:
+        value_text = value_text.ljust(width, ' ')
 
     return value_text
 
