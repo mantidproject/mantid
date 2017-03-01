@@ -642,6 +642,32 @@ public:
     }
   }
 
+  void testMinimumXUsedIfRangeLowerNotGiven() {
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "testSpace"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", 4.0))
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get back the saved workspace
+    Workspace2D_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<Workspace2D>("out"));
+    TS_ASSERT_EQUALS(output->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS(output->blocksize(), 1)
+    const std::array<double, 5> correctAnswers{{6, 26, 46, 66, 86}};
+    for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(output->x(i)[0], 0)
+      TS_ASSERT_EQUALS(output->x(i)[1], 4)
+      TS_ASSERT_EQUALS(output->y(i)[0], correctAnswers[i])
+      TS_ASSERT_DELTA(output->e(i)[0], std::sqrt(correctAnswers[i]), 1e-7)
+    }
+  }
+
 private:
   void assertRangeWithPartialBins(Workspace_sptr input) {
     Integration alg;

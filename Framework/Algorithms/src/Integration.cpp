@@ -79,6 +79,9 @@ void Integration::exec() {
 
   /// The value in X to start the integration from
   double minRange = getProperty("RangeLower");
+  if (isEmpty(minRange)) {
+    minRange = std::numeric_limits<double>::lowest();
+  }
   /// The value in X to finish the integration at
   double maxRange = getProperty("RangeUpper");
   /// The spectrum to start the integration from
@@ -140,7 +143,7 @@ void Integration::exec() {
     }
     // Get the eventworkspace rebinned to apply the upper and lowerrange
     double evntMinRange =
-        isEmpty(minRange) ? eventInputWS->getEventXMin() : minRange;
+        std::max(minRange, eventInputWS->getEventXMin());
     double evntMaxRange =
         isEmpty(maxRange) ? eventInputWS->getEventXMax() : maxRange;
     localworkspace =
