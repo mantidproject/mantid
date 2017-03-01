@@ -269,31 +269,29 @@ def display_name_for_minimizers(names):
     return display_names
 
 
-def calc_cell_len_rst_table(columns_txt, items_link):
+def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     """
     Calculate what width in ascii characters we need for an RST table.
 
     @param columns_txt :: list of the contents of the column headers
+    @param items_link :: the test names used for summary tables
+    @param cells :: the values of the results
+    @param color_scale :: whether a color_scale is used or not
     """
-    # One length for all cells
-    cell_len = 50
-    cell_len = 0
-    for col in columns_txt:
-        new_len = len(col) + 2
-        if new_len > cell_len:
-            cell_len = new_len
 
-    # Beware of the long links
-    links_len = 0
-    if items_link and isinstance(items_link, list):
-        links_len = max([len(item) for item in items_link])
-    elif items_link:
-        links_len = len(items_link)
-
-    additional_len = 0
-    if items_link:
-        additional_len = links_len
-    cell_len += int(additional_len/1.2)
+    # The length of the longest header (minimizer name)
+    max_header = len(max(col for col in columns_txt))
+    # The value of the longest (once formatted) value in the table
+    max_value = max(("%.4g" % cell for cell in np.nditer(cells)), key=len)
+    # The length of the longest link reference (angular bracket content present in summary tables)
+    max_item = max(items_link, key=len) if isinstance(items_link, list) else items_link
+    # One space on each end of a cell
+    padding = 2
+    # Set cell length equal to the length of: the longest combination of value, test name, and colour (plus padding)
+    cell_len = len(format_cell_value_rst(float(max_value), 0, color_scale, max_item).strip()) + padding
+    # If the header is longer than any cell's contents, i.e. is a group results table, use that length instead
+    if cell_len < max_header:
+        cell_len = max_header
 
     return cell_len
 
@@ -324,7 +322,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
 
     items_link = build_items_links(comparison_type, comparison_dim, using_errors)
 
-    cell_len = calc_cell_len_rst_table(columns_txt, items_link)
+    cell_len = calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale)
 
     # The first column tends to be disproportionately long if it has a link
     first_col_len = calc_first_col_len(cell_len, rows_txt)
