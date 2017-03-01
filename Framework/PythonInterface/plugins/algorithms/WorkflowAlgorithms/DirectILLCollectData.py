@@ -8,7 +8,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, IntMandatoryValidator, Property, StringArrayProperty, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateSingleValuedWorkspace, 
-                              ExtractMonitors, FindEPP, GetEiMonDet, Load, MaskDetectors, MergeRuns, Minus, NormaliseToMonitor,
+                              CropWorkspace, ExtractMonitors, FindEPP, GetEiMonDet, Load, MaskDetectors, MergeRuns, Minus, NormaliseToMonitor,
                               Scale)
 
 
@@ -87,6 +87,13 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
                                     NullifyNegativeValues=False,
                                     AveragingWindowWidth=windowWidth,
                                     EnableLogging=algorithmLogging)
+    firstBinStart = bkgWS.dataX(0)[0]
+    firstBinEnd = bkgWS.dataX(0)[1]
+    bkgWS = CropWorkspace(InputWorkspace=bkgWS,
+                          OutputWorkspace=bkgWS,
+                          XMin=firstBinStart,
+                          XMax=firstBinEnd,
+                          EnableLogging=algorithmLogging)
     return bkgWS
 
 
