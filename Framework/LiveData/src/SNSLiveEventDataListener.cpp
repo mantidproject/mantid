@@ -88,7 +88,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   int keepPausedEvents;
   if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
                                          keepPausedEvents)) {
-    m_keepPausedEvents = bool(keepPausedEvents);
+    m_keepPausedEvents = (keepPausedEvents != 0);
   } else {
     // If the property hasn't been set, assume false
     m_keepPausedEvents = false;
