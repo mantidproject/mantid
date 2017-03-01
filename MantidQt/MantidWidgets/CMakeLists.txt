@@ -14,7 +14,6 @@ set ( SRC_FILES
 	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorWhiteList.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
-	src/DataProcessorUI/ReflDataProcessorPresenter.cpp
 	src/DataProcessorUI/ParseKeyValueString.cpp
 	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp

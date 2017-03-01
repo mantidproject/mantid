@@ -6,6 +6,10 @@
 #include <gtest/gtest.h>
 
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
+#include "MantidAPI/FrameworkManager.h"
+
+using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
@@ -22,6 +26,8 @@ public:
   }
 
   ReflDataProcessorPresenterTest() { FrameworkManager::Instance(); }
+
+  void test_something() {}
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLDATAPROCESSORPRESENTERTEST_H */
