@@ -32,14 +32,13 @@ public:
     const auto wsOld =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1000,
                                                                      true);
-    auto wsNew = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        2, 1000, true);
+    wsNew = wsOld->clone();
 
     const auto &positionSampleOld = wsOld->detectorInfo().samplePosition();
     const auto &positionSourceOld = wsOld->detectorInfo().sourcePosition();
 
     const auto &instNew = wsNew->getInstrument();
-    const double l1 = 10.0;
+    const double l1 = wsOld->detectorInfo().l1() - 1.23;
     const double newZ = 3.0;
     const auto &positionSampleNew = V3D(1.0, 2.0, newZ);
     const auto &positionSourceNew = V3D(1.0, 2.0, newZ - l1);
@@ -69,11 +68,13 @@ public:
     // Make a second move - here the old and new workspaces have different
     // positions
 
+    const auto &instNew2 = wsNew->getInstrument();
+
     auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         2, 1000, true);
     const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
     CalibrationHelpers::adjustUpSampleAndSourcePositions(
-        *instNew, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
+        *instNew2, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
 
     TS_ASSERT_EQUALS(wsNew2->detectorInfo().samplePosition(),
                      positionSampleOld);
@@ -251,8 +252,7 @@ private:
   void setUpFixUpBankParameterMap() {
     wsOld = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
         3, 3, 3);
-    wsNew = WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(
-        3, 3, 3);
+    wsNew = wsOld->clone();
 
     const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
