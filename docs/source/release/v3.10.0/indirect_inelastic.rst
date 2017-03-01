@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- *EnergyWindowScan* has been renamed to :ref:`IndirectReductionAndAnalysis <algm-IndirectReductionAndAnalysis>`
+- An option for Diffraction Reduction has been added to :ref:`IndirectReductionAndAnalysis <algm-IndirectReductionAndAnalysis>`
 - A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
 - :ref:`LoadVesuvio <algm-LoadVesuvio> can now load NeXus files as well as raw files
 

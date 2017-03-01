@@ -30,7 +30,6 @@ set ( TEST_PY_FILES
   DNSMergeRunsTest.py
   DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
-  EnergyWindowScanTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
   EnggFitDIFCFromPeaksTest.py
@@ -54,6 +53,7 @@ set ( TEST_PY_FILES
   IndirectAnnulusAbsorption2Test.py
   IndirectCylinderAbsorption2Test.py
   IndirectFlatPlateAbsorption2Test.py
+  IndirectReductionAndAnalysisTest.py
   IndirectILLEnergyTransferTest.py
   IndirectILLReductionTest.py
   IndirectILLReductionFWSTest.py

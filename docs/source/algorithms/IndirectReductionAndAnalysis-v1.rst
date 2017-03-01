@@ -24,9 +24,9 @@ Usage
 
 .. code-block:: python
 
-    EnergyWindowScan(InputFiles="IRS21360.RAW", Instrument='IRIS', Analyser='graphite',
-                             Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
-                             InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
+    IndirectReductionAndAnalysis(InputFiles="IRS21360.RAW", Instrument='IRIS', Analyser='graphite',
+                                 Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
+                                 InelasticRange='0, 0.5', GroupingMethod='Individual', MSDFit=True)
 
 .. categories::
 
