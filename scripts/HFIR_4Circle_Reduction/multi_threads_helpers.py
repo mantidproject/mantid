@@ -239,7 +239,7 @@ class IntegratePeaksThread(QThread):
             # check given mask workspace
             if self._maskDetector:
                 self._mainWindow.controller.check_generate_mask_workspace(self._expNumber, scan_number,
-                                                                          self._selectedMaskName)
+                                                                          self._selectedMaskName, check_throw=True)
 
             bkgd_pt_list = (self._numBgPtLeft, self._numBgPtRight)
             # integrate peak
@@ -257,11 +257,15 @@ class IntegratePeaksThread(QThread):
             except ValueError as val_err:
                 status = False
                 ret_obj = 'Unable to integrate scan {0} due to {1}.'.format(scan_number, str(val_err))
+            except RuntimeError as run_err:
+                status = False
+                ret_obj = 'Unable to integrate scan {0}: {1}.'.format(scan_number, run_err)
 
             # handle integration error
             if status:
                 # get PT dict
                 pt_dict = ret_obj
+                assert isinstance(pt_dict, dict), 'dictionary must'
                 self.set_integrated_peak_info(scan_number, pt_dict)
                 # information setup include
                 # - lorentz correction factor
@@ -321,7 +325,7 @@ class IntegratePeaksThread(QThread):
         lorentz_factor = peak_integration_utility.calculate_lorentz_correction_factor(peak_center_q, wavelength,
                                                                                       motor_step)
 
-        peak_info_obj.lorentz_factor = lorentz_factor
+        peak_info_obj.lorentz_correction_factor = lorentz_factor
         # set motor
         peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
         # set peak integration dictionary

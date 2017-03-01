@@ -9,6 +9,7 @@ set( UI_FILES
   SpiceViewerDialog.ui
   UBSelectPeaksDialog.ui
   AddUBPeaksDialog.ui
+  PeakIntegrationSpreadSheet.ui
 )
 
 UiToPy( UI_FILES CompileUIHFIR_4Circle_Reduction)

@@ -91,6 +91,13 @@ class NTableWidget(QtGui.QTableWidget):
 
         return
 
+    def export_table_csv(self, csv_file_name):
+        """
+
+        :return:
+        """
+        # FIXME/ISSUE/TODO/NOW/NOW - implement above
+
     def get_cell_value(self, row_index, col_index):
         """
         Purpose: Get cell value

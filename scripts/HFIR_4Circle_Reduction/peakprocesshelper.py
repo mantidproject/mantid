@@ -48,8 +48,7 @@ class PeakProcessRecord(object):
 
         self._myLastPeakUB = None
 
-        self._myIntensity = 0.
-        self._mySigma = 0.
+        self._myIntensity = None
         self._gaussIntensity = 0.
         self._gaussStdDev = 0.
         self._lorenzFactor = None
@@ -130,15 +129,22 @@ class PeakProcessRecord(object):
         :return:
         """
         # check
-        if self._integrationDict is None:
+        if self._integrationDict is None and self._myIntensity is None:
             raise RuntimeError('PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup.'
                                ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))))
+        elif self._myIntensity is not None:
+            # return ZERO intensity due to previously found error
+            return self._myIntensity, 0.
 
         try:
             if algorithm_type == 0 or algorithm_type.startswith('simple'):
                 # simple
                 intensity = self._integrationDict['simple intensity']
                 std_dev = self._integrationDict['simple error']
+            elif algorithm_type == 1 or algorithm_type.count('mixed') > 0:
+                # intensity 2: mixed simple and gaussian
+                intensity = self._integrationDict['intensity 2']
+                std_dev = self._integrationDict['error 2']
             elif algorithm_type == 2 or algorithm_type.count('gauss') > 0:
                 # gaussian
                 intensity = self._integrationDict['gauss intensity']
@@ -150,9 +156,12 @@ class PeakProcessRecord(object):
                       ''.format(self._integrationDict.keys(), key_err)
             raise RuntimeError(err_msg)
 
-        if lorentz_corrected:
-            intensity *= lorentz_corrected
-            std_dev *= lorentz_corrected
+        if intensity is None:
+            intensity = 0.
+            std_dev = 0.
+        elif lorentz_corrected:
+            intensity *= self._lorenzFactor
+            std_dev *= self._lorenzFactor
 
         return intensity, std_dev
 
@@ -198,12 +207,6 @@ class PeakProcessRecord(object):
             ret_hkl = self._spiceHKL
 
         return ret_hkl
-
-    def get_sigma(self):
-        """ Get peak intensity's sigma
-        :return:
-        """
-        return self._mySigma
 
     def get_experiment_info(self):
         """
@@ -269,6 +272,9 @@ class PeakProcessRecord(object):
         """
         assert isinstance(factor, float), 'Lorentz correction factor'
         self._lorenzFactor = factor
+
+        print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
+              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
 
         return
 
@@ -408,10 +414,19 @@ class PeakProcessRecord(object):
             'Integrated peak information {0} must be given by a dictionary but not a {1}.' \
             ''.format(peak_integration_dict, type(peak_integration_dict))
 
-        print '[DB...BAT] Exp {0} Scan {1}  ({2}) has integrated dictionary set up.' \
-              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint)
+        print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has integrated dictionary set up.' \
+              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
 
         self._integrationDict = peak_integration_dict
+
+        return
+
+    def set_intensity_to_zero(self):
+        """
+        if peak integration is wrong, then set the intensity to zero
+        :return:
+        """
+        self._myIntensity = -0.
 
         return
 
@@ -424,16 +439,6 @@ class PeakProcessRecord(object):
         assert isinstance(pt_intensity_dict, dict)
 
         self._ptIntensityDict = pt_intensity_dict
-
-        return
-
-    def set_sigma(self, sigma):
-        """ set peak intensity's sigma
-        :return:
-        """
-        assert isinstance(sigma, float) and sigma > -0.
-
-        self._mySigma = sigma
 
         return
 

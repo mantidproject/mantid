@@ -175,11 +175,8 @@ def find_gaussian_start_values_by_observation(vec_x, vec_y):
     :return: must be the same order as gaussian linear background function as x0, sigma, a, b
     """
     # assume that it is a quasi-ideal Gaussian
-    print '[DB] Observation: vec x = ', vec_x, '; vec y = ', vec_y
-
     # find out the maximum Y with x
     max_y_index = vec_y.argmax()
-    print '[DB] max Y index = ', max_y_index
 
     x0 = vec_x[max_y_index]
     max_y = vec_y[max_y_index]
@@ -342,6 +339,9 @@ def get_motor_step_for_intensity(motor_pos_dict):
     # get Pt list
     pt_list = motor_pos_dict.keys()
     pt_list.sort()
+    if len(pt_list) < 2:
+        raise RuntimeError('Motor position dictionary has too few Pt (FYI: Motor positions: {0}'
+                           ''.format(motor_pos_dict))
 
     # get step dictionary
     motor_step_dict = dict()
@@ -669,14 +669,19 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     # END-DEF: create_peak_integration_dict()
 
     # integrate the peak in MD workspace
-    status, ret_obj = integrate_single_scan_peak(merged_scan_workspace_name=scan_md_ws_name,
-                                                 integrated_peak_ws_name=output_peak_ws_name,
-                                                 peak_radius=1.0,
-                                                 peak_centre=peak_center,
-                                                 merge_peaks=False,
-                                                 mask_ws_name=mask_workspace_name,
-                                                 normalization=norm_type,
-                                                 scale_factor=intensity_scale_factor)
+    try:
+        status, ret_obj = integrate_single_scan_peak(merged_scan_workspace_name=scan_md_ws_name,
+                                                     integrated_peak_ws_name=output_peak_ws_name,
+                                                     peak_radius=1.0,
+                                                     peak_centre=peak_center,
+                                                     merge_peaks=False,
+                                                     mask_ws_name=mask_workspace_name,
+                                                     normalization=norm_type,
+                                                     scale_factor=intensity_scale_factor)
+    except RuntimeError as run_err:
+        raise RuntimeError('Failed to integrate peak at {0} due to {1}'.format(scan_md_ws_name, run_err))
+    except Exception as run_err:
+        raise RuntimeError('Failed (2) to integrate peak at {0} due to {1}'.format(scan_md_ws_name, run_err))
 
     # result due to error
     if status is False:
@@ -700,7 +705,10 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['pt intensities'] = pt_intensity_vec
 
     # get motor step per pt.
-    motor_step_dict = get_motor_step_for_intensity(motor_pos_dict)
+    try:
+        motor_step_dict = get_motor_step_for_intensity(motor_pos_dict)
+    except RuntimeError as run_err:
+        raise RuntimeError('Unable to integrate workspace {0} due to {1}.'.format(scan_md_ws_name, run_err))
 
     # calculate the intensity with background removed and correct intensity by background value
     averaged_background = estimate_background(integrated_pt_dict, background_pt_tuple)
@@ -717,8 +725,8 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     peak_int_dict['gauss errors'] = errors
     peak_int_dict['covariance matrix'] = covariance_matrix
 
-    if covariance_matrix is None:
-        # gaussian fit fails
+    if covariance_matrix is None or parameters['B'] < 0.:
+        # gaussian fit fails or output result is not correct
         peak_int_dict['intensity 2'] = None
         peak_int_dict['error 2'] = None
 
@@ -744,8 +752,6 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
         intensity_gauss, intensity_gauss_error = gaussian_peak_intensity(parameters, errors)
         peak_int_dict['gauss intensity'] = intensity_gauss
         peak_int_dict['gauss error'] = intensity_gauss_error
-
-        print '[DB...BATBAT] Gaussian error = ', intensity_gauss_error
     # END-IF-ELSE
 
     return peak_int_dict

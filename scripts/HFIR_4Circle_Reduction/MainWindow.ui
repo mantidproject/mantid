@@ -168,7 +168,7 @@
            <bool>true</bool>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>5</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -3387,6 +3387,100 @@ p, li { white-space: pre-wrap; }
             </item>
             <item row="1" column="0">
              <layout class="QGridLayout" name="gridLayout_10">
+              <item row="0" column="3">
+               <widget class="QLabel" name="label_peakIndexType">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Peaks indexed by</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="9">
+               <widget class="QLabel" name="label_30">
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Scans List</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="5">
+               <spacer name="horizontalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="10">
+               <widget class="QLineEdit" name="lineEdit_listScansSliceView">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans excpet 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="7">
+               <widget class="QPushButton" name="pushButton_showIntegrateDetails">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show Integrate Details</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="8">
+               <spacer name="horizontalSpacer_39">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="0" column="6">
+               <widget class="QPushButton" name="pushButton_showUB">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Show UB Matrix</string>
+                </property>
+               </widget>
+              </item>
               <item row="0" column="0">
                <widget class="QLabel" name="label_29">
                 <property name="font">
@@ -3415,97 +3509,10 @@ p, li { white-space: pre-wrap; }
                 </property>
                </spacer>
               </item>
-              <item row="0" column="5">
-               <widget class="QPushButton" name="pushButton_showUB">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Show UB Matrix</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="9">
-               <widget class="QLineEdit" name="lineEdit_listScansSliceView">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;List of scans and possibly Pt numbers.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 1:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304&lt;/p&gt;&lt;p&gt;It will integrate all Pts. in each scan&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 2:&lt;/p&gt;&lt;p&gt;123 (1, 2, 3, 4-10), 125-130, &lt;/p&gt;&lt;p&gt;It will integrate all Pts. in all scans excpet 123, which will have a selected few to be integrated&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Example 3:&lt;/p&gt;&lt;p&gt;123, 125-130, 301, 304 | 1, 2, 3-9&lt;/p&gt;&lt;p&gt;It will integrate selected Pts. in the previous one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="7">
-               <spacer name="horizontalSpacer_39">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Preferred</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLabel" name="label_peakIndexType">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Peaks indexed by</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="8">
-               <widget class="QLabel" name="label_30">
-                <property name="maximumSize">
-                 <size>
-                  <width>100</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Scans List</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="4">
-               <spacer name="horizontalSpacer_10">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Preferred</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="0" column="6">
-               <widget class="QPushButton" name="pushButton_showIntegrateDetails">
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                 </font>
-                </property>
+               <widget class="QLabel" name="label_peaksIndexedBy">
                 <property name="text">
-                 <string>Show Integrate Details</string>
+                 <string/>
                 </property>
                </widget>
               </item>
@@ -3605,6 +3612,34 @@ p, li { white-space: pre-wrap; }
                  <string>Toggle Int Type</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_exportSelectedPeaks">
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Export Selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_24">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Preferred</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
               <item>
                <widget class="Line" name="line_8">

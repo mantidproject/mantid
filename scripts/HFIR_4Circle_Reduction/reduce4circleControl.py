@@ -626,49 +626,67 @@ class CWSCDReductionControl(object):
         assert len(scan_kindex_dict) == 0 or len(scan_kindex_dict) >= len(scan_number_list), error_message
 
         # form peaks
-        peaks = list()
         no_shift = len(scan_kindex_dict) == 0
 
         # get ub matrix
         ub_matrix = self.get_ub_matrix(exp_number)
 
-        for scan_number in scan_number_list:
-            peak_dict = dict()
+        for algorithm_type in ['simple', 'mixed', 'gauss']:
+            # set list of peaks for exporting
+            peaks = list()
+            for scan_number in scan_number_list:
+                peak_dict = dict()
+                try:
+                    peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)].get_hkl(user_hkl=True)
+                except RuntimeError as run_err:
+                    return False, str('Peak index error: %s.' % run_err)
+
+                intensity, std_dev = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity(
+                    algorithm_type, lorentz_corrected=True)
+
+                if intensity < std_dev:
+                    # error is huge, very likely bad gaussian fit
+                    print '[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} Excluded from exporting.' \
+                          ''.format(algorithm_type, scan_number, intensity, std_dev)
+                    continue
+                # END-IF
+
+                peak_dict['intensity'] = intensity
+                peak_dict['sigma'] = std_dev
+                if no_shift:
+                    peak_dict['kindex'] = 0
+                else:
+                    peak_dict['kindex'] = scan_kindex_dict[scan_number]
+
+                if export_absorption:
+                    # calculate absorption correction
+                    import absorption
+
+                    spice_ub = convert_mantid_ub_to_spice(ub_matrix)
+                    up_cart, us_cart = absorption.calculate_absorption_correction_2(
+                        exp_number, scan_number, spice_ub)
+                    peak_dict['up'] = up_cart
+                    peak_dict['us'] = us_cart
+
+                # append peak (in dict) to peaks
+                peaks.append(peak_dict)
+            # END-FOR (scan_number)
+
+            # get file name for this type
+            this_file_name = fullprof_file_name.split('.')[0] + '_' + algorithm_type + '.dat'
+
             try:
-                peak_dict['hkl'] = self._myPeakInfoDict[(exp_number, scan_number)]. get_hkl(user_hkl=True)
-            except RuntimeError as run_err:
-                return False, str('Peak index error: %s.' % run_err)
+                file_content = fputility.write_scd_fullprof_kvector(
+                    user_header=user_header, wave_length=exp_wave_length,
+                    k_vector_dict=k_shift_dict, peak_dict_list=peaks,
+                    fp_file_name=this_file_name, with_absorption=export_absorption)
+            except AssertionError as error:
+                return False, 'AssertionError: %s.' % str(error)
+            except RuntimeError as error:
+                return False, 'RuntimeError: %s.' % str(error)
 
-            peak_dict['intensity'] = self._myPeakInfoDict[(exp_number, scan_number)].get_intensity()
-            peak_dict['sigma'] = self._myPeakInfoDict[(exp_number, scan_number)].get_sigma()
-            if no_shift:
-                peak_dict['kindex'] = 0
-            else:
-                peak_dict['kindex'] = scan_kindex_dict[scan_number]
-
-            if export_absorption:
-                # calculate absorption correction
-                import absorption
-
-                spice_ub = convert_mantid_ub_to_spice(ub_matrix)
-                up_cart, us_cart = absorption.calculate_absorption_correction_2(
-                    exp_number, scan_number, spice_ub)
-                peak_dict['up'] = up_cart
-                peak_dict['us'] = us_cart
-
-            # append peak (in dict) to peaks
-            peaks.append(peak_dict)
-        # END-FOR (scan_number)
-
-        try:
-            file_content = fputility.write_scd_fullprof_kvector(
-                user_header=user_header, wave_length=exp_wave_length,
-                k_vector_dict=k_shift_dict, peak_dict_list=peaks,
-                fp_file_name=fullprof_file_name, with_absorption=export_absorption)
-        except AssertionError as error:
-            return False, 'AssertionError: %s.' % str(error)
-        except RuntimeError as error:
-            return False, 'RuntimeError: %s.' % str(error)
+            continue
+        # END-FOR
 
         return True, file_content
 
@@ -872,8 +890,8 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
-        print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object.'.format(exp_number, scan_number)
-        print '[DB...BAT] Get Peak Info Object.  Current keys are {0}'.format(self._myPeakInfoDict.keys())
+        print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
+              ''.format(exp_number, scan_number, self._myPeakInfoDict.keys())
 
         # construct key
         if pt_number is None:
@@ -884,6 +902,8 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
+            print '[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
+                                                                                        hex(id(ret_value)))
         else:
             ret_value = None
 
@@ -1220,75 +1240,10 @@ class CWSCDReductionControl(object):
         assert len(peak_centre) == 3
         assert isinstance(merge_peaks, bool)
 
-        peak_int_dict= self.integrate_scan_peak(exp_number=exp, scan_number=scan, peak_centre=peak_centre,
-                                                mask_name=mask_ws_name, normalization=normalization,
-                                                scale_factor=scale_factor, background_pt_tuple=background_pt_tuple)
+        peak_int_dict = self.integrate_scan_peak(exp_number=exp, scan_number=scan, peak_centre=peak_centre,
+                                                 mask_name=mask_ws_name, normalization=normalization,
+                                                 scale_factor=scale_factor, background_pt_tuple=background_pt_tuple)
 
-
-
-        #
-        # # get spice file
-        # spice_table_name = get_spice_table_name(exp, scan)
-        # if AnalysisDataService.doesExist(spice_table_name) is False:
-        #     self.download_spice_file(exp, scan, False)
-        #     self.load_spice_scan_file(exp, scan)
-        #
-        # # get MD workspace name
-        # status, pt_list = self.get_pt_numbers(exp, scan)
-        # assert status, str(pt_list)
-        # md_ws_name = get_merged_md_name(self._instrumentName, exp, scan, pt_list)
-        #
-        # peak_centre_str = '%f, %f, %f' % (peak_centre[0], peak_centre[1],
-        #                                   peak_centre[2])
-        #
-        # # mask workspace
-        # if use_mask:
-        #     if mask_ws_name is None:
-        #         # get default mask workspace name
-        #         mask_ws_name = get_mask_ws_name(exp, scan)
-        #     elif not AnalysisDataService.doesExist(mask_ws_name):
-        #         # the appointed mask workspace has not been loaded
-        #         # then load it from saved mask
-        #         self.check_generate_mask_workspace(exp, scan, mask_ws_name)
-        #
-        #     assert AnalysisDataService.doesExist(mask_ws_name), 'MaskWorkspace %s does not exist.' \
-        #                                                         '' % mask_ws_name
-        #
-        #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list, use_mask)
-        # else:
-        #     mask_ws_name = ''
-        #     integrated_peak_ws_name = get_integrated_peak_ws_name(exp, scan, pt_list)
-        #
-        # # normalization
-        # norm_by_mon = False
-        # norm_by_time = False
-        # if normalization == 'time':
-        #     norm_by_time = True
-        # elif normalization == 'monitor':
-        #     norm_by_mon = True
-        #
-        # # integrate peak of a scan
-        # mantidsimple.IntegratePeaksCWSD(InputWorkspace=md_ws_name,
-        #                                 OutputWorkspace=integrated_peak_ws_name,
-        #                                 PeakRadius=peak_radius,
-        #                                 PeakCentre=peak_centre_str,
-        #                                 MergePeaks=merge_peaks,
-        #                                 NormalizeByMonitor=norm_by_mon,
-        #                                 NormalizeByTime=norm_by_time,
-        #                                 MaskWorkspace=mask_ws_name,
-        #                                 ScaleFactor=scale_factor)
-        #
-        # # process the output workspace
-        #  pt_dict = dict()
-        # out_peak_ws = AnalysisDataService.retrieve(integrated_peak_ws_name)
-        # num_peaks = out_peak_ws.rowCount()
-        #
-        # for i_peak in xrange(num_peaks):
-        #     peak_i = out_peak_ws.getPeak(i_peak)
-        #     run_number_i = peak_i.getRunNumber() % 1000
-        #     intensity_i = peak_i.getIntensity()
-        #     pt_dict[run_number_i] = intensity_i
-        # # END-FOR
         #
         # store the data into peak info
         if (exp, scan) not in self._myPeakInfoDict:
@@ -2381,7 +2336,7 @@ class CWSCDReductionControl(object):
 
         return ptlist
 
-    def set_peak_intensity(self, exp_number, scan_number, intensity):
+    def set_zero_peak_intensity(self, exp_number, scan_number):
         """
         Set peak intensity to a scan and set to PeakInfo
         :param exp_number:
@@ -2392,7 +2347,6 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
-        assert isinstance(intensity, float)
 
         # get dictionary item
         err_msg = 'Exp %d Scan %d does not exist in peak information' \
@@ -2401,17 +2355,7 @@ class CWSCDReductionControl(object):
         peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
 
         # set intensity
-        try:
-            peak_info.set_intensity(intensity)
-        except AssertionError as ass_error:
-            return False, 'Unable to set peak intensity due to %s.' % str(ass_error)
-
-        # calculate sigma by simple square root
-        if intensity > 0:
-            sigma = math.sqrt(intensity)
-        else:
-            sigma = 1.
-        peak_info.set_sigma(sigma)
+        peak_info.set_intensity_to_zero()
 
         return True, ''
 

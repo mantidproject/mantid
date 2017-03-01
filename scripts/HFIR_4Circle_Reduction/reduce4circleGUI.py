@@ -69,6 +69,7 @@ class MainWindow(QtGui.QMainWindow):
         self._refineConfigWindow = None
         self._peakIntegrationInfoWindow = None
         self._addUBPeaksDialog = None
+        self._spiceViewer = None
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -237,6 +238,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_show_integration_details)
         self.connect(self.ui.pushButton_toggleIntegrateType, QtCore.SIGNAL('clicked()'),
                      self.do_toggle_table_integration)
+        self.connect(self.ui.pushButton_exportSelectedPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_export_selected_peaks_to_integrate)
+        # FIXME/ISSUE/TODO/NOW/NOW - implement above
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -326,9 +330,6 @@ class MainWindow(QtGui.QMainWindow):
         # QSettings
         self.load_settings()
 
-        # pre-define child windows
-        self._spiceViewer = None
-
         return
 
     @property
@@ -415,7 +416,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def _build_peak_info_list(self, zero_hkl):
+    def _build_peak_info_list(self, zero_hkl, is_spice=True):
         """ Build a list of PeakInfo to build peak workspace
         peak HKL can be set to zero or from table
         :return: list of peak information, which is a PeakProcessRecord instance
@@ -442,10 +443,13 @@ class MainWindow(QtGui.QMainWindow):
             if zero_hkl:
                 # set HKL to zero
                 peak_info.set_hkl(0., 0., 0.)
-            else:
+            elif is_spice:
                 # set from table
                 spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
                 peak_info.set_hkl_np_array(numpy.array(spice_hkl))
+            else:
+                calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
             # END-IF-ELSE
 
             peak_info_list.append(peak_info)
@@ -1258,15 +1262,6 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            # # get lattice parameters from UB tab
-            # a = float(self.ui.lineEdit_aUnitCell.text())
-            # b = float(self.ui.lineEdit_bUnitCell.text())
-            # c = float(self.ui.lineEdit_cUnitCell.text())
-            # alpha = float(self.ui.lineEdit_alphaUnitCell.text())
-            # beta = float(self.ui.lineEdit_betaUnitCell.text())
-            # gamma = float(self.ui.lineEdit_gammaUnitCell.text())
-            # lattice = absorption.Lattice(a, b, c, alpha, beta, gamma)
-
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
             status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
@@ -1280,6 +1275,8 @@ class MainWindow(QtGui.QMainWindow):
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
             return
+        except KeyError as key_err:
+            self.pop_one_button_dialog(str(key_err))
 
         return
 
@@ -1533,7 +1530,7 @@ class MainWindow(QtGui.QMainWindow):
             if status is False:
                 error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
                                                                                        str(pt_number_list))
-                self.controller.set_peak_intensity(exp_number, scan_number, 0.)
+                self.controller.set_zero_peak_intensity(exp_number, scan_number)
                 self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False,
                                                                   integrate_method='')
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
@@ -2056,7 +2053,7 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # show result
-        self._show_refined_ub_result(is_spice=False)
+        self._show_refined_ub_result()
 
         return
 
@@ -2455,9 +2452,15 @@ class MainWindow(QtGui.QMainWindow):
         # set the index to integer
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for row_index in range(num_rows):
-            m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index, is_spice_hkl=is_spice)
-            peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
-            self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
+            try:
+                m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index, is_spice_hkl=is_spice)
+                peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
+                self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
+            except RuntimeError as run_err:
+                scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
+                print '[ERROR] Unable to convert HKL to integer for scan {0} due to {1}.' \
+                      ''.format(scan_number, run_err)
+        # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
         # self.ui.pushButton_setHKL2Int.setEnabled(False)
@@ -2471,19 +2474,26 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         exp_number = int(self.ui.lineEdit_exp.text())
-        # FIXME/TODO/ISSUE/NOW - Need to toggle among 3 options
 
         integrate_type = self.ui.tableWidget_mergeScans.get_integration_type()
-        if integrate_type != 'gaussian':
+        if integrate_type == 'simple':
+            integrate_type = 'mixed'
+        elif integrate_type == 'mixed':
             integrate_type = 'gaussian'
+        else:
+            integrate_type = 'simple'
 
         for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
             peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
-            intensity1, error1 = peak_info_obj.get_intensity(integrate_type, False)
-            intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
-
-            self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
+            try:
+                intensity1, error1 = peak_info_obj.get_intensity(integrate_type, False)
+                intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
+            except RuntimeError as run_err:
+                print '[ERROR] Unable to get peak intensity of scan {0} due to {1}.' \
+                      ''.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err)
+        # END-FOR
 
         return
 
@@ -2707,7 +2717,7 @@ class MainWindow(QtGui.QMainWindow):
         # check whether the integration information table
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = XX
-            # TODO/ISSUE/NOW/FIXME - CONTINUE FROM HERE TO IMPLEMENT A NEW WINDOW
+            # TODO/ISSUE/NOW/FIXME/NOW - CONTINUE FROM HERE TO IMPLEMENT A NEW WINDOW
 
     def do_show_spice_file(self):
         """
@@ -3085,6 +3095,10 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+
+        # ignore the situation that this line edit is cleared
+        if max_number <= 0:
+            return
         if max_number != self.ui.tableWidget_surveyTable.rowCount():
             # re-show survey
             self.ui.tableWidget_surveyTable.remove_all_rows()
@@ -3658,12 +3672,12 @@ class MainWindow(QtGui.QMainWindow):
         # set intensity, state to table
         if mode == 0:
             # error message
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number, peak_intensity=0.,
-                                                              lorentz_corrected=False, integrate_method='sum')
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity=0., corrected_intensity=0.,
+                                                              standard_error=0., integrate_method='simple')
             self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=message)
 
             # set peak value
-            status, ret_message = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+            status, ret_message = self._myControl.set_zero_peak_intensity(exp_number, scan_number)
             if not status:
                 self.pop_one_button_dialog(ret_message)
 

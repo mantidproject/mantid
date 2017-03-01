@@ -2,6 +2,7 @@
 import numpy
 import sys
 import fourcircle_utility
+import guiutility
 
 import NTableWidget as tableBase
 
@@ -669,8 +670,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param is_spice_hkl:
         :return:
         """
-        import guiutility
-        assert isinstance(row_index, int), 'blabla'
+        assert isinstance(row_index, int), 'Row index {0} must be an integer'
         # TODO/ISSUE/NOW - clean
 
         if is_spice_hkl:
@@ -682,7 +682,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         if not status:
             raise RuntimeError(ret_obj)
         elif len(ret_obj) != 3:
-            raise RuntimeError('blabla')
+            raise RuntimeError('Unable to parse array "{0}" to 3 floating points.'.format(hkl_str))
         else:
             m_h, m_k, m_l = ret_obj
 
@@ -1034,7 +1034,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         get the peak integration type
         :return:
         """
-        # TODO/FIXME/ISSUE/NOW
         if self.rowCount() == 0:
             raise RuntimeError('Empty table!')
 
@@ -1223,9 +1222,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         hkl_str = '%.3f, %.3f, %.3f' % (hkl[0], hkl[1], hkl[2])
         self.update_cell_value(row_number, self._colIndexHKL, hkl_str)
 
-        if hkl_source is not None:
-            self.update_cell_value(row_number, self._colIndexIndexFrom, hkl_source)
-
         return
 
     def set_k_shift_index(self, row_number, k_index):
@@ -1297,19 +1293,11 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param integrate_method: must be '', simple or gaussian for simple counts summation or Gaussian fit, respectively
         :return:
         """
-        """
-        Requirement: Either row number or scan number must be given
-        :param row_number:
-        :param peak_intensity:
-        :param lorentz_corrected:
-        :param integrate_method:
-        :return:
-        """
         # check requirements
         assert isinstance(peak_intensity, float), 'Peak intensity must be a float.'
         assert isinstance(integrate_method, str), 'Integrated method {0} must be a string but not {1}.' \
                                                   ''.format(integrate_method, type(integrate_method))
-        if integrate_method not in ['', 'simple', 'gaussian']:
+        if integrate_method not in ['', 'simple', 'mixed', 'gaussian']:
             raise RuntimeError('Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"'
                                ', "gaussian"]'.format(integrate_method))
 
