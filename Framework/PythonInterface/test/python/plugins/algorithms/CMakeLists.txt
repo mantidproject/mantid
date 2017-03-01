@@ -65,6 +65,7 @@ set ( TEST_PY_FILES
   IqtFitSequentialTest.py
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
+  LoadAclimaxTest.py
   LoadDNSLegacyTest.py
   LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
