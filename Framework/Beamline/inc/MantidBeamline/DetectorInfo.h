@@ -87,31 +87,49 @@ public:
                    const Eigen::Quaterniond &rotation);
 
 private:
+  size_t linearIndex(const std::pair<size_t, size_t> &index) const;
+  void checkNoTimeDependence() const;
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
 };
 
-/// Returns the position of the detector with given index.
+/** Returns the position of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 inline Eigen::Vector3d DetectorInfo::position(const size_t index) const {
+  checkNoTimeDependence();
   return (*m_positions)[index];
 }
 
-/// Returns the rotation of the detector with given index.
+/** Returns the rotation of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 inline Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
+  checkNoTimeDependence();
   return (*m_rotations)[index];
 }
 
-/// Set the position of the detector with given index.
+/** Set the position of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 inline void DetectorInfo::setPosition(const size_t index,
                                       const Eigen::Vector3d &position) {
+  checkNoTimeDependence();
   m_positions.access()[index] = position;
 }
 
-/// Set the rotation of the detector with given index.
+/** Set the rotation of the detector with given detector index.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 inline void DetectorInfo::setRotation(const size_t index,
                                       const Eigen::Quaterniond &rotation) {
+  checkNoTimeDependence();
   m_rotations.access()[index] = rotation.normalized();
 }
 

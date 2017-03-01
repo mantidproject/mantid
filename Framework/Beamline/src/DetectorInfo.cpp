@@ -78,67 +78,101 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   return true;
 }
 
-/// Returns the size of the DetectorInfo, i.e., the number of detectors in the
-/// instrument.
+/** Returns the number of detectors in the instrument.
+ *
+ * If a detector is moving, i.e., has more than one associated position, it is
+ * nevertheless only counted as a single detector. */
 size_t DetectorInfo::size() const {
-  if (!m_isMasked)
+  if (!m_isMonitor)
     return 0;
-  return m_isMasked->size();
+  return m_isMonitor->size();
 }
 
-/// Returns true if the detector with given index is a monitor.
+/// Returns true if the detector with given detector index is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
+  // No check for time dependence since monitor flags are not time dependent.
   return (*m_isMonitor)[index];
 }
 
-/// Returns true if the detector with given index is a monitor.
+/** Returns true if the detector with given index is a monitor.
+ *
+ * The time component of the index is ignored since a detector is a monitor
+ * either for *all* times or for *none*. */
 bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> index) const {
+  // Monitors are not time dependent, ignore time component of index.
   return (*m_isMonitor)[index.first];
 }
 
-/// Returns true if the detector with given index is masked.
+/** Returns true if the detector with given detector index is masked.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 bool DetectorInfo::isMasked(const size_t index) const {
+  checkNoTimeDependence();
   return (*m_isMasked)[index];
 }
 
 /// Returns true if the detector with given index is masked.
 bool DetectorInfo::isMasked(const std::pair<size_t, size_t> index) const {
-  return (*m_isMasked)[index.first];
+  return (*m_isMasked)[linearIndex(index)];
 }
 
-/// Set the mask flag of the detector with given index. Not thread safe.
+/** Set the mask flag of the detector with given detector index. Not thread
+ * safe.
+ *
+ * Convenience method for beamlines with static (non-moving) detectors.
+ * Throws if there are time-dependent detectors. */
 void DetectorInfo::setMasked(const size_t index, bool masked) {
+  checkNoTimeDependence();
   m_isMasked.access()[index] = masked;
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
 void DetectorInfo::setMasked(const std::pair<size_t, size_t> index,
                              bool masked) {
-  m_isMasked.access()[index.first] = masked;
+  m_isMasked.access()[linearIndex(index)] = masked;
 }
 
 /// Returns the position of the detector with given index.
 Eigen::Vector3d
 DetectorInfo::position(const std::pair<size_t, size_t> index) const {
-  return (*m_positions)[index.first];
+  return (*m_positions)[linearIndex(index)];
 }
 
 /// Returns the rotation of the detector with given index.
 Eigen::Quaterniond
 DetectorInfo::rotation(const std::pair<size_t, size_t> index) const {
-  return (*m_rotations)[index.first];
+  return (*m_rotations)[linearIndex(index)];
 }
 
 /// Set the position of the detector with given index.
 void DetectorInfo::setPosition(const std::pair<size_t, size_t> index,
                                const Eigen::Vector3d &position) {
-  m_positions.access()[index.first] = position;
+  m_positions.access()[linearIndex(index)] = position;
 }
 
 /// Set the rotation of the detector with given index.
 void DetectorInfo::setRotation(const std::pair<size_t, size_t> index,
                                const Eigen::Quaterniond &rotation) {
-  m_rotations.access()[index.first] = rotation.normalized();
+  m_rotations.access()[linearIndex(index)] = rotation.normalized();
+}
+
+size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
+  // The most common case are beamlines with static detectors. In that case the
+  // time index is always 0 and we avoid expensive map lookups. Linear indices
+  // are ordered such that the first block contains everything for time index 0
+  // so even in the time dependent case no translation is necessary.
+  if (index.second == 0)
+    return index.first;
+  throw std::runtime_error("DetectorInfo accessed with non-zero time index. "
+                           "This is not supported yet.");
+}
+
+/// Throws if this has time-dependent data.
+void DetectorInfo::checkNoTimeDependence() const {
+  if (size() != m_positions->size())
+    throw std::runtime_error("DetectorInfo accessed without time index but the "
+                             "beamline has time-dependent (moving) detectors.");
 }
 
 } // namespace Beamline
