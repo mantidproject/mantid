@@ -46,7 +46,7 @@ public:
   QString tooltip() override { return QString("Save Table As"); }
   QString whatsthis() override {
     return QString("Saves current table as a table workspace. Asks for the "
-                       "name of the ouput table");
+                   "name of the ouput table");
   }
   QString shortcut() override { return QString(); }
 };

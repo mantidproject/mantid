@@ -46,8 +46,8 @@ public:
   QString tooltip() override { return QString("Open Table"); }
   QString whatsthis() override {
     return QString("Loads a table into the interface. Table must exist in "
-                       "the ADS and be compatible in terms of the number and "
-                       "type of columns");
+                   "the ADS and be compatible in terms of the number and "
+                   "type of columns");
   }
   QString shortcut() override { return QString(); }
 };

@@ -44,9 +44,7 @@ public:
   };
   QString name() override { return QString("Delete Group"); }
   QString icon() override { return QString("://delete_group.png"); }
-  QString tooltip() override {
-    return QString("Deletes selected group");
-  }
+  QString tooltip() override { return QString("Deletes selected group"); }
   QString whatsthis() override {
     return QString("Deletes the selected groups");
   }

@@ -46,8 +46,8 @@ public:
   QString tooltip() override { return QString("Cut selected"); }
   QString whatsthis() override {
     return QString("Copies the selected rows to the clipboard, and then "
-                       "deletes them. Each row is placed on a new line, and "
-                       "each cell is separated by a tab");
+                   "deletes them. Each row is placed on a new line, and "
+                   "each cell is separated by a tab");
   }
   QString shortcut() override { return QString("Ctrl+X"); }
 };

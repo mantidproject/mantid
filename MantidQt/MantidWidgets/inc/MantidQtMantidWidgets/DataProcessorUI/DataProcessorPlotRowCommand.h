@@ -43,12 +43,10 @@ public:
   };
   QString name() override { return QString("Plot Selected Rows"); }
   QString icon() override { return QString("://graph.png"); }
-  QString tooltip() override {
-    return QString("Plot the selected runs");
-  }
+  QString tooltip() override { return QString("Plot the selected runs"); }
   QString whatsthis() override {
     return QString("Creates a plot of the reduced workspaces produced by "
-                       "the selected runs");
+                   "the selected runs");
   }
   QString shortcut() override { return QString(); }
 };

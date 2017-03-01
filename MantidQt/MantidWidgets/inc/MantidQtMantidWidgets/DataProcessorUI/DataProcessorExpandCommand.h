@@ -43,14 +43,12 @@ public:
   };
   QString name() override { return QString("Expand Selection"); }
   QString icon() override { return QString("://fit_frame.png"); }
-  QString tooltip() override {
-    return QString("Selects an entire group");
-  }
+  QString tooltip() override { return QString("Selects an entire group"); }
   QString whatsthis() override {
     return QString("Expands the current selection to include any runs that "
-                       "are in the same group as any selected run. This "
-                       "effectively means selecting the group to which the "
-                       "selected run belongs");
+                   "are in the same group as any selected run. This "
+                   "effectively means selecting the group to which the "
+                   "selected run belongs");
   }
   QString shortcut() override { return QString(); }
 };

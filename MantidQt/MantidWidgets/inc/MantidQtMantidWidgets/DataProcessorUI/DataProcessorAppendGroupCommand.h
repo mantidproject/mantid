@@ -47,8 +47,8 @@ public:
   QString tooltip() override { return QString("Inserts group after"); }
   QString whatsthis() override {
     return QString("Inserts a new group after the first selected group. If "
-                       "no groups are selected then a new group is added at "
-                       "the end of the table");
+                   "no groups are selected then a new group is added at "
+                   "the end of the table");
   }
   QString shortcut() override { return QString(); }
 };

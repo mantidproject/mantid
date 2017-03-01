@@ -43,12 +43,10 @@ public:
   };
   QString name() override { return QString("Plot Selected Groups"); }
   QString icon() override { return QString("://trajectory.png"); }
-  QString tooltip() override {
-    return QString("Plots the selected group");
-  }
+  QString tooltip() override { return QString("Plots the selected group"); }
   QString whatsthis() override {
     return QString("Creates a plot of the post-processed workspaces "
-                       "produced by any groups any selected runs are in");
+                   "produced by any groups any selected runs are in");
   }
   QString shortcut() override { return QString(); }
 };

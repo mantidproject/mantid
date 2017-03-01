@@ -53,7 +53,9 @@ public:
   virtual std::vector<std::unique_ptr<DataProcessorCommand>> &getChild() final {
     return m_child;
   }
-  virtual bool isSeparator() final { return name().isEmpty() && icon().isEmpty(); }
+  virtual bool isSeparator() final {
+    return name().isEmpty() && icon().isEmpty();
+  }
 
 protected:
   std::vector<std::unique_ptr<DataProcessorCommand>> m_child;

@@ -45,9 +45,7 @@ public:
   QString name() override { return QString("Delete Row"); }
   QString icon() override { return QString("://delete_row.png"); }
   QString tooltip() override { return QString("Deletes a row"); }
-  QString whatsthis() override {
-    return QString("Deletes the selected row");
-  }
+  QString whatsthis() override { return QString("Deletes the selected row"); }
   QString shortcut() override { return QString(); }
 };
 }

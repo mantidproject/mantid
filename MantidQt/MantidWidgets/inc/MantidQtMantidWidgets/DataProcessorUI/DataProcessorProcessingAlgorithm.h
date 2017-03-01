@@ -44,8 +44,7 @@ public:
       const std::string &name, const std::vector<std::string> &prefix,
       const std::set<std::string> &blacklist = std::set<std::string>());
   // Delegating constructor
-  DataProcessorProcessingAlgorithm(const QString &name,
-                                   const QString &prefix,
+  DataProcessorProcessingAlgorithm(const QString &name, const QString &prefix,
                                    const QString &blacklist = "");
   // Destructor
   virtual ~DataProcessorProcessingAlgorithm();

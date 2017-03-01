@@ -43,14 +43,12 @@ public:
   };
   QString name() override { return QString("Process"); }
   QString icon() override { return QString("://stat_rows.png"); }
-  QString tooltip() override {
-    return QString("Processes selected runs");
-  }
+  QString tooltip() override { return QString("Processes selected runs"); }
   QString whatsthis() override {
     return QString("Processes the selected runs. Selected runs are reduced "
-                       "sequentially and independently. If nothing is "
-                       "selected, the behaviour is as if all "
-                       "runs were selected.");
+                   "sequentially and independently. If nothing is "
+                   "selected, the behaviour is as if all "
+                   "runs were selected.");
   }
   QString shortcut() override { return QString(); }
 };

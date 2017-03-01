@@ -46,8 +46,8 @@ public:
   QString tooltip() override { return QString("Paste selected"); }
   QString whatsthis() override {
     return QString("Pastes the contents of the clipboard into the selected "
-                       "rows. If no rows are selected, new ones are added at "
-                       "the end");
+                   "rows. If no rows are selected, new ones are added at "
+                   "the end");
   }
   QString shortcut() override { return QString("Ctrl+V"); }
 };

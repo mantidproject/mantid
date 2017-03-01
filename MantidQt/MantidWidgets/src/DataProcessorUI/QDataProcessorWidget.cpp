@@ -187,8 +187,7 @@ Set the list of tables the user is offered to open
 void QDataProcessorWidget::setTableList(const QSet<QString> &tables) {
   ui.menuOpenTable->clear();
   for (auto it = tables.begin(); it != tables.end(); ++it) {
-    QAction *openTable =
-        ui.menuOpenTable->addAction(*it);
+    QAction *openTable = ui.menuOpenTable->addAction(*it);
     openTable->setIcon(QIcon("://worksheet.png"));
 
     // Map this action to the table name
