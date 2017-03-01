@@ -310,6 +310,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="pbPlotPreview">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -405,11 +412,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtAPI/MWRunFiles.h</header>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/DataSelector.h</header>
@@ -419,6 +421,11 @@
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/PreviewPlot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
