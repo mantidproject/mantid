@@ -288,7 +288,9 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     # One space on each end of a cell
     padding = 2
     # Set cell length equal to the length of: the longest combination of value, test name, and colour (plus padding)
-    cell_len = len(format_cell_value_rst(float(max_value), 0, color_scale, max_item).strip()) + padding
+    cell_len = len(format_cell_value_rst(value=float(max_value),
+                                         color_scale=color_scale,
+                                         items_link=max_item).strip()) + padding
     # If the header is longer than any cell's contents, i.e. is a group results table, use that length instead
     if cell_len < max_header:
         cell_len = max_header
@@ -418,7 +420,7 @@ def build_items_links(comparison_type, comparison_dim, using_errors):
     return items_link
 
 
-def format_cell_value_rst(value, width, color_scale=None, items_link=None):
+def format_cell_value_rst(value, width=None, color_scale=None, items_link=None):
     """
     Build the content string for a table cell, adding style/color tags
     if required.
@@ -426,9 +428,9 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
     """
     if not color_scale:
         if not items_link:
-            value_text = ' {0:.4g}'.format(value).ljust(width, ' ')
+            value_text = ' {0:.4g}'.format(value)
         else:
-            value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link).ljust(width, ' ')
+            value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link)
     else:
         color = ''
         for color_descr in color_scale:
@@ -437,7 +439,10 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
                 break
         if not color:
             color = color_scale[-1][1]
-        value_text = " :{0}:`{1:.4g}`".format(color, value).ljust(width, ' ')
+        value_text = " :{0}:`{1:.4g}`".format(color, value)
+
+    if width:
+        value_text.ljust(width, ' ')
 
     return value_text
 
