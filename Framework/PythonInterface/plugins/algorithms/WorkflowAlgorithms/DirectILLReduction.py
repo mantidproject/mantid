@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, Property,
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, IntBoundedValidator, Property,
                            StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
                               Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
@@ -188,6 +188,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
         positiveFloat = FloatBoundedValidator(lower=0)
+        positiveInt = IntBoundedValidator(lower=0)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -239,6 +240,12 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Energy rebinnin mode.')
         self.setPropertyGroup(common.PROP_REBINNING_MODE_W, common.PROPGROUP_REBINNING)
+        self.declareProperty(name=common.PROP_BIN_COUNT_LIMIT_W,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=positiveInt,
+                             direction=Direction.Input,
+                             doc='Maximum number of energy bins for automatic rebinning '
+                                 '(default: 10 times the number of TOF bins).')
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
@@ -290,6 +297,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
                       EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return maskedWS
+
+    def _binWidthLimit(self, ws):
+        if self.getProperty(common.PROP_BIN_COUNT_LIMIT_W).isDefault:
+            countLimit = 10 * ws.blocksize()
+        else:
+            countLimit = self.getProperty(common.PROP_BIN_COUNT_LIMIT_W).value
+        xs = ws.dataX(0)
+        return (xs[-1] - xs[0]) / float(countLimit)
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""
@@ -385,14 +400,16 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                    X=0.0,
                                    Rounding='10^n',
                                    EnableLogging=subalgLogging)
-            params = [binWidth]
+            binWidthLimit = self._binWidthLimit(mainWS)
+            params = [max(binWidth, binWidthLimit)]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
         elif mode == common.REBIN_AUTO_MEDIAN_BIN_WIDTH:
             binWidth = MedianBinWidth(InputWorkspace=mainWS,
                                       Rounding='10^n',
                                       EnableLogging=subalgLogging)
-            params = [binWidth]
+            binWidthLimit = self._binWidthLimit(mainWS)
+            params = [max(binWidth, binWidthLimit)]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
         elif mode == common.REBIN_MANUAL_W:
