@@ -123,28 +123,45 @@ class MatrixTable(tableBase.NTableWidget):
         return
 
 
-class PeakIntegrationTable(tableBase.NTableWidget):
+class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
     """
-    Peak integration information table. Each row is for a peak measured in a scan containing multiple Pts.
+    Detailed peaks integration information table. Each row is for a peak measured in a scan containing multiple Pts.
+    It can be converted to a csv file for user to check the integration details.
+    Note: all the intensities shown below are corrected by by Lorentzian and absorption if either of them is
+          calculated and applied.
     """
     Table_Setup = [('Scan', 'int'),
+                   ('HKL (S)', 'str'),
+                   ('HKL (C)', 'str'),
                    ('Mask', 'str'),
-                   ('Raw Intensity', 'float'),
-                   ('Error', 'float'),
+                   ('Intensity (R)', 'float'),
+                   ('Error (R)', 'float'),
                    ('Intensity 2', 'float'),
-                   ('Error', 'float'),
-                   ('Intensity 3', 'float'),
-                   ('Error', 'float')]
+                   ('Error (2)', 'float'),
+                   ('Intensity (G)', 'float'),
+                   ('Error (G)', 'float'),
+                   ('Lorentz', 'float'),
+                   ('Bkgd (E)', 'float'),
+                   ('Bkgd (G)', 'float'),
+                   ('Sigma', 'float'),
+                   ('A', 'float'),
+                   ('Motor Name', 'str'),
+                   ('Motor Step', 'float'),
+                   ('K-shift', 'str'),
+                   ('Absorption', 'float')
+                   ]
 
     def __init__(self, parent):
         """
         initialization
         :param parent:
         """
-        super(PeakIntegrationTable, self).__init__(parent)
+        super(PeaksIntegrationSpreadSheet, self).__init__(parent)
 
         # define column indexes
         self._colIndexScan = None
+        self._colIndexSpiceHKL = None
+        self._colIndexMantidHKL = None
         self._colIndexMask = None
         self._colIndexRawIntensity = None
         self._colIndexRawError = None
@@ -152,14 +169,26 @@ class PeakIntegrationTable(tableBase.NTableWidget):
         self._colIndexError2 = None
         self._colIndexIntensity3 = None
         self._colIndexError3 = None
+        self._colIndexBkgdE = None
+        self._colIndexBkgdG = None
+        self._colIndexMotorName = None
+        self._colIndexMotorStep = None
+        self._colIndexAbsorption = None
+        self._colIndexKShift = None
+        self._colIndexLorentz = None
+        self._colIndexSigma = None
+        self._colIndexA = None
 
         return
 
-    def add_scan_information(self, scan_number, mask, raw_intensity, raw_error, intensity2, error2,
-                             intensity3, error3):
+    def add_scan_information(self, scan_number, s_hkl, m_hkl, mask, raw_intensity, raw_error, intensity2, error2,
+                             intensity3, error3, lorentz, bkgd_e, bkgd_g, gauss_s, gauss_a, motor_name, motor_step,
+                             k_shift, absorption):
         """
-
+        add the detailed integrating information to table
         :param scan_number:
+        :param s_hkl:
+        :param m_hkl:
         :param mask:
         :param raw_intensity:
         :param raw_error:
@@ -167,10 +196,43 @@ class PeakIntegrationTable(tableBase.NTableWidget):
         :param error2:
         :param intensity3:
         :param error3:
+        :param lorentz:
+        :param bkgd_e:
+        :param bkgd_g:
+        :param gauss_s:
+        :param gauss_a:
+        :param motor_name:
+        :param motor_step:
+        :param k_shift:
+        :param absorption:
         :return:
         """
-        row_list = [scan_number, mask, raw_intensity, raw_error, intensity2, error2, intensity3, error3]
+        # append an empty row
+        row_list = [None] * len(self.Table_Setup)
         self.append_row(row_list)
+        last_row_number = self.rowCount() - 1
+
+        # set value
+        self.update_cell_value(last_row_number, self._colIndexScan, scan_number)
+        self.update_cell_value(last_row_number, self._colIndexSpiceHKL, s_hkl)
+        self.update_cell_value(last_row_number, self._colIndexMantidHKL, m_hkl)
+        self.update_cell_value(last_row_number, self._colIndexMask, mask)
+        self.update_cell_value(last_row_number, self._colIndexRawIntensity, raw_intensity)
+        self.update_cell_value(last_row_number, self._colIndexRawError, raw_error)
+        self.update_cell_value(last_row_number, self._colIndexIntensity2, intensity2)
+        self.update_cell_value(last_row_number, self._colIndexIntensity3, intensity3)
+        self.update_cell_value(last_row_number, self._colIndexError2, error2)
+        self.update_cell_value(last_row_number, self._colIndexError3, error3)
+        self.update_cell_value(last_row_number, self._colIndexLorentz, lorentz)
+        self.update_cell_value(last_row_number, self._colIndexBkgdE, bkgd_e)
+        self.update_cell_value(last_row_number, self._colIndexBkgdG, bkgd_g)
+        self.update_cell_value(last_row_number, self._colIndexSigma, gauss_s)
+        self.update_cell_value(last_row_number, self._colIndexA, gauss_a)
+        self.update_cell_value(last_row_number, self._colIndexKShift, k_shift)
+        self.update_cell_value(last_row_number, self._colIndexAbsorption, absorption)
+        self.update_cell_value(last_row_number, self._colIndexMotorName, motor_name)
+        self.update_cell_value(last_row_number, self._colIndexMotorStep, motor_step)
+
 
         return
 
@@ -185,13 +247,24 @@ class PeakIntegrationTable(tableBase.NTableWidget):
         col_name_list = self.getColumnNames()
 
         self._colIndexScan = col_name_list.index('Scan')
-        self._colIndexMask = col_name_list.index('Mask')
-        self._colIndexRawIntensity = col_name_list.index('Raw Intensity')
-        self._colIndexRawError = col_name_list.index('Error')
-        self._colIndexIntensity2 = col_name_list.index('Intensity 2')
-        self._colIndexError2 = col_name_list.index('Error', self._colIndexRawError+1)
-        self._colIndexIntensity3 = col_name_list.index('Intensity 3')
-        self._colIndexError3 = col_name_list.index('Error', self._colIndexError2+1)
+        self._colIndexSpiceHKL = self.Table_Setup.index(('HKL (S)', 'str'))
+        self._colIndexMantidHKL = self.Table_Setup.index(('HKL (M)', 'str'))
+        self._colIndexMask = self.Table_Setup.index(('Mask', 'str'))
+        self._colIndexRawIntensity = self.Table_Setup.index(('Intensity (R)', 'float'))
+        self._colIndexRawError = self.Table_Setup.index(('Error (R)', 'float'))
+        self._colIndexIntensity2 = self.Table_Setup.index(('Intensity 2', 'float'))
+        self._colIndexError2 = self.Table_Setup.index(('Error (2)', 'float'))
+        self._colIndexIntensity3 = self.Table_Setup.index(('Intensity (G)', 'float'))
+        self._colIndexError3 = self.Table_Setup.index(('Error (G)', 'float'))
+        self._colIndexLorentz = self.Table_Setup.index(('Lorentz', 'float'))
+        self._colIndexBkgdE = self.Table_Setup.index(('Bkgd (E)', 'float'))
+        self._colIndexBkgdG = self.Table_Setup.index(('Bkgd (G)', 'float'))
+        self._colIndexMotorName = self.Table_Setup.index(('Motor Name', 'str'))
+        self._colIndexMotorStep = self.Table_Setup.index(('Motor Step', 'float'))
+        self._colIndexKShift = self.Table_Setup.index(('K-shift', 'str'))
+        self._colIndexAbsorption = self.Table_Setup.index(('Absorption', 'float'))
+        self._colIndexSigma = self.Table_Setup.index(('Sigma', 'float'))
+        self._colIndexA = self.Table_Setup.index(('A', 'float'))
 
         return
 
@@ -593,6 +666,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         """
         Get reflection's miller index
         :param row_index:
+        :param is_spice_hkl:
         :return:
         """
         import guiutility
@@ -895,7 +969,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         peak_center = ''
         hkl = ''
 
-        new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask, #peak_center,
+        new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask,  # peak_center,
                    hkl, motor_name, motor_step, wave_length, 0, False]
 
         return new_row
@@ -957,7 +1031,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
 
     def get_integration_type(self):
         """
-
+        get the peak integration type
         :return:
         """
         # TODO/FIXME/ISSUE/NOW

@@ -1057,10 +1057,19 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_clear_peak_integration_canvas(self):
         """
-        TODO/ISSUE/ doc
+        clear the peak integration canvas and the integrated values
         :return:
         """
         self.ui.graphicsView_integratedPeakView.clear_all_lines()
+
+        self.ui.lineEdit_rawSinglePeakIntensity.setText('')
+        self.ui.lineEdit_intensity2.setText('')
+        self.ui.lineEdit_gaussianPeakIntensity.setText('')
+        self.ui.lineEdit_errorIntensity1.setText('')
+        self.ui.lineEdit_errorIntensity2.setText('')
+        self.ui.lineEdit_errorIntensity3.setText('')
+
+        return
 
     def do_clear_survey(self):
         """

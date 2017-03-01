@@ -272,6 +272,22 @@ class PeakProcessRecord(object):
 
         return
 
+    @property
+    def md_workspace(self):
+        """
+        give out MDEventWorkspace name for merged scan
+        :return:
+        """
+        return self._myDataMDWorkspaceName
+
+    @property
+    def peaks_workspace(self):
+        """
+        give out PeaksWorkspace
+        :return:
+        """
+        return self._myPeakWorkspaceName
+
     def retrieve_hkl_from_spice_table(self):
         """ Get averaged HKL from SPICE table
         HKL will be averaged from SPICE table by assuming the value in SPICE might be right

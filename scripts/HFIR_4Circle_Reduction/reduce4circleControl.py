@@ -219,7 +219,8 @@ class CWSCDReductionControl(object):
                                  PeakDistanceThreshold=5.,
                                  DensityThresholdFactor=0.1,
                                  OutputWorkspace=peak_ws_name)
-        assert AnalysisDataService.doesExist(peak_ws_name)
+        assert AnalysisDataService.doesExist(peak_ws_name), 'PeaksWorkspace {0} does not exist in ADS.' \
+                                                            ''.format(peak_ws_name)
 
         # add peak to UB matrix workspace to manager
         self._set_peak_info(exp_number, scan_number, peak_ws_name, merged_ws_name)
@@ -2298,10 +2299,22 @@ class CWSCDReductionControl(object):
         :return: (boolean, PeakInfo/string)
         """
         # check
-        assert isinstance(exp_number, int)
-        assert isinstance(scan_number, int)
-        assert isinstance(peak_ws_name, str)
-        assert isinstance(md_ws_name, str)
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number, int), 'Scan number must an be integer.'
+        assert isinstance(peak_ws_name, str), 'PeaksWorkspace must be a string.'
+        assert isinstance(md_ws_name, str), 'MDEventWorkspace name must be a string.'
+
+        # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
+        if (exp_number, scan_number) in self._myPeakInfoDict:
+            peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
+            print '[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not be created twice!' \
+                  ''.format(exp_number, scan_number)
+            print '[CONTINUE] New PeaksWorkspace = {0} vs Existing PeaksWorkspace = {1}.' \
+                  ''.format(peak_ws_name, peak_info.peaks_workspace)
+            print '[CONTINUE] New MDEventWorkspace = {0} vs Existing MDEventWorkspace = {1}.' \
+                  ''.format(md_ws_name, peak_info.md_workspace)
+            return False, peak_info
+        # END-IF
 
         # create a PeakInfo instance if it does not exist
         peak_info = PeakProcessRecord(exp_number, scan_number, peak_ws_name)
