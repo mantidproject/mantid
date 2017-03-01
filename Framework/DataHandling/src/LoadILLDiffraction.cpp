@@ -73,11 +73,7 @@ void LoadILLDiffraction::exec() {
 
   m_fileName = getPropertyValue("Filename");
 
-  // open the root node
-  NXRoot dataRoot(m_fileName);
-  NXEntry firstEntry = dataRoot.openFirstEntry();
-
-  loadDataScan(firstEntry);
+  loadDataScan();
   m_progress->report("Loaded data scan");
 
   //loadMetadata();
@@ -90,20 +86,22 @@ void LoadILLDiffraction::exec() {
 /**
 * Load the data scan
 */
-void LoadILLDiffraction::loadDataScan(NXEntry &firstEntry) {
+void LoadILLDiffraction::loadDataScan() {
 
-  std::string instName = firstEntry.getString("instrument/name");
+  // open the root node
+  NXRoot dataRoot(m_fileName);
+  NXEntry firstEntry = dataRoot.openFirstEntry();
 
   m_numberScanPoints = firstEntry.getInt("data_scan/total_steps");
 
   // read in the actual data
   NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
-  NXInt data = dataGroup.openIntData();
+  NXUInt data = dataGroup.openUIntData();
   data.load();
 
   m_numberDetectorsRead = data.dim1();
 
-  resolveInstrument(instName);
+  resolveInstrument(firstEntry.getString("instrument/name"));
 
   // read the scanned variables
   NXInt scannedVar = firstEntry.openNXInt(
@@ -145,13 +143,14 @@ void LoadILLDiffraction::loadDataScan(NXEntry &firstEntry) {
   // Assign detector counts
   for (int i = 1; i <= data.dim1(); ++i) {
     for (int j = 0; j < data.dim0(); ++j) {
-      double y = double(data()[j * data.dim1() + i - 1]);
+      unsigned int y = data(j, i - 1);
       m_outWorkspace->mutableY(i)[j] = y;
       m_outWorkspace->mutableE(i)[j] = sqrt(y);
     }
     m_outWorkspace->mutableX(i) = xAxis;
   }
 
+  dataRoot.close();
   loadStaticInstrument();
 }
 
@@ -179,21 +178,6 @@ void LoadILLDiffraction::resolveInstrument(const std::string &inst) {
       case 4800: {
         m_instName = "D20c";
         m_numberDetectorsActual = 4608;
-        break;
-      }
-      default:
-        throw std::runtime_error("Unknown resolution mode for instrument " +
-                                 inst);
-      }
-    } else if (inst == "D4") {
-      switch (m_numberDetectorsRead) {
-        m_numberDetectorsActual = m_numberDetectorsRead;
-      case 576: {
-        m_instName = "D4a";
-        break;
-      }
-      case 1152: {
-        m_instName = "D4b";
         break;
       }
       default:

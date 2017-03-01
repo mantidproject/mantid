@@ -46,9 +46,7 @@ private:
   void init() override;
   void exec() override;
 
-  void loadDataDetails(NeXus::NXEntry&);
-  void loadDataScan(NeXus::NXEntry&);
-  void loadDetectorScan(NeXus::NXEntry&);
+  void loadDataScan();
   void loadStaticInstrument();
   void loadMovingInstrument();
   void loadMetadata();
