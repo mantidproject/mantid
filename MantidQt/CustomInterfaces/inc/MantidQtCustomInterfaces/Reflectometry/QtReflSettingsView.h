@@ -88,9 +88,12 @@ public:
   std::string getI0MonitorIndex() const override;
   /// Return processing instructions
   std::string getProcessingInstructions() const override;
+  /// Return selected detector correction type
+  std::string getDetectorCorrectionType() const override;
   /// Set default values for experiment and instrument settings
   void setExpDefaults(const std::vector<std::string> &) const override;
-  void setInstDefaults(const std::vector<double> &) const override;
+  void setInstDefaults(const std::vector<double> &,
+                       const std::vector<std::string> &) const override;
 
   /// Creates hints for 'Stitch1DMany'
   void

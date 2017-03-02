@@ -58,7 +58,9 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {}
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {
+  m_parmap->setDetectorInfo(m_detectorInfo);
+}
 
 /**
  * Constructs the object from a copy if the input. This leaves the new mutex
@@ -208,12 +210,13 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
-    m_parmap = instr->getParameterMap();
+    m_parmap = boost::make_shared<ParameterMap>(*instr->getParameterMap());
   } else {
     sptr_instrument = instr;
     m_parmap = boost::make_shared<ParameterMap>();
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
+  m_parmap->setDetectorInfo(m_detectorInfo);
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -404,6 +407,7 @@ void ExperimentInfo::replaceInstrumentParameters(
   m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap.reset(new ParameterMap(pmap));
+  m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
 /**
@@ -418,6 +422,7 @@ void ExperimentInfo::swapInstrumentParameters(Geometry::ParameterMap &pmap) {
   m_spectrumInfoWrapper = nullptr;
   m_detectorInfoWrapper = nullptr;
   this->m_parmap->swap(pmap);
+  m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
 /**
