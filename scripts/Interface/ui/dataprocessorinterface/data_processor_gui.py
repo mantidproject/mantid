@@ -4,7 +4,7 @@ except ImportError:
     canMantidPlot = False
 
 import ui_data_processor_window
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtGui
 from mantid.simpleapi import *
 from mantidqtpython import MantidQt
 
@@ -33,14 +33,14 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     def getPreprocessingOptionsAsString(self):
         """
         Return global pre-processing options as a string.
-		The string must be a sequence of key=value separated by ','.
+        The string must be a sequence of key=value separated by ','.
         """
         return "AnalysisMode=PointDetectorAnalysis"
 
     def getProcessingOptions(self):
         """
         Return global processing options as a string. 
-		The string must be a sequence of key=value separated by ','.
+        The string must be a sequence of key=value separated by ','.
         """
         return "AnalysisMode=PointDetectorAnalysis, WavelengthMin=1.5"
 
@@ -207,7 +207,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
             action.setStatusTip(command.tooltip())
             action.triggered.connect(lambda: self._connect_action(command))
             menu.addAction(action)
-            
+
     def _connect_action(self, command):
         """
         Executes an action
