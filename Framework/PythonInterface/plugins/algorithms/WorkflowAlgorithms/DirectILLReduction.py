@@ -18,26 +18,28 @@ def _createDetectorGroups(ws):
     detectors are ignored.
     """
     numHistograms = ws.getNumberHistograms()
-    assignedDets = list()
     groups = list()
+    detectorGrouped = numHistograms * [False]
+    spectrumInfo = ws.spectrumInfo()
+    twoThetas = numpy.empty(numHistograms)
     for i in range(numHistograms):
-        if i in assignedDets:
+        det = ws.getDetector(i)
+        if spectrumInfo.isMasked(i):
+            twoThetas[i] = numpy.nan
+        else:
+            twoThetas[i] = ws.detectorTwoTheta(det)
+    for i in range(numHistograms):
+        if detectorGrouped[i]:
             continue
-        det1 = ws.getDetector(i)
-        if det1.isMasked():
+        twoTheta1 = twoThetas[i]
+        if numpy.isnan(twoTheta1):
             continue
-        currentGroup = [i]
-        twoTheta1 = ws.detectorTwoTheta(det1)
-        for j in range(i + 1, numHistograms):
-            if j in assignedDets:
-                continue
-            det2 = ws.getDetector(j)
-            if det2.isMasked():
-                continue
-            twoTheta2 = ws.detectorTwoTheta(det2)
-            if abs(twoTheta1 - twoTheta2) < 0.01 / 180.0 * constants.pi:
-                currentGroup.append(j)
-                assignedDets.append(j)
+        currentGroup = [ws.getDetector(i).getID()]
+        twoThetaDiff = numpy.abs(twoThetas[i + 1:] - twoTheta1)
+        equalTwoThetas = numpy.flatnonzero(twoThetaDiff < 0.01 / 180.0 * constants.pi)
+        for j in (i + 1) + equalTwoThetas:
+            currentGroup.append(ws.getDetector(j).getID())
+            detectorGrouped[j] = True
         groups.append(currentGroup)
     return groups
 
@@ -49,14 +51,17 @@ def _deltaQ(ws):
     return 2.0 * constants.pi / wavelength * deltaTheta
 
 
-def _groupsToGroupingPattern(groups):
-    """Return a grouping pattern suitable for the GroupDetectors algorithm."""
-    pattern = ''
+def _detectorGroupsToXml(groups, instrument):
+    from xml.etree import ElementTree
+    rootElement = ElementTree.Element('detector-grouping', {'instrument': 'IN5'})
     for group in groups:
-        for index in group:
-            pattern += str(index) + '+'
-        pattern = pattern[:-1] + ','
-    return pattern[:-1]
+        name = str(group.pop())
+        groupElement = ElementTree.SubElement(rootElement, 'group', {'name': name})
+        detIds = name
+        for detId in group:
+            detIds += ',' + str(detId)
+        ElementTree.SubElement(groupElement, 'detids', {'val': detIds})
+    return rootElement
 
 
 def _medianDeltaTheta(ws):
@@ -97,6 +102,12 @@ def _rebin(ws, params, wsNames, algorithmLogging):
                        Params=params,
                        EnableLogging=algorithmLogging)
     return rebinnedWS
+
+
+def _writeXml(element, filename):
+    from xml.etree import ElementTree
+    with open(filename, mode='w') as outFile:
+        ElementTree.ElementTree(element).write(outFile)
 
 
 class DirectILLReduction(DataProcessorAlgorithm):
@@ -340,21 +351,28 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _finalize(self, outWS, wsCleanup, report):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
+        wsCleanup.cleanup(outWS)
         wsCleanup.finalCleanup()
         report.toLog(self.log())
 
     def _groupDetectors(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Group detectors with similar thetas."""
+        import os
+        import tempfile
         groups = _createDetectorGroups(mainWS)
-        groupingPattern = _groupsToGroupingPattern(groups)
+        instrumentName = mainWS.run().getProperty('instrument.name').value
+        groupsXml = _detectorGroupsToXml(groups, instrumentName)
+        fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
+        _writeXml(groupsXml, path)
         groupedWSName = wsNames.withSuffix('grouped_detectors')
         groupedWS = GroupDetectors(InputWorkspace=mainWS,
                                    OutputWorkspace=groupedWSName,
-                                   GroupingPattern=groupingPattern,
+                                   MapFile=path,
                                    KeepUngroupedSpectra=False,
                                    Behaviour='Average',
                                    EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
+        os.remove(path)
         return groupedWS
 
     def _inputWS(self, wsNames, wsCleanup, subalgLogging):
