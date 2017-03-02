@@ -209,13 +209,16 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        // Go down to one level
-        std::string p_nxname(
-            nxname); // current names can be useful for next level
-        std::string p_nxclass(nxclass);
+        if (!std::string(nxclass).empty()) {
 
-        recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
-                                        p_nxclass, level + 1);
+          // Go down to one level
+          std::string p_nxname(
+              nxname); // current names can be useful for next level
+          std::string p_nxclass(nxclass);
+
+          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
+                                          p_nxclass, level + 1);
+        }
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
@@ -224,7 +227,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
         g_log.debug() << indent_str << nxname << " opened.\n";
 
         if (parent_class == "NXData" || parent_class == "NXMonitor" ||
-            std::string(nxname) == "data" || parent_class.empty()) {
+            std::string(nxname) == "data") {
           g_log.debug() << indent_str << "skipping " << parent_class << " ("
                         << nxname << ")\n";
           /* nothing */
