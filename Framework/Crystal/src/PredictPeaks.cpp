@@ -102,7 +102,6 @@ void PredictPeaks::init() {
                   "checked.\n"
                   "Keep unchecked to use the original values");
 
-
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
