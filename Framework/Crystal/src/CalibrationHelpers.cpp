@@ -64,8 +64,6 @@ void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
  * @param detHtScale The factor to multiply the current detector height, from
  *old NewInstrument, by to get the new detector height for the banks in
  *bankNames.
- * @param rotCenters Rotate the centers of the panels(the same amount) with the
- *rotation of panels around their center
  * @param detectorInfo DetectorInfo object for the
  */
 void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
