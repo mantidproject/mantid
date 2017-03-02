@@ -39,7 +39,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
 
     def getProcessingOptions(self):
         """
-        Return global processing options as a string. 
+        Return global processing options as a string.
         The string must be a sequence of key=value separated by ','.
         """
         return "AnalysisMode=PointDetectorAnalysis, WavelengthMin=1.5"
