@@ -2736,7 +2736,7 @@ class MainWindow(QtGui.QMainWindow):
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
 
-        self._peakIntegrationInfoWindow.set_report(self.generate_peaks_integration_report)
+        self._peakIntegrationInfoWindow.set_report(self.generate_peaks_integration_report())
         self._peakIntegrationInfoWindow.show()
 
         return
@@ -3127,6 +3127,28 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
         return
+
+    def generate_peaks_integration_report(self):
+        """
+        generate a report for all integrated peaks
+        :return:
+        """
+        # get experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        # get all the selected peaks from table
+        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows()
+
+        # collection all the information
+        report_dict = dict()
+        for row_number in row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+            peak_integrate_dict = peak_info.generate_report()
+            report_dict[scan_number] = peak_integrate_dict
+        # END-FOR
+
+        return report_dict
 
     def get_ub_from_text(self):
         """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
