@@ -240,7 +240,6 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_toggle_table_integration)
         self.connect(self.ui.pushButton_exportSelectedPeaks, QtCore.SIGNAL('clicked()'),
                      self.do_export_selected_peaks_to_integrate)
-        # FIXME/ISSUE/TODO/NOW/NOW - implement above
 
         # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
@@ -1236,6 +1235,23 @@ class MainWindow(QtGui.QMainWindow):
 
         return hkl, vec_q
 
+    def do_export_selected_peaks_to_integrate(self):
+        """
+        export (to file or just print out) the scans that are selected for integration
+        :param self:
+        :return:
+        """
+        # get selected rows' scan numbers
+        scan_number_list = self.ui.tableWidget_mergeScans.get_selected_scans()
+        scan_number_list.sort()
+
+        info_str = '# Selected scans: \n'
+        info_str += '{0}'.format(scan_number_list)
+
+        print '[TEMP] Selected scans:\n{0}'.format(info_str)
+
+        return
+
     def do_export_to_fp(self):
         """ Export selected reflections to Fullprof single crystal data file for analysis
         :return:
@@ -2037,11 +2053,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_refine_ub_cal_indexed_peaks(self):
         """
-
+        refine UB matrix by indexed peaks with HKL calculated
         :return:
         """
-        # TODO/ISSUE/NOW - clean and implement
-
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False, is_spice=False)
 
@@ -2510,7 +2524,6 @@ class MainWindow(QtGui.QMainWindow):
             is_spice = False
 
         # restore the value
-        # FIXME/TODO/ISSUE/NOW - is_spice is a new parameter!
         self.ui.tableWidget_peaksCalUB.restore_cached_indexing(is_spice)
 
         # enable and disable the buttons
@@ -2714,10 +2727,16 @@ class MainWindow(QtGui.QMainWindow):
         show the details (in table) about the integration of scans
         :return:
         """
+        import PeaksIntegrationReport
+
         # check whether the integration information table
         if self._peakIntegrationInfoWindow is None:
-            self._peakIntegrationInfoWindow = XX
-            # TODO/ISSUE/NOW/FIXME/NOW - CONTINUE FROM HERE TO IMPLEMENT A NEW WINDOW
+            self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
+
+        self._peakIntegrationInfoWindow.set_report(self.generate_peaks_integration_report)
+        self._peakIntegrationInfoWindow.show()
+
+        return
 
     def do_show_spice_file(self):
         """

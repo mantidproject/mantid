@@ -96,7 +96,27 @@ class NTableWidget(QtGui.QTableWidget):
 
         :return:
         """
-        # FIXME/ISSUE/TODO/NOW/NOW - implement above
+        # FIXME/TODO/ISSUE/NOW - Need to prototype with pandas
+        import pandas
+
+        # get title
+        col_names = self._myColumnNameList[:]
+        col_names_str = '{0}'.format(col_names)
+        col_names_str = col_names_str.replace(', ', ' ')
+        headeder = col_names_str
+
+        num_columns = self.columnCount()
+
+        num_rows = self.rowCount()
+        for i_row in range(num_columns):
+            line_items = list()
+            for j_col in range(num_columns):
+                item_value = self.get_cell_value(i_row, j_col)
+                line_items.append(item_value)
+            # END-FOR
+            blabla()
+
+        return
 
     def get_cell_value(self, row_index, col_index):
         """

@@ -842,7 +842,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
-    def restore_cached_indexing(self):
+    def restore_cached_indexing(self, is_spice=True):
         """
         Restore the previously saved value to HKL
         :return:
@@ -854,7 +854,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         # restore
         for row_index in stored_line_index:
             hkl = self._cachedSpiceHKL[row_index]
-            self.set_hkl(row_index, hkl, is_spice_hkl=True)
+            self.set_hkl(row_index, hkl, is_spice_hkl=is_spice)
         # END-FOR
 
         # clear
