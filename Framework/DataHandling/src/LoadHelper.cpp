@@ -485,6 +485,12 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
   }
 }
 
+/**
+ * @brief LoadHelper::moveComponent
+ * @param ws A MatrixWorkspace
+ * @param componentName The name of the component of the instrument
+ * @param newPos New position of the component
+ */
 void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
                                const std::string &componentName,
                                const V3D &newPos) {
@@ -497,6 +503,13 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
   ws->mutableDetectorInfo().setPosition(*component, newPos);
 }
 
+/**
+ * @brief LoadHelper::rotateComponent
+ * @param ws A MantrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @param rot Rotations defined by setting a quaternion from an angle in degrees
+ * and an axis
+ */
 void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
@@ -509,6 +522,12 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
   ws->mutableDetectorInfo().setRotation(*component, rot);
 }
 
+/**
+ * @brief LoadHelper::getComponentPosition
+ * @param ws A MatrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @return The position of the component
+ */
 V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
                                      const std::string &componentName) {
   Geometry::IComponent_const_sptr component =
