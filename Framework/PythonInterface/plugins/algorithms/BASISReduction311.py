@@ -48,7 +48,7 @@ class BASISReduction311(PythonAlgorithm):
         return "BASISReduction311"
 
     def summary(self):
-        return "Multiple-file BASIS reduction for the 311 reflection."
+        return "THIS ALGORITHM IS DEPRECATED (2017-03-11). USE BASISReduction instead"
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -80,6 +80,7 @@ class BASISReduction311(PythonAlgorithm):
                              "Switch for grouping detectors")
 
     def PyExec(self):
+        self.log().error('THIS ALGORITHM IS DEPRECATED (2017-03-11). USE BASISReduction instead')
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
         self._doIndiv = self.getProperty("DoIndividual").value
