@@ -155,11 +155,18 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
 
             # Normalize the data
             normalized_data = data_cropped / norm_summed
+
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_file_path',
+                         LogText=norm_summed.getRun().getProperty("Filename").value)
+            norm_dirpix = norm_summed.getRun().getProperty('DIRPIX').getStatistics().mean
+            AddSampleLog(Workspace=normalized_data, LogName='normalization_dirpix',
+                         LogText=str(norm_dirpix), LogType='Number', LogUnit='pixel')
+
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(data_cropped))
             AnalysisDataService.remove(str(norm_cropped))
             AnalysisDataService.remove(str(norm_summed))
-            AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText=str(normalizationRunNumber))
         else:
             normalized_data = data_cropped
             AddSampleLog(Workspace=normalized_data, LogName='normalization_run', LogText="None")
@@ -248,7 +255,7 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Calculate Qx, Qz for each pixel
         LL,TT = np.meshgrid(wl_values, theta_f[:,0])
 
-        qz = 4*math.pi/LL * np.sin(theta + TT) * np.cos(TT)
+        qz=4*math.pi/LL * np.sin(theta + TT) * np.cos(TT)
         qz = qz.T
 
         AddSampleLog(Workspace=workspace, LogName='q_min', LogText=str(np.min(qz)),
@@ -424,6 +431,8 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
         # Sanity check
         if sum(data_y) == 0:
             raise RuntimeError("The reflectivity is all zeros: check your peak selection")
+
+        self.write_meta_data(q_rebin)
         return q_rebin
 
     def calculate_scattering_angle(self, ws_event_data):
@@ -483,6 +492,56 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
             logger.notice("Determining range: %g %g" % (tof_min, tof_max))
 
         return self._tof_range
+
+    def write_meta_data(self, workspace):
+        """
+            Write meta data documenting the regions of interest
+            @param workspace: data workspace
+        """
+        constant_q_binning = self.getProperty("ConstantQBinning").value
+        AddSampleLog(Workspace=workspace, LogName='constant_q_binning', LogText=str(constant_q_binning))
+
+        # Data
+        data_peak_range = self.getProperty("SignalPeakPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='scatt_peak_min', LogText=str(data_peak_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='scatt_peak_max', LogText=str(data_peak_range[1]),
+                     LogType='Number', LogUnit='pixel')
+
+        data_bg_range = self.getProperty("SignalBackgroundPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='scatt_bg_min', LogText=str(data_bg_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='scatt_bg_max', LogText=str(data_bg_range[1]),
+                     LogType='Number', LogUnit='pixel')
+
+        low_res_range = self.getProperty("LowResDataAxisPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='scatt_low_res_min', LogText=str(low_res_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='scatt_low_res_max', LogText=str(low_res_range[1]),
+                     LogType='Number', LogUnit='pixel')
+
+        specular_pixel = self.getProperty("SpecularPixel").value
+        AddSampleLog(Workspace=workspace, LogName='specular_pixel', LogText=str(specular_pixel),
+                     LogType='Number', LogUnit='pixel')
+
+        # Direct beam runs
+        data_peak_range = self.getProperty("NormPeakPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='norm_peak_min', LogText=str(data_peak_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='norm_peak_max', LogText=str(data_peak_range[1]),
+                     LogType='Number', LogUnit='pixel')
+
+        data_bg_range = self.getProperty("NormBackgroundPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='norm_bg_min', LogText=str(data_bg_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='norm_bg_max', LogText=str(data_bg_range[1]),
+                     LogType='Number', LogUnit='pixel')
+
+        low_res_range = self.getProperty("LowResNormAxisPixelRange").value
+        AddSampleLog(Workspace=workspace, LogName='norm_low_res_min', LogText=str(low_res_range[0]),
+                     LogType='Number', LogUnit='pixel')
+        AddSampleLog(Workspace=workspace, LogName='norm_low_res_max', LogText=str(low_res_range[1]),
+                     LogType='Number', LogUnit='pixel')
 
     #pylint: disable=too-many-arguments
     def process_data(self, workspace, crop_low_res, low_res_range,
