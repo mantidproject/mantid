@@ -50,6 +50,8 @@ Indirect > Corrections and Indirect > Analysis interfaces have been configured t
 Bugs Resolved
 -------------
 
+- Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
+
 SliceViewer Improvements
 ------------------------
 
