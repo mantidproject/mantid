@@ -76,7 +76,7 @@ void LoadILLDiffraction::exec() {
   loadDataScan();
   m_progress->report("Loaded data scan");
 
-  //loadMetadata();
+  loadMetadata();
   m_progress->report("Loaded the metadata");
 
   // set the output
