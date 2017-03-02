@@ -290,9 +290,9 @@ void ResNorm::previewSpecChanged(int value) {
               fitWsName);
 
       MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
-      fit->setSharedX(0, fit->sharedX(1));
-      fit->setSharedY(0, fit->sharedY(1));
-      fit->setSharedE(0, fit->sharedE(1));
+      fit->setSharedX(0, fitWs->sharedX(1));
+      fit->setSharedY(0, fitWs->sharedY(1));
+      fit->setSharedE(0, fitWs->sharedE(1));
 
       for (size_t i = 0; i < fit->blocksize(); i++)
         fit->mutableY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
@@ -312,6 +312,15 @@ void ResNorm::plotCurrentPreview() {
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
     plotSpectrum(m_uiForm.dsResolution->getCurrentDataName(), 0);
+  }
+  if (m_uiForm.ppPlot->hasCurve("Fit")) {
+    WorkspaceGroup_sptr fitWorkspaces =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        m_pythonExportWsName + "_Fit_Workspaces");
+
+      auto fitWsName = QString::fromStdString(
+        fitWorkspaces->getItem(m_previewSpec)->getName());
+      plotSpectrum(fitWsName, 0);
   }
 }
 
