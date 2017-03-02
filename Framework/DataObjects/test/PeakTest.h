@@ -381,10 +381,10 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
     auto extendedSpaceObj =
         ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = new ObjComponent("extended-detector-space",
-                                          extendedSpaceObj, sphereInst.get());
+    auto extendedSpace = std::make_unique<ObjComponent>(
+        "extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-    sphereInst->add(extendedSpace);
+    sphereInst->add(extendedSpace.release());
     const auto refFrame = sphereInst->getReferenceFrame();
     const auto refBeamDir = refFrame->vecPointingAlongBeam();
 
@@ -458,10 +458,10 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
     auto extendedSpaceObj =
         ComponentCreationHelper::createSphere(10., V3D(0, 0, 0));
-    auto extendedSpace = new ObjComponent("extended-detector-space",
-                                          extendedSpaceObj, sphereInst.get());
+    auto extendedSpace = std::make_unique<ObjComponent>(
+        "extended-detector-space", extendedSpaceObj, sphereInst.get());
     extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
-    sphereInst->add(extendedSpace);
+    sphereInst->add(extendedSpace.release());
 
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
