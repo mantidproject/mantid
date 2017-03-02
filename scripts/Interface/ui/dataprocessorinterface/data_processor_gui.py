@@ -14,19 +14,20 @@ from mantidqtpython import MantidQt
 
 canMantidPlot = True
 
+
 class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     """
-	A DataProcessorMainPresenter. The base class provides default implementations
-	but we should re-implement the following methods:
-		getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
-		getProcessingOptions() -- to supply global processing options
-		getPostprocessingOptions() -- to supply global post-processing options
-		notifyADSChanged() -- to act when the ADS changed, typically updating table actions with the list of
-		table workspaces that can be loaded into the interface
+    A DataProcessorMainPresenter. The base class provides default implementations
+    but we should re-implement the following methods:
+    - getPreprocessingOptionsAsString() -- to supply global pre-processing options to the table widget
+    - getProcessingOptions() -- to supply global processing options
+    - getPostprocessingOptions() -- to supply global post-processing options
+    - notifyADSChanged() -- to act when the ADS changed, typically we want to update
+      table actions with the list of table workspaces that can be loaded into the interface
 
     This is an intermediate layer needed in python. Ideally our gui class should
-	inherit from 'DataProcessorMainPresenter' directly and provide the required implementations,
-	but multiple inheritance does not seem to be fully supported, hence we need this extra class.
+    inherit from 'DataProcessorMainPresenter' directly and provide the required implementations,
+    but multiple inheritance does not seem to be fully supported, hence we need this extra class.
     """
 
     def __init__(self, gui):
