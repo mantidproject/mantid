@@ -46,7 +46,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
 
     def getPostprocessingOptions(self):
         """
-        Return global post-processing options as a string. 
+        Return global post-processing options as a string.
         The string must be a sequence of key=value separated by ','.
         """
         return "Params='0.03, -0.04, 0.6'"
@@ -87,7 +87,8 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         # The second argument is the algorithm property
         # The third argument is a brief description of the column
         # The fourth argument is a boolean indicating if the value in this column will be used to name the reduced run
-        # The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run (unused if the previous argument is false)
+        # The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run
+        # (unused if the previous argument is false)
         # In addition to the specified columns, a last column 'Options' is always added
         whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
         whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce', True, '')
