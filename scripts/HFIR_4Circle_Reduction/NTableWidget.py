@@ -96,9 +96,6 @@ class NTableWidget(QtGui.QTableWidget):
 
         :return:
         """
-        # FIXME/TODO/ISSUE/NOW - Need to prototype with pandas
-        import pandas
-
         # get title
         col_names = self._myColumnNameList[:]
         col_names_str = '{0}'.format(col_names)
@@ -115,6 +112,16 @@ class NTableWidget(QtGui.QTableWidget):
                 line_items.append(item_value)
             # END-FOR
             blabla()
+
+        # FIXME/TODO/ISSUE/NOW - From here!
+        """
+        import csv
+        with open('eggs.csv', 'wb') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=' ',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
+        spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
+        """
 
         return
 

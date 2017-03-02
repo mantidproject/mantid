@@ -120,6 +120,37 @@ class PeakProcessRecord(object):
 
         return
 
+    def generate_report(self):
+        """
+
+        :return:
+        """
+        # TODO/FIXME/NOW/ISSUE - Implement ASAP
+        """
+        scan_number_list = sorted(peak_integration_summary.keys())
+        for scan_number in scan_number_list:
+            spice_hkl = peak_integration_summary['SPICE HKL']
+            calculated_hkl = peak_integration_summary['Mantid HKL']
+            mask_name = peak_integration_summary['Mask']
+            intensity1 = peak_integration_summary['Raw Intensity']
+            error1 = peak_integration_summary['Raw Intensity Error']
+            intensity2 = peak_integration_summary['Intensity 2']
+            error2 = peak_integration_summary['Intensity 2 Error']
+            intensity3 = peak_integration_summary['Gauss Intensity']
+            error3 = peak_integration_summary['Gauss Intensity Error']
+            lorentz_factor = peak_integration_summary['Lorentz']
+            estimated_bkgd = peak_integration_summary['Estimated Background']
+            gauss_bkgd = peak_integration_summary['Fitted Background']
+            gauss_a = peak_integration_summary['Fitted A']
+            gauss_sigma = peak_integration_summary['Fitted Sigma']
+            motor_name = peak_integration_summary['Motor']
+            motor_step = peak_integration_summary['Motor Step']
+            k_shift = peak_integration_summary['K-vector']
+            absorption_correction = peak_integration_summary['Absorption Correction']
+        """
+
+        return dict()
+
     def get_intensity(self, algorithm_type, lorentz_corrected):
         """
         get the integrated intensity with specified integration algorithm and whether
