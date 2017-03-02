@@ -10,7 +10,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-
 namespace Mantid {
 namespace DataHandling {
 
@@ -32,12 +31,13 @@ int LoadILLReflectometry::confidence(
     Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if (descriptor.pathExists("/entry0/wavelength")               // ILL
-      && descriptor.pathExists("/entry0/experiment_identifier") // ILL
-      && descriptor.pathExists("/entry0/mode")                  // ILL
+  if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
+       descriptor.pathExists("/entry0/theta"))        // ILL Figaro
       &&
-      descriptor.pathExists(
-          "/entry0/instrument/VirtualChopper") // ILL reflectometry
+      descriptor.pathExists("/entry0/experiment_identifier") &&
+      descriptor.pathExists("/entry0/mode") &&
+      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
+       descriptor.pathExists("/entry0/instrument/Theta")) // ILL Figaro
       )
     return 80;
   else
@@ -119,12 +119,9 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
    * Run the Child Algorithm LoadInstrument.
    */
 void LoadILLReflectometry::runLoadInstrument() {
-
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
   // execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
-
+    IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty("RewriteSpectraMap",
                           Mantid::Kernel::OptionalBool(true));
@@ -152,11 +149,11 @@ void LoadILLReflectometry::exec() {
   // load Monitor details: n. monitors x monitor contents
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
 
-  // load Data details (number of tubes, channels, etc)
-  loadDataDetails(firstEntry);
-
   std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
+
+  // load Data details (number of tubes, channels, etc)
+  loadDataDetails(firstEntry);
 
   initWorkspace(firstEntry, monitorsData, filenameData);
 
@@ -166,7 +163,8 @@ void LoadILLReflectometry::exec() {
   // load the instrument from the IDF if it exists
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
-  placeDetector();
+  if (m_instrumentName == "D17")
+    placeDetector();
 
   Mantid::Kernel::NexusDescriptor descriptor(filenameData);
 
@@ -174,8 +172,7 @@ void LoadILLReflectometry::exec() {
   // Set the channel width property and get x values
   if (descriptor.pathExists("/entry0/monitor1/time_of_flight")) {
     auto channel_width = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "monitor1.time_of_flight_0"));
+        m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
     m_localWorkspace->mutableRun().addProperty<double>(
         "channel_width", *channel_width, true); // overwrite
     m_channelWidth = *channel_width;
@@ -193,7 +190,8 @@ void LoadILLReflectometry::exec() {
       xVals.push_back(dt);
     }
   }
-  g_log.debug() << "Channel width: " << m_channelWidth << "\n"; // UNIT??cm supposed
+  g_log.debug() << "Channel width: " << m_channelWidth
+                << "\n"; // UNIT??cm supposed
   g_log.debug("Loading data...");
   loadData(firstEntry, monitorsData, xVals);
   const std::string unit = getPropertyValue("XUnit");
@@ -272,16 +270,14 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   NXInt data{dataGroup.openIntData()};
 
   m_numberOfTubes = static_cast<size_t>(data.dim0());
-  g_log.debug() << "Number of tubes: " << m_numberOfTubes << '\n';
-
   m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
+  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
+  m_numberOfChannels = static_cast<size_t>(data.dim2());
+
+  g_log.debug() << "Number of tubes (banks): " << m_numberOfTubes << '\n';
   g_log.debug() << "Number of pixels per tube: " << m_numberOfPixelsPerTube
                 << '\n';
-
-  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
   g_log.debug() << "Number of detectors: " << m_numberOfHistograms << '\n';
-
-  m_numberOfChannels = static_cast<size_t>(data.dim2());
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
 }
 
@@ -372,10 +368,13 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     g_log.debug() << chopper << " 2 phase : " << *chop2_phase << '\n';
     g_log.debug() << chopper << " 2 speed : " << *chop2_speed << '\n';
 
-/*
-temp 1 = parref.tofd / cos(atan(((peakref – parref.x_min) * parref.pixeldensity - (c_params.pixels_x / 2.)-0.5) * c_params.pixelwidth, parref.tofd))
-//lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) * parref.channelwidth + parref.delay) / temp1)
-*/
+    /*
+    temp 1 = parref.tofd / cos(atan(((peakref – parref.x_min) *
+    parref.pixeldensity - (c_params.pixels_x / 2.)-0.5) * c_params.pixelwidth,
+    parref.tofd))
+    //lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
+    parref.channelwidth + parref.delay) / temp1)
+    */
     double t_TOF2 = 0.0;
     if (!chop1_speed) {
       g_log.warning() << "Warning: chop1_speed is null.\n";
@@ -411,45 +410,46 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
                                     std::vector<std::vector<int>> monitorsData,
                                     std::vector<double> &xVals) {
 
-  m_wavelength = entry.getFloat("wavelength");
-  double ei = m_loader.calculateEnergy(m_wavelength);
-  m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
-                                                     true); // overwrite
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   // load the counts from the file into memory
   data.load();
-
   size_t nb_monitors = monitorsData.size();
-
   Progress progress(this, 0, 1,
                     m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
 
-  HistogramData::BinEdges binEdges(xVals);
+  if (m_instrumentName == "D17") {
+    m_wavelength = entry.getFloat("wavelength");
+    double ei = m_loader.calculateEnergy(m_wavelength);
+    m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
+                                                       true); // overwrite
 
-  // write monitors
-  for (size_t im = 0; im < nb_monitors; im++) {
-    int *monitor_p = monitorsData[im].data();
-    const HistogramData::Counts histoCounts(monitor_p,
-                                            monitor_p + m_numberOfChannels);
-    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
-
-    progress.report();
-  }
-
-  // write data
-  size_t spec = 0;
-  for (size_t i = 0; i < m_numberOfTubes; ++i) {
-    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-      const HistogramData::Counts histoCounts(data_p,
-                                              data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
-                                     std::move(histoCounts));
-      ++spec;
+    HistogramData::BinEdges binEdges(xVals);
+    // write monitors
+    for (size_t im = 0; im < nb_monitors; im++) {
+      int *monitor_p = monitorsData[im].data();
+      const HistogramData::Counts histoCounts(monitor_p,
+                                              monitor_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
       progress.report();
     }
+
+    // write data
+    size_t spec = 0;
+    for (size_t i = 0; i < m_numberOfTubes; ++i) {
+      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+        const HistogramData::Counts histoCounts(data_p,
+                                                data_p + m_numberOfChannels);
+        m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
+                                       std::move(histoCounts));
+        ++spec;
+        progress.report();
+      }
+    }
+  }
+  if (m_instrumentName == "Figaro") {
   }
 
 } // LoadILLIndirect::loadData
@@ -496,7 +496,8 @@ void LoadILLReflectometry::placeDetector() {
       throw std::runtime_error("Theta (san or dan option) is not defined");
     }
   }
-  g_log.debug() << "Using " << thetaIn << " to calculate theta " << theta << " degrees\n";
+  g_log.debug() << "Using " << thetaIn << " to calculate theta " << theta
+                << " degrees\n";
   double twotheta_rad = (2. * theta) * M_PI / 180.0;
   // incident theta angle for being able to call the algorithm
   // ConvertToReflectometryQ
