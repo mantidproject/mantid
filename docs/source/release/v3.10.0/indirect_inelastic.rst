@@ -12,7 +12,8 @@ Algorithms
 ##########
 
 - A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
-- :ref:`LoadVesuvio <algm-LoadVesuvio> can now load NeXus files as well as raw files
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` can now load NeXus files as well as raw files
+- :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 
 Data Reduction
 ##############
