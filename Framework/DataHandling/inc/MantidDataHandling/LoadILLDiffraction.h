@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
 #define MANTID_DATAHANDLING_LOADILLDIFFRACTION_H_
 
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -46,22 +46,28 @@ private:
   void init() override;
   void exec() override;
 
-  void loadDataScan();
-  void loadStaticInstrument();
+  void initWorkspace();
+  void loadDataScan(NeXus::NXEntry &);
   void loadMovingInstrument();
   void loadMetadata();
+  void loadStaticInstrument();
+  void fillMovingInstrumentScan(const NeXus::NXUInt &,
+                                const NeXus::NXDouble &);
+  void fillStaticInstrumentScan(const NeXus::NXUInt &,
+                                const NeXus::NXDouble &);
   void resolveInstrument(const std::string &);
-  void resolveScanType(){}
-  void initWorkspace();
 
-  std::string m_fileName;
-  std::string m_instName;
-  std::set<std::string> m_instNames;
-  LoadHelper m_loadHelper;
   int m_numberScanPoints;
   int m_numberDetectorsRead;
   int m_numberDetectorsActual;
   bool m_isDetectorScan;
+
+  std::vector<int> m_scannedVarIndices;
+  std::string m_instName;
+  std::set<std::string> m_instNames;
+  std::string m_fileName;
+
+  LoadHelper m_loadHelper;
   API::MatrixWorkspace_sptr m_outWorkspace;
   std::unique_ptr<API::Progress> m_progress;
 };

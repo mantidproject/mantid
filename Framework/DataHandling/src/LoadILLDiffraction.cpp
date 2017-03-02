@@ -49,8 +49,8 @@ const std::string LoadILLDiffraction::summary() const {
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D1B", "D2B", "D4C", "D20"}),
-      m_isDetectorScan(false) {}
+    : IFileLoader<NexusDescriptor>(), m_isDetectorScan(false),
+      m_instNames({"D1B", "D2B", "D4C", "D20"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -73,8 +73,13 @@ void LoadILLDiffraction::exec() {
 
   m_fileName = getPropertyValue("Filename");
 
-  loadDataScan();
-  m_progress->report("Loaded data scan");
+  // open the root node
+  NXRoot dataRoot(m_fileName);
+  NXEntry firstEntry = dataRoot.openFirstEntry();
+
+  loadDataScan(firstEntry);
+  m_progress->report("Loaded the data scan block");
+  dataRoot.close();
 
   loadMetadata();
   m_progress->report("Loaded the metadata");
@@ -84,15 +89,10 @@ void LoadILLDiffraction::exec() {
 }
 
 /**
-* Load the data scan
+* Load the data scan block
+* @param firstEntry : First nexus entry opened
 */
-void LoadILLDiffraction::loadDataScan() {
-
-  // open the root node
-  NXRoot dataRoot(m_fileName);
-  NXEntry firstEntry = dataRoot.openFirstEntry();
-
-  m_numberScanPoints = firstEntry.getInt("data_scan/total_steps");
+void LoadILLDiffraction::loadDataScan(NXEntry &firstEntry) {
 
   // read in the actual data
   NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
@@ -100,38 +100,56 @@ void LoadILLDiffraction::loadDataScan() {
   data.load();
 
   m_numberDetectorsRead = data.dim1();
+  m_numberScanPoints = data.dim0();
 
+  // figure out the instrument
   resolveInstrument(firstEntry.getString("instrument/name"));
 
-  // read the scanned variables
-  NXInt scannedVar = firstEntry.openNXInt(
+  // read which variables are scanned
+  NXInt scanned = firstEntry.openNXInt(
       "data_scan/scanned_variables/variables_names/scanned");
-  scannedVar.load();
+  scanned.load();
 
-  // resolveScanType();
+  for (int i = 0; i < scanned.dim0(); ++i) {
+    if (scanned[i] == 1) {
+      m_scannedVarIndices.emplace_back(i);
+    }
+  }
 
   // read the scan points
   NXData scanValues = firstEntry.openNXData("data_scan/scanned_variables");
   NXDouble scanVal = scanValues.openDoubleData();
   scanVal.load();
 
+  // what to do if nothing is scanned?
+  m_isDetectorScan = scanned[1] == 1;
+
+  // Init the output workspace
   initWorkspace();
 
-  std::vector<int> scannedVarIndices;
+  if (m_isDetectorScan) {
+    fillMovingInstrumentScan(data, scanVal);
+  } else {
+    fillStaticInstrumentScan(data, scanVal);
+  }
+}
+
+/**
+ * Fills the loaded data to the workspace for non-moving instrument
+ * @param data : pointer to data
+ * @param scan : pointer to scan points
+ */
+void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
+                                                  const NXDouble &scan) {
+
   std::vector<double> xAxis;
   std::vector<double> monitor;
 
-  for (int i = 0; i < scannedVar.dim0(); ++i) {
-    if (scannedVar[i] == 1) {
-      scannedVarIndices.emplace_back(i);
-    }
-  }
-
-  if (!scannedVarIndices.empty()) {
-    xAxis.assign(scanVal() + m_numberScanPoints * scannedVarIndices[0],
-                 scanVal() + m_numberScanPoints * (scannedVarIndices[0] + 1));
-    monitor.assign(scanVal() + 3 * m_numberScanPoints,
-                   scanVal() + 4 * m_numberScanPoints);
+  if (!m_scannedVarIndices.empty()) {
+    xAxis.assign(scan() + m_numberScanPoints * m_scannedVarIndices[0],
+                 scan() + m_numberScanPoints * (m_scannedVarIndices[0] + 1));
+    monitor.assign(scan() + 3 * m_numberScanPoints,
+                   scan() + 4 * m_numberScanPoints);
   }
 
   // Assign monitor counts
@@ -150,8 +168,19 @@ void LoadILLDiffraction::loadDataScan() {
     m_outWorkspace->mutableX(i) = xAxis;
   }
 
-  dataRoot.close();
+  // Link the instrument
   loadStaticInstrument();
+}
+
+/**
+ * Fills the loaded data to the workspace for moving instrument
+ * @param data : pointer to data
+ * @param scan : pointer to scan points
+ */
+void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
+                                                  const NXDouble &scan) {
+
+  // fill detector scan here
 }
 
 /**
@@ -207,7 +236,7 @@ void LoadILLDiffraction::initWorkspace() {
       nSpectra = m_numberDetectorsActual + 1;
       nBins = m_numberScanPoints;
     } else {
-      nSpectra = m_numberDetectorsActual * m_numberScanPoints + 1;
+      nSpectra = (m_numberDetectorsActual + 1) * m_numberScanPoints;
       nBins = 1;
     }
   }
@@ -216,7 +245,7 @@ void LoadILLDiffraction::initWorkspace() {
 }
 
 /**
-* Loads the metadata. Segfaults on recursion!
+* Loads the metadata to SampleLogs
 */
 void LoadILLDiffraction::loadMetadata() {
 
