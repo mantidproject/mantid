@@ -1242,7 +1242,10 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # get selected rows' scan numbers
-        scan_number_list = self.ui.tableWidget_mergeScans.get_selected_scans()
+        scan_tuple_list = self.ui.tableWidget_mergeScans.get_selected_scans()
+        scan_number_list = list()
+        for tup in scan_tuple_list:
+            scan_number_list.append(tup[0])
         scan_number_list.sort()
 
         info_str = '# Selected scans: \n'
@@ -1998,8 +2001,8 @@ class MainWindow(QtGui.QMainWindow):
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
             self.ui.tableWidget_mergeScans.set_ws_name(row_number, merged_name)
-            if peak_centre is not None:
-                self.ui.tableWidget_mergeScans.set_peak_centre(row_number, peak_centre)
+            # if peak_centre is not None:
+            #     self.ui.tableWidget_mergeScans.set_peak_centre(row_number, peak_centre)
 
             # Sleep for a while
             time.sleep(0.1)
