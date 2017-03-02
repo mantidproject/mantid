@@ -2,10 +2,6 @@ try:
     from mantidplot import *
 except ImportError:
     canMantidPlot = False
-try:
-    from PyQt4.QtCore import QString
-except ImportError:
-    QString = type("")
 
 import ui_data_processor_window
 from PyQt4 import QtCore, QtGui
@@ -51,18 +47,18 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     def getPostprocessingOptions(self):
         """
         Return global post-processing options as a string. 
-		The string must be a sequence of key=value separated by ','.
+        The string must be a sequence of key=value separated by ','.
         """
         return "Params='0.03, -0.04, 0.6'"
 
     def notifyADSChanged(self, workspace_list):
         """
-		The widget will call this method when something changes in the ADS.
-		The argument is the list of table workspaces that can be loaded into
-		the table. This method is intended to be used to update the table actions,
-		specifically, to populate the 'Open Table' menu with the list of table
-		workspaces.
-		"""
+        The widget will call this method when something changes in the ADS.
+        The argument is the list of table workspaces that can be loaded into
+        the table. This method is intended to be used to update the table actions,
+        specifically, to populate the 'Open Table' menu with the list of table
+        workspaces.
+        """
         self.gui.add_actions_to_menus(workspace_list)
 
 
@@ -81,18 +77,18 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
     def setup_layout(self):
         """
         Do further setup that could not be done in the designer.
-		So far only two menus have been added, we need to add the processing table manually.
+        So far only two menus have been added, we need to add the processing table manually.
         """
 
         # The white list (mandatory)
-		# Defines the number of columns, their names and the algorithm properties linked to them
-		# Metdho 'addElement' adds a column to the widget
-		# The first argument is the name of the column
-		# The second argument is the algorithm property
-		# The third argument is a brief description of the column
-		# The fourth argument is a boolean indicating if the value in this column will be used to name the reduced run
-		# The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run (unused if the previous argument is false)
-		# In addition to the specified columns, a last column 'Options' is always added
+        # Defines the number of columns, their names and the algorithm properties linked to them
+        # Metdho 'addElement' adds a column to the widget
+        # The first argument is the name of the column
+        # The second argument is the algorithm property
+        # The third argument is a brief description of the column
+        # The fourth argument is a boolean indicating if the value in this column will be used to name the reduced run
+        # The fifth arument is a prefix added to the value in this column used to generate the name of the reduced run (unused if the previous argument is false)
+        # In addition to the specified columns, a last column 'Options' is always added
         whitelist = MantidQt.MantidWidgets.DataProcessorWhiteList()
         whitelist.addElement('Runs', 'InputWorkspace', 'The run to reduce', True, '')
         whitelist.addElement('Angle', 'ThetaIn', 'The incident angle', False, '')
@@ -103,52 +99,52 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         whitelist.addElement('Scale', 'ScaleFactor', 'Scale Factor', False, '')
 
         # Pre-processing instructions (optional)
-		# Indicates which columns should be pre-process and the algorithms used to pre-process
-		# Pre-processing only happens when two or more runs are specified in the same column, i.e. '1+2'
-		# For instance, runs '1+2' in column 'Runs' will be added
-		# Runs '3+4' in column 'Transmission Runs' will be combined using 'CreateTransmissionWorkspaceAuto'
-		# First argument is the column name that should be pre-processed
-		# Second argument is the algorithm used to pre-process
-		# Third argument is a prefix to name the pre-processed workspace
-		# Fourth argument is used if a 'HintingLineEdit' is used in the interface. In this case it indicates
-		# the blacklist of properties that should be hidden in the hinting line edit
+        # Indicates which columns should be pre-process and the algorithms used to pre-process
+        # Pre-processing only happens when two or more runs are specified in the same column, i.e. '1+2'
+        # For instance, runs '1+2' in column 'Runs' will be added
+        # Runs '3+4' in column 'Transmission Runs' will be combined using 'CreateTransmissionWorkspaceAuto'
+        # First argument is the column name that should be pre-processed
+        # Second argument is the algorithm used to pre-process
+        # Third argument is a prefix to name the pre-processed workspace
+        # Fourth argument is used if a 'HintingLineEdit' is used in the interface. In this case it indicates
+        # the blacklist of properties that should be hidden in the hinting line edit
         preprocess_map = MantidQt.MantidWidgets.DataProcessorPreprocessMap()
         preprocess_map.addElement('Runs', 'Plus', '', '')
         preprocess_map.addElement('Transmission Runs', 'CreateTransmissionWorkspaceAuto', '', '')
 
         # Processing algorithm (mandatory)
-		# The main reduction algorithm
-		# A number of prefixes equal to the number of output workspace properties must be specified
-		# This prefixes are used in combination with the whitelist to name the reduced workspaces
-		# For instance in this case, the first output workspace will be named IvsQ_binned_<runno>,
-		# because column 'Run' is the only column used to create the workspace name, according to
-		# the whitelist above
-		# Additionally (not specified here) a blacklist of properties can be specified as the third
-		# argument. These properties will not appear in the 'Options' column when typing
+        # The main reduction algorithm
+        # A number of prefixes equal to the number of output workspace properties must be specified
+        # This prefixes are used in combination with the whitelist to name the reduced workspaces
+        # For instance in this case, the first output workspace will be named IvsQ_binned_<runno>,
+        # because column 'Run' is the only column used to create the workspace name, according to
+        # the whitelist above
+        # Additionally (not specified here) a blacklist of properties can be specified as the third
+        # argument. These properties will not appear in the 'Options' column when typing
         alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('ReflectometryReductionOneAuto','IvsQ_binned_, IvsQ_, IvsLam_','')
 
         # Post-processing algorithm (optional, but functionality not well tested when not supplied)
-		# Algorithm to post-process runs belonging to the same group
-		# First argument is the name of the algorithm
-		# Second argument is the prefix to be added to the name of the post-processed workspace
-		# Third argument is a black list of properties to hide if a hinting line edit is added to the interface
+        # Algorithm to post-process runs belonging to the same group
+        # First argument is the name of the algorithm
+        # Second argument is the prefix to be added to the name of the post-processed workspace
+        # Third argument is a black list of properties to hide if a hinting line edit is added to the interface
         post_alg = MantidQt.MantidWidgets.DataProcessorPostprocessingAlgorithm('Stitch1DMany', 'IvsQ_', 'InputWorkspaces, OutputWorkspaces')
 
         # The table widget
         self.data_processor_table = MantidQt.MantidWidgets.QDataProcessorWidget(whitelist, preprocess_map, alg, post_alg, self)
 
         # A main presenter
-		# Needed to supply global options for pre-processing/processing/post-processing to the widget
+        # Needed to supply global options for pre-processing/processing/post-processing to the widget
         self.main_presenter = MainPresenter(self)
         self.data_processor_table.accept(self.main_presenter)
 
-		# Set the list of available instruments in the widget and the default instrument
+        # Set the list of available instruments in the widget and the default instrument
         self.data_processor_table.setInstrumentList('INTER, POLREF, OFFSPEC', 'INTER')
-		# The widget will emit a 'runAsPythonScript' signal to run python code
-		# We need to re-emit this signal so that it reaches mantidplot and the code is executed as a python script
+        # The widget will emit a 'runAsPythonScript' signal to run python code
+        # We need to re-emit this signal so that it reaches mantidplot and the code is executed as a python script
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
 
-		# Add the widget to this interface
+        # Add the widget to this interface
         self.layoutBase.addWidget(self.data_processor_table)
 
         return True
@@ -156,12 +152,12 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
     def add_actions_to_menus(self, workspace_list):
         """
         Initialize table actions. Some table actions are not shown with the widget but they can be added to external menus.
-		In this interface we have a 'File' menu and an 'Edit' menu
+        In this interface we have a 'File' menu and an 'Edit' menu
         """
         self.menuEdit.clear()
         self.menuFile.clear()
 
-		# Actions that go in the 'Edit' menu
+        # Actions that go in the 'Edit' menu
         self._create_action(MantidQt.MantidWidgets.DataProcessorProcessCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorExpandCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorPlotRowCommand(self.data_processor_table), self.menuEdit)
@@ -176,7 +172,7 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
         self._create_action(MantidQt.MantidWidgets.DataProcessorDeleteRowCommand(self.data_processor_table), self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessorDeleteGroupCommand(self.data_processor_table), self.menuEdit)
 
-		# Actions that go in the 'File' menu
+        # Actions that go in the 'File' menu
         self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table), self.menuFile, workspace_list)
         self._create_action(MantidQt.MantidWidgets.DataProcessorNewTableCommand(self.data_processor_table), self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table), self.menuFile)
@@ -188,24 +184,24 @@ class DataProcessorGui(QtGui.QMainWindow, ui_data_processor_window.Ui_DataProces
     def _create_action(self, command, menu, workspace_list = None):
         """
         Create an action from a given DataProcessorCommand and add it to a given menu
-		A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
-		It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
-		table workspaces with an appropriate number of columns and column types can be loaded.
+        A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
+        It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
+        table workspaces with an appropriate number of columns and column types can be loaded.
         """
 
         if (workspace_list is not None and command.name() == "Open Table"):
-            submenu = QtGui.QMenu(QString(command.name()), self)
+            submenu = QtGui.QMenu(command.name(), self)
             submenu.setIcon(QtGui.QIcon(command.icon()))
 
             for ws in workspace_list:
-	            ws_command = MantidQt.MantidWidgets.DataProcessorWorkspaceCommand(self.data_processor_table, QString(ws))
-	            action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), QString(ws_command.name()), self)
-	            action.triggered.connect(lambda: self._connect_action(ws_command))
-	            submenu.addAction(action)
+                ws_command = MantidQt.MantidWidgets.DataProcessorWorkspaceCommand(self.data_processor_table, ws)
+                action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
+                action.triggered.connect(lambda: self._connect_action(ws_command))
+                submenu.addAction(action)
 
             menu.addMenu(submenu)
         else:
-            action = QtGui.QAction(QtGui.QIcon(command.icon()), QString(command.name()), self)
+            action = QtGui.QAction(QtGui.QIcon(command.icon()), command.name(), self)
             action.setShortcut(command.shortcut())
             action.setStatusTip(command.tooltip())
             action.triggered.connect(lambda: self._connect_action(command))
