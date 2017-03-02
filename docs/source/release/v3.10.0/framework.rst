@@ -17,6 +17,7 @@ Improved
 ########
 
 - :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
 - Two new properties were added to :ref:`algm-Integration`: *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 
 Bug Fixes
@@ -46,6 +47,8 @@ Improved
 ########
 
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
+
+- :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
 Python
 ------

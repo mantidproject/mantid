@@ -8,6 +8,11 @@ Direct Inelastic Changes
 Algorithms
 ----------
 
+New
+###
+
+- :ref:`CreateEPP <algm-CreateEPP>`: generate EPP tables compatible with :ref:`FindEPP <algm-FindEPP>` directly from instrument geometry.
+
 Improved
 ########
 
