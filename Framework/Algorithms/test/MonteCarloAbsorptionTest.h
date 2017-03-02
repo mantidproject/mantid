@@ -28,12 +28,49 @@ struct TestWorkspaceDescriptor {
   double beamHeight;
 };
 
-Mantid::API::MatrixWorkspace_sptr
-setUpWS(const TestWorkspaceDescriptor &wsProps) {
+void addSample(Mantid::API::MatrixWorkspace_sptr ws,
+               const Environment environment, double beamWidth = 0.,
+               double beamHeight = 0.) {
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
   namespace PhysicalConstants = Mantid::PhysicalConstants;
+
+  // Define a sample shape
+  Object_sptr sampleShape =
+      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
+  // And a material
+  sampleShape->setMaterial(
+      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
+  ws->mutableSample().setShape(*sampleShape);
+
+  if (environment == Environment::SamplePlusContainer) {
+    const std::string id("container");
+    const double radius(0.11);
+    const double height(0.03);
+    const V3D baseCentre(0.0, -height / 2.0, 0.0);
+    const V3D axis(0.0, 1.0, 0.0);
+
+    ShapeFactory shapeMaker;
+    auto can = shapeMaker.createShape<Container>(
+        ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
+                                                   axis, id));
+    can->setMaterial(Material("CanMaterial",
+                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
+    SampleEnvironment *env = new SampleEnvironment("can", can);
+    ws->mutableSample().setEnvironment(env);
+  } else if (environment == Environment::UserBeamSize) {
+    auto inst = ws->getInstrument();
+    auto &pmap = ws->instrumentParameters();
+    auto source = inst->getSource();
+    pmap.addDouble(source->getComponentID(), "beam-width", beamWidth);
+    pmap.addDouble(source->getComponentID(), "beam-height", beamHeight);
+  }
+}
+
+Mantid::API::MatrixWorkspace_sptr
+setUpWS(const TestWorkspaceDescriptor &wsProps) {
+  using namespace Mantid::Kernel;
 
   auto space = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
       wsProps.nspectra, wsProps.nbins);
@@ -51,34 +88,9 @@ setUpWS(const TestWorkspaceDescriptor &wsProps) {
     pmap.addString(inst.get(), "deltaE-mode", "Indirect");
     pmap.addDouble(inst.get(), "Efixed", efixed);
   }
-  // Define a sample shape
-  Object_sptr sampleShape =
-      ComponentCreationHelper::createSphere(0.1, V3D(), "sample-sphere");
-  // And a material
-  sampleShape->setMaterial(
-      Material("Vanadium", PhysicalConstants::getNeutronAtom(23, 0), 0.072));
-  space->mutableSample().setShape(*sampleShape);
 
-  if (wsProps.sampleEnviron == Environment::SamplePlusContainer) {
-    const std::string id("container");
-    const double radius(0.11);
-    const double height(0.03);
-    const V3D baseCentre(0.0, -height / 2.0, 0.0);
-    const V3D axis(0.0, 1.0, 0.0);
-
-    ShapeFactory shapeMaker;
-    auto can = shapeMaker.createShape<Container>(
-        ComponentCreationHelper::cappedCylinderXML(radius, height, baseCentre,
-                                                   axis, id));
-    can->setMaterial(Material("CanMaterial",
-                              PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-    SampleEnvironment *env = new SampleEnvironment("can", can);
-    space->mutableSample().setEnvironment(env);
-  } else if (wsProps.sampleEnviron == Environment::UserBeamSize) {
-    auto source = inst->getSource();
-    pmap.addDouble(source->getComponentID(), "beam-width", wsProps.beamWidth);
-    pmap.addDouble(source->getComponentID(), "beam-height", wsProps.beamHeight);
-  }
+  addSample(space, wsProps.sampleEnviron, wsProps.beamWidth,
+            wsProps.beamHeight);
   return space;
 }
 }
@@ -227,6 +239,20 @@ public:
     auto mcabs = createAlgorithm();
     TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", testWS));
     TS_ASSERT_THROWS(mcabs->execute(), std::invalid_argument);
+  }
+
+  void test_event_workspace() {
+    auto inputWS =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(5, 2,
+                                                                        true);
+    inputWS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    addSample(inputWS, Environment::SampleOnly);
+
+    auto mcabs = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(mcabs->setProperty("InputWorkspace", inputWS));
+    TS_ASSERT(mcabs->execute());
+    // only checking that it can successfully execute
   }
 
 private:

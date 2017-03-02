@@ -2690,6 +2690,7 @@ void ConfigDialog::apply() {
 
   // MD Plotting
   updateMdPlottingSettings();
+  emit app->configModified();
 }
 
 /**

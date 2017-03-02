@@ -77,6 +77,29 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
 
+  void test_detector_component_is_valid() {
+    SpecularReflectionPositionCorrect2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("DetectorComponentName", "invalid-detector-name");
+    alg.setProperty("TwoTheta", 1.4);
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_sample_component_is_valid() {
+    SpecularReflectionPositionCorrect2 alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", m_interWS);
+    alg.setProperty("DetectorComponentName", "point-detector");
+    alg.setProperty("SampleComponentName", "invalid-sample-name");
+    alg.setProperty("TwoTheta", 1.4);
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
   void test_correct_point_detector() {
     SpecularReflectionPositionCorrect2 alg;
     alg.initialize();

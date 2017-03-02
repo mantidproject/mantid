@@ -2,6 +2,7 @@
 """
 This is a module for creating peak integration reports.
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import mantid.api
 from mantidplot import plotSlice

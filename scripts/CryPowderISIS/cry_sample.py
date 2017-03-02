@@ -1,7 +1,7 @@
 #pylint: disable=anomalous-backslash-in-string,redefined-outer-name
 
+from __future__ import (absolute_import, division, print_function)
 import re
-
 from mantid.simpleapi import *
 import cry_load
 
@@ -21,8 +21,8 @@ def get_data_sum(sampleAdd, samLab, EXPR_FILE):
             uamps, uampstot = cry_load.load(samLab, SampleFn, EXPR_FILE, add=True)
         if uamps > 1e-6:
             uampstotal = uampstotal + uamps
-            print "'w' uamps = " + str(uampstot) + 'Data uamps =' + str(uamps) + 'Manually computed sum=' + str(
-                uampstotal)
+            print("'w' uamps = " + str(uampstot) + 'Data uamps =' + str(uamps) + 'Manually computed sum=' + str(
+                uampstotal))
             if firstnonzeronotfound:
                 # Gets BasenameRunno from SampleFn using RegEx
                 # try to find it as path\BasenameRunno.raw
@@ -43,7 +43,7 @@ def get_data_sum(sampleAdd, samLab, EXPR_FILE):
                 msg = msg + '\n' + SampleFn + " Added with " + str(uamps) + " uamp, Total=" + str(uampstotal)
     if firstnonzeronotfound:
         return ('', 0)
-    print msg
+    print(msg)
     # NormaliseByCurrent(samLab,samLab)
     CreateSingleValuedWorkspace(OutputWorkspace='totuamps', DataValue=uampstotal)
     Divide(LHSWorkspace=samLab, RHSWorkspace='totuamps', OutputWorkspace=samLab)
