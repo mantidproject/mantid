@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>803</width>
-    <height>643</height>
+    <height>689</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,9 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="0">
@@ -89,6 +92,9 @@
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="ShowGroups" stdset="0">
          <bool>false</bool>
         </property>
        </widget>
@@ -151,7 +157,16 @@
         </property>
         <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="1" column="3">
@@ -280,7 +295,16 @@
         </widget>
         <widget class="QWidget" name="pgAbsCorAnnulus">
          <layout class="QGridLayout" name="loAnnulus">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="1" column="0">
@@ -399,7 +423,16 @@
         </widget>
         <widget class="QWidget" name="pgAbsCorCylinder">
          <layout class="QGridLayout" name="loCylinder">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item row="0" column="3">
