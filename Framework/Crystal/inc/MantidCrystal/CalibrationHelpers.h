@@ -36,14 +36,14 @@ namespace CalibrationHelpers {
 
 DLLExport void
 adjustUpSampleAndSourcePositions(const Geometry::Instrument &newInstrument,
-                                 double const L0, Kernel::V3D const newSampPos,
+                                 double const L0, const Kernel::V3D &newSampPos,
                                  API::DetectorInfo &detectorInfo);
 
 DLLExport void
-adjustBankPositionsAndSizes(std::vector<std::string> const bankNames,
+adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
                             const Geometry::Instrument &newInstrument,
-                            Kernel::V3D const pos, Kernel::Quat const rot,
-                            double const detWScale, double const detHtScale,
+                            const Kernel::V3D &pos, const Kernel::Quat &rot,
+                            const double detWScale, const double detHtScale,
                             API::DetectorInfo &detectorInfo);
 
 } // namespace CalibrationHelpers

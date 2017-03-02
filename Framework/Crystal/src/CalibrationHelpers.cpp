@@ -24,7 +24,7 @@ constexpr double RAD_TO_DEG = 180. / M_PI;
  * @param detectorInfo DetectorInfo for the workspace being updated
  */
 void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
-                                      double const L0, const V3D newSampPos,
+                                      const double L0, const V3D &newSampPos,
                                       DetectorInfo &detectorInfo) {
 
   if (L0 <= 0)
@@ -68,10 +68,11 @@ void adjustUpSampleAndSourcePositions(const Instrument &newInstrument,
  *rotation of panels around their center
  * @param detectorInfo DetectorInfo object for the
  */
-void adjustBankPositionsAndSizes(const std::vector<std::string> bankNames,
-                                 const Instrument &newInstrument, const V3D pos,
-                                 const Quat rot, double const detWScale,
-                                 double const detHtScale,
+void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
+                                 const Instrument &newInstrument,
+                                 const V3D &pos, const Quat &rot,
+                                 const double detWScale,
+                                 const double detHtScale,
                                  DetectorInfo &detectorInfo) {
   boost::shared_ptr<ParameterMap> pmap = newInstrument.getParameterMap();
 
