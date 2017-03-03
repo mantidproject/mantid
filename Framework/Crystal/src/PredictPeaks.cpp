@@ -301,7 +301,7 @@ void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
 
   g_log.notice() << "Out of " << allowedPeakCount
                  << " allowed peaks within parameters, " << onDetectorPeakCount
-                 << " were found to hit a detector ";
+                 << " were found to hit a detector";
 
   if (usingExtendedDetectorSpace) {
     g_log.notice() << " and " << offDetectorPeakCount << " were found in "
