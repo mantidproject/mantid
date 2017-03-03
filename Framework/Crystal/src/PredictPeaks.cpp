@@ -262,7 +262,7 @@ void PredictPeaks::exec() {
     if (useExtendedDetectorSpace &&
         !m_inst->getComponentByName("extended-detector-space")) {
       g_log.warning() << "Attempting to find peaks outside of detectors but "
-                         "no extended detector space has been defined";
+                         "no extended detector space has been defined\n";
     }
 
     for (auto &possibleHKL : possibleHKLs) {
