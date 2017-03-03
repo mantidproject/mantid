@@ -16,6 +16,7 @@ from peakprocesshelper import PeakProcessRecord
 import fputility
 import project_manager
 import peak_integration_utility
+import absorption
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -141,9 +142,9 @@ class CWSCDReductionControl(object):
         :return: k_index of the (k_x, k_y, k_z)
         """
         # check
-        assert isinstance(k_x, float)
-        assert isinstance(k_y, float)
-        assert isinstance(k_z, float)
+        assert isinstance(k_x, float), 'Kx is wrong'
+        assert isinstance(k_y, float), 'Ky is wrong'
+        assert isinstance(k_z, float), 'Kz is wrong'
 
         k_shift_vector = (k_x, k_y, k_z)
         self._kShiftDict[self._kVectorIndex] = [k_shift_vector, []]
@@ -554,8 +555,10 @@ class CWSCDReductionControl(object):
         :return:
         """
         # check
-        assert isinstance(exp_number, int), 'blabla'
-        assert isinstance(scan_number, int), 'blabla'
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(exp_number, type(scan_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(scan_number, type(scan_number))
 
         # get SPICE table
         spice_table_name = get_spice_table_name(exp_number, scan_number)
@@ -660,8 +663,6 @@ class CWSCDReductionControl(object):
 
                 if export_absorption:
                     # calculate absorption correction
-                    import absorption
-
                     spice_ub = convert_mantid_ub_to_spice(ub_matrix)
                     up_cart, us_cart = absorption.calculate_absorption_correction_2(
                         exp_number, scan_number, spice_ub)
@@ -2205,6 +2206,10 @@ class CWSCDReductionControl(object):
             # add to the target k-index list
             if k_index > 0 and scan_number not in self._kShiftDict[k_index][1]:
                 self._kShiftDict[k_index][1].append(scan_number)
+
+            # add to the peak info
+            peak_info = self.get_peak_info(self._expNumber, scan_number)
+            peak_info.set_k_vector(self._kShiftDict[k_index][0])
 
             # remove from the previous placeholder
             for k_i in self._kShiftDict.keys():

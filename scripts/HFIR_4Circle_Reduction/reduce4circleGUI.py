@@ -821,8 +821,10 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_k_shift(scan_list, k_index)
 
         # set to table
+        exp_number = int(self.ui.lineEdit_exp.text())
         for row_index in selected_row_numbers:
             self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
 
         return
 
@@ -3144,7 +3146,7 @@ class MainWindow(QtGui.QMainWindow):
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
-            peak_integrate_dict = peak_info.generate_report()
+            peak_integrate_dict = peak_info.generate_integration_report()
             report_dict[scan_number] = peak_integrate_dict
         # END-FOR
 

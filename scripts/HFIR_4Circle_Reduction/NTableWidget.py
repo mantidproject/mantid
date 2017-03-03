@@ -1,6 +1,6 @@
 #pylint: disable=C0103,R0904
 # N(DAV)TableWidget
-
+import csv
 from PyQt4 import QtGui, QtCore
 
 try:
@@ -96,32 +96,37 @@ class NTableWidget(QtGui.QTableWidget):
 
         :return:
         """
-        # get title
+        # get title as header
         col_names = self._myColumnNameList[:]
-        col_names_str = '{0}'.format(col_names)
-        col_names_str = col_names_str.replace(', ', ' ')
-        headeder = col_names_str
+        # col_names_str = '{0}'.format(col_names)
+        # col_names_str = col_names_str.replace(', ', ' ')
+        # headeder = col_names_str
 
         num_columns = self.columnCount()
 
         num_rows = self.rowCount()
+        content_line_list = list()
         for i_row in range(num_columns):
             line_items = list()
             for j_col in range(num_columns):
                 item_value = self.get_cell_value(i_row, j_col)
+                if isinstance(item_value, str):
+                    # remove tab because tab will be used as delimiter
+                    item_value = item_value.replace('\t', '')
                 line_items.append(item_value)
             # END-FOR
-            blabla()
+            content_line_list.append(line_items)
+        # END-FOR (row)
 
-        # FIXME/TODO/ISSUE/NOW - From here!
-        """
-        import csv
-        with open('eggs.csv', 'wb') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=' ',
-                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
-        spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
-        """
+        with open(csv_file_name, 'w') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='#', quoting=csv.QUOTE_MINIMAL)
+            # write header
+            csv_writer.writerow(col_names)
+            # write content
+            for line_items in content_line_list:
+                csv_writer.writerow(line_items)
+            # END-FOR
+        # END-WITH
 
         return
 

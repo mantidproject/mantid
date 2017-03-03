@@ -27,7 +27,6 @@ class PeakProcessRecord(object):
                                                             'exist.' % peak_ws_name
 
         # set
-        self._isCurrentUserHKL = True
         self._myExpNumber = exp_number
         self._myScanNumber = scan_number
         self._myPeakWorkspaceName = peak_ws_name
@@ -37,9 +36,13 @@ class PeakProcessRecord(object):
 
         # Define class variable
         # HKL list
-        self._userHKL = None    # user specified HKL
+        self._calculatedHKL = None    # user specified HKL
         self._spiceHKL = None                        # spice HKL
         self._prevHKL = numpy.array([0., 0., 0.])    # previous HKL
+
+        # magnetic peak set up
+        self._kShiftVector = [0, 0, 0]
+        self._absorptionCorrection = 1.
 
         # peak center and PeaksWorkspace
         self._avgPeakCenter = None
@@ -63,7 +66,8 @@ class PeakProcessRecord(object):
         # Figure print
         self._fingerPrint = '{0:.7f}.{1}'.format(time.time(), random.randint(0, 10000000))
 
-        print '[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).'.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print '[DB...BAT] Create PeakProcessRecord for Exp {0} Scan {1} ({2} | {3}).' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
         return
 
     def calculate_peak_center(self):
@@ -120,34 +124,54 @@ class PeakProcessRecord(object):
 
         return
 
-    def generate_report(self):
+    def generate_integration_report(self):
         """
-
+        generate a dictionary for this PeakInfo
         :return:
         """
-        # TODO/FIXME/NOW/ISSUE - Implement ASAP
-        """
-        scan_number_list = sorted(peak_integration_summary.keys())
-        for scan_number in scan_number_list:
-            spice_hkl = peak_integration_summary['SPICE HKL']
-            calculated_hkl = peak_integration_summary['Mantid HKL']
-            mask_name = peak_integration_summary['Mask']
-            intensity1 = peak_integration_summary['Raw Intensity']
-            error1 = peak_integration_summary['Raw Intensity Error']
-            intensity2 = peak_integration_summary['Intensity 2']
-            error2 = peak_integration_summary['Intensity 2 Error']
-            intensity3 = peak_integration_summary['Gauss Intensity']
-            error3 = peak_integration_summary['Gauss Intensity Error']
-            lorentz_factor = peak_integration_summary['Lorentz']
-            estimated_bkgd = peak_integration_summary['Estimated Background']
-            gauss_bkgd = peak_integration_summary['Fitted Background']
-            gauss_a = peak_integration_summary['Fitted A']
-            gauss_sigma = peak_integration_summary['Fitted Sigma']
-            motor_name = peak_integration_summary['Motor']
-            motor_step = peak_integration_summary['Motor Step']
-            k_shift = peak_integration_summary['K-vector']
-            absorption_correction = peak_integration_summary['Absorption Correction']
-        """
+        report = dict()
+
+        report['SPICE HKL'] = str_format(self._spiceHKL)
+        report['Mantid HKL'] = str_format(self._calculatedHKL)
+        report['Mask'] = self._integrationDict['mask']
+        if self._integrationDict:
+            report['Raw Intensity'] = self._integrationDict['simple intensity']
+            report['Raw Intensity Error'] = self._integrationDict['simple error']
+            report['Intensity 2'] = self._integrationDict['intensity 2']
+            report['Intensity 2 Error'] = self._integrationDict['error 2']
+            report['Gauss Intensity'] = self._integrationDict['gauss intensity']
+            report['Gauss Error'] = self._integrationDict['gauss error']
+            report['Estimated Background'] = self._integrationDict['estimated background']
+            if ['gauss parameters'] in self._integrationDict:
+                report['Fitted Background'] = self._integrationDict['gauss parameters']['B']
+                report['Fitted A'] = self._integrationDict['gauss parameters']['A']
+                report['Fitted Sigma'] = self._integrationDict['gauss parameters']['s']
+            else:
+                report['Fitted Background'] = ''
+                report['Fitted A'] = ''
+                report['Fitted Sigma'] = ''
+        else:
+            report['Raw Intensity'] = ''
+            report['Raw Intensity Error'] = ''
+            report['Intensity 2'] = ''
+            report['Intensity 2 Error'] = ''
+            report['Gauss Intensity'] = ''
+            report['Gauss Error'] = ''
+            report['Lorentz'] = ''
+            report['Estimated Background'] = ''
+            report['Fitted Background'] = ''
+            report['Fitted A'] = ''
+            report['Fitted Sigma'] = ''
+
+        report['Lorentz'] = self._lorenzFactor
+        if self._movingMotorTuple is None:
+            report['Motor'] = ''
+            report['Motor Step'] = None
+        else:
+            report['Motor'] = self._movingMotorTuple[0]
+            report['Motor Step'] = self._movingMotorTuple[1]
+        report['K-vector'] = self._kShiftVector
+        report['Absorption Correction'] = self._absorptionCorrection
 
         return dict()
 
@@ -229,8 +253,8 @@ class PeakProcessRecord(object):
         """
         if user_hkl:
             # return user-specified HKL
-            assert self._userHKL is not None, 'User HKL is None (not set up yet)'
-            ret_hkl = self._userHKL
+            assert self._calculatedHKL is not None, 'User HKL is None (not set up yet)'
+            ret_hkl = self._calculatedHKL
         else:
             # get HKL from SPICE file
             # if self._spiceHKL is None:
@@ -283,6 +307,19 @@ class PeakProcessRecord(object):
 
         return peak_center_list, peak_intensity_list
 
+    def set_k_vector(self, k_vector):
+        """
+
+        :param k_vector:
+        :return:
+        """
+        # check input
+        assert not isinstance(k_vector, str) and len(k_vector) == 3, 'K-vector {0} must have 3 items.'.format(k_vector)
+
+        self._kShiftVector = k_vector[:]
+
+        return
+
     @property
     def lorentz_correction_factor(self):
         """
@@ -304,8 +341,8 @@ class PeakProcessRecord(object):
         assert isinstance(factor, float), 'Lorentz correction factor'
         self._lorenzFactor = factor
 
-        print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
-              ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+        # print '[DB...BAT] Exp {0} Scan {1}  ({2} | {3}) has Lorentz factor set up.' \
+        #       ''.format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
 
         return
 
@@ -357,6 +394,19 @@ class PeakProcessRecord(object):
 
         return
 
+    def set_absorption_factor(self, abs_factor):
+        """
+        set absorption correction factor
+        :return:
+        """
+        # check
+        assert isinstance(abs_factor, float) or isinstance(abs_factor, int),\
+            'Absorption correction {0} must be an integer but not {1}.'.format(abs_factor, type(abs_factor))
+
+        self._absorptionCorrection = abs_factor
+
+        return
+
     def set_data_ws_name(self, md_ws_name):
         """ Set the name of MDEventWorkspace with merged Pts.
         :param md_ws_name:
@@ -379,9 +429,9 @@ class PeakProcessRecord(object):
         assert hkl.shape == (3,), 'HKL must be a 3-element 1-D array but not %s.' % str(hkl.shape)
 
         # store the HKL
-        if self._userHKL is not None:
-            self._prevHKL = self._userHKL[:]
-        self._userHKL = hkl
+        if self._calculatedHKL is not None:
+            self._prevHKL = self._calculatedHKL[:]
+        self._calculatedHKL = hkl
 
         return
 
@@ -403,17 +453,17 @@ class PeakProcessRecord(object):
             mi_l = float(mi_l)
         # END-IF
 
-        if self._userHKL is None:
+        if self._calculatedHKL is None:
             # init HKL
-            self._userHKL = numpy.ndarray(shape=(3,), dtype='float')
+            self._calculatedHKL = numpy.ndarray(shape=(3,), dtype='float')
         else:
             # save previous HKL
-            self._prevHKL = self._userHKL[:]
+            self._prevHKL = self._calculatedHKL[:]
 
         # set current
-        self._userHKL[0] = mi_h
-        self._userHKL[1] = mi_k
-        self._userHKL[2] = mi_l
+        self._calculatedHKL[0] = mi_h
+        self._calculatedHKL[1] = mi_k
+        self._calculatedHKL[2] = mi_l
 
         return
 
@@ -489,3 +539,22 @@ def build_pt_spice_table_row_map(spice_table_ws):
         pt_spice_row_dict[pt_number] = i_row
 
     return pt_spice_row_dict
+
+
+def str_format(float_items):
+    """
+
+    :param float_items:
+    :return:
+    """
+    format_str = ''
+    for index, value in enumerate(float_items):
+        if index > 0:
+            format_str += ', '
+        if isinstance(value, float):
+            format_str += '{0:.4f}'.format(value)
+        else:
+            format_str += '{0}'.format(value)
+    # END-FOR
+
+    return format_str
