@@ -25,7 +25,7 @@ std::string generateDifferenceMessage(const std::string &item,
   return stringstream.str();
 }
 }
-
+const std::string SampleLogsBehaviour::SUM_MERGE = "sample_logs_sum";
 const std::string SampleLogsBehaviour::TIME_SERIES_MERGE =
     "sample_logs_time_series";
 const std::string SampleLogsBehaviour::LIST_MERGE = "sample_logs_list";
@@ -46,6 +46,8 @@ const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
  *
  * @param ws the base workspace that the other workspaces are merged into
  * @param logger the logger from the parent algorithm
+ * @param sampleLogsSum a string with a comma separated list of the logs to be
+ *summed
  * @param sampleLogsTimeSeries a string with a comma separated list of the logs
  * for the time series merge
  * @param sampleLogsList a string with a comma separated list of the logs for a
@@ -61,14 +63,13 @@ const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
  * @return An instance of SampleLogsBehaviour initialised with the merge types
  * from the IPF and parent algorithm
  */
-SampleLogsBehaviour::SampleLogsBehaviour(MatrixWorkspace &ws, Logger &logger,
-                                         std::string sampleLogsTimeSeries,
-                                         std::string sampleLogsList,
-                                         std::string sampleLogsWarn,
-                                         std::string sampleLogsWarnTolerances,
-                                         std::string sampleLogsFail,
-                                         std::string sampleLogsFailTolerances)
+SampleLogsBehaviour::SampleLogsBehaviour(
+    MatrixWorkspace &ws, Logger &logger, std::string sampleLogsSum,
+    std::string sampleLogsTimeSeries, std::string sampleLogsList,
+    std::string sampleLogsWarn, std::string sampleLogsWarnTolerances,
+    std::string sampleLogsFail, std::string sampleLogsFailTolerances)
     : m_logger(logger) {
+  setSampleMap(m_logMap, MergeLogType::Sum, sampleLogsSum, ws, "");
   setSampleMap(m_logMap, MergeLogType::TimeSeries, sampleLogsTimeSeries, ws,
                "");
   setSampleMap(m_logMap, MergeLogType::List, sampleLogsList, ws, "");
@@ -95,7 +96,10 @@ SampleLogsBehaviour::SampleLogsBehaviour(MatrixWorkspace &ws, Logger &logger,
 void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
     SampleLogsMap &map, MatrixWorkspace &ws) {
   std::string params =
-      ws.getInstrument()->getParameterAsString(TIME_SERIES_MERGE, false);
+      ws.getInstrument()->getParameterAsString(SUM_MERGE, false);
+  setSampleMap(map, MergeLogType::Sum, params, ws, "", true);
+
+  params = ws.getInstrument()->getParameterAsString(TIME_SERIES_MERGE, false);
   setSampleMap(map, MergeLogType::TimeSeries, params, ws, "", true);
 
   params = ws.getInstrument()->getParameterAsString(LIST_MERGE, false);
@@ -186,7 +190,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     bool isNumeric;
     double value = 0.0;
     isNumeric = setNumericValue(item, ws, value);
-    if (!isNumeric && mergeType == MergeLogType::TimeSeries) {
+    if (!isNumeric && (mergeType == MergeLogType::Sum ||
+                       mergeType == MergeLogType::TimeSeries)) {
       m_logger.error() << item << " could not be converted to a numeric type. "
                                   "This sample log will be ignored."
                        << std::endl;
@@ -350,6 +355,10 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
     }
 
     switch (item.first.second) {
+    case MergeLogType::Sum: {
+      this->updateSumProperty(addeeWSNumber, outWSNumber, outWS, logName);
+      break;
+    }
     case MergeLogType::TimeSeries: {
       this->updateTimeSeriesProperty(addeeWS, outWS, logName);
       break;
@@ -368,6 +377,21 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
       break;
     }
   }
+}
+
+/**
+ * Perform the update for a sum property, adding a new value to the existing
+ *one. Skipped if the time series log entry is in the addeeWS.
+ *
+ * @param addeeWS the workspace being merged
+ * @param outWS the workspace the others are merged into
+ * @param name the name of the property
+ */
+void SampleLogsBehaviour::updateSumProperty(double addeeWSNumber,
+                                            double outWSNumber,
+                                            MatrixWorkspace &outWS,
+                                            const std::string name) {
+  outWS.mutableRun().addProperty(name, addeeWSNumber + outWSNumber, name, true);
 }
 
 /**

@@ -34,8 +34,9 @@ namespace Algorithms {
 */
 class MANTID_ALGORITHMS_DLL SampleLogsBehaviour {
 public:
-  enum class MergeLogType { TimeSeries, List, Warn, Fail };
+  enum class MergeLogType { Sum, TimeSeries, List, Warn, Fail };
 
+  static const std::string SUM_MERGE;
   static const std::string TIME_SERIES_MERGE;
   static const std::string LIST_MERGE;
   static const std::string WARN_MERGE;
@@ -53,6 +54,7 @@ public:
   };
 
   SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
+                      const std::string sampleLogsSum,
                       const std::string sampleLogsTimeSeries,
                       const std::string sampleLogsList,
                       const std::string sampleLogsWarn,
@@ -94,6 +96,8 @@ private:
   createTolerancesVector(const size_t numberNames,
                          const std::vector<std::string> &tolerances);
 
+  void updateSumProperty(double addeeWSNumber, double outWSNumber,
+                         API::MatrixWorkspace &outWS, const std::string name);
   void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS,
                                 API::MatrixWorkspace &outWS,
                                 const std::string name);

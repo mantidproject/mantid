@@ -1003,6 +1003,13 @@ public:
     AnalysisDataService::Instance().remove("outWS2");
   }
 
+  void test_mergeSampleLogs_sum() {
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 1.2, 2.3, 0.0, 0.0);
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "3.5", 2);
+  }
+
   void test_mergeSampleLogs_time_series() {
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
     auto ws = create_group_workspace_with_sample_logs<double>(
@@ -1139,11 +1146,11 @@ public:
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
-    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
     do_test_mergeSampleLogs(
         create_group_workspace_with_sample_logs<std::string>(
             mergeType, "prop1", "1", "two", "", ""),
-        "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
+        "prop1", mergeType, "1", 1);
   }
 
   void

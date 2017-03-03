@@ -40,6 +40,9 @@ void MergeRuns::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty(
+      "SampleLogsSum", "",
+      "A comma separated list of the sample logs to sum into a single entry.");
   declareProperty("SampleLogsTimeSeries", "",
                   "A comma separated list of the sample logs to merge into a "
                   "time series. The initial times are taken as the start times "
@@ -85,6 +88,7 @@ void MergeRuns::exec() {
   // Check that all input workspaces exist and match in certain important ways
   const std::vector<std::string> inputs_orig = getProperty("InputWorkspaces");
 
+  const std::string sampleLogsSum = getProperty("SampleLogsSum");
   const std::string sampleLogsTimeSeries = getProperty("SampleLogsTimeSeries");
   const std::string sampleLogsList = getProperty("SampleLogsList");
   const std::string sampleLogsWarn = getProperty("SampleLogsWarn");
@@ -130,8 +134,9 @@ void MergeRuns::exec() {
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS(m_inMatrixWS.front()->clone());
     Algorithms::SampleLogsBehaviour sampleLogsBehaviour = SampleLogsBehaviour(
-        *outWS, g_log, sampleLogsTimeSeries, sampleLogsList, sampleLogsWarn,
-        sampleLogsWarnTolerances, sampleLogsFail, sampleLogsFailTolerances);
+        *outWS, g_log, sampleLogsSum, sampleLogsTimeSeries, sampleLogsList,
+        sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
+        sampleLogsFailTolerances);
 
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
