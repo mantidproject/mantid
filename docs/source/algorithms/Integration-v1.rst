@@ -31,7 +31,9 @@ limiting the summing range over all histograms. RangeLowerList and
 RangeUpperList contain the ranges for each individual histogram. The
 properties can be mixed: for instance, the histogram specific lower
 integration limits can be given by RangeLowerList while all upper limits
-can be set to the same value by RangeUpper.
+can be set to the same value by RangeUpper. If both list and non-list versions
+are given, then the range is chosen which gives stricter limits for each
+histogram.
 
 No rebinning takes place as part of this algorithm: if the ranges given do
 not coincide with a bin boundary then the first bin boundary within the

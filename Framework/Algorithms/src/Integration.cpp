@@ -202,9 +202,9 @@ void Integration::exec() {
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
     const double lowerLimit =
-        minRanges.empty() ? minRange : minRanges[i - minSpec];
+        minRanges.empty() ? minRange : std::max(minRange, minRanges[outWI]);
     const double upperLimit =
-        maxRanges.empty() ? maxRange : maxRanges[i - minSpec];
+        maxRanges.empty() ? maxRange : std::min(maxRange, maxRanges[outWI]);
 
     // If doing partial bins, we want to set the bin boundaries to the specified
     // values
