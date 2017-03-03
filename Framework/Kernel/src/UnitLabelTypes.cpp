@@ -22,7 +22,7 @@ const UnitLabel Symbol::InverseAngstromSq("Angstrom^-2", L"\u212b\u207b\u00b2",
 /// MilliElectronVolts
 const UnitLabel Symbol::MilliElectronVolts("meV");
 /// GHz
-  const UnitLabel Symbol::GHz("GHz");
+const UnitLabel Symbol::GHz("GHz");
 /// Metre
 const UnitLabel Symbol::Metre("m");
 /// Nanometre

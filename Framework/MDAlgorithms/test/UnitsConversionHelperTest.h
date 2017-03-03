@@ -107,7 +107,8 @@ public:
     const auto &X = ws2D->readX(0);
     size_t n_bins = X.size() - 1;
     for (size_t i = 0; i < n_bins; i++) {
-      TS_ASSERT_DELTA(X[i]*Mantid::PhysicalConstants::meVtoFrequency, Conv.convertUnits(X[i]), 1.e-4);
+      TS_ASSERT_DELTA(X[i] * Mantid::PhysicalConstants::meVtoFrequency,
+                      Conv.convertUnits(X[i]), 1.e-4);
     }
 
     auto range = Conv.getConversionRange(0, 10);

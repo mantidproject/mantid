@@ -862,7 +862,8 @@ double DeltaE_inWavenumber::conversionTOFMax() const {
 /* Energy Transfer in units of frequency
  * =====================================================================================================
  *
- * This is identical to Energy Transfer in meV, with one division by Plank's constant, or multiplication
+ * This is identical to Energy Transfer in meV, with one division by Plank's
+ *constant, or multiplication
  * by factor PhysicalConstants::meVtoFrequency
  */
 DECLARE_UNIT(DeltaE_inFrequency)
@@ -880,7 +881,7 @@ Unit *DeltaE_inFrequency::clone() const {
 }
 
 DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
-  addConversion("DeltaE", 1.0/PhysicalConstants::meVtoFrequency, 1.);
+  addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
 }
 
 double DeltaE_inFrequency::conversionTOFMin() const {

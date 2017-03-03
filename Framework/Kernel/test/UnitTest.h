@@ -943,7 +943,9 @@ public:
   // Energy transfer in frequency tests
   //----------------------------------------------------------------------
 
-  void testDeltaEf_unitID() { TS_ASSERT_EQUALS(dEf.unitID(), "DeltaE_inFrequency") }
+  void testDeltaEf_unitID() {
+    TS_ASSERT_EQUALS(dEf.unitID(), "DeltaE_inFrequency")
+  }
 
   void testDeltaEf_caption() {
     TS_ASSERT_EQUALS(dE.caption(), "Energy transfer")
@@ -961,7 +963,8 @@ public:
   }
 
   void testDeltaEf_toTOF() {
-    std::vector<double> x(1, 0.26597881882), y(1, 1.0);  //1.1meV = h*0.26597881882Ghz
+    std::vector<double> x(1, 0.26597881882),
+        y(1, 1.0); // 1.1meV = h*0.26597881882Ghz
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
     TS_ASSERT_DELTA(x[0], 5071.066, 0.001)

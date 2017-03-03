@@ -602,11 +602,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
-    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "DeltaE_inFrequency");
     TS_ASSERT_EQUALS(output->blocksize(), 1669);
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
-
 
     AnalysisDataService::Instance().remove(outputSpace);
   }
