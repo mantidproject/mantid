@@ -73,7 +73,7 @@ double QwtWorkspaceSpectrumData::getY(size_t i) const {
 }
 
 double QwtWorkspaceSpectrumData::getEX(size_t i) const {
-  return m_hist.pointStandardDeviations()[i];
+  return m_hist.x()[i];
 }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
