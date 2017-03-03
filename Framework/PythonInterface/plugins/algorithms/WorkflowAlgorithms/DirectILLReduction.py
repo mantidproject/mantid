@@ -206,7 +206,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             name=common.PROP_INPUT_WS,
             defaultValue='',
             validator=inputWorkspaceValidator,
-            optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
@@ -239,7 +238,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
             name=common.PROP_DIAGNOSTICS_WS,
             defaultValue='',
             direction=Direction.Input,
-            optional=PropertyMode.Mandatory),
+            optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
         self.declareProperty(name=common.PROP_REBINNING_MODE_W,
@@ -257,6 +256,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Maximum number of energy bins for automatic rebinning '
                                  '(default: 10 times the number of TOF bins).')
+        self.setPropertyGroup(common.PROP_BIN_COUNT_LIMIT_W, common.PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
@@ -385,7 +385,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Normalize to vanadium workspace."""
         vanaWS = self.getProperty(common.PROP_VANA_WS).value
-        # TODO integrate vana, ComputeCalibrationCoefVan
+        if not vanaWS:
+            return
         vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
         vanaNormalizedWS = Divide(LHSWorkspace=mainWS,
                                   RHSWorkspace=vanaWS,

@@ -307,12 +307,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm.')
-        self.declareProperty(name=common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
-                             defaultValue=3.0,
-                             validator=positiveFloat,
-                             direction=Direction.Input,
-                             doc="Width of the elastic peak in multiples " +
-                                 " of 'Sigma' in the EPP table.")
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL,
                              defaultValue=Property.EMPTY_INT,
                              validator=IntBoundedValidator(lower=0),
@@ -323,6 +317,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              validator=positiveInt,
                              direction=Direction.Input,
                              doc='Index of the incident monitor, if not specified in instrument parameters.')
+        self.declareProperty(IntArrayProperty(name=common.PROP_DETS_AT_L2,
+                                              values='',
+                                              validator=positiveIntArray,
+                                              direction=Direction.Input),
+                             doc='List of detectors with the instruments ' +
+                                 'nominal L2 distance.')
         self.declareProperty(name=common.PROP_INCIDENT_ENERGY_CALIBRATION,
                              defaultValue=common.INCIDENT_ENERGY_CALIBRATION_ON,
                              validator=StringListValidator([
@@ -331,14 +331,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable incident energy ' +
                                  'calibration on IN4 and IN6.')
-        # TODO This is actually mandatory if Ei calibration or
-        #      diagnostics are enabled.
-        self.declareProperty(IntArrayProperty(name=common.PROP_DETS_AT_L2,
-                                              values='',
-                                              validator=positiveIntArray,
-                                              direction=Direction.Input),
-                             doc='List of detectors with the instruments ' +
-                                 'nominal L2 distance.')
+        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_INCIDENT_ENERGY_WS,
             defaultValue='',
@@ -346,6 +339,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='A single-valued workspace holding the calibrated ' +
                 'incident energy.')
+        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_WS, common.PROPGROUP_INCIDENT_ENERGY_CALIBRATION)
         self.declareProperty(name=common.PROP_FLAT_BKG_SCALING,
                              defaultValue=1.0,
                              validator=positiveFloat,
@@ -374,6 +368,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.NORM_METHOD_OFF]),
                              direction=Direction.Input,
                              doc='Normalisation method.')
+        self.setPropertyGroup(common.PROP_NORMALISATION, common.PROPGROUP_MON_NORMALISATION)
+        self.declareProperty(name=common.PROP_MON_PEAK_SIGMA_MULTIPLIER,
+                             defaultValue=3.0,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc="Width of the monitor peak in multiples " +
+                                 " of 'Sigma' in monitor's EPP table.")
+        self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, common.PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_OUTPUT_DET_EPP_WS,
@@ -551,7 +553,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if normalisationMethod != common.NORM_METHOD_OFF:
             if normalisationMethod == common.NORM_METHOD_MON:
                 sigmaMultiplier = \
-                    self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+                    self.getProperty(common.PROP_MON_PEAK_SIGMA_MULTIPLIER).value
                 monIndex = self._monitorIndex(monWS)
                 eppRow = monEPPWS.row(monIndex)
                 if eppRow['FitStatus'] != 'success':

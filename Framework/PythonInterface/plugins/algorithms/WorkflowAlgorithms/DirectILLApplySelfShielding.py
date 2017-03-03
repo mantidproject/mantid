@@ -146,7 +146,6 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             name=common.PROP_INPUT_WS,
             defaultValue='',
             validator=inputWorkspaceValidator,
-            optional=PropertyMode.Optional,
             direction=Direction.Input),
             doc='Input workspace.')
         self.declareProperty(WorkspaceProperty(name=common.PROP_OUTPUT_WS,
@@ -175,16 +174,12 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced empty container workspace.')
-        self.setPropertyGroup(common.PROP_EC_WS,
-                              common.PROPGROUP_EC)
         self.declareProperty(name=common.PROP_EC_SCALING,
                              defaultValue=1.0,
                              validator=scalingFactor,
                              direction=Direction.Input,
                              doc='Scaling factor (transmission, if no self ' +
                                  'shielding is applied) for empty container.')
-        self.setPropertyGroup(common.PROP_EC_SCALING,
-                              common.PROPGROUP_EC)
         self.declareProperty(WorkspaceGroupProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
