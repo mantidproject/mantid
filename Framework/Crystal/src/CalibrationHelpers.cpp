@@ -10,9 +10,6 @@ namespace Mantid {
 namespace Crystal {
 
 namespace CalibrationHelpers {
-
-constexpr double RAD_TO_DEG = 180. / M_PI;
-
 /**
  * Updates the DetectorInfo for the workspace containing newInstrument to
  *reflect the position of the source
