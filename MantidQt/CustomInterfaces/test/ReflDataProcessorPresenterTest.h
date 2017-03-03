@@ -48,53 +48,6 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspace(const std::string &wsName,
-                           const DataProcessorWhiteList &whitelist) {
-    auto ws = createWorkspace(wsName, whitelist);
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "12345"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "ProcessingInstructions='0'";
-    row = ws->appendRow();
-    row << "0"
-        << "12346"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "ProcessingInstructions='0'";
-    row = ws->appendRow();
-    row << "1"
-        << "24681"
-        << "0.5"
-        << ""
-        << "0.1"
-        << "1.6"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "24682"
-        << "1.5"
-        << ""
-        << "1.4"
-        << "2.9"
-        << "0.04"
-        << "1"
-        << "";
-    return ws;
-  }
-
-  ITableWorkspace_sptr
-  createPrefilledEventWorkspace(const std::string &wsName,
                                 const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
@@ -140,30 +93,49 @@ private:
     return ws;
   }
 
-  void createTOFWorkspace(const std::string &wsName,
-                          const std::string &runNumber = "") {
-    auto tinyWS =
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
-    auto inst = tinyWS->getInstrument();
+  ITableWorkspace_sptr
+  createPrefilledMixedWorkspace(const std::string &wsName,
+                                const DataProcessorWhiteList &whitelist) {
+    auto ws = createWorkspace(wsName, whitelist);
+    TableRow row = ws->appendRow();
+    row << "0"
+        << "38415"
+        << "0.5069"
+        << "38393"
+        << "0.0065"
+        << "0.0737"
+        << "0.0148"
+        << "1"
+        << "";
+    row = ws->appendRow();
+    row << "0"
+        << "38417"
+        << "0.5069"
+        << "38393"
+        << "0.0065"
+        << "0.0737"
+        << "0.0198"
+        << "1"
+        << "";
+    return ws;
+  }
 
-    inst->getParameterMap()->addDouble(inst.get(), "I0MonitorIndex", 1.0);
-    inst->getParameterMap()->addDouble(inst.get(), "PointDetectorStart", 1.0);
-    inst->getParameterMap()->addDouble(inst.get(), "PointDetectorStop", 1.0);
-    inst->getParameterMap()->addDouble(inst.get(), "LambdaMin", 0.0);
-    inst->getParameterMap()->addDouble(inst.get(), "LambdaMax", 10.0);
-    inst->getParameterMap()->addDouble(inst.get(), "MonitorBackgroundMin", 0.0);
-    inst->getParameterMap()->addDouble(inst.get(), "MonitorBackgroundMax",
-                                       10.0);
-    inst->getParameterMap()->addDouble(inst.get(), "MonitorIntegralMin", 0.0);
-    inst->getParameterMap()->addDouble(inst.get(), "MonitorIntegralMax", 10.0);
-
-    tinyWS->mutableRun().addLogData(
-        new PropertyWithValue<double>("Theta", 0.12345));
-    if (!runNumber.empty())
-      tinyWS->mutableRun().addLogData(
-          new PropertyWithValue<std::string>("run_number", runNumber));
-
-    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
+  ITableWorkspace_sptr
+    createPrefilledMinimalWorkspace(const std::string &wsName,
+      const DataProcessorWhiteList &whitelist) {
+    auto ws = createWorkspace(wsName, whitelist);
+    TableRow row = ws->appendRow();
+    row << "0"
+      << "38415"
+      << "0.5069"
+      << ""
+      << "0.0065"
+      << "0.0737"
+      << "0.0148"
+      << "1"
+      << "";
+    row = ws->appendRow();
+    return ws;
   }
 
   ReflGenericDataProcessorPresenterFactory presenterFactory;
@@ -180,7 +152,7 @@ public:
 
   ReflDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
-  void testProcessNonEventWorkspaces() {
+  void testProcessEventWorkspacesCustomSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
@@ -189,82 +161,6 @@ public:
     presenter->accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
-    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-        .Times(1)
-        .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
-
-    std::set<int> grouplist;
-    grouplist.insert(0);
-
-    createTOFWorkspace("TOF_12345", "12345");
-    createTOFWorkspace("TOF_12346", "12346");
-
-    // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
-
-    // The user hits the "process" button with the first group selected
-    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
-        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
-    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(grouplist));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
-        .Times(1)
-        .WillOnce(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
-    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(2)
-        .WillRepeatedly(Return(""));
-    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(1)
-        .WillOnce(Return("Params = \"0.1\""));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(1)
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
-
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
-
-    // Check output workspaces were created as expected
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_12345_12346"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_12345"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_12346"));
-
-    // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-    AnalysisDataService::Instance().remove("TOF_12345");
-    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-    AnalysisDataService::Instance().remove("TOF_12346");
-    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
-  }
-
-  void testProcessEventWorkspaces() {
-    NiceMock<MockDataProcessorView> mockDataProcessorView;
-    NiceMock<MockProgressableView> mockProgress;
-    NiceMock<MockMainPresenter> mockMainPresenter;
-    auto presenter = presenterFactory.create();
-    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
-    presenter->accept(&mockMainPresenter);
-
-    createPrefilledEventWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
@@ -351,6 +247,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
 
     // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("IvsLam_13460_0_10");
     AnalysisDataService::Instance().remove("IvsLam_13460_10_20");
     AnalysisDataService::Instance().remove("IvsLam_13460_20_30");
@@ -381,7 +278,7 @@ public:
     AnalysisDataService::Instance().remove("TOF_13462_10_20");
     AnalysisDataService::Instance().remove("TOF_13462_20_30");
     AnalysisDataService::Instance().remove("TOF_13460_monitors");
-    AnalysisDataService::Instance().remove("TOF_13460_monitors");
+    AnalysisDataService::Instance().remove("TOF_13462_monitors");
     AnalysisDataService::Instance().remove("TRANS_13463");
     AnalysisDataService::Instance().remove("TRANS_13464");
     AnalysisDataService::Instance().remove("TRANS_13463_13464");
@@ -390,15 +287,110 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  void testProcessEventWorkspacesCustomSlicing() {}
+  void testProcessWithNotebookWarn() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-  void testPlotRow() {}
+    createPrefilledMinimalWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
-  void testPlotGroup() {}
+    std::set<int> groupList;
+    groupList.insert(0);
 
-  void testProcessWithNotebookWarn() {}
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
 
-  void testProcessMixedEventAndNonEventWorkspacesWarn() {}
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(1)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsLam_38415_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_38415_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_binned_38415_0_10");
+    AnalysisDataService::Instance().remove("TOF_38415");
+    AnalysisDataService::Instance().remove("TOF_38415_0_10");
+    AnalysisDataService::Instance().remove("TOF_38415_monitors");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessMixedWorkspacesWarn() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    for (auto &x : AnalysisDataService::Instance().getObjectNames())
+      std::cout << "Name = " << x << "\n";
+
+    createPrefilledMixedWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(grouplist));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
+
+    presenter->notify(DataProcessorPresenter::ProcessFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("TOF_38415");
+    AnalysisDataService::Instance().remove("TOF_38417");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotRowPythonCode() {}
+
+  void testPlotGroupPythonCode() {}
 
   void testPlotRowWarn() {}
 
