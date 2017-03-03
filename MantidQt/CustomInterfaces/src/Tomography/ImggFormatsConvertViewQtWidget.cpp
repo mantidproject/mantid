@@ -14,8 +14,8 @@ using namespace MantidQt::CustomInterfaces;
 #include <QMessageBox>
 #include <QSettings>
 
-#include <iostream>
 #include <QImage>
+#include <iostream>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -231,7 +231,7 @@ void ImggFormatsConvertViewQtWidget::writeImg(
   const double scaleFactor = std::numeric_limits<unsigned short int>::max() /
                              std::numeric_limits<unsigned char>::max();
   for (int yi = 0; yi < static_cast<int>(width); ++yi) {
-    const auto &row = inWks->readY(yi);
+    const auto &row = inWks->y(yi);
     for (int xi = 0; xi < static_cast<int>(width); ++xi) {
       int scaled = static_cast<int>(row[xi] / scaleFactor);
       // Images not from IMAT, just crop. This needs much improvement when
@@ -282,9 +282,8 @@ ImggFormatsConvertViewQtWidget::loadImg(const std::string &inputName,
   const double scaleFactor = std::numeric_limits<unsigned char>::max();
   for (int yi = 0; yi < static_cast<int>(width); ++yi) {
     auto &row = imgWks->getSpectrum(yi);
-    auto &dataY = row.dataY();
-    auto &dataX = row.dataX();
-    std::fill(dataX.begin(), dataX.end(), static_cast<double>(yi));
+    auto &dataY = row.mutableY();
+    row.mutableX() = static_cast<double>(yi);
     for (int xi = 0; xi < static_cast<int>(width); ++xi) {
       QRgb vRgb = img.pixel(xi, yi);
       dataY[xi] = scaleFactor * qGray(vRgb);

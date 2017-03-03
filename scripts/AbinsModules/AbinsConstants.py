@@ -132,6 +132,7 @@ MIN_SIZE = 2  # minimal size of an array
 # values of S below that are considered to be zero
 S_THRESHOLD = 10e-8
 THRESHOLD = 10e-15
+NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 

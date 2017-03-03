@@ -448,5 +448,15 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
   }
 }
 
+/** Return the underlying data structure, i.e. the table workspace this model is
+ * representing
+ *
+ * @return :: the underlying table workspace
+ */
+ITableWorkspace_sptr
+QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
+  return m_tWS;
+}
+
 } // namespace MantidWidgets
 } // namespace Mantid

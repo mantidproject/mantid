@@ -18,7 +18,7 @@ class ReflTestHarness:
     def __setup(self):
         activateItem(waitForObjectItem(":_QMenuBar", "Interfaces"))
         activateItem(waitForObjectItem(":MantidPlot - untitled.Interfaces_QMenu", "Reflectometry"))
-        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry")
+        refl_gui = waitForObjectItem(":Interfaces.Reflectometry_QMenu", "ISIS Reflectometry (Old)")
         activateItem(refl_gui)
 
     def process_everything(self):

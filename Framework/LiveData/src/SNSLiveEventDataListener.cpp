@@ -1227,6 +1227,7 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
+  prop->setUnits("picoCoulomb");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 
