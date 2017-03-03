@@ -106,13 +106,15 @@ class NTableWidget(QtGui.QTableWidget):
 
         num_rows = self.rowCount()
         content_line_list = list()
-        for i_row in range(num_columns):
+        for i_row in range(num_rows):
             line_items = list()
             for j_col in range(num_columns):
                 item_value = self.get_cell_value(i_row, j_col)
                 if isinstance(item_value, str):
                     # remove tab because tab will be used as delimiter
                     item_value = item_value.replace('\t', '')
+                elif item_value is None:
+                    item_value = ''
                 line_items.append(item_value)
             # END-FOR
             content_line_list.append(line_items)
@@ -160,7 +162,9 @@ class NTableWidget(QtGui.QTableWidget):
             assert isinstance(item_i_j, QtGui.QTableWidgetItem)
 
             return_value = str(item_i_j.text())
-            if cell_data_type == 'int':
+            if return_value == 'None':
+                return_value = None
+            elif cell_data_type == 'int':
                 return_value = int(return_value)
             elif cell_data_type == 'float' or cell_data_type == 'double':
                 return_value = float(return_value)

@@ -131,18 +131,24 @@ class PeakProcessRecord(object):
         """
         report = dict()
 
-        report['SPICE HKL'] = str_format(self._spiceHKL)
-        report['Mantid HKL'] = str_format(self._calculatedHKL)
-        report['Mask'] = self._integrationDict['mask']
+        if self._spiceHKL is not None:
+            report['SPICE HKL'] = str_format(self._spiceHKL)
+        else:
+            report['SPICE HKL'] = ''
+        if self._calculatedHKL is not None:
+            report['Mantid HKL'] = str_format(self._calculatedHKL)
+        else:
+            report['Mantid HKL'] = None
         if self._integrationDict:
+            report['Mask'] = self._integrationDict['mask']
             report['Raw Intensity'] = self._integrationDict['simple intensity']
             report['Raw Intensity Error'] = self._integrationDict['simple error']
             report['Intensity 2'] = self._integrationDict['intensity 2']
             report['Intensity 2 Error'] = self._integrationDict['error 2']
             report['Gauss Intensity'] = self._integrationDict['gauss intensity']
             report['Gauss Error'] = self._integrationDict['gauss error']
-            report['Estimated Background'] = self._integrationDict['estimated background']
-            if ['gauss parameters'] in self._integrationDict:
+            report['Estimated Background'] = self._integrationDict['simple background']
+            if 'gauss parameters' in self._integrationDict:
                 report['Fitted Background'] = self._integrationDict['gauss parameters']['B']
                 report['Fitted A'] = self._integrationDict['gauss parameters']['A']
                 report['Fitted Sigma'] = self._integrationDict['gauss parameters']['s']
@@ -162,6 +168,7 @@ class PeakProcessRecord(object):
             report['Fitted Background'] = ''
             report['Fitted A'] = ''
             report['Fitted Sigma'] = ''
+            report['Mask'] = ''
 
         report['Lorentz'] = self._lorenzFactor
         if self._movingMotorTuple is None:
@@ -173,7 +180,7 @@ class PeakProcessRecord(object):
         report['K-vector'] = self._kShiftVector
         report['Absorption Correction'] = self._absorptionCorrection
 
-        return dict()
+        return report
 
     def get_intensity(self, algorithm_type, lorentz_corrected):
         """

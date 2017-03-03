@@ -2738,8 +2738,12 @@ class MainWindow(QtGui.QMainWindow):
         if self._peakIntegrationInfoWindow is None:
             self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
 
-        self._peakIntegrationInfoWindow.set_report(self.generate_peaks_integration_report())
+        # show
         self._peakIntegrationInfoWindow.show()
+
+        # report
+        report_dict = self.generate_peaks_integration_report()
+        self._peakIntegrationInfoWindow.set_report(report_dict)
 
         return
 
@@ -3143,11 +3147,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # collection all the information
         report_dict = dict()
+        print '[DB] Selected rows: {0}'.format(row_number_list)
         for row_number in row_number_list:
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             peak_info = self._myControl.get_peak_info(exp_number, scan_number)
             peak_integrate_dict = peak_info.generate_integration_report()
             report_dict[scan_number] = peak_integrate_dict
+            print '[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys())
         # END-FOR
 
         return report_dict

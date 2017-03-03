@@ -210,8 +210,16 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
         """
         # append an empty row
         row_list = [None] * len(self.Table_Setup)
-        self.append_row(row_list)
+        status, msg = self.append_row(row_list)
+        if not status:
+            print '[ERROR] Unable to append a new row due to {0}.'.format(msg)
+        else:
+            row_list[0] = 123
+            row_list[1] = ''
+            row_list[2] = ''
         last_row_number = self.rowCount() - 1
+
+        # FIXME/ISSUE/NOW Problematic!
 
         # set value
         self.update_cell_value(last_row_number, self._colIndexScan, scan_number)
@@ -245,11 +253,11 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
         self.init_setup(self.Table_Setup)
 
         # get column names
-        col_name_list = self.getColumnNames()
+        col_name_list = self._myColumnNameList
 
         self._colIndexScan = col_name_list.index('Scan')
         self._colIndexSpiceHKL = self.Table_Setup.index(('HKL (S)', 'str'))
-        self._colIndexMantidHKL = self.Table_Setup.index(('HKL (M)', 'str'))
+        self._colIndexMantidHKL = self.Table_Setup.index(('HKL (C)', 'str'))
         self._colIndexMask = self.Table_Setup.index(('Mask', 'str'))
         self._colIndexRawIntensity = self.Table_Setup.index(('Intensity (R)', 'float'))
         self._colIndexRawError = self.Table_Setup.index(('Error (R)', 'float'))
@@ -268,6 +276,7 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
         self._colIndexA = self.Table_Setup.index(('A', 'float'))
 
         return
+
 
 class PeakIntegrationTableWidget(tableBase.NTableWidget):
     """

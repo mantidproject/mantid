@@ -703,6 +703,7 @@ def integrate_peak_full_version(scan_md_ws_name, spice_table_name, output_peak_w
     motor_pos_vec, pt_intensity_vec = convert_motor_pos_intensity(integrated_pt_dict, motor_pos_dict)
     peak_int_dict['motor positions'] = motor_pos_vec
     peak_int_dict['pt intensities'] = pt_intensity_vec
+    peak_int_dict['mask'] = mask_workspace_name
 
     # get motor step per pt.
     try:
