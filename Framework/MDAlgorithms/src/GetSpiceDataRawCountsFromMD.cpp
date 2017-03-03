@@ -503,10 +503,9 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
 
   // Set data
   outws->setHistogram(0, Points(std::move(vecX)), Counts(std::move(vecY)));
-
   auto &dataE = outws->mutableE(0);
-  std::transform(vecY.begin(), vecY.end(), dataE.begin(),
-                 [](double value) { return (value > 1.) ? sqrt(value) : 1.; });
+  std::replace_if(dataE.begin(), dataE.end(),
+                  [](double val) { return val < 1.0; }, 1.0);
 
   // Set label
   outws->setYUnitLabel(ylabel);

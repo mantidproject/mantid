@@ -405,30 +405,26 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 
       // Perform the integration into whatever box is contained within.
-      std::vector<signal_t> signal_fit;
+      Counts signal_fit(numSteps);
+      signal_fit = 0;
 
-      signal_fit.clear();
-      for (size_t j = 0; j < numSteps; j++)
-        signal_fit.push_back(0.0);
-      ws->getBox()->integrateCylinder(cylinder,
-                                      static_cast<coord_t>(PeakRadius),
-                                      static_cast<coord_t>(cylinderLength),
-                                      signal, errorSquared, signal_fit);
+      ws->getBox()->integrateCylinder(
+          cylinder, static_cast<coord_t>(PeakRadius),
+          static_cast<coord_t>(cylinderLength), signal, errorSquared,
+          signal_fit.mutableRawData());
 
       // Integrate around the background radius
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside "BackgroundOuterRadius"
-
-        signal_fit.clear();
-        std::fill(signal_fit.begin(), signal_fit.end(), 0.0);
+        signal_fit = 0;
 
         ws->getBox()->integrateCylinder(
             cylinder, static_cast<coord_t>(BackgroundOuterRadius),
             static_cast<coord_t>(cylinderLength), bgSignal, bgErrorSquared,
-            signal_fit);
+            signal_fit.mutableRawData());
 
         Points points(signal_fit.size(), LinearGenerator(0, 1));
-        wsProfile2D->setHistogram(i, points, Counts(signal_fit));
+        wsProfile2D->setHistogram(i, points, signal_fit);
 
         // Evaluate the signal inside "BackgroundInnerRadius"
         signal_t interiorSignal = 0;
@@ -439,7 +435,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           ws->getBox()->integrateCylinder(
               cylinder, static_cast<coord_t>(BackgroundInnerRadius),
               static_cast<coord_t>(cylinderLength), interiorSignal,
-              interiorErrorSquared, signal_fit);
+              interiorErrorSquared, signal_fit.mutableRawData());
         } else {
           // PeakRadius == BackgroundInnerRadius, so use the previous value
           interiorSignal = signal;
@@ -468,7 +464,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         bgErrorSquared *= scaleFactor * scaleFactor;
       } else {
         Points points(signal_fit.size(), LinearGenerator(0, 1));
-        wsProfile2D->setHistogram(i, points, Counts(signal_fit));
+        wsProfile2D->setHistogram(i, points, signal_fit);
       }
 
       if (profileFunction.compare("NoFit") == 0) {
@@ -558,9 +554,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         fun->function(domain, yy);
         auto funcValues = yy.toVector();
 
-        wsFit2D->mutableY(i) = funcValues;
+        wsFit2D->mutableY(i) = std::move(funcValues);
         wsDiff2D->setSharedY(i, wsProfile2D->sharedY(i));
-        wsDiff2D->mutableY(i) -= funcValues;
+        wsDiff2D->mutableY(i) -= wsFit2D->y(i);
 
         // Calculate intensity
         signal = 0.0;
