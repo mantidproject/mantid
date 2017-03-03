@@ -33,6 +33,18 @@ Input workspaces
 
 The workspace in *InputWorkspace* should be loaded using the :ref:`DirectILLCollectData <algm-DirectILLCollectData>` algorithm. It also provides the data needed for *EPPWorkspace* and *FlatBkgWorkspace*.
 
+Diagnostics reporting
+#####################
+
+The optional *OutputDiagnosticsReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has three columns:
+
+#. 'WorkspaceIndex'
+#. 'ElasticIntensity': Holds the value of integrated elastic peaks used for the diagnostics.
+#. 'FlagBkg': Holds the value of the flat backgrounds used for the diagnostics.
+#. 'Diagnosed': Non-zero values in this column indicate that the spectrum did not pass the diagnostics.
+
+The columns can be plotted to get an overview of the diagnostics.
+
 Usage
 -----
 

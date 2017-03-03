@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm prepares data for the other algorithms in ILL's time-of-flight data reduction suite. Thus, it is usually the first algorithm to call in the reduction process. The algorithm performs some common basic data reduction steps to the raw data, and provides other workspaces, such as flat background information, which can be used in subsequent reduction steps. The workflow of the algorithm is shown in the diagram below:
+This algorithm preprocesses data for the other algorithms in ILL's time-of-flight data reduction suite. Thus, it is usually the first algorithm to call in the reduction process. The algorithm (optionally) loads data from disk, performs some common basic data reduction steps to the raw data, and provides other workspaces, such as flat background information, which can be used in subsequent reduction steps. The workflow of the algorithm is shown in the diagram below:
 
 .. diagram:: DirectILLCollectData-v1_wkflw.dot
 
@@ -40,7 +40,7 @@ The TOF axis is adjusted according to the elastic channel number found in the 'D
 Normalisation to monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the *Monitor* property is used for normalisation. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`.
+If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the *Monitor* property is used for normalisation. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If :ref:`FindEPP <algm-FindEPP>` fails to find a peak in the monitor spectrum, the entire monitor range is integrated.
 
 
 Flat background subtraction

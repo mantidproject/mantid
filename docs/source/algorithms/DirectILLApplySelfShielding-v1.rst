@@ -19,6 +19,9 @@ In all modes where *EmptyContainerWorkspace* is supplied, the container data is 
 
 *SelfShieldingCorrectionWorkspace* can be obtained from the :ref:`DirectILLSelfShielding <algm-DirectILLSelfShielding>` algorithm.
 
+.. note::
+    At the moment, there are known issues in the self-shielding correction. Thus only the basic empty container subtraction should be used.
+
 Usage
 -----
 
