@@ -72,9 +72,7 @@ double QwtWorkspaceSpectrumData::getY(size_t i) const {
   return m_isDistribution ? m_hist.frequencies()[i] : m_hist.counts()[i];
 }
 
-double QwtWorkspaceSpectrumData::getEX(size_t i) const {
-  return m_hist.x()[i];
-}
+double QwtWorkspaceSpectrumData::getEX(size_t i) const { return m_hist.x()[i]; }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
   return m_isDistribution ? m_hist.frequencyStandardDeviations()[i]
