@@ -62,6 +62,7 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                                   Temperature=temperature,
                                                   EnableLogging=subalgLogging)
         self.setProperty(common.PROP_OUTPUT_WS, calibrationWS)
+        wsCleanup.cleanup(calibrationWS)
         wsCleanup.finalCleanup()
         progress.report('Done')
 

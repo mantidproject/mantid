@@ -170,7 +170,7 @@ class NameSource:
 
     def withSuffix(self, suffix):
         """Returns a workspace name with given suffix applied."""
-        return self._prefix + '_' + suffix
+        return self._prefix + '_' + suffix + '_'
 
 
 class Report:

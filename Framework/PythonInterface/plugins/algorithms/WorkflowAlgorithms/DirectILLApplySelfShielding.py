@@ -195,6 +195,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
     def _finalize(self, outWS, wsCleanup):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
+        wsCleanup.cleanup(outWS)
         wsCleanup.finalCleanup()
 
     def _inputWS(self, wsCleanup):
