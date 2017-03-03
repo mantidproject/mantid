@@ -82,9 +82,9 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
 
     Quat relRot = bank->getRelativeRot();
     Quat parentRot = bank->getParent()->getRotation();
-    Quat newRelRot = parentRot * rot * relRot;
+    Quat newRot = parentRot * rot * relRot;
 
-    detectorInfo.setRotation(*bank, newRelRot);
+    detectorInfo.setRotation(*bank, newRot);
 
     V3D rotatedPos = V3D(pos);
     bank->getParent()->getRotation().rotate(rotatedPos);

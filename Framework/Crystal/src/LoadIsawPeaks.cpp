@@ -295,10 +295,12 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
-
-  std::string s =
-      ApplyCalibInfo(in, "", instr, tempWS->mutableDetectorInfo(), T0);
   outWS->setInstrument(instr);
+
+  auto &detInfo = outWS->mutableDetectorInfo();
+  instr = outWS->getInstrument();
+
+  std::string s = ApplyCalibInfo(in, "", instr, detInfo, T0);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
