@@ -8,6 +8,9 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -16,6 +19,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 
@@ -46,6 +50,7 @@ using namespace Mantid::Kernel;
 using namespace Poco::XML;
 
 namespace Mantid {
+
 namespace API {
 namespace {
 /// static logger object
@@ -58,7 +63,8 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)) {
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>(0)),
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
 }
 
@@ -174,6 +180,56 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
+void checkComponentInfoSize(const Instrument &instr,
+                            const Beamline::ComponentInfo &compInfo) {
+  std::vector<IComponent_const_sptr> children;
+  instr.getChildren(children, true); // Horribly wasteful
+  const auto nComps = children.size();
+  if (nComps != compInfo.size()) {
+
+    throw std::runtime_error("ExperimentInfo: size mismatch between "
+                             "ComponentInfo and number of components in "
+                             "instrument");
+  }
+}
+}
+
+void registerComponentInfo(
+    std::vector<std::vector<size_t>> &componentDetectorIndexes,
+    const IComponent &component, const DetectorInfo &detectorInfo) {
+
+  std::vector<size_t> localDetectorIndexes;
+  if (const auto *bank =
+          dynamic_cast<const Mantid::Geometry::ICompAssembly *>(&component)) {
+    std::vector<IComponent_const_sptr> bankChildren;
+    bank->getChildren(bankChildren, false);
+
+    for (const auto &child : bankChildren) {
+
+      if (const auto *detector =
+              dynamic_cast<const Mantid::Geometry::IDetector *>(child.get())) {
+        localDetectorIndexes.push_back(detectorInfo.indexOf(detector->getID()));
+      } else {
+        registerComponentInfo(componentDetectorIndexes, *child, detectorInfo);
+      }
+    }
+  }
+
+  componentDetectorIndexes.push_back(localDetectorIndexes);
+}
+
+boost::shared_ptr<Beamline::ComponentInfo>
+makeComponentInfo(const Instrument &oldInstr,
+                  const API::DetectorInfo &detectorInfo) {
+
+  std::vector<std::vector<size_t>> componentDetectorIndexes;
+  componentDetectorIndexes.reserve(detectorInfo.size());
+  registerComponentInfo(componentDetectorIndexes, oldInstr, detectorInfo);
+
+  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+      componentDetectorIndexes);
+}
+
 std::unique_ptr<Beamline::DetectorInfo>
 makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   if (newInstr.hasDetectorInfo()) {
@@ -200,7 +256,6 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
     return Kernel::make_unique<Beamline::DetectorInfo>(numDets, monitors);
   }
 }
-}
 
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
@@ -217,6 +272,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_componentInfo = makeComponentInfo(*instr, detectorInfo());
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -232,9 +288,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
+  // checkComponentInfoSize(*sptr_instrument, *m_componentInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
+  // instrument->setComponentInfo(m_componentInfo);
   return instrument;
 }
 
@@ -465,8 +523,9 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
  *
  * This method should not need to be called explicitly. Groupings are updated
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void ExperimentInfo::setDetectorGrouping(
-    const size_t index, const std::set<detid_t> &detIDs) const {
+void
+ExperimentInfo::setDetectorGrouping(const size_t index,
+                                    const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
@@ -1129,6 +1188,10 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
+const Beamline::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfo;
+}
+
 /// Sets the SpectrumDefinition for all spectra.
 void ExperimentInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
@@ -1156,8 +1219,8 @@ void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
   m_spectrumDefinitionNeedsUpdate.at(index) = 1;
 }
 
-void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
-    const size_t index) const {
+void
+ExperimentInfo::updateSpectrumDefinitionIfNecessary(const size_t index) const {
   if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
     updateCachedDetectorGrouping(index);
 }
@@ -1321,9 +1384,10 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
-    ::NeXus::File *file, std::string &instrumentName,
-    std::string &instrumentXml) {
+void
+ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
+                                                std::string &instrumentName,
+                                                std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
 
@@ -1561,8 +1625,8 @@ void ExperimentInfo::populateIfNotLoaded() const {
   // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

@@ -19,6 +19,7 @@ namespace Kernel {
 class Property;
 }
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 class SpectrumInfo;
 }
@@ -29,6 +30,7 @@ class XMLInstrumentParameter;
 
 namespace API {
 class ChopperModel;
+// class ComponentInfo;
 class DetectorInfo;
 class ModeratorModel;
 class Run;
@@ -165,6 +167,8 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
+  const Beamline::ComponentInfo &componentInfo() const;
+
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
@@ -224,6 +228,9 @@ private:
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
   mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
   mutable std::mutex m_detectorInfoMutex;
+
+  boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
+  //  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
 
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;

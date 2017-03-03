@@ -16,7 +16,7 @@
 #include "MantidKernel/Matrix.h"
 
 #include "MantidAPI/FileFinder.h"
-
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
@@ -762,6 +762,23 @@ public:
     target.setInstrument(source.getInstrument());
     source.mutableDetectorInfo().setMasked(0, true);
     TS_ASSERT(!target.detectorInfo().isMasked(0));
+  }
+
+  void test_create_componentInfo() {
+
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, 10 /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    std::vector<IComponent_const_sptr> allComponents;
+    inst->getChildren(allComponents, true);
+    size_t nComponents = allComponents.size();
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::Beamline::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    TS_ASSERT_EQUALS(compInfo.size(), nComponents);
   }
 
 private:
