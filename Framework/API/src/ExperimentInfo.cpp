@@ -458,7 +458,7 @@ void ExperimentInfo::populateInstrumentParameters() {
   // this is that ParameterMap will then take care of assembling parameters for
   // individual position or rotation components into a vector or quaternion. In
   // particular, we cannot directly change DetectorInfo since the order of
-  // rotation components is not guarenteed.
+  // rotation components is not guaranteed.
   for (const auto &item : paramInfoFromIDF) {
     const auto &nameComp = item.first;
     const auto &paramInfo = item.second;
