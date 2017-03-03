@@ -89,7 +89,8 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     V3D rotatedPos = V3D(pos);
     bank->getParent()->getRotation().rotate(rotatedPos);
 
-    detectorInfo.setPosition(*bank, bank->getPos() + rotatedPos);
+    detectorInfo.setPosition(*bank, rotatedPos + bank->getPos() +
+                                        bank->getPos() - bank->getPos());
 
     // TODO: Use ResizeRectangularDetectorHelper from PR #18906
     std::vector<double> oldScalex =
