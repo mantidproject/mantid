@@ -454,7 +454,7 @@ std::string MuonAnalysisFitDataPresenter::getRebinParams(
       const double step = std::stod(m_rebinArgs.second);
       const auto &mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
       if (mws) {
-        const double binSize = mws->dataX(0)[1] - mws->dataX(0)[0];
+        const double binSize = mws->x(0)[1] - mws->x(0)[0];
         params = boost::lexical_cast<std::string>(step * binSize);
       }
     } catch (const std::exception &err) {
