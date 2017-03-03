@@ -121,7 +121,7 @@ class NTableWidget(QtGui.QTableWidget):
         # END-FOR (row)
 
         with open(csv_file_name, 'w') as csv_file:
-            csv_writer = csv.writer(csv_file, delimiter=' ', quotechar='#', quoting=csv.QUOTE_MINIMAL)
+            csv_writer = csv.writer(csv_file, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
             # write header
             csv_writer.writerow(col_names)
             # write content

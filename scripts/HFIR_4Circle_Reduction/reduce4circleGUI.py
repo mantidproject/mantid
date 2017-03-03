@@ -112,6 +112,35 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_wave_length)
 
+        # Tab survey
+        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
+                     self.do_survey)
+        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_save_survey)
+        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_load_survey)
+        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
+                     self.do_view_survey_peak)
+        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
+                     self.do_add_peaks_for_ub)
+        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_merge_scans_survey)
+        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_select_all_survey)
+        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
+                     self.do_filter_sort_survey_table)
+        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_survey)
+        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
+                     self.do_show_spice_file)
+
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
+                     self.evt_show_survey)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
+                     self.evt_show_survey)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
+                     self.evt_show_survey)
+
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
                      self.do_load_scan_info)
@@ -251,36 +280,6 @@ class MainWindow(QtGui.QMainWindow):
         #              self.do_show_single_peak_integration)
         self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
                      self.do_clear_peak_integration_canvas)
-
-        # Tab survey
-        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
-                     self.do_survey)
-        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_save_survey)
-        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_load_survey)
-        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_view_survey_peak)
-        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peaks_for_ub)
-        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_merge_scans_survey)
-        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_survey)
-        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
-                     self.do_filter_sort_survey_table)
-        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_survey)
-
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
-                     self.evt_show_survey)
-
-        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -3757,9 +3756,6 @@ class MainWindow(QtGui.QMainWindow):
         # get PeakInfo
         peak_info = self._myControl.get_peak_info(exp_number, scan_number)
         assert isinstance(peak_info, r4c.PeakProcessRecord)
-
-        # retrieve and set HKL from spice table
-        # peak_info.retrieve_hkl_from_spice_table()
 
         # add to table
         self.set_ub_peak_table(peak_info)

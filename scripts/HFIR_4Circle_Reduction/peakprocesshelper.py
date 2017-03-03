@@ -129,6 +129,9 @@ class PeakProcessRecord(object):
         generate a dictionary for this PeakInfo
         :return:
         """
+        print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) generate report.  Spice HKL: {2}' \
+              ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
+
         report = dict()
 
         if self._spiceHKL is not None:
@@ -267,6 +270,9 @@ class PeakProcessRecord(object):
             # if self._spiceHKL is None:
             self.retrieve_hkl_from_spice_table()
             ret_hkl = self._spiceHKL
+
+            print '[DB...BAT] PeakInfo (Scan: {0}, ID: {1}) SPICE HKL: {2}' \
+                  ''.format(self._myScanNumber, hex(id(self)), self._spiceHKL)
 
         return ret_hkl
 
