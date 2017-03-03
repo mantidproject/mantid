@@ -84,7 +84,8 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     35); // 34 logs in file + 1 synthetic nperiods log
+                     36); // 34 logs in file + 1 synthetic nperiods log
+                          // + 1 proton_charge_by_period log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -168,6 +169,12 @@ public:
                                           periodValues.end());
     TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
                       uniquePeriods.size());
+
+    std::vector<double> protonChargeByPeriod =
+        run.getPropertyValueAsType<std::vector<double>>(
+            "proton_charge_by_period");
+    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4,
+                      protonChargeByPeriod.size());
   }
 
   void test_extract_run_title_from_event_nexus() {

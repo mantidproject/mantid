@@ -1,5 +1,6 @@
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -108,6 +109,8 @@ void SaveFocusedXYE::exec() {
     throw std::runtime_error(msg.str());
   }
 
+  const auto &detectorInfo = inputWS->detectorInfo();
+
   Progress progress(this, 0.0, 1.0, nHist);
   for (size_t i = 0; i < nHist; i++) {
     const auto &X = inputWS->x(i);
@@ -120,11 +123,11 @@ void SaveFocusedXYE::exec() {
     if (headers) {
       // try to get detector information
       try {
-        getFocusedPos(inputWS, i, l1, l2, tth);
-      } catch (Kernel::Exception::NotFoundError &) {
-        // if detector not found or there was an error skip this spectrum
-        g_log.warning() << "Skipped spectrum " << i << '\n';
-        continue;
+        l1 = detectorInfo.l1();
+        l2 = detectorInfo.l2(i);
+        tth = detectorInfo.twoTheta(i) * 180. / M_PI;
+      } catch (std::runtime_error &ex) {
+        g_log.warning() << ex.what() << '\n';
       }
     }
 
@@ -291,33 +294,4 @@ void SaveFocusedXYE::writeMAUDSpectraHeader(std::ostream &os, size_t index1,
      << index2 << '\n';
   os << "#P0 0 0 " << tth << ' ' << flightPath << '\n';
   os << "#L " << caption << " Data Error\n";
-}
-
-/**
-* Determine the focused position for the supplied spectrum. The position
-* (l1, l2, tth) is returned via the references passed in.
-*/
-void SaveFocusedXYE::getFocusedPos(Mantid::API::MatrixWorkspace_const_sptr wksp,
-                                   const size_t spectrum, double &l1,
-                                   double &l2, double &tth) {
-  Geometry::Instrument_const_sptr instrument = wksp->getInstrument();
-  if (instrument == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  Geometry::IComponent_const_sptr source = instrument->getSource();
-  Geometry::IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    l1 = 0.;
-    l2 = 0.;
-    tth = 0.;
-    return;
-  }
-  l1 = source->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = wksp->getDetector(spectrum);
-  l2 = det->getDistance(*sample);
-  constexpr double rad2deg = 180. / M_PI;
-  tth = wksp->detectorTwoTheta(*det) * rad2deg;
 }
