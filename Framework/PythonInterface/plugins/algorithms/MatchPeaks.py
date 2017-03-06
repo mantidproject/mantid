@@ -128,7 +128,7 @@ class MatchPeaks(PythonAlgorithm):
                     issues['InputWorkspace3'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
                                                 'histogram data'
                 elif mtd[input3].blocksize() != mtd[input2].blocksize():
-                    issues['InputWorkspace3'] = 'Incompatible same number of bins'
+                    issues['InputWorkspace3'] = 'Incompatible number of bins'
                 elif mtd[input3].getNumberHistograms() != mtd[input2].getNumberHistograms():
                     issues['InputWorkspace3'] = 'Incompatible number of spectra'
                 elif np.any(mtd[input3].extractX() - mtd[input2].extractX()):
@@ -139,7 +139,7 @@ class MatchPeaks(PythonAlgorithm):
                 issues['InputWorkspace2'] = 'InputWorkspace2 and InputWorkspace3 must be either point data or ' \
                                             'histogram data'
             elif mtd[input1].blocksize() != mtd[input2].blocksize():
-                issues['InputWorkspace2'] = 'Incompatible same number of bins'
+                issues['InputWorkspace2'] = 'Incompatible number of bins'
             elif mtd[input1].getNumberHistograms() != mtd[input2].getNumberHistograms():
                 issues['InputWorkspace2'] = 'Incompatible number of spectra'
             elif np.any(mtd[input1].extractX() - mtd[input2].extractX()):
