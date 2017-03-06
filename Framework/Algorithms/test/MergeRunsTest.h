@@ -1123,8 +1123,7 @@ public:
     do_test_mergeSampleLogs(gws, "prop1", mergeTypeTimeSeries, "", 1, true);
   }
 
-  void
-  test_mergeSampleLogs_log_used_twice_with_different_merge_types_fails() {
+  void test_mergeSampleLogs_log_used_twice_with_different_merge_types_fails() {
     std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
     std::string mergeTypeList = SampleLogsBehaviour::LIST_MERGE;
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
@@ -1153,10 +1152,10 @@ public:
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
     auto ws = create_group_workspace_with_sample_logs<std::string>(
         mergeType, "prop1", "one", "two", "", "");
-    // should get stuck when looking for "prop1_time_series"
+    // should get stuck when trying to get "prop1" as a time series
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
                                              "2013-Jun-25 10:59:15  1\n", 2),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     std::invalid_argument);
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {

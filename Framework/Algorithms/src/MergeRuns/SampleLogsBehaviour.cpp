@@ -157,14 +157,13 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
 
     // Check 1: Does the key exist in the primary map? If so ignore it and
     // continue.
-    if (skipIfInPrimaryMap &&
-        (m_logMap.count(SampleLogsKey(item, mergeType)) != 0)) {
+    if (skipIfInPrimaryMap && (m_logMap.count(item) != 0)) {
       continue;
     }
 
-    // Check 2: If the key (sample log name, merge type) already exists in this
-    // map throw an error.
-    if (map.count(SampleLogsKey(item, mergeType)) != 0) {
+    // Check 2: If the key (sample log name) already exists in this map throw an
+    // error.
+    if (map.count(item) != 0) {
       throw std::invalid_argument(
           "Error when making list of merge items, sample log \"" + item +
           "\" defined more than once!");
@@ -182,8 +181,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
       continue;
     }
 
-    // Check 4: Can the property can be converted to a double? If not, and time
-    // series case, log an error but continue.
+    // Check 4: Can the property can be converted to a double? If not, and sum
+    // or time series case, log an error but continue.
     bool isNumeric;
     double value = 0.0;
     isNumeric = setNumericValue(item, ws, value);
@@ -203,7 +202,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     }
 
     // Finally add the key-value pair to the map
-    map[SampleLogsKey(item, mergeType)] = {prop, tolerance, isNumeric};
+    map[item] = {prop, tolerance, isNumeric, mergeType};
   }
 }
 
@@ -256,17 +255,20 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
   std::shared_ptr<Property> returnProp;
 
   try {
-    // See if property exists as a TimeSeriesLog already - merging an output of MergeRuns
+    // See if property exists as a TimeSeriesLog already - merging an output of
+    // MergeRuns
     ws.run().getTimeSeriesProperty<double>(item);
     returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
   } catch (std::invalid_argument &) {
     // Property does not already exist, so add it setting the first entry
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item));
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
+        new TimeSeriesProperty<double>(item));
     std::string startTime = ws.run().startTime().toISO8601String();
 
     timeSeriesProp->addValue(startTime, value);
     ws.mutableRun().removeLogData(item);
-    ws.mutableRun().addLogData(std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
+    ws.mutableRun().addLogData(
+        std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
 
     returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
   }
@@ -331,7 +333,7 @@ bool SampleLogsBehaviour::setNumericValue(const std::string item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
                                           MatrixWorkspace &outWS) {
   for (auto item : m_logMap) {
-    std::string logName = item.first.first;
+    std::string logName = item.first;
 
     Property *addeeWSProperty = addeeWS.getLog(logName);
 
@@ -348,7 +350,7 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
       }
     }
 
-    switch (item.first.second) {
+    switch (item.second.mergeLogType) {
     case MergeLogType::Sum: {
       this->updateSumProperty(addeeWSNumber, outWSNumber, outWS, logName);
       break;
@@ -405,7 +407,8 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
     // are combined when adding workspaces.
     addeeWS.run().getTimeSeriesProperty<double>(name);
   } catch (std::invalid_argument &) {
-    auto timeSeriesProp = outWS.mutableRun().getTimeSeriesProperty<double>(name);
+    auto timeSeriesProp =
+        outWS.mutableRun().getTimeSeriesProperty<double>(name);
     Kernel::DateAndTime startTime = addeeWS.mutableRun().startTime();
     double value = addeeWS.mutableRun().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
@@ -427,7 +430,8 @@ void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
   auto propertyAddeeWS = addeeWS.getLog(name);
   auto propertyOutWS = outWS.mutableRun().getProperty(name);
 
-  propertyOutWS->setValue(propertyOutWS->value() + ", " + propertyAddeeWS->value());
+  propertyOutWS->setValue(propertyOutWS->value() + ", " +
+                          propertyAddeeWS->value());
 }
 
 /**
@@ -524,13 +528,15 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  */
 void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
   for (auto &item : m_logMap) {
-    std::string propertyToReset = item.first.first;
+    std::string propertyToReset = item.first;
 
-    if (item.first.second == MergeLogType::Warn || item.first.second == MergeLogType::Fail) {
+    if (item.second.mergeLogType == MergeLogType::Warn ||
+        item.second.mergeLogType == MergeLogType::Fail) {
       continue;
     }
 
-    const Property *outWSProperty =  ws.mutableRun().getProperty(propertyToReset);
+    const Property *outWSProperty =
+        ws.mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
   }
 }
@@ -542,13 +548,16 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
  */
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
-    std::string propertyToReset = item.first.first;
+    std::string propertyToReset = item.first;
 
-    if (item.first.second == MergeLogType::TimeSeries) {
-      auto property = std::unique_ptr<Kernel::Property>(item.second.property->clone());
+    if (item.second.mergeLogType == MergeLogType::TimeSeries) {
+      auto property =
+          std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws.mutableRun().addProperty(std::move(property), true);
-    } else if (item.first.second == MergeLogType::List) {
-      ws.mutableRun().getProperty(propertyToReset)->setValue(item.second.property->value());
+    } else if (item.second.mergeLogType == MergeLogType::List) {
+      ws.mutableRun()
+          .getProperty(propertyToReset)
+          ->setValue(item.second.property->value());
     }
   }
 }
