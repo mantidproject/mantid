@@ -73,6 +73,9 @@ class BASISReduction(PythonAlgorithm):
         self._normWs = None
         self._normMonWs = None
 
+        # additional output
+
+
     def category(self):
         return "Inelastic\\Reduction"
 
@@ -149,6 +152,14 @@ class BASISReduction(PythonAlgorithm):
                              "Wavelength range for normalization")
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
+
+        # Aditional output properties
+        titleAddionalOutput = "Additional Output"
+        self.declareProperty("OutputSusceptibility", False, direction=Direction.Output,
+                             doc="Do we output file for dynamic susceptibility?")
+        self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
+
+
 
     #pylint: disable=too-many-branches
     def PyExec(self):
@@ -255,6 +266,17 @@ class BASISReduction(PythonAlgorithm):
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
+
+            # additional output
+            if self.getProperty("OutputSusceptibility").value:
+                samXqsWs = self._samSqwWs.replace("sqw", "xqs")
+                temperature = mtd[self._samSqwWs].getRun().getProperty("SensorA").getStatistics().mean
+                sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs,
+                                          OutputWorkspace=samXqsWs, Temperature = temperature)
+                ConvertUnits(InputWorkspace=self._samSqwWs, OutputWorkspace=,
+                             Target="DeltaE_inFrequency", Emode="Indirect")
+                susceptibility_filename = processed_filename.replace("sqw", "xqw")
+                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=self._samSqwWs,)
 
         if not self._debugMode:
             sapi.DeleteWorkspace("BASIS_MASK")  # delete the mask
@@ -368,7 +390,7 @@ class BASISReduction(PythonAlgorithm):
         @param wsName: workspace as a function of wavelength and detector id
         @param etRebins: final energy domain and bin width
         @param isSample: discriminates between sample and vanadium
-        @return: S(Q,E)
+        @return: string name of S(Q,E)
         """
         sapi.ConvertUnits(InputWorkspace=wsName, OutputWorkspace=wsName, Target='DeltaE', EMode='Indirect')
         sapi.CorrectKiKf(InputWorkspace=wsName, OutputWorkspace=wsName, EMode='Indirect')
