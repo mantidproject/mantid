@@ -36,9 +36,6 @@ const std::string SampleLogsBehaviour::WARN_MERGE_TOLERANCES =
 const std::string SampleLogsBehaviour::FAIL_MERGE_TOLERANCES =
     "sample_logs_fail_tolerances";
 
-const std::string SampleLogsBehaviour::TIME_SERIES_SUFFIX = "_time_series";
-const std::string SampleLogsBehaviour::LIST_SUFFIX = "_list";
-
 /**
  * Create and initialise an object that is responsbile for keeping track of the
  * merge types, and performing the merge or warning/error for sample logs when
@@ -130,7 +127,7 @@ void SampleLogsBehaviour::createSampleLogsMapsFromInstrumentParams(
  * @param ws the base workspace that the other workspaces are merged into
  * @param paramsTolerances a string containing a comma spearated list of the
  * tolerances for this merge behaviour (optional)
- * @param skipIfInPrimaryMap wether to skip if in the member variable map
+ * @param skipIfInPrimaryMap whether to skip if in the member variable map
  * (optional, default false)
  */
 void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
@@ -259,21 +256,19 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
   std::shared_ptr<Property> returnProp;
 
   try {
-    // See if property exists already - merging an output of MergeRuns
-    returnProp = std::shared_ptr<Property>(
-        ws.getLog(item + TIME_SERIES_SUFFIX)->clone());
+    // See if property exists as a TimeSeriesLog already - merging an output of MergeRuns
+    ws.run().getTimeSeriesProperty<double>(item);
+    returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
   } catch (std::invalid_argument &) {
     // Property does not already exist, so add it setting the first entry
-    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(
-        new TimeSeriesProperty<double>(item + TIME_SERIES_SUFFIX));
-    std::string startTime = ws.mutableRun().startTime().toISO8601String();
+    std::unique_ptr<Kernel::TimeSeriesProperty<double>> timeSeriesProp(new TimeSeriesProperty<double>(item));
+    std::string startTime = ws.run().startTime().toISO8601String();
 
     timeSeriesProp->addValue(startTime, value);
-    ws.mutableRun().addLogData(
-        std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
+    ws.mutableRun().removeLogData(item);
+    ws.mutableRun().addLogData(std::unique_ptr<Kernel::Property>(std::move(timeSeriesProp)));
 
-    returnProp = std::shared_ptr<Property>(
-        ws.getLog(item + TIME_SERIES_SUFFIX)->clone());
+    returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
   }
 
   return returnProp;
@@ -291,14 +286,13 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForList(
     const std::string item, const std::string value, MatrixWorkspace &ws) {
   std::shared_ptr<Property> returnProp;
 
-  try {
-    // See if property exists already - merging an output of MergeRuns
-    returnProp =
-        std::shared_ptr<Property>(ws.getLog(item + LIST_SUFFIX)->clone());
-  } catch (std::invalid_argument &) {
-    ws.mutableRun().addProperty(item + LIST_SUFFIX, value);
-    returnProp =
-        std::shared_ptr<Property>(ws.getLog(item + LIST_SUFFIX)->clone());
+  // See if property exists already - merging an output of MergeRuns
+  returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
+
+  if (returnProp->type().compare("string") != 0) {
+    ws.mutableRun().removeLogData(item);
+    ws.mutableRun().addProperty(item, value);
+    returnProp = std::shared_ptr<Property>(ws.getLog(item)->clone());
   }
 
   return returnProp;
@@ -364,7 +358,7 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
       break;
     }
     case MergeLogType::List: {
-      this->updateListProperty(addeeWS, outWS, addeeWSProperty, logName);
+      this->updateListProperty(addeeWS, outWS, logName);
       break;
     }
     case MergeLogType::Warn:
@@ -409,10 +403,9 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
   try {
     // If this already exists we do not need to do anything, Time Series Logs
     // are combined when adding workspaces.
-    addeeWS.getLog(name + TIME_SERIES_SUFFIX);
+    addeeWS.run().getTimeSeriesProperty<double>(name);
   } catch (std::invalid_argument &) {
-    auto timeSeriesProp = outWS.mutableRun().getTimeSeriesProperty<double>(
-        name + TIME_SERIES_SUFFIX);
+    auto timeSeriesProp = outWS.mutableRun().getTimeSeriesProperty<double>(name);
     Kernel::DateAndTime startTime = addeeWS.mutableRun().startTime();
     double value = addeeWS.mutableRun().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
@@ -426,23 +419,15 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
  *
  * @param addeeWS the workspace being merged
  * @param outWS the workspace the others are merged into
- * @param addeeWSProperty the relevant property in addeeWS
  * @param name the name of the property
  */
 void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
                                              MatrixWorkspace &outWS,
-                                             Property *addeeWSProperty,
                                              const std::string name) {
-  try {
-    // If this already exists we combine the two strings.
-    auto propertyAddeeWS = addeeWS.getLog(name + LIST_SUFFIX);
-    auto propertyOutWS = outWS.mutableRun().getProperty(name + LIST_SUFFIX);
-    propertyOutWS->setValue(propertyOutWS->value() + ", " +
-                            propertyAddeeWS->value());
-  } catch (std::invalid_argument &) {
-    auto property = outWS.mutableRun().getProperty(name + LIST_SUFFIX);
-    property->setValue(property->value() + ", " + addeeWSProperty->value());
-  }
+  auto propertyAddeeWS = addeeWS.getLog(name);
+  auto propertyOutWS = outWS.mutableRun().getProperty(name);
+
+  propertyOutWS->setValue(propertyOutWS->value() + ", " + propertyAddeeWS->value());
 }
 
 /**
@@ -541,16 +526,11 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
   for (auto &item : m_logMap) {
     std::string propertyToReset = item.first.first;
 
-    if (item.first.second == MergeLogType::TimeSeries) {
-      propertyToReset = propertyToReset.append(TIME_SERIES_SUFFIX);
-    } else if (item.first.second == MergeLogType::List) {
-      propertyToReset = propertyToReset.append(LIST_SUFFIX);
-    } else {
+    if (item.first.second == MergeLogType::Warn || item.first.second == MergeLogType::Fail) {
       continue;
     }
 
-    const Property *outWSProperty =
-        ws.mutableRun().getProperty(propertyToReset);
+    const Property *outWSProperty =  ws.mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
   }
 }
@@ -565,15 +545,10 @@ void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
     std::string propertyToReset = item.first.first;
 
     if (item.first.second == MergeLogType::TimeSeries) {
-      propertyToReset = propertyToReset.append(TIME_SERIES_SUFFIX);
-      auto property =
-          std::unique_ptr<Kernel::Property>(item.second.property->clone());
+      auto property = std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws.mutableRun().addProperty(std::move(property), true);
     } else if (item.first.second == MergeLogType::List) {
-      propertyToReset = propertyToReset.append(LIST_SUFFIX);
-      ws.mutableRun()
-          .getProperty(propertyToReset)
-          ->setValue(item.second.property->value());
+      ws.mutableRun().getProperty(propertyToReset)->setValue(item.second.property->value());
     }
   }
 }

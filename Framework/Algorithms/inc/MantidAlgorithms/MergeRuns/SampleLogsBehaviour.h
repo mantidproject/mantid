@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** MergeRunsSampleLogsBehaviour : This class holds information relating to the
+/** SampleLogsBehaviour : This class holds information relating to the
   behaviour of the sample log merging. It holds a map of all the sample log
   parameters to merge, how to merge them, and the associated tolerances.
 
@@ -43,9 +43,6 @@ public:
   static const std::string FAIL_MERGE;
   static const std::string WARN_MERGE_TOLERANCES;
   static const std::string FAIL_MERGE_TOLERANCES;
-
-  static const std::string TIME_SERIES_SUFFIX;
-  static const std::string LIST_SUFFIX;
 
   struct SampleLogBehaviour {
     std::shared_ptr<Kernel::Property> property;
@@ -103,7 +100,6 @@ private:
                                 const std::string name);
   void updateListProperty(API::MatrixWorkspace &addeeWS,
                           API::MatrixWorkspace &outWS,
-                          Kernel::Property *addeeWSProperty,
                           const std::string name);
   void checkWarnProperty(const API::MatrixWorkspace &addeeWS,
                          Kernel::Property *addeeWSProperty,
