@@ -137,12 +137,12 @@ def save_table_to_file(table_data, errors, group_name, metric_type, file_extensi
     """
     Saves a group results table or overall results table to a given file type.
 
-    :param table_data: the results table
-    :param errors: whether to use observational errors
-    :param group_name: name of this group of problems (example 'NIST "lower difficulty"', or
+    @param table_data :: the results table
+    @param errors :: whether to use observational errors
+    @param group_name :: name of this group of problems (example 'NIST "lower difficulty"', or
                          'Neutron data')
-    :param metric_type: the test type of the table data (e.g. runtime, accuracy)
-    :param file_extension: the file type extension (e.g. html)
+    @param metric_type :: the test type of the table data (e.g. runtime, accuracy)
+    @param file_extension :: the file type extension (e.g. html)
     """
     file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
                  .format(weighted=weighted_suffix_string(errors),
