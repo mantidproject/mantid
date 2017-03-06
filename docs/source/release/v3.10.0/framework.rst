@@ -13,9 +13,20 @@ Algorithms
 New
 ###
 
+- :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
 
 Improved
 ########
+
+- :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
+
+Bug Fixes
+#########
+
+- Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
+- Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
 
 
 Deprecated
@@ -27,11 +38,17 @@ MD Algorithms (VATES CLI)
 Performance
 -----------
 
-CurveFitting
-------------
+Bugs
+----
+
+- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
 
 Improved
 ########
+
+- :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
+
+- :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
 Python
 ------

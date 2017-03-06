@@ -1200,8 +1200,31 @@ bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
   startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
-  // Call the concrete algorithm's processGroups method
-  const bool completed = processGroups();
+
+  bool completed = false;
+  try {
+    // Call the concrete algorithm's processGroups method
+    completed = processGroups();
+  } catch (std::exception &ex) {
+    // The child algorithm will already have logged the error etc.,
+    // but we also need to update flags in the parent algorithm and
+    // send an ErrorNotification (because the child isn't registered with the
+    // AlgorithmMonitor).
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false;
+    notificationCenter().postNotification(
+        new ErrorNotification(this, ex.what()));
+    throw;
+  } catch (...) {
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false;
+    notificationCenter().postNotification(new ErrorNotification(
+        this, "UNKNOWN Exception caught from processGroups"));
+    throw;
+  }
+
   // Check for a cancellation request in case the concrete algorithm doesn't
   interruption_point();
 

@@ -150,12 +150,14 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
                 fig['layout']['yaxis%d' % (i+1)].update(title=ylabel)
                 if len(spectraNames) > 0:  # remove the used spectra names
                     spectraNames = spectraNames[len(traces):]
+            fig['layout'].update(margin={'l':40,'r':0,'t':0,'b':40})
         else:
             (traces, xlabel, ylabel) = self.toScatterAndLabels(self._wksp,
                                                                spectraNames)
 
             layout = go.Layout(yaxis={'title': ylabel},
-                               xaxis={'title': xlabel})
+                               xaxis={'title': xlabel},
+                               margin={'l':40,'r':0,'t':0,'b':40})
 
             fig = go.Figure(data=traces, layout=layout)
 

@@ -3,10 +3,10 @@
  * */
 
 #include "MantidDataHandling/LoadHelper.h"
-
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
@@ -536,19 +536,6 @@ V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +
                              " : NotFoundError");
-  }
-}
-
-template <typename T>
-T LoadHelper::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
-                                 const std::string &propertyName) {
-  if (inputWS->run().hasProperty(propertyName)) {
-    Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-    return boost::lexical_cast<T>(prop->value());
-  } else {
-    std::string mesg =
-        "No '" + propertyName + "' property found in the input workspace....";
-    throw std::runtime_error(mesg);
   }
 }
 
