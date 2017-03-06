@@ -100,7 +100,9 @@ protected:
   /// Gets the base name of a workspace
   QString getWorkspaceBasename(const QString &wsName);
   /// Plot multiple spectra from multiple workspaces
-  void IndirectTab::plotMultipleSpectra(const QStringList &workspaceNames, const std::vector<int> &workspaceIndices);
+  void
+  IndirectTab::plotMultipleSpectra(const QStringList &workspaceNames,
+                                   const std::vector<int> &workspaceIndices);
   /// Plot a spectrum plot with a given ws index
   void plotSpectrum(const QStringList &workspaceNames, int wsIndex = 0);
   /// Plot a spectrum plot of a given workspace
