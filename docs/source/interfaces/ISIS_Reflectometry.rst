@@ -1,8 +1,8 @@
 .. _interface-isis-refl:
 
-=====================================
-ISIS Reflectometry (Polref) Interface
-=====================================
+============================
+ISIS Reflectometry Interface
+============================
 
 .. contents:: Table of Contents
   :local:
@@ -44,8 +44,8 @@ Once they are downloaded, place the nxs files in one of Mantid's user directorie
 To see a list of directories, click on **File -> Manage User Directories**.
 ``INTER_NR_test2.tbl`` can be saved anywhere you like, as long as you know where it is.
 
-Open MantidPlot, and open the ISIS Reflectometry (Polref) interface.
-**Interfaces -> Reflectometry -> ISIS Reflectometry (Polref)**
+Open MantidPlot, and open the ISIS Reflectometry interface.
+**Interfaces -> Reflectometry -> ISIS Reflectometry**
 
 Within the interface, we first want to import the tbl file as a TableWorkspace.
 To do this, click on **Reflectometry -> Import .TBL**. A :ref:`LoadTBL <algm-LoadTBL>`

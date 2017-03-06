@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
-    <height>575</height>
+    <width>661</width>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,6 +62,16 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="ckUseCan">
+        <property name="text">
+         <string>Use Can:</string>
+        </property>
        </widget>
       </item>
       <item row="0" column="1">
@@ -90,12 +100,15 @@
         <property name="showLoad" stdset="0">
          <bool>false</bool>
         </property>
+        <property name="ShowGroups" stdset="0">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="ckUseCan">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbInputType">
         <property name="text">
-         <string>Use Can:</string>
+         <string>Sample:</string>
         </property>
        </widget>
       </item>
@@ -288,19 +301,10 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbFlatSampleAngle">
+            <property name="text">
+             <string>Sample Angle:</string>
             </property>
            </widget>
           </item>
@@ -314,23 +318,13 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbFlatSampleThickness">
+          <item row="3" column="2">
+           <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Sample Thickness:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
-            <property name="suffix">
-             <string> cm</string>
-            </property>
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
+             <string>Container Back Thickness:</string>
             </property>
            </widget>
           </item>
@@ -350,30 +344,46 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbFlatSampleAngle">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbFlatSampleThickness">
             <property name="text">
-             <string>Sample Angle:</string>
+             <string>Sample Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spFlatSampleAngle">
-            <property name="suffix">
-             <string> °</string>
-            </property>
             <property name="decimals">
              <number>3</number>
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLabel" name="lbFlatCanBackThickness">
-            <property name="enabled">
-             <bool>false</bool>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
+            <property name="suffix">
+             <string> cm</string>
             </property>
-            <property name="text">
-             <string>Container Back Thickness:</string>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -648,23 +658,13 @@
       <string>Sample Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbSampleChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="spSampleDensity">
+        <property name="maximum">
+         <double>9999.989999999999782</double>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valSampleChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
         </property>
        </widget>
       </item>
@@ -682,16 +682,10 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="spSampleDensity">
-        <property name="suffix">
-         <string> g/cm3</string>
-        </property>
-        <property name="maximum">
-         <double>9999.989999999999782</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbSampleChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
         </property>
        </widget>
       </item>
@@ -699,6 +693,19 @@
        <widget class="QLineEdit" name="leSampleChemicalFormula">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="valSampleChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -726,24 +733,18 @@
       <string>Can Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="2">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4">
-       <widget class="QLabel" name="valCanChemicalFormula">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item row="0" column="3">
@@ -769,18 +770,24 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="cbCanDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
-         </property>
-        </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QLabel" name="valCanChemicalFormula">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
        </widget>
       </item>
      </layout>
@@ -940,8 +947,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>633</x>
-     <y>64</y>
+     <x>640</x>
+     <y>65</y>
     </hint>
    </hints>
   </connection>
@@ -956,8 +963,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>126</x>
-     <y>258</y>
+     <x>99</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -972,8 +979,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>497</x>
-     <y>258</y>
+     <x>413</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -988,8 +995,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>326</x>
-     <y>258</y>
+     <x>256</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -1004,8 +1011,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>633</x>
-     <y>258</y>
+     <x>569</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -1020,8 +1027,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>99</x>
-     <y>160</y>
+     <x>115</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
@@ -1036,8 +1043,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>126</x>
-     <y>160</y>
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
@@ -1048,12 +1055,12 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>326</x>
-     <y>258</y>
+     <x>256</x>
+     <y>222</y>
     </hint>
     <hint type="destinationlabel">
-     <x>633</x>
-     <y>258</y>
+     <x>569</x>
+     <y>222</y>
     </hint>
    </hints>
   </connection>
@@ -1068,8 +1075,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>44</x>
-     <y>166</y>
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
@@ -1084,8 +1091,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>71</x>
-     <y>166</y>
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
