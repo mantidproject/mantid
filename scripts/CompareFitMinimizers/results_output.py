@@ -274,7 +274,7 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     Calculate ascii character width needed for an RST table, using the length of the longest table cell.
 
     @param columns_txt :: list of the contents of the column headers
-    @param items_link :: the test names used for summary tables
+    @param items_link :: the links from rst table cells to other pages/sections of pages
     @param cells :: the values of the results
     @param color_scale :: whether a color_scale is used or not
     """
