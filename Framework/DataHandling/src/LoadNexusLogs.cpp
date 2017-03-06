@@ -656,9 +656,21 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   }
 }
 
+/**
+  * Checks whether the specified character is invalid or a control
+  * character. If it is invalid (i.e. negative) or a control character
+  * the method returns true. If it is valid and not a control character
+  * it returns false. Additionally if the character is invalid is
+  * logs a warning with the property name so users are aware.
+  *
+  * @param c :: Character to check
+  * @param propName :: The name of the property currently being checked for
+  *logging
+  * @param log :: Reference to logger to print out to
+  * @return :: True if control character OR invalid. Else False
+  */
 bool LoadNexusLogs::isControlValue(const char &c, const std::string &propName,
                                    Kernel::Logger &log) {
-
   // Have to check it falls within range accepted by c style check
   if (c <= -1) {
     log.warning("Found an invalid character in property " + propName);
