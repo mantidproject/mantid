@@ -714,6 +714,7 @@ DeltaE::DeltaE()
     : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN),
       t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
   addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
+  addConversion("DeltaE_inFrequency", PhysicalConstants::meVtoFrequency, 1.);
 }
 
 void DeltaE::init() {
@@ -854,6 +855,40 @@ double DeltaE_inWavenumber::conversionTOFMin() const {
 }
 
 double DeltaE_inWavenumber::conversionTOFMax() const {
+  return DeltaE::conversionTOFMax();
+}
+
+// =====================================================================================================
+/* Energy Transfer in units of frequency
+ * =====================================================================================================
+ *
+ * This is identical to Energy Transfer in meV, with one division by Plank's
+ *constant, or multiplication
+ * by factor PhysicalConstants::meVtoFrequency
+ */
+DECLARE_UNIT(DeltaE_inFrequency)
+
+const UnitLabel DeltaE_inFrequency::label() const { return Symbol::GHz; }
+
+void DeltaE_inFrequency::init() {
+  DeltaE::init();
+  // Change the unit scaling factor
+  unitScaling = PhysicalConstants::meVtoFrequency;
+}
+
+Unit *DeltaE_inFrequency::clone() const {
+  return new DeltaE_inFrequency(*this);
+}
+
+DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
+  addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
+}
+
+double DeltaE_inFrequency::conversionTOFMin() const {
+  return DeltaE::conversionTOFMin();
+}
+
+double DeltaE_inFrequency::conversionTOFMax() const {
   return DeltaE::conversionTOFMax();
 }
 

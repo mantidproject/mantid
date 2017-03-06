@@ -5,6 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+API
+---
+
+- Frequency unit (GHz) included as an option to represent energy transfer.
+
 Algorithms
 ----------
 
