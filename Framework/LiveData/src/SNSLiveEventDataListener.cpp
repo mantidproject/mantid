@@ -16,8 +16,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
-#include "MantidLiveData/SNSLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/SNSLiveEventDataListener.h"
 
 // Includes for parsing the XML device descriptions
 #include <Poco/DOM/AutoPtr.h>
