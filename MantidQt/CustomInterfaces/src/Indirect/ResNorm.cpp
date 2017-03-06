@@ -1,9 +1,9 @@
 #include "MantidQtCustomInterfaces/Indirect/ResNorm.h"
 
-#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 using namespace Mantid::API;
 
@@ -47,7 +47,8 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Post Plot and Save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 void ResNorm::setup() {}
@@ -303,30 +304,30 @@ void ResNorm::previewSpecChanged(int value) {
 }
 
 /**
-* Plot the current spectrum in the miniplot
-*/
+ * Plot the current spectrum in the miniplot
+ */
 
 void ResNorm::plotCurrentPreview() {
+
+  QStringList plotWorkspaces;
+  std::vector<int> plotIndices;
+
   if (m_uiForm.ppPlot->hasCurve("Vanadium")) {
-    plotSpectrum(m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
+    plotWorkspaces << m_uiForm.dsVanadium->getCurrentDataName();
+    plotIndices.push_back(m_previewSpec);
   }
   if (m_uiForm.ppPlot->hasCurve("Resolution")) {
-    plotSpectrum(m_uiForm.dsResolution->getCurrentDataName(), 0);
+    plotWorkspaces << m_uiForm.dsResolution->getCurrentDataName();
+    plotIndices.push_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
-    WorkspaceGroup_sptr fitWorkspaces =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        m_pythonExportWsName + "_Fit_Workspaces");
-
-      auto fitWsName = QString::fromStdString(
-        fitWorkspaces->getItem(m_previewSpec)->getName());
-      plotSpectrum(fitWsName, 0);
   }
+  plotMultipleSpectra(plotWorkspaces, plotIndices);
 }
 
 /**
-* Handles saving when button is clicked
-*/
+ * Handles saving when button is clicked
+ */
 
 void ResNorm::saveClicked() {
 
@@ -343,8 +344,8 @@ void ResNorm::saveClicked() {
 }
 
 /**
-* Handles plotting when button is clicked
-*/
+ * Handles plotting when button is clicked
+ */
 
 void ResNorm::plotClicked() {
   WorkspaceGroup_sptr fitWorkspaces =
