@@ -14,7 +14,6 @@ absorption_correction_params = {
 gem_adv_config_params = {
     "raw_tof_cropping_values": (500, 20000),
     "spline_coefficient": 30
-
 }
 
 focused_cropping_values = [(550, 19900),  # Bank 1

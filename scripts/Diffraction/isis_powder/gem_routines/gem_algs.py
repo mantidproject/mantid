@@ -27,6 +27,7 @@ def get_run_details(run_number_string, inst_settings):
     label = common.cal_map_dictionary_key_helper(cycle_map, "label")
     offset_file_name = common.cal_map_dictionary_key_helper(cycle_map, "offset_file_name")
     empty_runs = common.cal_map_dictionary_key_helper(cycle_map, "empty_run_numbers")
+    empty_containers_runs = common.cal_map_dictionary_key_helper(cycle_map, "empty_container_run_numbers")
     vanadium_runs = common.cal_map_dictionary_key_helper(cycle_map, "vanadium_run_numbers")
 
     # For GEM the grouping and offset file are identical
@@ -37,8 +38,6 @@ def get_run_details(run_number_string, inst_settings):
 
     offset_file_path = os.path.join(label_calibration_folder, offset_file_name)
     splined_file_path = os.path.join(label_calibration_folder, splined_vanadium_name)
-
-    # TODO generate splined vanadium name from common
 
     run_details = RunDetails.RunDetails(run_number=run_number)
     run_details.empty_runs = empty_runs
