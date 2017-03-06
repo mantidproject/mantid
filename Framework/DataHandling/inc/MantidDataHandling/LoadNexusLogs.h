@@ -97,6 +97,11 @@ private:
   /// Create a time series property
   Kernel::Property *createTimeSeries(::NeXus::File &file,
                                      const std::string &prop_name) const;
+
+  /// Returns true if the character is a control value or invalid
+  static bool isControlValue(const char &c, const std::string &propName,
+                             Kernel::Logger &log);
+
   /// Progress reporting object
   boost::shared_ptr<API::Progress> m_progress;
 

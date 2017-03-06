@@ -3,7 +3,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
-#include <cctype>
+#include <locale>
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -620,7 +620,9 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(values.begin(), values.end(), iscntrl, ' ');
+    std::replace_if(values.begin(), values.end(), [&](const char &c) {
+      return isControlValue(c, prop_name, g_log);
+    }, ' ');
     auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
@@ -651,6 +653,22 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     throw ::NeXus::Exception(
         "Invalid value type for time series. Only int, double or strings are "
         "supported");
+  }
+}
+
+bool LoadNexusLogs::isControlValue(const char &c, const std::string &propName,
+                                   Kernel::Logger &log) {
+
+  // Have to check it falls within range accepted by c style check
+  if (c <= -1 || c > 255) {
+    log.warning("Found an invalid character in property " + propName);
+    // Pretend this is a control value so it is sanitized
+    return true;
+  } else {
+    // Use default global c++ locale within this program
+    std::locale locale{};
+    // Use c++ style call so we don't need to cast from int to bool
+    return std::iscntrl(c, locale);
   }
 }
 
