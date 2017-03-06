@@ -32,6 +32,7 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+- The Delta Function option can now be used with StretchedExpFT mode
 
 Jump Fit
 ~~~~~~~~
