@@ -1607,6 +1607,23 @@ void FilterEvents::generateSplitterTSP(
   return;
 }
 
+// TODO/FIXME/NOW - From HERE!
+/*
+ * FilterEvents-[Warning] [FilterEvents] Workspace FilteredWS01_unfiltered Indexed @ -1 won't have logs splitted due to zero splitter size. .
+
+Thread 1 "AlgorithmsTest" received signal SIGSEGV, Segmentation fault.
+0x00007ffff7496c2d in Mantid::Algorithms::FilterEvents::generateSplitterTSPalpha (this=0x7fffffffd130, split_tsp_vec=std::vector of length 0, capacity 0)
+    at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:1630
+1630	    split_tsp_vec[itarget]->addValue(splitter.start(), 1);
+(gdb) bt
+#0  0x00007ffff7496c2d in Mantid::Algorithms::FilterEvents::generateSplitterTSPalpha (this=0x7fffffffd130, split_tsp_vec=std::vector of length 0, capacity 0)
+    at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:1630
+#1  0x00007ffff748c884 in Mantid::Algorithms::FilterEvents::exec (this=0x7fffffffd130) at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:203
+
+ *
+ *
+ */
+
 /** Generate the splitter's time series property (log) the splitters workspace
  * @brief FilterEvents::generateSplitterTSPalpha
  * @param split_tsp_vec
