@@ -1,4 +1,5 @@
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidCrystal/CalibrationHelpers.h"
 
@@ -94,7 +95,6 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     detectorInfo.setPosition(*bank, rotatedPos + bank->getPos() +
                                         bank->getPos() - bank->getPos());
 
-    // TODO: Use ResizeRectangularDetectorHelper from PR #18906
     std::vector<double> oldScalex =
         pmap->getDouble(bank->getName(), std::string("scalex"));
     std::vector<double> oldScaley =
@@ -113,6 +113,9 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
 
     pmap->addDouble(bank.get(), std::string("scalex"), scalex);
     pmap->addDouble(bank.get(), std::string("scaley"), scaley);
+
+    applyRectangularDetectorScaleToDetectorInfo(detectorInfo, *bank, detWScale,
+                                                detHtScale);
   }
 }
 
