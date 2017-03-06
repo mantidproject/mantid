@@ -207,6 +207,31 @@ QString IndirectTab::getWorkspaceBasename(const QString &wsName) {
 }
 
 /**
+* Plots different spectra from multiple workspaces on the same plot
+*
+* This uses the plotSpectrum function from the Python API.
+*
+* @param workspaceNames List of names of workspaces to plot
+* @param workspaceIndices List of indices to plot
+*/
+void IndirectTab::plotMultipleSpectra(const QStringList &workspaceNames, const std::vector<int> &workspaceIndices) {
+  if (workspaceNames.isEmpty())
+    return;
+  if (workspaceNames.size() != workspaceIndices.size())
+    return;
+
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+  pyInput += "window = plotSpectrum('";
+  pyInput += workspaceNames[0];
+  pyInput += "', ";
+  pyInput += QString::number(workspaceIndices[0]);
+  pyInput += ").window()\n";
+  m_pythonRunner.runPythonCode(pyInput);
+
+}
+
+
+/**
  * Creates a spectrum plot of one or more workspaces at a given spectrum
  * index.
  *
