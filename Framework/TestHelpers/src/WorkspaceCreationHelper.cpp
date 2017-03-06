@@ -112,9 +112,8 @@ Workspace2D_sptr create1DWorkspaceRand(int size, bool isHisto) {
   Counts counts(size, randFunc);
   CountStandardDeviations errorVals(size, randFunc);
 
-  auto generatedHisto = createHisto(isHisto, counts, errorVals);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, std::move(generatedHisto));
+  retVal->initialize(1, createHisto(isHisto, counts, errorVals));
   return retVal;
 }
 
@@ -122,10 +121,9 @@ Workspace2D_sptr create1DWorkspaceConstant(int size, double value, double error,
                                            bool isHisto) {
   Counts yVals(size, value);
   CountStandardDeviations errVals(size, error);
-  auto generatedHisto = createHisto(isHisto, yVals, errVals);
 
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, std::move(generatedHisto));
+  retVal->initialize(1, createHisto(isHisto, yVals, errVals));
   return retVal;
 }
 
@@ -144,9 +142,8 @@ Workspace2D_sptr create1DWorkspaceFib(int size, bool isHisto) {
   Counts yVals(size, FibSeries<double>());
   CountStandardDeviations errVals(size);
 
-  auto generatedHisto = createHisto(isHisto, yVals, errVals);
   auto retVal = boost::make_shared<Workspace2D>();
-  retVal->initialize(1, std::move(generatedHisto));
+  retVal->initialize(1, createHisto(isHisto, yVals, errVals));
   return retVal;
 }
 

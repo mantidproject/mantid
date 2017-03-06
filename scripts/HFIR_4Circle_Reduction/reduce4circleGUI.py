@@ -3417,7 +3417,8 @@ class MainWindow(QtGui.QMainWindow):
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
-        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
+        # TODO/FIXME - changed to 512 from 256 as prototype.  Should be via configuration
+        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=512, y_min=0, y_max=512,
                                                         hold_prev_image=False)
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
         if status:
