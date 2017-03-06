@@ -277,6 +277,7 @@ def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     @param items_link :: the links from rst table cells to other pages/sections of pages
     @param cells :: the values of the results
     @param color_scale :: whether a color_scale is used or not
+    @returns :: the length of the longest cell in a table
     """
 
     # The length of the longest header (minimizer name)
@@ -424,6 +425,12 @@ def format_cell_value_rst(value, width=None, color_scale=None, items_link=None):
     """
     Build the content string for a table cell, adding style/color tags
     if required.
+
+    @param value :: the value of the result
+    @param width :: the width of the longest table cell
+    @param color_scale :: the colour scale used
+    @param items_link :: the links from rst table cells to other pages/sections of pages
+    @returns :: the (formatted) contents of a cell
 
     """
     if not color_scale:
