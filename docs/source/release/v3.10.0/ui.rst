@@ -45,7 +45,9 @@ Documentation
 Custom Interfaces
 #################
 
-Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+- Indirect > Corrections > CalculatePaalmanPings is upgraded with few new options for computation of the corrections. Those are needed to be able to compute the corrections for different scenarios, like QENS, FWS, diffraction.
+- Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+
 
 Bugs Resolved
 -------------
