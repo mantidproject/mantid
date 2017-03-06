@@ -112,8 +112,18 @@ void ResizeRectangularDetector::exec() {
 
   // Positions of detectors are now stored in DetectorInfo, so we must update
   // positions there.
+  // This algorithm is setting the absolute scale factor. Since there may be a
+  // previous scaling we have to factor that out.
+  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
+  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
+  double relscalex = ScaleX;
+  double relscaley = ScaleY;
+  if (!oldscalex.empty())
+    relscalex /= oldscalex[0];
+  if (!oldscaley.empty())
+    relscaley /= oldscaley[0];
   applyRectangularDetectorScaleToDetectorInfo(input->mutableDetectorInfo(),
-                                              *det, ScaleX, ScaleY);
+                                              *det, relscalex, relscaley);
 }
 
 } // namespace Mantid
