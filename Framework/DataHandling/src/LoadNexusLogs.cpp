@@ -660,7 +660,7 @@ bool LoadNexusLogs::isControlValue(const char &c, const std::string &propName,
                                    Kernel::Logger &log) {
 
   // Have to check it falls within range accepted by c style check
-  if (c <= -1 || c > 255) {
+  if (c <= -1) {
     log.warning("Found an invalid character in property " + propName);
     // Pretend this is a control value so it is sanitized
     return true;

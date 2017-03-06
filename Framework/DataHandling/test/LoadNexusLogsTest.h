@@ -127,7 +127,6 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     const API::Run &run = testWS->run();
-    const std::vector<Property *> &logs = run.getLogData();
 
     TimeSeriesProperty<std::string> *putLog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
