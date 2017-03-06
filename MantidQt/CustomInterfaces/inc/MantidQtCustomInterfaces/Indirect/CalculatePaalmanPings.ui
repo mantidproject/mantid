@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>661</width>
-    <height>507</height>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,13 +102,6 @@
         </property>
         <property name="ShowGroups" stdset="0">
          <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lbInputType">
-        <property name="text">
-         <string>Sample:</string>
         </property>
        </widget>
       </item>
@@ -285,7 +278,7 @@
       <item>
        <widget class="QStackedWidget" name="swShapeOptions">
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="pgFlatPlate">
          <layout class="QGridLayout" name="gridLayout_2">
@@ -405,6 +398,9 @@
           </property>
           <item row="5" column="3">
            <widget class="QDoubleSpinBox" name="spCylBeamWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -429,6 +425,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spCylBeamHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -466,6 +465,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spCylSampleOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -481,6 +483,9 @@
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
             </property>
             <property name="decimals">
              <number>3</number>
@@ -521,6 +526,9 @@
           </property>
           <item row="5" column="3">
            <widget class="QDoubleSpinBox" name="spAnnBeamWidth">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -545,6 +553,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spAnnBeamHeight">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -588,6 +599,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -601,6 +615,9 @@
           </item>
           <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -628,6 +645,9 @@
           </item>
           <item row="0" column="1">
            <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -660,6 +680,9 @@
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="spSampleDensity">
+        <property name="suffix">
+         <string> g/cm3</string>
+        </property>
         <property name="maximum">
          <double>9999.989999999999782</double>
         </property>
