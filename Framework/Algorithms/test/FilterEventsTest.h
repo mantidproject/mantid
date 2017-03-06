@@ -622,10 +622,10 @@ public:
     //  Test the sample logs
     std::vector<std::string> outputwsnames =
         filter.getProperty("OutputWorkspaceNames");
-    for (size_t i = 0; i < outputwsnames.size(); ++i)
-    {
-      EventWorkspace_sptr filtered_ws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
-            AnalysisDataService::Instance().retrieve(outputwsnames[i]));
+    for (size_t i = 0; i < outputwsnames.size(); ++i) {
+      EventWorkspace_sptr filtered_ws =
+          boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+              AnalysisDataService::Instance().retrieve(outputwsnames[i]));
 
       TS_ASSERT(filtered_ws->run().hasProperty("LogA"));
       TS_ASSERT(filtered_ws->run().hasProperty("LogB"));
@@ -636,8 +636,9 @@ public:
       TS_ASSERT_EQUALS(valueA.compare("A"), 0);
 
       TS_ASSERT(filtered_ws->run().hasProperty("slow_int_log"));
-      Kernel::TimeSeriesProperty<int> *intlog = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
-            filtered_ws->run().getProperty("slow_int_log"));
+      Kernel::TimeSeriesProperty<int> *intlog =
+          dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
+              filtered_ws->run().getProperty("slow_int_log"));
       TS_ASSERT(intlog);
     }
 
@@ -805,17 +806,22 @@ public:
     eventWS->mutableRun().integrateProtonCharge();
 
     // add some arbitrary sample log for splitting or not splitting
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogA", "A"));
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogB", "B"));
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
-    eventWS->mutableRun().addProperty(new Kernel::PropertyWithValue<std::string>("Title", "Testing EventWorkspace"));
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<std::string>("LogA", "A"));
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<std::string>("LogB", "B"));
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<std::string>("LogC", "C"), true);
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<std::string>("Title",
+                                                   "Testing EventWorkspace"));
 
     // add an integer slow log
-    auto int_tsp = Kernel::make_unique<Kernel::TimeSeriesProperty<int> >("slow_int_log");
-    for (size_t i = 0; i < 10; ++i)
-    {
-      Kernel::DateAndTime log_time(runstart_i64 + 5*pulsedt*i);
-      int log_value = static_cast<int>(i+1) * 20;
+    auto int_tsp =
+        Kernel::make_unique<Kernel::TimeSeriesProperty<int>>("slow_int_log");
+    for (size_t i = 0; i < 10; ++i) {
+      Kernel::DateAndTime log_time(runstart_i64 + 5 * pulsedt * i);
+      int log_value = static_cast<int>(i + 1) * 20;
       int_tsp->addValue(log_time, log_value);
     }
     eventWS->mutableRun().addLogData(int_tsp.release());

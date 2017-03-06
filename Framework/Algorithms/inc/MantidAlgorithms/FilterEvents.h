@@ -123,7 +123,8 @@ private:
   /// Examine workspace
   void examineEventWS();
 
-  /// Convert SplittersWorkspace to vector of time and vector of target (itarget)
+  /// Convert SplittersWorkspace to vector of time and vector of target
+  /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
   DataObjects::EventWorkspace_sptr m_eventWS;
@@ -157,12 +158,15 @@ private:
 
   Kernel::TimeSplitterType generateSplitters(int wsindex);
 
-  void generateSplitterTSP(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+  void generateSplitterTSP(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
-  void generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+  void generateSplitterTSPalpha(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
   ///
-  void mapSplitterTSPtoWorkspaces(const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+  void mapSplitterTSPtoWorkspaces(
+      const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);
