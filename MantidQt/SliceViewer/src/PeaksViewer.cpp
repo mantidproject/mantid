@@ -512,7 +512,7 @@ bool PeaksViewer::removePeaksWorkspace(
         break;
       }
     }
-	m_presenter->hideInPlot(toRemove, somethingToRemove);
+    m_presenter->hideInPlot(toRemove, somethingToRemove);
     m_presenter->remove(toRemove);
   }
   return somethingToRemove;

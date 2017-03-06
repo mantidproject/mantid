@@ -87,9 +87,9 @@ Clear all peaks
 */
 void CompositePeaksPresenter::clear() {
   if (!m_subjects.empty()) {
-	  for (auto i = 0; i < m_subjects.size(); i++) {
-		  m_subjects[i]->setShown(false);
-	}
+    for (auto i = 0; i < m_subjects.size(); i++) {
+      m_subjects[i]->setShown(false);
+    }
     m_subjects.clear();
     this->m_zoomablePlottingWidget->detach();
     PeakPalette<PeakViewColor> tempPeakViewColor;
