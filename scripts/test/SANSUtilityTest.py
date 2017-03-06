@@ -4,7 +4,7 @@ import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
-from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager)
+from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService)
 from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
                            BoolTimeSeriesProperty,StringTimeSeriesProperty,
                            StringPropertyWithValue, V3D, Quat)
@@ -30,7 +30,7 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
-    
+
 def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = False):
     number_of_times = 10
     for i in range(0, number_of_times):
@@ -1323,8 +1323,6 @@ class TestCorrectingCummulativeSampleLogs(unittest.TestCase):
         out_ws_name = 'out_ws'
         time_shift = 0
         log_names = ['good_uah_log', 'good_frames', 'new_series']
-        import time
-        time.sleep(10)
         start_time_1 = "2010-01-01T00:00:00"
         proton_charge_1 = 10.2
         lhs = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0,
@@ -1513,8 +1511,6 @@ class TestBenchRotDetection(unittest.TestCase):
 
     def test_workspace_without_bench_raises(self):
         # Arrange
-        import time
-        time.sleep(10)
         ws = self._get_sample_workspace(has_bench_rot=False)
         # Act + Assert
         expected_raise = True
@@ -1523,8 +1519,6 @@ class TestBenchRotDetection(unittest.TestCase):
 
     def test_workspace_without_bench_but_no_log_dict_does_not_raise(self):
         # Arrange
-        import time
-        time.sleep(10)
         ws = self._get_sample_workspace(has_bench_rot=False)
         # Act + Assert
         expected_raise = False
@@ -1567,6 +1561,7 @@ class TestQuaternionToAngleAndAxis(unittest.TestCase):
         # There shouldn't be an axis for angle 0
         self._do_test_quaternion(angle, axis)
 
+
 class TestTransmissionName(unittest.TestCase):
     def test_that_suffix_is_added_if_not_exists(self):
         # Arrange
@@ -1584,6 +1579,99 @@ class TestTransmissionName(unittest.TestCase):
         # Assert
         expected = workspace_name
         self.assertTrue(unfitted_workspace_name == expected)
+
+
+class TestAddingUserFileExtension(unittest.TestCase):
+    def test_that_does_not_alter_user_file_name_when_contains_txt_ending(self):
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXt") == ["test.TXt"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.txt") == ["test.txt"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.TXT") == ["test.TXT"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tXt") == ["test.tXt"])
+
+    def test_that_does_alters_user_file_name_when_does_contain_txt_ending(self):
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test.tt") == ["test.tt.txt", "test.tt.TXT"])
+        self.assertTrue(su.get_user_file_name_options_with_txt_extension("test") == ["test.txt", "test.TXT"])
+
+
+class TestSelectNewDetector(unittest.TestCase):
+    def test_that_for_SANS2D_correct_settings_are_selected(self):
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2d", "rear") == "rear")
+        self.assertTrue(su.get_correct_combinDet_setting("SANS2D", "FRONT") == "front")
+        self.assertTrue(su.get_correct_combinDet_setting("sAnS2d", "boTH") == "both")
+        self.assertTrue(su.get_correct_combinDet_setting("sans2d", "merged") == "merged")
+
+    def test_that_for_LOQ_correct_settings_are_selected(self):
+        self.assertTrue(su.get_correct_combinDet_setting("Loq", "main") == "rear")
+        self.assertTrue(su.get_correct_combinDet_setting("LOQ", "Hab") == "front")
+        self.assertTrue(su.get_correct_combinDet_setting("lOQ", "boTH") == "both")
+        self.assertTrue(su.get_correct_combinDet_setting("loq", "merged") == "merged")
+
+    def test_that_for_LARMOR_correct_settings_are_selected(self):
+        self.assertTrue(su.get_correct_combinDet_setting("larmor", "main") is None)
+        self.assertTrue(su.get_correct_combinDet_setting("LARMOR", "DetectorBench") is None)
+
+    def test_that_for_unknown_instrument_raises(self):
+        args = ["unknown_instrument", "main"]
+        self.assertRaises(RuntimeError, su.get_correct_combinDet_setting, *args)
+
+    def test_that_for_unknown_detector_command_raises(self):
+        args = ["sans2d", "main"]
+        self.assertRaises(RuntimeError, su.get_correct_combinDet_setting, *args)
+        args = ["loq", "front"]
+        self.assertRaises(RuntimeError, su.get_correct_combinDet_setting, *args)
+
+
+class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
+    def _create_sample_workspace(self):
+        ws = CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=1,
+                                   XMin=1, XMax=14, BinWidth=2)
+        return ws
+
+    def test_that_SANS2D_workspace_is_renamed_correctly(self):
+        workspace = self._create_sample_workspace()
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.LAB, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_rear"))
+        self.assertTrue(out_name == "test_rear")
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.HAB, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_front"))
+        self.assertTrue(out_name == "test_front")
+        out_name = su.rename_workspace_correctly("SANS2D", su.ReducedType.Merged, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_merged"))
+        self.assertTrue(out_name == "test_merged")
+
+        if AnalysisDataService.doesExist("test_merged"):
+            AnalysisDataService.remove("test_merged")
+
+    def test_that_LOQ_workspace_is_renamed_correctly(self):
+        workspace = self._create_sample_workspace()
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.LAB, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_main"))
+        self.assertTrue(out_name == "test_main")
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.HAB, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_hab"))
+        self.assertTrue(out_name == "test_hab")
+        out_name = su.rename_workspace_correctly("LOQ", su.ReducedType.Merged, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test_merged"))
+        self.assertTrue(out_name == "test_merged")
+
+        if AnalysisDataService.doesExist("test_merged"):
+            AnalysisDataService.remove("test_merged")
+
+    def test_that_LAMROR_workspace_is_not_renamed(self):
+        workspace = self._create_sample_workspace()
+        out_name = su.rename_workspace_correctly("LARMOR", su.ReducedType.LAB, "test", workspace)
+        self.assertTrue(AnalysisDataService.doesExist("test"))
+        self.assertTrue(out_name == "test")
+
+        if AnalysisDataService.doesExist("test"):
+            AnalysisDataService.remove("test")
+
+    def test_that_raies_for_unkown_reduction_type(self):
+        workspace = self._create_sample_workspace()
+        args = ["SANS2D", "jsdlkfsldkfj", "test", workspace]
+        self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
+        AnalysisDataService.remove("ws")
+
 
 if __name__ == "__main__":
     unittest.main()

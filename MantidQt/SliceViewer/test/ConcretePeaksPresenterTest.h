@@ -558,7 +558,7 @@ public:
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView>>(pMockView);
     EXPECT_CALL(*pMockView, showView())
-        .Times(1); // Expect that the view will be forced to SHOW.
+        .Times(2); // Expect that the view will be forced to SHOW.
     EXPECT_CALL(*pMockView, hideView())
         .Times(1); // Expect that the view will be forced to HIDE.
     EXPECT_CALL(*pMockView, updateView())

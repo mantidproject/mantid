@@ -114,7 +114,7 @@ class CrystalField(object):
                                           See the Crystal Field Python Interface help page for more details.
         """
         from .function import PeaksFunction
-        self._ion = Ion
+        self.Ion = Ion
         self._symmetry = Symmetry
         self._toleranceEnergy = 1e-10
         self._toleranceIntensity = 1e-1
@@ -397,7 +397,16 @@ class CrystalField(object):
         if value not in self.ion_nre_map.keys():
             msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' %\
                   (value, ', '.join(list(self.ion_nre_map.keys())))
-            raise RuntimeError(msg)
+            arbitraryJ = re.match('[SJsj]([0-9\.]+)', value)
+            if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
+                value = arbitraryJ.group(0)
+                self._nre = int(-float(arbitraryJ.group(1)) * 2.)
+                if self._nre < -99:
+                    raise RuntimeError('J value ' + str(-self._nre / 2) + ' is too large.')
+            else:
+                raise RuntimeError(msg+', S<n>, J<n>')
+        else:
+            self._nre = self.ion_nre_map[value]
         self._ion = value
         self._dirty_eigensystem = True
         self._dirty_peaks = True
@@ -1092,8 +1101,9 @@ class CrystalField(object):
         """
         if self._dirty_eigensystem:
             import CrystalField.energies as energies
-            nre = self.ion_nre_map[self._ion]
-            self._eigenvalues, self._eigenvectors, self._hamiltonian = energies.energies(nre, **self._fieldParameters)
+            if self._nre < -99:
+                raise RuntimeError('J value ' + str(-self._nre / 2) + ' is too large.')
+            self._eigenvalues, self._eigenvectors, self._hamiltonian = energies.energies(self._nre, **self._fieldParameters)
             self._dirty_eigensystem = False
 
     def _calcPeaksList(self, i):

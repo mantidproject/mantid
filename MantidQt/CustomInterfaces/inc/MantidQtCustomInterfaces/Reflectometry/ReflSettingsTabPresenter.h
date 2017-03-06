@@ -15,7 +15,7 @@ class IReflSettingsPresenter;
 /** @class ReflSettingsTabPresenter
 
 ReflSettingsTabPresenter is a presenter class for the tab 'Settings' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

@@ -125,6 +125,7 @@ void IndirectDiffractionReduction::run() {
             "Calibration and rebinning parameters are incorrect.");
         return;
       }
+      runGenericReduction(instName, mode);
     }
   } else {
     if (!validateRebin()) {
