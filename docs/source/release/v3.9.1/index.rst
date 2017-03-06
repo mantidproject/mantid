@@ -9,8 +9,8 @@ Mantid 3.9.1 Release Notes
 
 This is a patch release that corrects some significant issues since :ref:`version 3.9.0 <v3.9.0>`.
 
-There is no common theme to the fixes contained in this patch, rather it is collection of small but significant fixes. Please see below
-for the full list of changes.
+There is no common theme to the fixes contained in this patch, rather it is collection of small but
+significant fixes. Please see below for the full list of changes.
 
 Citation
 --------
@@ -44,6 +44,7 @@ Changes in this version
 * `18979 <https://www.github.com/mantidproject/mantid/pull/18979>`_ Fix delete confirmations in workspace dock
 * `18984 <https://www.github.com/mantidproject/mantid/pull/18984>`_ Abins: Correct setting numerical zero for b_tensors
 * `18995 <https://www.github.com/mantidproject/mantid/pull/18995>`_ Add bank43 to TOPAZ IDF this run cycle
+* `19022 <https://www.github.com/mantidproject/mantid/pull/19022>`_ Fix reduction for osiris diffspec
 
 
 Summary of impact
@@ -92,6 +93,8 @@ Summary of impact
 | 18984 | Sets a minimum threshold for values of B tensor in Abins                          | Check values on load                        | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18995 | Mantid now recognises bank 43 of TOPAZ                                            | Update IDF                                  | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 19022 | OSIRIS diffspec reduction now works                                               | Add back code in else statement             | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org

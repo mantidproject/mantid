@@ -1,22 +1,17 @@
-#ifndef MANTID_ALGORITHMS_SETINSTRUMENTPARAMETER_H_
-#define MANTID_ALGORITHMS_SETINSTRUMENTPARAMETER_H_
+#ifndef MANTID_ALGORITHMS_CREATEEPP_H_
+#define MANTID_ALGORITHMS_CREATEEPP_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-
-namespace Geometry {
-class ParameterMap;
-class IComponent;
-}
-
 namespace Algorithms {
 
-/** SetInstrumentParameter : A simple algorithm to add or set the value of an
-  instrument parameter
+/** CreateEPP : Calculates the nominal elastic time-of flights for
+  each spectrum and creates an elastic peak position table (EPP)
+  like the one returned by the FindEPP algorithm.
 
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -37,29 +32,20 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SetInstrumentParameter : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateEPP : public API::Algorithm {
 public:
   const std::string name() const override;
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Add or replace an parameter attached to an instrument component.";
-  }
-
   int version() const override;
   const std::string category() const override;
-  std::map<std::string, std::string> validateInputs() override;
+  const std::string summary() const override;
 
 private:
   void init() override;
   void exec() override;
-
-  void addParameter(Mantid::Geometry::ParameterMap &pmap,
-                    const Mantid::Geometry::IComponent *cmptId,
-                    const std::string &paramName, const std::string &paramType,
-                    const std::string &paramValue) const;
+  std::map<std::string, std::string> validateInputs(void) override;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SETINSTRUMENTPARAMETER_H_ */
+#endif /* MANTID_ALGORITHMS_CREATEEPP_H_ */

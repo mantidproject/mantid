@@ -42,8 +42,15 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+#################
+
+Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+
 Bugs Resolved
 -------------
+
+- Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
 
 SliceViewer Improvements
 ------------------------
