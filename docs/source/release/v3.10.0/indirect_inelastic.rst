@@ -31,6 +31,7 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+- Added peak radius parameter with value of 50
 
 Jump Fit
 ~~~~~~~~

@@ -314,6 +314,7 @@ void ConvFit::run() {
   cfs->setProperty("EndX", m_properties["EndX"]->valueText().toStdString());
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
+  cfs->setProperty("PeakRadius", 50);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
@@ -1270,6 +1271,7 @@ void ConvFit::singleFit() {
   m_singleFitAlg->setProperty("CreateOutput", true);
   m_singleFitAlg->setProperty("OutputCompositeMembers", true);
   m_singleFitAlg->setProperty("ConvolveMembers", true);
+  m_singleFitAlg->setProperty("PeakRadius", 50);
   m_singleFitAlg->setProperty("MaxIterations", maxIterations);
   m_singleFitAlg->setProperty(
       "Minimizer", minimizerString(m_singleFitOutputName).toStdString());
