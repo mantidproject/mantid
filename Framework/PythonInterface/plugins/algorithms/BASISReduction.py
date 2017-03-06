@@ -2,12 +2,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as sapi
-from mantid.api import PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
+from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
 from mantid.kernel import IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty,\
     FloatArrayLengthValidator, Direction, PropertyCriterion
 from mantid import config
 from os.path import join as pjoin
 
+TEMPERATURE_SENSOR = "SensorA"
 DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015"
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
@@ -155,8 +156,8 @@ class BASISReduction(PythonAlgorithm):
 
         # Aditional output properties
         titleAddionalOutput = "Additional Output"
-        self.declareProperty("OutputSusceptibility", False, direction=Direction.Output,
-                             doc="Do we output file for dynamic susceptibility?")
+        self.declareProperty("OutputSusceptibility", False, direction=Direction.Input,
+                             doc="Output dynamic susceptibility (Xqw)")
         self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
 
 
@@ -269,14 +270,14 @@ class BASISReduction(PythonAlgorithm):
 
             # additional output
             if self.getProperty("OutputSusceptibility").value:
-                samXqsWs = self._samSqwWs.replace("sqw", "xqs")
-                temperature = mtd[self._samSqwWs].getRun().getProperty("SensorA").getStatistics().mean
+                temperature = mtd[self._samSqwWs].getRun().getProperty(TEMPERATURE_SENSOR).getStatistics().mean
+                samXqsWs = self._samSqwWs.replace("sqw", "Xqw")
                 sapi.ApplyDetailedBalance(InputWorkspace=self._samSqwWs,
-                                          OutputWorkspace=samXqsWs, Temperature = temperature)
-                ConvertUnits(InputWorkspace=self._samSqwWs, OutputWorkspace=,
-                             Target="DeltaE_inFrequency", Emode="Indirect")
-                susceptibility_filename = processed_filename.replace("sqw", "xqw")
-                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=self._samSqwWs,)
+                                          OutputWorkspace=samXqsWs, Temperature=str(temperature))
+                sapi.ConvertUnits(InputWorkspace=samXqsWs, OutputWorkspace=samXqsWs,
+                                  Target="DeltaE_inFrequency", Emode="Indirect")
+                susceptibility_filename = processed_filename.replace("sqw", "Xqw")
+                sapi.SaveNexus(Filename=susceptibility_filename, InputWorkspace=samXqsWs)
 
         if not self._debugMode:
             sapi.DeleteWorkspace("BASIS_MASK")  # delete the mask
