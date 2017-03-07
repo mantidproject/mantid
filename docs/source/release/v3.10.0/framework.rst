@@ -23,6 +23,7 @@ Improved
 
 - :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
 - :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
+- Two new properties were added to :ref:`algm-Integration`: *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 
 Bug Fixes
 #########
@@ -45,6 +46,9 @@ Bugs
 ----
 
 - We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
+
+CurveFitting
+------------
 
 Improved
 ########
