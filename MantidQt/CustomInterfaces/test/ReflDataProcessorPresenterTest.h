@@ -8,7 +8,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMockObjects.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
@@ -48,7 +47,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspace(const std::string &wsName,
-                                const DataProcessorWhiteList &whitelist) {
+                           const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -121,21 +120,26 @@ private:
   }
 
   ITableWorkspace_sptr
-    createPrefilledMinimalWorkspace(const std::string &wsName,
-      const DataProcessorWhiteList &whitelist) {
+  createPrefilledMinimalWorkspace(const std::string &wsName,
+                                  const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
-      << "38415"
-      << "0.5069"
-      << ""
-      << "0.0065"
-      << "0.0737"
-      << "0.0148"
-      << "1"
-      << "";
+        << "38415"
+        << "0.5069"
+        << ""
+        << "0.0065"
+        << "0.0737"
+        << "0.0148"
+        << "1"
+        << "";
     row = ws->appendRow();
     return ws;
+  }
+
+  void createSampleEventWS(const std::string &wsName) {
+    auto tinyWS = WorkspaceCreationHelper::createEventWorkspace2();
+    AnalysisDataService::Instance().addOrReplace(wsName, tinyWS);
   }
 
   ReflGenericDataProcessorPresenterFactory presenterFactory;
@@ -166,8 +170,8 @@ public:
         .WillRepeatedly(Return("TestWorkspace"));
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
-    std::set<int> grouplist;
-    grouplist.insert(0);
+    std::set<int> groupList;
+    groupList.insert(0);
 
     // We should not receive any errors
     EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
@@ -178,7 +182,7 @@ public:
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
-        .WillRepeatedly(Return(grouplist));
+        .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
@@ -351,17 +355,14 @@ public:
     presenter->acceptViews(&mockDataProcessorView, &mockProgress);
     presenter->accept(&mockMainPresenter);
 
-    for (auto &x : AnalysisDataService::Instance().getObjectNames())
-      std::cout << "Name = " << x << "\n";
-
     createPrefilledMixedWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
-    std::set<int> grouplist;
-    grouplist.insert(0);
+    std::set<int> groupList;
+    groupList.insert(0);
 
     // We should be warned
     EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
@@ -372,7 +373,7 @@ public:
         .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
-        .WillRepeatedly(Return(grouplist));
+        .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
@@ -388,13 +389,225 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
-  void testPlotRowPythonCode() {}
+  void testPlotRowPythonCode() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
 
-  void testPlotGroupPythonCode() {}
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
-  void testPlotRowWarn() {}
+    createSampleEventWS("IvsQ_13460_0_10");
+    createSampleEventWS("IvsQ_13460_10_20");
+    createSampleEventWS("IvsQ_13460_20_30");
+    createSampleEventWS("IvsQ_13462_0_10");
+    createSampleEventWS("IvsQ_13462_10_20");
+    createSampleEventWS("IvsQ_13462_20_30");
 
-  void testPlotGroupWarn() {}
+    std::map<int, std::set<int>> rowlist;
+    rowlist[0].insert(0);
+    rowlist[0].insert(1);
+
+    // We should not be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(std::set<int>()));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
+
+    std::string pythonCode =
+        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_0_10\", 0, "
+        "True, window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_10_20\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_20_30\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_0_10\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_10_20\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_20_30\", 0, True, "
+        "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+
+    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_13460_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_13460_10_20");
+    AnalysisDataService::Instance().remove("IvsQ_13460_20_30");
+    AnalysisDataService::Instance().remove("IvsQ_13462_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_13462_10_20");
+    AnalysisDataService::Instance().remove("IvsQ_13462_20_30");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotGroupPythonCode() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    createSampleEventWS("IvsQ_13460_0_10");
+    createSampleEventWS("IvsQ_13460_10_20");
+    createSampleEventWS("IvsQ_13460_20_30");
+    createSampleEventWS("IvsQ_13462_0_10");
+    createSampleEventWS("IvsQ_13462_10_20");
+    createSampleEventWS("IvsQ_13462_20_30");
+
+    std::set<int> groupList;
+    groupList.insert(0);
+
+    // We should not be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(0);
+
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
+
+    std::string pythonCode =
+        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_0_10\", 0, "
+        "True, window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_10_20\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_20_30\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_0_10\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_10_20\", 0, True, "
+        "window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_20_30\", 0, True, "
+        "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+
+    EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
+    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_13460_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_13460_10_20");
+    AnalysisDataService::Instance().remove("IvsQ_13460_20_30");
+    AnalysisDataService::Instance().remove("IvsQ_13462_0_10");
+    AnalysisDataService::Instance().remove("IvsQ_13462_10_20");
+    AnalysisDataService::Instance().remove("IvsQ_13462_20_30");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotRowWarn() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    createSampleEventWS("13460");
+
+    std::map<int, std::set<int>> rowlist;
+    rowlist[0].insert(0);
+
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(rowlist));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(std::set<int>()));
+    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+
+    for (auto &x : AnalysisDataService::Instance().getObjectNames())
+      std::cout << "Name = " << x << "\n";
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("13460");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testPlotGroupWarn() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+
+    createSampleEventWS("13460");
+    createSampleEventWS("13462");
+
+    std::set<int> groupList;
+    groupList.insert(0);
+
+    // We should be warned
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+
+    // The user hits "plot rows" with the first row selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("13460");
+    AnalysisDataService::Instance().remove("13462");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
 };
 
 #endif /* MANTID_CUSTOMINTERFACES_REFLDATAPROCESSORPRESENTERTEST_H */
