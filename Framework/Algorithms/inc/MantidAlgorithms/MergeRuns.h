@@ -68,6 +68,11 @@ namespace Algorithms {
 */
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
+  const static std::string SKIP_BEHAVIOUR;
+  const static std::string STOP_BEHAVIOUR;
+  const static std::string REBIN_BEHAVIOUR;
+  const static std::string FAIL_BEHAVIOUR;
+
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MergeRuns"; }
   /// Summary of algorithms purpose

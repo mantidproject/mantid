@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -1228,6 +1229,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1", mergeType, "1", 2);
   }
 
+  void test_mergeSampleLogs_sum_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
   void test_mergeSampleLogs_time_series_and_error_skips_merging_second_file() {
     auto ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0,
@@ -1240,6 +1253,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1",
                                          SampleLogsBehaviour::TIME_SERIES_MERGE,
                                          "2013-Jun-25 10:59:15  1\n", 1);
+  }
+
+  void test_mergeSampleLogs_list_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::LIST_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::LIST_MERGE, "1", 1);
   }
 
   void test_merging_three_workspace_with_time_series() {
@@ -1354,6 +1379,56 @@ public:
 
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n",
                             1);
+  }
+
+  void test_mergeSampleLogs_fail_throwing_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    alg.setPropertyValue("FailBehaviour", MergeRuns::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop2", SampleLogsBehaviour::FAIL_MERGE, "3", 1, true);
+  }
+
+  void rebin_one_workspace() {
+    Rebin rebinAlg;
+    rebinAlg.initialize();
+    rebinAlg.setPropertyValue("InputWorkspace", "b1");
+    rebinAlg.setPropertyValue("OutputWorkspace", "b1");
+    rebinAlg.setPropertyValue("Params", "0.1");
+    rebinAlg.execute();
+  }
+
+  void test_mergeSampleLogs_with_different_binning_skips_merging() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRuns::FAIL_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
+  void
+  test_mergeSampleLogs_with_different_binning_skips_merging_and_throws_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRuns::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour", MergeRuns::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
   }
 
 private:

@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidAPI/ADSValidator.h"
@@ -26,6 +27,11 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+
+const std::string MergeRuns::SKIP_BEHAVIOUR = "Skip File";
+const std::string MergeRuns::STOP_BEHAVIOUR = "Stop";
+const std::string MergeRuns::REBIN_BEHAVIOUR = "Rebin";
+const std::string MergeRuns::FAIL_BEHAVIOUR = "Fail";
 
 /// Initialisation method
 void MergeRuns::init() {
@@ -69,6 +75,18 @@ void MergeRuns::init() {
                   "single value for all fail sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsFail).");
+  const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
+                                                 FAIL_BEHAVIOUR};
+  declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
+                  boost::make_shared<StringListValidator>(rebinOptions),
+                  "Choose whether to rebin when bins are different, or fail "
+                  "(fail behaviour defined in FailBehaviour option).");
+  const std::vector<std::string> failBehaviourOptions = {SKIP_BEHAVIOUR,
+                                                         STOP_BEHAVIOUR};
+  declareProperty("FailBehaviour", SKIP_BEHAVIOUR,
+                  boost::make_shared<StringListValidator>(failBehaviourOptions),
+                  "Choose whether to skip the file and continue, or stop and "
+                  "throw and error, when encountering a failure.");
 }
 
 // @return the name of the property used to supply in input workspace(s).
@@ -97,6 +115,8 @@ void MergeRuns::exec() {
   const std::string sampleLogsFail = getProperty("SampleLogsFail");
   const std::string sampleLogsFailTolerances =
       getProperty("SampleLogsFailTolerances");
+  const std::string rebinBehaviour = getProperty("RebinBehaviour");
+  const std::string sampleLogsFailBehaviour = getProperty("FailBehaviour");
 
   // This will hold the inputs, with the groups separated off
   std::vector<std::string> inputs;
@@ -146,12 +166,24 @@ void MergeRuns::exec() {
       // Only do a rebinning if the bins don't already match - otherwise can
       // just add (see the 'else')
       if (!WorkspaceHelpers::matchingBins(*outWS, **it, true)) {
-        std::vector<double> rebinParams;
-        this->calculateRebinParams(outWS, *it, rebinParams);
+        if (rebinBehaviour == REBIN_BEHAVIOUR) {
+          std::vector<double> rebinParams;
+          this->calculateRebinParams(outWS, *it, rebinParams);
 
-        // Rebin the two workspaces in turn to the same set of bins
-        outWS = this->rebinInput(outWS, rebinParams);
-        addee = this->rebinInput(*it, rebinParams);
+          // Rebin the two workspaces in turn to the same set of bins
+          outWS = this->rebinInput(outWS, rebinParams);
+          addee = this->rebinInput(*it, rebinParams);
+        } else if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error() << "Could not merge run: " << it->get()->getName()
+                        << ". Binning is different from first workspace. "
+                           "MergeRuns will continue but this run will be "
+                           "skipped.";
+          continue;
+        } else {
+          throw std::invalid_argument(
+              "Could not merge run: " + it->get()->getName() +
+              ". Binning is different from first workspace.");
+        }
       } else {
         addee = *it;
       }
@@ -163,11 +195,15 @@ void MergeRuns::exec() {
         outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
       } catch (std::invalid_argument &e) {
-        g_log.error()
-            << "Could not merge run: " << it->get()->getName() << ". Reason: \""
-            << e.what()
-            << "\". MergeRuns will continue but this run will be skipped.";
-        sampleLogsBehaviour.resetSampleLogs(*outWS);
+        if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
+          g_log.error()
+              << "Could not merge run: " << it->get()->getName()
+              << ". Reason: \"" << e.what()
+              << "\". MergeRuns will continue but this run will be skipped.";
+          sampleLogsBehaviour.resetSampleLogs(*outWS);
+        } else {
+          throw std::invalid_argument(e);
+        }
       }
 
       m_progress->report();

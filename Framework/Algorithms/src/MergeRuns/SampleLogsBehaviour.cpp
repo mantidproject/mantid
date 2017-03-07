@@ -554,7 +554,8 @@ void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
       auto property =
           std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws.mutableRun().addProperty(std::move(property), true);
-    } else if (item.second.mergeLogType == MergeLogType::List) {
+    } else if (item.second.mergeLogType == MergeLogType::Sum ||
+               item.second.mergeLogType == MergeLogType::List) {
       ws.mutableRun()
           .getProperty(propertyToReset)
           ->setValue(item.second.property->value());
