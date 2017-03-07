@@ -668,6 +668,7 @@ set ( TEST_FILES
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
 	CalMuonDetectorPhasesTest.h
+	CalculateAsymmetryTest.h
 	CalculateCountRateTest.h
 	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
@@ -749,6 +750,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
+	EstimateAsymmetryFromCountsTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h

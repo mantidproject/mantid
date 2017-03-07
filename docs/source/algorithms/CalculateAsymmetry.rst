@@ -1,0 +1,58 @@
+.. algorithm::
+
+.. summary::
+
+.. alias::
+
+.. properties::
+
+Description
+-----------
+
+This algorithm calculates the asymmetry from the specified muon
+spectra. By default, all of the spectra
+in a workspace will be corrected.
+
+The formula for calculating the asymmetry is given by:
+
+.. math:: \textrm{NewData} = (\textrm{OldData}\times{e^\frac{t}{\tau}})/F N_0 - 1.0,
+
+where :math:`\tau` is the muon lifetime (2.1969811e-6 seconds), :math:'F' is the number of good frames and :math:`N_0` is a
+fitted normalisation constant. The normalisation is calculated by fitting to the normalised counts which is given by
+..math::\textrm{normalisedCounts}=(\textrm{OldData}\times{e^\frac{t}{\tau}})/F
+and the fitting function is given by
+..math::N_0[1+f(t)] 
+where :math:'f(t)' is a user defined function. 
+
+Usage
+-----
+
+**Example - Calculating Asymmetry:**
+
+.. testcode:: ExSimple
+
+import math
+import numpy as np
+xData=np.linspace(start=0,stop=10,num=22)
+yData=[]
+tau =  2.1969811
+for x in xData:
+    yData.append(50.*(1+10.*math.cos(3.*x))*math.exp(-x/tau))
+input = CreateWorkspace(xData,yData)
+run = input.getRun()
+run.addProperty("goodfrm","10","None",True)
+
+output=CalculateAsymmetry(InputWorkspace=input,spectra=0,XStart=1,XEnd=5,myFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0")
+print "Asymmetry: ", output.readY(0)
+
+Output:
+
+.. testoutput:: ExSimple
+Asymmetry:  [ 10.           1.41745897  -9.59816201  -4.13845915   8.4249428
+   6.5268613   -6.57463118  -8.39071529   4.19593225   9.58022765
+  -1.48001632  -9.99980013  -1.35484497   9.6157127    4.08082062
+  -8.45883354  -6.47883052   6.62213825   8.35615238  -4.25323762
+  -9.56191034   1.5425145 ]
+.. categories::
+
+.. sourcelink::

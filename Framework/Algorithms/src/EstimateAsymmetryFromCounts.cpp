@@ -122,7 +122,7 @@ void EstimateAsymmetryFromCounts::exec() {
 		throw std::runtime_error("Start and end times are equal, there is no data to apply the algorithm to.");
 	}
 
-	auto &xData = inputWS->histogram(specNum).binEdges();
+	auto xData = inputWS->histogram(specNum).binEdges();
 	if (startX < xData[0]) {
 		  g_log.warning() << "Start time is before the first data point. Using first data point." << '\n';
 	}
@@ -132,7 +132,8 @@ void EstimateAsymmetryFromCounts::exec() {
 	}
 	// Calculate the normalised counts
     const Mantid::API::Run &run = inputWS->run();
-    const double numGoodFrames = std::stod(run.getProperty("goodfrm")-> value());
+    const double numGoodFrames= std::stod(run.getProperty("goodfrm")-> value());
+	
 	const double normConst = estimateNormalisationConst(inputWS->histogram(specNum), numGoodFrames, startX, endX);
 	// Calculate the asymmetry  
 	outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum),numGoodFrames));

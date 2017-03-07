@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Progress.h"
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -75,7 +76,7 @@ HistogramData::Histogram normaliseCounts(
 */
 double estimateNormalisationConst(const HistogramData::Histogram &histogram, const double numGoodFrames,const double startX, const double endX) {
 	
-	auto &xData = histogram.binEdges();
+	auto xData = histogram.binEdges();
 	auto &yData = histogram.y();
 
 	size_t i0 = startIndexFromTime(xData,startX);

@@ -125,7 +125,7 @@ void CalculateAsymmetry::exec() {
 			  throw std::runtime_error("Start and end times are equal, there is no data to apply the algorithm to.");
 		  }
 
-		  auto &xData = inputWS->histogram(specNum).binEdges();
+		  auto xData = inputWS->histogram(specNum).binEdges();
 		  if (startX < xData[0]) {
 			  g_log.warning() << "Start time is before the first data point. Using first data point." << '\n';
 		  }

@@ -28,19 +28,19 @@ Usage
 
 .. testcode:: ExSimple
 
-   y = [100, 150, 50, 10, 5]
-   x = [1,2,3,4,5,6]
-   input = CreateWorkspace(x,y)
+y = [100, 150, 50, 10, 5]
+x = [1,2,3,4,5,6]
+input = CreateWorkspace(x,y)
+run = input.getRun()
+run.addProperty("goodfrm","10","None",True)
 
-   output = RemoveExpDecay(input)
-
-   print "Exp. decay removed:", output.readY(0)
+output=EstimateAsymmetryFromCounts(InputWorkspace=input,spectra=0,XStart=1,XEnd=5)
+print "Asymmetry estimate: ", output.readY(0)
 
 Output:
 
 .. testoutput:: ExSimple
-
-   Exp. decay removed: [-0.24271431  0.79072482 -0.05900907 -0.70331658 -0.76614798]
+Asymmetry estimate:  [-0.1232116   1.07330834  0.08948306 -0.65649875 -0.7292452 ]
 
 .. categories::
 
