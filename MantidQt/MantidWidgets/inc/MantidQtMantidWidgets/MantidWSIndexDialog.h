@@ -248,8 +248,18 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexWidget : public QWidget {
 
 public:
   /**
-        * POD structure to hold all user-selected input
-        */
+   * Plain old data structures to hold all user-selected input
+   */
+
+  /// Struct to hold user input
+  struct UserInputForContourAndSurface {
+    bool accepted;
+    int plotIndex;
+    QString axisName;
+    QString logName;
+    std::set<double> customLogValues;
+  };
+
   struct UserInput {
     QMultiMap<QString, std::set<int>> plots;
     bool waterfall;
@@ -257,6 +267,7 @@ public:
     bool errors;
     bool surface;
     bool contour;
+    UserInputForContourAndSurface contorSurface;
   };
 
   /// Constructor - same parameters as one of the parent constructors, along

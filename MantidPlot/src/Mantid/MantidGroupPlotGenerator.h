@@ -5,6 +5,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidMatrix.h"
+#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
 #include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 
 /**
@@ -20,13 +21,13 @@ public:
   /// Plots a surface from the given workspace group
   void plotSurface(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
           options) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(
       const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
           options) const;
 
   /// Tests if WorkspaceGroup contains only MatrixWorkspaces
@@ -35,7 +36,7 @@ public:
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
-      MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+    MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
           options,
       int nWorkspaces);
 
@@ -51,14 +52,14 @@ private:
   /// Plots a graph from the given workspace group
   void plot(
       Type graphType, const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
           options) const;
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       Type graphType,
       boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidQt::MantidWidgets::MantidSurfacePlotDialog::UserInputSurface &
+      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
           options) const;
 
   /// Returns a single log value from the given workspace

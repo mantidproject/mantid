@@ -3973,9 +3973,11 @@ void MantidUI::showSurfacePlot() {
           wsGroup->getNumberOfEntries());
 
       // TODO: Figure out how to get rid of MantidUI dependency here.
+#if 0
       auto plotter =
           Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
       plotter->plotSurface(wsGroup, options);
+#endif
     }
   }
 }
@@ -3991,11 +3993,26 @@ void MantidUI::showContourPlot() {
           wsGroup->getNumberOfEntries());
 
       // TODO: Figure out how to remove the MantidUI dependency
+#if 0
       auto plotter =
           Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
       plotter->plotContour(wsGroup, options);
+#endif
     }
   }
+}
+
+void MantidUI::plotContour(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup,
+  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const {
+
+  auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
+  plotter->plotContour(workspaceGroup, userInputForContourAndSurface);
+}
+
+void MantidUI::plotSurface(const Mantid::API::WorkspaceGroup_sptr & workspaceGroup,
+  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const {
+  auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
+  plotter->plotSurface(workspaceGroup, userInputForContourAndSurface);
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }

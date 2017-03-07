@@ -30,7 +30,7 @@ MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
  */
 void MantidGroupPlotGenerator::plotSurface(
     const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options) const {
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
   plot(Type::Surface, wsGroup, options);
 }
 
@@ -41,7 +41,7 @@ void MantidGroupPlotGenerator::plotSurface(
  */
 void MantidGroupPlotGenerator::plotContour(
     const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options) const {
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
   plot(Type::Contour, wsGroup, options);
 }
 
@@ -53,7 +53,7 @@ void MantidGroupPlotGenerator::plotContour(
  */
 void MantidGroupPlotGenerator::plot(
     Type graphType, const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options) const {
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
   if (wsGroup && options.accepted) {
     // Set up one new matrix workspace to hold all the data for plotting
     MatrixWorkspace_sptr matrixWS;
@@ -108,7 +108,7 @@ void MantidGroupPlotGenerator::plot(
 const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType, WorkspaceGroup_const_sptr wsGroup,
-    const MantidSurfacePlotDialog::UserInputSurface &options) const {
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
   const auto index = static_cast<size_t>(
       options.plotIndex);                // which spectrum to plot from each WS
   const auto &logName = options.logName; // Log to read for axis of XYZ plot
@@ -260,7 +260,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @returns Error string, or empty string if no error
  */
 std::string MantidGroupPlotGenerator::validatePlotOptions(
-    MantidSurfacePlotDialog::UserInputSurface &options, int nWorkspaces) {
+  MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options, int nWorkspaces) {
   std::stringstream err;
   if (options.accepted) {
     if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
