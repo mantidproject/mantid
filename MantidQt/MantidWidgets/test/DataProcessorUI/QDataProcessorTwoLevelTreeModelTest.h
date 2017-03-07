@@ -570,6 +570,51 @@ public:
                      "group0_row1_col0");
   }
 
+  void testUnsortedTableGetsSorted() {
+
+    // Create an unsorted table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Column1");
+    ws->addColumn("str", "Column2");
+
+    TableRow row = ws->appendRow();
+    row << "3"
+        << "13462"
+        << "2.3";
+    row = ws->appendRow();
+    row << "2"
+        << "13470"
+        << "2.3";
+    row = ws->appendRow();
+    row << "0"
+        << "13463"
+        << "0.7";
+    row = ws->appendRow();
+    row << "4"
+        << "13469"
+        << "0.7";
+    row = ws->appendRow();
+    row << "0"
+        << "13460"
+        << "0.7";
+
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    ITableWorkspace_sptr ws_model = model.getTableWorkspace();
+
+    TS_ASSERT_EQUALS(ws_model->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws_model->String(0, 0), "0");
+    TS_ASSERT_EQUALS(ws_model->String(1, 0), "0");
+    TS_ASSERT_EQUALS(ws_model->String(2, 0), "2");
+    TS_ASSERT_EQUALS(ws_model->String(3, 0), "3");
+    TS_ASSERT_EQUALS(ws_model->String(4, 0), "4");
+    TS_ASSERT_EQUALS(ws_model->String(0, 1), "13463");
+    TS_ASSERT_EQUALS(ws_model->String(1, 1), "13460");
+    TS_ASSERT_EQUALS(ws_model->String(2, 1), "13470");
+    TS_ASSERT_EQUALS(ws_model->String(3, 1), "13462");
+    TS_ASSERT_EQUALS(ws_model->String(4, 1), "13469");
+  }
+
 private:
   DataProcessorWhiteList m_whitelist;
 };
