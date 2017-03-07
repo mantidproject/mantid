@@ -8,6 +8,7 @@
 #include "../Graph.h"
 #include "MantidQtAPI/IProjectSerialisable.h"
 #include "MantidQtMantidWidgets/MantidDisplayBase.h"
+#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -18,6 +19,7 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/MantidAlgorithmMetatype.h"
@@ -294,6 +296,14 @@ public slots:
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false, MultiLayer *plotWindow = NULL,
          bool clearWindow = false, bool waterfallPlot = false) override;
+
+  /// Plot contour
+  void plotContour(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup, 
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const;
+
+  /// Plot surface
+  void plotSurface(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup, 
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const;
 
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(
