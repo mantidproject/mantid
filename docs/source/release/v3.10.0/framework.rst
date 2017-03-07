@@ -5,14 +5,12 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-Concepts
---------
 
-Configurations
-##############
+API
+---
 
 - The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
-
+- Frequency unit (GHz) included as an option to represent energy transfer.
 
 Algorithms
 ----------
@@ -26,12 +24,15 @@ Improved
 ########
 
 - :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
 
 Bug Fixes
 #########
 
 - Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
+- Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
+
 
 Deprecated
 ##########
@@ -75,7 +76,6 @@ Python
       3.0
       3.0
 
-- Exposed more `SpectrumInfo` functionality to Python.
 
 
 Python Algorithms
