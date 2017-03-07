@@ -71,8 +71,6 @@ private:
   removeDecay(const HistogramData::Histogram &histogram) const;
   // calculate Muon normalisation constant
   double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
-  double fullCalNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
-
 };
 
 } // namespace Algorithm
