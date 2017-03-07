@@ -113,6 +113,8 @@ private:
   getDetectorPtr(const size_t index) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
+  const std::vector<size_t> &
+  getAssemblyDetectorIndices(const Geometry::IComponent &comp) const;
 
   void cacheSource() const;
   void cacheSample() const;
@@ -145,6 +147,9 @@ private:
 
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
+  mutable std::vector<
+      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
+      m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 

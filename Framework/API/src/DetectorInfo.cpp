@@ -24,6 +24,7 @@ DetectorInfo::DetectorInfo(
     Geometry::ParameterMap *pmap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
@@ -197,13 +198,9 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     // Detector positions are currently not cached, the cached pointers to
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
-    std::vector<Geometry::IDetector_const_sptr> dets;
-    // Using the base component should be slightly faster
-    m_instrument->getDetectorsInBank(dets, *comp.getBaseComponent());
-    const auto delta = pos - oldPos;
-    for (const auto &det : dets) {
-      const auto index = indexOf(det->getID());
-      setPosition(index, position(index) + delta);
+    const auto delta = toVector3d(pos - oldPos);
+    for (const auto index : getAssemblyDetectorIndices(comp)) {
+      m_detectorInfo.setPosition(index, m_detectorInfo.position(index) + delta);
     }
   }
 }
@@ -240,15 +237,15 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // Detector positions and rotations are currently not cached, the cached
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
-    std::vector<Geometry::IDetector_const_sptr> dets;
-    // Using the base component should be slightly faster
-    m_instrument->getDetectorsInBank(dets, *comp.getBaseComponent());
-    for (const auto &det : dets) {
-      const auto index = indexOf(det->getID());
-      setRotation(index, delta * rotation(index));
-      auto relativePos = position(index) - pos;
-      delta.rotate(relativePos);
-      setPosition(index, relativePos + pos);
+    auto fastDelta = toQuaterniond(delta);
+    auto transformation = Eigen::Matrix3d(fastDelta);
+    auto fastPos = toVector3d(pos);
+    for (const auto index : getAssemblyDetectorIndices(comp)) {
+      m_detectorInfo.setRotation(index,
+                                 fastDelta * m_detectorInfo.rotation(index));
+      auto relativePos =
+          transformation * (m_detectorInfo.position(index) - fastPos);
+      m_detectorInfo.setPosition(index, relativePos + fastPos);
     }
   }
 }
@@ -313,6 +310,27 @@ const Geometry::IComponent &DetectorInfo::getSource() const {
 const Geometry::IComponent &DetectorInfo::getSample() const {
   cacheSample();
   return *m_sample;
+}
+
+/** Returns a reference to a vector of detector indices in a CompAssembly.
+ *
+ * Note that this method will be removed once ComponentInfo provides this
+ * functionality. */
+const std::vector<size_t> &DetectorInfo::getAssemblyDetectorIndices(
+    const Geometry::IComponent &comp) const {
+  const auto *base = comp.getBaseComponent();
+  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  if (m_lastAssemblyDetectorIndices[thread].first != base) {
+    m_lastAssemblyDetectorIndices[thread].first = base;
+    m_lastAssemblyDetectorIndices[thread].second.clear();
+    std::vector<Geometry::IDetector_const_sptr> dets;
+    m_instrument->getDetectorsInBank(dets, *base);
+    for (const auto &det : dets) {
+      const auto index = indexOf(det->getID());
+      m_lastAssemblyDetectorIndices[thread].second.push_back(index);
+    }
+  }
+  return m_lastAssemblyDetectorIndices[thread].second;
 }
 
 void DetectorInfo::cacheSource() const {
