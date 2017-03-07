@@ -58,6 +58,33 @@ public:
     return ws;
   }
 
+  ITableWorkspace_sptr unsortedFourRowTable() {
+    // A table workspace where rows belonging to the same group are
+    // non-consecutive
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Column1");
+    ws->addColumn("str", "Column2");
+
+    TableRow row = ws->appendRow();
+    row << "group0"
+        << "group0_row0_col0"
+        << "group0_row0_col1";
+    row = ws->appendRow();
+    row << "group1"
+        << "group1_row0_col0"
+        << "group1_row0_col1";
+    row = ws->appendRow();
+    row << "group0"
+        << "group0_row1_col0"
+        << "group0_row1_col1";
+    row = ws->appendRow();
+    row << "group1"
+        << "group1_row1_col0"
+        << "group1_row1_col1";
+    return ws;
+  }
+
   void testBadTableWorkspace() {
     auto ws = oneRowTable();
 
@@ -456,6 +483,91 @@ public:
                          .toString()
                          .toStdString(),
                      "0.7");
+  }
+
+  void testRemoveRowUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second row
+    TS_ASSERT_EQUALS(model.removeRows(1, 1, model.index(0, 0)), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(1, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)), "group1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))),
+                     "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))),
+                     "group1_row1_col0");
+  }
+
+  void testRemoveRowsUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete two consecutive rows belonging to second group
+    TS_ASSERT_EQUALS(model.removeRows(0, 2, model.index(1, 0)), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(0, 0, model.index(0, 0))));
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
+  }
+
+  void testRemoveGroupUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second group
+    TS_ASSERT_EQUALS(model.removeRows(1, 1), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
+  }
+
+  void testRemoveGroupsUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    // Add an extra group
+    TableRow row = ws->appendRow();
+    row << "group2"
+        << "group2_row0_col0"
+        << "group2_row0_col1";
+    row = ws->appendRow();
+    row << "group2"
+        << "group2_row1_col0"
+        << "group2_row1_col1";
+
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second and third groups
+    TS_ASSERT_EQUALS(model.removeRows(1, 2), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(0, 0, model.index(0, 0))));
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
   }
 
 private:
