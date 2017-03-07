@@ -379,7 +379,8 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
  * Perform the update for a sum property, adding a new value to the existing
  *one. Skipped if the time series log entry is in the addeeWS.
  *
- * @param addeeWS the workspace being merged
+ * @param addeeWSNumber the sample log value from the workspace being merged
+ * @param outWSNumber the sample log value for the merged workspace
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
  */
