@@ -27,9 +27,8 @@ from mantid.kernel import V3D
 
 DebugMode = True
 
-# TODO - changed without configuration
-DET_X_SIZE = 512
-DET_Y_SIZE = 512
+# DET_X_SIZE = 512
+# DET_Y_SIZE = 512
 
 MAX_SCAN_NUMBER = 100000
 
@@ -108,6 +107,9 @@ class CWSCDReductionControl(object):
         # self._expDataDict = {}
         self._detSampleDistanceDict = dict()
         self._detCenterDict = dict()
+
+        # detector geometry: initialized to unphysical value
+        self._detectorSize = [-1, -1]
 
         # register startup
         mantid.UsageService.registerFeatureUsage("Interface","4-Circle Reduction",False)
@@ -775,10 +777,11 @@ class CWSCDReductionControl(object):
         print '[DB...BAT] Raw workspace size: ', raw_ws.getNumberHistograms()
 
         # Convert to numpy array
-        array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
-        for i in xrange(DET_X_SIZE):
-            for j in xrange(DET_Y_SIZE):
-                array2d[i][j] = raw_ws.readY(j * DET_X_SIZE + i)[0]
+        det_shape = (self._detectorSize[0], self._detectorSize[1])
+        array2d = numpy.ndarray(shape=det_shape, dtype='float')
+        for i in xrange(det_shape[0]):
+            for j in xrange(det_shape[1]):
+                array2d[i][j] = raw_ws.readY(j * det_shape[0] + i)[0]
 
         # Flip the 2D array to look detector from sample
         array2d = numpy.flipud(array2d)
@@ -1419,8 +1422,8 @@ class CWSCDReductionControl(object):
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           # FIXME - Need UI input
-                                           DetectorGeometry='512,512',
+                                           # FIXME/TEST/TODO: should not need external input for detector geometry
+                                           # DetectorGeometry='512,512',
                                            InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
@@ -1768,6 +1771,24 @@ class CWSCDReductionControl(object):
             self._defaultDetectorCenter = (center_row, center_col)
         else:
             self._detCenterDict[exp_number] = (center_row, center_col)
+
+        return
+
+    def set_detector_geometry(self, size_x, size_y):
+        """
+        set the detector's geometry, i.e., size
+        :param size_x:
+        :param size_y:
+        :return:
+        """
+        # check inputs
+        assert isinstance(size_x, int) and size_x > 0, 'Input detector size-X {0} must be a positive integer.' \
+                                                       ''.format(size_x)
+        assert isinstance(size_y, int) and size_y > 0, 'Input detector size-Y {0} must be a positive integer.' \
+                                                       ''.format(size_y)
+
+        self._detectorSize[0] = size_x
+        self._detectorSize[1] = size_y
 
         return
 

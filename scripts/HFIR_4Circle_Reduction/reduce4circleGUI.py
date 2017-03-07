@@ -111,6 +111,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_user_detector_center)
         self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_wave_length)
+        self.connect(self.ui.pushButton_applyDetectorSize, QtCore.SIGNAL('clicked()'),
+                     self.do_set_detector_size)
 
         # Tab survey
         self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
@@ -318,6 +320,9 @@ class MainWindow(QtGui.QMainWindow):
         self._surveyTableFlag = True
         self._ubPeakTableFlag = True
 
+        # set the detector geometry
+        self.do_set_detector_size()
+
         # Sub window
         self._baseTitle = 'Title is not initialized'
 
@@ -346,7 +351,10 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         self._baseTitle = str(self.windowTitle())
-        self.setWindowTitle('%s: No Experiment Is Set' % self._baseTitle)
+        self.setWindowTitle('No Experiment Is Set')
+
+        # detector geometry
+        self.ui.lineEdit_detectorGeometry.setText('256, 256')
 
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
@@ -2388,6 +2396,22 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_detector_size(self):
+        """
+        set the detector size to controller
+        :return:
+        """
+        status, ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()))
+        if status:
+            size_x, size_y = ret_obj
+            self._myControl.set_detector_geometry(size_x, size_y)
+            if size_x != size_y or (size_x != 256 and size_x != 512):
+                self.pop_one_button_dialog('Detector geometry should be either 256 x 256 or 512 x 512.')
+        else:
+            self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!')
+
+        return
+
     def do_set_experiment(self):
         """ Set experiment
         :return:
@@ -2404,7 +2428,7 @@ class MainWindow(QtGui.QMainWindow):
             # set the new experiment number
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
-            self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
+            self.setWindowTitle('Experiment %d' % exp_number)
 
             # try to set the default
             default_data_dir = '/HFIR/HB3A/exp%d/Datafiles' % exp_number
@@ -3554,8 +3578,13 @@ class MainWindow(QtGui.QMainWindow):
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
-        # TODO/FIXME - changed to 512 from 256 as prototype.  Should be via configuration
-        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=512, y_min=0, y_max=512,
+        # get the configuration of detector from GUI
+        status, ret_obj = gutil.parse_integer_list(self.ui.lineEdit_detectorGeometry.text(), expected_size=2)
+        if status:
+            x_max, y_max = ret_obj
+        else:
+            raise RuntimeError(ret_obj)
+        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
         if status:
