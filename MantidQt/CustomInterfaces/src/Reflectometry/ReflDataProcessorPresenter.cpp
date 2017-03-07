@@ -305,9 +305,8 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
     return;
   }
 
-  const auto minTime = mws->getFirstPulseTime();
-  const auto maxTime = mws->getLastPulseTime();
-  const auto totalDuration = maxTime - minTime;
+  const auto run = mws->run();
+  const auto totalDuration = run.endTime() - run.startTime();
   double totalDurationSec = totalDuration.seconds();
   double sliceDuration = .0;
   int numSlices = 0;
