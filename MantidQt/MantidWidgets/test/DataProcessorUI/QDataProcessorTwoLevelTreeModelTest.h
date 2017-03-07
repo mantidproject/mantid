@@ -440,11 +440,11 @@ public:
         << "13470"
         << "2.3";
     row = ws->appendRow();
-    row << ""
+    row << "3"
         << "13460"
         << "0.7";
     row = ws->appendRow();
-    row << ""
+    row << "3"
         << "13469"
         << "0.7";
 
