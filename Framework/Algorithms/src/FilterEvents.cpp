@@ -434,10 +434,17 @@ void FilterEvents::processSplittersWorkspace() {
   m_splitters.reserve(numsplitters);
 
   // 2. Insert all splitters
+  m_maxTargetIndex = 0;
   bool inorder = true;
   for (size_t i = 0; i < numsplitters; i++) {
+    // push back the splitter in SplittersWorkspace to list of splitters
     m_splitters.push_back(m_splittersWorkspace->getSplitter(i));
+    // add the target workspace index to target workspace indexes set
     m_targetWorkspaceIndexSet.insert(m_splitters.back().index());
+    // register for the maximum target index
+    if (m_splitters.back().index() > m_maxTargetIndex)
+      m_maxTargetIndex = m_splitters.back().index();
+    // check whether the splitters are in time order
     if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
       inorder = false;
   }
@@ -1607,23 +1614,6 @@ void FilterEvents::generateSplitterTSP(
   return;
 }
 
-// TODO/FIXME/NOW - From HERE!
-/*
- * FilterEvents-[Warning] [FilterEvents] Workspace FilteredWS01_unfiltered Indexed @ -1 won't have logs splitted due to zero splitter size. .
-
-Thread 1 "AlgorithmsTest" received signal SIGSEGV, Segmentation fault.
-0x00007ffff7496c2d in Mantid::Algorithms::FilterEvents::generateSplitterTSPalpha (this=0x7fffffffd130, split_tsp_vec=std::vector of length 0, capacity 0)
-    at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:1630
-1630	    split_tsp_vec[itarget]->addValue(splitter.start(), 1);
-(gdb) bt
-#0  0x00007ffff7496c2d in Mantid::Algorithms::FilterEvents::generateSplitterTSPalpha (this=0x7fffffffd130, split_tsp_vec=std::vector of length 0, capacity 0)
-    at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:1630
-#1  0x00007ffff748c884 in Mantid::Algorithms::FilterEvents::exec (this=0x7fffffffd130) at /home/wzz/Mantid/Framework/Algorithms/src/FilterEvents.cpp:203
-
- *
- *
- */
-
 /** Generate the splitter's time series property (log) the splitters workspace
  * @brief FilterEvents::generateSplitterTSPalpha
  * @param split_tsp_vec
@@ -1636,6 +1626,11 @@ void FilterEvents::generateSplitterTSPalpha(
   // initialize m_maxTargetIndex + 1 time series properties in integer
   // TODO:FIXME - shall not use m_maxTargetIndex, because it is not set for
   // SplittersWorkspace-type splitters
+  g_log.notice() << "[DB] Maximum target index = " << m_maxTargetIndex << "\n";
+  if (m_maxTargetIndex <= 0)
+    throw std::runtime_error("Maximum target index must be positive");
+
+  // initialize the target index
   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
@@ -1644,6 +1639,8 @@ void FilterEvents::generateSplitterTSPalpha(
 
   for (SplittingInterval splitter : m_splitters) {
     int itarget = splitter.index();
+    if (itarget >= split_tsp_vec.size())
+      throw std::runtime_error("Target workspace index is out of range!");
     split_tsp_vec[itarget]->addValue(splitter.start(), 1);
     split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
   }
@@ -1658,7 +1655,7 @@ void FilterEvents::generateSplitterTSPalpha(
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   if (m_useSplittersWorkspace) {
-    // TODO:FIXME - need to find document for this feature
+    // TODO:FIXME - need to find document for this feature: CONTINUE FROM HERE!
     ;
   } else {
     // Either Table-type or Matrix-type splitters

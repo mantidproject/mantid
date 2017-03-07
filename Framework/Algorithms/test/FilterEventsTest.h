@@ -132,6 +132,9 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
+    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
+    // TODO - Add check for splitter log
+
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<EventWorkspace>(
@@ -190,7 +193,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Passed_test_FilterWOCorrection2() {
+  void Xtest_FilterWOCorrection2() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -273,7 +276,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void Passed_test_FilterWithCustumizedCorrection() {
+  void Xtest_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -357,7 +360,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Passed_test_FilterElasticCorrection() {
+  void Xtest_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -415,7 +418,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Passed_test_FilterDGCorrection() {
+  void Xtest_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -466,7 +469,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void Passed_test_FilterIndirectGeometryCorrection() {
+  void Xtest_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -544,7 +547,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void test_FilterRelativeTime() {
+  void Xtest_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -590,6 +593,9 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
+    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
+    // TODO - Add check for splitter log
+
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<EventWorkspace>(
@@ -597,12 +603,18 @@ public:
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
+    TS_ASSERT(filteredws1->run().hasProperty("splitter"));
+    // TODO - Add check for splitter log
+
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
         boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS10_2"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+
+    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
+    // TODO - Add check for splitter log
 
     // Check spectrum 3 of workspace 2
     EventList elist3 = filteredws2->getSpectrum(3);
@@ -672,7 +684,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void Passed_test_tableSplitter() {
+  void Xtest_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -719,12 +731,18 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
+    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
+    // TODO - Find out the correct value of the splitter log 0
+
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
         boost::dynamic_pointer_cast<EventWorkspace>(
             AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_B"));
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
+    TS_ASSERT(filteredws1->run().hasProperty("splitter"));
+
+    // TODO - Find out the correct value of the splitter log 1
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
@@ -732,6 +750,9 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_C"));
     TS_ASSERT(filteredws2);
     TS_ASSERT_EQUALS(filteredws2->getSpectrum(1).getNumberEvents(), 27);
+    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
+
+    // TODO - Find out the correct value of the splitter log 2
 
     // Check spectrum 3 of workspace 2
     EventList elist3 = filteredws2->getSpectrum(3);
@@ -748,7 +769,7 @@ public:
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
                     1.0E-4);
 
-    // 5. Clean up
+    // Clean up the generated workspaces
     AnalysisDataService::Instance().remove("Test11");
     AnalysisDataService::Instance().remove("TableSplitter1");
     std::vector<std::string> outputwsnames =
