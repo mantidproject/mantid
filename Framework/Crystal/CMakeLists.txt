@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PeakStatisticsTools.cpp
 	src/PeaksInRegion.cpp
 	src/PeaksIntersection.cpp
 	src/PeaksOnSurface.cpp
@@ -115,6 +116,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PeakStatisticsTools.h
 	inc/MantidCrystal/PeaksInRegion.h
 	inc/MantidCrystal/PeaksIntersection.h
 	inc/MantidCrystal/PeaksOnSurface.h
@@ -183,6 +185,7 @@ set ( TEST_FILES
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PeakStatisticsToolsTest.h
 	PeaksInRegionTest.h
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
