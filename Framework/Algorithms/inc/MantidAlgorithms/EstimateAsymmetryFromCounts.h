@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
-#define MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
+#ifndef MANTID_ALGORITHM_ESTIMATEASYMMETRYFROMCOUNTS_H_
+#define MANTID_ALGORITHM_ESTIMATEASYMMETRYFROMCOUNTS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,9 +10,7 @@
 
 namespace Mantid {
 namespace Algorithms {
-/**Takes a muon workspace as input and removes the exponential decay from a time
-channel.
-     This is done by multiplying the data by exp(t/tmuon).
+/**Takes a muon workspace as input and estimates the asymmetry, using a simple method. 
 
 Required Properties:
 <UL>
@@ -20,11 +18,13 @@ Required Properties:
 <LI> OutputWorkspace - The name of the workspace in which to store the result
 </LI>
 <LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
+<LI> StartX - The minimum time to include in the analysis </LI>
+<LI> EndX - The maximum time to include in the analysis </LI>
 </UL>
 
 
 @author
-@date 11/07/2008
+@date 03/03/2017
 
 Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -47,14 +47,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MuonRemoveExpDecay : public API::Algorithm {
+class DLLExport EstimateAsymmetryFromCounts : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "RemoveExpDecay"; }
+  const std::string name() const override { return "EstimateAsymmetryFromCounts"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "This algorithm removes the exponential decay from a muon "
-           "workspace.";
+    return "This algorithm gives an estimate "
+           "for the asymmetry.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -66,16 +66,9 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  // Remove exponential decay from Y and E
-  HistogramData::Histogram
-  removeDecay(const HistogramData::Histogram &histogram) const;
-  // calculate Muon normalisation constant
-  double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
-  double fullCalNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
-
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_*/
+#endif /*MANTID_ESTIMATEASYMMETRYFROMCOUNTS_H_*/

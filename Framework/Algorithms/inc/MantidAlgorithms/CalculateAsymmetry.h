@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
-#define MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
+#ifndef MANTID_ALGORITHM_CALCULATEASYMMETRY_H_
+#define MANTID_ALGORITHM_CALCULATEASYMMETRY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,9 +10,14 @@
 
 namespace Mantid {
 namespace Algorithms {
-/**Takes a muon workspace as input and removes the exponential decay from a time
-channel.
-     This is done by multiplying the data by exp(t/tmuon).
+/**Takes a muon workspace as input and calculates the
+asymmetry, using a function fo the form
+
+N_0* [ 1 + sum_j f(t,{lambda}_j) ] 
+
+where the sum is over a set of functions and {lambda}_j is the jth
+set of input parameters. The above equation is fitted to the normalised
+counts to get the asymmetry.
 
 Required Properties:
 <UL>
@@ -20,11 +25,14 @@ Required Properties:
 <LI> OutputWorkspace - The name of the workspace in which to store the result
 </LI>
 <LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
+<LI> StartX - The minimum time to include the analysis </LI>
+<LI> EndX - The maximum time to include in the analysis </LI>
+<LI> myFucntion - The composite function to be used in the fitting (sum_j f(t,{lambda}_j) ) </LI>
 </UL>
 
 
 @author
-@date 11/07/2008
+@date 03/03/2017
 
 Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -47,14 +55,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MuonRemoveExpDecay : public API::Algorithm {
+class DLLExport CalculateAsymmetry : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "RemoveExpDecay"; }
+  const std::string name() const override { return "CalculateAsymmetry"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "This algorithm removes the exponential decay from a muon "
-           "workspace.";
+    return "This algorithm calculates the asymmetry for a transverse field.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -66,16 +73,12 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
-  // Remove exponential decay from Y and E
-  HistogramData::Histogram
-  removeDecay(const HistogramData::Histogram &histogram) const;
   // calculate Muon normalisation constant
-  double calNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
-  double fullCalNormalisationConst(API::MatrixWorkspace_sptr ws, int wsIndex);
+  double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex, const double estNormConst, const double startX, const double endX);
 
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_*/
+#endif /*MANTID_ALGORITHM_CALCULATEASYMMETRY_H_*/

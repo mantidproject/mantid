@@ -19,9 +19,9 @@ namespace WorkflowAlgorithms {
 MuonGroupAsymmetryCalculator::MuonGroupAsymmetryCalculator(
     const Mantid::API::WorkspaceGroup_sptr inputWS,
     const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods, const int groupIndex, const double xMin, const double xMax)
+    const std::vector<int> subtractedPeriods, const int groupIndex)
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
-                          groupIndex),m_xMin(xMin),m_xMax(xMax) {}
+                          groupIndex) {}
 
 /**
 * Calculates asymmetry between given group (specified via group index) and Muon
@@ -38,11 +38,10 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
 
     auto summedWS = sumPeriods(m_summedPeriods);
     auto subtractedWS = sumPeriods(m_subtractedPeriods);
-	auto hasRange = m_xMin != EMPTY_DBL() && m_xMax != EMPTY_DBL();
 
     // Remove decay (summed periods ws)
     MatrixWorkspace_sptr asymSummedPeriods =
-        hasRange ? removeExpDecay(summedWS, m_groupIndex,m_xMin,m_xMax): removeExpDecay(summedWS, m_groupIndex);
+        removeExpDecay(summedWS, m_groupIndex);
 
     if (!m_subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
@@ -55,9 +54,6 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
     }
   } else {
     // Only one period was supplied
-	  auto hasRange = m_xMin != EMPTY_DBL() && m_xMax != EMPTY_DBL();
-	  hasRange ? removeExpDecay(m_inputWS->getItem(0), -1, m_xMin, m_xMax) : removeExpDecay(m_inputWS->getItem(0), -1);
-
     tempWS = removeExpDecay(m_inputWS->getItem(0), -1);
   }
 
@@ -76,7 +72,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
 */
 MatrixWorkspace_sptr
 MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
-                                             const int index) const { // add optional arg to pass start and end
+                                             const int index) const {
   MatrixWorkspace_sptr outWS;
   // Remove decay
   if (inputWS) {
@@ -92,38 +88,11 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
       asym->setProperty("Spectra", spec);
     }
     asym->setProperty("OutputWorkspace", "__NotUsed__");
-	//set property sttartX and endX here-ish
     asym->execute();
     outWS = asym->getProperty("OutputWorkspace");
   }
   return outWS;
 }
-MatrixWorkspace_sptr
-MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
-	const int index, const double startX, const double endX) const { // add optional arg to pass start and end
-	MatrixWorkspace_sptr outWS;
-	// Remove decay
-	if (inputWS) {
-		IAlgorithm_sptr asym =
-			AlgorithmManager::Instance().create("RemoveExpDecay");
-		asym->setChild(true);
-		asym->setProperty("InputWorkspace", inputWS);
-		asym->setProperty("XStart", startX);
-		asym->setProperty("XEnd", endX);
 
-		if (index > 0) {
-			// GroupIndex as vector
-			// Necessary if we want RemoveExpDecay to fit only the requested
-			// spectrum
-			std::vector<int> spec(1, index);
-			asym->setProperty("Spectra", spec);
-		}
-		asym->setProperty("OutputWorkspace", "__NotUsed__");
-		//set property sttartX and endX here-ish
-		asym->execute();
-		outWS = asym->getProperty("OutputWorkspace");
-	}
-	return outWS;
-}
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

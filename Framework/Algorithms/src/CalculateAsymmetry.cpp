@@ -1,9 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/RemoveExpDecay.h"
+#include "MantidAlgorithms/AsymmetryHelper.h"
+#include "MantidAlgorithms/CalculateAsymmetry.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -29,12 +32,12 @@ using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(MuonRemoveExpDecay)
+DECLARE_ALGORITHM(CalculateAsymmetry)
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
-void MuonRemoveExpDecay::init() {
+void CalculateAsymmetry::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
@@ -45,12 +48,18 @@ void MuonRemoveExpDecay::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
+  declareProperty("XStart", 0.1,
+	  "The lower limit for calculating the asymmetry (an X value).");
+  declareProperty("XEnd", 15.0,
+	  "The upper limit for calculating the asymmetry  (an X value).");
+  declareProperty("myFunction", "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
+	  "The additional fitting functions to be used.");
 }
 
 /** Executes the algorithm
  *
  */
-void MuonRemoveExpDecay::exec() {
+void CalculateAsymmetry::exec() {
   std::vector<int> spectra = getProperty("Spectra");
 
   // Get original workspace
@@ -92,22 +101,50 @@ void MuonRemoveExpDecay::exec() {
   // Do the specified spectra only
   int specLength = static_cast<int>(spectra.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-  for (int i = 0; i < specLength; ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    const auto specNum = static_cast<size_t>(spectra[i]);
-    if (spectra[i] > numSpectra) {
-      g_log.error("Spectra size greater than the number of spectra!");
-      throw std::invalid_argument(
-          "Spectra size greater than the number of spectra!");
-    }
+	  for (int i = 0; i < specLength; ++i) {
+		  PARALLEL_START_INTERUPT_REGION
+			  const auto specNum = static_cast<size_t>(spectra[i]);
+		  if (spectra[i] > numSpectra) {
+			  g_log.error("Spectra size greater than the number of spectra!");
+			  throw std::invalid_argument(
+				  "Spectra size greater than the number of spectra!");
+		  }
+	  
 
-    // Remove decay from Y and E
-    outputWS->setHistogram(specNum, removeDecay(inputWS->histogram(specNum)));
+		  // check start and end times
+		  double startX = getProperty("XStart");
+		  double endX = getProperty("XEnd");
 
-    // do scaling and subtract 1
-    const double normConst = calNormalisationConst(outputWS, spectra[i]);
-    outputWS->mutableY(specNum) /= normConst;
-    outputWS->mutableY(specNum) -= 1.0;
+		  if (startX > endX) {
+			  g_log.warning() << "Start time is after the end time. Swapping the start and end." << '\n';
+			  double tmp = endX;
+			  endX = startX;
+			  startX = tmp;
+		  }
+		  else if (startX == endX) {
+			  throw std::runtime_error("Start and end times are equal, there is no data to apply the algorithm to.");
+		  }
+
+		  auto &xData = inputWS->histogram(specNum).binEdges();
+		  if (startX < xData[0]) {
+			  g_log.warning() << "Start time is before the first data point. Using first data point." << '\n';
+		  }
+		  if (endX > xData[xData.size() - 1]) {
+			  g_log.warning() << "End time is after the last data point. Using last data point." << '\n';
+			  g_log.warning() << "Data at late times may dominate the normalisation." << '\n';
+		  }
+  
+    const Mantid::API::Run &run = inputWS->run();
+    const double numGoodFrames = std::stod(run.getProperty("goodfrm")-> value());
+	//inital estimate of N0
+	const double estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),numGoodFrames,startX,endX);
+	// Calculate the normalised counts
+	outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum),numGoodFrames));
+	// get the normalisation constant
+	const double normConst = getNormConstant(outputWS, spectra[i], estNormConst,startX,endX);
+   //calculate the asymmetry
+	outputWS->mutableY(specNum) /= normConst;
+	outputWS->mutableY(specNum) -=  1.0;
     outputWS->mutableE(specNum) /= normConst;
 
     prog.report();
@@ -121,81 +158,57 @@ void MuonRemoveExpDecay::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-/**
- * Corrects the data and errors for one spectrum.
- * The muon lifetime is in microseconds, not seconds, because the data is in
- * microseconds.
- * @param histogram :: [input] Input histogram
- * @returns :: Histogram with exponential removed from Y and E
- */
-HistogramData::Histogram MuonRemoveExpDecay::removeDecay(
-    const HistogramData::Histogram &histogram) const {
-  HistogramData::Histogram result(histogram);
 
-  auto &yData = result.mutableY();
-  auto &eData = result.mutableE();
-  for (size_t i = 0; i < yData.size(); ++i) {
-    const double factor = exp(result.x()[i] / MUON_LIFETIME_MICROSECONDS);
-    // Correct the Y data
-    if (yData[i] != 0.0) {
-      yData[i] *= factor;
-    } else {
-      yData[i] = 0.1 * factor;
-    }
-
-    // Correct the E data
-    if (eData[i] != 0.0) {
-      eData[i] *= factor;
-    } else {
-      eData[i] = factor;
-    }
-  }
-
-  return result;
-}
 
 /**
  * calculate normalisation constant after the exponential decay has been removed
  * to a linear fitting function
  * @param ws ::  workspace
  * @param wsIndex :: workspace index
+ * @param startX :: the smallest x value for the fit
+ * @param endX :: the largest x value for the fit
  * @return normalisation constant
 */
-double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
-                                                 int wsIndex) {
+double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
+                                                 int wsIndex,const double estNormConstant, const double startX, const double endX) {
   double retVal = 1.0;
 
   API::IAlgorithm_sptr fit;
   fit = createChildAlgorithm("Fit", -1, -1, true);
-
+  std::string tmpString = getProperty("myFunction");
+  if (tmpString == "")
+  {
+	  g_log.warning("There is no additional function defined. Using original estimate");
+	  return estNormConstant;
+  }
   std::stringstream ss;
-  ss << "name=LinearBackground,A0=" << ws->y(wsIndex)[0] << ",A1=" << 0.0
-     << ",ties=(A1=0.0)";
-  std::string function = ss.str();
 
+  ss << "composite=ProductFunction;name=FlatBackground,A0=" << estNormConstant;
+  ss << ";(";
+  
+  ss << "name=FlatBackground,A0=1.0"
+	  << ",ties=(A0=1.0);";
+  
+  ss << tmpString;
+  ss << ")";
+  std::string function = ss.str();
   fit->setPropertyValue("Function", function);
   fit->setProperty("InputWorkspace", ws);
   fit->setProperty("WorkspaceIndex", wsIndex);
-  fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
-  fit->setProperty("Ties", "A1=0.0");
-  fit->execute();
+  fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");  
+  fit->setProperty("StartX", startX);
+  fit->setProperty("EndX", endX);	 
+    fit->execute();
 
   std::string fitStatus = fit->getProperty("OutputStatus");
   API::IFunction_sptr result = fit->getProperty("Function");
   std::vector<std::string> paramnames = result->getParameterNames();
-
   // Check order of names
-  if (paramnames[0].compare("A0") != 0) {
-    g_log.error() << "Parameter 0 should be A0, but is " << paramnames[0]
+  if (paramnames[0].compare("f0.A0") != 0) {
+    g_log.error() << "Parameter 0 should be f0.A0, but is " << paramnames[0]
                   << '\n';
     throw std::invalid_argument(
-        "Parameters are out of order @ 0, should be A0");
-  }
-  if (paramnames[1].compare("A1") != 0) {
-    g_log.error() << "Parameter 1 should be A1, but is " << paramnames[1]
-                  << '\n';
-    throw std::invalid_argument(
-        "Parameters are out of order @ 0, should be A1");
+        "Parameters are out of order @ 0, should be f0.A0");
   }
 
   if (!fitStatus.compare("success")) {
@@ -216,6 +229,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws,
 
   return retVal;
 }
+
 
 } // namespace Algorithm
 } // namespace Mantid
