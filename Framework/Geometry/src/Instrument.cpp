@@ -1266,6 +1266,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double L = 1000.0;
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+#pragma omp parallel for
   for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
     const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
     if (m_detectorInfo->isMasked(i)) {
