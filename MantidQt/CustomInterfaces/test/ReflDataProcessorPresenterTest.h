@@ -557,9 +557,6 @@ public:
         .WillRepeatedly(Return(std::set<int>()));
     presenter->notify(DataProcessorPresenter::PlotRowFlag);
 
-    for (auto &x : AnalysisDataService::Instance().getObjectNames())
-      std::cout << "Name = " << x << "\n";
-
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
     AnalysisDataService::Instance().remove("13460");
