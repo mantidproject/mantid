@@ -14,6 +14,12 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+  /// The string "Workspace index"
+  const QString MantidWSIndexWidget::WORKSPACE_INDEX = "Workspace index";
+
+  /// The string "Custom"
+  const QString MantidWSIndexWidget::CUSTOM = "Custom";
+
 //----------------------------------
 // MantidWSIndexWidget methods
 //----------------------------------
@@ -208,6 +214,7 @@ void MantidWSIndexWidget::init() {
   initSpectraBox();
   initWorkspaceBox();
   initOptionsBoxes();
+  initLogs();
   setLayout(m_outer);
 }
 
@@ -287,6 +294,20 @@ void MantidWSIndexWidget::initOptionsBoxes() {
   }
 
   m_outer->addItem(m_optionsBox);
+}
+
+void MantidWSIndexWidget::initLogs() {
+  m_logBox = new QVBoxLayout;
+  m_logLabel = new QLabel(tr("Log value to plot against:"));
+  m_logSelector = new QComboBox();
+
+  m_logBox->addWidget(m_logLabel);
+  m_logBox->addWidget(m_logSelector);
+
+  m_outer->addItem(m_logBox);
+
+  m_logSelector->addItem(WORKSPACE_INDEX); // Will need moving to populateLogComboBox
+  m_logSelector->addItem(CUSTOM);          // Will need moving to populateLogComboBox
 }
 
 /**

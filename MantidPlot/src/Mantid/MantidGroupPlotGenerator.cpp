@@ -152,7 +152,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
       // Y and E can be shared
       matrixWS->setSharedY(i, ws->sharedY(index));
       matrixWS->setSharedE(i, ws->sharedE(index));
-      if (logName == MantidSurfacePlotDialog::CUSTOM) {
+      if (logName == MantidWSIndexWidget::CUSTOM) {
         logValues.push_back(getSingleLogValue(i, options.customLogValues));
       } else {
         logValues.push_back(getSingleLogValue(i, ws, logName));
@@ -226,7 +226,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
 double MantidGroupPlotGenerator::getSingleLogValue(
     int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
-  if (logName == MantidSurfacePlotDialog::WORKSPACE_INDEX) {
+  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX) {
     return wsIndex;
   } else {
     // MatrixWorkspace is an ExperimentInfo
@@ -263,7 +263,7 @@ std::string MantidGroupPlotGenerator::validatePlotOptions(
   MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options, int nWorkspaces) {
   std::stringstream err;
   if (options.accepted) {
-    if (options.logName == MantidSurfacePlotDialog::CUSTOM) {
+    if (options.logName == MantidWSIndexWidget::CUSTOM) {
       // Check number of values supplied
       if (static_cast<int>(options.customLogValues.size()) != nWorkspaces) {
         err << "Number of custom log values must be equal to "
