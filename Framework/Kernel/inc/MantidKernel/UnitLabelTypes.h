@@ -50,6 +50,8 @@ public:
   static const UnitLabel InverseAngstromSq;
   /// MilliElectronVolts
   static const UnitLabel MilliElectronVolts;
+  /// GHz
+  static const UnitLabel GHz;
   /// Metre
   static const UnitLabel Metre;
   /// Nanometre

@@ -76,7 +76,7 @@ void ScriptFileInterpreter::tabsToSpaces() {
     spaces = spaces + " ";
 
   text = text.replace("\t", spaces, Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Convert spaces in selection to tabs
@@ -96,7 +96,7 @@ void ScriptFileInterpreter::spacesToTabs() {
     spaces = spaces + " ";
 
   text = text.replace(spaces, "\t", Qt::CaseInsensitive);
-  replaceSelectedText(m_editor, text);
+  m_editor->replaceSelectedText(text);
 }
 
 /// Set a font
@@ -211,23 +211,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment) {
 
   m_editor->setSelection(selFromLine, 0, selToLine,
                          m_editor->lineLength(selToLine));
-  replaceSelectedText(m_editor, replacementText);
+  m_editor->replaceSelectedText(replacementText);
   m_editor->setCursorPosition(selFromLine, selFromInd);
-}
-
-// Replaces the currently selected text in the editor
-// Reimplementation of .replaceSelectedText from QScintilla. Added as osx + rhel
-// builds are
-// using an older version(2.4.6) of the library missing the method, and too
-// close to code freeze to update.
-inline void
-ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor,
-                                           const QString &text) {
-  int UTF8_CodePage = 65001;
-  const char *b = ((editor->SCI_GETCODEPAGE == UTF8_CodePage)
-                       ? text.toUtf8().constData()
-                       : text.toLatin1().constData());
-  editor->SendScintilla(editor->SCI_REPLACESEL, b);
 }
 
 /**

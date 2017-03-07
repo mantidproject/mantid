@@ -17,6 +17,7 @@ resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, e
 PyChop2.showGUI()
 """
 
+from __future__ import (absolute_import, division, print_function)
 import warnings
 from .PyChop2 import PyChop2
 # If the system doesn't have matplotlib, don't import the GUI.

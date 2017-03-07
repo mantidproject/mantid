@@ -14,6 +14,8 @@ Overview
 Provides correction routines for quasielastic, inelastic and diffraction
 reductions.
 
+These interfaces do not support GroupWorkspace as input.
+
 Action Buttons
 ~~~~~~~~~~~~~~
 
@@ -71,6 +73,30 @@ Plot Output
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+
+Correction Details
+~~~~~~~~~~~~~~~~~~
+
+These options will be automatically preset to the default values read from the sample workspace, whenever possible.
+They can be overridden manually.
+
+Emode
+  The energy transfer mode. All the options except *Efixed* require the input workspaces to be in wavelength.
+  In *Efixed* mode, correction will be computed only for a single wavelength point defined by ` Efixed` value.
+  All the options except *Elastic* require the Efixed value to be set correctly.
+  For flat plate, all the options except *Efixed*, are equivalent.
+  In brief, use *Indirect* for QENS, *Efixed* for FWS and diffraction.
+  *Efixed* can be used for QENS also, if the energy transfer can be neglected compared to the incident energy.
+  See :ref:`CylinderPaalmanPingsCorrections <algm-CylinderPaalmanPingsCorrections>` for the details.
+
+Efixed
+  The value of the incident (indirect) or final (direct) energy in `mev`. Specified in the instrument parameter file.
+
+NumberWavelength
+  Number of wavelength points to compute the corrections for. Ignored for *Efixed*.
+
+Interpolate
+  Whether or not to interpolate the corrections as a function of wavelength. Ignored for *Efixed*.
 
 Shape Details
 ~~~~~~~~~~~~~

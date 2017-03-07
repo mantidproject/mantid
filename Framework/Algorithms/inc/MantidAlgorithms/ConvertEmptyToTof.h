@@ -71,8 +71,6 @@ private:
 
   double calculateTOF(double, double);
   bool areEqual(double, double, double);
-  template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr, const std::string &);
   int roundUp(double);
   std::vector<double> makeTofAxis(int, double, size_t, double);
   void setTofInWS(const std::vector<double> &, API::MatrixWorkspace_sptr);

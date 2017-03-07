@@ -117,7 +117,7 @@ void vtkMDHexFactory::doCreate(
       API::IMDNode *box = boxes[i];
       Mantid::signal_t signal_normalized = (box->*normFunction)();
 
-      if (std::isfinite(signal_normalized)) {
+      if (std::isnormal(signal_normalized)) {
         // Cache the signal and using of it
         signalCache[i] = static_cast<float>(signal_normalized);
         useBox[i] = true;

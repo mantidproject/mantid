@@ -286,7 +286,7 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
         In this benchmark it is tested if scaling is correct.
         """
         _wrk_1 = None
-        _wrk_2 = None
+        _ref_result = None
 
         def skipTests(self):
             return skip_tests()
@@ -296,7 +296,8 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
 
             scaling_factor = 2.0
 
-            name = "BenzeneNoScale"
+            name = "BenzeneScale"
+            self.ref_result = name + ".nxs"
             self.set_dft_program("CASTEP")
             self.set_name(name)
             self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
@@ -308,21 +309,8 @@ class AbinsCASTEPTestScale(stresstesting.MantidStressTest, HelperTestingClass):
                   Operation='Multiply',
                   Factor=scaling_factor)
 
-            self._output_name = ""
-            name = "BenzeneScale"
-            self.set_dft_program("CASTEP")
-            self.set_name(name)
-            self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-            self.set_scale(scaling_factor)
-            self.case_from_scratch()
-
-            self._wrk_2 = self._output_name
-
-        def validateMethod(self):
-            return "validateWorkspaceToWorkspace"
-
         def validate(self):
-            return self._wrk_1, self._wrk_2
+            return self._output_name, self.ref_result
 
 # ----------------------------------------------------------------------------------------------------------------
 # Tests for 2D S

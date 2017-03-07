@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 project( VatesAPI )
 
-set( SRC_FILES 
+set( SRC_FILES
 src/ADSWorkspaceProvider.cpp
 src/BoxInfo.cpp
 src/Common.cpp
@@ -62,7 +62,7 @@ src/vtkSinglePeakMarker.cpp
 src/SQWLoadingPresenter.cpp
 )
 
-set( INC_FILES 
+set( INC_FILES
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
@@ -206,8 +206,8 @@ set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 
-target_link_libraries( VatesAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+target_link_libraries( VatesAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
@@ -243,22 +243,21 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # Create test file projects
-if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
-  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                        ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
-                        ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
-  cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-  ${MANTID_SUBPROJECT_LIBS} 
-  VatesAPI 
-  DataHandling 
-  Kernel 
-  DataObjects 
+include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
+set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+                      ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+cxxtest_add_test( VatesAPITest ${TEST_FILES} )
+target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${MANTID_SUBPROJECT_LIBS}
+  VatesAPI
+  DataHandling
+  Kernel
+  DataObjects
   vtkCommonCore
   vtkCommonDataModel
   vtkIOLegacy
@@ -268,13 +267,13 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES} 
+  ${GMOCK_LIBRARIES}
+  ${GTEST_LIBRARIES}
   ${QWT_LIBRARIES}
   Qt4::QtCore
-  ${GTEST_LIBRARIES} )
-  add_dependencies( AllTests VatesAPITest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
-endif()
+  )
+add_dependencies( AllTests VatesAPITest )
+# Add to the 'UnitTests' group in VS
+set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
 
 install( TARGETS VatesAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
