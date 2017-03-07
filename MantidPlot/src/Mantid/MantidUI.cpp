@@ -4008,14 +4008,14 @@ void MantidUI::showContourPlot() {
 }
 
 void MantidUI::plotContour(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup,
-  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const {
+  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
 
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
   plotter->plotContour(workspaceGroup, userInputForContourAndSurface);
 }
 
 void MantidUI::plotSurface(const Mantid::API::WorkspaceGroup_sptr & workspaceGroup,
-  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const {
+  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
   plotter->plotSurface(workspaceGroup, userInputForContourAndSurface);
 }
