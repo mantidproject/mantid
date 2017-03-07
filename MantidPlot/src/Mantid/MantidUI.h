@@ -299,11 +299,11 @@ public slots:
 
   /// Plot contour
   void plotContour(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup, 
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const;
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface);
 
   /// Plot surface
   void plotSurface(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup, 
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) const;
+    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface);
 
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(
