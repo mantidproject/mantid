@@ -1639,7 +1639,7 @@ void FilterEvents::generateSplitterTSPalpha(
 
   for (SplittingInterval splitter : m_splitters) {
     int itarget = splitter.index();
-    if (itarget >= split_tsp_vec.size())
+    if (itarget >= static_cast<int>(split_tsp_vec.size()))
       throw std::runtime_error("Target workspace index is out of range!");
     split_tsp_vec[itarget]->addValue(splitter.start(), 1);
     split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
@@ -1655,6 +1655,18 @@ void FilterEvents::generateSplitterTSPalpha(
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   if (m_useSplittersWorkspace) {
+      g_log.warning() << "There are " << split_tsp_vec.size() << " TimeSeriesPropeties.\n";
+      std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+      for (miter = m_outputWorkspacesMap.begin(); miter != m_outputWorkspacesMap.end(); ++ miter)
+      {
+          g_log.warning() << "Output workspace index: " << miter->first << "\n";
+          if (0 <= miter->first && miter->first < static_cast<int>(split_tsp_vec.size()))
+          {
+              DataObjects::EventWorkspace_sptr outws = miter->second;
+              outws->mutableRun().addProperty(split_tsp_vec[miter->first]);
+          }
+      }
+
     // TODO:FIXME - need to find document for this feature: CONTINUE FROM HERE!
     ;
   } else {

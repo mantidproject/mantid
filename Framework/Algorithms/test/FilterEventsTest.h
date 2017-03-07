@@ -91,7 +91,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void test_FilterNoCorrection() {
+  void IT_test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -108,6 +108,14 @@ public:
 
     FilterEvents filter;
     filter.initialize();
+
+    /*
+     *  979: Add splitters: 20000000000, 20035000000, 0
+        979: Add splitters: 20035000000, 20195000000, 1
+        979: Add splitters: 20200000000, 20265000000, 2
+        979: Add splitters: 20300000000, 20365000000, 2
+        979: Add splitters: 20400000000, 20465000000, 2
+     */
 
     // Set properties
     filter.setProperty("InputWorkspace", "Test02");
@@ -133,7 +141,13 @@ public:
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
+    TS_ASSERT_EQUALS(filteredws0->run().getProperty("splitter")->size(), 2);
     // TODO - Add check for splitter log
+    // TODO/FIXME/NOW - From here!
+    throw std::runtime_error("Need to set up everything right!");
+    Kernel::TimeSeriesProperty<int> *splitter0;
+    TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthValue(0), 0);
 
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
@@ -547,7 +561,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Xtest_FilterRelativeTime() {
+  void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -595,6 +609,14 @@ public:
 
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
     // TODO - Add check for splitter log
+    /*
+        979: 0: 0  -  3.5e+07: 0
+        979: 1: 3.5e+07  -  1.95e+08: 1
+        979: 2: 1.95e+08  -  2.65e+08: 2
+        979: 3: 2.65e+08  -  3.65e+08: 2
+        979: 4: 3.65e+08  -  4.65e+08: 2
+     */
+    TS_ASSERT_EQUALS(filteredws0->run().getProperty("splitter")->size(), 3);
 
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
@@ -604,6 +626,7 @@ public:
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     TS_ASSERT(filteredws1->run().hasProperty("splitter"));
+
     // TODO - Add check for splitter log
 
     // Workspace 2
@@ -1010,11 +1033,15 @@ public:
     Kernel::SplittingInterval interval0(t0, t1, 0);
     splitterws->addSplitter(interval0);
 
+    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 0 << "\n";
+
     // 2. Splitter 1: 3+ ~ 9+ (second pulse)
     t0 = t1;
     t1 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
     Kernel::SplittingInterval interval1(t0, t1, 1);
     splitterws->addSplitter(interval1);
+
+    std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 1 << "\n";
 
     // 3. Splitter 2: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
@@ -1022,6 +1049,8 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
+
+      std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
     }
 
     return splitterws;
@@ -1081,6 +1110,11 @@ public:
       splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]);
     for (size_t iy = 0; iy < size_y; ++iy)
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
+
+    // print out splitters
+    for (size_t ix = 0; ix < size_y; ++ ix)
+        std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  " << splitterws->mutableX(0)[ix+1]
+                  << ": " << splitterws->mutableY(0)[ix] << "\n";
 
     return splitterws;
   }
