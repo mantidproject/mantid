@@ -219,8 +219,6 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
             row_list[2] = ''
         last_row_number = self.rowCount() - 1
 
-        # FIXME/ISSUE/NOW Problematic!
-
         # set value
         self.update_cell_value(last_row_number, self._colIndexScan, scan_number)
         self.update_cell_value(last_row_number, self._colIndexSpiceHKL, s_hkl)
@@ -241,7 +239,6 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
         self.update_cell_value(last_row_number, self._colIndexAbsorption, absorption)
         self.update_cell_value(last_row_number, self._colIndexMotorName, motor_name)
         self.update_cell_value(last_row_number, self._colIndexMotorStep, motor_step)
-
 
         return
 
@@ -975,7 +972,6 @@ class ProcessTableWidget(tableBase.NTableWidget):
         motor_name = None
         motor_step = None
         wave_length = 0
-        peak_center = ''
         hkl = ''
 
         new_row = [scan_number, status, intensity, corr_int, error, integrate_type, mask,  # peak_center,
