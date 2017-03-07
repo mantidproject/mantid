@@ -62,6 +62,7 @@ Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_save(false) {
   // Connect the plot and save push buttons
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
 }
 
 void Stretch::setup() {}
@@ -264,6 +265,15 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   // update the current positions of the range bars
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
+}
+
+/**
+* plots the current miniplot preview
+*/
+void Stretch::plotCurrentPreview() {
+  if (m_uiForm.ppPlot->hasCurve("Sample")) {
+    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(),0);
+  }
 }
 
 /**
