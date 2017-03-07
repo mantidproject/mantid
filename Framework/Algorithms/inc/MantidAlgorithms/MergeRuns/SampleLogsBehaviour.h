@@ -99,8 +99,7 @@ private:
                                 API::MatrixWorkspace &outWS,
                                 const std::string name);
   void updateListProperty(API::MatrixWorkspace &addeeWS,
-                          API::MatrixWorkspace &outWS,
-                          const std::string name);
+                          API::MatrixWorkspace &outWS, const std::string name);
   void checkWarnProperty(const API::MatrixWorkspace &addeeWS,
                          Kernel::Property *addeeWSProperty,
                          const SampleLogBehaviour &behaviour,
