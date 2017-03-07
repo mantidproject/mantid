@@ -136,8 +136,8 @@ def get_hb3a_wavelength(m1_motor_pos):
     :param m1_motor_pos:
     :return: wavelength.  None for no mapping
     """
-    assert isinstance(m1_motor_pos, float) or isinstance(m1_motor_pos, int),  'Motor m1\'s position %s must be a float but not %s.' \
-                                            '' % (str(m1_motor_pos), type(m1_motor_pos))
+    assert isinstance(m1_motor_pos, float) or isinstance(m1_motor_pos, int),\
+        'Motor m1\'s position {0} must be a float but not {1}.'.format(m1_motor_pos, type(m1_motor_pos))
 
     # hard-coded HB3A m1 position and wavelength mapping
     m1_pos_list = [(-25.870, 1.003),

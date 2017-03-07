@@ -2,7 +2,7 @@
 import os
 import numpy as np
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 from PyQt4.QtCore import pyqtSignal
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas

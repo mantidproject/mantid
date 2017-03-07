@@ -132,7 +132,7 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         """
         if self._modelDataID is None:
             raise RuntimeError('There is no model plot on canvas')
-        
+
         # reset title
         self.set_title('')
         self.remove_line(self._modelDataID)
@@ -189,4 +189,3 @@ class IntegratedPeakView(mplgraphicsview.MplGraphicsView):
         self.setXYLimit(ymin=y_lower_limit, ymax=y_upper_limit)
 
         return
-

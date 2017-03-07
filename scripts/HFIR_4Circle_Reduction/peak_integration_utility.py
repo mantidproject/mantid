@@ -591,7 +591,6 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
         norm_by_mon = True
 
     # integrate peak of a scan
-    print '[DB...BAT] Inputs are ', merged_scan_workspace_name, integrated_peak_ws_name, peak_radius, merge_peaks, norm_by_mon, norm_by_time, mask_ws_name, scale_factor
     mantidsimple.IntegratePeaksCWSD(InputWorkspace=merged_scan_workspace_name,
                                     OutputWorkspace=integrated_peak_ws_name,
                                     PeakRadius=peak_radius,

@@ -819,11 +819,11 @@ class MainWindow(QtGui.QMainWindow):
         # set to controller
         self._myControl.set_k_shift(scan_list, k_index)
 
-        # set to table
-        exp_number = int(self.ui.lineEdit_exp.text())
+        # set k-shift to table
+        # exp_number = int(self.ui.lineEdit_exp.text())
         for row_index in selected_row_numbers:
             self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+            # scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
 
         return
 
@@ -1985,10 +1985,6 @@ class MainWindow(QtGui.QMainWindow):
                                                                 pt_num_list=[])
             # find peaks too
             status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
-            if status:
-                peak_centre = ret_obj
-            else:
-                peak_centre = None
 
             # process output
             if status:
@@ -3777,6 +3773,3 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         return self._myControl._workDir
-
-
-    # END-OF-DEFINITION (MainWindow)

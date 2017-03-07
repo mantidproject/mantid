@@ -3,6 +3,7 @@
 #
 import math
 import numpy
+import os
 from PyQt4 import QtGui, QtCore
 
 
