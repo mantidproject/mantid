@@ -20,15 +20,12 @@ class InstrumentSettings(object):
         self._basic_conf_dict = basic_conf_dict
         self._kwargs = kwargs
 
-        self._unknown_keys_found = False
         # We parse in the order advanced config, basic config (if specified), kwargs.
         # This means that users can use the advanced config as a safe set of defaults, with their own preferences as
         # the next layer which can override defaults and finally script arguments as their final override.
         self._parse_attributes(dict_to_parse=adv_conf_dict)
         self._parse_attributes(dict_to_parse=basic_conf_dict)
         self._parse_attributes(dict_to_parse=kwargs)
-        if self._unknown_keys_found:
-            _print_known_keys(attr_mapping)
 
     def __getattr__(self, item):
         map_entry = next((attr_tuple for attr_tuple in self._attr_mapping if item == attr_tuple[-1]), None)
@@ -59,7 +56,6 @@ class InstrumentSettings(object):
         self._basic_conf_dict = basic_config if basic_config else self._basic_conf_dict
         self._kwargs = kwargs if kwargs else self._kwargs
 
-        has_known_keys_already_been_printed = self._unknown_keys_found
         # Only update if one in hierarchy below it has been updated
         # so if advanced_config has been changed we need to parse the basic and kwargs again to ensure
         # the overrides are respected. Additionally we check whether we should suppress warnings based on
@@ -72,9 +68,6 @@ class InstrumentSettings(object):
                                    suppress_warnings=(not bool(basic_config or suppress_warnings)))
         if advanced_config or basic_config or kwargs:
             self._parse_attributes(self._kwargs, suppress_warnings=(not bool(kwargs or suppress_warnings)))
-
-        if not has_known_keys_already_been_printed and self._unknown_keys_found:
-            _print_known_keys(self._attr_mapping)
 
     def _parse_attributes(self, dict_to_parse, suppress_warnings=False):
         if not dict_to_parse:
@@ -93,10 +86,10 @@ class InstrumentSettings(object):
                 # The first element of the attribute is the config name and the last element is the friendly name
                 self._update_attribute(attr_name=found_attribute[-1], attr_val=dict_to_parse[found_attribute[0]],
                                        friendly_name=found_attribute[0], suppress_warnings=suppress_warnings)
-            elif not suppress_warnings:
-                warnings.warn("Ignoring unknown configuration key: " + str(config_key))
-                self._unknown_keys_found = True
-                continue
+            else:
+                # Key is unknown to us
+                _print_known_keys(self._attr_mapping)
+                raise ValueError("Unknown configuration key: " + str(config_key))
 
     def _update_attribute(self, attr_name, attr_val, friendly_name, suppress_warnings):
         # Does the attribute exist - has it changed and are we suppressing warnings
