@@ -341,6 +341,21 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 */
 void Quasi::plotCurrentPreview() {
 
+  if (m_uiForm.ppPlot->hasCurve("fit.1")) {
+    QString program = m_uiForm.cbProgram->currentText();
+    auto fitName = m_QuasiAlg->getPropertyValue("OutputWorkspaceFit");
+    checkADSForPlotSaveWorkspace(fitName, false);
+    fitName.pop_back();
+    QString QfitWS = QString::fromStdString(fitName + "_");
+    QfitWS += QString::number(m_previewSpec);
+    if (program == "Lorentzians")
+      plotSpectra(QfitWS, { 0, 1, 2, 4 });
+    else
+     plotSpectra(QfitWS, { 0, 1, 2 });
+  }
+  else if (m_uiForm.ppPlot->hasCurve("Sample")) {
+    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+  }
 }
 
 /**
