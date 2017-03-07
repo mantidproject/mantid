@@ -169,7 +169,7 @@ void DetectorInfo::setRotation(const size_t index,
   m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
-/** Set the absolute position of the component `comp`. Not thread safe.
+/** Set the absolute position of the component `comp`.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions. Note that this method will be
@@ -189,23 +189,29 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     // If comp is a detector cached positions stay valid. In all other cases
     // (higher level in instrument tree, or other leaf component such as sample
     // or source) we flush all cached positions.
-    if (m_source)
-      m_sourcePos = m_source->getPos();
-    if (m_sample)
-      m_samplePos = m_sample->getPos();
-    if (m_source && m_sample)
-      m_L1 = m_sourcePos.distance(m_samplePos);
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if (detIndices.size() == 0 || detIndices.size() == size()) {
+      // Update only if comp is not a bank (not detectors) or the full
+      // instrument (all detectors). The should make this thread-safe for
+      // practical purposes such as moving each bank in a separate thread.
+      if (m_source)
+        m_sourcePos = m_source->getPos();
+      if (m_sample)
+        m_samplePos = m_sample->getPos();
+      if (m_source && m_sample)
+        m_L1 = m_sourcePos.distance(m_samplePos);
+    }
     // Detector positions are currently not cached, the cached pointers to
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
     const auto delta = toVector3d(pos - oldPos);
-    for (const auto index : getAssemblyDetectorIndices(comp)) {
+    for (const auto index : detIndices) {
       m_detectorInfo.setPosition(index, m_detectorInfo.position(index) + delta);
     }
   }
 }
 
-/** Set the absolute rotation of the component `comp`. Not thread safe.
+/** Set the absolute rotation of the component `comp`.
  *
  * This may or may not be a detector. Even if it is not a detector it will
  * typically still influence detector positions rotations. Note that this method
@@ -218,34 +224,37 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
   } else {
     // This will go badly wrong if the parameter map in the component is not
     // identical to ours, but there does not seem to be a way to check?
-    const auto pos = comp.getPos();
+    const auto pos = toVector3d(comp.getPos());
     auto invOldRot = comp.getRotation();
     invOldRot.inverse();
-    const auto delta = rot * invOldRot;
+    const auto delta = toQuaterniond(rot * invOldRot);
     using namespace Geometry::ComponentHelper;
     TransformType rotationType = Absolute;
     rotateComponent(comp, *m_pmap, rot, rotationType);
     // If comp is a detector cached positions and rotations stay valid. In all
     // other cases (higher level in instrument tree, or other leaf component
     // such as sample or source) we flush all cached positions and rotations.
-    if (m_source)
-      m_sourcePos = m_source->getPos();
-    if (m_sample)
-      m_samplePos = m_sample->getPos();
-    if (m_source && m_sample)
-      m_L1 = m_sourcePos.distance(m_samplePos);
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if (detIndices.size() == 0 || detIndices.size() == size()) {
+      // Update only if comp is not a bank (not detectors) or the full
+      // instrument (all detectors). The should make this thread-safe for
+      // practical purposes such as moving each bank in a separate thread.
+      if (m_source)
+        m_sourcePos = m_source->getPos();
+      if (m_sample)
+        m_samplePos = m_sample->getPos();
+      if (m_source && m_sample)
+        m_L1 = m_sourcePos.distance(m_samplePos);
+    }
     // Detector positions and rotations are currently not cached, the cached
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
-    auto fastDelta = toQuaterniond(delta);
-    auto transformation = Eigen::Matrix3d(fastDelta);
-    auto fastPos = toVector3d(pos);
-    for (const auto index : getAssemblyDetectorIndices(comp)) {
-      m_detectorInfo.setRotation(index,
-                                 fastDelta * m_detectorInfo.rotation(index));
+    auto transformation = Eigen::Matrix3d(delta);
+    for (const auto index : detIndices) {
+      m_detectorInfo.setRotation(index, delta * m_detectorInfo.rotation(index));
       auto relativePos =
-          transformation * (m_detectorInfo.position(index) - fastPos);
-      m_detectorInfo.setPosition(index, relativePos + fastPos);
+          transformation * (m_detectorInfo.position(index) - pos);
+      m_detectorInfo.setPosition(index, relativePos + pos);
     }
   }
 }

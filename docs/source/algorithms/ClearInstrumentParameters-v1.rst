@@ -44,6 +44,10 @@ Usage
   ClearInstrumentParameters(ws)
 
   #Check the parmaeters have been cleared correctly
+  #Obtain instrument and banks again, to make sure they contain the updated parameters
+  instrument = ws.getInstrument()
+  bank1 = instrument.getComponentByName("bank1")
+  bank2 = instrument.getComponentByName("bank2")
   if len(instrument.getStringParameter("TestParam")) == 0:
     print("Instrument was cleared successfully.")
   if len(bank1.getStringParameter("TestParam")) == 0:
