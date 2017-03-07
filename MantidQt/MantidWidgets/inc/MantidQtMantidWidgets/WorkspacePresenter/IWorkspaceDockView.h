@@ -65,6 +65,7 @@ public:
                                      const std::string &newName) = 0;
   virtual void enableDeletePrompt(bool enable) = 0;
   virtual bool isPromptDelete() const = 0;
+  virtual bool isFocused() const = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces(const StringList &wsNames) = 0;
   virtual void clearView() = 0;

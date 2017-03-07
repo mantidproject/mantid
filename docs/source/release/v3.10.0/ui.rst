@@ -16,7 +16,8 @@ OS X
 
 User Interface
 --------------
-
+ - Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
+ - Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on.
 
 Instrument View
 ###############

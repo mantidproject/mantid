@@ -37,6 +37,7 @@ public:
   MOCK_METHOD0(showLoadDialog, void());
   MOCK_METHOD0(showLiveDataDialog, void());
   MOCK_CONST_METHOD0(isPromptDelete, bool());
+  MOCK_CONST_METHOD0(isFocused, bool());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD1(deleteWorkspaces, void(const StringList &wsNames));
   MOCK_METHOD0(clearView, void());

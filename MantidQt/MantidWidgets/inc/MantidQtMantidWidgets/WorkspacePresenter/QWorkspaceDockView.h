@@ -110,6 +110,7 @@ public:
   showRenameDialog(const MantidQt::MantidWidgets::StringList &wsNames) override;
   void enableDeletePrompt(bool enable) override;
   bool isPromptDelete() const override;
+  bool isFocused() const override;
   bool deleteConfirmation() const override;
   void
   deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
