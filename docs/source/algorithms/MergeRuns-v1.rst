@@ -180,7 +180,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_time_series').valueAsString().rstrip()
+  print merged.run().getLogData('sample_magn_field').valueAsString().rstrip()
 
 Output:
 
@@ -198,7 +198,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsList='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field_list').value
+  print merged.run().getLogData('sample_magn_field').value
 
 Output:
 
@@ -216,7 +216,7 @@ Output:
                      SampleLogsTimeSeries='sample_temp',
                      SampleLogsWarn='sample_magn_field')
 
-  print merged.run().getLogData('sample_temp_time_series').size()
+  print merged.run().getLogData('sample_temp').size()
 
 Output:
 
@@ -231,11 +231,11 @@ Output:
   Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
 
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
-                     SampleLogsTimeSeries='sample_magn_field',
+                     SampleLogsTimeSeries='sample_temp',
                      SampleLogsFail='sample_magn_field, nspectra',
                      SampleLogsFailTolerances='5, 0')
 
-  print merged.run().getLogData('sample_magn_field_time_series').size()
+  print merged.run().getLogData('sample_temp').size()
 
 Output:
 
