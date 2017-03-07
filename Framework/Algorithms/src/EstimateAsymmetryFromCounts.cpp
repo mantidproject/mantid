@@ -48,10 +48,12 @@ void EstimateAsymmetryFromCounts::init() {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
-  declareProperty("XStart",0.1,
-	  "The lower limit for calculating the asymmetry (an X value).");
-  declareProperty("XEnd",15.0,
-	  "The upper limit for calculating the asymmetry  (an X value).");
+  declareProperty(
+      "XStart", 0.1,
+      "The lower limit for calculating the asymmetry (an X value).");
+  declareProperty(
+      "XEnd", 15.0,
+      "The upper limit for calculating the asymmetry  (an X value).");
 }
 
 /** Executes the algorithm
@@ -99,48 +101,56 @@ void EstimateAsymmetryFromCounts::exec() {
   // Do the specified spectra only
   int specLength = static_cast<int>(spectra.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-	  for (int i = 0; i < specLength; ++i) {
-		  PARALLEL_START_INTERUPT_REGION
-			  const auto specNum = static_cast<size_t>(spectra[i]);
-		  if (spectra[i] > numSpectra) {
-			  g_log.error("Spectra size greater than the number of spectra!");
-			  throw std::invalid_argument(
-				  "Spectra size greater than the number of spectra!");
-		  }
+  for (int i = 0; i < specLength; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto specNum = static_cast<size_t>(spectra[i]);
+    if (spectra[i] > numSpectra) {
+      g_log.error("Spectra size greater than the number of spectra!");
+      throw std::invalid_argument(
+          "Spectra size greater than the number of spectra!");
+    }
 
-	// check start and end times
-	double startX = getProperty("XStart");
-	double endX = getProperty("XEnd");
-	
-	if (startX > endX) {
-		g_log.warning() << "Start time is after the end time. Swapping the start and end." << '\n';
-		double tmp = endX;
-		endX = startX;
-		startX = tmp;
-	}
-	else if (startX == endX) {
-		throw std::runtime_error("Start and end times are equal, there is no data to apply the algorithm to.");
-	}
+    // check start and end times
+    double startX = getProperty("XStart");
+    double endX = getProperty("XEnd");
 
-	auto xData = inputWS->histogram(specNum).binEdges();
-	if (startX < xData[0]) {
-		  g_log.warning() << "Start time is before the first data point. Using first data point." << '\n';
-	}
-	if (endX > xData[xData.size()-1]) {
-		g_log.warning() << "End time is after the last data point. Using last data point." << '\n';
-		g_log.warning() << "Data at late times may dominate the normalisation." << '\n';
-	}
-	// Calculate the normalised counts
+    if (startX > endX) {
+      g_log.warning()
+          << "Start time is after the end time. Swapping the start and end."
+          << '\n';
+      double tmp = endX;
+      endX = startX;
+      startX = tmp;
+    } else if (startX == endX) {
+      throw std::runtime_error("Start and end times are equal, there is no "
+                               "data to apply the algorithm to.");
+    }
+
+    auto xData = inputWS->histogram(specNum).binEdges();
+    if (startX < xData[0]) {
+      g_log.warning() << "Start time is before the first data point. Using "
+                         "first data point." << '\n';
+    }
+    if (endX > xData[xData.size() - 1]) {
+      g_log.warning()
+          << "End time is after the last data point. Using last data point."
+          << '\n';
+      g_log.warning() << "Data at late times may dominate the normalisation."
+                      << '\n';
+    }
+    // Calculate the normalised counts
     const Mantid::API::Run &run = inputWS->run();
-    const double numGoodFrames= std::stod(run.getProperty("goodfrm")-> value());
-	
-	const double normConst = estimateNormalisationConst(inputWS->histogram(specNum), numGoodFrames, startX, endX);
-	// Calculate the asymmetry  
-	outputWS->setHistogram(specNum, normaliseCounts(inputWS->histogram(specNum),numGoodFrames));
+    const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
+
+    const double normConst = estimateNormalisationConst(
+        inputWS->histogram(specNum), numGoodFrames, startX, endX);
+    // Calculate the asymmetry
+    outputWS->setHistogram(
+        specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     outputWS->mutableY(specNum) /= normConst;
-	outputWS->mutableY(specNum) -=  1.0;
+    outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
-	
+
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }

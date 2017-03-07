@@ -10,7 +10,8 @@
 
 namespace Mantid {
 namespace Algorithms {
-/**Takes a muon workspace as input and estimates the asymmetry, using a simple method. 
+/**Takes a muon workspace as input and estimates the asymmetry, using a simple
+method.
 
 Required Properties:
 <UL>
@@ -50,7 +51,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport EstimateAsymmetryFromCounts : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "EstimateAsymmetryFromCounts"; }
+  const std::string name() const override {
+    return "EstimateAsymmetryFromCounts";
+  }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm gives an estimate "

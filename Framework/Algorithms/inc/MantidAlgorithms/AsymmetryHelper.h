@@ -10,8 +10,9 @@
 namespace Mantid {
 /*
 A set of helper functions for calculating asymmetry. Including:
- Calculating the normalised counts, estimating the normalisation constant and finding the range
- of data to use in the analysis. 
+ Calculating the normalised counts, estimating the normalisation constant and
+finding the range
+ of data to use in the analysis.
 
 
 @author
@@ -38,12 +39,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	HistogramData::Histogram
-		normaliseCounts(const HistogramData::Histogram &histogram, const double numGoodFrames);
-  // calculate Muon normalisation constant
-  double estimateNormalisationConst(const HistogramData::Histogram &histogram, const double numGoodFrames, const double startX, const double endX);
-  size_t startIndexFromTime(const HistogramData::BinEdges &xData, const double startX);
-  size_t endIndexFromTime(const HistogramData::BinEdges  &xData, const double endX);
+HistogramData::Histogram
+normaliseCounts(const HistogramData::Histogram &histogram,
+                const double numGoodFrames);
+// calculate Muon normalisation constant
+double estimateNormalisationConst(const HistogramData::Histogram &histogram,
+                                  const double numGoodFrames,
+                                  const double startX, const double endX);
+size_t startIndexFromTime(const HistogramData::BinEdges &xData,
+                          const double startX);
+size_t endIndexFromTime(const HistogramData::BinEdges &xData,
+                        const double endX);
 
 } // namespace Mantid
 

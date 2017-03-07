@@ -13,7 +13,7 @@ namespace Algorithms {
 /**Takes a muon workspace as input and calculates the
 asymmetry, using a function fo the form
 
-N_0* [ 1 + sum_j f(t,{lambda}_j) ] 
+N_0* [ 1 + sum_j f(t,{lambda}_j) ]
 
 where the sum is over a set of functions and {lambda}_j is the jth
 set of input parameters. The above equation is fitted to the normalised
@@ -27,7 +27,8 @@ Required Properties:
 <LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
 <LI> StartX - The minimum time to include the analysis </LI>
 <LI> EndX - The maximum time to include in the analysis </LI>
-<LI> myFucntion - The composite function to be used in the fitting (sum_j f(t,{lambda}_j) ) </LI>
+<LI> myFucntion - The composite function to be used in the fitting (sum_j
+f(t,{lambda}_j) ) </LI>
 </UL>
 
 
@@ -74,8 +75,9 @@ private:
   void init() override;
   void exec() override;
   // calculate Muon normalisation constant
-  double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex, const double estNormConst, const double startX, const double endX);
-
+  double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex,
+                         const double estNormConst, const double startX,
+                         const double endX);
 };
 
 } // namespace Algorithm
