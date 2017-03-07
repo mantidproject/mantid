@@ -74,9 +74,6 @@ class BASISReduction(PythonAlgorithm):
         self._normWs = None
         self._normMonWs = None
 
-        # additional output
-
-
     def category(self):
         return "Inelastic\\Reduction"
 
@@ -159,8 +156,6 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("OutputSusceptibility", False, direction=Direction.Input,
                              doc="Output dynamic susceptibility (Xqw)")
         self.setPropertyGroup("OutputSusceptibility", titleAddionalOutput)
-
-
 
     #pylint: disable=too-many-branches
     def PyExec(self):
