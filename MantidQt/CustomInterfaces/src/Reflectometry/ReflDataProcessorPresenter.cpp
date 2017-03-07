@@ -190,7 +190,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     auto data = row.second;               // Vector containing data for this row
     std::string runNo = row.second.at(0); // The run number
 
-    if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
+    if (timeSlicingType != "Custom") {
       const std::string runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
@@ -293,6 +293,12 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   IEventWorkspace_sptr mws;
   if (AnalysisDataService::Instance().doesExist(wsName)) {
     mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
+    if (!mws) {
+      m_mainPresenter->giveUserCritical("Workspace to slice " + wsName +
+                                            " is not an event workspace!",
+                                        "Time slicing error");
+      return;
+    }
   } else {
     m_mainPresenter->giveUserCritical("Workspace to slice not found: " + wsName,
                                       "Time slicing error");
