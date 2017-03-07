@@ -366,7 +366,7 @@ bool MantidMatrixCurve::isDistribution() const {
 }
 
 bool MantidMatrixCurve::isHistogramData() const {
-  if (auto *d = dynamic_cast<const QwtWorkspaceSpectrumData *>(&data())) {
+  if (dynamic_cast<const QwtWorkspaceSpectrumData *>(&data())) {
     return true;
   } else
     return false;
