@@ -267,8 +267,13 @@ public:
     bool errors;
     bool surface;
     bool contour;
-    UserInputForContourAndSurface contorSurface;
+    UserInputForContourAndSurface contourSurface;
   };
+
+  /// The string "Workspace index"
+  static const QString WORKSPACE_INDEX;
+  /// The string "Custom"
+  static const QString CUSTOM;
 
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
@@ -313,6 +318,8 @@ private:
   void initSpectraBox();
   /// Initialize the layout of the options check boxes
   void initOptionsBoxes();
+  /// Initializes the layout of the log options
+  void initLogs();
 
   /// Check to see if all workspaces have a spectrum axis
   void checkForSpectraAxes();
@@ -346,6 +353,9 @@ private:
   QHBoxLayout *m_optionsBox;
   QComboBox *m_plotOptions;
   QCheckBox *m_showErrorBars;
+  QVBoxLayout *m_logBox;
+  QComboBox *m_logSelector;
+  QLabel *m_logLabel;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;

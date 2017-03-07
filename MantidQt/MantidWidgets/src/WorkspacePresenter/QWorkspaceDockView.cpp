@@ -1536,9 +1536,15 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
                              showErrorBars);
-  } else {
+  } else if (userInput.waterfall) {
     m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
                        showErrorBars, nullptr, false, userInput.waterfall);
+  }
+  else if (userInput.surface) {
+   // m_mantidUI->showSurfacePlot(wsg, userInput.contourSurface);
+
+  }
+  else if (userInput.contour) {
   }
 }
 
