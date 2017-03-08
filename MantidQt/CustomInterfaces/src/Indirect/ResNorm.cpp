@@ -300,10 +300,8 @@ void ResNorm::previewSpecChanged(int value) {
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
 
-      AnalysisDataService::Instance().addOrReplace("__"+ fitWsGroupName +"_scaled", fit);
-
-      
-
+      AnalysisDataService::Instance().addOrReplace(
+          "__" + fitWsGroupName + "_scaled", fit);
     }
   }
 }
@@ -328,7 +326,7 @@ void ResNorm::plotCurrentPreview() {
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
     std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
 
-    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName+"_scaled");
+    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName + "_scaled");
     plotIndices.push_back(0);
   }
   plotMultipleSpectra(plotWorkspaces, plotIndices);

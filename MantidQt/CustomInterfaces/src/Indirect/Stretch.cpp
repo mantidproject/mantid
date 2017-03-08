@@ -12,7 +12,8 @@ Mantid::Kernel::Logger g_log("Stretch");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_save(false), m_previewSpec(0) {
+Stretch::Stretch(QWidget *parent)
+    : IndirectBayesTab(parent), m_save(false), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -60,12 +61,13 @@ Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent), m_save(false), m_p
           SLOT(setEnabled(bool)));
   // Connect preview spectrum spinner to handler
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
-    SLOT(previewSpecChanged(int)));
+          SLOT(previewSpecChanged(int)));
 
   // Connect the plot and save push buttons
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 void Stretch::setup() {}
@@ -271,8 +273,8 @@ void Stretch::handleSampleInputReady(const QString &filename) {
 
   // set the max spectrum
   MatrixWorkspace_const_sptr sampleWs =
-    AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      filename.toStdString());
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          filename.toStdString());
   const auto spectra = sampleWs->getNumberHistograms();
   m_uiForm.spPreviewSpectrum->setMaximum(spectra);
 }
@@ -292,10 +294,7 @@ void Stretch::previewSpecChanged(int value) {
 
   QString sampleName = m_uiForm.dsSample->getCurrentDataName();
   m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
-
 }
-
-
 
 /**
 * plots the current miniplot preview

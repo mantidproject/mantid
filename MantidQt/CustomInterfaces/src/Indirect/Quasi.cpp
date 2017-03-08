@@ -62,7 +62,8 @@ Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
           SLOT(previewSpecChanged(int)));
 
   // Plot current preview
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 
   // Post saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -349,11 +350,10 @@ void Quasi::plotCurrentPreview() {
     QString QfitWS = QString::fromStdString(fitName + "_");
     QfitWS += QString::number(m_previewSpec);
     if (program == "Lorentzians")
-      plotSpectra(QfitWS, { 0, 1, 2, 4 });
+      plotSpectra(QfitWS, {0, 1, 2, 4});
     else
-     plotSpectra(QfitWS, { 0, 1, 2 });
-  }
-  else if (m_uiForm.ppPlot->hasCurve("Sample")) {
+      plotSpectra(QfitWS, {0, 1, 2});
+  } else if (m_uiForm.ppPlot->hasCurve("Sample")) {
     plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
   }
 }
