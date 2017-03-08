@@ -52,13 +52,13 @@ public:
   };
 
   SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
-                      const std::string sampleLogsSum,
-                      const std::string sampleLogsTimeSeries,
-                      const std::string sampleLogsList,
-                      const std::string sampleLogsWarn,
-                      const std::string sampleLogsWarnTolerances,
-                      const std::string sampleLogsFail,
-                      const std::string sampleLogsFailTolerances);
+                      const std::string &sampleLogsSum,
+                      const std::string &sampleLogsTimeSeries,
+                      const std::string &sampleLogsList,
+                      const std::string &sampleLogsWarn,
+                      const std::string &sampleLogsWarnTolerances,
+                      const std::string &sampleLogsFail,
+                      const std::string &sampleLogsFailTolerances);
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
@@ -76,17 +76,17 @@ private:
                                                 API::MatrixWorkspace &ws);
 
   std::shared_ptr<Kernel::Property>
-  addPropertyForTimeSeries(const std::string item, const double value,
+  addPropertyForTimeSeries(const std::string &item, const double value,
                            API::MatrixWorkspace &ws);
   std::shared_ptr<Kernel::Property>
-  addPropertyForList(const std::string item, const std::string value,
+  addPropertyForList(const std::string &item, const std::string &value,
                      API::MatrixWorkspace &ws);
-  bool setNumericValue(const std::string item, const API::MatrixWorkspace &ws,
+  bool setNumericValue(const std::string &item, const API::MatrixWorkspace &ws,
                        double &value);
 
   void setSampleMap(SampleLogsMap &map, const MergeLogType &,
                     const std::string &params, API::MatrixWorkspace &ws,
-                    const std::string paramsTolerances = "",
+                    const std::string &paramsTolerances = "",
                     bool skipIfInPrimaryMap = false);
 
   std::vector<double>
@@ -94,22 +94,22 @@ private:
                          const std::vector<std::string> &tolerances);
 
   void updateSumProperty(double addeeWSNumber, double outWSNumber,
-                         API::MatrixWorkspace &outWS, const std::string name);
+                         API::MatrixWorkspace &outWS, const std::string &name);
   void updateTimeSeriesProperty(API::MatrixWorkspace &addeeWS,
                                 API::MatrixWorkspace &outWS,
-                                const std::string name);
+                                const std::string &name);
   void updateListProperty(API::MatrixWorkspace &addeeWS,
-                          API::MatrixWorkspace &outWS, const std::string name);
+                          API::MatrixWorkspace &outWS, const std::string &name);
   void checkWarnProperty(const API::MatrixWorkspace &addeeWS,
                          Kernel::Property *addeeWSProperty,
                          const SampleLogBehaviour &behaviour,
                          const double addeeWSNumber, const double outWSNumber,
-                         const std::string name);
+                         const std::string &name);
   void checkErrorProperty(const API::MatrixWorkspace &addeeWS,
                           Kernel::Property *addeeWSProperty,
                           const SampleLogBehaviour &behaviour,
                           const double addeeWSNumber, const double outWSNumber,
-                          const std::string name);
+                          const std::string &name);
 
   bool isWithinTolerance(const SampleLogBehaviour &behaviour,
                          const double addeeWSNumber, const double outWSNumber);

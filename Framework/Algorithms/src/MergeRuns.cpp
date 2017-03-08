@@ -46,9 +46,6 @@ void MergeRuns::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
-  declareProperty(
-      "SampleLogsSum", "",
-      "A comma separated list of the sample logs to sum into a single entry.");
   declareProperty("SampleLogsTimeSeries", "",
                   "A comma separated list of the sample logs to merge into a "
                   "time series. The initial times are taken as the start times "
@@ -75,6 +72,9 @@ void MergeRuns::init() {
                   "single value for all fail sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsFail).");
+  declareProperty(
+      "SampleLogsSum", "",
+      "A comma separated list of the sample logs to sum into a single entry.");
   const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
                                                  FAIL_BEHAVIOUR};
   declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
@@ -177,7 +177,7 @@ void MergeRuns::exec() {
           g_log.error() << "Could not merge run: " << it->get()->getName()
                         << ". Binning is different from first workspace. "
                            "MergeRuns will continue but this run will be "
-                           "skipped.";
+                           "skipped.\n";
           continue;
         } else {
           throw std::invalid_argument(
@@ -199,7 +199,7 @@ void MergeRuns::exec() {
           g_log.error()
               << "Could not merge run: " << it->get()->getName()
               << ". Reason: \"" << e.what()
-              << "\". MergeRuns will continue but this run will be skipped.";
+              << "\". MergeRuns will continue but this run will be skipped.\n";
           sampleLogsBehaviour.resetSampleLogs(*outWS);
         } else {
           throw std::invalid_argument(e);

@@ -171,6 +171,23 @@ Output:
 
 .. include:: ../usagedata-note.txt
 
+**Example: Merge Workspace Summing Sample Logs**
+
+.. testcode:: MergeSampleLogs
+
+  Load(Filename='MUSR00015189.nxs, MUSR00015190.nxs', OutputWorkspace='gws')
+
+  merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
+                     SampleLogsSum='dur')
+
+  print(merged.run().getLogData('dur').value)
+
+Output:
+
+.. testoutput:: MergeSampleLogs
+
+  200.0
+
 **Example: Merge Workspace Combining Sample Logs as a TimeSeries**
 
 .. testcode:: MergeSampleLogs
@@ -180,7 +197,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsTimeSeries='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field').valueAsString().rstrip()
+  print(merged.run().getLogData('sample_magn_field').valueAsString().rstrip())
 
 Output:
 
@@ -198,7 +215,7 @@ Output:
   merged = MergeRuns(InputWorkspaces='MUSR00015189_1, MUSR00015190_1',
                      SampleLogsList='sample_magn_field')
 
-  print merged.run().getLogData('sample_magn_field').value
+  print(merged.run().getLogData('sample_magn_field').value)
 
 Output:
 
@@ -216,7 +233,7 @@ Output:
                      SampleLogsTimeSeries='sample_temp',
                      SampleLogsWarn='sample_magn_field')
 
-  print merged.run().getLogData('sample_temp').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 
@@ -235,7 +252,7 @@ Output:
                      SampleLogsFail='sample_magn_field, nspectra',
                      SampleLogsFailTolerances='5, 0')
 
-  print merged.run().getLogData('sample_temp').size()
+  print(merged.run().getLogData('sample_temp').size())
 
 Output:
 
