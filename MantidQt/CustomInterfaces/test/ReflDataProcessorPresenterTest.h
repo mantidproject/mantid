@@ -389,6 +389,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(8)
+        .WillRepeatedly(Return("INTER"));
 
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
