@@ -7,7 +7,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, IntBoundedValidator, Property,
                            StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
+from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
                               Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
 import numpy
 from scipy import constants
