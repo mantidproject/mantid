@@ -28,7 +28,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   MantidVec Y;
   MantidVec E;
   for (size_t s = 0; s < nspec; s++) {
-    for (size_t t = 0; t < maxt; t++) {
+    for (size_t t = 0; t <= maxt; t++) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
       X.push_back(x);
@@ -83,8 +83,8 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("XStart", 0.1);
-    alg->setProperty("XEnd", 0.9);
+    alg->setProperty("StartX", 0.1);
+    alg->setProperty("EndX", 0.9);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -100,8 +100,8 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("XStart", 0.1);
-    alg->setProperty("XEnd", 0.9);
+    alg->setProperty("StartX", 0.1);
+    alg->setProperty("EndX", 0.9);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 
@@ -147,8 +147,8 @@ public:
     alg1->setChild(true);
     alg1->setProperty("InputWorkspace", ws);
     alg1->setPropertyValue("OutputWorkspace", outputName);
-    alg1->setProperty("XStart", 0.1);
-    alg1->setProperty("XEnd", 0.9);
+    alg1->setProperty("StartX", 0.1);
+    alg1->setProperty("EndX", 0.9);
     TS_ASSERT_THROWS_NOTHING(alg1->execute());
     TS_ASSERT(alg1->isExecuted());
 
@@ -162,8 +162,8 @@ public:
     alg2->setProperty("InputWorkspace", ws);
     alg2->setPropertyValue("OutputWorkspace", outputName);
     alg2->setPropertyValue("Spectra", "1");
-    alg2->setProperty("XStart", 0.1);
-    alg2->setProperty("XEnd", 0.9);
+    alg2->setProperty("StartX", 0.1);
+    alg2->setProperty("EndX", 0.9);
     TS_ASSERT_THROWS_NOTHING(alg2->execute());
     TS_ASSERT(alg2->isExecuted());
     MatrixWorkspace_sptr out2 = alg2->getProperty("OutputWorkspace");
@@ -192,8 +192,8 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("XStart", 0.1);
-    alg->setProperty("XEnd", 0.9);
+    alg->setProperty("StartX", 0.1);
+    alg->setProperty("EndX", 0.9);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -202,7 +202,7 @@ public:
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
   }
-  void test_noUpperBound() {
+   void test_noUpperBound() {
 
     auto ws = createWorkspace(4, 50);
 
@@ -212,7 +212,7 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("XStart", 0.1);
+    alg->setProperty("StartX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -225,7 +225,7 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("XEnd", 0.9);
+    alg->setProperty("EndX", 0.9);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -243,7 +243,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
   }
-  void test_backwardsRange() {
+   void test_backwardsRange() {
     auto ws = createWorkspace(4, 50);
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
@@ -251,12 +251,14 @@ public:
     alg->setChild(true);
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
-    alg->setProperty("Xstart", 0.9);
-    alg->setProperty("XEnd", 0.1);
+    alg->setProperty("StartX", 0.9);
+    alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
   }
+
+
 };
 
 class EstimateAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
@@ -280,8 +282,8 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", input);
     alg.setPropertyValue("OutputWorkspace", "output");
-    alg.setProperty("XStart", 0.1);
-    alg.setProperty("XEnd", 0.9);
+    alg.setProperty("StartX", 0.1);
+    alg.setProperty("EndX", 0.9);
 
     alg.execute();
   }

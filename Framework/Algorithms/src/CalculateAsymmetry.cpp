@@ -49,10 +49,10 @@ void CalculateAsymmetry::init() {
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
-      "XStart", 0.1,
+      "StartX", 0.1,
       "The lower limit for calculating the asymmetry (an X value).");
   declareProperty(
-      "XEnd", 15.0,
+      "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
   declareProperty(
       "myFunction",
@@ -115,8 +115,8 @@ void CalculateAsymmetry::exec() {
     }
 
     // check start and end times
-    double startX = getProperty("XStart");
-    double endX = getProperty("XEnd");
+    double startX = getProperty("StartX");
+    double endX = getProperty("EndX");
 
     if (startX > endX) {
       g_log.warning()
@@ -171,10 +171,11 @@ void CalculateAsymmetry::exec() {
 }
 
 /**
- * calculate normalisation constant after the exponential decay has been removed
+ * Calculate normalisation constant after the exponential decay has been removed
  * to a linear fitting function
  * @param ws ::  workspace
  * @param wsIndex :: workspace index
+ * @param estNormConstant :: estimate of normalisation constant
  * @param startX :: the smallest x value for the fit
  * @param endX :: the largest x value for the fit
  * @return normalisation constant

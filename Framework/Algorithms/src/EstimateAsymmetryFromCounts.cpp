@@ -49,10 +49,10 @@ void EstimateAsymmetryFromCounts::init() {
       Kernel::make_unique<Kernel::ArrayProperty<int>>("Spectra", empty),
       "The workspace indices to remove the exponential decay from.");
   declareProperty(
-      "XStart", 0.1,
+      "StartX", 0.1,
       "The lower limit for calculating the asymmetry (an X value).");
   declareProperty(
-      "XEnd", 15.0,
+      "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
 }
 
@@ -111,8 +111,8 @@ void EstimateAsymmetryFromCounts::exec() {
     }
 
     // check start and end times
-    double startX = getProperty("XStart");
-    double endX = getProperty("XEnd");
+    double startX = getProperty("StartX");
+    double endX = getProperty("EndX");
 
     if (startX > endX) {
       g_log.warning()

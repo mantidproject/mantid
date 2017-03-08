@@ -65,7 +65,7 @@ normaliseCounts(const HistogramData::Histogram &histogram,
 }
 
 /**
-* estimates normalisation constant via
+* Estimates normalisation constant via
 * N_0 = (Delta/f)*(sum_i W_i)/(int_a^b exp(-t/tau)dt )
 * where W is the raw data, tau is the muon
 * lifetime, t is time, f is the
@@ -73,11 +73,13 @@ normaliseCounts(const HistogramData::Histogram &histogram,
 * a is the start of the range and b is the end of the range.
 * @param histogram :: [input] Input histogram
 * @param numGoodFrames :: [input] the number of good frames
+* @param  StartX :: [input] the start time
+* @param  EndX :: [input] the end time
 * @returns :: The normalization constant N_0
 */
 double estimateNormalisationConst(const HistogramData::Histogram &histogram,
                                   const double numGoodFrames,
-                                  const double startX, const double endX) {
+                                 const double startX, const double endX) {
 
   auto xData = histogram.binEdges();
   auto &yData = histogram.y();
@@ -96,9 +98,9 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   return summation * Delta / denominator;
 }
 /**
-* find the first index in bin edges that is after
+* Finds the first index in bin edges that is after
 * the start time.
-* @param BinEdges :: [input] Input bin edges
+* @param xData :: [input] Input HistogramData as bin edges
 * @param startX :: [input] the start time
 * @returns :: The index to start calculations from
 */
@@ -121,7 +123,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 /**
 * find the first index in bin edges that is after
 * the endtime.
-* @param BinEdges :: [input] Input bin edges
+* @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations
 */
