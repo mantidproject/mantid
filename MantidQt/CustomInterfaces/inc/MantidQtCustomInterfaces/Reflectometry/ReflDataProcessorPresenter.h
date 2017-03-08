@@ -88,6 +88,9 @@ private:
   // Take a slice from event workspace
   std::string takeSlice(const std::string &runNo, size_t sliceIndex,
                         double startTime, double stopTime);
+
+  std::map<int, std::map<int, size_t>> m_numSlicesMap;
+  std::map<int, size_t> m_numGroupSlicesMap;
 };
 }
 }

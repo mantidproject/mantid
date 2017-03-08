@@ -78,6 +78,7 @@ void ReflDataProcessorPresenter::process() {
 
     // Group of runs
     GroupData group = item.second;
+    const auto x = item.first;
 
     try {
       // First load the runs.
@@ -177,7 +178,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
   bool errors = false;
   bool multiRow = group.size() > 1;
-  size_t groupNumSlices = INT_MAX;
+  size_t numGroupSlices = INT_MAX;
 
   std::vector<double> startTimes, stopTimes;
 
@@ -187,7 +188,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
   for (const auto &row : group) {
 
-    auto data = row.second;               // Vector containing data for this row
+    const auto rowID = row.first;         // Integer ID of this row
+    const auto data = row.second;         // Vector containing data for this row
     std::string runNo = row.second.at(0); // The run number
 
     if (timeSlicingType != "Custom") {
@@ -197,6 +199,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     }
 
     size_t numSlices = startTimes.size();
+    m_numSlicesMap[groupID][rowID] = numSlices;
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
@@ -205,7 +208,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
         slice[0] = wsName;
         auto newData = reduceRow(slice);
         newData[0] = data[0];
-        m_manager->update(groupID, row.first, newData);
+        m_manager->update(groupID, rowID, newData);
       } catch (...) {
         return true;
       }
@@ -214,7 +217,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     // For uniform slicing with multiple rows only the minimum number of slices
     // are common to each row
     if (multiRow && timeSlicingType == "Uniform")
-      groupNumSlices = std::min(groupNumSlices, startTimes.size());
+      numGroupSlices = std::min(numGroupSlices, numSlices);
   }
 
   // Post-process (if needed)
@@ -222,9 +225,11 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     // All slices are common for uniform even or custom slicing
     if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
-      groupNumSlices = startTimes.size();
+      numGroupSlices = startTimes.size();
 
-    for (size_t i = 0; i < groupNumSlices; i++) {
+    m_numGroupSlicesMap[groupID] = numGroupSlices;
+
+    for (size_t i = 0; i < numGroupSlices; i++) {
       GroupData groupNew;
       std::vector<std::string> data;
       for (const auto &row : group) {
@@ -279,10 +284,6 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
 * @param timeSlicing :: The string to parse
 * @param slicingType :: The type of uniform slicing being used
 * @param wsName :: The name of the workspace to be sliced
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
 */
 void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
                                               const std::string &slicingType,
@@ -309,20 +310,21 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   const auto totalDuration = run.endTime() - run.startTime();
   double totalDurationSec = totalDuration.seconds();
   double sliceDuration = .0;
-  int numSlices = 0;
+  size_t numSlices = 0;
 
   if (slicingType == "UniformEven") {
-    numSlices = std::stoi(timeSlicing);
+    numSlices = static_cast<size_t>(std::stoi(timeSlicing));
     sliceDuration = totalDurationSec / numSlices;
   } else if (slicingType == "Uniform") {
     sliceDuration = std::stod(timeSlicing);
-    numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
+    numSlices = static_cast<size_t>(ceil(totalDurationSec / sliceDuration));
   }
 
   // Add the start/stop times
   startTimes = std::vector<double>(numSlices);
   stopTimes = std::vector<double>(numSlices);
-  for (int i = 0; i < numSlices; i++) {
+
+  for (size_t i = 0; i < numSlices; i++) {
     startTimes[i] = sliceDuration * i;
     stopTimes[i] = sliceDuration * (i + 1);
   }
@@ -331,10 +333,6 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
 /** Parses a string to extract custom time slicing
 *
 * @param timeSlicing :: The string to parse
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
 */
 void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
                                              std::vector<double> &startTimes,
@@ -348,23 +346,20 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
                  [](const std::string &astr) { return std::stod(astr); });
 
   size_t numTimes = times.size();
+  
+  // Add the start/stop times
+  startTimes = std::vector<double>(numTimes);
+  stopTimes = std::vector<double>(numTimes);
 
   if (numTimes == 1) {
-    startTimes.push_back(0);
-    stopTimes.push_back(times[0]);
-  } else if (numTimes == 2) {
-    startTimes.push_back(times[0]);
-    stopTimes.push_back(times[1]);
+    startTimes[0] = 0;
+    stopTimes[0] = times[0];
   } else {
     for (size_t i = 0; i < numTimes - 1; i++) {
-      startTimes.push_back(times[i]);
-      stopTimes.push_back(times[i + 1]);
+      startTimes[i] = times[i];
+      stopTimes[i] = times[i + 1];
     }
   }
-
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
 }
 
 /** Loads an event workspace and puts it into the ADS
@@ -483,34 +478,16 @@ void ReflDataProcessorPresenter::plotRow() {
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
-  // Num of slices can be predetermined with uniform even or custom slicing
-  if (timeSlicingType == "UniformEven") {
-    const auto &row = items.at(0).at(0);
-    const std::string wsName = getReducedWorkspaceName(row, "TOF_");
-    parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
-                 stopTimes);
-  } else if (timeSlicingType == "Custom") {
-    parseCustom(timeSlicingValues, startTimes, stopTimes);
-  }
-
-  size_t numSlices = startTimes.size();
-
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
   std::set<std::string> notFound;
 
   for (const auto &item : items) {
+
     for (const auto &run : item.second) {
 
-      if (timeSlicingType == "Uniform") {
-        // Num slices for each ws in uniform slicing are separately determined
-        const std::string wsName = getReducedWorkspaceName(run.second, "TOF_");
-        parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
-                     stopTimes);
-        numSlices = startTimes.size();
-      }
-
+      const size_t numSlices = m_numSlicesMap[item.first][run.first];
       const std::string wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
@@ -573,18 +550,6 @@ void ReflDataProcessorPresenter::plotGroup() {
   std::vector<double> startTimes, stopTimes;
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
-  // No. of slices can be predetermined with uniform even or custom slicing
-  if (timeSlicingType == "UniformEven") {
-    const std::string wsName =
-        getReducedWorkspaceName(items.at(0).at(0), "TOF_");
-    parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
-                 stopTimes);
-  } else if (timeSlicingType == "Custom") {
-    parseCustom(timeSlicingValues, startTimes, stopTimes);
-  }
-
-  size_t numSlices = startTimes.size();
-
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
@@ -594,19 +559,7 @@ void ReflDataProcessorPresenter::plotGroup() {
 
     if (item.second.size() > 1) {
 
-      // For uniform slicing, we must parse through each workspace to find the
-      // minimum number of slices
-      if (timeSlicingType == "Uniform") {
-        numSlices = INT_MAX;
-
-        for (const auto &run : item.second) {
-          const std::string wsName =
-              getReducedWorkspaceName(run.second, "TOF_");
-          parseUniform(timeSlicingValues, timeSlicingType, wsName, startTimes,
-                       stopTimes);
-          numSlices = std::min(numSlices, startTimes.size());
-        }
-      }
+      size_t numSlices = m_numGroupSlicesMap[item.first];
 
       for (size_t slice = 0; slice < numSlices; slice++) {
 
