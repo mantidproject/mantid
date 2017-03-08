@@ -11,7 +11,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/make_shared.hpp>
-#include <atomic>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -1268,7 +1267,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
   const auto size = static_cast<int64_t>(m_detectorInfo->size());
-  std::atomic<bool> bad_position_param{false};
 #pragma omp parallel for
   for (int64_t i = 0; i < size; ++i) {
     const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
@@ -1293,7 +1291,9 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
     if ((relPos - toVector3d(parDet->getRelativePos())).norm() >= 1e-9) {
       if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(parDet))
-        bad_position_param = true;
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
       pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
     }
 
@@ -1302,10 +1302,6 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
             .norm() >= imag_norm_max)
       pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
   }
-  if (bad_position_param)
-    throw std::runtime_error("Cannot create legacy ParameterMap: Position "
-                             "parameters for RectangularDetectorPixel are not "
-                             "supported");
   return pmap;
 }
 
