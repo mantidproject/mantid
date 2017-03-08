@@ -94,6 +94,10 @@ public:
   size_t getParameterIndex(const API::ParameterReference &ref) const override;
   /// Set up the function for a fit.
   void setUpForFit() override;
+  /// Get the tie for i-th parameter
+  API::ParameterTie *getTie(size_t i) const override;
+  /// Get the i-th constraint
+  API::IConstraint *getConstraint(size_t i) const override;
 
   /// Build target function.
   virtual void buildTargetFunction() const = 0;

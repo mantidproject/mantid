@@ -275,6 +275,36 @@ void FunctionGenerator::checkTargetFunction() const {
   }
 }
 
+/// Get the tie for i-th parameter
+API::ParameterTie *FunctionGenerator::getTie(size_t i) const {
+  auto tie = IFunction::getTie(i);
+  if (tie == nullptr) {
+    if (i < m_nOwnParams) {
+      tie = m_source->getTie(i);
+    } else {
+      checkTargetFunction();
+      tie = m_target->getTie(i - m_nOwnParams);
+    }
+  }
+  return tie;
+}
+
+/// Get the i-th constraint
+API::IConstraint *FunctionGenerator::getConstraint(size_t i) const {
+  auto constraint = IFunction::getConstraint(i);
+  if (constraint == nullptr) {
+    if (i < m_nOwnParams) {
+      constraint = m_source->getConstraint(i);
+    } else {
+      checkTargetFunction();
+      constraint = m_target->getConstraint(i - m_nOwnParams);
+    }
+  }
+  return constraint;
+}
+
+
+
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
