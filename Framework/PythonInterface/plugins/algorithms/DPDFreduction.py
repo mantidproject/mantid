@@ -45,7 +45,7 @@ class DPDFreduction(PythonAlgorithm):
         self.setPropertyGroup("RunNumbers", titleInputOptions)
         self.declareProperty(FileProperty(name='Vanadium', defaultValue='',
                                           action=FileAction.OptionalLoad, extensions=['.nxs']),
-                             'Preprocessed vanadium file.')
+                             'Preprocessed white-beam vanadium file.')
         self.setPropertyGroup("Vanadium", titleInputOptions)
         self.declareProperty('EmptyCanRunNumbers', '', 'Empty can run numbers')
         self.setPropertyGroup("EmptyCanRunNumbers", titleInputOptions)
@@ -131,49 +131,50 @@ class DPDFreduction(PythonAlgorithm):
         if self._clean:
             prefix = '__'
         # "wn" denotes workspace name
-        wn_data = prefix + 'data'
-        wn_van = prefix + 'vanadium'
-        wn_reduced = prefix + 'reduced'
-        wn_ste = prefix + 'S_theta_E'
+        wn_data = prefix + 'data'  # Accumulated data events
+        wn_data_mon = prefix + 'data_monitors'  # Accumulated monitors for data
+        wn_van = prefix + 'vanadium'  # White-beam vanadium
         wn_van_st = prefix + 'vanadium_S_theta'
+        wn_reduced = prefix + 'reduced'  # data after DGSReduction
+        wn_ste = prefix + 'S_theta_E'  # data after grouping by theta angle
         wn_sten = prefix + 'S_theta_E_normalized'
-        wn_steni = prefix + 'S_theta_E_normalized_interp'
+        wn_steni = prefix + 'S_theta_E_interp'
         wn_sqe = prefix + 'S_Q_E'
         wn_sqeb = prefix + 'S_Q_E_binned'
         wn_sqesn = prefix + wn_sqes + '_norm'
         # Empty can files
-        wn_ec_data = prefix + 'ec_data'
-        wn_ec_reduced = prefix + 'ec_reduced'
-        wn_ec_ste = prefix + 'ec_S_theta_E'
+        wn_ec_data = prefix + 'ec_data'  # Accumulated empty can data
+        wn_ec_data_mon = prefix + 'ec_data_monitors'  # Accumulated monitors for empty can
+        wn_ec_reduced = prefix + 'ec_reduced'  # empty can data after DGSReduction
+        wn_ec_ste = prefix + 'ec_S_theta_E'  # empty can data after grouping by theta angle
+
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
 
         try:
-            # Load several event files into a single workspace. The nominal incident
-            # energy should be the same to avoid difference in energy resolution
-            api.Load(Filename=self._runs, OutputWorkspace=wn_data)
-
             # Load the vanadium file, assumed to be preprocessed, meaning that
             # for every detector all events within a particular wide wavelength
             # range have been rebinned into a single histogram
             api.Load(Filename=self._vanfile, OutputWorkspace=wn_van)
+            # Check for white-beam vanadium, true if the vertical chopper is absent (vChTrans==2)
+            if mtd[wn_van].run().getProperty('vChTrans').value[0] != 2:
+                raise ValueError("White-vanadium is required")
+
+            # Load several event files into a single workspace. The nominal incident
+            # energy should be the same to avoid difference in energy resolution
+            self._load(self._runs, wn_data)
 
             # Load empty can event files, if present
             if self._ecruns:
-                api.Load(Filename=self._ecruns, OutputWorkspace=wn_ec_data)
+                self._load(self._ecruns, wn_ec_data)
+
         finally:
             # Recover the default configuration
             config['default.facility'] = facility
             config['default.instrument'] = instrument
             config["datasearch.searcharchive"] = datasearch
-
-        # Retrieve the mask from the vanadium workspace, and apply it to the data
-        # (and empty can, if submitted)
-        api.MaskDetectors(Workspace=wn_data, MaskedWorkspace=wn_van)
-        if self._ecruns:
-            api.MaskDetectors(Workspace=wn_ec_data, MaskedWorkspace=wn_van)
 
         # Obtain incident energy as the mean of the nominal Ei values.
         # There is one nominal value for each run number.
@@ -214,10 +215,24 @@ class DPDFreduction(PythonAlgorithm):
         # The output workspace is S(detector-id,E)
         factor = 0.1  # use a finer energy bin than the one passed (self._ebins[1])
         Erange = '{0},{1},{2}'.format(self._ebins[0], factor * self._ebins[1], self._ebins[2])
+        Ei_calc, T0 = api.GetEiT0atSNS(MonitorWorkspace=wn_data_mon, IncidentEnergyGuess=Ei)
+        api.MaskDetectors(Workspace=wn_data, MaskedWorkspace=wn_van)  # Use vanadium mask
         api.DgsReduction(SampleInputWorkspace=wn_data,
-                         EnergyTransferRange=Erange, OutputWorkspace=wn_reduced)
+                         SampleInputMonitorWorkspace=wn_data_mon,
+                         IncidentEnergyGuess=Ei_calc,
+                         UseIncidentEnergyGuess=1,
+                         TimeZeroGuess=T0,
+                         EnergyTransferRange=Erange,
+                         IncidentBeamNormalisation='ByCurrent',
+                         OutputWorkspace=wn_reduced)
+
         if self._ecruns:
+            api.MaskDetectors(Workspace=wn_ec_data, MaskedWorkspace=wn_van)
             api.DgsReduction(SampleInputWorkspace=wn_ec_data,
+                             SampleInputMonitorWorkspace=wn_ec_data_mon,
+                             IncidentEnergyGuess=Ei_calc,
+                             UseIncidentEnergyGuess=1,
+                             TimeZeroGuess=T0,
                              EnergyTransferRange=Erange,
                              IncidentBeamNormalisation='ByCurrent',
                              OutputWorkspace=wn_ec_reduced)
@@ -272,9 +287,14 @@ class DPDFreduction(PythonAlgorithm):
         # bin, so we get S(theta) instead of S(theta,E)
         api.GroupDetectors(InputWorkspace=wn_van, MapFile=group_file_name,
                            OutputWorkspace=wn_van_st)
-        os.remove(group_file_name)  # no need for this file
+        # Divide by vanadium. Make sure it is integrated in the energy domain
+        api.Integration(wn_van_st, OutputWorkspace=wn_van_st)
         api.Divide(wn_ste, wn_van_st, OutputWorkspace=wn_sten)
         api.ClearMaskFlag(Workspace=wn_sten)
+
+        # Temporary file generated by GenerateGroupingPowder to be removed
+        os.remove(group_file_name)  # no need for this file
+        os.remove(os.path.splitext(group_file_name)[0]+".par")
 
         max_i_theta = 0.0
         min_i_theta = 0.0
@@ -293,7 +313,7 @@ class DPDFreduction(PythonAlgorithm):
                 break
         # Scan the region [min_i_theta, max_i_theta] and apply interpolation to
         # theta angles with no signal whatsoever, S(theta*, E)=0.0 for all energies
-        api.CloneWorkspace(InputWorkspace=wn_sten, OutputWorkspace=wn_steni)
+        api.CloneWorkspace(InputWorkspace=ws_sten, OutputWorkspace=wn_steni)
         ws_steni = api.mtd[wn_steni]
         i_theta = 1 + min_i_theta
         while i_theta < max_i_theta:
@@ -370,6 +390,32 @@ class DPDFreduction(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", api.mtd[wn_sqes])
 
+    def _load(self, run_numbers, data_name):
+        """
+        Load data and monitors for run numbers and monitors.
+        Algorithm 'Load' can aggregate many runs into a single workspace, but it is not able to do so
+        with the monitor workspaces.
+        :param run_numbers: run numbers for data event files
+        :param data_name: output name for data workspace. The name for the workspace holding the
+        monitor data will be data_name+'_monitors'
+        :return: None
+        """
+        # Find out the files for each run
+        load_algorithm = AlgorithmManager.createUnmanaged("Load")
+        load_algorithm.initialize()
+        load_algorithm.setPropertyValue('Filename', str(run_numbers))
+        files = (load_algorithm.getProperty('Filename').value)[0]
+        if not isinstance(files, list):
+            # run_numbers represents one file only
+            api.Load(Filename=files, LoadMonitors=True, OutputWorkspace=data_name)
+        else:
+            api.Load(Filename=files[0], LoadMonitors=True, OutputWorkspace=data_name)
+            monitor_name = data_name + '_monitors'
+            for file in files[1:]:
+                api.Load(Filename=file, LoadMonitors=True, OutputWorkspace=data_name+'_tmp')
+                api.Plus(LHSWorkspace=data_name, RHSWorkspace=data_name+'_tmp', OutputWorkspace=data_name)
+                api.Plus(LHSWorkspace=monitor_name, RHSWorkspace=data_name + '_tmp_monitors', OutputWorkspace=monitor_name)
+            api.DeleteWorkspace(data_name+'_tmp')
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(DPDFreduction)
