@@ -327,6 +327,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(2)
+        .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
         .Times(1)
         .WillOnce(Return(true));
@@ -377,13 +380,30 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(2)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(1)
+        .WillRepeatedly(Return(""));
 
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsLam_38415");
+    AnalysisDataService::Instance().remove("IvsLam_38417");
+    AnalysisDataService::Instance().remove("IvsQ_38415");
+    AnalysisDataService::Instance().remove("IvsQ_38417");
+    AnalysisDataService::Instance().remove("IvsQ_38415_38417");
+    AnalysisDataService::Instance().remove("IvsQ_binned_38415");
+    AnalysisDataService::Instance().remove("IvsQ_binned_38417");
     AnalysisDataService::Instance().remove("TOF_38415");
     AnalysisDataService::Instance().remove("TOF_38417");
+    AnalysisDataService::Instance().remove("TRANS_38393");
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
