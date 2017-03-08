@@ -87,13 +87,7 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     V3D rotatedPos = V3D(pos);
     bank->getParent()->getRotation().rotate(rotatedPos);
 
-    // TODO: Adding the bank position, and then subtracting it again is
-    // necessary for the CalibrateSCDPanels test to pass. Otherwise small errors
-    // propagate through the test and lead to larger errors when checking the
-    // fit parameters. The tests should be made less sensitive and this extra
-    // addition and subtraction should be removed.
-    detectorInfo.setPosition(*bank, rotatedPos + bank->getPos() +
-                                        bank->getPos() - bank->getPos());
+    detectorInfo.setPosition(*bank, rotatedPos + bank->getPos());
 
     std::vector<double> oldScalex =
         pmap->getDouble(bank->getName(), std::string("scalex"));
@@ -114,8 +108,9 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
     pmap->addDouble(bank.get(), std::string("scalex"), scalex);
     pmap->addDouble(bank.get(), std::string("scaley"), scaley);
 
-    applyRectangularDetectorScaleToDetectorInfo(detectorInfo, *bank, detWScale,
-                                                detHtScale);
+    if (detWScale != 1.0 || detHtScale != 1.0)
+      applyRectangularDetectorScaleToDetectorInfo(detectorInfo, *bank,
+                                                  detWScale, detHtScale);
   }
 }
 
