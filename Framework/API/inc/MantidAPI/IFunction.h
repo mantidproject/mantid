@@ -471,7 +471,7 @@ public:
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
   /// Write a parameter tie to a string
-  virtual std::string writeTie(size_t iParam) const;
+  std::string writeTies() const;
   //@}
 
   /** @name Constraints */
@@ -485,7 +485,7 @@ public:
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
   /// Write a parameter constraint to a string
-  virtual std::string writeConstraint(size_t iParam) const;
+  std::string writeConstraints() const;
   /// Remove all constraints.
   virtual void clearConstraints();
   //@}

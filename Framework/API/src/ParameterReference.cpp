@@ -38,19 +38,22 @@ std::size_t ParameterReference::getIndex() const { return m_index; }
  */
 void ParameterReference::reset(IFunction *fun, std::size_t index,
                                bool isDefault) {
-  IFunction *fLocal = fun;
-  size_t iLocal = index;
-  CompositeFunction *cf = dynamic_cast<CompositeFunction *>(fun);
-  while (cf) {
-    size_t iFun =
-        cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
-    fLocal = cf->getFunction(iFun).get();
-    iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
-    cf = dynamic_cast<CompositeFunction *>(fLocal);
-  }
+  //IFunction *fLocal = fun;
+  //size_t iLocal = index;
+  //CompositeFunction *cf = dynamic_cast<CompositeFunction *>(fun);
+  //while (cf) {
+  //  size_t iFun =
+  //      cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
+  //  fLocal = cf->getFunction(iFun).get();
+  //  iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
+  //  cf = dynamic_cast<CompositeFunction *>(fLocal);
+  //}
 
-  m_function = fLocal;
-  m_index = iLocal;
+  //m_function = fLocal;
+  //m_index = iLocal;
+  //m_isDefault = isDefault;
+  m_function = fun;
+  m_index = index;
   m_isDefault = isDefault;
 }
 

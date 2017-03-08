@@ -164,18 +164,18 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
-/// Write a parameter tie to a string
-/// @param iParam :: An index of a parameter.
+/// Write all parameter ties owned by this function to a string
 /// @return A tie string for the parameter.
-std::string IFunction::writeTie(size_t iParam) const {
+std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
-  const ParameterTie *tie = getTie(iParam);
-  if (tie) {
-    if (!tie->isDefault()) {
-      tieStream << tie->asString(this);
+  bool first = true;
+  for(auto &tie: m_ties) {
+    if (!first) {
+      tieStream << ',';
+    } else {
+      first = false;
     }
-  } else if (isFixed(iParam)) {
-    tieStream << parameterName(iParam) << "=" << getParameter(iParam);
+    tieStream << tie->asString(this);
   }
   return tieStream.str();
 }
@@ -331,18 +331,20 @@ void IFunction::setUpForFit() {
   }
 }
 
-/// Write a parameter constraint to a string
-/// @param iParam :: An index of a parameter.
+/// Write all parameter constraints owned by this function to a string
 /// @return A constraint string for the parameter.
-std::string IFunction::writeConstraint(size_t iParam) const {
-  const IConstraint *c = getConstraint(iParam);
-  if (c && !c->isDefault()) {
-    std::string constraint = c->asString();
-    if (!constraint.empty()) {
-      return constraint;
+std::string IFunction::writeConstraints() const {
+  std::ostringstream stream;
+  bool first = true;
+  for(auto &constrint: m_constraints) {
+    if (!first) {
+      stream << ',';
+    } else {
+      first = false;
     }
+    stream << constrint->asString();
   }
-  return "";
+  return stream.str();
 }
 
 /**
@@ -361,35 +363,29 @@ std::string IFunction::asString() const {
       ostr << ',' << attName << '=' << attValue;
     }
   }
+  std::vector<std::string> ties;
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    if (!isFixed(i)) {
-      ostr << ',' << parameterName(i) << '=' << getParameter(i);
+    std::ostringstream paramOut;
+    paramOut << parameterName(i) << '=' << getParameter(i);
+    if (isActive(i)) {
+      ostr << ',' << paramOut.str();
+    } else if (isFixed(i)) {
+      ties.push_back(paramOut.str());
     }
   }
 
   // collect non-default constraints
-  std::vector<std::string> constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    auto constraint = writeConstraint(i);
-    if (!constraint.empty()) {
-      constraints.push_back(constraint);
-    }
-  }
+  std::string constraints = writeConstraints();
   // print constraints
   if (!constraints.empty()) {
-    ostr << ",constraints=("
-         << Kernel::Strings::join(constraints.begin(), constraints.end(), ",")
-         << ")";
+    ostr << ",constraints=(" << constraints << ")";
   }
 
   // collect the non-default ties
-  std::vector<std::string> ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    auto tie = writeTie(i);
-    if (!tie.empty()) {
-      ties.push_back(tie);
-    }
+  auto tiesString = writeTies();
+  if (!tiesString.empty()) {
+    ties.push_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {

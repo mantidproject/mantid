@@ -7,6 +7,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -89,26 +90,21 @@ std::string CompositeFunction::asString() const {
       ostr << ';';
     }
   }
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie) {
-      IFunction_sptr fun = getFunction(functionIndex(i));
-      std::string tmp = tie->asString(fun.get());
-      if (tmp.empty()) {
-        tmp = tie->asString(this);
-        if (!tmp.empty()) {
-          if (!ties.empty()) {
-            ties += ",";
-          }
-          ties += tmp;
-        }
-      }
-    }
+
+  // collect non-default constraints
+  std::string constraints = writeConstraints();
+  // print constraints
+  if (!constraints.empty()) {
+    ostr << ";constraints=(" << constraints << ")";
   }
+
+  // collect the non-default ties
+  std::string ties = writeTies();
+  // print the ties
   if (!ties.empty()) {
     ostr << ";ties=(" << ties << ")";
   }
+
   return ostr.str();
 }
 

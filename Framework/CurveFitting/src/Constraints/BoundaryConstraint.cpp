@@ -51,7 +51,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
     : m_penaltyFactor(1000.0), m_parameterName(paramName),
       m_hasLowerBound(true), m_hasUpperBound(true), m_lowerBound(lowerBound),
       m_upperBound(upperBound) {
-  reset(fun, fun->parameterIndex(paramName), isDefault);
+  //reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
@@ -60,7 +60,7 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
     : m_penaltyFactor(1000.0), m_parameterName(paramName),
       m_hasLowerBound(true), m_hasUpperBound(false), m_lowerBound(lowerBound),
       m_upperBound(-DBL_MAX) {
-  reset(fun, fun->parameterIndex(paramName), isDefault);
+  //reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
 /** Initialize the constraint from an expression.
