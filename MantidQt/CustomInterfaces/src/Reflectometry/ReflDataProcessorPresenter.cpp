@@ -78,7 +78,6 @@ void ReflDataProcessorPresenter::process() {
 
     // Group of runs
     GroupData group = item.second;
-    const auto x = item.first;
 
     try {
       // First load the runs.
@@ -312,21 +311,21 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
   const auto totalDuration = run.endTime() - run.startTime();
   double totalDurationSec = totalDuration.seconds();
   double sliceDuration = .0;
-  size_t numSlices = 0;
+  int numSlices = 0;
 
   if (slicingType == "UniformEven") {
-    numSlices = static_cast<size_t>(std::stoi(timeSlicing));
+    numSlices = std::stoi(timeSlicing);
     sliceDuration = totalDurationSec / numSlices;
   } else if (slicingType == "Uniform") {
     sliceDuration = std::stod(timeSlicing);
-    numSlices = static_cast<size_t>(ceil(totalDurationSec / sliceDuration));
+    numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
   }
 
   // Add the start/stop times
   startTimes = std::vector<double>(numSlices);
   stopTimes = std::vector<double>(numSlices);
 
-  for (size_t i = 0; i < numSlices; i++) {
+  for (int i = 0; i < numSlices; i++) {
     startTimes[i] = sliceDuration * i;
     stopTimes[i] = sliceDuration * (i + 1);
   }
