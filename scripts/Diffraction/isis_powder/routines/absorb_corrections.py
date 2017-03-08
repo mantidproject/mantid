@@ -23,6 +23,7 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, config_d
     radius_key = "cylinder_sample_radius"
     pos_key = "cylinder_position"
     formula_key = "chemical_formula"
+    number_density_key = "number_density"
 
     e_msg = "The following key was not found in the advanced configuration for sample correction:\n"
 
@@ -31,16 +32,26 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, config_d
     pos = common.dictionary_key_helper(dictionary=config_dict, key=pos_key, exception_msg=e_msg + pos_key)
 
     formula = common.dictionary_key_helper(dictionary=config_dict, key=formula_key, exception_msg=e_msg + formula_key)
+    if len(formula) > 1:
+        # Not a trivial element so we need them to manually specify number density as Mantid
+        # struggles to calculate it
+        number_density = common.dictionary_key_helper(
+            dictionary=config_dict, key=number_density_key,
+            exception_msg="The number density is required as the chemical formula (" + str(formula) + ")"
+            " is not a single element. The number density was not found. Please add the following key: " +
+                          number_density_key)
+    else:
+        number_density = None
 
     ws_to_correct = _calculate__cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct, multiple_scattering=multiple_scattering,
-        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula)
+        c_height=height, c_radius=radius, c_pos=pos, chemical_formula=formula, number_density=number_density)
 
     return ws_to_correct
 
 
 def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
-                                            c_height, c_radius, c_pos, chemical_formula):
+                                            c_height, c_radius, c_pos, chemical_formula, number_density):
     """
     Calculates vanadium absorption corrections for the specified workspace. The workspace
     should have any monitor spectra masked before being passed into this method. Additionally
@@ -52,11 +63,16 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering,
     :param c_radius: The radius of the cylinder as a float
     :param c_pos: The position as a list of three float values
     :param chemical_formula: The chemical formula of the container - usually set to 'V' for Vanadium
+    :param number_density: The number density if the element is not elemental. Note it is up to the caller
+    to ensure a none elemental formula has associated number density
     :return: The workspace with corrections applied
     """
     geometry_json = {'Shape': 'Cylinder', 'Height': c_height,
                      'Radius': c_radius, 'Center': c_pos}
     material_json = {'ChemicalFormula': chemical_formula}
+
+    if number_density:
+        material_json["SampleNumberDensity"] = number_density
 
     mantid.SetSample(InputWorkspace=ws_to_correct, Geometry=geometry_json, Material=material_json)
 
