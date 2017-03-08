@@ -35,8 +35,11 @@ private slots:
   void plotWorkspaces();
   void algorithmComplete(const bool &error);
   void plotCurrentPreview();
+  void previewSpecChanged(int value);
 
 private:
+  /// Current preview spectrum
+  int m_previewSpec;
   // The ui form
   Ui::Stretch m_uiForm;
   // Output Names
