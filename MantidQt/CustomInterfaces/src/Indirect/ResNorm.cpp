@@ -299,6 +299,11 @@ void ResNorm::previewSpecChanged(int value) {
         fit->mutableY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
+
+      AnalysisDataService::Instance().addOrReplace("__"+ fitWsGroupName +"_scaled", fit);
+
+      
+
     }
   }
 }
@@ -321,6 +326,10 @@ void ResNorm::plotCurrentPreview() {
     plotIndices.push_back(0);
   }
   if (m_uiForm.ppPlot->hasCurve("Fit")) {
+    std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
+
+    plotWorkspaces << QString::fromStdString("__" + fitWsGroupName+"_scaled");
+    plotIndices.push_back(0);
   }
   plotMultipleSpectra(plotWorkspaces, plotIndices);
 }
