@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name
-from geometry_writer import MantidGeom
+from __future__ import (absolute_import, division, print_function)
+from .geometry_writer import MantidGeom
 
 NUM_PIXELS_PER_TUBE = 304
 NUM_TUBES = 256

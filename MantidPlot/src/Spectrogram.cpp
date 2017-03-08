@@ -979,7 +979,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
         jmin = 0;
 
       unsigned char *line = image.scanLine(static_cast<int>(i)) + jmin;
-      const Mantid::MantidVec &X = mantidFun->getMantidVec(row);
+      const auto &X = mantidFun->getHistogramX(row);
       int col = 0;
       int nX = static_cast<int>(X.size()) - 1;
       for (int j = jmin; j < imageWidth; ++j) {

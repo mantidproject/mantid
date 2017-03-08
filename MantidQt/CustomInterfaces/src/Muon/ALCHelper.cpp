@@ -20,8 +20,8 @@ namespace ALCHelper {
  */
 boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
                                            size_t wsIndex) {
-  const double *x = &ws->readX(wsIndex)[0];
-  const double *y = &ws->readY(wsIndex)[0];
+  const double *x = &ws->x(wsIndex)[0];
+  const double *y = &ws->y(wsIndex)[0];
   size_t size = ws->blocksize();
 
   return boost::make_shared<QwtArrayData>(x, y, size);
@@ -40,13 +40,7 @@ curveDataFromWs(MatrixWorkspace_const_sptr ws) {
   auto histograms = ws->getNumberHistograms();
 
   for (size_t wsIndex = 0; wsIndex < histograms; wsIndex++) {
-
-    const double *x = &ws->readX(wsIndex)[0];
-    const double *y = &ws->readY(wsIndex)[0];
-    size_t size = ws->blocksize();
-
-    auto wsIdxData = boost::make_shared<QwtArrayData>(x, y, size);
-
+    auto wsIdxData = curveDataFromWs(ws, wsIndex);
     dataVector.push_back(wsIdxData);
   }
   return dataVector;
@@ -60,7 +54,7 @@ curveDataFromWs(MatrixWorkspace_const_sptr ws) {
  */
 std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws,
                                       size_t wsIndex) {
-  return ws->readE(wsIndex);
+  return ws->e(wsIndex).rawData();
 }
 
 /**
@@ -90,7 +84,7 @@ MatrixWorkspace_sptr createWsFromFunction(IFunction_const_sptr func,
   auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));
-  inputWs->dataX(0) = xValues;
+  inputWs->mutableX(0) = xValues;
 
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
   fit->setChild(true); // Don't want workspace in the ADS

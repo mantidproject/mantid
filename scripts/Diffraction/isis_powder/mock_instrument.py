@@ -9,14 +9,14 @@ class MockInstrument(AbstractInst):
                                              output_dir=output_dir)
         self.generate_cycle_dir_flag = False
 
-    def generate_output_file_name(self, run_number_string):
+    def _generate_output_file_name(self, run_number_string):
         return "test_output_string"
 
-    def apply_absorb_corrections(self, calibration_full_paths, ws_to_match):
+    def _apply_absorb_corrections(self, calibration_full_paths, ws_to_match):
         return None
 
-    def spline_vanadium_ws(self, focused_vanadium_banks):
+    def _spline_vanadium_ws(self, focused_vanadium_banks):
         return None
 
-    def get_run_details(self, run_number_string):
+    def _get_run_details(self, run_number_string):
         return RunDetails.RunDetails(run_number=run_number_string)
