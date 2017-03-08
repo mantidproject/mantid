@@ -3,8 +3,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
-                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty, 
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
+                        ITableWorkspaceProperty, MatrixWorkspaceProperty, mtd, Progress, PropertyMode, WorkspaceProperty,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
@@ -145,7 +145,6 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, peakSettings,
     wsCleanup.cleanup(solidAngleCorrectedElasticPeaksWS)
     wsCleanup.cleanup(userMask)
     return diagnosticsWS
-
 
 
 def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):

@@ -8,6 +8,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator, Property, StringListValidator
 from mantid.simpleapi import ComputeCalibrationCoefVan
 
+
 class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
     """A workflow algorithm which integrates the vanadium data."""
 
@@ -37,7 +38,6 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
-        wsNames = common.NameSource(wsNamePrefix, cleanupMode)
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
         progress.report('Loading inputs')

@@ -6,9 +6,9 @@ import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, InstrumentValidator,
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
-                           IntArrayProperty, IntMandatoryValidator, Property, StringArrayProperty, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateSingleValuedWorkspace, 
-                              CropWorkspace, ExtractMonitors, FindEPP, GetEiMonDet, Load, MaskDetectors, MergeRuns, Minus, NormaliseToMonitor,
+                           IntMandatoryValidator, Property, StringListValidator, UnitConversion)
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateSingleValuedWorkspace,
+                              CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus, NormaliseToMonitor,
                               Scale)
 
 
@@ -256,7 +256,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def PyInit(self):
         """Initialize the algorithm's input and output properties."""
         # Validators.
-        greaterThanUnityFloat = FloatBoundedValidator(lower=1)
         mandatoryPositiveInt = CompositeValidator()
         mandatoryPositiveInt.add(IntMandatoryValidator())
         mandatoryPositiveInt.add(IntBoundedValidator(lower=0))
@@ -264,7 +263,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         positiveInt = IntBoundedValidator(lower=0)
         positiveIntArray = IntArrayBoundedValidator()
         positiveIntArray.setLower(0)
-        scalingFactor = FloatBoundedValidator(lower=0, upper=1)
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
@@ -532,7 +530,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _monitorIndex(self, monWS):
         if self.getProperty(common.PROP_MON_INDEX).isDefault:
-            NON_RECURSIVE = False  # Prevent recursive calls in the following. 
+            NON_RECURSIVE = False  # Prevent recursive calls in the following.
             if not monWS.getInstrument().hasParameter('default-incident-monitor-spectrum', NON_RECURSIVE):
                 raise RuntimeError('default-incident-monitor-spectrum missing in instrument parameters; ' +
                                    common.PROP_MON_INDEX + ' must be specified.')

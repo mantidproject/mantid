@@ -3,9 +3,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
-from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
+from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, FloatBoundedValidator, IntBoundedValidator, Property,
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, IntBoundedValidator, Property,
                            StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
                               Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
@@ -198,7 +198,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
-        positiveFloat = FloatBoundedValidator(lower=0)
         positiveInt = IntBoundedValidator(lower=0)
 
         # Properties.
@@ -380,7 +379,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self.getProperty(common.PROP_INPUT_WS).value
         wsCleanup.protect(mainWS)
         return mainWS
-
 
     def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Normalize to vanadium workspace."""

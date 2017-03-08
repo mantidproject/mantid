@@ -125,7 +125,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
             correctedWS = _applySelfShieldingCorrections(wavelengthWS, wavelengthECWS, ecScaling, selfShieldingWS, wsNames, subalgLogging)
             wsCleanup.cleanup(wavelengthECWS)
         else:  # No ecWS
-            correctedWS = _applySelfShieldingCorrectionsNoEC(wavelenghtWS, selfShieldingWS, wsNames, subalgLogging)
+            correctedWS = _applySelfShieldingCorrectionsNoEC(wavelengthWS, selfShieldingWS, wsNames, subalgLogging)
         wsCleanup.cleanup(wavelengthWS)
         correctedWS = ConvertUnits(InputWorkspace=correctedWS,
                                    Target='TOF',

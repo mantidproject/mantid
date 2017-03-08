@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, FloatBoundedValidator, IntBoundedValidator,
-                           Property, PropertyCriterion, StringListValidator)
+from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntBoundedValidator,
+                           Property, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, FlatPlatePaalmanPingsCorrection)
 
 
@@ -167,7 +167,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
         positiveFloat = FloatBoundedValidator(lower=0)
         positiveInt = IntBoundedValidator(lower=0)
-        scalingFactor = FloatBoundedValidator(lower=0, upper=1)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -178,8 +177,8 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
             direction=Direction.Input),
             doc='Input workspace.')
         self.declareProperty(WorkspaceGroupProperty(name=common.PROP_OUTPUT_WS,
-                                               defaultValue='',
-                                               direction=Direction.Output),
+                                                    defaultValue='',
+                                                    direction=Direction.Output),
                              doc='The output corrections workspace.')
         self.declareProperty(name=common.PROP_CLEANUP_MODE,
                              defaultValue=common.CLEANUP_ON,

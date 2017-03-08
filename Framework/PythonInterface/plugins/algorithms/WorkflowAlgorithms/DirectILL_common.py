@@ -4,7 +4,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
 from mantid.simpleapi import DeleteWorkspace
-import numpy
 
 
 CLEANUP_OFF = 'Cleanup OFF'
@@ -227,7 +226,7 @@ class Report:
                 log.error(entry.contents())
 
 
-def convertToWorkspaceIndex(i, ws, indexType = INDEX_TYPE_DET_ID):
+def convertToWorkspaceIndex(i, ws, indexType=INDEX_TYPE_DET_ID):
     """Convert given number to workspace index."""
     if indexType == INDEX_TYPE_WS_INDEX:
         return i
@@ -239,6 +238,7 @@ def convertToWorkspaceIndex(i, ws, indexType = INDEX_TYPE_DET_ID):
                 return j
         raise RuntimeError('No workspace index found for detector id {0}'.format(i))
 
-def convertListToWorkspaceIndices(indices, ws, indexType = INDEX_TYPE_DET_ID):
+
+def convertListToWorkspaceIndices(indices, ws, indexType=INDEX_TYPE_DET_ID):
     """Convert a list of spectrum nubmers/detector IDs to workspace indices."""
     return [convertToWorkspaceIndex(i, ws, indexType) for i in indices]
