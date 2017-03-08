@@ -59,7 +59,7 @@ public:
     TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.0);
     TS_ASSERT_DELTA(0.0, results->cell<double>(4, 1), 1.0);
     TS_ASSERT_DELTA(0.1133, results->cell<double>(5, 1), 0.2);
-    TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 1e-3);
+    TS_ASSERT_DELTA(1.0024, results->cell<double>(6, 1), 3e-3);
     TS_ASSERT_DELTA(0.9986, results->cell<double>(7, 1), 1e-2);
     TS_ASSERT_DELTA(0.2710, results->cell<double>(8, 1), 0.2);
     ITableWorkspace_sptr resultsL1 =
