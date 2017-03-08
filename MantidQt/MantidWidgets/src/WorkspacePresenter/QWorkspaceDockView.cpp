@@ -1540,8 +1540,7 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
                        showErrorBars, nullptr, false, userInput.waterfall);
   }
   else if (userInput.surface) {
-   // m_mantidUI->showSurfacePlot(wsg, userInput.contourSurface);
-
+   // m_mantidUI->plotSurface(userInput.contourSurface);
   }
   else if (userInput.contour) {
   }

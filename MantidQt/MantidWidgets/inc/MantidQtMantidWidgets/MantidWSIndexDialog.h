@@ -258,6 +258,7 @@ public:
     QString axisName;
     QString logName;
     std::set<double> customLogValues;
+    QList<QString> workspaceNames;
   };
 
   struct UserInput {
@@ -274,6 +275,8 @@ public:
   static const QString WORKSPACE_INDEX;
   /// The string "Custom"
   static const QString CUSTOM;
+  static const QString SURFACE_PLOT;
+  static const QString CONTOUR_PLOT;
 
   /// Constructor - same parameters as one of the parent constructors, along
   /// with a
@@ -283,7 +286,7 @@ public:
                       const bool showTiledOption = false);
 
   /// Returns a structure holding all of the selected options
-  UserInput getSelections() const;
+  UserInput getSelections();
   /// Returns the QMultiMap that contains all the workspaces that are to be
   /// plotted,
   /// mapped to the set of workspace indices.
@@ -308,6 +311,10 @@ private slots:
   void editedWsField();
   /// Called when the spectraField has been edited.
   void editedSpectraField();
+  /// Called when the log selection is changed.
+  void onLogSelected(const QString &logName);
+  /// Called when the plot option has changed.
+  void onPlotOptionChanged(const QString &logName);
 
 private:
   /// Initializes the layout of the dialog
@@ -320,6 +327,22 @@ private:
   void initOptionsBoxes();
   /// Initializes the layout of the log options
   void initLogs();
+  /// Populate the log combo box
+  void populateLogComboBox();
+  /// Get a handle a workspace by name
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace(const QString& workspaceName) const;
+  /// Check if workspaces are suitable for contour or surface plot
+  bool isSuitableForContourOrSurfacePlot() const;
+  /// Gets the axis name
+  const QString getAxisName() const;
+  /// Gets the log name
+  const QString getLogName() const;
+  /// Get the set of custom log values
+  const std::set<double> getCustomLogValues() const;
+  /// Provide warning if there are plot errors.
+  void showPlotOptionsError(const QString &message);
+  /// Get the plot index
+  int getPlotIndex() const;
 
   /// Check to see if all workspaces have a spectrum axis
   void checkForSpectraAxes();
@@ -347,15 +370,13 @@ private:
   bool m_tiled;
 
   /// Pointers to the obligatory Qt objects:
-  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage;
+  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_logLabel, *m_customLogLabel, *m_axisLabel;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
-  QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox;
+  QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox;
   QHBoxLayout *m_optionsBox;
-  QComboBox *m_plotOptions;
+  QComboBox *m_plotOptions, *m_logSelector;
   QCheckBox *m_showErrorBars;
-  QVBoxLayout *m_logBox;
-  QComboBox *m_logSelector;
-  QLabel *m_logLabel;
+  QLineEdit* m_axisNameEdit, *m_logValues;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
@@ -375,7 +396,7 @@ public:
                       const bool showPlotAll = true,
                       const bool showTiledOption = false );
   /// Returns a structure holding all of the selected options
-  MantidWSIndexWidget::UserInput getSelections() const;
+  MantidWSIndexWidget::UserInput getSelections();
   /// Returns the QMultiMap that contains all the workspaces that are to be
   /// plotted,
   /// mapped to the set of workspace indices.
