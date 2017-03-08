@@ -672,7 +672,10 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
 bool LoadNexusLogs::isControlValue(const char &c, const std::string &propName,
                                    Kernel::Logger &log) {
   // Have to check it falls within range accepted by c style check
-  if (c <= -1) {
+  // as the (un)signed nature of char is implementation defined
+  // we will cast to a signed int which can always hold both
+  const signed int charValue = c;
+  if (charValue <= -1 || charValue >= 255) {
     log.warning("Found an invalid character in property " + propName);
     // Pretend this is a control value so it is sanitized
     return true;
