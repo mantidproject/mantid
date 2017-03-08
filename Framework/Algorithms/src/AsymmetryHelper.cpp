@@ -73,8 +73,8 @@ normaliseCounts(const HistogramData::Histogram &histogram,
 * a is the start of the range and b is the end of the range.
 * @param histogram :: [input] Input histogram
 * @param numGoodFrames :: [input] the number of good frames
-* @param  StartX :: [input] the start time
-* @param  EndX :: [input] the end time
+* @param  startX :: [input] the start time
+* @param  endX :: [input] the end time
 * @returns :: The normalization constant N_0
 */
 double estimateNormalisationConst(const HistogramData::Histogram &histogram,
