@@ -202,7 +202,7 @@ public:
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
   }
-   void test_noUpperBound() {
+  void test_noUpperBound() {
 
     auto ws = createWorkspace(4, 50);
 
@@ -243,7 +243,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
   }
-   void test_backwardsRange() {
+  void test_backwardsRange() {
     auto ws = createWorkspace(4, 50);
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
@@ -257,8 +257,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
   }
-
-
 };
 
 class EstimateAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {

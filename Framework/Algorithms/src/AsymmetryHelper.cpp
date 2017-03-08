@@ -79,7 +79,7 @@ normaliseCounts(const HistogramData::Histogram &histogram,
 */
 double estimateNormalisationConst(const HistogramData::Histogram &histogram,
                                   const double numGoodFrames,
-                                 const double startX, const double endX) {
+                                  const double startX, const double endX) {
 
   auto xData = histogram.binEdges();
   auto &yData = histogram.y();
