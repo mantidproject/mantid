@@ -1,9 +1,11 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -111,9 +113,8 @@ void LoadIsawPeaks::exec() {
 std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
                                           std::string startChar,
                                           Geometry::Instrument_const_sptr instr,
+                                          DetectorInfo &detectorInfo,
                                           double &T0) {
-
-  ParameterMap_sptr parMap = instr->getParameterMap();
 
   while (in.good() && (startChar.empty() || startChar != "7")) {
     readToEndOfLine(in, true);
@@ -135,8 +136,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     iss >> L1;
     iss >> T0;
     V3D sampPos = instr->getSample()->getPos();
-    SCDCalibratePanels::FixUpSourceParameterMap(instr, L1 / 100, sampPos,
-                                                parMap);
+    CalibrationHelpers::adjustUpSampleAndSourcePositions(*instr, L1 / 100,
+                                                         sampPos, detectorInfo);
   } catch (...) {
     g_log.error() << "Invalid L1 or Time offset\n";
     throw std::invalid_argument("Invalid L1 or Time offset");
@@ -229,8 +230,8 @@ std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
     }
     const std::vector<std::string> bankNames{bankName};
 
-    SCDCalibratePanels::FixUpBankParameterMap(
-        bankNames, instr, dPos, dRot, DetWScale, DetHtScale, parMap, false);
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *instr, dPos, dRot, DetWScale, DetHtScale, detectorInfo);
   }
   return startChar;
 }
@@ -294,9 +295,12 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   // bug
   tempWS->populateInstrumentParameters();
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
-
-  std::string s = ApplyCalibInfo(in, "", instr, T0);
   outWS->setInstrument(instr);
+
+  auto &detInfo = outWS->mutableDetectorInfo();
+  instr = outWS->getInstrument();
+
+  std::string s = ApplyCalibInfo(in, "", instr, detInfo, T0);
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.

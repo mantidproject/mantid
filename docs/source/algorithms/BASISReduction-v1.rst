@@ -90,6 +90,14 @@ range given by **NormWavelengthRange** to obtain
 :math:`S_v(i)` and then divide :math:`S_s(\lambda, i)/S_v(i)=S'_s(\lambda, i)`. From this
 point on, the reduction process continues using :math:`S'_s` in place of :math:`S_s`.
 
+Dynamic Susceptibility
+======================
+
+If <i>OutputSusceptibility</i> is checked, one additional workspace and one Nexus file will be generated,
+both containing the dynamic susceptibility as a function of frequency, in units of GHz.
+The extension denoting this quantity in the workspace and file names is "Xqw"
+(the extension for the structure factor is "sqw").
+
 Usage
 -----
 

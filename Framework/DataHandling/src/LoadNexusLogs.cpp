@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include <cctype>
@@ -366,6 +367,41 @@ void LoadNexusLogs::loadNPeriods(
   const std::string nPeriodsLabel = "nperiods";
   if (!run.hasProperty(nPeriodsLabel)) {
     run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
+  }
+
+  // For ISIS Nexus only, fabricate an additional log containing an array of
+  // proton charge information from the periods group.
+  try {
+    file.openGroup("periods", "IXperiods");
+
+    // Get the number of periods again
+    file.openData("number");
+    int numberOfPeriods = 0;
+    file.getData(&numberOfPeriods);
+    file.closeData();
+
+    // Get the proton charge vector
+    std::vector<double> protonChargeByPeriod(numberOfPeriods);
+    file.openData("proton_charge");
+    file.getDataCoerce(protonChargeByPeriod);
+    file.closeData();
+
+    // Add the proton charge vector
+    API::Run &run = workspace->mutableRun();
+    const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
+    if (!run.hasProperty(protonChargeByPeriodLabel)) {
+      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel,
+                                                protonChargeByPeriod));
+    }
+    file.closeGroup();
+  } catch (::NeXus::Exception &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
+  } catch (std::runtime_error &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
   }
 }
 
