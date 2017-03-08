@@ -24,6 +24,11 @@ ISIS Reflectometry
 
 - Interface `ISIS Reflectometry (Polref)` has been renamed to `ISIS Reflectometry`.
 - Fixed a bug where the contents of the processing table where not saved to the selected table workspace.
+- Fixed shortcuts:
+
+  - Ctrl+C copies the selected row(s) to the clipboard.
+  - Ctrl+V pastes the contents of the clipboard into the selected row(s). If no rows are selected, new ones are added at the end.
+  - Ctrl+X copies the selected row(s) to the clipboard and deletes them.
 
 ISIS Reflectometry (Old)
 ########################
