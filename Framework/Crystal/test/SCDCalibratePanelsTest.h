@@ -53,7 +53,7 @@ public:
     // TODO: Some of the fit parameters that are below are extermly sensitive to
     // rounding errors in the algorithm LoadIsawPeaks and floating point math in
     // the instrument code. Ideally the assertions should be on something else.
-    TS_ASSERT_DELTA(-0.0050, results->cell<double>(0, 1), 6e-4);
+    TS_ASSERT_DELTA(-0.0050, results->cell<double>(0, 1), 1e-3);
     TS_ASSERT_DELTA(0.0013, results->cell<double>(1, 1), 3e-4);
     TS_ASSERT_DELTA(0.0012, results->cell<double>(2, 1), 1e-4);
     TS_ASSERT_DELTA(0.0, results->cell<double>(3, 1), 1.0);
