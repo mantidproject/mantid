@@ -28,6 +28,7 @@ Jump Fit
 Improvements
 ------------
 
+- Bayes interfaces have the functionality to plot the current preview in the miniplot
 
 Bugfixes
 --------
