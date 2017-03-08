@@ -280,11 +280,13 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
 }
 
 /** Parses a string to extract uniform time slicing
-*
-* @param timeSlicing :: The string to parse
-* @param slicingType :: The type of uniform slicing being used
-* @param wsName :: The name of the workspace to be sliced
-*/
+ *
+ * @param timeSlicing :: The string to parse
+ * @param slicingType :: The type of uniform slicing being used
+ * @param wsName :: The name of the workspace to be sliced
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
 void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
                                               const std::string &slicingType,
                                               const std::string &wsName,
@@ -331,9 +333,11 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
 }
 
 /** Parses a string to extract custom time slicing
-*
-* @param timeSlicing :: The string to parse
-*/
+ *
+ * @param timeSlicing :: The string to parse
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
 void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
                                              std::vector<double> &startTimes,
                                              std::vector<double> &stopTimes) {
@@ -475,9 +479,6 @@ void ReflDataProcessorPresenter::plotRow() {
     return;
   }
 
-  std::vector<double> startTimes, stopTimes;
-  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
@@ -546,9 +547,6 @@ void ReflDataProcessorPresenter::plotGroup() {
     GenericDataProcessorPresenter::plotGroup();
     return;
   }
-
-  std::vector<double> startTimes, stopTimes;
-  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
