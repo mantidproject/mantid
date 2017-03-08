@@ -89,9 +89,17 @@ public:
     * In this test
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected
-   *events
+   *      events
+   *
+   *  Splitter-log test: each output workspace should have a sample log named "splitter", which
+   *  is created by FilterEvents to record the splitters for the corresponding workspace
+   *  1: 20000000000, 20035000000, 0
+   *  2: 20035000000, 20195000000, 1
+   *  3: 20200000000, 20265000000, 2
+   *  4: 20300000000, 20365000000, 2
+   *  5: 20400000000, 20465000000, 2
    */
-  void IT_test_FilterNoCorrection() {
+  void test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -108,14 +116,6 @@ public:
 
     FilterEvents filter;
     filter.initialize();
-
-    /*
-     *  979: Add splitters: 20000000000, 20035000000, 0
-        979: Add splitters: 20035000000, 20195000000, 1
-        979: Add splitters: 20200000000, 20265000000, 2
-        979: Add splitters: 20300000000, 20365000000, 2
-        979: Add splitters: 20400000000, 20465000000, 2
-     */
 
     // Set properties
     filter.setProperty("InputWorkspace", "Test02");
@@ -140,14 +140,15 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
     TS_ASSERT_EQUALS(filteredws0->run().getProtonCharge(), 10);
 
+    // check splitter log
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    TS_ASSERT_EQUALS(filteredws0->run().getProperty("splitter")->size(), 2);
-    // TODO - Add check for splitter log
-    // TODO/FIXME/NOW - From here!
-    throw std::runtime_error("Need to set up everything right!");
-    Kernel::TimeSeriesProperty<int> *splitter0;
+    Kernel::TimeSeriesProperty<int> *splitter0 = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
+    TS_ASSERT(splitter0);
+    TS_ASSERT_EQUALS(splitter0->size(), 2);
     TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
-    TS_ASSERT_EQUALS(splitter0->nthValue(0), 0);
+    TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
+    TS_ASSERT_EQUALS(splitter0->nthTime(1), Kernel::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Check Workspace group 1
     EventWorkspace_sptr filteredws1 =
@@ -156,6 +157,18 @@ public:
     TS_ASSERT(filteredws1);
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
     TS_ASSERT_EQUALS(filteredws1->run().getProtonCharge(), 11);
+
+    // check splitter log
+    TS_ASSERT(filteredws0->run().hasProperty("splitter"));
+    Kernel::TimeSeriesProperty<int> *splitter1 = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws1->run().getProperty("splitter"));
+    TS_ASSERT(splitter1);
+    TS_ASSERT_EQUALS(splitter1->size(), 3);
+    TS_ASSERT_EQUALS(splitter1->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
+    TS_ASSERT_EQUALS(splitter1->nthTime(1), Kernel::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
+    TS_ASSERT_EQUALS(splitter1->nthTime(2), Kernel::DateAndTime(20195000000));
+    TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Check Workspace group 2
     EventWorkspace_sptr filteredws2 =
@@ -178,6 +191,30 @@ public:
                      runstart_i64 + pulsedt * 4);
     TS_ASSERT_DELTA(eventmax.tof(), static_cast<double>(tofdt * 6 / 1000),
                     1.0E-4);
+
+    // check splitter log
+    TS_ASSERT(filteredws2->run().hasProperty("splitter"));
+    Kernel::TimeSeriesProperty<int> *splitter2 = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws2->run().getProperty("splitter"));
+    TS_ASSERT(splitter2);
+    TS_ASSERT_EQUALS(splitter2->size(), 7);
+
+    TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
+
+    TS_ASSERT_EQUALS(splitter2->nthTime(1), Kernel::DateAndTime(20200000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
+    TS_ASSERT_EQUALS(splitter2->nthTime(2), Kernel::DateAndTime(20265000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
+
+    TS_ASSERT_EQUALS(splitter2->nthTime(3), Kernel::DateAndTime(20300000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(3), 1);
+    TS_ASSERT_EQUALS(splitter2->nthTime(4), Kernel::DateAndTime(20365000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(4), 0);
+
+    TS_ASSERT_EQUALS(splitter2->nthTime(5), Kernel::DateAndTime(20400000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(5), 1);
+    TS_ASSERT_EQUALS(splitter2->nthTime(6), Kernel::DateAndTime(20465000000));
+    TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
@@ -559,7 +596,10 @@ public:
     * In this test
    *  (1) Leave correction table workspace empty
    *  (2) Count events in each output including "-1", the excluded/unselected
-   *events
+   *      events
+   *
+   * Splitter-log test:
+   *
    */
   void test_FilterRelativeTime() {
     // Create EventWorkspace and SplittersWorkspace
@@ -607,16 +647,15 @@ public:
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
     TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
 
+    // check sample log "splitter"
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
-    // TODO - Add check for splitter log
-    /*
-        979: 0: 0  -  3.5e+07: 0
-        979: 1: 3.5e+07  -  1.95e+08: 1
-        979: 2: 1.95e+08  -  2.65e+08: 2
-        979: 3: 2.65e+08  -  3.65e+08: 2
-        979: 4: 3.65e+08  -  4.65e+08: 2
-     */
-    TS_ASSERT_EQUALS(filteredws0->run().getProperty("splitter")->size(), 3);
+    Kernel::TimeSeriesProperty<int> *splitter0 = dynamic_cast<Kernel::TimeSeriesProperty<int> *>(filteredws0->run().getProperty("splitter"));
+    TS_ASSERT(splitter0);
+    TS_ASSERT_EQUALS(splitter0->size(), 2);
+    TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
+    TS_ASSERT_EQUALS(splitter0->nthTime(1), Kernel::DateAndTime(static_cast<int>(3.5e+07)));
+    TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Workspace 1
     EventWorkspace_sptr filteredws1 =
@@ -628,6 +667,15 @@ public:
     TS_ASSERT(filteredws1->run().hasProperty("splitter"));
 
     // TODO - Add check for splitter log
+
+    // TODO - Add check for splitter log
+    /*
+        979: 0: 0  -  3.5e+07: 0
+        979: 1: 3.5e+07  -  1.95e+08: 1
+        979: 2: 1.95e+08  -  2.65e+08: 2
+        979: 3: 2.65e+08  -  3.65e+08: 2
+        979: 4: 3.65e+08  -  4.65e+08: 2
+     */
 
     // Workspace 2
     EventWorkspace_sptr filteredws2 =
