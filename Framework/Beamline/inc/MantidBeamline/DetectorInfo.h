@@ -96,13 +96,13 @@ inline Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
 
 /// Set the position of the detector with given index.
 inline void DetectorInfo::setPosition(const size_t index,
-                               const Eigen::Vector3d &position) {
+                                      const Eigen::Vector3d &position) {
   m_positions.access()[index] = position;
 }
 
 /// Set the rotation of the detector with given index.
 inline void DetectorInfo::setRotation(const size_t index,
-                               const Eigen::Quaterniond &rotation) {
+                                      const Eigen::Quaterniond &rotation) {
   m_rotations.access()[index] = rotation.normalized();
 }
 
