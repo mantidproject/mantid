@@ -1594,11 +1594,12 @@ void FilterEvents::generateSplitterTSP(
   split_tsp_vec.clear();
 
   // initialize m_maxTargetIndex + 1 time series properties in integer
-  // TODO:FIXME - m_maxTargetIndex is not set up yet!
   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
     split_tsp_vec.push_back(split_tsp);
+    // add initial value
+    split_tsp->addValue(Kernel::DateAndTime(m_runStartTime), 0);
   }
 
   // start to go through  m_vecSplitterTime (int64) and m_vecSplitterGroup add
@@ -1606,6 +1607,18 @@ void FilterEvents::generateSplitterTSP(
   for (size_t igrp = 0; igrp < m_vecSplitterGroup.size(); ++igrp) {
     int itarget = m_vecSplitterGroup[igrp];
     DateAndTime start_time(m_vecSplitterTime[igrp]);
+    if (start_time <= m_runStartTime)
+    {
+        // clear the initial value with check first
+        if (split_tsp_vec[itarget]->size() != 1)
+        {
+            g_log.error() << "With start time " << start_time << " same as run start time " << m_runStartTime
+                          << ", the TSP must have only 1 entry from initialization.  But not it has "
+                          << split_tsp_vec[itarget]->size() << "entries\n";
+            throw std::runtime_error("Coding logic error");
+        }
+        split_tsp_vec[itarget]->clear();
+    }
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
     split_tsp_vec[itarget]->addValue(start_time, 1);
     split_tsp_vec[itarget]->addValue(stop_time, 0);
@@ -1618,8 +1631,7 @@ void FilterEvents::generateSplitterTSP(
  * @brief FilterEvents::generateSplitterTSPalpha
  * @param split_tsp_vec
  */
-void FilterEvents::generateSplitterTSPalpha(
-    std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
+void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   // clear vector to set up
   split_tsp_vec.clear();
 
@@ -1634,6 +1646,7 @@ void FilterEvents::generateSplitterTSPalpha(
   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
     Kernel::TimeSeriesProperty<int> *split_tsp =
         new Kernel::TimeSeriesProperty<int>("splitter");
+    split_tsp->addValue(m_runStartTime, 0);
     split_tsp_vec.push_back(split_tsp);
   }
 
@@ -1641,6 +1654,16 @@ void FilterEvents::generateSplitterTSPalpha(
     int itarget = splitter.index();
     if (itarget >= static_cast<int>(split_tsp_vec.size()))
       throw std::runtime_error("Target workspace index is out of range!");
+
+    if (splitter.start() == m_runStartTime)
+    {
+        // there should be only 1 value in the splitter and clear it.
+        if (split_tsp_vec[itarget]->size() != 1)
+        {
+            throw std::runtime_error("Splitter must have 1 value with initialization.");
+        }
+        split_tsp_vec[itarget]->clear();
+    }
     split_tsp_vec[itarget]->addValue(splitter.start(), 1);
     split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
   }

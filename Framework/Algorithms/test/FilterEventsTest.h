@@ -99,7 +99,7 @@ public:
    *  4: 20300000000, 20365000000, 2
    *  5: 20400000000, 20465000000, 2
    */
-  void test_FilterNoCorrection() {
+  void Passed_test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -654,7 +654,8 @@ public:
     TS_ASSERT_EQUALS(splitter0->size(), 2);
     TS_ASSERT_EQUALS(splitter0->nthTime(0), Kernel::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1), Kernel::DateAndTime(static_cast<int>(3.5e+07)));
+    TS_ASSERT_EQUALS(splitter0->nthTime(1).totalNanoseconds(),
+                     Kernel::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds()+runstart_i64);
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Workspace 1
@@ -665,6 +666,7 @@ public:
     TS_ASSERT_EQUALS(filteredws1->getSpectrum(1).getNumberEvents(), 16);
 
     TS_ASSERT(filteredws1->run().hasProperty("splitter"));
+    TS_ASSERT_EQUALS("Continue from here", "Do it!");
 
     // TODO - Add check for splitter log
 
@@ -1097,8 +1099,7 @@ public:
       t1 = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
       Kernel::SplittingInterval interval2(t0, t1, 2);
       splitterws->addSplitter(interval2);
-
-      std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
+      // std::cout << "Add splitters: " << t0 << ", " << t1 << ", " << 2 << "\n";
     }
 
     return splitterws;
