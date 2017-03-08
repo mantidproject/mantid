@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 #                 Maps friendly user name -> script name
-attr_mapping = [("attenuation_file_name",       "attenuation_file_name"),
+attr_mapping = [("attenuation_file_path",       "attenuation_file_path"),
                 ("config_file",                 "config_file_name"),
                 ("calibration_config_path",     "cal_map_path"),
                 ("calibration_directory",       "calibration_dir"),
@@ -15,6 +15,8 @@ attr_mapping = [("attenuation_file_name",       "attenuation_file_name"),
                 ("output_directory",            "output_dir"),
                 ("perform_attenuation",         "perform_atten"),
                 ("raw_data_tof_cropping",       "raw_data_crop_vals"),
+                ("run_in_cycle",                "run_in_range"),
+                ("run_number",                  "run_number"),
                 ("spline_coefficient",          "spline_coefficient"),
                 ("tof_cropping_ranges",         "tof_cropping_values"),
                 ("tt88_grouping",               "tt88_grouping"),

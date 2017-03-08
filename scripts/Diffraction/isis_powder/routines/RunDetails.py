@@ -9,6 +9,7 @@ class RunDetails(object):
     def __init__(self, run_number):
         # Essential attribute
         self.run_number = run_number
+        self.user_input_run_number = None
 
         self.empty_runs = None
         self.label = None

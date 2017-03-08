@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
+	src/CalibrationHelpers.cpp
 	src/CentroidPeaks.cpp
 	src/ClearUB.cpp
 	src/Cluster.cpp
@@ -75,6 +76,7 @@ set ( INC_FILES
 	inc/MantidCrystal/BackgroundStrategy.h
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
+	inc/MantidCrystal/CalibrationHelpers.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/Cluster.h
@@ -146,6 +148,7 @@ set ( TEST_FILES
 	AnvredCorrectionTest.h
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
+	CalibrationHelpersTest.h
 	CentroidPeaksTest.h
 	ClearUBTest.h
 	ClusterRegisterTest.h
