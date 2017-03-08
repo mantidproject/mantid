@@ -13,6 +13,7 @@ absorption_correction_params = {
 
 
 gem_adv_config_params = {
+    "grouping_file_name": "GEM_Instrument_grouping.cal",
     "raw_tof_cropping_values": (500, 20000),
     "spline_coefficient": 30
 }
