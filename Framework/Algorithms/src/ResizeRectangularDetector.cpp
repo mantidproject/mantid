@@ -105,6 +105,8 @@ void ResizeRectangularDetector::exec() {
 
   auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
   Geometry::ParameterMap &pmap = input->instrumentParameters();
+  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
+  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
   // Add a parameter for the new scale factors
   pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
   pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
@@ -114,8 +116,6 @@ void ResizeRectangularDetector::exec() {
   // positions there.
   // This algorithm is setting the absolute scale factor. Since there may be a
   // previous scaling we have to factor that out.
-  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
-  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
   double relscalex = ScaleX;
   double relscaley = ScaleY;
   if (!oldscalex.empty())
