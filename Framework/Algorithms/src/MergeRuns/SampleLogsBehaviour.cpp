@@ -270,7 +270,7 @@ std::shared_ptr<Property> SampleLogsBehaviour::addPropertyForTimeSeries(
     timeSeriesProp->addValue(startTime, value);
     ws.mutableRun().addProperty(std::move(timeSeriesProp), true);
 
-    returnProp.reset(ws.getLog(item)->clone());;
+    returnProp.reset(ws.getLog(item)->clone());
   }
 
   return returnProp;
@@ -351,7 +351,8 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
 
     switch (item.second.mergeLogType) {
     case MergeLogType::Sum: {
-      this->updateSumProperty(addeeWSNumericValue, outWSNumericValue, outWS, logName);
+      this->updateSumProperty(addeeWSNumericValue, outWSNumericValue, outWS,
+                              logName);
       break;
     }
     case MergeLogType::TimeSeries: {
@@ -378,7 +379,8 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
  * Perform the update for a sum property, adding a new value to the existing
  *one. Skipped if the time series log entry is in the addeeWS.
  *
- * @param addeeWSNumericValue the sample log value from the workspace being merged
+ * @param addeeWSNumericValue the sample log value from the workspace being
+ *merged
  * @param outWSNumericValue the sample log value for the merged workspace
  * @param outWS the workspace the others are merged into
  * @param name the name of the property
@@ -387,7 +389,8 @@ void SampleLogsBehaviour::updateSumProperty(double addeeWSNumericValue,
                                             double outWSNumericValue,
                                             MatrixWorkspace &outWS,
                                             const std::string &name) {
-  outWS.mutableRun().addProperty(name, addeeWSNumericValue + outWSNumericValue, true);
+  outWS.mutableRun().addProperty(name, addeeWSNumericValue + outWSNumericValue,
+                                 true);
 }
 
 /**
@@ -443,8 +446,10 @@ void SampleLogsBehaviour::updateListProperty(MatrixWorkspace &addeeWS,
  * @param addeeWSProperty the property value of the workspace being merged
  * @param behaviour the merge behaviour struct, containing information about the
  *merge
- * @param addeeWSNumericValue a double for the addeeWS value (0 if it is not numeric)
- * @param outWSNumericValue a double for the outWS value (0 if it is not numeric)
+ * @param addeeWSNumericValue a double for the addeeWS value (0 if it is not
+ *numeric)
+ * @param outWSNumericValue a double for the outWS value (0 if it is not
+ *numeric)
  * @param name the name of the sample log to check
  */
 void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS,
@@ -471,8 +476,10 @@ void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS,
  * @param addeeWSProperty the property value of the workspace being merged
  * @param behaviour the merge behaviour struct, containing information about the
  *merge
- * @param addeeWSNumericValue a double for the addeeWS value (0 if it is not numeric)
- * @param outWSNumericValue a double for the outWS value (0 if it is not numeric)
+ * @param addeeWSNumericValue a double for the addeeWS value (0 if it is not
+ *numeric)
+ * @param outWSNumericValue a double for the outWS value (0 if it is not
+ *numeric)
  * @param name the name of the sample log to check
  */
 void SampleLogsBehaviour::checkErrorProperty(
@@ -502,7 +509,8 @@ bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour,
                                             const double addeeWSNumericValue,
                                             const double outWSNumericValue) {
   if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
-    return std::abs(addeeWSNumericValue - outWSNumericValue) < behaviour.tolerance;
+    return std::abs(addeeWSNumericValue - outWSNumericValue) <
+           behaviour.tolerance;
   }
 
   return false;
