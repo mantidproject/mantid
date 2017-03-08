@@ -227,7 +227,7 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     const auto pos = toVector3d(comp.getPos());
     auto invOldRot = comp.getRotation();
     invOldRot.inverse();
-    const auto delta = toQuaterniond(rot * invOldRot);
+    const auto delta = toQuaterniond(rot * invOldRot).normalized();
     using namespace Geometry::ComponentHelper;
     TransformType rotationType = Absolute;
     rotateComponent(comp, *m_pmap, rot, rotationType);
