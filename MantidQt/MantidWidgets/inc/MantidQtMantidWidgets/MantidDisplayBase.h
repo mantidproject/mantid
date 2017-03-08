@@ -115,6 +115,9 @@ public:
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false, MultiLayer *plotWindow = nullptr) = 0;
 
+
+
+
   // Interface Methods
   virtual void showVatesSimpleInterface() = 0;
   virtual void showSpectrumViewer() = 0;

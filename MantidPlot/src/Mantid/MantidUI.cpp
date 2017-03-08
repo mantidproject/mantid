@@ -190,6 +190,16 @@ GraphOptions::CurveType getCurveTypeForFitResult(const size_t spectrum) {
     return GraphOptions::CurveType::Unspecified;
   }
 }
+
+std::vector<Mantid::API::MatrixWorkspace_const_sptr> getWorkspacesFromAds(const QList<QString>& workspaceNames) {
+  std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces;
+  for (auto& workspaceName : workspaceNames) {
+    Mantid::API::MatrixWorkspace_const_sptr workspace =  boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
+    workspaces.push_back(workspace);
+  }
+  return workspaces;
+}
 }
 
 MantidUI::MantidUI(ApplicationWindow *aw)
@@ -4007,17 +4017,16 @@ void MantidUI::showContourPlot() {
   }
 }
 
-void MantidUI::plotContour(const Mantid::API::WorkspaceGroup_sptr& workspaceGroup,
-  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
-
+void MantidUI::plotContour(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
+  auto workspaces = getWorkspacesFromAds(userInputForContourAndSurface.workspaceNames);
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-  plotter->plotContour(workspaceGroup, userInputForContourAndSurface);
+  //plotter->plotContour(workspaces, userInputForContourAndSurface);
 }
 
-void MantidUI::plotSurface(const Mantid::API::WorkspaceGroup_sptr & workspaceGroup,
-  const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
+void MantidUI::plotSurface(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
+  auto workspaces = getWorkspacesFromAds(userInputForContourAndSurface.workspaceNames);
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-  plotter->plotSurface(workspaceGroup, userInputForContourAndSurface);
+  //plotter->plotSurface(workspaceGroup, userInputForContourAndSurface);
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }

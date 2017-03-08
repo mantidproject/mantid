@@ -1,13 +1,16 @@
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
 #include <QPalette>
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
+#include <QMessageBox>
 #include <boost/lexical_cast.hpp>
 #include <exception>
 #include <stdlib.h>
@@ -20,6 +23,8 @@ namespace MantidWidgets {
   /// The string "Custom"
   const QString MantidWSIndexWidget::CUSTOM = "Custom";
 
+  const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot of Group";
+  const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot of Group";
 //----------------------------------
 // MantidWSIndexWidget methods
 //----------------------------------
@@ -52,15 +57,113 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
  * Returns the user-selected options
  * @returns Struct containing user options
  */
-MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() const {
+MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
   UserInput options;
   options.plots = getPlots();
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
   options.errors = isErrorBarsSelected();
   options.surface = isSurfacePlotSelected();
+
+  // Contour and Surface options
+  UserInputForContourAndSurface userInputForContourAndSurface;
+  userInputForContourAndSurface.accepted = true;
+  userInputForContourAndSurface.plotIndex = getPlotIndex();
+  userInputForContourAndSurface.axisName = getAxisName();
+  userInputForContourAndSurface.logName = getLogName();
+  userInputForContourAndSurface.workspaceNames = m_wsNames;
+  if (userInputForContourAndSurface.logName == CUSTOM) {
+    try {
+      userInputForContourAndSurface.customLogValues = getCustomLogValues();
+    }
+    catch (const std::invalid_argument &ex) {
+      QString error("Invalid log value supplied: ");
+      showPlotOptionsError(error.append(ex.what()));
+      userInputForContourAndSurface.accepted = false;
+    }
+  }
+
+  options.contourSurface = userInputForContourAndSurface;
   return options;
 }
+
+/**
+* Returns the workspace index to be plotted
+* @returns Workspace index to be plotted
+*/
+int MantidWSIndexWidget::getPlotIndex() const {
+  int spectrumIndex = 0; // default to 0
+  const auto userInput = getPlots();
+
+  if (!userInput.empty()) {
+    const auto indexList = userInput.values();
+    if (!indexList.empty()) {
+      const auto spectrumIndexes = indexList.at(0);
+      if (!spectrumIndexes.empty()) {
+        spectrumIndex = *spectrumIndexes.begin();
+      }
+    }
+  }
+  return spectrumIndex;
+}
+
+
+/**
+* Displays a message box with the supplied error string.
+* @param message :: [input] Error message to display
+*/
+void MantidWSIndexWidget::showPlotOptionsError(const QString &message) {
+  if (!message.isEmpty()) {
+    QMessageBox errorMessage;
+    errorMessage.setText(message);
+    errorMessage.setIcon(QMessageBox::Critical);
+    errorMessage.exec();
+  }
+}
+
+
+/**
+* If "Custom" is selected as log, returns the list of values the user has input
+* into the edit box, otherwise returns an empty set.
+* Note that the set is ordered by definition, and values are only added if they
+* are successfully converted to a double.
+* @returns Set of numerical log values
+* @throws invalid_argument if values are not numeric
+*/
+const std::set<double> MantidWSIndexWidget::getCustomLogValues() const {
+  std::set<double> logValues;
+  if (m_logSelector->currentText() == CUSTOM) {
+    QStringList values = m_logValues->text().split(',');
+    foreach(QString value, values) {
+      bool ok = false;
+      double number = value.toDouble(&ok);
+      if (ok) {
+        logValues.insert(number);
+      }
+      else {
+        throw std::invalid_argument(value.toStdString());
+      }
+    }
+  }
+  return logValues;
+}
+
+/**
+* Gets the name that the user gave for the Y axis of the surface plot
+* @returns Name input by user for axis
+*/
+const QString MantidWSIndexWidget::getAxisName() const {
+  return m_axisNameEdit->text();
+}
+
+/**
+* Gets the log that user selected to plot against
+* @returns Name of log, or "Workspace index"
+*/
+const QString MantidWSIndexWidget::getLogName() const {
+  return m_logSelector->currentText();
+}
+
 
 /**
  * Returns the user-selected plots
@@ -131,7 +234,7 @@ bool MantidWSIndexWidget::isTiledPlotSelected() const {
 * @returns True if surfarce plot selected
 */
 bool MantidWSIndexWidget::isSurfacePlotSelected() const {
-  return (m_plotOptions->currentText() == "Surface Plot of Group");
+  return (m_plotOptions->currentText() == SURFACE_PLOT);
 }
 
 /**
@@ -139,7 +242,7 @@ bool MantidWSIndexWidget::isSurfacePlotSelected() const {
 * @returns True if surfarce plot selected
 */
 bool MantidWSIndexWidget::isContourPlotSelected() const {
-  return (m_plotOptions->currentText() == "Contour Plot of Group");
+  return (m_plotOptions->currentText() == CONTOUR_PLOT);
 }
 
 /**
@@ -214,7 +317,9 @@ void MantidWSIndexWidget::init() {
   initSpectraBox();
   initWorkspaceBox();
   initOptionsBoxes();
-  initLogs();
+  if (isSuitableForContourOrSurfacePlot()) {
+    initLogs();
+  }
   setLayout(m_outer);
 }
 
@@ -288,27 +393,128 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     if (m_tiled) {
       m_plotOptions->addItem(tr("Tiled Plot"));
     }
-    m_plotOptions->addItem(tr("Surface Plot of Group"));
-    m_plotOptions->addItem(tr("Contour Plot of Group"));
+    if (isSuitableForContourOrSurfacePlot()) {
+      m_plotOptions->addItem(SURFACE_PLOT);
+      m_plotOptions->addItem(CONTOUR_PLOT);
+    }
     m_optionsBox->addWidget(m_plotOptions);
   }
-
+  connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
+    SLOT(onPlotOptionChanged(const QString &)));
   m_outer->addItem(m_optionsBox);
 }
 
 void MantidWSIndexWidget::initLogs() {
   m_logBox = new QVBoxLayout;
+
   m_logLabel = new QLabel(tr("Log value to plot against:"));
   m_logSelector = new QComboBox();
+  populateLogComboBox();
+ 
+  m_customLogLabel = new QLabel(tr("<br>Custom log values:"));
+  m_logValues = new QLineEdit();
+
+  m_axisLabel = new QLabel(tr("<br>Label for plot axis:"));
+  m_axisNameEdit = new QLineEdit();
+  m_axisNameEdit->setText(m_logSelector->currentText());
 
   m_logBox->addWidget(m_logLabel);
   m_logBox->addWidget(m_logSelector);
+  m_logBox->addWidget(m_customLogLabel);
+  m_logBox->addWidget(m_logValues);
+  m_logBox->addWidget(m_axisLabel);
+  m_logBox->addWidget(m_axisNameEdit);
+
+  m_logSelector->setEnabled(false);
+  m_logValues->setEnabled(false);
+  m_axisNameEdit->setEnabled(false);
 
   m_outer->addItem(m_logBox);
 
-  m_logSelector->addItem(WORKSPACE_INDEX); // Will need moving to populateLogComboBox
-  m_logSelector->addItem(CUSTOM);          // Will need moving to populateLogComboBox
+  connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this,
+    SLOT(onLogSelected(const QString &)));
 }
+
+/**
+* Called when log selection changed
+* If "Custom" selected, enable the custom log input box.
+* Otherwise, it is read-only.
+* Also put the log name into the axis name box as a default choice.
+* @param logName :: [input] Text selected in combo box
+*/
+void MantidWSIndexWidget::onLogSelected(const QString &logName) {
+  m_logValues->setEnabled(logName == CUSTOM);
+  m_logValues->clear();
+  m_axisNameEdit->setText(logName);
+}
+
+
+
+void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
+  auto isSurfaceOrContourOption = plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT;
+  auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
+  m_logSelector->setEnabled(isSurfaceOrContourOption);
+  m_logValues->setEnabled(isSurfaceOrContourOption && isLogSelectorCustom);
+  m_logValues->clear();
+  m_axisNameEdit->setEnabled(isSurfaceOrContourOption);
+}
+
+
+/**
+* Populate the log combo box with all log names that
+* have single numeric value per workspace (and occur
+* in every workspace)
+*/
+void MantidWSIndexWidget::populateLogComboBox() {
+  // First item should be "Workspace index"
+  m_logSelector->addItem(WORKSPACE_INDEX);
+
+  // Create a table of all single-value numeric log names versus
+  // how many workspaces they appear in
+  std::map<std::string, int> logCounts;
+  for (auto wsName : m_wsNames) {
+    auto ws = getWorkspace(wsName);
+    if (ws) {
+        const std::vector<Mantid::Kernel::Property *> &logData = ws->run().getLogData();
+        for (auto log : logData) {
+          // If this is a single-value numeric log, add it to the list of counts
+          if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
+            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
+            const std::string name = log->name();
+            if (logCounts.find(name) != logCounts.end()) {
+              logCounts[name]++;
+            }
+            else {
+              logCounts[name] = 1;
+            }
+          }
+        }
+    }
+  }
+
+  // Add the log names to the combo box if they appear in all workspaces
+  const int nWorkspaces = m_wsNames.size();
+  for (auto logCount : logCounts) {
+    if (logCount.second == nWorkspaces) {
+      m_logSelector->addItem(logCount.first.c_str());
+    }
+  }
+
+  // Add "Custom" at the end of the list
+  m_logSelector->addItem(CUSTOM);
+}
+
+Mantid::API::MatrixWorkspace_const_sptr MantidWSIndexWidget::getWorkspace(const QString& workspaceName) const {
+    return boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
+}
+
+
+bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const {
+  return (m_wsNames.size() > 2);
+}
+
+
 
 /**
 * Check to see if *all* workspaces have a spectrum axis.
@@ -437,7 +643,7 @@ MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
  * Returns the user-selected options
  * @returns Struct containing user options
  */
-MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() const {
+MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() {
   return m_widget.getSelections();
 }
 
