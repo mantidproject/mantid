@@ -47,7 +47,8 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1) {
+                    std::vector<V3D> hkls, int convention = 1,
+                    std::string pointGroup = "") {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -74,6 +75,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMax", "10.0"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinDSpacing", "1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PointGroup", pointGroup));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("ReflectionCondition", reflectionCondition));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
@@ -92,7 +94,7 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
     V3D hklTest(-10, -6, 1);
     hklTest *= convention;
-    if (expectedNumber > 1)
+    if (expectedNumber > 3)
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
 
     // Remove workspace from the data service.
@@ -104,6 +106,10 @@ public:
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition() {
     do_test_exec("C-face centred", 6, std::vector<V3D>());
+  }
+
+  void test_point_group() {
+    do_test_exec("All-face centred", 3, std::vector<V3D>(), 1, "m-3 (Cubic)");
   }
 
   void test_exec_withInputHKLList() {

@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidKernel/System.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
@@ -58,7 +59,7 @@ private:
 
   void setStructureFactorCalculatorFromSample(const API::Sample &sample);
 
-  void calculateQAndAddToOutput(const Kernel::V3D &hkl,
+  bool calculateQAndAddToOutput(const Kernel::V3D &hkl,
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
@@ -66,12 +67,16 @@ private:
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 
+  /// Space group if specified
+  std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
+
   /// Run number of input workspace
   int m_runNumber;
   /// Instrument reference
   Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
   Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_pws;
   Geometry::StructureFactorCalculator_sptr m_sfCalculator;
 
   double m_qConventionFactor;
