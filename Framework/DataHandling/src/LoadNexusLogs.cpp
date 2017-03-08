@@ -660,7 +660,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   * Checks whether the specified character is invalid or a control
   * character. If it is invalid (i.e. negative) or a control character
   * the method returns true. If it is valid and not a control character
-  * it returns false. Additionally if the character is invalid is
+  * it returns false. Additionally if the character is invalid it
   * logs a warning with the property name so users are aware.
   *
   * @param c :: Character to check
