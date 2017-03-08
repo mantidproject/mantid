@@ -7,8 +7,9 @@ Diffraction Changes
 
 Crystal Improvements
 --------------------
-- :ref:`StartLiveData <algm-StartLiveData>` will load "live"
-  data streaming from MaNDi data server.
+
+ - :ref:`algm-PredictPeaks` has a new option ``PredictPeaksOutsideDetectors`` which will predict peaks which fall outside of any defined detectors. This feature requires an extended detector space definition and will do nothing if this is not present in the IDF.
+ - :ref:`StartLiveData <algm-StartLiveData>` will load "live" data streaming from MaNDi data server.
 
 Engineering Diffraction
 -----------------------
