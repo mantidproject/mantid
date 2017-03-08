@@ -12,6 +12,8 @@ def create_van(instrument, run_details, absorb):
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
                                                                input_batching=InputBatchingEnum.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
+
+    # TODO where do we subtract empty can on GEM ?
     corrected_van_ws = common.subtract_sample_empty(ws_to_correct=input_van_ws,
                                                     empty_sample_ws_string=run_details.empty_runs,
                                                     instrument=instrument)

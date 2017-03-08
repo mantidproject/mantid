@@ -12,6 +12,7 @@ class RunDetails(object):
         self.user_input_run_number = None
 
         self.empty_runs = None
+        self.sample_empty = None
         self.label = None
 
         self.offset_file_path = None
