@@ -26,8 +26,11 @@ def get_run_details(run_number_string, inst_settings):
 
     label = common.cal_map_dictionary_key_helper(cycle_map, "label")
     offset_file_name = common.cal_map_dictionary_key_helper(cycle_map, "offset_file_name")
-    empty_runs = common.cal_map_dictionary_key_helper(cycle_map, "empty_run_numbers")
-    vanadium_runs = common.cal_map_dictionary_key_helper(cycle_map, "vanadium_run_numbers")
+
+    chopper_dict = common.cal_map_dictionary_key_helper(cycle_map, inst_settings.mode)
+
+    empty_runs = common.cal_map_dictionary_key_helper(chopper_dict, "empty_run_numbers")
+    vanadium_runs = common.cal_map_dictionary_key_helper(chopper_dict, "vanadium_run_numbers")
 
     # For GEM the grouping and offset file are identical
     calibration_folder = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
