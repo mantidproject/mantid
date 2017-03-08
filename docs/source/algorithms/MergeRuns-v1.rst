@@ -78,6 +78,9 @@ Matrix Workspaces.
 
 .. code-block:: xml
 
+    <parameter name="sample_logs_sum" type="string">
+        <value val="duration, monitor1.monsum" />
+    </parameter>
     <parameter name="sample_logs_time_series" type="string">
         <value val="sample.temperature, sample.pressure" />
     </parameter>
