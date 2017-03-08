@@ -11,7 +11,6 @@ class RunDetails(object):
         self.run_number = run_number
         self.user_input_run_number = None
 
-        self.empty_container_runs = None
         self.empty_runs = None
         self.label = None
 
