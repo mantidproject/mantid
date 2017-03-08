@@ -48,12 +48,13 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     return calibratedWS
 
 
-def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace, eiCalibrationDets,
+def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace,
                               eiCalibrationMon, wsNames, log, algorithmLogging):
     """Return the calibrated incident energy."""
     instrument = detWorkspace.getInstrument().getName()
     eiWorkspace = None
     if instrument in ['IN4', 'IN6']:
+        eiCalibrationDets = [i for i in range(detWorkspace.getNumberHistograms())]
         pulseInterval = detWorkspace.getRun().getLogData('pulse_interval').value
         energy = GetEiMonDet(DetectorWorkspace=detWorkspace,
                              DetectorEPPTable=detEPPWorkspace,
@@ -317,12 +318,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              validator=positiveInt,
                              direction=Direction.Input,
                              doc='Index of the incident monitor, if not specified in instrument parameters.')
-        self.declareProperty(IntArrayProperty(name=common.PROP_DETS_AT_L2,
-                                              values='',
-                                              validator=positiveIntArray,
-                                              direction=Direction.Input),
-                             doc='List of detectors with the instruments ' +
-                                 'nominal L2 distance.')
         self.declareProperty(name=common.PROP_INCIDENT_ENERGY_CALIBRATION,
                              defaultValue=common.INCIDENT_ENERGY_CALIBRATION_ON,
                              validator=StringListValidator([
@@ -422,10 +417,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_ON:
             eiInWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
             if not eiInWS:
-                eiCalibrationDets = self.getProperty(common.PROP_DETS_AT_L2).value
-                eiCalibrationDets = common.convertListToWorkspaceIndices(eiCalibrationDets, mainWS)
                 monIndex = self._monitorIndex(monWS)
-                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, eiCalibrationDets, monIndex, wsNames,
+                eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:
                 eiCalibrationWS = eiInWS
@@ -456,13 +449,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                    ' given. TOF axis will not be adjusted.')
                 return mainWS
             index = mainWS.run().getLogData('Detector.elasticpeak').value
-        detectorsAtL2 = self.getProperty(common.PROP_DETS_AT_L2).value
-        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS)
+        try:
+            l2 = mainWS.getInstrument().getNumberParameter('l2')[0]
+        except IndexError:
+            self.log().warning("No 'l2' instrument parameter defined. TOF axis will not be adjusted")
+            return mainWS
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
                                      IndexType='Workspace Index',
-                                     ReferenceSpectra=detectorsAtL2,
                                      ElasticBinIndex=index,
+                                     L2=l2,
                                      EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return correctedWS

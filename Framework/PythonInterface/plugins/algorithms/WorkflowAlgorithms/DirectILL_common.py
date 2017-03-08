@@ -40,7 +40,6 @@ PROP_CONTAINER_NUMBER_DENSITY = 'ContainerNumberDensity'
 PROP_CONTAINER_OUTER_RADIUS = 'ContainerOuterRadius'
 PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 PROP_DET_DIAGNOSTICS = 'Diagnostics'
-PROP_DETS_AT_L2 = 'DetectorsAtL2'
 PROP_EC_SCALING = 'EmptyContainerScaling'
 PROP_EC_WS = 'EmptyContainerWorkspace'
 PROP_ELASTIC_CHANNEL = 'ElasticChannel'
@@ -243,19 +242,3 @@ def convertToWorkspaceIndex(i, ws, indexType = INDEX_TYPE_DET_ID):
 def convertListToWorkspaceIndices(indices, ws, indexType = INDEX_TYPE_DET_ID):
     """Convert a list of spectrum nubmers/detector IDs to workspace indices."""
     return [convertToWorkspaceIndex(i, ws, indexType) for i in indices]
-
-
-def medianEPP(eppWS, eppIndices):
-    """Calculate the median 'PeakCentre' for given workpsace indices."""
-    centres = list()
-    sigmas = list()
-    for rowIndex in eppIndices:
-        eppRow = eppWS.row(rowIndex)
-        if eppRow['FitStatus'] == 'success':
-            centres.append(eppRow['PeakCentre'])
-            sigmas.append(eppRow['Sigma'])
-    if len(centres) == 0:
-        raise RuntimeError('No successes in EPP table.')
-    median = numpy.median(numpy.array(centres))
-    sigma = numpy.median(numpy.array(sigmas))
-    return median, sigma

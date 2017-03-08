@@ -8,8 +8,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, IntArrayBoundedValidator,
                            IntArrayProperty, StringArrayProperty, StringListValidator)
-from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, ConvertToConstantL2, CreateEmptyTableWorkspace, Divide,
+from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWorkspace, Divide,
                               ExtractMask, Integration, MaskDetectors, MedianDetectorTest, Plus, SolidAngle)
+import numpy
 
 
 class _DiagnosticsSettings:
@@ -59,26 +60,32 @@ def _extractUserMask(ws, wsNames, algorithmLogging):
     return maskWS
 
 
-def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
+def _diagnoseDetectors(ws, bkgWS, eppWS, peakSettings,
                        sigmaMultiplier, noisyBkgSettings, wsNames,
                        wsCleanup, report, reportWSName, algorithmLogging):
     """Return a diagnostics workspace."""
     # 1. Diagnose elastic peak region.
-    constantL2WSName = wsNames.withSuffix('constant_L2')
-    constantL2WS = ConvertToConstantL2(InputWorkspace=ws,
-                                       OutputWorkspace=constantL2WSName,
-                                       EnableLogging=algorithmLogging)
-    medianEPPCentre, medianEPPSigma = common.medianEPP(eppWS, eppIndices)
-    integrationBegin = medianEPPCentre - sigmaMultiplier * medianEPPSigma
-    integrationEnd = medianEPPCentre + sigmaMultiplier * medianEPPSigma
+    histogramCount = ws.getNumberHistograms()
+    integrationBegins = numpy.empty(histogramCount)
+    integrationEnds = numpy.empty(histogramCount)
+    for i in range(histogramCount):
+        eppRow = eppWS.row(i)
+        if eppRow['FitStatus'] != 'success':
+            integrationBegins[i] = 0
+            integrationEnds[i] = 0
+            continue
+        peakCentre = eppRow['PeakCentre']
+        sigma = eppRow['Sigma']
+        integrationBegins[i] = peakCentre - sigmaMultiplier * sigma
+        integrationEnds[i] = peakCentre + sigmaMultiplier * sigma
     integratedElasticPeaksWSName = \
         wsNames.withSuffix('integrated_elastic_peak')
     integratedElasticPeaksWS = \
-        Integration(InputWorkspace=constantL2WS,
+        Integration(InputWorkspace=ws,
                     OutputWorkspace=integratedElasticPeaksWSName,
-                    RangeLower=integrationBegin,
-                    RangeUpper=integrationEnd,
                     IncludePartialBins=True,
+                    RangeLowerList=integrationBegins,
+                    RangeUpperList=integrationEnds,
                     EnableLogging=algorithmLogging)
     solidAngleWSName = wsNames.withSuffix('detector_solid_angles')
     solidAngleWS = SolidAngle(InputWorkspace=ws,
@@ -133,7 +140,6 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, eppIndices, peakSettings,
                                       diagnosticsWS,
                                       reportWSName,
                                       algorithmLogging)
-    wsCleanup.cleanup(constantL2WS)
     wsCleanup.cleanup(elasticPeakDiagnostics)
     wsCleanup.cleanup(noisyBkgDiagnostics)
     wsCleanup.cleanup(solidAngleCorrectedElasticPeaksWS)
@@ -286,12 +292,6 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Enable or disable subalgorithms to ' +
                                  'print in the logs.')
-        self.declareProperty(IntArrayProperty(name=common.PROP_DETS_AT_L2,
-                                              values='',
-                                              validator=positiveIntArray,
-                                              direction=Direction.Input),
-                             doc='List of detectors with the instruments ' +
-                                 'nominal L2 distance.')
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_EPP_WS,
             defaultValue='',
@@ -417,12 +417,10 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
         highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
         significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
         bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-        detectorsAtL2 = self.getProperty(common.PROP_DETS_AT_L2).value
-        detectorsAtL2 = common.convertListToWorkspaceIndices(detectorsAtL2, mainWS)
         diagnosticsReportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
         bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
         eppWS = self.getProperty(common.PROP_EPP_WS).value
-        diagnosticsWS = _diagnoseDetectors(mainWS, bkgWS, eppWS, detectorsAtL2, peakDiagnosticsSettings,
+        diagnosticsWS = _diagnoseDetectors(mainWS, bkgWS, eppWS, peakDiagnosticsSettings,
                                            sigmaMultiplier, bkgDiagnosticsSettings, wsNames, wsCleanup,
                                            report, diagnosticsReportWSName, subalgLogging)
         wsCleanup.cleanup(mainWS)
