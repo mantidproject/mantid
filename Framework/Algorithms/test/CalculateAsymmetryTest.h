@@ -84,7 +84,7 @@ public:
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 10.);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -104,7 +104,7 @@ public:
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 10.);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -154,7 +154,7 @@ public:
     alg1->setProperty("StartX", 0.1);
     alg1->setProperty("EndX", 0.9);
     alg1->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg1->execute());
     TS_ASSERT(alg1->isExecuted());
@@ -172,7 +172,7 @@ public:
     alg2->setProperty("StartX", 0.1);
     alg2->setProperty("EndX", 0.9);
     alg2->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg2->execute());
     TS_ASSERT(alg2->isExecuted());
@@ -206,7 +206,7 @@ public:
     alg->setProperty("EndX", 0.9);
     alg->setProperty("OutputWorkspace", outputName);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -226,7 +226,7 @@ public:
     alg->setProperty("EndX", 0.9);
     alg->setProperty("OutputWorkspace", outputName);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -242,7 +242,7 @@ public:
     alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setProperty("OutputWorkspace", outputName);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -259,7 +259,7 @@ public:
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
     alg->setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted())
@@ -321,7 +321,7 @@ public:
     alg.setProperty("StartX", 0.1);
     alg.setProperty("EndX", 10.);
     alg.setProperty(
-        "myFunction",
+        "FittingFunction",
         "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
 
     alg.execute();

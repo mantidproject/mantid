@@ -55,7 +55,7 @@ void CalculateAsymmetry::init() {
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
   declareProperty(
-      "myFunction",
+      "FittingFunction",
       "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
       "The additional fitting functions to be used.");
 }
@@ -189,7 +189,7 @@ double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
 
   API::IAlgorithm_sptr fit;
   fit = createChildAlgorithm("Fit", -1, -1, true);
-  std::string tmpString = getProperty("myFunction");
+  std::string tmpString = getProperty("FittingFunction");
   if (tmpString == "") {
     g_log.warning(
         "There is no additional function defined. Using original estimate");
