@@ -16,11 +16,6 @@
 #include <numeric>
 #include <vector>
 
-namespace {
-/// Number of microseconds in one second (10^6)
-constexpr double MICROSECONDS_PER_SECOND{1000000.0};
-}
-
 namespace Mantid {
 namespace Algorithms {
 
