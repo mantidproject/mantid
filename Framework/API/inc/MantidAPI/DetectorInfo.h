@@ -2,6 +2,7 @@
 #define MANTID_API_DETECTORINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -116,6 +117,15 @@ public:
   /// Returns the index of the detector with the given detector ID.
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
+
+  size_t scanCount(const size_t index) const;
+  std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+  scanInterval(const std::pair<size_t, size_t> index) const;
+  void
+  setScanInterval(const std::pair<size_t, size_t> index,
+                  std::pair<Kernel::DateAndTime, Kernel::DateAndTime> interval);
+
+  void merge(const DetectorInfo &other);
 
   friend class SpectrumInfo;
 

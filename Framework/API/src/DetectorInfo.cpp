@@ -388,6 +388,35 @@ const std::vector<detid_t> &DetectorInfo::detectorIDs() const {
   return m_detectorIDs;
 }
 
+/// Returns the scan count of the detector with given detector index.
+size_t DetectorInfo::scanCount(const size_t index) const {
+  return m_detectorInfo.scanCount(index);
+}
+
+/// Returns the scan interval of the detector with given index.
+std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
+  const auto &interval = m_detectorInfo.scanInterval(index);
+  return {interval.first, interval.second};
+}
+
+/// Set the scan interval of the detector with given index.
+void DetectorInfo::setScanInterval(
+    const std::pair<size_t, size_t> index,
+    std::pair<Kernel::DateAndTime, Kernel::DateAndTime> interval) {
+  m_detectorInfo.setScanInterval(index, {interval.first.totalNanoseconds(),
+                                         interval.second.totalNanoseconds()});
+}
+
+/** Merges the contents of other into this.
+ *
+ * Scan intervals in both other and this must be set. Intervals must be
+ * identical or non-overlapping. If they are identical all other parameters (for
+ * that index) must match. */
+void DetectorInfo::merge(const DetectorInfo &other) {
+  m_detectorInfo.merge(other.m_detectorInfo);
+}
+
 const Geometry::IDetector &DetectorInfo::getDetector(const size_t index) const {
   size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
   if (m_lastIndex[thread] != index) {
