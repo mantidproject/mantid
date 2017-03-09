@@ -425,7 +425,8 @@ void FilterEvents::examineEventWS() {
  *    Convert SplitterWorkspace object to TimeSplitterType (sorted vector)
  *    and create a map for all workspace group number
  *  Requirements:
- *  Gaurantees
+ *  Gaurantees:
+ *  - Update of m_maxTargetIndex: it can be zero in SplittersWorkspace case
  * @brief FilterEvents::processSplittersWorkspace
  */
 void FilterEvents::processSplittersWorkspace() {
@@ -1640,8 +1641,8 @@ void FilterEvents::generateSplitterTSPalpha(
   // TODO:FIXME - shall not use m_maxTargetIndex, because it is not set for
   // SplittersWorkspace-type splitters
   g_log.notice() << "[DB] Maximum target index = " << m_maxTargetIndex << "\n";
-  if (m_maxTargetIndex <= 0)
-    throw std::runtime_error("Maximum target index must be positive");
+  if (m_maxTargetIndex < 0)
+    throw std::runtime_error("Maximum target index cannot be negative.");
 
   // initialize the target index
   for (int itarget = 0; itarget <= m_maxTargetIndex; ++itarget) {
