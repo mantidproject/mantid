@@ -53,8 +53,6 @@ PROP_FLAT_BKG_WINDOW = 'FlatBkgAveragingWindow'
 PROP_FLAT_BKG_WS = 'FlatBkgWorkspace'
 PROP_INCIDENT_ENERGY_CALIBRATION = 'IncidentEnergyCalibration'
 PROP_INCIDENT_ENERGY_WS = 'IncidentEnergyWorkspace'
-# TODO remove IndexType and assiciated constants. They are not used anymore.
-PROP_INDEX_TYPE = 'IndexType'
 PROP_INPUT_FILE = 'InputFile'
 PROP_INPUT_WS = 'InputWorkspace'
 PROP_MON_EPP_WS = 'MonitorEPPWorkspace'
