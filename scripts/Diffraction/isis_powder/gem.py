@@ -10,7 +10,7 @@ class Gem(AbstractInst):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
 
         self._inst_settings = InstrumentSettings.InstrumentSettings(
-            attr_mapping=gem_param_mapping.attr_mapping, adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
+            param_map=gem_param_mapping.attr_mapping, adv_conf_dict=gem_advanced_config.get_all_adv_variables(),
             kwargs=kwargs, basic_conf_dict=basic_config_dict)
 
         super(Gem, self).__init__(user_name=self._inst_settings.user_name,

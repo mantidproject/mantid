@@ -13,7 +13,7 @@ class Pearl(AbstractInst):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
 
         self._inst_settings = InstrumentSettings.InstrumentSettings(
-           attr_mapping=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
+           param_map=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
            basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
