@@ -1261,7 +1261,7 @@ public:
 
     // print out splitters
     for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] * 1.0E-9<< "  -  "
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] * 1.0E-9 << "  -  "
                 << splitterws->mutableX(0)[ix + 1] * 1.0E-9 << ": "
                 << splitterws->mutableY(0)[ix] << "\n";
 

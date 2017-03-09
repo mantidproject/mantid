@@ -610,7 +610,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
     g_log.debug() << "Target = " << target
                   << " with splitter index = " << index_splitter << "\n"
-                  << "\t" << "Time index = " << index_tsp_time << "\n\n";
+                  << "\t"
+                  << "Time index = " << index_tsp_time << "\n\n";
 
     bool continue_add = true;
     while (continue_add) {
