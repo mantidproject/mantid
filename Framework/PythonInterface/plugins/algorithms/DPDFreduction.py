@@ -148,7 +148,6 @@ class DPDFreduction(PythonAlgorithm):
         wn_ec_reduced = prefix + 'ec_reduced'  # empty can data after DGSReduction
         wn_ec_ste = prefix + 'ec_S_theta_E'  # empty can data after grouping by theta angle
 
-
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
             config["datasearch.searcharchive"] = "On"
