@@ -79,21 +79,16 @@ void UniqueReflection::setPeaksIntensityAndSigma(double intensity,
 }
 
 /**
- * @brief SortHKL::getPossibleUniqueReflections
+ * @brief UniqueReflectionCollection::UniqueReflectionCollection
  *
- * This method returns a map that contains UniqueReflection-objects, one
- * for each unique reflection in the given resolution range. It uses the
- * given cell, point group and centering to determine which reflections
- * are allowed and which ones are equivalent.
+ * Takes the supplied parameters to calculate theoretically possible
+ * unique reflections and stores a UniqueReflection for each of those
+ * internally.
  *
  * @param cell :: UnitCell of the sample.
  * @param dLimits :: Resolution limits for the generated reflections.
  * @param pointGroup :: Point group of the sample.
- * @param centering :: Lattice centering (important for completeness
- * calculation).
- *
- * @return Map of UniqueReflection objects with HKL of the reflection family as
- * key
+ * @param centering :: Lattice centering.
  */
 UniqueReflectionCollection::UniqueReflectionCollection(
     const UnitCell &cell, const std::pair<double, double> &dLimits,
@@ -116,30 +111,37 @@ UniqueReflectionCollection::UniqueReflectionCollection(
   }
 }
 
-UniqueReflectionCollection::UniqueReflectionCollection(
-    const std::map<V3D, UniqueReflection> &reflections,
-    const PointGroup_sptr &pointGroup)
-    : m_reflections(reflections), m_pointgroup(pointGroup) {}
-
+/// Assigns the supplied peaks to the proper UniqueReflection. Peaks for which
+/// the reflection family can not be found are ignored.
 void UniqueReflectionCollection::addObservations(
     const std::vector<Peak> &peaks) {
   for (auto const &peak : peaks) {
     V3D hkl = peak.getHKL();
     hkl.round();
 
-    m_reflections.at(m_pointgroup->getReflectionFamily(hkl)).addPeak(peak);
+    auto reflection =
+        m_reflections.find(m_pointgroup->getReflectionFamily(hkl));
+
+    if (reflection != m_reflections.end()) {
+      (*reflection).second.addPeak(peak);
+    }
   }
 }
 
+/// Returns a copy of the UniqueReflection with the supplied HKL. Raises an
+/// exception if the reflection is not found.
 UniqueReflection
 UniqueReflectionCollection::getReflection(const V3D &hkl) const {
   return m_reflections.at(m_pointgroup->getReflectionFamily(hkl));
 }
 
+/// Total number of unique reflections (theoretically possible).
 size_t UniqueReflectionCollection::getUniqueReflectionCount() const {
   return m_reflections.size();
 }
 
+/// Number of unique reflections that have more observations than the supplied
+/// number (default is 0 - gives number of ).
 size_t UniqueReflectionCollection::getObservedUniqueReflectionCount(
     size_t moreThan) const {
   return std::count_if(
@@ -149,6 +151,7 @@ size_t UniqueReflectionCollection::getObservedUniqueReflectionCount(
       });
 }
 
+/// Number of observed reflections.
 size_t UniqueReflectionCollection::getObservedReflectionCount() const {
   return std::accumulate(
       m_reflections.cbegin(), m_reflections.cend(), 0,
@@ -158,6 +161,8 @@ size_t UniqueReflectionCollection::getObservedReflectionCount() const {
       });
 }
 
+/// Returns the internally stored reflection map. May disappear or change if
+/// implementation changes.
 const std::map<V3D, UniqueReflection> &
 UniqueReflectionCollection::getReflections() const {
   return m_reflections;

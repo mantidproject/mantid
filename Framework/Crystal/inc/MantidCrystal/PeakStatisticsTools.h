@@ -4,7 +4,6 @@
 #include "MantidDataObjects/Peak.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
@@ -46,17 +45,27 @@ private:
   std::vector<DataObjects::Peak> m_peaks;
 };
 
+/**
+ * \class UniqueReflectionCollection
+ *
+ * This class computes all possible unique reflections within the
+ * specified d-limits, given a certain unit cell, lattice centering
+ * and point group. The cost of this computation depends directly
+ * on the size of the unit cell (larger cells result in more
+ * reflections) and to some extent also on the symmetry (higher symmetry
+ * results in more matrix operations).
+ *
+ * After adding observations using addObservations, various reflection-
+ * counts can be obtained, for example to calculate redundancy or
+ * completeness of the observations.
+ *
+ */
 class DLLExport UniqueReflectionCollection {
 public:
   UniqueReflectionCollection(
       const Geometry::UnitCell &cell, const std::pair<double, double> &dLimits,
       const Geometry::PointGroup_sptr &pointGroup,
       const Geometry::ReflectionCondition_sptr &centering);
-
-  explicit UniqueReflectionCollection(
-      const std::map<Kernel::V3D, UniqueReflection> &reflections,
-      const Geometry::PointGroup_sptr &pointGroup =
-          Geometry::PointGroupFactory::Instance().createPointGroup("1"));
 
   ~UniqueReflectionCollection() = default;
 
@@ -70,6 +79,13 @@ public:
 
   const std::map<Kernel::V3D, UniqueReflection> &getReflections() const;
 
+protected:
+  /// Alternative constructor for testing purposes, no validation is performed.
+  UniqueReflectionCollection(
+      const std::map<Kernel::V3D, UniqueReflection> &reflections,
+      const Geometry::PointGroup_sptr &pointGroup)
+      : m_reflections(reflections), m_pointgroup(pointGroup) {}
+
 private:
   std::map<Kernel::V3D, UniqueReflection> m_reflections;
   Geometry::PointGroup_sptr m_pointgroup;
@@ -78,15 +94,12 @@ private:
 /**
  * \class PeaksStatistics
  *
- * The PeaksStatistics class is a small helper class for SortHKL.
+ * The PeaksStatistics class is a small helper class that is used
+ * in SortHKL. It takes a UniqueReflectionCollection and calculates
+ * a few data set quality indicators such as Rmerge and Rpim.
  *
- * During construction, a number of statistical indicators is calculated,
- * using the map passed to the constructor.
- *
- * Please note that the map is modified during the calculation and becomes
- * essentially unusable after that, but that is not a problem since the map
- * is currently not meant to be stored anywhere. This class may eventually
- * disappear and might end up being re-implemented in a more general scope.
+ * Do not rely on this class to exist forever, parts of it may change
+ * or the entire class may disappear over time.
  */
 class DLLExport PeaksStatistics {
 public:

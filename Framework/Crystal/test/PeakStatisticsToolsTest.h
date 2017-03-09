@@ -4,22 +4,27 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/PeakStatisticsTools.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidDataObjects/Peak.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::Crystal::PeakStatisticsTools;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
 std::vector<Peak> getPeaksWithIandSigma(const std::vector<double> &intensity,
-                                        const std::vector<double> &sigma) {
+                                        const std::vector<double> &sigma,
+                                        const V3D &hkl = V3D(0, 0, 1)) {
   std::vector<Peak> peaks;
   std::transform(intensity.begin(), intensity.end(), sigma.begin(),
-                 std::back_inserter(peaks), [](double intensity, double sigma) {
+                 std::back_inserter(peaks),
+                 [hkl](double intensity, double sigma) {
                    Peak peak;
                    peak.setIntensity(intensity);
                    peak.setSigmaIntensity(sigma);
+                   peak.setHKL(hkl);
                    return peak;
                  });
 
@@ -44,6 +49,27 @@ UniqueReflection getReflectionWithPeaks(const std::vector<double> &intensities,
 
   return reflection;
 }
+
+UniqueReflectionCollection
+getUniqueReflectionCollection(double a, const std::string &centering,
+                              const std::string &pointGroup, double dMin) {
+  UnitCell cell(a, a, a);
+  PointGroup_sptr pg =
+      PointGroupFactory::Instance().createPointGroup(pointGroup);
+  ReflectionCondition_sptr cent = getReflectionConditionBySymbol(centering);
+
+  return UniqueReflectionCollection(cell, std::make_pair(dMin, 100.0), pg,
+                                    cent);
+}
+
+class MockUniqueReflectionCollection : public UniqueReflectionCollection {
+public:
+  explicit MockUniqueReflectionCollection(
+      const std::map<V3D, UniqueReflection> &reflections,
+      const PointGroup_sptr &pointGroup =
+          PointGroupFactory::Instance().createPointGroup("1"))
+      : UniqueReflectionCollection(reflections, pointGroup) {}
+};
 }
 
 class PeakStatisticsToolsTest : public CxxTest::TestSuite {
@@ -163,11 +189,71 @@ public:
     }
   }
 
+  void test_UniqueReflectionCollectionEmpty() {
+    UniqueReflectionCollection reflections =
+        getUniqueReflectionCollection(3.0, "P", "m-3m", 1.5);
+
+    // There should be 4 reflections: 001, 011, 111, 002
+    TS_ASSERT_EQUALS(reflections.getUniqueReflectionCount(), 4);
+
+    // Uses point group to retrieve UniqueReflections
+    TS_ASSERT_THROWS_NOTHING(reflections.getReflection(V3D(0, 0, 1)));
+    TS_ASSERT_THROWS_NOTHING(reflections.getReflection(V3D(0, 0, -1)));
+
+    TS_ASSERT_THROWS_NOTHING(reflections.getReflection(V3D(0, 1, 1)));
+    TS_ASSERT_THROWS_NOTHING(reflections.getReflection(V3D(1, 1, 1)));
+    TS_ASSERT_THROWS_NOTHING(reflections.getReflection(V3D(0, 0, 2)));
+
+    // Reflections that do not exist throw some exception
+    TS_ASSERT_THROWS_ANYTHING(reflections.getReflection(V3D(0, 0, 3)));
+    TS_ASSERT_THROWS_ANYTHING(reflections.getReflection(V3D(2, -1, 0)));
+
+    // No observations
+    TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 0);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 0);
+  }
+
+  void test_UniqueReflectionCollectionAddObservations() {
+    UniqueReflectionCollection reflections =
+        getUniqueReflectionCollection(3.0, "P", "m-3m", 1.5);
+
+    TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 0);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 0);
+
+    reflections.addObservations(
+        getPeaksWithIandSigma({1.0, 1.0}, {2.0, 2.0}, V3D(1, 0, 0)));
+
+    TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 2);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 1);
+
+    // out-of-range peaks are ignored, so the reflection counts do not change
+    reflections.addObservations(
+        getPeaksWithIandSigma({1.0, 1.0}, {2.0, 2.0}, V3D(0, 5, 0)));
+
+    TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 2);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 1);
+  }
+
+  void test_UniqueReflectionCollectionReflectionCounts() {
+    UniqueReflectionCollection reflections =
+        getUniqueReflectionCollection(3.0, "P", "m-3m", 1.5);
+
+    reflections.addObservations(
+        getPeaksWithIandSigma({1.0, 1.0}, {2.0, 2.0}, V3D(1, 0, 0)));
+    reflections.addObservations(
+        getPeaksWithIandSigma({1.0, 1.0, 2.0}, {2.0, 2.0, 3.0}, V3D(1, 1, 0)));
+
+    TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 5);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 2);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(2), 1);
+    TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(3), 0);
+  }
+
   void test_PeaksStatisticsNoObservation() {
     std::map<V3D, UniqueReflection> uniques;
     uniques.insert(
         std::make_pair(V3D(1, 1, 1), UniqueReflection(V3D(1, 1, 1))));
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 0);
@@ -182,7 +268,7 @@ public:
   void test_PeaksStatisticsOneObservation() {
     std::map<V3D, UniqueReflection> uniques{
         {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)}};
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -198,7 +284,7 @@ public:
     std::map<V3D, UniqueReflection> uniques{
         {{1, 1, 1}, getReflectionWithPeaks({56.0}, {4.5}, 1.0)},
         {{1, 1, 2}, UniqueReflection(V3D(1, 1, 2))}};
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 1);
@@ -215,7 +301,7 @@ public:
     std::map<V3D, UniqueReflection> uniques{
         {{1, 1, 1}, getReflectionWithPeaks({10.0}, {1.0}, 1.0)},
         {{1, 1, 2}, getReflectionWithPeaks({20.0}, {1.0}, 2.0)}};
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -230,7 +316,7 @@ public:
   void test_PeaksStatisticsTwoObservationOneUnique() {
     std::map<V3D, UniqueReflection> uniques{
         {{1, 1, 1}, getReflectionWithPeaks({10.0, 20.0}, {0.1, 0.1}, 1.0)}};
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 2);
@@ -248,7 +334,7 @@ public:
     std::map<V3D, UniqueReflection> uniques{
         {{1, 1, 1},
          getReflectionWithPeaks({10.0, 20.0, 15.0}, {0.1, 0.1, 0.1}, 1.0)}};
-    UniqueReflectionCollection reflections(uniques);
+    MockUniqueReflectionCollection reflections(uniques);
 
     PeaksStatistics statistics(reflections);
     TS_ASSERT_EQUALS(statistics.m_peaks.size(), 3);
