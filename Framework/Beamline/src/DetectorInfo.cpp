@@ -34,7 +34,7 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
  * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
  * - Rotations that imply relative position changes of less than 1 nm = 1e-9 m
  *   with a rotation center that is 1000 m away are considered equivalent.
- * Note that in both cases the actual limit may be lower, but it is guarenteed
+ * Note that in both cases the actual limit may be lower, but it is guaranteed
  * that any LARGER differences are NOT considered equivalent. */
 bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   if (this == &other)
@@ -157,6 +157,109 @@ void DetectorInfo::setRotation(const std::pair<size_t, size_t> index,
   m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }
 
+/// Returns the scan count of the detector with given detector index.
+size_t DetectorInfo::scanCount(const size_t index) const {
+  if (!m_scanCounts)
+    return 1;
+  return (*m_scanCounts)[index];
+}
+
+/// Returns the scan interval of the detector with given index.
+std::pair<int64_t, int64_t>
+DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
+  if (!m_scanIntervals)
+    return {0, 0};
+  return (*m_scanIntervals)[linearIndex(index)];
+}
+
+/// Set the scan interval of the detector with given index.
+void DetectorInfo::setScanInterval(const std::pair<size_t, size_t> index,
+                                   std::pair<int64_t, int64_t> interval) {
+  if (!m_scanIntervals)
+    initScanIntervals();
+  // We forbid this since we (currently?) can not verify that the new interval
+  // has no collisions with any of the other intervals for this detector.
+  checkNoTimeDependence();
+  if (interval.first > interval.second)
+    throw std::runtime_error(
+        "DetectorInfo: cannot set scan interval with start > end");
+  m_scanIntervals.access()[linearIndex(index)] = interval;
+}
+
+namespace {
+void failMerge(const std::string &what) {
+  throw std::runtime_error(std::string("Cannot merge DetectorInfo: ") + what);
+}
+
+std::pair<size_t, size_t>
+getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
+         const size_t index) {
+  if (!indices)
+    return {index, 0};
+  return (*indices)[index];
+}
+}
+
+/** Merges the contents of other into this.
+ *
+ * Scan intervals in both other and this must be set. Intervals must be
+ * identical or non-overlapping. If they are identical all other parameters (for
+ * that index) must match. */
+void DetectorInfo::merge(const DetectorInfo &other) {
+  if (size() != other.size())
+    failMerge("size mismatch");
+  if (!m_scanIntervals || !other.m_scanIntervals)
+    failMerge("scan intervals not defined");
+  if (!(m_isMonitor == other.m_isMonitor) &&
+      (*m_isMonitor != *other.m_isMonitor))
+    failMerge("monitor flags mismatch");
+  // TODO If we make masking time-independent we need to check masking here.
+
+  std::vector<bool> merge(other.m_positions->size(), true);
+
+  for (size_t index1 = 0; index1 < other.m_positions->size(); ++index1) {
+    const size_t detIndex = getIndex(other.m_indices, index1).first;
+    const auto &interval1 = (*other.m_scanIntervals)[index1];
+    for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
+      const auto index2 = linearIndex({detIndex, timeIndex});
+      const auto &interval2 = (*m_scanIntervals)[index2];
+      if (interval1 == interval2) {
+        if ((*m_isMasked)[index1] != (*other.m_isMasked)[index2])
+          failMerge("matching scan interval but mask flags differ");
+        if ((*m_positions)[index1] != (*other.m_positions)[index2])
+          failMerge("matching scan interval but positions differ");
+        if ((*m_rotations)[index1].coeffs() !=
+            (*other.m_rotations)[index2].coeffs())
+          failMerge("matching scan interval but rotations differ");
+        merge[index1] = false;
+      } else if ((interval1.first < interval2.second) &&
+                 (interval1.second > interval2.first)) {
+        failMerge("scan intervals overlap but not identical");
+      }
+    }
+  }
+
+  if (!m_scanCounts)
+    initScanCounts();
+  if (!m_indexMap)
+    initIndices();
+  for (size_t index = 0; index < other.m_positions->size(); ++index) {
+    if (!merge[index])
+      continue;
+    auto newIndex = getIndex(other.m_indices, index);
+    const size_t detIndex = newIndex.first;
+    newIndex.second += scanCount(detIndex);
+    m_scanCounts.access()[detIndex]++;
+    m_indexMap.access()[detIndex].push_back((*m_indices).size());
+    m_indices.access().push_back(newIndex);
+    m_isMasked.access().push_back((*other.m_isMasked)[index]);
+    m_positions.access().push_back((*other.m_positions)[index]);
+    m_rotations.access().push_back((*other.m_rotations)[index]);
+    m_scanIntervals.access().push_back((*other.m_scanIntervals)[index]);
+  }
+}
+
+/// Returns the linear index for a pair of detector index and time index.
 size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // The most common case are beamlines with static detectors. In that case the
   // time index is always 0 and we avoid expensive map lookups. Linear indices
@@ -164,8 +267,7 @@ size_t DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
   // so even in the time dependent case no translation is necessary.
   if (index.second == 0)
     return index.first;
-  throw std::runtime_error("DetectorInfo accessed with non-zero time index. "
-                           "This is not supported yet.");
+  return (*m_indexMap)[index.first][index.second];
 }
 
 /// Throws if this has time-dependent data.
@@ -173,6 +275,32 @@ void DetectorInfo::checkNoTimeDependence() const {
   if (size() != m_positions->size())
     throw std::runtime_error("DetectorInfo accessed without time index but the "
                              "beamline has time-dependent (moving) detectors.");
+}
+
+void DetectorInfo::initScanCounts() {
+  checkNoTimeDependence();
+  m_scanCounts = Kernel::make_cow<std::vector<size_t>>(size(), 1);
+}
+
+void DetectorInfo::initScanIntervals() {
+  checkNoTimeDependence();
+  m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+      size(), std::pair<int64_t, int64_t>{0, 0});
+}
+
+void DetectorInfo::initIndices() {
+  checkNoTimeDependence();
+  m_indexMap = Kernel::make_cow<std::vector<std::vector<size_t>>>();
+  m_indices = Kernel::make_cow<std::vector<std::pair<size_t, size_t>>>();
+  auto &indexMap = m_indexMap.access();
+  auto &indices = m_indices.access();
+  indexMap.reserve(size());
+  indices.reserve(size());
+  // No time dependence, so both the detector index and the linear index are i.
+  for (size_t i = 0; i < size(); ++i) {
+    indexMap.emplace_back(1, i);
+    indices.emplace_back(i, 0);
+  }
 }
 
 } // namespace Beamline

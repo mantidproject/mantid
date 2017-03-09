@@ -86,13 +86,31 @@ public:
   void setRotation(const std::pair<size_t, size_t> index,
                    const Eigen::Quaterniond &rotation);
 
+  size_t scanCount(const size_t index) const;
+  std::pair<int64_t, int64_t>
+  scanInterval(const std::pair<size_t, size_t> index) const;
+  void setScanInterval(const std::pair<size_t, size_t> index,
+                       std::pair<int64_t, int64_t> interval);
+
+  void merge(const DetectorInfo &other);
+
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
   void checkNoTimeDependence() const;
+  void initScanCounts();
+  void initScanIntervals();
+  void initIndices();
+
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
   Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
+
+  Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
+  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{
+      nullptr};
+  Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
+  Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
 };
 
 /** Returns the position of the detector with given detector index.
