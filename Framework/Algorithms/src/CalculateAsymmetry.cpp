@@ -19,9 +19,6 @@
 namespace {
 /// Number of microseconds in one second (10^6)
 constexpr double MICROSECONDS_PER_SECOND{1000000.0};
-/// Muon lifetime in microseconds
-constexpr double MUON_LIFETIME_MICROSECONDS{
-    Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 }
 
 namespace Mantid {
