@@ -7,7 +7,7 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
                         ITableWorkspaceProperty, MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
-from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateSingleValuedWorkspace,
+from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
                               CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus, NormaliseToMonitor,
                               Scale)
 
@@ -46,6 +46,15 @@ def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
     report.notice('Original Ei: {} new Ei: {}.'.format(originalEnergy, energy))
     report.notice('Original wavelength: {} new wavelength {}.'.format(originalWavelength, wavelength))
     return calibratedWS
+
+
+def _calculateEPP(ws, sigma, wsNames, algorithmLogging):
+    eppWSName = wsNames.withSuffix('epp_detectors')
+    eppWS = CreateEPP(InputWorkspace=ws,
+                      OutputWorkspace=eppWSName,
+                      Sigma=sigma,
+                      EnableLogging=algorithmLogging)
+    return eppWS
 
 
 def _calibratedIncidentEnergy(detWorkspace, detEPPWorkspace, monWorkspace, monEPPWorkspace,
@@ -98,8 +107,8 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
     return bkgWS
 
 
-def _findEPP(ws, wsType, wsNames, algorithmLogging):
-    """Return an EPP table for a workspace."""
+def _fitEPP(ws, wsType, wsNames, algorithmLogging):
+    """Return a fitted EPP table for a workspace."""
     if wsType == common.WS_CONTENT_DETS:
         eppWSName = wsNames.withSuffix('epp_detectors')
     else:
@@ -306,6 +315,20 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Table workspace containing results from the FindEPP ' +
                 'algorithm.')
+        self.declareProperty(name=common.PROP_EPP_METHOD,
+                             defaultValue=common.EPP_METHOD_FIT,
+                             validator=StringListValidator([
+                                 common.EPP_METHOD_FIT,
+                                 common.EPP_MEHTOD_CALCULATE]),
+                             direction=Direction.Input,
+                             doc='Method to create the EPP table for detectors (monitor is awlays fitted) if ' + common.PROP_EPP_WS + ' is not given.')
+        self.declareProperty(name=common.PROP_EPP_SIGMA,
+                             defaultValue=Property.EMPTY_DBL,
+                             validator=positiveFloat,
+                             direction=Direction.Input,
+                             doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD +
+                                 ' is set to ' + common.EPP_MEHTOD_CALCULATE +
+                                 ' (default: 10 times the first bin width).')
         self.declareProperty(name=common.PROP_ELASTIC_CHANNEL,
                              defaultValue=Property.EMPTY_INT,
                              validator=IntBoundedValidator(lower=0),
@@ -470,7 +493,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             return None
         detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
         if not detEPPInWS:
-            detEPPWS = _findEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
+            eppMethod = self.getProperty(common.PROP_EPP_METHOD).value
+            if eppMethod == common.EPP_METHOD_FIT:
+                detEPPWS = _fitEPP(mainWS, common.WS_CONTENT_DETS, wsNames, subalgLogging)
+            else:
+                sigma = self.getProperty(common.PROP_EPP_SIGMA).value
+                if sigma == Property.EMPTY_DBL:
+                    sigma = 10.0 * (mainWS.readX(0)[1] - mainWS.readX(0)[0])
+                detEPPWS = _calculateEPP(mainWS, sigma, wsNames, subalgLogging)
         else:
             detEPPWS = detEPPInWS
             wsCleanup.protect(detEPPWS)
@@ -481,7 +511,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def _createEPPWSMon(self, monWS, wsNames, wsCleanup, subalgLogging):
         """Create an EPP table for a monitor workspace."""
-        monEPPWS = _findEPP(monWS, common.WS_CONTENT_MONS, wsNames, subalgLogging)
+        monEPPWS = _fitEPP(monWS, common.WS_CONTENT_MONS, wsNames, subalgLogging)
         return monEPPWS
 
     def _finalize(self, outWS, wsCleanup):
