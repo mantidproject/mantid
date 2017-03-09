@@ -398,7 +398,7 @@ void MuonAnalysis::plotSelectedItem() {
 void MuonAnalysis::plotItem(ItemType itemType, int tableRow,
                             PlotType plotType) {
   m_updating = true;
-
+  m_dataSelector->clearChosenGroups();
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
 
   try {

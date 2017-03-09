@@ -380,15 +380,26 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
   }
   return chosen;
 }
-
+/**
+* Returns a list of the selected groups (checked boxes)
+* @returns :: list of selected groups
+*/
+void MuonFitDataSelector::clearChosenGroups() const {
+	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+		++iter) {
+		iter.value()->setChecked(false);
+	}
+}
 /**
  * Set the chosen group ticked and all others off
  * Used when switching from Home tab to Data Analysis tab
  * @param group :: [input] Name of group to select
  */
 void MuonFitDataSelector::setChosenGroup(const QString &group) {
+	auto tmp = group.toStdString();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
+
     if (iter.key() == group) {
       iter.value()->setChecked(true);
     }
@@ -628,6 +639,7 @@ QString MuonFitDataSelector::getSimultaneousFitLabel() const {
  * @param label :: [input] Text to set as label
  */
 void MuonFitDataSelector::setSimultaneousFitLabel(const QString &label) {
+	auto tmp = label;
   m_ui.txtSimFitLabel->setText(label);
 }
 
