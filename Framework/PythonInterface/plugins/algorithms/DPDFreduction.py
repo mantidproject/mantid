@@ -21,12 +21,10 @@ class DPDFreduction(api.PythonAlgorithm):
     _runs = None
     _vanfile = None
     _ecruns = None
-    _ebins_str = None
-    _qbins_str = None
+    _ebins = None
+    _qbins = None
     _snorm = None
     _clean = None
-    _qbins = None
-    _ebins = None
 
     def category(self):
         return "Inelastic\\Reduction"
