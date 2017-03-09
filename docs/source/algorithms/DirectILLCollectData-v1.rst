@@ -23,12 +23,12 @@ Basic reduction steps
 
 Some basic reduction steps are done to the input data.
 
-#. Adjust the TOF axis so that the elastic time-of-flight corresponds to the L1+L2 distances (:ref:`CorrectTOFAxis <algm-CorrectTOFAxis>`).
-#. Separate monitor and detector spectra to different workspaces (:ref:`ExtractMonitors <algm-ExtractMonitors>`).
-#. Optionally normalise the detector specta to monitor counts or acquisition time (:ref:`NormaliseToMonitor <algm-NormaliseToMonitor>`).
-#. Subtract time-independent background from the detector spectra (:ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`).
-#. Optionally find the elastic peak positions for later use (:ref:`FindEPP <algm-FindEPP>`).
-#. Optionally calibrate the incident energy (IN4 and IN6 spectrometers only, :ref:`GetEiMonDet <algm-GetEiMonDet>`).
+#. Adjust the TOF axis so that the elastic time-of-flight corresponds to the L1+L2 distances.
+#. Separate monitor and detector spectra to different workspaces.
+#. Optionally normalise the detector specta to monitor counts or acquisition time.
+#. Subtract time-independent background from the detector spectra.
+#. Optionally find the elastic peak positions for later use.
+#. Optionally calibrate the incident energy.
 
 More detailed description of some of these steps is given below.
 
@@ -42,7 +42,6 @@ Normalisation to monitor
 
 If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the *Monitor* property is used for normalisation. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If :ref:`FindEPP <algm-FindEPP>` fails to find a peak in the monitor spectrum, the entire monitor range is integrated.
 
-
 Flat background subtraction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -51,6 +50,13 @@ A flat time-independent background for subtraction can be given by *FlatBkgWorks
 Before subtraction, the background workspace is multiplied by *FlatBkgScaling*.
 
 The background used for the subtraction can be retrieved using the *OutputFlatBkgWorkspace* property. This property holds either the same workspace as *FlatBkgWorkspace*, or a workspace created by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`. Note that no *FlatBkgScaling* is applied to this workspace. 
+
+Elastic peak positions (EPP)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Information on the elastic peaks (position, peak width) is needed for incident energy calibration, as well as for the :ref:`DirectILLDiagnostics <algm-DirectILLDiagnostics>` and :ref:`DirectILLIntegrateVanadium <algm-DirectILLIntegrateVanadium>` algorithms. This data comes in the form of a EPP workspace which is a TableWorkspace containing columns specified by the :ref:`FindEPP <algm-FindEPP>` algorithm.
+
+If no external EPP table is given by the *EPPWorkspace* property, the algorithm either fits the elastic peaks using :ref:`FindEPP <algm-FindEPP>`, or calculates their nominal positions using :ref:`CreateEPP <algm-CreateEPP>`. This behavior can be controlled by the *EPPCreationMode* property. In the calculation case, a nominal peak width can be given using the *Sigma* property.  The peak width is needed for some integration operations. If *Sigma* is not specified, ten times the first bin width in the workspace will be used.
 
 Incident energy calibration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
