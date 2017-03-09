@@ -175,7 +175,7 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
-  const auto names = generateWorkspaceNames(overwrite);
+  const auto names = generateWorkspaceNames(overwrite);// might be this
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
@@ -487,6 +487,7 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
     const QString &status) const {
   Q_UNUSED(status);
   // If fitting was simultaneous, transform the results.
+  bool tmp = isSimultaneousFit();
   if (isSimultaneousFit()) {
     const auto label = m_dataSelector->getSimultaneousFitLabel();
     const auto groupName =
@@ -744,6 +745,8 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
  * @returns :: True for simultaneous fit, else false
  */
 bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
+	int j = m_dataSelector->getChosenGroups().size();
+	int k = m_dataSelector->getPeriodSelections().size();
   if (m_dataSelector->getFitType() ==
       IMuonFitDataSelector::FitType::Simultaneous) {
     return true;
@@ -813,6 +816,7 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
  * @returns :: True if multiple runs selected
  */
 bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
+	auto tmp = m_dataSelector->getRuns().toStdString();
   return m_dataSelector->getRuns().contains(QRegExp("-|,"));
 }
 
