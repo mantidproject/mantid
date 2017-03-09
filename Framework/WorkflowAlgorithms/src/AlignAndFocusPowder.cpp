@@ -34,11 +34,7 @@ using API::FileProperty;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
-AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false),
-      xmin(0.0), xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.),
-      tmin(0.0), tmax(0.0), m_preserveEvents(false), m_processLowResTOF(false),
-      m_lowResSpecOffset(0), m_progress(nullptr) {}
+AlignAndFocusPowder::AlignAndFocusPowder() : API::DataProcessorAlgorithm() {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)
