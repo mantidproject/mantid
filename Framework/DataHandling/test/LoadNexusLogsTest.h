@@ -117,6 +117,29 @@ public:
     TS_ASSERT_EQUALS(dlog->size(), 172);
   }
 
+  void test_File_With_Bad_Property() {
+    LoadNexusLogs loader;
+    loader.initialize();
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Workspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "IMAT00003680.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    const API::Run &run = testWS->run();
+
+    TimeSeriesProperty<std::string> *putLog =
+        dynamic_cast<TimeSeriesProperty<std::string> *>(
+            run.getLogData("EPICS_PUTLOG"));
+    TS_ASSERT(putLog);
+    std::string str = putLog->value();
+    TS_ASSERT_EQUALS(str.size(), 340);
+    // Characters 77 + 6 (i.e. 77-83) contain the bad characters
+    // Check they were replaced with space characters
+    TS_ASSERT_EQUALS(str.substr(77, 6), "E ( $ ");
+  }
+
   void test_extract_nperiod_log_from_event_nexus() {
 
     auto testWS = createTestWorkspace();
