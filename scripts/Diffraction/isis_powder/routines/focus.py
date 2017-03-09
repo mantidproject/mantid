@@ -41,7 +41,12 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     cropped_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
     # Output
-    processed_nexus_files = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
+    d_spacing_group, tof_group = instrument._output_focused_ws(cropped_spectra, run_details=run_details)
+
+    import pydevd
+    pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+                               unit_to_keep=instrument._get_unit_to_keep())
 
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
@@ -49,7 +54,7 @@ def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
     common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(cropped_spectra)
 
-    return processed_nexus_files
+    return d_spacing_group
 
 
 def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform_vanadium_norm):

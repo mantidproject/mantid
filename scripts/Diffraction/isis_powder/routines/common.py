@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import InputBatchingEnum, WorkspaceUnits
 
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
@@ -171,6 +171,33 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
+
+
+def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
+    """
+    Takes variables to the output workspaces in d-spacing and TOF and removes one
+    of them depending on what the user has selected as their unit to keep.
+    If a workspace has been deleted it additionally deletes the variable.
+    If a unit they want to keep has not been specified it does nothing.
+    :param d_spacing_group: The output workspace group in dSpacing
+    :param tof_group: The output workspace group in TOF
+    :param unit_to_keep: The unit to keep from the WorkspaceUnits enum
+    :return: None
+    """
+    if not unit_to_keep:
+        # If they do not specify which unit to keep don't do anything
+        return
+
+    if unit_to_keep == WorkspaceUnits.d_spacing:
+        remove_intermediate_workspace(tof_group)
+        del tof_group
+
+    elif unit_to_keep == WorkspaceUnits.tof:
+        remove_intermediate_workspace(d_spacing_group)
+        del d_spacing_group
+
+    else:
+        raise ValueError("The user specified unit to keep is unknown")
 
 
 def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None):

@@ -18,7 +18,7 @@ class Pearl(AbstractInst):
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
                                     calibration_dir=self._inst_settings.calibration_dir,
-                                    output_dir=self._inst_settings.output_dir)
+                                    output_dir=self._inst_settings.output_dir, inst_prefix="PEARL")
 
         self._cached_run_details = None
         self._cached_run_details_number = None

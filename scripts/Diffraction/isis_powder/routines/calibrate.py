@@ -33,10 +33,13 @@ def create_van(instrument, run_details, absorb):
     focused_spectra = common.extract_ws_spectra(focused_vanadium)
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
-    d_spacing_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
+    d_spacing_group, tof_group = _save_focused_vanadium(instrument=instrument, run_details=run_details,
                                              van_spectra=focused_spectra)
 
     _create_vanadium_splines(focused_spectra, instrument, run_details)
+
+    common.keep_single_ws_unit(d_spacing_group=d_spacing_group,tof_group=tof_group,
+                               unit_to_keep=instrument._get_unit_to_keep())
 
     common.remove_intermediate_workspace(corrected_van_ws)
     common.remove_intermediate_workspace(aligned_ws)

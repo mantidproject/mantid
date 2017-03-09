@@ -15,6 +15,7 @@ attr_mapping = [("calibration_directory",       "calibration_dir"),
                 ("sample_empty",                "sample_empty"),
                 ("spline_coefficient",          "spline_coeff"),
                 ("output_directory",            "output_dir"),
+                ("unit_to_keep",                "unit_to_keep"),
                 ("user_name",                   "user_name"),
                 ("vanadium_cropping_values",    "vanadium_cropping_values"),
                 ("vanadium_normalisation",      "do_van_norm")]

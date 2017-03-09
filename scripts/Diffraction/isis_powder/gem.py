@@ -15,7 +15,7 @@ class Gem(AbstractInst):
 
         super(Gem, self).__init__(user_name=self._inst_settings.user_name,
                                   calibration_dir=self._inst_settings.calibration_dir,
-                                  output_dir=self._inst_settings.output_dir)
+                                  output_dir=self._inst_settings.output_dir, inst_prefix="GEM")
 
         self._cached_run_details = None
         self._cached_run_number = None
@@ -67,6 +67,9 @@ class Gem(AbstractInst):
 
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         return common.crop_banks_in_tof(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
+
+    def _get_unit_to_keep(self):
+        return self._inst_settings.unit_to_keep
 
 
 def check_mode_is_valid(inst_settings):

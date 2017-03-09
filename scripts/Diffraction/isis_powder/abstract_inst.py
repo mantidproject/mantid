@@ -14,12 +14,13 @@ from isis_powder.routines import calibrate, focus, common, common_enums, common_
 # private method for the scripts
 
 class AbstractInst(object):
-    def __init__(self, user_name, calibration_dir, output_dir):
+    def __init__(self, user_name, calibration_dir, output_dir, inst_prefix):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
         self._user_name = user_name
         self._calibration_dir = calibration_dir
+        self._inst_prefix = inst_prefix
         self._output_dir = output_dir
 
     @property
@@ -37,10 +38,8 @@ class AbstractInst(object):
     def _create_vanadium(self, run_details, do_absorb_corrections=True):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
-        :param vanadium_runs: The vanadium run or run in range (depending on instrument) to process
-        :param empty_runs: The empty run to process
+        :param run_details: The run details for the run to process
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
-        :param gen_absorb_correction: Set to true if absorption corrections should be recalculated
         :return: d_spacing focused vanadium group
         """
         return calibrate.create_van(instrument=self, run_details=run_details,
@@ -147,6 +146,9 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
+    def _get_unit_to_keep(self):
+        return None
+
     def _generate_auto_vanadium_calibration(self, run_details):
         """
         Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
@@ -198,9 +200,10 @@ class AbstractInst(object):
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                                        output_paths=output_paths, inst_prefix="POL",
+                                        output_paths=output_paths, inst_prefix=self._inst_prefix,
                                         run_number_string=run_details.user_input_run_number)
-        return d_spacing_group
+
+        return d_spacing_group, tof_group
 
     # Steps applicable to all instruments
 
