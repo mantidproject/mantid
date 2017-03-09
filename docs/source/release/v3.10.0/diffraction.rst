@@ -14,6 +14,11 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+Powder Diffraction
+------------------
+
+- Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
+
 Single Crystal Diffraction
 --------------------------
 
