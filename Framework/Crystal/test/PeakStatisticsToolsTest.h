@@ -219,12 +219,14 @@ public:
 
     TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 0);
     TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 0);
+    TS_ASSERT_EQUALS(reflections.getUnobservedUniqueReflections().size(), 4);
 
     reflections.addObservations(
         getPeaksWithIandSigma({1.0, 1.0}, {2.0, 2.0}, V3D(1, 0, 0)));
 
     TS_ASSERT_EQUALS(reflections.getObservedReflectionCount(), 2);
     TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 1);
+    TS_ASSERT_EQUALS(reflections.getUnobservedUniqueReflections().size(), 3);
 
     // out-of-range peaks are ignored, so the reflection counts do not change
     reflections.addObservations(
@@ -247,6 +249,8 @@ public:
     TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(), 2);
     TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(2), 1);
     TS_ASSERT_EQUALS(reflections.getObservedUniqueReflectionCount(3), 0);
+
+    TS_ASSERT_EQUALS(reflections.getUnobservedUniqueReflections().size(), 2);
   }
 
   void test_PeaksStatisticsNoObservation() {

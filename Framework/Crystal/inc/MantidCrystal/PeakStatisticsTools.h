@@ -74,6 +74,7 @@ public:
 
   size_t getUniqueReflectionCount() const;
   size_t getObservedUniqueReflectionCount(size_t moreThan = 0) const;
+  std::vector<Kernel::V3D> getUnobservedUniqueReflections() const;
 
   size_t getObservedReflectionCount() const;
 

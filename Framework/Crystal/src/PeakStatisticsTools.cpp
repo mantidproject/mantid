@@ -151,6 +151,21 @@ size_t UniqueReflectionCollection::getObservedUniqueReflectionCount(
       });
 }
 
+/// List of unobserved unique reflections in resolution range.
+std::vector<V3D>
+UniqueReflectionCollection::getUnobservedUniqueReflections() const {
+  std::vector<V3D> reflections;
+  reflections.reserve(m_reflections.size());
+
+  for (const auto &reflection : m_reflections) {
+    if (reflection.second.count() == 0) {
+      reflections.push_back(reflection.first);
+    }
+  }
+
+  return reflections;
+}
+
 /// Number of observed reflections.
 size_t UniqueReflectionCollection::getObservedReflectionCount() const {
   return std::accumulate(
