@@ -237,6 +237,7 @@ set ( INC_FILES
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorNewTableCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOneLevelTreeManager.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenTableCommand.h
+	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOpenCloseGroupsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorOptionsCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPasteSelectedCommand.h
 	inc/MantidQtMantidWidgets/DataProcessorUI/DataProcessorPlotGroupCommand.h

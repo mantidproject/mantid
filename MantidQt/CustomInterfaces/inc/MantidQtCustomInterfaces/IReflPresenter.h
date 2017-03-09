@@ -62,7 +62,8 @@ public:
     ImportTableFlag,
     ExportTableFlag,
     PlotRowFlag,
-    PlotGroupFlag
+    PlotGroupFlag,
+    OpenCloseAllGroupsFlag
   };
 
   // Tell the presenter something happened
