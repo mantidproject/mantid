@@ -555,16 +555,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   // time of a splitter
   bool continue_search = true;
   bool no_entry_in_range = false;
-  // TODO/FIXME/ - use binary search to replace
-  //  (ForwardIterator first, ForwardIterator last, const T& val);
-  //   Returns an iterator pointing to the first element in the range
-  //   [first,last) which does not compare less than val.
-  // std::vector<DateAndTime>::iterator low;
-  // low = std::lower_bound(splitter_time_vec.begin(), splitter_time_vec.end(),
-  //                       tsp_time);
 
-  // use bindary search to find the first split stop time that is bigger than
-  // tsp_time
   std::vector<DateAndTime>::iterator splitter_iter;
   splitter_iter = std::lower_bound(splitter_time_vec.begin(),
                                    splitter_time_vec.end(), tsp_time);
@@ -583,36 +574,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     split_stop_time = splitter_time_vec[index_splitter + 1];
   }
 
-  /*
-  while (continue_search) {
-    std::cout << "[*]  Split Index = " << index_splitter
-              << ": start = " << split_start_time
-              << ", stop = " << split_stop_time << "\n";
-    if (tsp_time < split_stop_time) {
-      // requirement is met
-      continue_search = false;
-    } else {
-      // continue to move splitter index
-      ++index_splitter;
-      if (index_splitter == splitter_time_vec.size() - 1) {
-        // even the last splitter is before first entry
-        continue_search = false;
-        no_entry_in_range = true;
-      } else {
-        // advance
-        split_start_time = split_stop_time;
-        split_stop_time = splitter_time_vec[index_splitter + 1];
-        std::cout << "Split Index = " << index_splitter
-                  << ": start = " << split_start_time
-                  << ", stop = " << split_stop_time << "\n";
-      }
-    }
-  } // END-WHILE: to move the splitters to the first entry
-  */
-
-  std::cout << "[DB  1] "
-            << "TSP entry: " << index_tsp_time
-            << ", Splitter index = " << index_splitter << "\n";
+  g_log.debug() << "TSP entry: " << index_tsp_time
+                << ", Splitter index = " << index_splitter << "\n";
 
   // move along the entries to find the entry inside the current splitter
   if (!no_entry_in_range) {
@@ -633,33 +596,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
-  // TODO/FIXME - use binary search to replace=
-  /*
-  continue_search = !no_entry_in_range;
-  while (continue_search) {
-    if (tsp_time < split_start_time) {
-      // current entry is before the current splitters
-      ++index_tsp_time;
-      if (index_tsp_time == tsp_time_vec.size()) {
-        // already last entry, then it means that the splitters are too behind
-        continue_search = false;
-        no_entry_in_range = true;
-      } else {
-        // move the next entry
-        tsp_time = tsp_time_vec[index_tsp_time];
-      }
-    } else {
-      // current entry is after split start time. with while loop one, it is
-      // certain that the current entry
-      // is within the current splitter.
-      continue_search = false;
-    }
-  } // END-WHILE: to move the entries of TSP to the current splitter
-  */
-
-  std::cout << "[DB  2] "
-            << "TSP entry: " << index_tsp_time
-            << ", Splitter index = " << index_splitter << "\n";
+  g_log.debug() << "TSP entry: " << index_tsp_time
+                << ", Splitter index = " << index_splitter << "\n";
 
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
@@ -670,16 +608,15 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
 
     int target = target_vec[index_splitter];
 
-    std::cout << "Target = " << target
-              << " with splitter index = " << index_splitter << "\n";
-    std::cout << "\t"
-              << "Time index = " << index_tsp_time << "\n\n";
+    g_log.debug() << "Target = " << target
+                  << " with splitter index = " << index_splitter << "\n"
+                  << "\t" << "Time index = " << index_tsp_time << "\n\n";
 
     bool continue_add = true;
     while (continue_add) {
       // add current entry
-      std::cout << "Add entry " << index_tsp_time << " to target " << target
-                << "\n";
+      g_log.debug() << "Add entry " << index_tsp_time << " to target " << target
+                    << "\n";
       if (outputs[target]->size() == 0 ||
           outputs[target]->lastTime() < tsp_time) {
         // avoid to add duplicate entry
@@ -690,8 +627,8 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
       // advance to next entry
       ++index_tsp_time;
 
-      std::cout << "\tEntry time " << tsp_time_vec[index_tsp_time]
-                << ", stop time " << split_stop_time << "\n";
+      g_log.debug() << "\tEntry time " << tsp_time_vec[index_tsp_time]
+                    << ", stop time " << split_stop_time << "\n";
 
       if (index_tsp_time == tsp_time_vec.size()) {
         // last entry. quit all loops
@@ -705,8 +642,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
                                     m_values[index_tsp_time].value());
         }
         // FIXME - in future, need to find out WHETHER there is way to skip the
-        // rest
-        //         without going through the whole sequence
+        // rest without going through the whole sequence
         continue_add = false;
         // reset time entry as the next splitter will add
         // --index_tsp_time;

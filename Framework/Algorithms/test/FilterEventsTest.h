@@ -101,7 +101,7 @@ public:
    *  4: 20300000000, 20365000000, 2
    *  5: 20400000000, 20465000000, 2
    */
-  void Passed_test_FilterNoCorrection() {
+  void test_FilterNoCorrection() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -252,7 +252,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    *events
    */
-  void Xtest_FilterWOCorrection2() {
+  void test_FilterWOCorrection2() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -335,7 +335,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /**  Filter test with TOF correction
     */
-  void Xtest_FilterWithCustumizedCorrection() {
+  void test_FilterWithCustumizedCorrection() {
     // 1. Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -419,7 +419,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Xtest_FilterElasticCorrection() {
+  void test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -477,7 +477,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Xtest_FilterDGCorrection() {
+  void test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -528,7 +528,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction to indirect geometry inelastic instrument
     */
-  void Xtest_FilterIndirectGeometryCorrection() {
+  void test_FilterIndirectGeometryCorrection() {
     // Create workspaces for filtering
     EventWorkspace_sptr ws = createEventWorkspaceInDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockIndirectEventWS", ws);
@@ -718,19 +718,19 @@ public:
         dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
             filteredws2->run().getProperty("splitter"));
     TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 3);
+    TS_ASSERT_EQUALS(splitter2->size(), 7);
 
     TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter2->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.9e+08)).totalNanoseconds() +
+        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter2->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(4.65e+08)).totalNanoseconds() +
+        Kernel::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
@@ -802,7 +802,7 @@ public:
    *  (2) Count events in each output including "-1", the excluded/unselected
    * events
    */
-  void Xtest_tableSplitter() {
+  void test_tableSplitter() {
     // Create EventWorkspace and SplittersWorkspace
     int64_t runstart_i64 = 20000000000;
     int64_t pulsedt = 100 * 1000 * 1000;
@@ -907,19 +907,19 @@ public:
         dynamic_cast<Kernel::TimeSeriesProperty<int> *>(
             filteredws2->run().getProperty("splitter"));
     TS_ASSERT(splitter2);
-    TS_ASSERT_EQUALS(splitter2->size(), 3);
+    TS_ASSERT_EQUALS(splitter2->size(), 7);
 
     TS_ASSERT_EQUALS(splitter2->nthTime(0), Kernel::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
         splitter2->nthTime(1).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(1.9e+08)).totalNanoseconds() +
+        Kernel::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
     TS_ASSERT_EQUALS(
         splitter2->nthTime(2).totalNanoseconds(),
-        Kernel::DateAndTime(static_cast<int>(4.65e+08)).totalNanoseconds() +
+        Kernel::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
@@ -1261,8 +1261,8 @@ public:
 
     // print out splitters
     for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  "
-                << splitterws->mutableX(0)[ix + 1] << ": "
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] * 1.0E-9<< "  -  "
+                << splitterws->mutableX(0)[ix + 1] * 1.0E-9 << ": "
                 << splitterws->mutableY(0)[ix] << "\n";
 
     return splitterws;
