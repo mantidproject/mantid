@@ -73,7 +73,7 @@ void AlignAndFocusPowder::init() {
                   "grouping data");
   declareProperty(Kernel::make_unique<FileProperty>(
                       "GroupFilename", "", FileProperty::OptionalLoad,
-                      std::vector<std::string>{".xml"}),
+                      std::vector<std::string>{".xml", ".cal"}),
                   "Overrides grouping from CalFileName");
   declareProperty(
       make_unique<WorkspaceProperty<GroupingWorkspace>>(
@@ -929,12 +929,28 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
   if (loadMask && !groupFilename.empty()) {
     g_log.information() << "Loading Grouping file \"" << groupFilename
                         << "\"\n";
-    IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
-    alg->setProperty("InputFile", groupFilename);
-    alg->executeAsChildAlg();
+    if (groupFilename.find(".cal") != std::string::npos) {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+      alg->setProperty("InputWorkspace", m_inputW);
+      alg->setPropertyValue("Filename", groupFilename);
+      alg->setProperty<bool>("MakeCalWorkspace", false);
+      alg->setProperty<bool>("MakeGroupingWorkspace", true);
+      alg->setProperty<bool>("MakeMaskWorkspace", false);
+      alg->setPropertyValue("WorkspaceName", m_instName);
+      alg->executeAsChildAlg();
 
-    // get and rename the workspace
-    m_groupWS = alg->getProperty("OutputWorkspace");
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputGroupingWorkspace");
+    } else {
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadDetectorsGroupingFile");
+      alg->setProperty("InputFile", groupFilename);
+      alg->executeAsChildAlg();
+
+      // get the workspace
+      m_groupWS = alg->getProperty("OutputWorkspace");
+    }
+
+    // register the workspace with the ADS
     const std::string name = m_instName + "_group";
     AnalysisDataService::Instance().addOrReplace(name, m_groupWS);
     this->setPropertyValue("GroupingWorkspace", name);
