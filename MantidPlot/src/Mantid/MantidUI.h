@@ -298,10 +298,14 @@ public slots:
          bool clearWindow = false, bool waterfallPlot = false) override;
 
   /// Plot contour
-  void plotContour(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface);
+  void plotContour(bool accepted, int plotIndex, const QString &axisName,
+    const QString &logName, const std::set<double> &customLogValues, 
+    const QList<QString> &workspaceNames) override;
 
   /// Plot surface
-  void plotSurface(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface);
+  void plotSurface(bool accepted, int plotIndex, const QString &axisName,
+    const QString &logName, const std::set<double> &customLogValues, 
+    const QList<QString> &workspaceNames) override;
 
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(

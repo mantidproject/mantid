@@ -114,10 +114,10 @@ public:
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false, MultiLayer *plotWindow = nullptr) = 0;
-  virtual void plotSurface( bool accepted, int plotIndex, QString axisName, 
-         QString logName, std::set<double> customLogValues, QList<QString> workspaceNames) = 0;
-  virtual void plotContour(bool accepted, int plotIndex, QString axisName,
-         QString logName, std::set<double> customLogValues, QList<QString> workspaceNames) = 0;
+  virtual void plotSurface( bool accepted, int plotIndex, const QString &axisName, 
+         const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) = 0;
+  virtual void plotContour(bool accepted, int plotIndex, const QString &axisName,
+         const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) = 0;
 
 
 

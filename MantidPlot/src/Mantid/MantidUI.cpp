@@ -4012,16 +4012,20 @@ void MantidUI::showContourPlot() {
   }
 }
 
-void MantidUI::plotContour(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
-  auto workspaces = getWorkspacesFromAds(userInputForContourAndSurface.workspaceNames);
+void MantidUI::plotContour(bool accepted, int plotIndex, const QString &axisName,
+  const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-  //plotter->plotContour(workspaces, userInputForContourAndSurface);
+  plotter->plotContour( accepted, plotIndex, axisName, 
+  logName, customLogValues, workspaces);
 }
 
-void MantidUI::plotSurface(const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &userInputForContourAndSurface) {
-  auto workspaces = getWorkspacesFromAds(userInputForContourAndSurface.workspaceNames);
+void MantidUI::plotSurface(bool accepted, int plotIndex, const QString &axisName,
+  const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) {
+  auto workspaces = getWorkspacesFromAds(workspaceNames);
   auto plotter = Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-  //plotter->plotSurface(workspaceGroup, userInputForContourAndSurface);
+  plotter->plotSurface(accepted, plotIndex, axisName,
+    logName, customLogValues, workspaces);
 }
 
 QWidget *MantidUI::getParent() { return m_appWindow; }
