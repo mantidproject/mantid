@@ -25,8 +25,8 @@ using API::MatrixWorkspace_sptr;
 using API::FileProperty;
 using std::size_t;
 
+// Anonymous namespace
 namespace {
-
 /**
  * @brief loadAndApplyMeasurementInfo
  * @param file : Nexus::File pointer
@@ -41,7 +41,7 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
     file->openGroup("measurement", "NXcollection");
 
     // If we can open the measurement group. We assume that the following will
-    // be avaliable.
+    // be available.
     file->openData("id");
     workspace.mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id",
@@ -92,7 +92,35 @@ bool loadAndApplyRunTitle(::NeXus::File *const file,
   }
   return successfullyApplied;
 }
+
+/**
+* Checks whether the specified character is invalid or a control
+* character. If it is invalid (i.e. negative) or a control character
+* the method returns true. If it is valid and not a control character
+* it returns false. Additionally if the character is invalid is
+* logs a warning with the property name so users are aware.
+*
+* @param c :: Character to check
+* @param propName :: The name of the property currently being checked for
+*logging
+* @param log :: Reference to logger to print out to
+* @return :: True if control character OR invalid. Else False
+*/
+bool isControlValue(const char &c, const std::string &propName,
+                    Kernel::Logger &log) {
+  // Have to check it falls within range accepted by c style check
+  if (c <= -1) {
+    log.warning("Found an invalid character in property " + propName);
+    // Pretend this is a control value so it is sanitized
+    return true;
+  } else {
+    // Use default global c++ locale within this program
+    std::locale locale{};
+    // Use c++ style call so we don't need to cast from int to bool
+    return std::iscntrl(c, locale);
+  }
 }
+} // End of anonymous namespace
 
 /// Empty default constructor
 LoadNexusLogs::LoadNexusLogs() {}
@@ -653,37 +681,6 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     throw ::NeXus::Exception(
         "Invalid value type for time series. Only int, double or strings are "
         "supported");
-  }
-}
-
-/**
-  * Checks whether the specified character is invalid or a control
-  * character. If it is invalid (i.e. negative) or a control character
-  * the method returns true. If it is valid and not a control character
-  * it returns false. Additionally if the character is invalid it
-  * logs a warning with the property name so users are aware.
-  *
-  * @param c :: Character to check
-  * @param propName :: The name of the property currently being checked for
-  *logging
-  * @param log :: Reference to logger to print out to
-  * @return :: True if control character OR invalid. Else False
-  */
-bool LoadNexusLogs::isControlValue(const char &c, const std::string &propName,
-                                   Kernel::Logger &log) {
-  // Have to check it falls within range accepted by c style check
-  // as the (un)signed nature of char is implementation defined
-  // we will cast to a signed int which can always hold both
-  const signed int charValue = c;
-  if (charValue <= -1 || charValue >= 255) {
-    log.warning("Found an invalid character in property " + propName);
-    // Pretend this is a control value so it is sanitized
-    return true;
-  } else {
-    // Use default global c++ locale within this program
-    std::locale locale{};
-    // Use c++ style call so we don't need to cast from int to bool
-    return std::iscntrl(c, locale);
   }
 }
 
