@@ -1607,17 +1607,17 @@ void FilterEvents::generateSplitterTSP(
   for (size_t igrp = 0; igrp < m_vecSplitterGroup.size(); ++igrp) {
     int itarget = m_vecSplitterGroup[igrp];
     DateAndTime start_time(m_vecSplitterTime[igrp]);
-    if (start_time <= m_runStartTime)
-    {
-        // clear the initial value with check first
-        if (split_tsp_vec[itarget]->size() != 1)
-        {
-            g_log.error() << "With start time " << start_time << " same as run start time " << m_runStartTime
-                          << ", the TSP must have only 1 entry from initialization.  But not it has "
-                          << split_tsp_vec[itarget]->size() << "entries\n";
-            throw std::runtime_error("Coding logic error");
-        }
-        split_tsp_vec[itarget]->clear();
+    if (start_time <= m_runStartTime) {
+      // clear the initial value with check first
+      if (split_tsp_vec[itarget]->size() != 1) {
+        g_log.error() << "With start time " << start_time
+                      << " same as run start time " << m_runStartTime
+                      << ", the TSP must have only 1 entry from "
+                         "initialization.  But not it has "
+                      << split_tsp_vec[itarget]->size() << "entries\n";
+        throw std::runtime_error("Coding logic error");
+      }
+      split_tsp_vec[itarget]->clear();
     }
     DateAndTime stop_time(m_vecSplitterTime[igrp + 1]);
     split_tsp_vec[itarget]->addValue(start_time, 1);
@@ -1631,7 +1631,8 @@ void FilterEvents::generateSplitterTSP(
  * @brief FilterEvents::generateSplitterTSPalpha
  * @param split_tsp_vec
  */
-void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
+void FilterEvents::generateSplitterTSPalpha(
+    std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   // clear vector to set up
   split_tsp_vec.clear();
 
@@ -1655,14 +1656,13 @@ void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProper
     if (itarget >= static_cast<int>(split_tsp_vec.size()))
       throw std::runtime_error("Target workspace index is out of range!");
 
-    if (splitter.start() == m_runStartTime)
-    {
-        // there should be only 1 value in the splitter and clear it.
-        if (split_tsp_vec[itarget]->size() != 1)
-        {
-            throw std::runtime_error("Splitter must have 1 value with initialization.");
-        }
-        split_tsp_vec[itarget]->clear();
+    if (splitter.start() == m_runStartTime) {
+      // there should be only 1 value in the splitter and clear it.
+      if (split_tsp_vec[itarget]->size() != 1) {
+        throw std::runtime_error(
+            "Splitter must have 1 value with initialization.");
+      }
+      split_tsp_vec[itarget]->clear();
     }
     split_tsp_vec[itarget]->addValue(splitter.start(), 1);
     split_tsp_vec[itarget]->addValue(splitter.stop(), 0);
@@ -1678,17 +1678,18 @@ void FilterEvents::generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProper
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   if (m_useSplittersWorkspace) {
-      g_log.warning() << "There are " << split_tsp_vec.size() << " TimeSeriesPropeties.\n";
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-      for (miter = m_outputWorkspacesMap.begin(); miter != m_outputWorkspacesMap.end(); ++ miter)
-      {
-          g_log.warning() << "Output workspace index: " << miter->first << "\n";
-          if (0 <= miter->first && miter->first < static_cast<int>(split_tsp_vec.size()))
-          {
-              DataObjects::EventWorkspace_sptr outws = miter->second;
-              outws->mutableRun().addProperty(split_tsp_vec[miter->first]);
-          }
+    g_log.warning() << "There are " << split_tsp_vec.size()
+                    << " TimeSeriesPropeties.\n";
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
+    for (miter = m_outputWorkspacesMap.begin();
+         miter != m_outputWorkspacesMap.end(); ++miter) {
+      g_log.warning() << "Output workspace index: " << miter->first << "\n";
+      if (0 <= miter->first &&
+          miter->first < static_cast<int>(split_tsp_vec.size())) {
+        DataObjects::EventWorkspace_sptr outws = miter->second;
+        outws->mutableRun().addProperty(split_tsp_vec[miter->first]);
       }
+    }
 
     // TODO:FIXME - need to find document for this feature: CONTINUE FROM HERE!
     ;

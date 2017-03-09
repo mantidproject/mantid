@@ -161,7 +161,8 @@ private:
   void generateSplitterTSP(
       std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
-  void generateSplitterTSPalpha(std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
+  void generateSplitterTSPalpha(
+      std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec);
 
   ///
   void mapSplitterTSPtoWorkspaces(
