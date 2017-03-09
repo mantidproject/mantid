@@ -20,19 +20,15 @@ public:
 
   /// Plots a surface from the given workspace group
   void plotSurface(
-      const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
-          options) const;
+    bool accepted, int plotIndex, const QString &axisName,
+    const QString &logName, const std::set<double> &customLogValues, 
+    const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(
-      const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
-          options) const;
-
-  /// Tests if WorkspaceGroup contains only MatrixWorkspaces
-  static bool groupIsAllMatrixWorkspaces(
-      const Mantid::API::WorkspaceGroup_const_sptr &wsGroup);
+    bool accepted, int plotIndex, const QString &axisName,
+    const QString &logName, const std::set<double> &customLogValues, 
+    const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const;
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
@@ -42,7 +38,7 @@ public:
 
   /// Tests if WorkspaceGroup contents all have same X for given spectrum
   static bool
-  groupContentsHaveSameX(const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
+  groupContentsHaveSameX(const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
                          const size_t index);
 
 private:
@@ -51,16 +47,16 @@ private:
 
   /// Plots a graph from the given workspace group
   void plot(
-      Type graphType, const Mantid::API::WorkspaceGroup_const_sptr &wsGroup,
-      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
-          options) const;
+      Type graphType, bool accepted, int plotIndex, const QString &axisName,
+      const QString &logName, const std::set<double> &customLogValues, 
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const;
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       Type graphType,
-      boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
-      const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
-          options) const;
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
+      bool accepted, int plotIndex, const QString &axisName,
+      const QString &logName, const std::set<double> &customLogValues) const;
 
   /// Returns a single log value from the given workspace
   double
@@ -73,11 +69,11 @@ private:
 
   /// Get X axis title
   QString getXAxisTitle(
-      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const;
+    const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const;
 
   /// Validate chosen workspaces/spectra
   void validateWorkspaceChoices(
-      const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
       const size_t spectrum) const;
 
   /// Pointer to the Mantid UI

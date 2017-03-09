@@ -25,47 +25,60 @@ MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
 
 /**
  * Plots a surface graph from the given workspace group
- * @param wsGroup :: [input] Workspace group to plot
- * @param options :: [input] User-selected plot options
+ * @param accepted :: [input] true if plot has been accepted
+ * @param plotIndex :: [input] plot index
+ * @param axisName :: [input] axis name
+ * @param logName :: [input] log name
+ * @param custumLogValues :: [input] custom log values
+ * @param workspaces :: [input] set of workspaces forming the group to be plotted
  */
 void MantidGroupPlotGenerator::plotSurface(
-    const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
-  plot(Type::Surface, wsGroup, options);
+  bool accepted, int plotIndex, const QString &axisName,
+  const QString &logName, const std::set<double> &customLogValues, const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const {
+  plot(Type::Surface, accepted, plotIndex, axisName, logName, customLogValues, workspaces);
 }
 
 /**
  * Plots a contour plot from the given workspace group
- * @param wsGroup :: [input] Workspace group to plot
- * @param options :: [input] User-selected plot options
+ * @param accepted :: [input] true if plot has been accepted
+ * @param plotIndex :: [input] plot index
+ * @param axisName :: [input] axis name
+ * @param logName :: [input] log name
+ * @param custumLogValues :: [input] custom log values
+ * @param workspaces :: [input] set of workspaces forming the group to be plotted
  */
 void MantidGroupPlotGenerator::plotContour(
-    const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
-  plot(Type::Contour, wsGroup, options);
+  bool accepted, int plotIndex, const QString &axisName,
+  const QString &logName, const std::set<double> &customLogValues, const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const {
+  plot(Type::Contour, accepted, plotIndex, axisName, logName, customLogValues, workspaces);
 }
 
 /**
- * Plots a graph from the given workspace group
+ * Plots a contour or surface graph from the given workspace group
  * @param graphType :: [input] Type of graph to plot
- * @param wsGroup :: [input] Workspace group to plot
- * @param options :: [input] User-selected plot options
+ * @param accepted :: [input] true if plot has been accepted
+ * @param plotIndex :: [input] plot index
+ * @param axisName :: [input] axis name
+ * @param logName :: [input] log name
+ * @param custumLogValues :: [input] custom log values
+ * @param workspaces :: [input] set of workspaces forming the group to be plotted
  */
 void MantidGroupPlotGenerator::plot(
-    Type graphType, const WorkspaceGroup_const_sptr &wsGroup,
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
-  if (wsGroup && options.accepted) {
+    Type graphType, bool accepted, int plotIndex, const QString &axisName,
+    const QString &logName, const std::set<double> &customLogValues, const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const {
+  if (!workspaces.empty() && accepted) {
+
     // Set up one new matrix workspace to hold all the data for plotting
     MatrixWorkspace_sptr matrixWS;
     try {
-      matrixWS = createWorkspaceForGroupPlot(graphType, wsGroup, options);
+      matrixWS = createWorkspaceForGroupPlot(graphType, workspaces, accepted, plotIndex, axisName, logName, customLogValues );
     } catch (const std::logic_error &err) {
       m_mantidUI->showCritical(err.what());
-      return;
-    }
+      return;  
+    } // We can now assume every workspace is a Matrix Workspace
 
     // Generate X axis title
-    const auto &xLabelQ = getXAxisTitle(wsGroup);
+    const auto &xLabelQ = getXAxisTitle(workspaces);
 
     // Import the data for plotting
     auto matrixToPlot =
@@ -73,22 +86,25 @@ void MantidGroupPlotGenerator::plot(
 
     // Change the default plot title
     QString title = QString("plot for %1, spectrum %2")
-                        .arg(wsGroup->getName().c_str(),
-                             QString::number(options.plotIndex));
+                        .arg(workspaces[0]->getName().c_str() ,
+                             QString::number(plotIndex) );
+    // For the time being we use the name of the first workspace.
+    // Later we need a way of conveying a name for this set of workspaces.
 
     // Plot the correct type of graph
     if (graphType == Type::Surface) {
       auto plot = matrixToPlot->plotGraph3D(Qwt3D::PLOTSTYLE::FILLED);
       plot->setTitle(QString("Surface ").append(title));
       plot->setXAxisLabel(xLabelQ);
-      plot->setYAxisLabel(options.axisName);
+      plot->setYAxisLabel(axisName);
       plot->setResolution(1); // If auto-set too high, appears empty
     } else if (graphType == Type::Contour) {
       MultiLayer *plot =
           matrixToPlot->plotGraph2D(GraphOptions::ColorMapContour);
-      plot->activeGraph()->setXAxisTitle(xLabelQ);
-      plot->activeGraph()->setYAxisTitle(options.axisName);
       plot->activeGraph()->setTitle(QString("Contour ").append(title));
+      plot->activeGraph()->setXAxisTitle(xLabelQ);
+      plot->activeGraph()->setYAxisTitle(axisName);
+
     }
   }
 }
@@ -101,23 +117,28 @@ void MantidGroupPlotGenerator::plot(
  * Table or Peaks workspaces then it cannot be used.
  *
  * @param graphType :: [input] Type of graph to plot
- * @param wsGroup :: [input] Pointer to workspace group to use as input
- * @param options :: [input] User input from dialog
+ * @param workspaces :: [input] set of workspaces forming the group to be plotted
+ * @param accepted :: [input] true if plot has been accepted
+ * @param plotIndex :: [input] plot index
+ * @param axisName :: [input] axis name
+ * @param logName :: [input] log name
+ * @param custumLogValues :: [input] custom log 
  * @returns Pointer to the created workspace
  */
 const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
-    Type graphType, WorkspaceGroup_const_sptr wsGroup,
-    const MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options) const {
+    Type graphType, const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
+  bool accepted, int plotIndex, const QString &axisName,
+  const QString &logName, const std::set<double> &customLogValues) const {
   const auto index = static_cast<size_t>(
-      options.plotIndex);                // which spectrum to plot from each WS
-  const auto &logName = options.logName; // Log to read for axis of XYZ plot
+      plotIndex);                // which spectrum to plot from each WS
+  //const auto &logName = logName; // Log to read for axis of XYZ plot
 
-  validateWorkspaceChoices(wsGroup, index);
+  validateWorkspaceChoices(workspaces, index);
 
   // Create workspace to hold the data
   // Each "spectrum" will be the data from one workspace
-  const auto nWorkspaces = wsGroup->getNumberOfEntries();
+  const auto nWorkspaces = workspaces.size();
   if (nWorkspaces < 0) {
     return MatrixWorkspace_sptr();
   }
@@ -125,7 +146,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
   MatrixWorkspace_sptr matrixWS; // Workspace to return
   // Cast succeeds: have already checked group contains only MatrixWorkspaces
   const auto firstWS =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(0));
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]);
 
   // If we are making a surface plot, create a point data workspace.
   // If it's a contour plot, make a histo workspace.
@@ -141,7 +162,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
   std::vector<double> logValues;
   for (int i = 0; i < nWorkspaces; i++) {
     const auto ws =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(i));
+        boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[i]);
     if (ws) {
       // Make sure the X data is set as the correct mode
       if (xMode == Histogram::XMode::BinEdges) {
@@ -153,7 +174,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
       matrixWS->setSharedY(i, ws->sharedY(index));
       matrixWS->setSharedE(i, ws->sharedE(index));
       if (logName == MantidWSIndexWidget::CUSTOM) {
-        logValues.push_back(getSingleLogValue(i, options.customLogValues));
+        logValues.push_back(getSingleLogValue(i, customLogValues));
       } else {
         logValues.push_back(getSingleLogValue(i, ws, logName));
       }
@@ -164,33 +185,6 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
   matrixWS->replaceAxis(1, new Mantid::API::NumericAxis(logValues));
 
   return matrixWS;
-}
-
-/**
- * Check if the supplied group contains only MatrixWorkspaces
- * @param wsGroup :: [input] Pointer to a WorkspaceGroup
- * @returns True if contains only MatrixWorkspaces, false if contains
- * other types or is empty
- */
-bool MantidGroupPlotGenerator::groupIsAllMatrixWorkspaces(
-    const WorkspaceGroup_const_sptr &wsGroup) {
-  bool allMatrixWSes = true;
-  if (wsGroup) {
-    if (wsGroup->isEmpty()) {
-      allMatrixWSes = false;
-    } else {
-      for (int index = 0; index < wsGroup->getNumberOfEntries(); index++) {
-        if (nullptr == boost::dynamic_pointer_cast<MatrixWorkspace>(
-                           wsGroup->getItem(index))) {
-          allMatrixWSes = false;
-          break;
-        }
-      }
-    }
-  } else {
-    allMatrixWSes = false;
-  }
-  return allMatrixWSes;
 }
 
 /**
@@ -274,6 +268,8 @@ std::string MantidGroupPlotGenerator::validatePlotOptions(
   }
   return err.str();
 }
+// This function is not currently called. 
+// May be needed later on in the GUI harmonization.
 
 /**
  * Generates X axis title for graph based on first workspace in group
@@ -282,13 +278,13 @@ std::string MantidGroupPlotGenerator::validatePlotOptions(
  * @returns :: Title for X axis of graph
  */
 QString MantidGroupPlotGenerator::getXAxisTitle(
-    const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup) const {
-  if (wsGroup->getNumberOfEntries() <= 0) {
+  const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces) const {
+  if (workspaces.size() <= 0) {
     return QString();
   }
   const auto firstWS =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(wsGroup->getItem(
-          0)); // Already checked group contains only MatrixWorkspaces
+      boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[0]); 
+  // Already checked group contains only MatrixWorkspaces
   const auto &xAxisLabel = firstWS->getXDimension()->getName();
   const auto &xAxisUnits = firstWS->getXDimension()->getUnits().ascii();
   // Generate title for the X axis
@@ -312,16 +308,16 @@ QString MantidGroupPlotGenerator::getXAxisTitle(
  * wsGroup contains workspaces other than MatrixWorkspaces
  */
 bool MantidGroupPlotGenerator::groupContentsHaveSameX(
-    const Mantid::API::WorkspaceGroup_const_sptr &wsGroup, const size_t index) {
-  if (!wsGroup) {
+  const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces, const size_t index) {
+  if (workspaces.size() == 0) {
     return false;
   }
 
   // Check and retrieve X data for given workspace, spectrum
-  const auto getXData = [&wsGroup](const size_t workspace,
+  const auto getXData = [&workspaces](const size_t index,
                                    const size_t spectrum) {
-    const auto &ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        wsGroup->getItem(workspace));
+    const auto &ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+        workspaces[index]);
     if (ws) {
       if (ws->getNumberHistograms() < spectrum) {
         throw std::logic_error("Spectrum index too large for some workspaces");
@@ -334,7 +330,7 @@ bool MantidGroupPlotGenerator::groupContentsHaveSameX(
     }
   };
 
-  const auto nWorkspaces = wsGroup->size();
+  const auto nWorkspaces = workspaces.size();
   switch (nWorkspaces) {
   case 0:
     return false;
@@ -364,18 +360,13 @@ bool MantidGroupPlotGenerator::groupContentsHaveSameX(
  * @throws std::invalid_argument if validation fails.
  */
 void MantidGroupPlotGenerator::validateWorkspaceChoices(
-    const boost::shared_ptr<const Mantid::API::WorkspaceGroup> wsGroup,
+    const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
     const size_t spectrum) const {
-  if (!wsGroup || wsGroup->size() == 0) {
+  if (workspaces.empty()) {
     throw std::invalid_argument("Must provide a non-empty WorkspaceGroup");
   }
 
-  if (!groupIsAllMatrixWorkspaces(wsGroup)) {
-    throw std::invalid_argument(
-        "Input WorkspaceGroup must only contain MatrixWorkspaces");
-  }
-
-  if (!groupContentsHaveSameX(wsGroup, spectrum)) {
+  if (!groupContentsHaveSameX(workspaces, spectrum)) {
     throw std::invalid_argument(
         "Input WorkspaceGroup must have same X data for all workspaces");
   }
