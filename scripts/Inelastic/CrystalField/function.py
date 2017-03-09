@@ -122,7 +122,9 @@ class Function(object):
         """
         for arg in args:
             constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
+            print(constraint)
             self.function.addConstraints(constraint)
+        print(self.function.name())
 
     def toString(self):
         """Create function initialisation string"""
@@ -222,15 +224,15 @@ class CompositeProperties(object):
     def update(self, function):
         self.function = function
 
-    def ties(self, **kwargs):
+    def ties(self, ties_dict):
         """Set ties on the parameters.
 
-        @param kwargs: Ties as name=value pairs: name is a parameter name,
+        :param ties_dict: Ties as name=value pairs: name is a parameter name,
             the value is a tie string or a number. For example:
-                tie(A0 = 0.1, A1 = '2*A0')
+                tie({'A0': 0.1, 'A1': '2*A0'})
         """
-        for param in kwargs:
-            self.function.tie(self.prefix + param, str(kwargs[param]))
+        for param, tie in ties_dict.items():
+            self.function.tie(self.prefix + param, str(tie))
 
     def constraints(self, *args):
         """
@@ -241,9 +243,7 @@ class CompositeProperties(object):
         """
         for arg in args:
             constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
-            print (constraint)
             self.function.addConstraints(constraint)
-        print (self.function)
 
     # def getSize(self):
     #     """Get number of maps (functions) defined here"""
@@ -287,29 +287,17 @@ class PeaksFunction(object):
     containing multiple peaks of the same spectrum.
     """
 
-    def __init__(self, crystalField, prefix):
+    def __init__(self, function, prefix, first_index):
         """
         Constructor.
-        @param crystalField: A CrystalField object who's peaks we want to access.
-        @param prefix: a prefix of the parameters of the spectrum we want to access.
+        :param function: A CrystalField function who's peaks we want to access.
+        :param prefix: a prefix of the parameters of the spectrum we want to access.
+        :param first_index: Index of the first peak
         """
-        # Index of the first peak
-        first_index = 1 if crystalField.isMultiSpectrum() else 0
         # Collection of all attributes
-        self._attrib = CompositeProperties(crystalField.function, prefix, 'attributes', first_index)
+        self._attrib = CompositeProperties(function, prefix, 'attributes', first_index)
         # Collection of all parameters
-        self._params = CompositeProperties(crystalField.function, prefix, 'parameters', first_index)
-        # # Ties
-        # self._ties = []
-        # # Constraints
-        # self._constraints = []
-        self.crystalField = crystalField
-
-
-    # @property
-    # def name(self):
-    #     """Read only name of the peak function"""
-    #     return self._name
+        self._params = CompositeProperties(function, prefix, 'parameters', first_index)
 
     @property
     def attr(self):
@@ -325,13 +313,14 @@ class PeaksFunction(object):
         """
         return self._params
 
-    def ties(self, **kwargs):
+    def ties(self, ties_dict):
         """Set ties on the peak parameters.
 
-        @param ties: A list of ties. For example:
-                ties('f1.Sigma=0.1', 'f2.Sigma=2*f0.Sigma')
+        :param ties_dict: Ties as name=value pairs: name is a parameter name,
+              the value is a tie string or a number. For example:
+              ties({'f1.Sigma': '0.1', 'f2.Sigma': '2*f0.Sigma'})
         """
-        self._params.ties(**kwargs)
+        self._params.ties(ties_dict)
 
     def constraints(self, *constraints):
         """

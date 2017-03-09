@@ -291,8 +291,8 @@ bool ParamFunction::isExplicitlySet(size_t i) const {
  * @return Parameter index or number of nParams() if parameter not found
  */
 size_t ParamFunction::getParameterIndex(const ParameterReference &ref) const {
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
   return nParams();
 }

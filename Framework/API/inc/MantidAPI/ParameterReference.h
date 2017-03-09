@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
+#include <string>
 
 namespace Mantid {
 namespace API {
@@ -41,18 +42,27 @@ class MANTID_API_DLL ParameterReference {
 public:
   ParameterReference();
   ParameterReference(IFunction *fun, std::size_t index, bool isDefault = false);
-  std::size_t getIndex() const;
-  void reset(IFunction *fun, std::size_t index, bool isDefault = false);
-  void setParameter(const double &value);
+  void setParameter(const double &value, bool isExplicitlySet = true);
   double getParameter() const;
-  IFunction *getFunction() const;
   bool isDefault() const;
   bool isParameterOf(const IFunction *fun) const;
   virtual ~ParameterReference() = default;
+  IFunction *getLocalFunction() const;
+  std::size_t getLocalIndex() const;
+  std::size_t parameterIndex() const;
+  std::string parameterName() const;
 
+protected:
+  void reset(IFunction *fun, std::size_t index, bool isDefault = false);
 private:
-  IFunction *m_function; ///< pointer to the function
-  std::size_t m_index;   ///< parameter index
+  /// Function-owner of this reference. parameterName() and parameterIndex()
+  /// return values relative to this function.
+  IFunction *m_owner;
+  /// Function that together with m_index uniquely identify the parameter.
+  IFunction *m_function;
+  /// Index of the parameter in m_function. It is assumed that this index
+  /// uniquely identifies the parameter withing m_function
+  std::size_t m_index;
   /// Flag to mark as default the value of an object associated with this
   /// reference: a tie or a constraint.
   bool m_isDefault;

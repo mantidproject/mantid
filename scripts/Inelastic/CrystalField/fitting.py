@@ -215,14 +215,13 @@ class CrystalField(object):
         if self._isMultiSpectrum:
             self._peaks = []
             for i in range(self.NumberOfSpectra):
-                self._peaks.append(PeaksFunction(self, 'f%s.' % i))
+                self._peaks.append(PeaksFunction(self.crystalFieldFunction, 'f%s.' % i, 1))
         else:
-            prefix = 'f1.' if self.background is not None else ''
-            self._peaks = PeaksFunction(self, prefix)
+            self._peaks = PeaksFunction(self.crystalFieldFunction, '', 0)
 
     @property
     def crystalFieldFunction(self):
-        if not self._isMultiSpectrum and self.background is not None :
+        if not self._isMultiSpectrum and self.background is not None:
             return self.function[1]
         else:
             return self.function

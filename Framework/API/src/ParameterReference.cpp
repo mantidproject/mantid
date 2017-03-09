@@ -6,7 +6,7 @@ namespace API {
 
 /// Default constructor
 ParameterReference::ParameterReference()
-    : m_function(), m_index(0), m_isDefault(false) {}
+    : m_owner(), m_function(), m_index(0), m_isDefault(false) {}
 
 /**
  * Constructor.
@@ -18,15 +18,27 @@ ParameterReference::ParameterReference()
  */
 ParameterReference::ParameterReference(IFunction *fun, std::size_t index,
                                        bool isDefault)
-    : m_function(fun), m_index(index), m_isDefault(isDefault) {
+    : m_owner(fun), m_function(fun), m_index(index), m_isDefault(isDefault) {
   reset(fun, index, isDefault);
 }
 
-/// Return pointer to the function
-IFunction *ParameterReference::getFunction() const { return m_function; }
+/// Return pointer to the local function
+IFunction *ParameterReference::getLocalFunction() const { return m_function; }
 
-/// Return parameter index in that function
-std::size_t ParameterReference::getIndex() const { return m_index; }
+/// Return parameter index in the local function
+std::size_t ParameterReference::getLocalIndex() const { 
+  return m_index; 
+}
+
+/// Return parameter index in the owning function
+std::size_t ParameterReference::parameterIndex() const { 
+  return m_owner->getParameterIndex(*this);
+}
+
+/// Return parameter name in the owning function
+std::string ParameterReference::parameterName() const {
+  return m_owner->parameterName(parameterIndex());
+}
 
 /**
  * Reset the reference
@@ -38,22 +50,20 @@ std::size_t ParameterReference::getIndex() const { return m_index; }
  */
 void ParameterReference::reset(IFunction *fun, std::size_t index,
                                bool isDefault) {
-  //IFunction *fLocal = fun;
-  //size_t iLocal = index;
-  //CompositeFunction *cf = dynamic_cast<CompositeFunction *>(fun);
-  //while (cf) {
-  //  size_t iFun =
-  //      cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
-  //  fLocal = cf->getFunction(iFun).get();
-  //  iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
-  //  cf = dynamic_cast<CompositeFunction *>(fLocal);
-  //}
+  m_owner = fun;
+  IFunction *fLocal = fun;
+  size_t iLocal = index;
+  CompositeFunction *cf = dynamic_cast<CompositeFunction *>(fun);
+  while (cf) {
+    size_t iFun =
+        cf->functionIndex(iLocal); // TODO squashing the warning breaks the code
+    fLocal = cf->getFunction(iFun).get();
+    iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
+    cf = dynamic_cast<CompositeFunction *>(fLocal);
+  }
 
-  //m_function = fLocal;
-  //m_index = iLocal;
-  //m_isDefault = isDefault;
-  m_function = fun;
-  m_index = index;
+  m_function = fLocal;
+  m_index = iLocal;
   m_isDefault = isDefault;
 }
 
@@ -61,8 +71,8 @@ void ParameterReference::reset(IFunction *fun, std::size_t index,
  * Set the parameter
  * @param value :: A value to set.
  */
-void ParameterReference::setParameter(const double &value) {
-  m_function->setParameter(m_index, value);
+void ParameterReference::setParameter(const double &value, bool isExplicitlySet) {
+  m_function->setParameter(m_index, value, isExplicitlySet);
 }
 
 /// Get the value of the parameter

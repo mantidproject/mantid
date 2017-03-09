@@ -180,8 +180,8 @@ size_t FunctionParameterDecorator::getParameterIndex(
     return m_wrappedFunction->getParameterIndex(ref);
   }
 
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
 
   return nParams();

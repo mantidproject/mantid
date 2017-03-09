@@ -215,14 +215,14 @@ public:
     TS_ASSERT(constraint);
     if (constraint) {
       TS_ASSERT_EQUALS(constraint->asString(), "1.3<f1.FWHM");
-      TS_ASSERT_EQUALS(constraint->getIndex(), 39);
+      TS_ASSERT_EQUALS(constraint->getLocalIndex(), 39);
     }
     i = fun->parameterIndex("B44");
     constraint = fun->getConstraint(i);
     TS_ASSERT(constraint);
     if (constraint) {
       TS_ASSERT_EQUALS(constraint->asString(), "0<B44<10");
-      TS_ASSERT_EQUALS(constraint->getIndex(), 13);
+      TS_ASSERT_EQUALS(constraint->getLocalIndex(), 13);
     }
   }
 

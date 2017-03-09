@@ -25,14 +25,14 @@ using namespace API;
 
 /// Default constructor
 BoundaryConstraint::BoundaryConstraint()
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(""),
+      : API::IConstraint(), m_penaltyFactor(1000.0),
         m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
         m_upperBound(-DBL_MAX) {}
 
 /// Constructor with no boundary arguments
 /// @param paramName :: The parameter name
 BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
-      : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(paramName),
+      : API::IConstraint(), m_penaltyFactor(1000.0),
         m_hasLowerBound(false), m_hasUpperBound(false) {}
 
 /** Constructor with boundary arguments
@@ -48,19 +48,19 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound,
                                        const double upperBound, bool isDefault)
-    : m_penaltyFactor(1000.0), m_parameterName(paramName),
+    : m_penaltyFactor(1000.0),
       m_hasLowerBound(true), m_hasUpperBound(true), m_lowerBound(lowerBound),
       m_upperBound(upperBound) {
-  //reset(fun, fun->parameterIndex(paramName), isDefault);
+  reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
 BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound, bool isDefault)
-    : m_penaltyFactor(1000.0), m_parameterName(paramName),
+    : m_penaltyFactor(1000.0),
       m_hasLowerBound(true), m_hasUpperBound(false), m_lowerBound(lowerBound),
       m_upperBound(-DBL_MAX) {
-  //reset(fun, fun->parameterIndex(paramName), isDefault);
+  reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 
 /** Initialize the constraint from an expression.
@@ -127,7 +127,6 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
   try {
     size_t i = fun->parameterIndex(parName);
     reset(fun, i, isDefault);
-    m_parameterName = parName;
   } catch (...) {
     g_log.error() << "Parameter " << parName << " not found in function "
                   << fun->name() << '\n';
@@ -160,31 +159,31 @@ void BoundaryConstraint::setParamToSatisfyConstraint() {
   if (!(m_hasLowerBound || m_hasUpperBound)) {
     g_log.warning()
         << "No bounds have been set on BoundaryConstraint for parameter "
-        << m_parameterName << ". Therefore"
+        << parameterName() << ". Therefore"
         << " this constraint serves no purpose!";
     return;
   }
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getParameter();
 
   if (m_hasLowerBound)
     if (paramValue < m_lowerBound)
-      getFunction()->setParameter(getIndex(), m_lowerBound, false);
+      setParameter(m_lowerBound, false);
   if (m_hasUpperBound)
     if (paramValue > m_upperBound)
-      getFunction()->setParameter(getIndex(), m_upperBound, false);
+      setParameter(m_upperBound, false);
 }
 
 double BoundaryConstraint::check() {
   if (!(m_hasLowerBound || m_hasUpperBound)) {
     g_log.warning()
         << "No bounds have been set on BoundaryConstraint for parameter "
-        << m_parameterName << ". Therefore"
+        << parameterName() << ". Therefore"
         << " this constraint serves no purpose!";
     return 0.0;
   }
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getParameter();
 
   double penalty = 0.0;
 
@@ -212,7 +211,7 @@ double BoundaryConstraint::checkDeriv() {
     return penalty;
   }
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getParameter();
 
   if (m_hasLowerBound)
     if (paramValue < m_lowerBound) {
@@ -238,7 +237,7 @@ double BoundaryConstraint::checkDeriv2() {
     return penalty;
   }
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getParameter();
 
   if (m_hasLowerBound)
     if (paramValue < m_lowerBound)
@@ -255,7 +254,7 @@ std::string BoundaryConstraint::asString() const {
   if (m_hasLowerBound) {
     ostr << m_lowerBound << '<';
   }
-  ostr << getFunction()->parameterName(getIndex());
+  ostr << parameterName();
   if (m_hasUpperBound) {
     ostr << '<' << m_upperBound;
   }

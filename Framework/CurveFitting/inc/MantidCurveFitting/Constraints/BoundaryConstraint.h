@@ -109,7 +109,7 @@ public:
   }
 
   /// Get parameter name
-  std::string getParameterName() const { return m_parameterName; }
+//  std::string getParameterName() const { return m_parameterName; }
 
   /// overwrite IConstraint base class methods
   double check() override;
@@ -123,7 +123,7 @@ private:
   double m_penaltyFactor;
 
   /// name of parameter you want to constraint
-  std::string m_parameterName;
+  //std::string m_parameterName;
 
   /// has a lower bound set true/false
   bool m_hasLowerBound;

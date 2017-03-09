@@ -409,7 +409,7 @@ void CompositeFunction::removeFunction(size_t i) {
   }
 
   IFunction_sptr fun = getFunction(i);
-
+  // Reduction in parameters
   size_t dnp = fun->nParams();
 
   for (size_t j = 0; j < nParams();) {
@@ -420,6 +420,10 @@ void CompositeFunction::removeFunction(size_t i) {
       j++;
     }
   }
+  // Number of parameters in functions preceding the removed one.
+  // Indices of those parameters won't change
+  size_t nParamsBeforeRemoved = m_paramOffsets[i];
+  // 
 
   // Shift down the function indeces for parameters
   for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {
@@ -724,8 +728,8 @@ bool CompositeFunction::isExplicitlySet(size_t i) const {
  */
 size_t
 CompositeFunction::getParameterIndex(const ParameterReference &ref) const {
-  if (ref.getFunction() == this && ref.getIndex() < nParams()) {
-    return ref.getIndex();
+  if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
+    return ref.getLocalIndex();
   }
   for (size_t iFun = 0; iFun < nFunctions(); iFun++) {
     IFunction_sptr fun = getFunction(iFun);

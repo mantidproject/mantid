@@ -279,10 +279,14 @@ public:
     icf.addTies("b2=b1,a2=a1/5");
     icf.applyTies();
 
+    auto icfString = icf.asString();
     TS_ASSERT_EQUALS(
-        icf.asString(),
+        icfString.substr(0, 78),
         "name=ImmutableCompositeFunctionTest_"
-        "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(a2=a1/5,b2=b1)");
+        "Function,NumDeriv=false,a1=11,b1=12,ties=(");
+    auto icfTies = icfString.substr(78);
+    TS_ASSERT(icfTies.find("a2=a1/5") != std::string::npos)
+    TS_ASSERT(icfTies.find("b2=b1") != std::string::npos)
 
     auto fun = FunctionFactory::Instance().createInitialized(icf.asString());
     TS_ASSERT(fun);
@@ -308,8 +312,7 @@ public:
     TS_ASSERT_EQUALS(icf.getParameter(3), 1.0);
 
     TS_ASSERT_EQUALS(icf.asString(), "name=ImmutableCompositeFunctionTest_"
-                                     "FunctionWithTies,NumDeriv=false,a1=1,b1="
-                                     "2,a2=0.25,b2=1");
+                                     "FunctionWithTies,NumDeriv=false,a1=1,b1=2");
 
     auto fun = FunctionFactory::Instance().createInitialized(icf.asString());
     TS_ASSERT(fun);

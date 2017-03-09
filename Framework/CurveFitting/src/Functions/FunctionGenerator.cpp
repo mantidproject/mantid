@@ -158,8 +158,8 @@ void FunctionGenerator::unfix(size_t i) {
 /// Return parameter index from a parameter reference.
 size_t
 FunctionGenerator::getParameterIndex(const ParameterReference &ref) const {
-  if (ref.getFunction() == this) {
-    auto index = ref.getIndex();
+  if (ref.getLocalFunction() == this) {
+    auto index = ref.getLocalIndex();
     auto np = nParams();
     if (index < np) {
       return index;

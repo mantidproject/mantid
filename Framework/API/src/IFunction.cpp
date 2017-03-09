@@ -170,6 +170,7 @@ std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
   bool first = true;
   for(auto &tie: m_ties) {
+    if (tie->isDefault()) continue;
     if (!first) {
       tieStream << ',';
     } else {
@@ -276,10 +277,10 @@ void IFunction::clearTies() {
  *  @param ic :: Pointer to a constraint.
  */
 void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
-  size_t iPar = ic->getIndex();
+  size_t iPar = ic->parameterIndex();
   bool found = false;
   for (auto &constraint : m_constraints) {
-    if (constraint->getIndex() == iPar) {
+    if (constraint->parameterIndex() == iPar) {
       found = true;
       constraint = std::move(ic);
       break;
@@ -312,7 +313,7 @@ IConstraint *IFunction::getConstraint(size_t i) const {
 void IFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
   for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getIndex()) {
+    if (iPar == (**it).getLocalIndex()) {
       m_constraints.erase(it);
       break;
     }
@@ -337,6 +338,7 @@ std::string IFunction::writeConstraints() const {
   std::ostringstream stream;
   bool first = true;
   for(auto &constrint: m_constraints) {
+    if (constrint->isDefault()) continue;
     if (!first) {
       stream << ',';
     } else {
