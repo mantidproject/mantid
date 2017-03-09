@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -1417,6 +1418,39 @@ public:
     }
 
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
+  }
+
+  void test_scanning() {
+    // Set up 2 workspaces to be merged
+    auto ws1 = makeWorkspaceWithDetectors(1, 1);
+    auto ws2 = makeWorkspaceWithDetectors(1, 1);
+    auto &detInfo1 = ws1->mutableDetectorInfo();
+    auto &detInfo2 = ws2->mutableDetectorInfo();
+    detInfo1.setPosition(0, {1, 0, 0});
+    detInfo2.setPosition(0, {2, 0, 0});
+    detInfo1.setScanInterval({0, 0}, {10, 20});
+    detInfo2.setScanInterval({0, 0}, {20, 30});
+
+    // Merge
+    auto merged = WorkspaceFactory::Instance().create(ws1, 2);
+    auto &detInfo = merged->mutableDetectorInfo();
+    detInfo.merge(detInfo2);
+
+    // Set up spectrum definitions with 1:1 mapping such that each spectrum
+    // corresponds to 1 time index of a detector.
+    auto specDefs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
+    specDefs.access()[0].add(0, 0); // detector 0, time index 0
+    specDefs.access()[1].add(0, 1); // detector 0, time index 1
+    auto indexInfo = merged->indexInfo();
+    indexInfo.setDetectorIDs({0, 0}); // both spectra have detector ID 0
+    indexInfo.setSpectrumDefinitions(specDefs);
+    merged->setIndexInfo(indexInfo);
+
+    const auto &specInfo = merged->spectrumInfo();
+    TS_ASSERT(specInfo.hasDetectors(0));
+    TS_ASSERT(specInfo.hasDetectors(1));
+    TS_ASSERT_EQUALS(specInfo.position(0), V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(specInfo.position(1), V3D(2, 0, 0));
   }
 
 private:
