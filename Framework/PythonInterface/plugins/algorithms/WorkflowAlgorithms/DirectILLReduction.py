@@ -10,6 +10,7 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, In
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
                               Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
 import numpy
+import roundinghelper
 from scipy import constants
 
 
@@ -188,7 +189,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                        subalgLogging)
 
         progress.report('Converting to q')
-        mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._sOfQW(mainWS, wsNames, wsCleanup, report, subalgLogging)
         mainWS = self._transpose(mainWS, wsNames, wsCleanup, subalgLogging)
         self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
@@ -240,15 +241,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
-        self.declareProperty(name=common.PROP_REBINNING_MODE_W,
-                             defaultValue=common.REBIN_AUTO_ELASTIC_PEAK,
-                             validator=StringListValidator([
-                                 common.REBIN_AUTO_ELASTIC_PEAK,
-                                 common.REBIN_AUTO_MEDIAN_BIN_WIDTH,
-                                 common.REBIN_MANUAL_W]),
-                             direction=Direction.Input,
-                             doc='Energy rebinnin mode.')
-        self.setPropertyGroup(common.PROP_REBINNING_MODE_W, common.PROPGROUP_REBINNING)
         self.declareProperty(name=common.PROP_BIN_COUNT_LIMIT_W,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -259,14 +251,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
-        self.declareProperty(name=common.PROP_BINNING_MODE_Q,
-                             defaultValue=common.REBIN_AUTO_Q,
-                             validator=StringListValidator([
-                                 common.REBIN_AUTO_Q,
-                                 common.REBIN_MANUAL_Q]),
-                             direction=Direction.Input,
-                             doc='q rebinning mode.')
-        self.setPropertyGroup(common.PROP_BINNING_MODE_Q, common.PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=common.PROP_BINNING_PARAMS_Q),
                              doc='Manual q rebinning parameters.')
         self.setPropertyGroup(common.PROP_BINNING_PARAMS_Q, common.PROPGROUP_REBINNING)
@@ -314,7 +298,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         else:
             countLimit = self.getProperty(common.PROP_BIN_COUNT_LIMIT_W).value
         xs = ws.dataX(0)
-        return (xs[-1] - xs[0]) / float(countLimit)
+        width = (xs[-1] - xs[0]) / float(countLimit)
+        return 10 * roundinghelper.round(width, roundinghelper.ROUNDING_TEN_TO_INT)
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""
@@ -411,46 +396,34 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
                   subalgLogging):
         """Rebin the horizontal axis of a workspace."""
-        mode = self.getProperty(common.PROP_REBINNING_MODE_W).value
-        if mode == common.REBIN_AUTO_ELASTIC_PEAK:
+        params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
+        if not params:
             binWidth = BinWidthAtX(InputWorkspace=mainWS,
                                    X=0.0,
                                    Rounding='10^n',
                                    EnableLogging=subalgLogging)
             binWidthLimit = self._binWidthLimit(mainWS)
-            params = [max(binWidth, binWidthLimit)]
+            params = [max(10.0 * binWidth, binWidthLimit)]
             report.notice('Rebinned energy axis to bin width {}.'
                           .format(binWidth))
-        elif mode == common.REBIN_AUTO_MEDIAN_BIN_WIDTH:
-            binWidth = MedianBinWidth(InputWorkspace=mainWS,
-                                      Rounding='10^n',
-                                      EnableLogging=subalgLogging)
-            binWidthLimit = self._binWidthLimit(mainWS)
-            params = [max(binWidth, binWidthLimit)]
-            report.notice('Rebinned energy axis to bin width {}.'
-                          .format(binWidth))
-        elif mode == common.REBIN_MANUAL_W:
-            params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
-        else:
-            raise RuntimeError('Unknown ' + common.PROP_REBINNING_MODE_W)
         rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
         wsCleanup.cleanup(mainWS)
         return rebinnedWS
 
-    def _sOfQW(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _sOfQW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Run the SofQWNormalisedPolygon algorithm."""
         sOfQWWSName = wsNames.withSuffix('sofqw')
-        qRebinningMode = self.getProperty(common.PROP_BINNING_MODE_Q).value
-        if qRebinningMode == common.REBIN_AUTO_Q:
+        params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
+        if not params:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
-            qBinning = '{0}, {1}, {2}'.format(qMin, dq, qMax)
-        else:
-            qBinning = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
+            dq = 10 * roundinghelper.round(dq, roundinghelper.ROUNDING_TEN_TO_INT)
+            params = [qMin, dq, qMax]
+            report.notice('Binned momentum transfer axis to bin width {0}.'.format(dq))
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,
-                                         QAxisBinning=qBinning,
+                                         QAxisBinning=params,
                                          EMode='Direct',
                                          EFixed=Ei,
                                          ReplaceNaNs=False,
