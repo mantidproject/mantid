@@ -117,7 +117,7 @@ def _check_value_is_in_enum(val, enum):
 
     for k, v in iteritems(enum.__dict__):
         # Get all class attribute and value pairs except enum_friendly_name
-        if k.lower == "enum_friendly_name":
+        if k.startswith("__") or k.lower() == "enum_friendly_name":
             continue
 
         enum_known_keys.append(k)
@@ -131,9 +131,9 @@ def _check_value_is_in_enum(val, enum):
         return val
     else:
         e_msg = "The user specified value: '" + str(val) + "' is unknown. "
-        e_msg += "Known values for " + enum.enum_friendly_name + " are:\n"
+        e_msg += "Known values for " + enum.enum_friendly_name + " are: \n"
         for key in enum_known_keys:
-            e_msg += key + '\n'
+            e_msg += '\'' + key + '\' '
 
         raise ValueError(e_msg)
 
