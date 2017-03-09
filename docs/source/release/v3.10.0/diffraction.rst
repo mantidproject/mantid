@@ -14,6 +14,11 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+Powder Diffraction
+------------------
+
+* :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
+
 Single Crystal Diffraction
 --------------------------
 
