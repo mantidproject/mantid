@@ -1,11 +1,9 @@
-from mantid.simpleapi import *
+import os.path
+
+from mantid import config
 from mantid.api import *
 from mantid.kernel import *
-from mantid import config
-import sys
-import math
-import os.path
-import numpy as np
+from mantid.simpleapi import *
 
 
 class SampleChanger(DataProcessorAlgorithm):
@@ -35,13 +33,11 @@ class SampleChanger(DataProcessorAlgorithm):
                              doc='Reflection number for instrument setup during run.')
 
         self.declareProperty(name='FirstRun', defaultValue=1,
-                             doc="First Sample runnumber.")
+                             doc="First Sample run-number.")
         self.declareProperty(name='LastRun', defaultValue=2,
-                             doc="Last Sample runnumber.")
+                             doc="Last Sample run-number.")
         self.declareProperty(name='NumberSamples', defaultValue=1,
-                             doc="Increment for runnumber.")
-        self.declareProperty(name='LoadLogFiles', defaultValue=True,
-                             doc='Load log files when loading runs')
+                             doc="Increment for run-number.")
 
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
@@ -50,20 +46,11 @@ class SampleChanger(DataProcessorAlgorithm):
                              doc='Range of background to subtract from raw data in time of flight.')
         self.declareProperty(FloatArrayProperty(name='InelasticRange'),
                              doc='Range of background to subtract from raw data in time of flight.')
-        self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
-                             doc='')
 
         # Spectra grouping options
         self.declareProperty(name='GroupingMethod', defaultValue='Individual',
                              validator=StringListValidator(['Individual', 'All', 'File']),
                              doc='Method used to group spectra.')
-
-        self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
-                             doc='Name of the sample environment log entry')
-        sampEnvLogVal_type = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
-                             StringListValidator(sampEnvLogVal_type),
-                             doc='Value selection of the sample environment log entry')
 
         self.declareProperty(name='MsdFit', defaultValue=False,
                              doc='Run msd fit')
@@ -159,7 +146,7 @@ class SampleChanger(DataProcessorAlgorithm):
         logger.information('Number of scans : %i' % self._number_samples)
 
         self._sum_files = False
-        self._load_logs = self.getProperty('LoadLogFiles').value
+        self._load_logs = True
         self._calibration_ws = ''
 
         self._instrument_name = self.getPropertyValue('Instrument')
@@ -169,14 +156,14 @@ class SampleChanger(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty('SpectraRange').value
         self._elastic_range = self.getProperty('ElasticRange').value
         self._inelastic_range = self.getProperty('InelasticRange').value
-        self._detailed_balance = self.getProperty('DetailedBalance').value
+        self._detailed_balance = Property.EMPTY_DBL
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
         self._grouping_ws = ''
         self._grouping_map_file = ''
 
-        self._sample_log_name = self.getPropertyValue('SampleEnvironmentLogName')
-        self._sample_log_value = self.getPropertyValue('SampleEnvironmentLogValue')
+        self._sample_log_name = 'Position'
+        self._sample_log_value = 'last_value'
 
         self._msdfit = self.getProperty('MsdFit').value
 
