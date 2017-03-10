@@ -189,9 +189,9 @@ public:
    * @param value: cast this value
    */
   void fromDouble(size_t i, double value) override {
-    typedef
-        typename std::conditional<std::is_convertible<double,Type>::value, Type, 			InconvertibleToDoubleType>::type
-            DoubleType;
+    typedef typename std::conditional<std::is_convertible<double, Type>::value,
+                                      Type, InconvertibleToDoubleType>::type
+        DoubleType;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
   }
