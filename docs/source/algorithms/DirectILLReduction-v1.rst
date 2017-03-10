@@ -32,11 +32,11 @@ The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofTh
 (Re)binning in energy and momentum transfer
 ###########################################
 
-Binning in both energy and momentun transfer is automatic by default. For energy rebinning, the entire energy transfer range is rebinned to the bin width at the elastic bin (zero energy transfer). :math:`q`, in turn, is binned to median :math:`2\theta` steps between the spectra. There is an option to rebin energy to the median bin width as well. This can be changed by *EnergyRebinningMode*.
+After conversion from time-of-flight to energy transfer, the binning may differ from spectrum to spectrum if the sample to detector distances are unequal. The :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` algorithm cannot work with such ragged workspaces and thus rebinning is necessary. The rebinning can be specified by the *EnergyRebinningParams* property. This is directly passed to :ref:`Rebin <algm-Rebin>` as the *Params* property. If *EnergyRebinningParams* is not specified, an automatic rebinning scheme is used:
+- Find the spectrum with smallest bin border. Copy binning from this spectrum for negative energy transfers.
+- For positive energy transfers, use the median bin width at zero energy transfer.
 
-The automatic energy rebinning might in some cases result in an enormous number of bins. The number of bins is thus limited to ten times the number of bins before rebinning. This limit can be controlled by *EnergyBinCountLimit*.
-
-If it is desirable to give manual binning parameters, both *EnergyRebinningMode* and *QBinningMode* can be set to manual mode. In this case, *EnergyRebinningParams* and *QBinningParams* have to be given as well. For the format of these properties, see :ref:`Rebin <algm-Rebin>`.
+*QBinningParams* are passed to :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` and have the same format as *EnergyRebinningParamas*. If the property is not specified, :math:`q` is binned to ten times the median :math:`2\theta` steps between the spectra.
 
 Usage
 -----

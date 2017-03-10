@@ -5,10 +5,10 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, IntBoundedValidator, Property,
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, IntBoundedValidator,
                            StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
-                              Divide, GroupDetectors, MaskDetectors, MedianBinWidth, Rebin, SofQWNormalisedPolygon, Transpose)
+                              Divide, GroupDetectors, MaskDetectors, Rebin, SofQWNormalisedPolygon, Transpose)
 import numpy
 import roundinghelper
 from scipy import constants
@@ -53,6 +53,7 @@ def _deltaQ(ws):
 
 
 def _detectorGroupsToXml(groups, instrument):
+    """Create grouping pattern XML tree from detector groups."""
     from xml.etree import ElementTree
     rootElement = ElementTree.Element('detector-grouping', {'instrument': 'IN5'})
     for group in groups:
@@ -63,6 +64,32 @@ def _detectorGroupsToXml(groups, instrument):
             detIds += ',' + str(detId)
         ElementTree.SubElement(groupElement, 'detids', {'val': detIds})
     return rootElement
+
+
+def _energyBinning(ws):
+    """Create common (but nonequidistant) binning for a DeltaE workspace."""
+    xs = ws.extractX()
+    minXIndex = numpy.nanargmin(xs[:, 0])
+    dx = BinWidthAtX(InputWorkspace=ws,
+                     X=0.0)
+    lastX = numpy.max(xs[:, -1])
+    binCount = ws.blocksize()
+    borders = list()
+    templateXs = xs[minXIndex, :]
+    currentX = numpy.nan
+    for i in range(binCount):
+        currentX = templateXs[i]
+        borders.append(currentX)
+        if currentX > 0:
+            break
+    i = 1
+    equalBinStart = borders[-1]
+    while currentX < lastX:
+        currentX = equalBinStart + i * dx
+        borders.append(currentX)
+        i += 1
+    borders[-1] = lastX
+    return numpy.array(borders)
 
 
 def _medianDeltaTheta(ws):
@@ -106,6 +133,7 @@ def _rebin(ws, params, wsNames, algorithmLogging):
 
 
 def _writeXml(element, filename):
+    """Write XML element to a file."""
     from xml.etree import ElementTree
     with open(filename, mode='w') as outFile:
         ElementTree.ElementTree(element).write(outFile)
@@ -199,7 +227,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         inputWorkspaceValidator = CompositeValidator()
         inputWorkspaceValidator.add(InstrumentValidator())
         inputWorkspaceValidator.add(WorkspaceUnitValidator('TOF'))
-        positiveInt = IntBoundedValidator(lower=0)
 
         # Properties.
         self.declareProperty(MatrixWorkspaceProperty(
@@ -241,13 +268,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Detector diagnostics workspace obtained from another ' +
                 'reduction run.')
-        self.declareProperty(name=common.PROP_BIN_COUNT_LIMIT_W,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=positiveInt,
-                             direction=Direction.Input,
-                             doc='Maximum number of energy bins for automatic rebinning '
-                                 '(default: 10 times the number of TOF bins).')
-        self.setPropertyGroup(common.PROP_BIN_COUNT_LIMIT_W, common.PROPGROUP_REBINNING)
         self.declareProperty(FloatArrayProperty(name=common.PROP_REBINNING_PARAMS_W),
                              doc='Manual energy rebinning parameters.')
         self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, common.PROPGROUP_REBINNING)
@@ -291,15 +311,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
                       EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
         return maskedWS
-
-    def _binWidthLimit(self, ws):
-        if self.getProperty(common.PROP_BIN_COUNT_LIMIT_W).isDefault:
-            countLimit = 10 * ws.blocksize()
-        else:
-            countLimit = self.getProperty(common.PROP_BIN_COUNT_LIMIT_W).value
-        xs = ws.dataX(0)
-        width = (xs[-1] - xs[0]) / float(countLimit)
-        return 10 * roundinghelper.round(width, roundinghelper.ROUNDING_TEN_TO_INT)
 
     def _convertTOFToDeltaE(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Convert the X axis units from time-of-flight to energy transfer."""
@@ -393,19 +404,17 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                           EnableLogging=subalgLogging)
             self.setProperty(common.PROP_OUTPUT_THETA_W_WS, thetaWS)
 
-    def _rebinInW(self, mainWS, wsNames, wsCleanup, report,
-                  subalgLogging):
+    def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
         params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
         if not params:
-            binWidth = BinWidthAtX(InputWorkspace=mainWS,
-                                   X=0.0,
-                                   Rounding='10^n',
-                                   EnableLogging=subalgLogging)
-            binWidthLimit = self._binWidthLimit(mainWS)
-            params = [max(10.0 * binWidth, binWidthLimit)]
-            report.notice('Rebinned energy axis to bin width {}.'
-                          .format(binWidth))
+            binBorders = _energyBinning(mainWS)
+            params = list()
+            binWidths = numpy.diff(binBorders)
+            for start, width in zip(binBorders[:-1], binWidths):
+                params.append(start)
+                params.append(width)
+            params.append(binBorders[-1])
         rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
         wsCleanup.cleanup(mainWS)
         return rebinnedWS

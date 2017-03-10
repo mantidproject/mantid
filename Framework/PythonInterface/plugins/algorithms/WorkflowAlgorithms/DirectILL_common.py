@@ -28,7 +28,6 @@ NORM_METHOD_TIME = 'Normalisation Time'
 
 PROP_BEAM_HEIGHT = 'BeamHeight'
 PROP_BEAM_WIDTH = 'BeamWidth'
-PROP_BIN_COUNT_LIMIT_W = 'EnergyBinCountLimit'
 PROP_BINNING_PARAMS_Q = 'QBinningParams'
 PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgHighThreshold'
 PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgLowThreshold'
