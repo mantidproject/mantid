@@ -258,13 +258,15 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     initScanCounts();
   if (!m_indexMap)
     initIndices();
+  // Temporary to accumulate scan counts (need original for index offset).
+  auto scanCounts(m_scanCounts);
   for (size_t index = 0; index < other.m_positions->size(); ++index) {
     if (!merge[index])
       continue;
     auto newIndex = getIndex(other.m_indices, index);
     const size_t detIndex = newIndex.first;
     newIndex.second += scanCount(detIndex);
-    m_scanCounts.access()[detIndex]++;
+    scanCounts.access()[detIndex]++;
     m_indexMap.access()[detIndex].push_back((*m_indices).size());
     m_indices.access().push_back(newIndex);
     m_isMasked.access().push_back((*other.m_isMasked)[index]);
@@ -272,6 +274,7 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     m_rotations.access().push_back((*other.m_rotations)[index]);
     m_scanIntervals.access().push_back((*other.m_scanIntervals)[index]);
   }
+  m_scanCounts = std::move(scanCounts);
 }
 
 /// Returns the linear index for a pair of detector index and time index.
