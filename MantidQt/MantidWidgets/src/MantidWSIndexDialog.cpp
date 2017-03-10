@@ -23,8 +23,11 @@ namespace MantidWidgets {
   /// The string "Custom"
   const QString MantidWSIndexWidget::CUSTOM = "Custom";
 
+  // String for plot types
+  const QString MantidWSIndexWidget::SIMPLE_PLOT = "1D Plot";
   const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot of Group";
   const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot of Group";
+
 //----------------------------------
 // MantidWSIndexWidget methods
 //----------------------------------
@@ -60,30 +63,33 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
 MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
   UserInput options;
   options.plots = getPlots();
+  options.simple = is1DPlotSelected();
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
   options.errors = isErrorBarsSelected();
   options.surface = isSurfacePlotSelected();
+  options.contour = isContourPlotSelected();
 
   // Contour and Surface options
-  UserInputForContourAndSurface userInputForContourAndSurface;
-  userInputForContourAndSurface.accepted = true;
-  userInputForContourAndSurface.plotIndex = getPlotIndex();
-  userInputForContourAndSurface.axisName = getAxisName();
-  userInputForContourAndSurface.logName = getLogName();
-  userInputForContourAndSurface.workspaceNames = m_wsNames;
-  if (userInputForContourAndSurface.logName == CUSTOM) {
-    try {
-      userInputForContourAndSurface.customLogValues = getCustomLogValues();
+  if (options.surface || options.contour) {
+    UserInputForContourAndSurface userInputForContourAndSurface;
+    userInputForContourAndSurface.accepted = true;
+    userInputForContourAndSurface.plotIndex = getPlotIndex();
+    userInputForContourAndSurface.axisName = getAxisName();
+    userInputForContourAndSurface.logName = getLogName();
+    userInputForContourAndSurface.workspaceNames = m_wsNames;
+    if (userInputForContourAndSurface.logName == CUSTOM) {
+      try {
+        userInputForContourAndSurface.customLogValues = getCustomLogValues();
+      }
+      catch (const std::invalid_argument &ex) {
+        QString error("Invalid log value supplied: ");
+        showPlotOptionsError(error.append(ex.what()));
+        userInputForContourAndSurface.accepted = false;
+      }
     }
-    catch (const std::invalid_argument &ex) {
-      QString error("Invalid log value supplied: ");
-      showPlotOptionsError(error.append(ex.what()));
-      userInputForContourAndSurface.accepted = false;
-    }
+    options.contourSurface = userInputForContourAndSurface;
   }
-
-  options.contourSurface = userInputForContourAndSurface;
   return options;
 }
 
@@ -211,6 +217,14 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
   }
 
   return plots;
+}
+
+/**
+* Whether the user selected "waterfall"
+* @returns True if 1D plot selected
+*/
+bool MantidWSIndexWidget::is1DPlotSelected() const {
+  return (m_plotOptions->currentText() == SIMPLE_PLOT);
 }
 
 /**
@@ -386,7 +400,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
 
   if (m_waterfall || m_tiled) {
     m_plotOptions = new QComboBox();
-    m_plotOptions->addItem(tr("1D Plot"));
+    m_plotOptions->addItem(SIMPLE_PLOT);
     if (m_waterfall) {
       m_plotOptions->addItem(tr("Waterfall Plot"));
     }
@@ -654,6 +668,14 @@ MantidWSIndexWidget::UserInput MantidWSIndexDialog::getSelections() {
 QMultiMap<QString, std::set<int>> MantidWSIndexDialog::getPlots() const {
 
   return m_widget.getPlots();
+}
+
+/**
+* Whether the user selected the simple 1D plot
+* @returns True if waterfall plot selected
+*/
+bool MantidWSIndexDialog::is1DPlotSelected() const {
+  return m_widget.is1DPlotSelected();
 }
 
 /**

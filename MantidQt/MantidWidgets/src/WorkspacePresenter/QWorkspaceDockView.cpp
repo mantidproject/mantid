@@ -1537,7 +1537,7 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
                              showErrorBars);
-  } else if (userInput.waterfall) {
+  } else if (userInput.simple || userInput.waterfall) {
     m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
                        showErrorBars, nullptr, false, userInput.waterfall);
   }
