@@ -60,6 +60,8 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
     // Create a detector for each spectra
     Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+    det->setShape(
+        ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
     inst->add(det);
     inst->markAsDetector(det);
     ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
@@ -1451,6 +1453,26 @@ public:
     TS_ASSERT(specInfo.hasDetectors(1));
     TS_ASSERT_EQUALS(specInfo.position(0), V3D(1, 0, 0));
     TS_ASSERT_EQUALS(specInfo.position(1), V3D(2, 0, 0));
+
+    TS_ASSERT_THROWS_NOTHING(specInfo.detector(0));
+    const auto &det = specInfo.detector(0);
+    // Failing legacy methods (use DetectorInfo/SpectrumInfo instead):
+    TS_ASSERT_THROWS(det.getPos(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRelativePos(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRotation(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRelativeRot(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getPhi(), std::runtime_error);
+    // Failing methods, currently without replacement:
+    TS_ASSERT_THROWS(det.solidAngle(V3D(0, 0, 0)), std::runtime_error);
+    BoundingBox bb;
+    TS_ASSERT_THROWS(det.getBoundingBox(bb), std::runtime_error);
+    // Moving parent not possible since non-detector components do not have time
+    // indices and thus DetectorInfo cannot tell which set of detector positions
+    // to adjust.
+    TS_ASSERT_THROWS(detInfo.setPosition(*det.getParent(), V3D(1, 2, 3)),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
+                     std::runtime_error);
   }
 
 private:
