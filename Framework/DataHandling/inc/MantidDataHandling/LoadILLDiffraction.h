@@ -6,10 +6,31 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
+namespace {
+enum ScanType : size_t {
+    NoScan = 0,
+    DetectorScan = 1,
+    OtherScan = 2
+};
+
+struct ScannedVariables {
+  int axis;
+  int scanned;
+  std::string name;
+  std::string property;
+  std::string unit;
+
+  ScannedVariables(int a, int s, std::string n, std::string p, std::string u)
+      : axis(a), scanned(s), name(n), property(p), unit(u) {}
+};
+}
+
 namespace Mantid {
 namespace DataHandling {
 
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
+
+  @author Gagik Vardanyan, vardanyan@ill.fr
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -46,30 +67,33 @@ private:
   void init() override;
   void exec() override;
 
-  void initWorkspace();
   void loadDataScan(NeXus::NXEntry &);
-  void loadMovingInstrument();
+  void loadScannedVariables(NeXus::NXEntry &);
+
   void loadMetadata();
   void loadStaticInstrument();
+
   void fillMovingInstrumentScan(const NeXus::NXUInt &,
-                                const NeXus::NXDouble &);
+                                const NeXus::NXDouble &) {}
   void fillStaticInstrumentScan(const NeXus::NXUInt &,
                                 const NeXus::NXDouble &);
+
+  void initWorkspace();
   void resolveInstrument(const std::string &);
+  void resolveScanType();
 
-  int m_numberScanPoints;
-  int m_numberDetectorsRead;
-  int m_numberDetectorsActual;
-  bool m_isDetectorScan;
+  int m_numberDetectorsRead; ///< number of cells read from file
+  int m_numberDetectorsActual; ///< number of cells actually active
+  int m_numberScanPoints; ///< number of scan points
 
-  std::vector<int> m_scannedVarIndices;
-  std::string m_instName;
-  std::set<std::string> m_instNames;
-  std::string m_fileName;
+  std::string m_instName; ///< instrument name to load the IDF
+  std::set<std::string> m_instNames; ///< supported instruments
+  std::string m_fileName; ///< file name to load
+  std::vector<ScannedVariables> m_scanVars; ///< holds the info on what is scanned
+  ScanType m_scanType; ///< scan type
 
-  LoadHelper m_loadHelper;
-  API::MatrixWorkspace_sptr m_outWorkspace;
-  std::unique_ptr<API::Progress> m_progress;
+  LoadHelper m_loadHelper; ///< a helper for metadata
+  API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
 };
 
 } // namespace DataHandling

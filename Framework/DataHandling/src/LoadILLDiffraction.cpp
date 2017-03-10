@@ -37,7 +37,7 @@ int LoadILLDiffraction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLDiffraction::category() const {
-  return "DataHandling\\Nexus";
+  return "DataHandling\\Nexus;ILL\\Diffraction";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
@@ -49,8 +49,8 @@ const std::string LoadILLDiffraction::summary() const {
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_isDetectorScan(false),
-      m_instNames({"D1B", "D2B", "D4C", "D20"}) {}
+    : IFileLoader<NexusDescriptor>(),
+      m_instNames({"D20"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -58,10 +58,10 @@ LoadILLDiffraction::LoadILLDiffraction()
 void LoadILLDiffraction::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
-      "File path of the Data file to load");
+      "File path of the data file to load");
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "An output workspace.");
+                  "The output workspace.");
 }
 
 /**
@@ -69,7 +69,7 @@ void LoadILLDiffraction::init() {
  */
 void LoadILLDiffraction::exec() {
 
-  m_progress = make_unique<Progress>(this, 0, 1, 2);
+  Progress progress(this, 0, 1, 2);
 
   m_fileName = getPropertyValue("Filename");
 
@@ -78,11 +78,12 @@ void LoadILLDiffraction::exec() {
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   loadDataScan(firstEntry);
-  m_progress->report("Loaded the data scan block");
   dataRoot.close();
 
+  progress.report("Loaded the data scan block");
+
   loadMetadata();
-  m_progress->report("Loaded the metadata");
+  progress.report("Loaded the metadata");
 
   // set the output
   setProperty("OutputWorkspace", m_outWorkspace);
@@ -94,45 +95,68 @@ void LoadILLDiffraction::exec() {
 */
 void LoadILLDiffraction::loadDataScan(NXEntry &firstEntry) {
 
-  // read in the actual data
+  // read the actual data
   NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
   NXUInt data = dataGroup.openUIntData();
   data.load();
-
-  m_numberDetectorsRead = data.dim1();
-  m_numberScanPoints = data.dim0();
-
-  // figure out the instrument
-  resolveInstrument(firstEntry.getString("instrument/name"));
-
-  // read which variables are scanned
-  NXInt scanned = firstEntry.openNXInt(
-      "data_scan/scanned_variables/variables_names/scanned");
-  scanned.load();
-
-  for (int i = 0; i < scanned.dim0(); ++i) {
-    if (scanned[i] == 1) {
-      m_scannedVarIndices.emplace_back(i);
-    }
-  }
 
   // read the scan points
   NXData scanValues = firstEntry.openNXData("data_scan/scanned_variables");
   NXDouble scanVal = scanValues.openDoubleData();
   scanVal.load();
 
-  // what to do if nothing is scanned?
-  m_isDetectorScan = scanned[1] == 1;
+  m_numberDetectorsRead = data.dim1();
+  m_numberScanPoints = data.dim0();
+
+  // figure out the IDF to load
+  resolveInstrument(firstEntry.getString("instrument/name"));
+
+  // read the scanned variables
+  loadScannedVariables(firstEntry);
+
+  // figure out the scan type
+  resolveScanType();
 
   // Init the output workspace
   initWorkspace();
 
-  if (m_isDetectorScan) {
+  if (m_scanType == DetectorScan) {
     fillMovingInstrumentScan(data, scanVal);
   } else {
     fillStaticInstrumentScan(data, scanVal);
   }
 }
+
+/**
+ * Resolves the scan type
+ */
+void LoadILLDiffraction::resolveScanType() {
+    if (m_numberScanPoints == 1) {
+        m_scanType = NoScan;
+    }
+    else {
+        // TODO check the detector scan
+        m_scanType = OtherScan;
+    }
+}
+
+/**
+ * Loads the scanned_variables/variables_names block
+ */
+void LoadILLDiffraction::loadScannedVariables(NXEntry& firstEntry) {
+
+    // read which variables are scanned
+    NXInt scanned = firstEntry.openNXInt(
+        "data_scan/scanned_variables/variables_names/scanned");
+    scanned.load();
+
+    // read what is going to be the axis axis
+    NXInt axis = firstEntry.openNXInt(
+        "data_scan/scanned_variables/variables_names/axis");
+    axis.load();
+
+}
+
 
 /**
  * Fills the loaded data to the workspace for non-moving instrument
@@ -142,15 +166,17 @@ void LoadILLDiffraction::loadDataScan(NXEntry &firstEntry) {
 void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan) {
 
-  std::vector<double> xAxis;
-  std::vector<double> monitor;
+  std::vector<double> xAxis{0.};
+  std::vector<double> monitor{1.};
 
+  /*
   if (!m_scannedVarIndices.empty()) {
     xAxis.assign(scan() + m_numberScanPoints * m_scannedVarIndices[0],
                  scan() + m_numberScanPoints * (m_scannedVarIndices[0] + 1));
     monitor.assign(scan() + 3 * m_numberScanPoints,
                    scan() + 4 * m_numberScanPoints);
   }
+  */
 
   // Assign monitor counts
   m_outWorkspace->mutableX(0) = xAxis;
@@ -169,43 +195,32 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   }
 
   // Link the instrument
-  loadStaticInstrument();
-}
-
-/**
- * Fills the loaded data to the workspace for moving instrument
- * @param data : pointer to data
- * @param scan : pointer to scan points
- */
-void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
-                                                  const NXDouble &scan) {
-
-  // fill detector scan here
+  // loadStaticInstrument();
 }
 
 /**
  * Resolves the instrument based on instrument name and resolution mode
  * @param inst Instrument name read from the file
- * @throws runtime_error, if the instrument name is not supported
+ * @throws runtime_error, if the instrument is not supported
  */
 void LoadILLDiffraction::resolveInstrument(const std::string &inst) {
   if (m_instNames.find(inst) == m_instNames.end()) {
     throw std::runtime_error("Instrument " + inst + " not supported.");
   } else {
     if (inst == "D20") {
+      m_instName = inst;
       switch (m_numberDetectorsRead) {
       case 1600: {
-        m_instName = "D20a";
+        m_instName += "_lr"; // low resolution mode
         m_numberDetectorsActual = 1536;
         break;
       }
       case 3200: {
-        m_instName = "D20";
         m_numberDetectorsActual = 3200; // 3072
         break;
       }
       case 4800: {
-        m_instName = "D20c";
+        m_instName += "_hr"; // high resolution mode
         m_numberDetectorsActual = 4608;
         break;
       }
@@ -225,21 +240,15 @@ void LoadILLDiffraction::resolveInstrument(const std::string &inst) {
  * points, and scan type
  */
 void LoadILLDiffraction::initWorkspace() {
-  // create empty workspace
-  int nSpectra = 0, nBins = 0;
 
-  if (m_numberScanPoints == 0) {
-    nSpectra = m_numberDetectorsActual + 1;
-    nBins = 1;
-  } else {
-    if (!m_isDetectorScan) {
-      nSpectra = m_numberDetectorsActual + 1;
-      nBins = m_numberScanPoints;
-    } else {
-      nSpectra = (m_numberDetectorsActual + 1) * m_numberScanPoints;
-      nBins = 1;
-    }
+  int nSpectra = m_numberDetectorsActual + 1, nBins = 1;
+
+  if (m_scanType == DetectorScan) {
+    nSpectra *= m_numberScanPoints;
+  } else if (m_scanType == OtherScan) {
+    nBins = m_numberScanPoints;
   }
+
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
 }
@@ -257,13 +266,11 @@ void LoadILLDiffraction::loadMetadata() {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
 
-  if (nxStat == NX_ERROR) {
-    throw Exception::FileError("Unable to open nexus file for metadata:",
-                               m_fileName);
-  }
-  m_loadHelper.addNexusFieldsToWsRun(nxHandle, run);
+  if (nxStat != NX_ERROR) {
+    m_loadHelper.addNexusFieldsToWsRun(nxHandle, run);
+    nxStat = NXclose(&nxHandle);
+  }  
 
-  nxStat = NXclose(&nxHandle);
 }
 
 /**
