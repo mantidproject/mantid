@@ -39,6 +39,7 @@ DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
 bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
   if (this == &other)
     return true;
+  // Same number of detectors
   if (size() != other.size())
     return false;
   if (size() == 0)
@@ -48,6 +49,17 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
     return false;
   if (!(m_isMasked == other.m_isMasked) && (*m_isMasked != *other.m_isMasked))
     return false;
+
+  // Scanning related fields. Not testing m_scanCounts and m_indexMap since
+  // those just are internally derived from m_indices.
+  if (m_scanIntervals && other.m_scanIntervals &&
+      !(m_scanIntervals == other.m_scanIntervals) &&
+      (*m_scanIntervals != *other.m_scanIntervals))
+    return false;
+  if (m_indices && other.m_indices && !(m_indices == other.m_indices) &&
+      (*m_indices != *other.m_indices))
+    return false;
+
   // Positions: Absolute difference matter, so comparison is not relative.
   // Changes below 1 nm = 1e-9 m are allowed.
   if (!(m_positions == other.m_positions) &&
