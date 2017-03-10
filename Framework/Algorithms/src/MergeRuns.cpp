@@ -27,11 +27,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
-
-const std::string MergeRuns::SKIP_BEHAVIOUR = "Skip File";
-const std::string MergeRuns::STOP_BEHAVIOUR = "Stop";
-const std::string MergeRuns::REBIN_BEHAVIOUR = "Rebin";
-const std::string MergeRuns::FAIL_BEHAVIOUR = "Fail";
+using namespace MergeRunsOptions;
 
 /// Initialisation method
 void MergeRuns::init() {
