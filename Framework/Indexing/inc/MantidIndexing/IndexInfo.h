@@ -75,12 +75,13 @@ public:
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
-  void makeSpectrumNumberTranslator();
+  void makeSpectrumNumberTranslator() const;
   Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>>
       m_spectrumDefinitions{nullptr};
-  Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{nullptr};
+  mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{
+      nullptr};
 };
 
 } // namespace Indexing

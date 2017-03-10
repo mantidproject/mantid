@@ -21,7 +21,6 @@ IndexInfo::IndexInfo(const size_t globalSize)
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
-  makeSpectrumNumberTranslator();
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -33,7 +32,6 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
                              "and detector ID vectors");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
   m_detectorIDs.access() = std::move(detectorIDs);
-  makeSpectrumNumberTranslator();
 }
 
 /// The *local* size, i.e., the number of spectra in this partition.
@@ -61,7 +59,8 @@ void IndexInfo::setSpectrumNumbers(
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
-  makeSpectrumNumberTranslator();
+  m_spectrumNumberTranslator =
+      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
 }
 
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
@@ -72,7 +71,8 @@ void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   auto &data = m_spectrumNumbers.access();
   std::iota(data.begin(), data.end(), static_cast<int32_t>(min));
-  makeSpectrumNumberTranslator();
+  m_spectrumNumberTranslator =
+      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
 }
 
 /// Set a single detector ID for each index.
@@ -121,30 +121,41 @@ IndexInfo::spectrumDefinitions() const {
 }
 
 SpectrumIndexSet IndexInfo::makeIndexSet() const {
+  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet();
 }
 
 SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
                                          SpectrumNumber max) const {
+  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
 SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
                                          GlobalSpectrumIndex max) const {
+  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
+  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
 }
 
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
-void IndexInfo::makeSpectrumNumberTranslator() {
+void IndexInfo::makeSpectrumNumberTranslator() const {
+  // To support legacy code that creates workspaces with duplicate spectrum
+  // numbers we are currently creating the SpectrumNumberTranslator only when
+  // needed.
+  // Note that the lazy initialization implies that no sharing of
+  // SpectrumNumberTranslator will be set up for workspaces created before the
+  // first access.
   // TODO We are not setting monitors currently. This is ok as long as we have
   // exactly one partition.
   PartitionIndex partition = 0;
