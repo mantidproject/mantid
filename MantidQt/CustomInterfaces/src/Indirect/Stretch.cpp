@@ -275,7 +275,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   MatrixWorkspace_const_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           filename.toStdString());
-  const auto spectra = sampleWs->getNumberHistograms();
+  const int spectra = sampleWs->getNumberHistograms();
   m_uiForm.spPreviewSpectrum->setMaximum(spectra);
 }
 

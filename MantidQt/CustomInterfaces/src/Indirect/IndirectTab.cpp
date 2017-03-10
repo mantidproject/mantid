@@ -230,7 +230,7 @@ void IndirectTab::plotMultipleSpectra(
   pyInput += QString::number(workspaceIndices[0]);
   pyInput += ")\n";
 
-  for (size_t i = 1; i < workspaceNames.size(); i++) {
+  for (int i = 1; i < workspaceNames.size(); i++) {
     pyInput += "plotSpectrum('";
     pyInput += workspaceNames[i];
     pyInput += "', ";
