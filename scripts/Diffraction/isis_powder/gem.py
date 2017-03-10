@@ -22,13 +22,11 @@ class Gem(AbstractInst):
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        check_mode_is_valid(self._inst_settings)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_norm)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        check_mode_is_valid(self._inst_settings)
         # First get a run_details object to find out the vanadium number
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         # Set the run and vanadium run equal
@@ -73,21 +71,6 @@ class Gem(AbstractInst):
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
                                                  spline_coefficient=self._inst_settings.spline_coeff)
-
-
-def check_mode_is_valid(inst_settings):
-    set_mode = str(inst_settings.mode).lower()
-    # Allowed values PDF / Rietveld
-    allowed_modes = ["Rietveld", "PDF"]
-
-    if set_mode not in [val.lower() for val in allowed_modes]:
-        e_str = "The mode entered : '" + str(inst_settings.mode) + "' is not valid. Valid values are:\n"
-        for val in allowed_modes:
-            e_str += val + '\n'
-        raise ValueError(e_str)
-    else:
-        # Valid ensure its lower case version
-        inst_settings.mode = set_mode
 
 
 def _gem_generate_inst_name(run_number):
