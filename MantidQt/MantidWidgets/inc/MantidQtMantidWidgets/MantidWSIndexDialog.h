@@ -263,6 +263,7 @@ public:
 
   struct UserInput {
     QMultiMap<QString, std::set<int>> plots;
+    bool simple;
     bool waterfall;
     bool tiled;
     bool errors;
@@ -275,6 +276,8 @@ public:
   static const QString WORKSPACE_INDEX;
   /// The string "Custom"
   static const QString CUSTOM;
+  /// Strings for plot types
+  static const QString SIMPLE_PLOT;
   static const QString SURFACE_PLOT;
   static const QString CONTOUR_PLOT;
 
@@ -291,6 +294,8 @@ public:
   /// plotted,
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
+  /// Returns whether the simple 1D plot option has been selected
+  bool is1DPlotSelected() const;
   /// Returns whether the waterfall option has been selected
   bool isWaterfallPlotSelected() const;
   /// Called by dialog when plot requested
@@ -401,6 +406,8 @@ public:
   /// plotted,
   /// mapped to the set of workspace indices.
   QMultiMap<QString, std::set<int>> getPlots() const;
+  /// Returns whether the waterfall option has been selected
+  bool is1DPlotSelected() const;
   /// Returns whether the waterfall option has been selected
   bool isWaterfallPlotSelected() const;
   /// Returns whether the tiled plot option has been selected
