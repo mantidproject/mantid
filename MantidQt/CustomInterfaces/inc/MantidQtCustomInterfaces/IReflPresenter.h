@@ -63,7 +63,8 @@ public:
     ExportTableFlag,
     PlotRowFlag,
     PlotGroupFlag,
-    OpenCloseAllGroupsFlag
+    OpenAllGroupsFlag,
+    CloseAllGroupsFlag
   };
 
   // Tell the presenter something happened

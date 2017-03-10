@@ -137,7 +137,7 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 28;
+  const size_t nCommands = 29;
   auto commands =
       m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {

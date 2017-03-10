@@ -804,7 +804,10 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
     break;
-  case DataProcessorPresenter::OpenCloseAllGroupsFlag:
+  case DataProcessorPresenter::OpenAllGroupsFlag:
+    // Nothing here yet
+    break;
+  case DataProcessorPresenter::CloseAllGroupsFlag:
     // Nothing here yet
     break;
   }
