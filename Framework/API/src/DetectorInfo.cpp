@@ -279,6 +279,11 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     const auto index = indexOf(det->getID());
     setPosition(index, pos);
   } else {
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if ((!detIndices.empty()) && m_detectorInfo.isScanning())
+      throw std::runtime_error("Cannot move parent component containing "
+                               "detectors since the beamline has "
+                               "time-dependent (moving) detectors.");
     // This will go badly wrong if the parameter map in the component is not
     // identical to ours, but there does not seem to be a way to check?
     const auto oldPos = comp.getPos();
@@ -288,7 +293,6 @@ void DetectorInfo::setPosition(const Geometry::IComponent &comp,
     // If comp is a detector cached positions stay valid. In all other cases
     // (higher level in instrument tree, or other leaf component such as sample
     // or source) we flush all cached positions.
-    const auto &detIndices = getAssemblyDetectorIndices(comp);
     if (detIndices.size() == 0 || detIndices.size() == size()) {
       // Update only if comp is not a bank (not detectors) or the full
       // instrument (all detectors). The should make this thread-safe for
@@ -321,6 +325,11 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     const auto index = indexOf(det->getID());
     setRotation(index, rot);
   } else {
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if ((!detIndices.empty()) && m_detectorInfo.isScanning())
+      throw std::runtime_error("Cannot move parent component containing "
+                               "detectors since the beamline has "
+                               "time-dependent (moving) detectors.");
     // This will go badly wrong if the parameter map in the component is not
     // identical to ours, but there does not seem to be a way to check?
     const auto pos = toVector3d(comp.getPos());
@@ -333,7 +342,6 @@ void DetectorInfo::setRotation(const Geometry::IComponent &comp,
     // If comp is a detector cached positions and rotations stay valid. In all
     // other cases (higher level in instrument tree, or other leaf component
     // such as sample or source) we flush all cached positions and rotations.
-    const auto &detIndices = getAssemblyDetectorIndices(comp);
     if (detIndices.size() == 0 || detIndices.size() == size()) {
       // Update only if comp is not a bank (not detectors) or the full
       // instrument (all detectors). The should make this thread-safe for

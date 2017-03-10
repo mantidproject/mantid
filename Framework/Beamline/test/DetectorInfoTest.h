@@ -25,6 +25,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         detInfo = Kernel::make_unique<DetectorInfo>(PosVec(1), RotVec(1)));
     TS_ASSERT_EQUALS(detInfo->size(), 1);
+    TS_ASSERT(!detInfo->isScanning());
   }
 
   void test_constructor_with_monitors() {
@@ -383,6 +384,7 @@ public:
     a.setScanInterval({0, 0}, interval1);
     b.setScanInterval({0, 0}, interval2);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT(a.isScanning());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT_EQUALS(a.size(), 2);
     TS_ASSERT_EQUALS(a.scanCount(0), 2);
@@ -417,6 +419,7 @@ public:
     c.setScanInterval({0, 0}, interval3);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(c));
+    TS_ASSERT(a.isScanning());
     TS_ASSERT(!a.isEquivalent(b));
     TS_ASSERT(!a.isEquivalent(c));
     TS_ASSERT_EQUALS(a.size(), 2);
