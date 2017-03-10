@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCrystal/CountPeaks.h"
+#include "MantidCrystal/CountReflections.h"
 
-using Mantid::Crystal::CountPeaks;
+using Mantid::Crystal::CountReflections;
 
-class CountPeaksTest : public CxxTest::TestSuite {
+class CountReflectionsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CountPeaksTest *createSuite() { return new CountPeaksTest(); }
-  static void destroySuite(CountPeaksTest *suite) { delete suite; }
+  static CountReflectionsTest *createSuite() { return new CountReflectionsTest(); }
+  static void destroySuite(CountReflectionsTest *suite) { delete suite; }
 
   void test_nothing() { TS_ASSERT(false); }
 };
