@@ -60,7 +60,7 @@ data, because some intensities in the input file are 0, so these reflections are
     # Run the SortHKL algorithm
     unique, completeness, redundancy, multiple = CountReflections(peaks, PointGroup='-3m1',
                                                                   LatticeCentering='Robv', MinDSpacing=0.205,
-                                                                  MaxDSpacing=2.08)
+                                                                  MaxDSpacing=2.08, MissingReflectionsWorkspace='')
 
     print 'Data set statistics:'
     print '             Peaks: {0}'.format(peaks.getNumberPeaks())
@@ -78,7 +78,7 @@ Output:
                 Unique: 358
           Completeness: 9.57%
             Redundancy: 1.21
-     Multiply observed: 20.67
+     Multiply observed: 20.67%
 
 The resulting completeness is slightly higher than in the SortHKL case, but for actual statistics it might be
 better to remove the zero intensity peaks from the workspace prior to running the algorithm.
