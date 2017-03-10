@@ -1266,36 +1266,51 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double L = 1000.0;
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+
+  const IComponent *oldParent{nullptr};
+  Eigen::Quaterniond invParentRot;
+  Eigen::Affine3d transformation;
   for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
     const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
     if (m_detectorInfo->isMasked(i)) {
       pmap->forceUnsafeSetMasked(det.get(), true);
     }
 
-    // Compare detector position with position based on pmap. Note that we
-    // previously stripped the DetectorInfo from pmap so we do not get positions
-    // from the DetectorInfo but only those directly stored in pmap.
-    const auto parDet = ParComponentFactory::create(det, pmap.get());
-    auto relPos = m_detectorInfo->position(i);
-    auto relRot = m_detectorInfo->rotation(i);
-    if (const auto parent = parDet->getParent()) {
-      relPos -= toVector3d(parent->getPos());
-      const auto invParentRot =
-          toQuaterniond(parent->getRotation()).conjugate();
-      relPos = invParentRot * relPos;
-      // Note the unusual order, see Component.cpp
-      relRot = invParentRot * relRot;
+    // Obtain parent position/rotation/scale.
+    const auto parent = det->getParent();
+    if (parent.get() != oldParent) {
+      oldParent = parent.get();
+      const auto parParent = ParComponentFactory::create(parent, pmap.get());
+      const auto parentPos = toVector3d(parParent->getPos());
+      invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
+      transformation = invParentRot;
+      transformation.translate(-parentPos);
+      // Special case: scaling for RectangularDetectorPixel
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det)) {
+        const auto *panel = det->getParent()->getParent().get();
+        Eigen::Vector3d scale(1, 1, 1);
+        if (auto scalex = pmap->get(panel, "scalex"))
+          scale[0] = 1.0 / scalex->value<double>();
+        if (auto scaley = pmap->get(panel, "scaley"))
+          scale[1] = 1.0 / scaley->value<double>();
+        transformation.prescale(scale);
+      }
     }
+
+    // Undo parent transformation to obtain relative position/rotation.
+    auto relPos = transformation * m_detectorInfo->position(i);
+    auto relRot = invParentRot * m_detectorInfo->rotation(i);
+
     // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
-    if ((relPos - toVector3d(parDet->getRelativePos())).norm() >= 1e-9) {
-      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(parDet))
+    if ((relPos - toVector3d(det->getRelativePos())).norm() >= 1e-9) {
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det))
         throw std::runtime_error("Cannot create legacy ParameterMap: Position "
                                  "parameters for RectangularDetectorPixel are "
                                  "not supported");
       pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
     }
 
-    if ((relRot * toQuaterniond(parDet->getRelativeRot()).conjugate())
+    if ((relRot * toQuaterniond(det->getRelativeRot()).conjugate())
             .vec()
             .norm() >= imag_norm_max)
       pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
