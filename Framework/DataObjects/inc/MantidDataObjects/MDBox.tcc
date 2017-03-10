@@ -19,7 +19,7 @@ TMDE(MDBox)::~MDBox() {
     // BAD!!! TODO: make correct destructors order.
     if (this->m_BoxController) // it is destructor, in tests everything may fall
                                // apart, though it should not be issue for a
-                               // worspace
+                               // workspace
     {
       if (this->m_BoxController->isFileBacked()) {
         this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
@@ -81,7 +81,7 @@ TMDE(MDBox)::MDBox(
  * @param depth :: splitting depth of the new box.
  * @param extentsVector :: vector defining the extents
  * @param nBoxEvents :: Initial number of events to reserve memory for. If left
- * undefined, the memory will be alocated on request.
+ * undefined, the memory will be allocated on request.
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
@@ -280,7 +280,7 @@ TMDE(void MDBox)::releaseEvents() {
 }
 
 /** The method to convert events in a box into a table of
- * coodrinates/signal/errors casted into coord_t type
+ * coordinates/signal/errors casted into coord_t type
   *   Used to save events from plain binary file
   *   @returns coordTable -- vector of events parameters in the form signal,
  * error, [detID,rinId], eventsCoordinates....
@@ -576,10 +576,9 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
       coord_t out[nd];
       radiusTransform.apply(it.getCenter(), out);
       if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
-        valAndErrorPair newPair;
-        newPair.first = static_cast<signal_t>(it.getSignal());
-        newPair.second = static_cast<signal_t>(it.getErrorSquared());
-        vals.emplace_back(std::move(newPair));
+        const auto signal = static_cast<signal_t>(it.getSignal());
+        const auto errSquared = static_cast<signal_t>(it.getErrorSquared());
+        vals.emplace_back(std::make_pair(signal, errSquared));
       }
     }
     // Sort based on signal values
