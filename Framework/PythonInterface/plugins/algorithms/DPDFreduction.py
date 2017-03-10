@@ -289,9 +289,10 @@ class DPDFreduction(api.PythonAlgorithm):
         max_i_theta = 0.0
         min_i_theta = 0.0
 
-        # Linear interpolation for those theta values with no intensity
+        # Linear interpolation for those theta values with low intensity
         # First, find minimum theta index with a non-zero histogram
         ws_sten = sapi.mtd[wn_sten]
+
         for i_theta in range(ws_sten.getNumberHistograms()):
             if ws_sten.dataY(i_theta).any():
                 min_i_theta = i_theta
@@ -301,28 +302,14 @@ class DPDFreduction(api.PythonAlgorithm):
             if ws_sten.dataY(i_theta).any():
                 max_i_theta = i_theta
                 break
-        # Scan the region [min_i_theta, max_i_theta] and apply interpolation to
-        # theta angles with no signal whatsoever, S(theta*, E)=0.0 for all energies
-        sapi.CloneWorkspace(InputWorkspace=ws_sten, OutputWorkspace=wn_steni)
-        ws_steni = sapi.mtd[wn_steni]
-        i_theta = 1 + min_i_theta
-        while i_theta < max_i_theta:
-            if not ws_steni.dataY(i_theta).any():
-                nonnull_i_theta_start = i_theta - 1  # angle index of non-null histogram
-                # scan until we find a non-null histogram
-                while not ws_steni.dataY(i_theta).any():
-                    i_theta += 1
-                nonnull_i_theta_end = i_theta  # angle index of non-null histogram
-                # The range [1+nonnull_i_theta_start, nonnull_i_theta_end]
-                # contains only null-histograms. Interpolate!
-                y_start = ws_steni.dataY(nonnull_i_theta_start)
-                y_end = ws_steni.dataY(nonnull_i_theta_end)
-                intercept = y_start
-                slope = (y_end - y_start) / (nonnull_i_theta_end - nonnull_i_theta_start)
-                for null_i_theta in range(1 + nonnull_i_theta_start, nonnull_i_theta_end):
-                    ws_steni.dataY(null_i_theta)[:] = \
-                        intercept + slope * (null_i_theta - nonnull_i_theta_start)
-            i_theta += 1
+
+        # Scan a range of theta angles and apply interpolation to those theta angles
+        # with considerably low intensity (gaps)
+        delta_theta = max_i_theta - min_i_theta
+        gaps = self._findGaps(wn_sten, int(min_i_theta+0.1*delta_theta), int(max_i_theta-0.1*delta_theta))
+        api.CloneWorkspace(InputWorkspace=wn_sten, OutputWorkspace=wn_steni)
+        for gap in gaps:
+            self._interpolate(wn_steni, gap)  # interpolate this gap
 
         # Convert S(theta,E) to S(Q,E), then rebin in |Q| and E to MD workspace
         sapi.ConvertToMD(InputWorkspace=wn_steni, QDimensions='|Q|',
@@ -408,6 +395,62 @@ class DPDFreduction(api.PythonAlgorithm):
             sapi.DeleteWorkspace(data_name+'_tmp')
         if sapi.mtd[data_name].getInstrument().getName() not in ('ARCS'):
             raise NotImplementedError("This algorithm works only for ARCS instrument")
+
+    def _findGaps(self, workspace_name, min_i, max_i):
+        """
+        Find workspace indexes with a low overall intensity
+        A histogram with low intensity contains zero-intensity values for many
+        of the energy values (Energy is the X-axis)
+        :param workspace_name:
+        :param min_i: minimum workspace index to look for
+        :param max_i: 1+maximum workspace index to look for
+        :return: chunks of consecutive workspace indexes with low overall intensity
+        """
+        zero_fraction = list()  # for each histogram, count the number of zeros
+        workspace = api.mtd[workspace_name]
+        for index in range(min_i, max_i):
+            y = workspace.dataY(index)
+            zero_fraction.append(1.0 - (1. * numpy.count_nonzero(y)) / len(y))
+        # Find workspace indexes zero fraction above a reasonable threshold
+        threshold = numpy.mean(zero_fraction) + 2 * numpy.std(zero_fraction)  # above twice the standard deviation
+        print("mean = ", numpy.mean(zero_fraction), " std = ", numpy.std(zero_fraction), "threshold = ", threshold)
+        high_zero_fraction = min_i + (numpy.where(zero_fraction > threshold))[0]
+        print("high_zero_fraction = ", str(high_zero_fraction))
+        api.CreateWorkspace(DataX=range(min_i, max_i), DataY=zero_fraction, NSpec=1,
+                            OutputWorkspace="zero_fraction")
+        # split the high_zero_fraction indexes into chunks of consecutive indexes
+        #  Example: if high_zero_fraction=[3,7,8,9,11,15,16], then we split into [3],[7,8,9], [11], [15,16]
+        gaps = list()  # intensity gaps, because high zero fraction means low overall intensity
+        gap = [high_zero_fraction[0], ]
+        for index in range(1, len(high_zero_fraction)):
+            if high_zero_fraction[index] - high_zero_fraction[index - 1] == 1:
+                gap.append(high_zero_fraction[index])  # two consecutive indexes
+            else:
+                gaps.append(gap)
+                gap = [high_zero_fraction[index], ]
+        gaps.append(gap)  # final dangling gap has to be appended
+        print("gaps = ", gaps)
+        return gaps  # a list of lists
+
+    def _interpolate(self, workspace_name, gap):
+        """
+        Assign intensity to the workspace indexes in the gap with the help
+        of the adjacent histograms via linear interpolation
+        :param workspace_name:
+        :param gap: a list of consecutive indexes
+        :return:
+        """
+        nonnull_i_theta_start = gap[0] - 1  # index of adjacent histogram with intensity not low
+        nonnull_i_theta_end = gap[-1] + 1  # index of adjacent histogram with intensity not low
+        workspace = api.mtd[workspace_name]
+        y_start = workspace.dataY(nonnull_i_theta_start)
+        y_end = workspace.dataY(nonnull_i_theta_end)
+        intercept = y_start
+        slope = (y_end - y_start) / (nonnull_i_theta_end - nonnull_i_theta_start)
+        for null_i_theta in range(1 + nonnull_i_theta_start, nonnull_i_theta_end):
+            workspace.dataY(null_i_theta)[:] = \
+                intercept + slope * (null_i_theta - nonnull_i_theta_start)  # linear interpolation
+
 
 # Register algorithm with Mantid.
 api.AlgorithmFactory.subscribe(DPDFreduction)

@@ -18,6 +18,7 @@ Improved
 
 - :ref:`LoadILLTof <algm-LoadILLTOF-v2>` now loads the monitor spectra last making the spectrum numbers and detectors IDs match.
 - In :ref:`CorrectTOFAxis <algm-CorrectTOFAxis>`, the sample to detector distance can now be directly given using the new *L2* property.
+- :ref:`DPDFReduction <algm-DPDFReduction>` now detects :math:`\theta^*` such that :math:`\langle S(\theta^*,E) \rangle_E \ll \langle S(\theta,E) \rangle_{\theta,E}`
 
 Deprecated
 ##########
