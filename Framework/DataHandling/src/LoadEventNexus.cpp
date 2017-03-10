@@ -298,6 +298,15 @@ public:
         // ID. Setting this will abort the loading of the bank.
         m_loadError = true;
       }
+      // fixup the minimum pixel id in the case that it's lower than the lowest
+      // 'known' id. We test this by checking that when we add the offset we
+      // would not get a negative index into the vector. Note that m_min_id is
+      // a uint so we have to be cautious about adding it to an int which may be
+      // negative.
+      if (alg->pixelID_to_wi_offset < 0 &&
+          m_min_id < abs(alg->pixelID_to_wi_offset)) {
+        m_min_id = abs(alg->pixelID_to_wi_offset);
+      }
       // fixup the maximum pixel id in the case that it's higher than the
       // highest 'known' id
       if (m_max_id > static_cast<uint32_t>(alg->eventid_max))
