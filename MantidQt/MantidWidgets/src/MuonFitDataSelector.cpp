@@ -384,10 +384,10 @@ QStringList MuonFitDataSelector::getChosenGroups() const {
 * Clears the list of selected groups (unchecks boxes)
 */
 void MuonFitDataSelector::clearChosenGroups() const {
-	for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
-		++iter) {
-		iter.value()->setChecked(false);
-	}
+  for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
+       ++iter) {
+    iter.value()->setChecked(false);
+  }
 }
 /**
  * Set the chosen group ticked and all others off

@@ -847,7 +847,7 @@ void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
       label.find_first_not_of("0123456789-,") == std::string::npos;
   if (isDefault) {
     // replace with current run string
-	const auto &runString = m_dataSelector->getRuns();
+    const auto &runString = m_dataSelector->getRuns();
     m_dataSelector->setSimultaneousFitLabel(runString);
     m_fitModel->setSimultaneousLabel(runString.toStdString());
   }
