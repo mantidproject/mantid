@@ -8,8 +8,9 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus, NormaliseToMonitor,
+                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus, NormaliseToMonitor,
                               Scale)
+import numpy
 
 
 def _applyIncidentEnergyCalibration(ws, wsType, eiWS, wsNames, report,
@@ -107,6 +108,24 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
     return bkgWS
 
 
+def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
+    """Return index to the peak position of ys."""
+    xs = numpy.array([i for i in range(len(ys))])
+    l2SumWSName = wsNames.withSuffix('summed_detectors_at_l2')
+    l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName,
+                              DataX=xs,
+                              DataY=ys,
+                              EnableLogging=algorithmLogging)
+    fitWSName = wsNames.withSuffix('summed_detectors_at_l2_fit_results')
+    fitWS = FindEPP(InputWorkspace=l2SumWS,
+                    OutputWorkspace=fitWSName,
+                    EnableLogging=algorithmLogging)
+    peakCentre = float(fitWS.cell('PeakCentre', 0))
+    wsCleanup.cleanup(l2SumWS)
+    wsCleanup.cleanup(fitWS)
+    return int(round(peakCentre))
+
+
 def _fitEPP(ws, wsType, wsNames, algorithmLogging):
     """Return a fitted EPP table for a workspace."""
     if wsType == common.WS_CONTENT_DETS:
@@ -189,6 +208,22 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
     return subtractedWS
 
 
+def _sumDetectorsAtDistance(ws, distance, tolerance):
+    """Return a sum of the Y values of detectors at distance away from the sample."""
+    histogramCount = ws.getNumberHistograms()
+    ySums = numpy.zeros(ws.blocksize())
+    detectorInfo = ws.detectorInfo()
+    sample = ws.getInstrument().getSample()
+    for i in range(histogramCount):
+        det = ws.getDetector(i)
+        sampleToDetector = sample.getDistance(det)
+        if abs(distance - sampleToDetector) < tolerance:
+            if detectorInfo.isMonitor(i) or detectorInfo.isMasked(i):
+                continue
+            ySums += ws.readY(i)
+    return ySums
+
+
 class DirectILLCollectData(DataProcessorAlgorithm):
     """A workflow algorithm for the initial sample, vanadium and empty container reductions."""
 
@@ -230,7 +265,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
 
         progress.report('Correcting TOF')
-        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, subalgLogging)
+        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Extract monitors to a separate workspace.
         progress.report('Extracting monitors')
@@ -259,7 +294,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                           subalgLogging)
         wsCleanup.cleanupLater(monWS)
 
-        self._finalize(mainWS, wsCleanup)
+        self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
 
     def PyInit(self):
@@ -329,11 +364,19 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              doc='Nominal sigma for the EPP table when ' + common.PROP_EPP_METHOD +
                                  ' is set to ' + common.EPP_MEHTOD_CALCULATE +
                                  ' (default: 10 times the first bin width).')
-        self.declareProperty(name=common.PROP_ELASTIC_CHANNEL,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=IntBoundedValidator(lower=0),
+        self.declareProperty(name=common.PROP_ELASTIC_CHANNEL_MODE,
+                             defaultValue=common.ELASTIC_CHANNEL_SAMPLE_LOG,
+                             validator=StringListValidator([
+                                 common.ELASTIC_CHANNEL_SAMPLE_LOG,
+                                 common.ELASTIC_CHANNEL_FIT]),
                              direction=Direction.Input,
-                             doc='The bin number of the elastic channel.')
+                             doc='How to acquire the elastic channel.')
+        self.declareProperty(MatrixWorkspaceProperty(
+                             name=common.PROP_ELASTIC_CHANNEL_WS,
+                             defaultValue='',
+                             direction=Direction.Input,
+                             optional=PropertyMode.Optional),
+                             doc='A single value workspace containing the elatic channel index. Overrides ' + common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -393,6 +436,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  " of 'Sigma' in monitor's EPP table.")
         self.setPropertyGroup(common.PROP_MON_PEAK_SIGMA_MULTIPLIER, common.PROPGROUP_MON_NORMALISATION)
         # Rest of the output properties.
+        self.declareProperty(WorkspaceProperty(
+            name=common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
+            defaultValue='',
+            direction=Direction.Output,
+            optional=PropertyMode.Optional),
+            doc='Output workspace for elastic channel index.')
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_OUTPUT_DET_EPP_WS,
             defaultValue='',
@@ -459,28 +508,42 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             wsCleanup.cleanup(eiCalibrationWS)
         return mainWS, monWS
 
-    def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Adjust the TOF axis to get the elastic channel correct."""
-        correctedWSName = wsNames.withSuffix('tof_axis_corrected')
-        if not self.getProperty(common.PROP_ELASTIC_CHANNEL).isDefault:
-            index = self.getProperty(common.PROP_ELASTIC_CHANNEL).value
-        else:
-            if not mainWS.run().hasProperty('Detector.elasticpeak'):
-                self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL +
-                                   ' given. TOF axis will not be adjusted.')
-                return mainWS
-            index = mainWS.run().getLogData('Detector.elasticpeak').value
         try:
             l2 = mainWS.getInstrument().getNumberParameter('l2')[0]
         except IndexError:
             self.log().warning("No 'l2' instrument parameter defined. TOF axis will not be adjusted")
             return mainWS
+        if not self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).isDefault:
+            indexWS = self.getProperty(common.PROP_ELASTIC_CHANNEL_WS).value
+            index = int(indexWS.readY(0)[0])
+        else:
+            mode = self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).value
+            if mode == common.ELASTIC_CHANNEL_SAMPLE_LOG:
+                if not mainWS.run().hasProperty('Detector.elasticpeak'):
+                    self.log().warning('No ' + common.PROP_ELASTIC_CHANNEL +
+                                       ' given. TOF axis will not be adjusted.')
+                    return mainWS
+                index = mainWS.run().getLogData('Detector.elasticpeak').value
+            else:
+                ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
+                index = _fitElasticChannel(ys, wsNames, wsCleanup, subalgLogging)
+        correctedWSName = wsNames.withSuffix('tof_axis_corrected')
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
                                      OutputWorkspace=correctedWSName,
                                      IndexType='Workspace Index',
                                      ElasticBinIndex=index,
                                      L2=l2,
                                      EnableLogging=subalgLogging)
+        report.notice('Elastic channel index {0} was used for TOF axis adjustment.'.format(index))
+        if not self.getProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS).isDefault:
+            indexOutputWSName = wsNames.withSuffix('elastic_channel_output')
+            indexOutputWS = CreateSingleValuedWorkspace(OutputWorkspace=indexOutputWSName,
+                                                        DataValue=index,
+                                                        EnableLogging=subalgLogging)
+            self.setProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, indexOutputWS)
+            wsCleanup.cleanup(indexOutputWS)
         wsCleanup.cleanup(mainWS)
         return correctedWS
 
@@ -514,11 +577,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         monEPPWS = _fitEPP(monWS, common.WS_CONTENT_MONS, wsNames, subalgLogging)
         return monEPPWS
 
-    def _finalize(self, outWS, wsCleanup):
+    def _finalize(self, outWS, wsCleanup, report):
         """Do final cleanup and set the output property."""
         self.setProperty(common.PROP_OUTPUT_WS, outWS)
         wsCleanup.cleanup(outWS)
         wsCleanup.finalCleanup()
+        report.toLog(self.log())
 
     def _flatBkgDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Subtract flat background from a detector workspace."""
