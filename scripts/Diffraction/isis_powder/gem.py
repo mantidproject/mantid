@@ -63,7 +63,10 @@ class Gem(AbstractInst):
         return common.crop_banks_in_tof(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
     def _get_sample_empty(self):
-        return self._inst_settings.sample_empty
+        sample_empty = self._inst_settings.sample_empty
+        if sample_empty:
+            raise NotImplementedError("Subtracting s-empty is not implemented yet.")
+        return sample_empty
 
     def _get_unit_to_keep(self):
         return self._inst_settings.unit_to_keep
@@ -83,5 +86,3 @@ def _gem_generate_inst_name(run_number):
     else:
         # Individual entry
         return "GEM" + str(run_number)
-
-

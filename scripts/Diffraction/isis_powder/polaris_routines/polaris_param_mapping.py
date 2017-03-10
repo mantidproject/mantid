@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.routines.ParamMapEntry import ParamMapEntry
+from isis_powder.routines.common_enums import InputBatchingEnum
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = \
@@ -13,7 +14,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="do_van_normalisation",     int_name="do_van_normalisation"),
      ParamMapEntry(ext_name="focused_cropping_values",  int_name="focused_cropping_values"),
      ParamMapEntry(ext_name="grouping_file_name",       int_name="grouping_file_name"),
-     ParamMapEntry(ext_name="input_mode",               int_name="input_mode"),
+     ParamMapEntry(ext_name="input_mode",               int_name="input_mode", enum_class=InputBatchingEnum),
      ParamMapEntry(ext_name="masking_file_name",        int_name="masking_file_name"),
      ParamMapEntry(ext_name="multiple_scattering",      int_name="multiple_scattering"),
      ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),

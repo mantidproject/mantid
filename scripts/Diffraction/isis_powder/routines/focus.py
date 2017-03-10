@@ -10,10 +10,12 @@ import warnings
 
 def focus(run_number_string, instrument, perform_vanadium_norm=True):
     input_batching = instrument._get_input_batching_mode()
-    if input_batching.lower() == InputBatchingEnum.Individual.lower():
+    if input_batching == InputBatchingEnum.Individual:
         return _individual_run_focusing(instrument, perform_vanadium_norm, run_number_string)
-    else:
+    elif input_batching == InputBatchingEnum.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string)
+    else:
+        raise ValueError("Input batching not passed through. Please contact development team.")
 
 
 def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
