@@ -195,7 +195,7 @@ void DetectorInfo::setScanInterval(const std::pair<size_t, size_t> index,
   // We forbid this since we (currently?) can not verify that the new interval
   // has no collisions with any of the other intervals for this detector.
   checkNoTimeDependence();
-  if (interval.first > interval.second)
+  if (interval.first >= interval.second)
     throw std::runtime_error(
         "DetectorInfo: cannot set scan interval with start > end");
   m_scanIntervals.access()[linearIndex(index)] = interval;
@@ -303,7 +303,7 @@ void DetectorInfo::initScanCounts() {
 void DetectorInfo::initScanIntervals() {
   checkNoTimeDependence();
   m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
-      size(), std::pair<int64_t, int64_t>{0, 0});
+      size(), std::pair<int64_t, int64_t>{0, 1});
 }
 
 void DetectorInfo::initIndices() {

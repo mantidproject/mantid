@@ -273,6 +273,12 @@ public:
                      (std::pair<int64_t, int64_t>(1, 2)));
   }
 
+  void test_setScanInterval_failures() {
+    DetectorInfo info(PosVec(1), RotVec(1));
+    TS_ASSERT_THROWS(info.setScanInterval({0, 0}, {1, 1}), std::runtime_error);
+    TS_ASSERT_THROWS(info.setScanInterval({0, 0}, {2, 1}), std::runtime_error);
+  }
+
   void test_merge_fail_size() {
     DetectorInfo a(PosVec(1), RotVec(1));
     DetectorInfo b(PosVec(2), RotVec(2));
