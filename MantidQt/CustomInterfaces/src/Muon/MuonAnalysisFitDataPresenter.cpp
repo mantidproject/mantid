@@ -175,7 +175,7 @@ void MuonAnalysisFitDataPresenter::handleDataPropertiesChanged() {
  * @param overwrite :: [input] Whether overwrite is on or off in interface
  */
 void MuonAnalysisFitDataPresenter::handleSelectedDataChanged(bool overwrite) {
-  const auto names = generateWorkspaceNames(overwrite);// might be this
+  const auto names = generateWorkspaceNames(overwrite);
   if (!names.empty()) {
     createWorkspacesToFit(names);
     updateWorkspaceNames(names);
@@ -487,7 +487,6 @@ void MuonAnalysisFitDataPresenter::handleFitFinished(
     const QString &status) const {
   Q_UNUSED(status);
   // If fitting was simultaneous, transform the results.
-  bool tmp = isSimultaneousFit();
   if (isSimultaneousFit()) {
     const auto label = m_dataSelector->getSimultaneousFitLabel();
     const auto groupName =
@@ -745,8 +744,6 @@ void MuonAnalysisFitDataPresenter::checkAndUpdateFitLabel(bool sequentialFit) {
  * @returns :: True for simultaneous fit, else false
  */
 bool MuonAnalysisFitDataPresenter::isSimultaneousFit() const {
-	int j = m_dataSelector->getChosenGroups().size();
-	int k = m_dataSelector->getPeriodSelections().size();
   if (m_dataSelector->getFitType() ==
       IMuonFitDataSelector::FitType::Simultaneous) {
     return true;
@@ -816,7 +813,6 @@ void MuonAnalysisFitDataPresenter::setUpDataSelector(
  * @returns :: True if multiple runs selected
  */
 bool MuonAnalysisFitDataPresenter::isMultipleRuns() const {
-	auto tmp = m_dataSelector->getRuns().toStdString();
   return m_dataSelector->getRuns().contains(QRegExp("-|,"));
 }
 
@@ -851,7 +847,7 @@ void MuonAnalysisFitDataPresenter::updateFitLabelFromRuns() {
       label.find_first_not_of("0123456789-,") == std::string::npos;
   if (isDefault) {
     // replace with current run string
-    const auto &runString = m_dataSelector->getRuns();
+	const auto &runString = m_dataSelector->getRuns();
     m_dataSelector->setSimultaneousFitLabel(runString);
     m_fitModel->setSimultaneousLabel(runString.toStdString());
   }
