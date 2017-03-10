@@ -18,7 +18,7 @@ and container) and  :math:`A_{c,c}` (scattering and absorption in container).
 This algorithm can be used to apply absorption corrections calculated with
 either the :ref:`algm-CylinderPaalmanPingsCorrection` and
 :ref:`algm-FlatPlatePaalmanPingsCorrection` algorithms as well as the legacy
-indirect calculate correcteions routine, providing that the sample and container
+indirect calculate corrections routine, providing that the sample and container
 are first converted to wavelength and the corrections are interpolated to match
 the sample as demonstrated in the example below.
 

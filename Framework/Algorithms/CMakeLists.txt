@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
+	src/CreateEPP.cpp
 	src/CreateFlatEventWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
@@ -90,6 +91,7 @@ set ( SRC_FILES
 	src/CylinderAbsorption.cpp
 	src/DeleteLog.cpp
 	src/DeleteWorkspace.cpp
+	src/DeleteWorkspaces.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
 	src/DetectorEfficiencyCorUser.cpp
@@ -383,6 +385,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
+	inc/MantidAlgorithms/CreateEPP.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
@@ -404,6 +407,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CylinderAbsorption.h
 	inc/MantidAlgorithms/DeleteLog.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
+	inc/MantidAlgorithms/DeleteWorkspaces.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
 	inc/MantidAlgorithms/DetectorEfficiencyCorUser.h
@@ -710,6 +714,7 @@ set ( TEST_FILES
 	CorrectToFileTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
+	CreateEPPTest.h
 	CreateFlatEventWorkspaceTest.h
 	CreateGroupingWorkspaceTest.h
 	CreateLogPropertyTableTest.h
@@ -718,10 +723,10 @@ set ( TEST_FILES
 	CreatePeaksWorkspaceTest.h
 	CreateSampleWorkspaceTest.h
 	CreateSingleValuedWorkspaceTest.h
-	CreateTransmissionWorkspaceAutoTest.h
-	CreateTransmissionWorkspaceAuto2Test.h
-	CreateTransmissionWorkspaceTest.h
 	CreateTransmissionWorkspace2Test.h
+	CreateTransmissionWorkspaceAuto2Test.h
+	CreateTransmissionWorkspaceAutoTest.h
+	CreateTransmissionWorkspaceTest.h
 	CreateUserDefinedBackgroundTest.h
 	CreateWorkspaceTest.h
 	CropToComponentTest.h
@@ -731,6 +736,7 @@ set ( TEST_FILES
 	CylinderAbsorptionTest.h
 	DeleteLogTest.h
 	DeleteWorkspaceTest.h
+	DeleteWorkspacesTest.h
 	DetectorEfficiencyCorTest.h
 	DetectorEfficiencyCorUserTest.h
 	DetectorEfficiencyVariationTest.h
@@ -853,10 +859,10 @@ set ( TEST_FILES
 	RebinToWorkspaceTest.h
 	RebunchTest.h
 	RectangularBeamProfileTest.h
-	ReflectometryReductionOneAutoTest.h
-	ReflectometryReductionOneAuto2Test.h
-	ReflectometryReductionOneTest.h
 	ReflectometryReductionOne2Test.h
+	ReflectometryReductionOneAuto2Test.h
+	ReflectometryReductionOneAutoTest.h
+	ReflectometryReductionOneTest.h
 	RegroupTest.h
 	RemoveBackgroundTest.h
 	RemoveBinsTest.h
@@ -890,8 +896,8 @@ set ( TEST_FILES
 	SortEventsTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateThetaTest.h
-	SpecularReflectionPositionCorrectTest.h
 	SpecularReflectionPositionCorrect2Test.h
+	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h
 	Stitch1DManyTest.h
 	Stitch1DTest.h

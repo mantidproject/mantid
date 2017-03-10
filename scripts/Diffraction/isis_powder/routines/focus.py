@@ -3,92 +3,107 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
+from isis_powder.routines.common_enums import InputBatchingEnum
 import os
+import warnings
 
 
-def focus(number, instrument, attenuate=True, van_norm=True):
-    return _run_focus(run_number=number, perform_attenuation=attenuate,
-                      perform_vanadium_norm=van_norm, instrument=instrument)
+def focus(run_number_string, instrument, perform_vanadium_norm=True):
+    input_batching = instrument._get_input_batching_mode()
+    if input_batching.lower() == InputBatchingEnum.Individual.lower():
+        return _individual_run_focusing(instrument, perform_vanadium_norm, run_number_string)
+    else:
+        return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string)
 
 
-def _run_focus(instrument, run_number, perform_attenuation, perform_vanadium_norm):
-    # Read
-    read_ws = common.load_current_normalised_ws(run_number_string=run_number, instrument=instrument)
-    input_workspace = instrument._do_tof_rebinning_focus(read_ws)  # Rebins for PEARL
+def _focus_one_ws(ws, run_number, instrument, perform_vanadium_norm):
+    run_details = instrument._get_run_details(run_number_string=run_number)
+    if perform_vanadium_norm:
+        _test_splined_vanadium_exists(instrument, run_details)
 
-    run_details = instrument._get_run_details(run_number=run_number)
+    # Subtract and crop to largest acceptable TOF range
+    input_workspace = common.subtract_sample_empty(ws_to_correct=ws, instrument=instrument,
+                                                   empty_sample_ws_string=run_details.empty_runs)
 
-    # Check the necessary splined vanadium file has been created
-    if not os.path.isfile(run_details.splined_vanadium):
-        raise ValueError("Processed vanadium runs not found at this path: "
-                         + str(run_details.splined_vanadium) +
-                         " \n\nHave you created a vanadium calibration with these settings yet?")
-
-    # Compensate for empty sample if specified
-    input_workspace = common.subtract_sample_empty(ws_to_correct=input_workspace, instrument=instrument,
-                                                   empty_sample_ws_string=run_details.sample_empty)
+    input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
     # Align / Focus
-    input_workspace = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                            CalibrationFile=run_details.calibration)
+    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
+                                       CalibrationFile=run_details.calibration_file_path)
 
-    input_workspace = instrument.apply_solid_angle_efficiency_corr(ws_to_correct=input_workspace,
-                                                                   run_details=run_details)
+    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                             GroupingFileName=run_details.grouping_file_path)
 
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=input_workspace,
-                                             GroupingFileName=run_details.grouping)
-
-    # Process
-    rebinning_params = instrument.calculate_focus_binning_params(sample=focused_ws)
-
-    calibrated_spectra = _divide_sample_by_vanadium(instrument=instrument, run_number=run_number,
-                                                    input_workspace=focused_ws,
-                                                    perform_vanadium_norm=perform_vanadium_norm)
-
-    _apply_binning_to_spectra(spectra_list=calibrated_spectra, binning_list=rebinning_params)
+    calibrated_spectra = _apply_vanadium_corrections(instrument=instrument, run_number=run_number,
+                                                     input_workspace=focused_ws,
+                                                     perform_vanadium_norm=perform_vanadium_norm)
 
     # Output
-    processed_nexus_files = instrument._process_focus_output(calibrated_spectra, run_details=run_details,
-                                                             attenuate=perform_attenuation)
+    processed_nexus_files = instrument._output_focused_ws(calibrated_spectra, run_details=run_details)
 
-    # Tidy
-    common.remove_intermediate_workspace(read_ws)
+    # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
+    common.remove_intermediate_workspace(aligned_ws)
     common.remove_intermediate_workspace(focused_ws)
-    for ws in calibrated_spectra:
-        common.remove_intermediate_workspace(ws)
-        pass
+    common.remove_intermediate_workspace(calibrated_spectra)
 
     return processed_nexus_files
 
 
-def _divide_sample_by_vanadium(instrument, run_number, input_workspace, perform_vanadium_norm):
-    processed_spectra = []
+def _apply_vanadium_corrections(instrument, run_number, input_workspace, perform_vanadium_norm):
+    run_details = instrument._get_run_details(run_number_string=run_number)
+    converted_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
+    split_data_spectra = common.extract_and_crop_spectra(converted_ws, instrument=instrument)
 
-    run_details = instrument._get_run_details(run_number=run_number)
-
-    alg_range, save_range = instrument._get_instrument_alg_save_ranges(run_details.instrument_version)
-
-    for index in range(0, alg_range):
-        if perform_vanadium_norm:
-            vanadium_ws = mantid.LoadNexus(Filename=run_details.splined_vanadium, EntryNumber=index + 1)
-
-            processed_spectra.append(
-                instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index, vanadium_ws=vanadium_ws))
-
-            common.remove_intermediate_workspace(vanadium_ws)
-        else:
-            processed_spectra.append(
-                instrument.correct_sample_vanadium(focused_ws=input_workspace, index=index))
+    if perform_vanadium_norm:
+        processed_spectra = _divide_by_vanadium_splines(spectra_list=split_data_spectra,
+                                                        spline_file_path=run_details.splined_vanadium_file_path)
+    else:
+        processed_spectra = split_data_spectra
 
     return processed_spectra
 
 
-def _apply_binning_to_spectra(spectra_list, binning_list):
-    if not binning_list:
-        return
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string):
+    read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
+                                                          instrument=instrument)
+    output = None
+    for ws in read_ws_list:
+        output = _focus_one_ws(ws=ws, run_number=run_number_string, instrument=instrument,
+                               perform_vanadium_norm=perform_vanadium_norm)
+    return output
 
-    for ws, bin_params in zip(spectra_list, binning_list):
-        # Starting bin edge / bin width / last bin edge
-        rebin_string = bin_params[0] + ',' + bin_params[1] + ',' + bin_params[2]
-        mantid.Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=rebin_string)
+
+def _divide_by_vanadium_splines(spectra_list, spline_file_path):
+    vanadium_ws_list = mantid.LoadNexus(Filename=spline_file_path)
+    output_list = []
+    for data_ws, van_ws in zip(spectra_list, vanadium_ws_list[1:]):
+        vanadium_ws = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws, WorkspaceToMatch=data_ws)
+        output_ws = mantid.Divide(LHSWorkspace=data_ws, RHSWorkspace=vanadium_ws, OutputWorkspace=data_ws)
+        output_list.append(output_ws)
+        common.remove_intermediate_workspace(vanadium_ws)
+    return output_list
+
+
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number):
+    # Load and process one by one
+    run_numbers = common.generate_run_numbers(run_number_string=run_number)
+    output = None
+    for run in run_numbers:
+        ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
+        output = _focus_one_ws(ws=ws[0], run_number=run, instrument=instrument,
+                               perform_vanadium_norm=perform_vanadium_norm)
+    return output
+
+
+def _test_splined_vanadium_exists(instrument, run_details):
+    # Check the necessary splined vanadium file has been created
+    if not os.path.isfile(run_details.splined_vanadium_file_path):
+        if instrument._can_auto_gen_vanadium_cal():
+            warnings.warn("\nAttempting to automatically generate vanadium calibration at this path: "
+                          + str(run_details.splined_vanadium_file_path) + " for these settings.\n")
+            instrument._generate_auto_vanadium_calibration(run_details=run_details)
+        else:
+            raise ValueError("Processed vanadium runs not found at this path: "
+                             + str(run_details.splined_vanadium_file_path) +
+                             " \nHave you created a vanadium calibration with these settings yet?\n")

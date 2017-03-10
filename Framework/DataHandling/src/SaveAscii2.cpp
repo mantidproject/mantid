@@ -1,10 +1,10 @@
-#include <set>
 #include <fstream>
+#include <set>
 
-#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/SaveAscii2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -14,8 +14,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -28,7 +28,7 @@ using namespace API;
 /// Empty constructor
 SaveAscii2::SaveAscii2()
     : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
-      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
+      m_writeID(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -123,7 +123,6 @@ void SaveAscii2::exec() {
   m_ws = getProperty("InputWorkspace");
   int nSpectra = static_cast<int>(m_ws->getNumberHistograms());
   m_nBins = static_cast<int>(m_ws->blocksize());
-  m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
   std::string metaDataString = getPropertyValue("SpectrumMetaData");
@@ -133,7 +132,7 @@ void SaveAscii2::exec() {
         findElementInUnorderedStringVector(m_metaData, "spectrumnumber");
     if (containsSpectrumNumber) {
       try {
-        m_specToIndexMap = m_ws->getSpectrumToWorkspaceIndexMap();
+        m_ws->getSpectrumToWorkspaceIndexMap();
       } catch (const std::runtime_error &) {
         throw std::runtime_error("SpectrumNumber is present in "
                                  "SpectrumMetaData but the workspace does not "
@@ -264,13 +263,13 @@ void SaveAscii2::exec() {
   if (idx.empty()) {
     Progress progress(this, 0, 1, nSpectra);
     for (int i = 0; i < nSpectra; i++) {
-      writeSpectra(i, file);
+      writeSpectrum(i, file);
       progress.report();
     }
   } else {
     Progress progress(this, 0, 1, idx.size());
     for (auto i = idx.begin(); i != idx.end(); ++i) {
-      writeSpectra(i, file);
+      writeSpectrum(*i, file);
       progress.report();
     }
   }
@@ -279,17 +278,15 @@ void SaveAscii2::exec() {
   file.close();
 }
 
-/**writes a spectra to the file using an iterator
-@param spectraItr :: a set<int> iterator pointing to a set of workspace IDs to
-be saved
-@param file :: the file writer object
+/** Writes a spectrum to the file using a workspace index
+*
+* @param wsIndex :: an integer relating to a workspace index
+* @param file :: the file writer object
 */
-void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
-                              std::ofstream &file) {
-  const auto specNo = m_ws->getSpectrum(*spectraItr).getSpectrumNo();
-  const auto workspaceIndex = m_specToIndexMap[specNo];
+void SaveAscii2::writeSpectrum(const int &wsIndex, std::ofstream &file) {
+
   for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-    auto value = m_metaDataMap[*iter][workspaceIndex];
+    auto value = m_metaDataMap[*iter][wsIndex];
     file << value;
     if (iter != m_metaData.end() - 1) {
       file << " " << m_sep << " ";
@@ -298,70 +295,20 @@ void SaveAscii2::writeSpectra(const std::set<int>::const_iterator &spectraItr,
   file << '\n';
 
   auto pointDeltas = m_ws->pointStandardDeviations(0);
+  auto points0 = m_ws->points(0);
+  auto pointsSpec = m_ws->points(wsIndex);
   for (int bin = 0; bin < m_nBins; bin++) {
-    if (!m_isCommonBins) // checking for ragged workspace
+    if (m_isCommonBins) {
+      file << points0[bin];
+    } else // checking for ragged workspace
     {
-      file << (m_ws->readX(*spectraItr)[bin] +
-               m_ws->readX(*spectraItr)[bin + 1]) /
-                  2;
-    }
-
-    else if (m_isHistogram & m_isCommonBins) // bin centres,
-    {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
-    }
-
-    else {
-      file << m_ws->readX(0)[bin];
+      file << pointsSpec[bin];
     }
     file << m_sep;
-    file << m_ws->readY(*spectraItr)[bin];
+    file << m_ws->y(wsIndex)[bin];
 
     file << m_sep;
-    file << m_ws->readE(*spectraItr)[bin];
-    if (m_writeDX) {
-      file << m_sep;
-      file << pointDeltas[bin];
-    }
-    file << '\n';
-  }
-}
-
-/**writes a spectra to the file using a workspace ID
-@param spectraIndex :: an integer relating to a workspace ID
-@param file :: the file writer object
-*/
-void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
-  const auto specNo = m_ws->getSpectrum(spectraIndex).getSpectrumNo();
-  const auto workspaceIndex = m_specToIndexMap[specNo];
-  for (auto iter = m_metaData.begin(); iter != m_metaData.end(); ++iter) {
-    auto value = m_metaDataMap[*iter][workspaceIndex];
-    file << value;
-    if (iter != m_metaData.end() - 1) {
-      file << " " << m_sep << " ";
-    }
-  }
-  file << '\n';
-
-  auto pointDeltas = m_ws->pointStandardDeviations(0);
-  for (int bin = 0; bin < m_nBins; bin++) {
-    if (m_isHistogram & m_isCommonBins) // bin centres,
-    {
-      file << (m_ws->readX(0)[bin] + m_ws->readX(0)[bin + 1]) / 2;
-    } else if (!m_isCommonBins) // checking for ragged workspace
-    {
-      file << (m_ws->readX(spectraIndex)[bin] +
-               m_ws->readX(spectraIndex)[bin + 1]) /
-                  2;
-    } else // data points
-    {
-      file << m_ws->readX(0)[bin];
-    }
-    file << m_sep;
-    file << m_ws->readY(spectraIndex)[bin];
-
-    file << m_sep;
-    file << m_ws->readE(spectraIndex)[bin];
+    file << m_ws->e(wsIndex)[bin];
     if (m_writeDX) {
       file << m_sep;
       file << pointDeltas[bin];
@@ -371,11 +318,11 @@ void SaveAscii2::writeSpectra(const int &spectraIndex, std::ofstream &file) {
 }
 
 /**
- * Converts a comma separated list to a vector of strings
- * Also ensures all strings are valid input
- * @param inputString	:: The user input comma separated string list
- * @return A vector of valid meta data strings
- */
+* Converts a comma separated list to a vector of strings
+* Also ensures all strings are valid input
+* @param inputString	:: The user input comma separated string list
+* @return A vector of valid meta data strings
+*/
 std::vector<std::string>
 SaveAscii2::stringListToVector(std::string &inputString) {
   const std::vector<std::string> validMetaData{"spectrumnumber", "q", "angle"};
@@ -395,22 +342,20 @@ SaveAscii2::stringListToVector(std::string &inputString) {
 }
 
 /**
- * Populate the map with the Q values associated with each spectrum in the
- * workspace
- */
+* Populate the map with the Q values associated with each spectrum in the
+* workspace
+*/
 void SaveAscii2::populateQMetaData() {
   std::vector<std::string> qValues;
   const auto nHist = m_ws->getNumberHistograms();
   const auto &spectrumInfo = m_ws->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    const auto specNo = m_ws->getSpectrum(i).getSpectrumNo();
-    const auto workspaceIndex = m_specToIndexMap[specNo];
     double theta(0.0), efixed(0.0);
-    if (!spectrumInfo.isMonitor(workspaceIndex)) {
-      theta = 0.5 * spectrumInfo.twoTheta(workspaceIndex);
+    if (!spectrumInfo.isMonitor(i)) {
+      theta = 0.5 * spectrumInfo.twoTheta(i);
       try {
         boost::shared_ptr<const Geometry::IDetector> detector(
-            &spectrumInfo.detector(workspaceIndex), NoDeleting());
+            &spectrumInfo.detector(i), NoDeleting());
         efixed = m_ws->getEFixed(detector);
       } catch (std::runtime_error) {
         throw;
@@ -428,8 +373,8 @@ void SaveAscii2::populateQMetaData() {
 }
 
 /**
- * Populate the map with the SpectrumNumber for each Spectrum in the workspace
- */
+* Populate the map with the SpectrumNumber for each Spectrum in the workspace
+*/
 void SaveAscii2::populateSpectrumNumberMetaData() {
   std::vector<std::string> spectrumNumbers;
   const size_t nHist = m_ws->getNumberHistograms();
@@ -442,16 +387,14 @@ void SaveAscii2::populateSpectrumNumberMetaData() {
 }
 
 /**
- * Populate the map with the Angle for each spectrum in the workspace
- */
+* Populate the map with the Angle for each spectrum in the workspace
+*/
 void SaveAscii2::populateAngleMetaData() {
   std::vector<std::string> angles;
   const size_t nHist = m_ws->getNumberHistograms();
+  const auto &spectrumInfo = m_ws->spectrumInfo();
   for (size_t i = 0; i < nHist; i++) {
-    const auto specNo = m_ws->getSpectrum(i).getSpectrumNo();
-    const auto workspaceIndex = m_specToIndexMap[specNo];
-    auto det = m_ws->getDetector(workspaceIndex);
-    const auto two_theta = m_ws->detectorTwoTheta(*det);
+    const auto two_theta = spectrumInfo.twoTheta(i);
     constexpr double rad2deg = 180. / M_PI;
     const auto angleInDeg = two_theta * rad2deg;
     const auto angleInDegStr = boost::lexical_cast<std::string>(angleInDeg);
@@ -461,8 +404,8 @@ void SaveAscii2::populateAngleMetaData() {
 }
 
 /**
- * Populate all required meta data in the meta data map
- */
+* Populate all required meta data in the meta data map
+*/
 void SaveAscii2::populateAllMetaData() {
   for (const auto &metaDataType : m_metaData) {
     if (metaDataType.compare("spectrumnumber") == 0)
