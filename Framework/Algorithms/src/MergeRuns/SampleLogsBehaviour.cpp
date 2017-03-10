@@ -415,6 +415,12 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
     Kernel::DateAndTime startTime = addeeWS.mutableRun().startTime();
     double value = addeeWS.mutableRun().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
+    // Remove this to supress a warning, we will put it back after adding the
+    // workspaces in MergeRuns
+    const Property *addeeWSProperty = addeeWS.mutableRun().getProperty(name);
+    m_addeeLogMap.push_back(
+        std::shared_ptr<Property>(addeeWSProperty->clone()));
+    addeeWS.mutableRun().removeProperty(name);
   }
 }
 
@@ -534,7 +540,7 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  *
  * @param ws the merged workspace
  */
-void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
+void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &outWS) {
   for (auto &item : m_logMap) {
     std::string propertyToReset = item.first;
 
@@ -544,9 +550,25 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &ws) {
     }
 
     const Property *outWSProperty =
-        ws.mutableRun().getProperty(propertyToReset);
+        outWS.mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
   }
+}
+
+/**
+ * When doing a time series merge we need to remove, then add back the sample
+ *log in the addee workspace to supress a warning about it not being a
+ *TimeSeriesProperty. Here we add back the original property, as the original
+ *workspace should remain unchanged.
+ *
+ * @param addeeWS the workspace being merged
+ */
+void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
+  for (auto item : m_addeeLogMap) {
+    auto property = std::unique_ptr<Kernel::Property>(item->clone());
+    addeeWS.mutableRun().addProperty(std::move(property));
+  }
+  m_addeeLogMap.clear();
 }
 
 /**

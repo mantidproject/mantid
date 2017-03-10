@@ -201,7 +201,7 @@ void MergeRuns::exec() {
           throw std::invalid_argument(e);
         }
       }
-
+      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       m_progress->report();
     }
 

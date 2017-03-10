@@ -986,6 +986,12 @@ public:
       TS_ASSERT_EQUALS(prop->value(), result);
     }
 
+    // We add and remove the property from the addee workspace to supress a
+    // warning. Check it is back here.
+    const auto &addeeWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    TS_ASSERT_THROWS_NOTHING(addeeWS->run().getProperty("prop1"));
+
     sample_logs_teardown();
   }
 

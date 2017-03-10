@@ -63,7 +63,8 @@ public:
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
                        API::MatrixWorkspace &outWS);
-  void setUpdatedSampleLogs(API::MatrixWorkspace &ws);
+  void setUpdatedSampleLogs(API::MatrixWorkspace &outWS);
+  void readdSampleLogToWorkspace(API::MatrixWorkspace &addeeWS);
   void resetSampleLogs(API::MatrixWorkspace &ws);
 
 private:
@@ -71,6 +72,7 @@ private:
 
   typedef std::map<std::string, SampleLogBehaviour> SampleLogsMap;
   SampleLogsMap m_logMap;
+  std::vector<std::shared_ptr<Kernel::Property>> m_addeeLogMap;
 
   void createSampleLogsMapsFromInstrumentParams(SampleLogsMap &instrumentMap,
                                                 API::MatrixWorkspace &ws);
