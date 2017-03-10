@@ -106,7 +106,7 @@ class Pearl(AbstractInst):
         group_name = "PEARL" + str(run_details.user_input_run_number)
         group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
-        return grouped_d_spacing
+        return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)

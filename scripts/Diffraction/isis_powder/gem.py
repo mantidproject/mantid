@@ -54,10 +54,6 @@ class Gem(AbstractInst):
         return gem_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
                                                      multiple_scattering=self._inst_settings.multiple_scattering)
 
-    def _spline_vanadium_ws(self, focused_vanadium_banks):
-        return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
-                                                 spline_coefficient=self._inst_settings.spline_coeff)
-
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.focused_cropping_values)
 
@@ -68,8 +64,15 @@ class Gem(AbstractInst):
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         return common.crop_banks_in_tof(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
+    def _get_sample_empty(self):
+        return self._inst_settings.sample_empty
+
     def _get_unit_to_keep(self):
         return self._inst_settings.unit_to_keep
+
+    def _spline_vanadium_ws(self, focused_vanadium_banks):
+        return common.spline_vanadium_workspaces(focused_vanadium_spectra=focused_vanadium_banks,
+                                                 spline_coefficient=self._inst_settings.spline_coeff)
 
 
 def check_mode_is_valid(inst_settings):
