@@ -42,7 +42,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(function->setWorkspace(ws));
     function->setParameter(0, 10.0);
 
-    FunctionDomain1DVector domain(ws->readX(0));
+    FunctionDomain1DVector domain(ws->x(0).rawData());
     FunctionValues values(domain);
 
     function->function(domain, values);

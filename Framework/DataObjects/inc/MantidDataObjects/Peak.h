@@ -135,7 +135,7 @@ public:
   void setRow(int m_row);
   void setCol(int m_col);
 
-  Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
   double getL2() const override;
 
@@ -152,6 +152,9 @@ public:
 
   /// Assignment
   Peak &operator=(const Peak &other);
+
+  /// Get the approximate position of a peak that falls off the detectors
+  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam);

@@ -1677,7 +1677,7 @@ def getDistances(ws_event_data):
             dPS_array[y, x] = sample.getDistance(detector)
 
     # Distance sample->center of detector
-    dSD = dPS_array[256./2.,304./2.]
+    dSD = dPS_array[256//2,304//2]
     # Distance source->center of detector
     dMD = dSD + dSM
 

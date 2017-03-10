@@ -675,8 +675,13 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
 
         if (m_options["Round"].toBool()) {
-          propValue = propValue.substr(
-              0, propValue.find(".") + m_options["RoundPrecision"].toInt() + 1);
+          std::string exp = (propValue.find("e") != std::string::npos)
+                                ? propValue.substr(propValue.find("e"))
+                                : "";
+          propValue =
+              propValue.substr(0, propValue.find(".") +
+                                      m_options["RoundPrecision"].toInt() + 1) +
+              exp;
         }
 
         newData[i] = propValue;
