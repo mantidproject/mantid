@@ -111,6 +111,16 @@ class InstrumentSettings(object):
 
 
 def _check_value_is_in_enum(val, enum):
+    """
+    Checks the the specified value is in the enum object. If it is
+    it will return the correctly capitalised version which should be used.
+    This is so the script not longer needs to convert to lower / upper case.
+    If the value was not in the enum it raises a value error and tells the user
+    the values available
+    :param val: The value to search for in the enumeration
+    :param enum: The enum object to check against.
+    :return: The correctly cased val. Otherwise raises a value error.
+    """
     seen_val_in_enum = False
     enum_known_keys = []
     lower_string_val = str(val).lower()
@@ -123,11 +133,13 @@ def _check_value_is_in_enum(val, enum):
         enum_known_keys.append(k)
 
         if lower_string_val == v.lower():
-            val = v  # Get the correctly types val
+            # Get the correctly capitalised value so we no longer have to call lower
+            val = v
             seen_val_in_enum = True
 
     # Check to see if the value was seen
     if seen_val_in_enum:
+        # Return the correctly capitalised value to be set
         return val
     else:
         e_msg = "The user specified value: '" + str(val) + "' is unknown. "
