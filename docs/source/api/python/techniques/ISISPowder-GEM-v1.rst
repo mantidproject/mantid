@@ -88,6 +88,9 @@ For background on script parameters and how they are evaluated see:
 - `input_mode` - Specifies how the runs are processed. Accepted values `Individual`,
   `Summed` - TODO write section on input modes for overview
 
+- `mode` - Determines the correct vanadium and empty instrument runs to use for
+  this chopper mode. Accepted values `PDF` and `Rietveld`
+
 - `multiple_scattering` - If set to True with `do_absorb_corrections` the calculation
   will factor in the effects of multiple scattering and apply the correct corrections.
 
@@ -103,6 +106,9 @@ For background on script parameters and how they are evaluated see:
   in a folder with the label appropriate for that/those run(s) and the user name
   specified by the user.
 
+- `sample_empty` - (Optional) - Specifies sample empty run(s) to subtract. Note:
+  This is currently not implemented
+
 - `user_name` - Specifies the user name to use when saving out focused data.
 
 - `vanadium_normalisation` - If set to True divides the sample by the calculated vanadium
@@ -113,21 +119,17 @@ For background on script parameters and how they are evaluated see:
 Advanced Script Parameters
 --------------------------
 
-- `grouping_file_name` - The name of the .cal file containing grouping information
-  for the detectors. This file must be located at the top of the calibration
-  directory as noted here :ref:`gem_calibration_folder-powder-diffraction-ref`
-
-- `masking_file_name` - The name of the file containing Vanadium masking information.
-  This file must be located at the top of the calibration directory as noted here:
-  :ref:`gem_calibration_folder-powder-diffraction-ref`
-
 - `focused_cropping_values` - Stores the TOF window to crop down to on a bank-by-bank
    basis. This is one of the final steps applied to a focused workspace. The values
    are stored as a list of tuples, with one tuple per bank and each containing
    the minimum and maximum values in TOF. The window specified must be less than
    both `vanadium_cropping_values` and `raw_data_tof_cropping`
 
-- `raw_data_cropping_values` - The window in TOF which the data should be cropped
+- `grouping_file_name` - The name of the .cal file containing grouping information
+  for the detectors. This file must be located at the top of the calibration
+  directory as noted here :ref:`gem_calibration_folder-powder-diffraction-ref`
+
+- `raw_tof_cropping_values` - The window in TOF which the data should be cropped
   down to before any processing. This should be stored as a tuple of minimum and
   maximum TOF values. The window should be larger than `vanadium_cropping_values`.
 
