@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <limits>
-#include <boost/lexical_cast.hpp>
-#include <boost/mpl/if.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -192,8 +190,7 @@ public:
    */
   void fromDouble(size_t i, double value) override {
     typedef
-        typename boost::mpl::if_c<boost::is_convertible<double, Type>::value,
-                                  Type, InconvertibleToDoubleType>::type
+        typename std::conditional<std::is_convertible<double,Type>::value, Type, 			InconvertibleToDoubleType>::type
             DoubleType;
     m_data[i] =
         static_cast<Type>(boost::numeric_cast<DoubleType, double>(value));
@@ -210,7 +207,7 @@ public:
   /// that the casting is possible
   double operator[](size_t i) const override {
     try {
-      return boost::lexical_cast<double>(m_data[i]);
+      return convertToDouble(m_data[i]);
     } catch (...) {
       return std::numeric_limits<double>::quiet_NaN();
     }
