@@ -60,7 +60,7 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
 *ADS. Returns a string with transmission runs so that they are considered in the
 *reduction
 *
-* @loadRuns :: If true, will try to load transmission runs as well
+* @param loadRuns :: If true, will try to load transmission runs as well
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
