@@ -74,15 +74,16 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   if (transRuns.size() > 2)
     throw std::invalid_argument("Only one transmission run or two "
-      "transmission runs separated by ',' "
-      "are allowed.");
+                                "transmission runs separated by ',' "
+                                "are allowed.");
 
   if (loadRuns) {
     for (const auto &run : transRuns) {
       if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
         continue;
       // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadISISNexus");
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
       alg->setProperty("Filename", run);
       alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
       alg->execute();

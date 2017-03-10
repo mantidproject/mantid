@@ -589,7 +589,7 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
-  if (!m_preprocessMap.empty()) 
+  if (!m_preprocessMap.empty())
     globalOptions = m_mainPresenter->getPreprocessingOptions();
 
   // If a preprocessing value is not found in the table, these external values
