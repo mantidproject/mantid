@@ -73,6 +73,7 @@ public:
   void giveUserWarning(std::string prompt, std::string title) override;
   void giveUserCritical(std::string prompt, std::string title) override;
   std::string runPythonAlgorithm(const std::string &pythonCode) override;
+  std::map<std::string, std::string> getPreprocessingValues() const override;
   /// Global options (inherited from DataProcessorMainPresenter)
   std::map<std::string, std::string> getPreprocessingOptions() const override;
   std::string getProcessingOptions() const override;

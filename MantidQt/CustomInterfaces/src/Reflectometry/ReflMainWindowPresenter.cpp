@@ -38,6 +38,19 @@ ReflMainWindowPresenter::ReflMainWindowPresenter(
 */
 ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 
+/** Returns values passed for 'Transmission run(s)'
+*
+* @param group :: Index of the group in 'Settings' tab from which to get the
+*values
+* @return :: Values passed for 'Transmission run(s)'
+*/
+std::string ReflMainWindowPresenter::getTransmissionRuns(int group) const {
+
+  checkSettingsPtrValid(m_settingsPresenter);
+
+  return m_settingsPresenter->getTransmissionRuns(group, false);
+}
+
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
 *
 * @param group :: Index of the group in 'Settings' tab from which to get the

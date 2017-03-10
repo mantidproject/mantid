@@ -589,8 +589,12 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
   // Global pre-processing options as a map
   std::map<std::string, std::string> globalOptions;
-  if (!m_preprocessMap.empty())
+  if (!m_preprocessMap.empty()) 
     globalOptions = m_mainPresenter->getPreprocessingOptions();
+
+  // If a preprocessing value is not found in the table, these external values
+  // can be substituted in
+  auto preProcessStrMap = m_mainPresenter->getPreprocessingValues();
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
@@ -600,27 +604,30 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
+    // The value for which preprocessing can be conducted on
+    std::string preProcessValue = data.at(i);
+    if (preProcessValue.empty()) {
+      if (preProcessStrMap.count(columnName))
+        preProcessValue = preProcessStrMap[columnName];
+      else
+        continue;
+    }
+
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
-      const std::string runStr = data.at(i);
+      auto preprocessor = m_preprocessMap[columnName];
 
-      if (!runStr.empty()) {
+      // Global pre-processing options for this algorithm as a string
+      const std::string options = globalOptions[columnName];
 
-        auto preprocessor = m_preprocessMap[columnName];
-
-        // Global pre-processing options for this algorithm as a string
-        const std::string options = globalOptions[columnName];
-
-        auto optionsMap = parseKeyValueString(options);
-        auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->getName());
-      }
+      auto optionsMap = parseKeyValueString(options);
+      auto runWS =
+          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
+      alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data.at(i);
-      if (!propertyValue.empty())
-        alg->setPropertyValue(propertyName, propertyValue);
+      alg->setPropertyValue(propertyName, preProcessValue);
     }
   }
 

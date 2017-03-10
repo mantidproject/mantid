@@ -356,6 +356,20 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+/** Requests pre-processing values. Values are supplied by the main
+* presenter
+* @return :: Pre-processing values
+*/
+std::map<std::string, std::string>
+ReflRunsTabPresenter::getPreprocessingValues() const {
+
+  std::map<std::string, std::string> values;
+  values["Transmission Run(s)"] =
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+
+  return values;
+}
+
 /** Requests global pre-processing options. Options are supplied by the main
 * presenter
 * @return :: Global pre-processing options
