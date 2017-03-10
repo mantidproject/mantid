@@ -1532,6 +1532,7 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
   }
   bool showErrorBars = ((type == "Errors") || ( type == "Advanced" && userInput.errors ));
 
+  // mantidUI knows nothing about userInput, hence the long argument lists.
   if (userInput.tiled) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
                              showErrorBars);
@@ -1540,9 +1541,20 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
                        showErrorBars, nullptr, false, userInput.waterfall);
   }
   else if (userInput.surface) {
-   // m_mantidUI->plotSurface(userInput.contourSurface);
+    m_mantidUI->plotSurface(userInput.contourSurface.accepted,
+                        userInput.contourSurface.plotIndex,
+                        userInput.contourSurface.axisName,
+                        userInput.contourSurface.logName,
+                        userInput.contourSurface.customLogValues,
+                        userInput.contourSurface.workspaceNames);
   }
   else if (userInput.contour) {
+    m_mantidUI->plotContour(userInput.contourSurface.accepted,
+                       userInput.contourSurface.plotIndex,
+                       userInput.contourSurface.axisName,
+                       userInput.contourSurface.logName,
+                       userInput.contourSurface.customLogValues,
+                       userInput.contourSurface.workspaceNames);
   }
 }
 
