@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from isis_powder.routines.common_enums import InputBatchingEnum, WorkspaceUnits
+from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
@@ -188,11 +188,11 @@ def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
         # If they do not specify which unit to keep don't do anything
         return
 
-    if unit_to_keep == WorkspaceUnits.d_spacing:
+    if unit_to_keep == WORKSPACE_UNITS.d_spacing:
         remove_intermediate_workspace(tof_group)
         del tof_group
 
-    elif unit_to_keep == WorkspaceUnits.tof:
+    elif unit_to_keep == WORKSPACE_UNITS.tof:
         remove_intermediate_workspace(d_spacing_group)
         del d_spacing_group
 
@@ -218,7 +218,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    if input_batching.lower() == InputBatchingEnum.Summed.lower() and len(raw_ws_list) > 1:
+    if input_batching.lower() == INPUT_BATCHING.Summed.lower() and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
@@ -302,7 +302,7 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
     """
     if empty_sample_ws_string:
         empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=InputBatchingEnum.Summed)
+                                                       input_batching=INPUT_BATCHING.Summed)
         mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
         remove_intermediate_workspace(empty_sample)
 

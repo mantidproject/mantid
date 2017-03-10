@@ -3,16 +3,16 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import INPUT_BATCHING
 import os
 import warnings
 
 
 def focus(run_number_string, instrument, perform_vanadium_norm=True):
     input_batching = instrument._get_input_batching_mode()
-    if input_batching == InputBatchingEnum.Individual:
+    if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument, perform_vanadium_norm, run_number_string)
-    elif input_batching == InputBatchingEnum.Summed:
+    elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")

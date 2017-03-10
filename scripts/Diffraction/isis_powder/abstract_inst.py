@@ -178,7 +178,7 @@ class AbstractInst(object):
         by default for instruments who do not with to specify it
         :return: The current input batching type from the InputBatchingEnum
         """
-        return common_enums.InputBatchingEnum.Summed
+        return common_enums.INPUT_BATCHING.Summed
 
     def _get_monitor_spectra_index(self, run_number):
         """

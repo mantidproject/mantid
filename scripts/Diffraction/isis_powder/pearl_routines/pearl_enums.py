@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class PearlFocusModes(object):
+class PEARL_FOCUS_MODES(object):
     enum_friendly_name  = "focus modes"
     all = "all"
     groups = "groups"
@@ -9,7 +9,7 @@ class PearlFocusModes(object):
     mods = "mods"
 
 
-class PearlTTModes(object):
+class PEARL_TT_MODES(object):
     enum_friendly_name = "tt_modes"
     all = "all"
     tt_35 = "tt35"

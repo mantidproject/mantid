@@ -3,14 +3,14 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import INPUT_BATCHING
 
 
 def create_van(instrument, run_details, absorb):
     van = run_details.vanadium_run_numbers
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
-                                                               input_batching=InputBatchingEnum.Summed)
+                                                               input_batching=INPUT_BATCHING.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
     # TODO where do we subtract empty can on GEM ?
