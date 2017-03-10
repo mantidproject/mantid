@@ -48,7 +48,6 @@ public:
     std::shared_ptr<Kernel::Property> property;
     double tolerance;
     bool isNumeric;
-    MergeLogType mergeLogType;
   };
 
   SampleLogsBehaviour(API::MatrixWorkspace &ws, Kernel::Logger &logger,
@@ -70,7 +69,8 @@ public:
 private:
   Kernel::Logger &m_logger;
 
-  typedef std::map<std::string, SampleLogBehaviour> SampleLogsMap;
+  typedef std::pair<std::string, MergeLogType> SampleLogsKey;
+  typedef std::map<SampleLogsKey, SampleLogBehaviour> SampleLogsMap;
   SampleLogsMap m_logMap;
   std::vector<std::shared_ptr<Kernel::Property>> m_addeeLogMap;
 

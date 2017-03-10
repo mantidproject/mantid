@@ -159,19 +159,42 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
 
     // Check 1: Does the key exist in the primary map? If so ignore it and
     // continue.
-    if (skipIfInPrimaryMap && (m_logMap.count(item) != 0)) {
+    if (skipIfInPrimaryMap &&
+        (m_logMap.count(SampleLogsKey(item, mergeType)) != 0)) {
       continue;
     }
 
     // Check 2: If the key (sample log name) already exists in this map throw an
     // error.
-    if (map.count(item) != 0) {
+    if (map.count(SampleLogsKey(item, mergeType)) != 0) {
       throw std::invalid_argument(
           "Error when making list of merge items, sample log \"" + item +
           "\" defined more than once!");
     }
 
-    // Check 3: Does the sample log exist? If not log an error but continue.
+    // Check 3: If the sample log is one that should not be combined with
+    // others, check other incompatible sample logs do not exist too.
+    std::set<MergeLogType> uncombinableLogs = {
+        MergeLogType::Sum, MergeLogType::TimeSeries, MergeLogType::List};
+    if (uncombinableLogs.count(mergeType) != 0) {
+      bool skipLog = false;
+
+      uncombinableLogs.erase(mergeType);
+      for (auto &logType : uncombinableLogs) {
+        if (map.count(SampleLogsKey(item, logType)) > 0)
+          throw std::invalid_argument(
+              "Error when making list of merge items, sample log " + item +
+              " being used for two incompatible merge types!");
+        if (skipIfInPrimaryMap &&
+            m_logMap.count(SampleLogsKey(item, logType)) > 0)
+          skipLog = true;
+      }
+
+      if (skipLog)
+        continue;
+    }
+
+    // Check 4: Does the sample log exist? If not log an error but continue.
     std::shared_ptr<Property> prop;
     try {
       prop = std::shared_ptr<Property>(ws.getLog(item)->clone());
@@ -183,7 +206,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
       continue;
     }
 
-    // Check 4: Can the property be converted to a double? If not, and sum or
+    // Check 5: Can the property be converted to a double? If not, and sum or
     // time series case, log an error but continue.
     bool isNumeric;
     double value = 0.0;
@@ -204,7 +227,7 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
     }
 
     // Finally add the key-value pair to the map
-    map[item] = {prop, tolerance, isNumeric, mergeType};
+    map[SampleLogsKey(item, mergeType)] = {prop, tolerance, isNumeric};
   }
 }
 
@@ -332,7 +355,7 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
 void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
                                           MatrixWorkspace &outWS) {
   for (auto item : m_logMap) {
-    std::string logName = item.first;
+    std::string logName = item.first.first;
 
     Property *addeeWSProperty = addeeWS.getLog(logName);
 
@@ -349,7 +372,7 @@ void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace &addeeWS,
       }
     }
 
-    switch (item.second.mergeLogType) {
+    switch (item.first.second) {
     case MergeLogType::Sum: {
       this->updateSumProperty(addeeWSNumericValue, outWSNumericValue, outWS,
                               logName);
@@ -542,10 +565,10 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  */
 void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &outWS) {
   for (auto &item : m_logMap) {
-    std::string propertyToReset = item.first;
+    std::string propertyToReset = item.first.first;
 
-    if (item.second.mergeLogType == MergeLogType::Warn ||
-        item.second.mergeLogType == MergeLogType::Fail) {
+    if (item.first.second == MergeLogType::Warn ||
+        item.first.second == MergeLogType::Fail) {
       continue;
     }
 
@@ -578,14 +601,14 @@ void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
  */
 void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace &ws) {
   for (auto const &item : m_logMap) {
-    std::string propertyToReset = item.first;
+    std::string propertyToReset = item.first.first;
 
-    if (item.second.mergeLogType == MergeLogType::TimeSeries) {
+    if (item.first.second == MergeLogType::TimeSeries) {
       auto property =
           std::unique_ptr<Kernel::Property>(item.second.property->clone());
       ws.mutableRun().addProperty(std::move(property), true);
-    } else if (item.second.mergeLogType == MergeLogType::Sum ||
-               item.second.mergeLogType == MergeLogType::List) {
+    } else if (item.first.second == MergeLogType::Sum ||
+               item.first.second == MergeLogType::List) {
       ws.mutableRun()
           .getProperty(propertyToReset)
           ->setValue(item.second.property->value());
