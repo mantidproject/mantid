@@ -180,18 +180,22 @@ Output:
     for name in sorted(wsnames):
         tmpws = mtd[name]
         print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
-        split_log = tmpws.run().getPropoerty('splitter')
-        print 'event splitter log: entry 0 and entry 1 are {0:.4f} and {1:.4f}.'.format(split_log.times[0], split_log.times[1])
+        split_log = tmpws.run().getProperty('splitter')
+        print 'event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0], split_log.times[1])
 
 
 Output:
 
 .. testoutput:: FilterEventNoCorrection
 
-    workspace tempsplitws3_a has 124 events
-    workspace tempsplitws3_b has 16915 events
-    workspace tempsplitws3_c has 10009 events
-    workspace tempsplitws3_unfiltered has 50603 events
+    workspace tempsplitws3_a has 77580 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
+    workspace tempsplitws3_b has 0 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:11:57 .
+    workspace tempsplitws3_c has 0 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:15:17 .
+    workspace tempsplitws3_unfiltered has 34686 events
+    event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37  and 2010-03-25T16:10:17 .
 
 
 **Example - Filtering event by pulse time**
