@@ -99,7 +99,7 @@ Developer's Note
 ----------------
 
 Splitters given by TableWorkspace
-=================================
+#################################
 
  - The *start/stop* time is converted to **m_vecSplitterTime**.
  - The *splitting target* (in string) is mapped to a set of continuous integers that are stored in **m_vecSplitterGroup**.
@@ -108,7 +108,7 @@ Splitters given by TableWorkspace
 
 
 Undefined splitting target
-==========================
+##########################
 
 Indexed as **0** in **m_vecSplitterGroup**.
 
