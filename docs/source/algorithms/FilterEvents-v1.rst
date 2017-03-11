@@ -150,6 +150,49 @@ Output:
     workspace tempsplitws_5 has 5133 events
     workspace tempsplitws_unfiltered has 50603 events
 
+**Example - Filtering event by a user-generated TableWorkspace**
+
+.. testcode:: FilterEventNoCorrection
+
+    ws = Load(Filename='CNCS_7860_event.nxs')
+
+    # create TableWorkspace
+    split_table_ws = CreateEmptyTableWorkspace()
+    split_table_ws.addColumn('float', 'start')
+    split_table_ws.addColumn('float', 'stop')
+    split_table_ws.addColumn('str', 'target')
+
+    split_table_ws.addRow([0., 100., 'a'])
+    split_table_ws.addRow([200., 300., 'b'])
+    split_table_ws.addRow([400., 600., 'c'])
+    split_table_ws.addRow([600., 650., 'b'])
+
+    # filter evnets
+    FilterEvents(InputWorkspace=ws, SplitterWorkspace=split_table_ws,
+            OutputWorkspaceBaseName='tempsplitws3',  GroupWorkspaces=True,
+            FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
+            CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
+            OutputTOFCorrectionWorkspace='mock')
+
+    # Print result
+    wsgroup = mtd["tempsplitws3"]
+    wsnames = wsgroup.getNames()
+    for name in sorted(wsnames):
+        tmpws = mtd[name]
+        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        split_log = tmpws.run().getPropoerty('splitter')
+        print 'event splitter log: entry 0 and entry 1 are {0:.4f} and {1:.4f}.'.format(split_log.times[0], split_log.times[1])
+
+
+Output:
+
+.. testoutput:: FilterEventNoCorrection
+
+    workspace tempsplitws3_a has 124 events
+    workspace tempsplitws3_b has 16915 events
+    workspace tempsplitws3_c has 10009 events
+    workspace tempsplitws3_unfiltered has 50603 events
+
 
 **Example - Filtering event by pulse time**
 
