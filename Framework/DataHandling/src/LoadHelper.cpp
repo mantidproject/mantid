@@ -209,13 +209,13 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-          // Go down to one level
-          std::string p_nxname(
-              nxname); // current names can be useful for next level
-          std::string p_nxclass(nxclass);
+        // Go down to one level
+        std::string p_nxname(
+            nxname); // current names can be useful for next level
+        std::string p_nxclass(nxclass);
 
-          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
-                                          p_nxclass, level + 1);
+        recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
+                                        p_nxclass, level + 1);
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
