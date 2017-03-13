@@ -134,7 +134,12 @@ void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
 std::string QtReflSettingsView::getStitchOptions() const {
 
   auto widget = m_ui.expSettingsLayout0->itemAtPosition(7, 1)->widget();
-  return static_cast<HintingLineEdit *>(widget)->text().toStdString();
+  std::string stitchOptionsText;
+  if (widget->isEnabled())
+    stitchOptionsText =
+        static_cast<HintingLineEdit *>(widget)->text().toStdString();
+
+  return stitchOptionsText;
 }
 
 /** Creates hints for 'Stitch1DMany'
@@ -152,7 +157,11 @@ void QtReflSettingsView::createStitchHints(
 */
 std::string QtReflSettingsView::getAnalysisMode() const {
 
-  return m_ui.analysisModeComboBox->currentText().toStdString();
+  std::string analysisModeText;
+  if (m_ui.analysisModeComboBox->isEnabled())
+    analysisModeText = m_ui.analysisModeComboBox->currentText().toStdString();
+
+  return analysisModeText;
 }
 
 /** Return direct beam
@@ -160,7 +169,11 @@ std::string QtReflSettingsView::getAnalysisMode() const {
 */
 std::string QtReflSettingsView::getDirectBeam() const {
 
-  return m_ui.directBeamEdit->text().toStdString();
+  std::string directBeamText;
+  if (m_ui.directBeamEdit->isEnabled())
+    directBeamText = m_ui.directBeamEdit->text().toStdString();
+
+  return directBeamText;
 }
 
 /** Return selected transmission run(s)
@@ -168,7 +181,11 @@ std::string QtReflSettingsView::getDirectBeam() const {
 */
 std::string QtReflSettingsView::getTransmissionRuns() const {
 
-  return m_ui.transmissionRunsEdit->text().toStdString();
+  std::string transmissionRunsText;
+  if (m_ui.transmissionRunsEdit->isEnabled())
+    transmissionRunsText = m_ui.transmissionRunsEdit->text().toStdString();
+
+  return transmissionRunsText;
 }
 
 /** Return start overlap
@@ -176,7 +193,11 @@ std::string QtReflSettingsView::getTransmissionRuns() const {
 */
 std::string QtReflSettingsView::getStartOverlap() const {
 
-  return m_ui.startOverlapEdit->text().toStdString();
+  std::string startOverlapText;
+  if (m_ui.startOverlapEdit->isEnabled())
+    startOverlapText = m_ui.startOverlapEdit->text().toStdString();
+
+  return startOverlapText;
 }
 
 /** Return end overlap
@@ -184,7 +205,11 @@ std::string QtReflSettingsView::getStartOverlap() const {
 */
 std::string QtReflSettingsView::getEndOverlap() const {
 
-  return m_ui.endOverlapEdit->text().toStdString();
+  std::string endOverlapText;
+  if (m_ui.endOverlapEdit->isEnabled())
+    endOverlapText = m_ui.endOverlapEdit->text().toStdString();
+
+  return endOverlapText;
 }
 
 /** Return selected polarisation corrections
@@ -192,7 +217,11 @@ std::string QtReflSettingsView::getEndOverlap() const {
 */
 std::string QtReflSettingsView::getPolarisationCorrections() const {
 
-  return m_ui.polCorrComboBox->currentText().toStdString();
+  std::string polCorrText;
+  if (m_ui.polCorrComboBox->isEnabled())
+    polCorrText = m_ui.polCorrComboBox->currentText().toStdString();
+
+  return polCorrText;
 }
 
 /** Return CRho
@@ -200,7 +229,11 @@ std::string QtReflSettingsView::getPolarisationCorrections() const {
 */
 std::string QtReflSettingsView::getCRho() const {
 
-  return m_ui.CRhoEdit->text().toStdString();
+  std::string CRhoText;
+  if (m_ui.CRhoEdit->isEnabled())
+    CRhoText = m_ui.CRhoEdit->text().toStdString();
+
+  return CRhoText;
 }
 
 /** Return CAlpha
@@ -208,7 +241,11 @@ std::string QtReflSettingsView::getCRho() const {
 */
 std::string QtReflSettingsView::getCAlpha() const {
 
-  return m_ui.CAlphaEdit->text().toStdString();
+  std::string CAlphaText;
+  if (m_ui.CAlphaEdit->isEnabled())
+    CAlphaText = m_ui.CAlphaEdit->text().toStdString();
+
+  return CAlphaText;
 }
 
 /** Return CAp
@@ -216,7 +253,11 @@ std::string QtReflSettingsView::getCAlpha() const {
 */
 std::string QtReflSettingsView::getCAp() const {
 
-  return m_ui.CApEdit->text().toStdString();
+  std::string CApText;
+  if (m_ui.CApEdit->isEnabled())
+    CApText = m_ui.CAlphaEdit->text().toStdString();
+
+  return CApText;
 }
 
 /** Return CPp
@@ -224,7 +265,11 @@ std::string QtReflSettingsView::getCAp() const {
 */
 std::string QtReflSettingsView::getCPp() const {
 
-  return m_ui.CPpEdit->text().toStdString();
+  std::string CPpText;
+  if (m_ui.CPpEdit->isEnabled())
+    CPpText = m_ui.CPpEdit->text().toStdString();
+
+  return CPpText;
 }
 
 /** Return momentum transfer limits
@@ -232,7 +277,11 @@ std::string QtReflSettingsView::getCPp() const {
 */
 std::string QtReflSettingsView::getMomentumTransferStep() const {
 
-  return m_ui.momentumTransferStepEdit->text().toStdString();
+  std::string momentumTransferText;
+  if (m_ui.momentumTransferStepEdit->isEnabled())
+    momentumTransferText = m_ui.momentumTransferStepEdit->text().toStdString();
+
+  return momentumTransferText;
 }
 
 /** Return scale factor
@@ -240,7 +289,11 @@ std::string QtReflSettingsView::getMomentumTransferStep() const {
 */
 std::string QtReflSettingsView::getScaleFactor() const {
 
-  return m_ui.scaleFactorEdit->text().toStdString();
+  std::string scaleFactorText;
+  if (m_ui.scaleFactorEdit->isEnabled())
+    scaleFactorText = m_ui.scaleFactorEdit->text().toStdString();
+
+  return scaleFactorText;
 }
 
 /** Return integrated monitors option
@@ -248,7 +301,11 @@ std::string QtReflSettingsView::getScaleFactor() const {
 */
 std::string QtReflSettingsView::getIntMonCheck() const {
 
-  return m_ui.intMonCheckBox->isChecked() ? "1" : "0";
+  std::string intMonCheckText;
+  if (m_ui.intMonCheckBox->isEnabled())
+    intMonCheckText = m_ui.intMonCheckBox->isChecked() ? "1" : "0";
+
+  return intMonCheckText;
 }
 
 /** Return monitor integral wavelength min
@@ -256,7 +313,11 @@ std::string QtReflSettingsView::getIntMonCheck() const {
 */
 std::string QtReflSettingsView::getMonitorIntegralMin() const {
 
-  return m_ui.monIntMinEdit->text().toStdString();
+  std::string monIntMinText;
+  if (m_ui.monIntMinEdit->isEnabled())
+    monIntMinText = m_ui.monIntMinEdit->text().toStdString();
+
+  return monIntMinText;
 }
 
 /** Return monitor integral wavelength max
@@ -264,7 +325,11 @@ std::string QtReflSettingsView::getMonitorIntegralMin() const {
 */
 std::string QtReflSettingsView::getMonitorIntegralMax() const {
 
-  return m_ui.monIntMaxEdit->text().toStdString();
+  std::string monIntMaxText;
+  if (m_ui.monIntMaxEdit->isEnabled())
+    monIntMaxText = m_ui.monIntMaxEdit->text().toStdString();
+
+  return monIntMaxText;
 }
 
 /** Return monitor background wavelength min
@@ -272,7 +337,11 @@ std::string QtReflSettingsView::getMonitorIntegralMax() const {
 */
 std::string QtReflSettingsView::getMonitorBackgroundMin() const {
 
-  return m_ui.monBgMinEdit->text().toStdString();
+  std::string monBgMinText;
+  if (m_ui.monBgMinEdit->isEnabled())
+    monBgMinText = m_ui.monBgMinEdit->text().toStdString();
+
+  return monBgMinText;
 }
 
 /** Return monitor background wavelength max
@@ -280,7 +349,11 @@ std::string QtReflSettingsView::getMonitorBackgroundMin() const {
 */
 std::string QtReflSettingsView::getMonitorBackgroundMax() const {
 
-  return m_ui.monBgMaxEdit->text().toStdString();
+  std::string monBgMaxText;
+  if (m_ui.monBgMaxEdit->isEnabled())
+    monBgMaxText = m_ui.monBgMaxEdit->text().toStdString();
+
+  return monBgMaxText;
 }
 
 /** Return wavelength min
@@ -288,7 +361,11 @@ std::string QtReflSettingsView::getMonitorBackgroundMax() const {
 */
 std::string QtReflSettingsView::getLambdaMin() const {
 
-  return m_ui.lamMinEdit->text().toStdString();
+  std::string lamMinText;
+  if (m_ui.lamMinEdit->isEnabled())
+    lamMinText = m_ui.lamMinEdit->text().toStdString();
+
+  return lamMinText;
 }
 
 /** Return wavelength max
@@ -296,7 +373,11 @@ std::string QtReflSettingsView::getLambdaMin() const {
 */
 std::string QtReflSettingsView::getLambdaMax() const {
 
-  return m_ui.lamMaxEdit->text().toStdString();
+  std::string lamMaxText;
+  if (m_ui.lamMaxEdit->isEnabled())
+    lamMaxText = m_ui.lamMaxEdit->text().toStdString();
+
+  return lamMaxText;
 }
 
 /** Return I0MonitorIndex
@@ -304,7 +385,11 @@ std::string QtReflSettingsView::getLambdaMax() const {
 */
 std::string QtReflSettingsView::getI0MonitorIndex() const {
 
-  return m_ui.I0MonIndexEdit->text().toStdString();
+  std::string I0MonIndexText;
+  if (m_ui.I0MonIndexEdit->isEnabled())
+    I0MonIndexText = m_ui.I0MonIndexEdit->text().toStdString();
+
+  return I0MonIndexText;
 }
 
 /** Return processing instructions
@@ -312,7 +397,11 @@ std::string QtReflSettingsView::getI0MonitorIndex() const {
 */
 std::string QtReflSettingsView::getProcessingInstructions() const {
 
-  return m_ui.procInstEdit->text().toStdString();
+  std::string procInstText;
+  if (m_ui.procInstEdit->isEnabled())
+    procInstText = m_ui.procInstEdit->text().toStdString();
+
+  return procInstText;
 }
 
 /** Return selected correction type
@@ -320,7 +409,12 @@ std::string QtReflSettingsView::getProcessingInstructions() const {
 */
 std::string QtReflSettingsView::getDetectorCorrectionType() const {
 
-  return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
+  std::string detCorrText;
+  if (m_ui.detectorCorrectionTypeComboBox->isEnabled())
+    detCorrText =
+        m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
+
+  return detCorrText;
 }
 
 } // namespace CustomInterfaces
