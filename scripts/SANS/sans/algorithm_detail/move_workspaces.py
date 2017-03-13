@@ -26,7 +26,7 @@ def move_component(workspace, offsets, component_to_move):
     move_options = {"Workspace": workspace,
                     "ComponentName": component_to_move,
                     "RelativePosition": True}
-    for key, value in offsets.items():
+    for key, value in list(offsets.items()):
         if key is CanonicalCoordinates.X:
             move_options.update({"X": value})
         elif key is CanonicalCoordinates.Y:
@@ -54,7 +54,7 @@ def rotate_component(workspace, angle, direction, component_to_rotate):
     rotate_options = {"Workspace": workspace,
                       "ComponentName": component_to_rotate,
                       "RelativeRotation": "1"}
-    for key, value in direction.items():
+    for key, value in list(direction.items()):
         if key is CanonicalCoordinates.X:
             rotate_options.update({"X": value})
         elif key is CanonicalCoordinates.Y:
@@ -223,7 +223,7 @@ def get_detector_component(move_info, component):
     """
     component_selection = component
     if component:
-        for detector_key in move_info.detectors.keys():
+        for detector_key in list(move_info.detectors.keys()):
             is_name = component == move_info.detectors[detector_key].detector_name
             is_name_short = component == move_info.detectors[detector_key].detector_name_short
             if is_name or is_name_short:
@@ -234,9 +234,7 @@ def get_detector_component(move_info, component):
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
-class SANSMove(object):
-    __metaclass__ = ABCMeta
-
+class SANSMove(object, metaclass=ABCMeta):
     def __init__(self):
         super(SANSMove, self).__init__()
 
@@ -275,7 +273,7 @@ class SANSMove(object):
     def _validate_component(move_info, component):
         if component is not None and len(component) != 0:
             found_name = False
-            for detector_keys in move_info.detectors.keys():
+            for detector_keys in list(move_info.detectors.keys()):
                 is_name = component == move_info.detectors[detector_keys].detector_name
                 is_name_short = component == move_info.detectors[detector_keys].detector_name_short
                 if is_name or is_name_short:

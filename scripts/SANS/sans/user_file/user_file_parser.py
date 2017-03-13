@@ -88,7 +88,7 @@ def does_pattern_match(compiled_regex, line):
 def escape_special_characters_for_file_path(to_escape):
     escape = {"\a": "\\a", "\b": "\\b", r"\c": "\\c", "\f": "\\f",
               "\n": "\\n", "\r": "\\r", "\t": "\\t", "\v": "\\v"}
-    keys = escape.keys()
+    keys = list(escape.keys())
     escaped = to_escape
     for key in keys:
         escaped = escaped.replace(key, escape[key])

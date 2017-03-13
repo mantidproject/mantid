@@ -187,7 +187,7 @@ class OutputParts(object):
 #  The fit type during merge of HAB and LAB reductions
 # -----------------------------------------------------
 @string_convertible
-@serializable_enum("Both", "None", "ShiftOnly", "ScaleOnly")
+@serializable_enum("Both", "NoFit", "ShiftOnly", "ScaleOnly")
 class FitModeForMerge(object):
     """
     Defines which fit operation to use during the merge of two reductions.

@@ -77,7 +77,7 @@ def get_single_valued_logs_from_workspace(workspace, log_names, log_types, conve
         log_value = get_log_value(run, log_name, log_type)
         log_results.update({log_name: log_value})
     if convert_from_millimeter_to_meter:
-        for key in log_results.keys():
+        for key in list(log_results.keys()):
             log_results[key] /= 1000.
     return log_results
 
@@ -93,7 +93,7 @@ def create_unmanaged_algorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in kwargs.items():
+    for key, value in list(kwargs.items()):
         alg.setProperty(key, value)
     return alg
 
@@ -261,7 +261,7 @@ def parse_event_slice_setting(string_to_parse):
         elements.append(stop)
 
         # We generate ranges with [[element[0], element[1]], [element[1], element[2]], ...]
-        ranges = zip(elements[:-1], elements[1:])
+        ranges = list(zip(elements[:-1], elements[1:]))
         return [[e1, e2] for e1, e2 in ranges]
 
     def _extract_full_range(line, range_marker_pattern):
