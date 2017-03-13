@@ -44,6 +44,7 @@ cache.
 """
 
 from abc import (ABCMeta, abstractmethod)
+from six import with_metaclass
 from mantid.api import (AnalysisDataService)
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
                                           find_full_file_path)
@@ -663,7 +664,7 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 # Load classes
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSLoadData(object, metaclass=ABCMeta):
+class SANSLoadData(with_metaclass(ABCMeta, object)):
     """ Base class for all SANSLoad implementations."""
 
     @abstractmethod

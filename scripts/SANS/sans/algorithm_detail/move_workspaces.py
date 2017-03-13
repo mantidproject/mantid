@@ -3,6 +3,7 @@
 import math
 from mantid.api import MatrixWorkspace
 from abc import (ABCMeta, abstractmethod)
+from six import with_metaclass
 from sans.state.move import StateMove
 from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorType)
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
@@ -234,7 +235,7 @@ def get_detector_component(move_info, component):
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
-class SANSMove(object, metaclass=ABCMeta):
+class SANSMove(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(SANSMove, self).__init__()
 
