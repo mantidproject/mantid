@@ -4,6 +4,8 @@
 #include "MantidBeamline/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
+#include "Eigen/Geometry"
+
 namespace Mantid {
 namespace Beamline {
 
@@ -56,20 +58,53 @@ namespace Beamline {
 */
 class MANTID_BEAMLINE_DLL DetectorInfo {
 public:
-  DetectorInfo(const size_t numberOfDetectors);
-  DetectorInfo(const size_t numberOfDetectors,
+  DetectorInfo() = default;
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond> rotations);
+  DetectorInfo(std::vector<Eigen::Vector3d> positions,
+               std::vector<Eigen::Quaterniond> rotations,
                const std::vector<size_t> &monitorIndices);
+
+  bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
   void setMasked(const size_t index, bool masked);
+  Eigen::Vector3d position(const size_t index) const;
+  Eigen::Quaterniond rotation(const size_t index) const;
+  void setPosition(const size_t index, const Eigen::Vector3d &position);
+  void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
 
 private:
-  Kernel::cow_ptr<std::vector<bool>> m_isMonitor;
-  Kernel::cow_ptr<std::vector<bool>> m_isMasked;
+  Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
+  Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions{nullptr};
+  Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations{nullptr};
 };
+
+/// Returns the position of the detector with given index.
+inline Eigen::Vector3d DetectorInfo::position(const size_t index) const {
+  return (*m_positions)[index];
+}
+
+/// Returns the rotation of the detector with given index.
+inline Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
+  return (*m_rotations)[index];
+}
+
+/// Set the position of the detector with given index.
+inline void DetectorInfo::setPosition(const size_t index,
+                                      const Eigen::Vector3d &position) {
+  m_positions.access()[index] = position;
+}
+
+/// Set the rotation of the detector with given index.
+inline void DetectorInfo::setRotation(const size_t index,
+                                      const Eigen::Quaterniond &rotation) {
+  m_rotations.access()[index] = rotation.normalized();
+}
 
 } // namespace Beamline
 } // namespace Mantid

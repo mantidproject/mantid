@@ -53,7 +53,9 @@ public:
 
   void test_constructor() {
     Beamline::SpectrumInfo specInfo(3);
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
+    auto ws = makeWorkspace(3);
+    TS_ASSERT_THROWS_NOTHING(
+        SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
   }
 
   void test_sourcePosition() {
@@ -161,16 +163,6 @@ public:
     // Monitors
     TS_ASSERT_THROWS(spectrumInfo.twoTheta(3), std::logic_error);
     TS_ASSERT_THROWS(spectrumInfo.twoTheta(4), std::logic_error);
-  }
-
-  void test_phi() {
-    const auto &spectrumInfo = m_workspace.spectrumInfo();
-    TS_ASSERT_DELTA(spectrumInfo.phi(0), -1.570796, 1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.phi(1), 0.0, 1e-6);
-    TS_ASSERT_DELTA(spectrumInfo.phi(2), 1.570796, 1e-6);
-    // Monitors
-    TS_ASSERT_THROWS(spectrumInfo.phi(3), std::logic_error);
-    TS_ASSERT_THROWS(spectrumInfo.phi(4), std::logic_error);
   }
 
   void test_twoTheta_grouped() {

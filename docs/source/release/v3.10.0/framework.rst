@@ -5,8 +5,15 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+API
+---
+
+- Frequency unit (GHz) included as an option to represent energy transfer.
+
 Algorithms
 ----------
+
+- Removed the optional flag `LocationParameters` from `ClearInstrumentParameters`.
 
 New
 ###
@@ -17,12 +24,16 @@ Improved
 ########
 
 - :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
+- Two new properties were added to :ref:`algm-Integration`: *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 
 Bug Fixes
 #########
 
 - Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
+- Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
+
 
 Deprecated
 ##########
@@ -38,10 +49,15 @@ Bugs
 
 - We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
 
+CurveFitting
+------------
+
 Improved
 ########
 
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
+
+- :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
 Python
 ------
@@ -64,7 +80,6 @@ Python
       3.0
       3.0
 
-- Exposed more `SpectrumInfo` functionality to Python.
 
 
 Python Algorithms

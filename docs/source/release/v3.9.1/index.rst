@@ -9,8 +9,8 @@ Mantid 3.9.1 Release Notes
 
 This is a patch release that corrects some significant issues since :ref:`version 3.9.0 <v3.9.0>`.
 
-There is no common theme to the fixes contained in this patch, rather it is collection of small but significant fixes. Please see below
-for the full list of changes.
+There is no common theme to the fixes contained in this patch, rather it is collection of small but
+significant fixes. Please see below for the full list of changes.
 
 Citation
 --------
@@ -37,9 +37,15 @@ Changes in this version
 * `18915 <https://www.github.com/mantidproject/mantid/pull/18915>`_ Add missing parameter in function call in performance test
 * `18926 <https://www.github.com/mantidproject/mantid/pull/18926>`_ Fix wrong detector selection when loading high angle bank user files in ISIS SANS
 * `18927 <https://www.github.com/mantidproject/mantid/pull/18927>`_ Fix sum file behaviour for vesuvio diffraction
+* `18952 <https://www.github.com/mantidproject/mantid/pull/18952>`_ Fix an issue in TimeSeriesProperty
 * `18955 <https://www.github.com/mantidproject/mantid/pull/18955>`_ Fix crash in MonitorDlg
 * `18959 <https://www.github.com/mantidproject/mantid/pull/18959>`_ Blank instrument view with U correction
 * `18972 <https://www.github.com/mantidproject/mantid/pull/18972>`_ Fix reading dead time data in Muon interface
+* `18979 <https://www.github.com/mantidproject/mantid/pull/18979>`_ Fix delete confirmations in workspace dock
+* `18984 <https://www.github.com/mantidproject/mantid/pull/18984>`_ Abins: Correct setting numerical zero for b_tensors
+* `18995 <https://www.github.com/mantidproject/mantid/pull/18995>`_ Add bank43 to TOPAZ IDF this run cycle
+* `19022 <https://www.github.com/mantidproject/mantid/pull/19022>`_ Fix reduction for osiris diffspec
+
 
 Summary of impact
 -----------------
@@ -58,13 +64,10 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18875 | Displays all of instrument when U correction applied                              | Apply U correction in appropriate all places| **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-<<<<<<< HEAD
-=======
 | 18884 | Allows Vesuvio to Load NeXus files from current cycle                             | Use Load not LoadRaw in algorithm           | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18888 | Fixes batch reduction for LOQ at ISIS                                             | Checks correctly for userfile in batch run  | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
->>>>>>> origin/release-v3.9
 | 18891 | Fixes bug in gd_prtn_chrg for chunked data                                        | Recalculate proton charge just prior to use | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18907 | Allows IMAT to use general file finding mechanism                                 | Facilities file update                      | **low**      |
@@ -75,17 +78,23 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18926 | Enables ISIS SANS to select the correct bank of the detector                      | Fix interpretation of list indices in GUI   | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
-<<<<<<< HEAD
-| 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
-=======
 | 18927 | Allow Vesuvio to sum runs in diffraction reduction                                | Fix incorrect assignment in loop            | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18952 | Avoid out of bounds access when comparing TimeSeriesProperty objects              | Check real size of objects first            | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18955 | Avoid possible crash in algorithm monitor dialog                                  | Check for null pointer                      | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18959 | Fixes blank view when U correction applied                                        | Fix missing call after #18875               | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 18972 | Loads data with/without dead-time correction as per user request                  | Clear data cache after option is updated    | **low**      |
->>>>>>> origin/release-v3.9
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18979 | Brings back delete confirmation dialog on removing workspace                      | Propagate setting to relevant objects       | **medium**   |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18984 | Sets a minimum threshold for values of B tensor in Abins                          | Check values on load                        | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 18995 | Mantid now recognises bank 43 of TOPAZ                                            | Update IDF                                  | **low**      |
++-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+| 19022 | OSIRIS diffspec reduction now works                                               | Add back code in else statement             | **low**      |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 
 .. _download page: http://download.mantidproject.org
