@@ -63,6 +63,7 @@ void IndexInfo::setSpectrumNumbers(
       Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
 }
 
+/// Set a contiguous range of spectrum numbers.
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
                                    const SpectrumNumber max) {
   if (static_cast<int64_t>(size()) !=
@@ -107,6 +108,13 @@ void IndexInfo::setDetectorIDs(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
 }
 
+/** Set the spectrum definitions.
+ *
+ * Note that in principle the spectrum definitions contain the same information
+ * as the groups of detector IDs. However, Mantid currently supports invalid
+ * detector IDs in groups, whereas spectrum definitions contain only valid
+ * indices. Validation requires access to the instrument and thus cannot be done
+ * internally in IndexInfo, i.e., spectrum definitions must be set by hand. */
 void IndexInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
@@ -115,34 +123,59 @@ void IndexInfo::setSpectrumDefinitions(
   m_spectrumDefinitions = spectrumDefinitions;
 }
 
+/// Returns the spectrum definitions.
 const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
 }
 
+/** Creates an index set containing all indices.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet() const {
   makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet();
 }
 
+/** Creates an index set containing all indices with spectrum number between
+ * `min` and `max`.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
                                          SpectrumNumber max) const {
   makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
+/** Creates an index set containing all indices with global index between `min`
+ * and `max`.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
                                          GlobalSpectrumIndex max) const {
   makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
+/** Creates an index set containing all indices corresponding to the spectrum
+ * numbers in the provided vector.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
   makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
 }
 
+/** Creates an index set containing all indices corresponding to the global
+ * indices in the provided vector.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   makeSpectrumNumberTranslator();

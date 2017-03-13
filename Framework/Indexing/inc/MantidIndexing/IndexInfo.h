@@ -17,8 +17,31 @@ class GlobalSpectrumIndex;
 class SpectrumIndexSet;
 class SpectrumNumberTranslator;
 
-/** IndexInfo is an object for holding information about spectrum numbers and
-  detector IDs associated to the spectra in a workspace.
+/** IndexInfo provides mapping from spectrum numbers to spectrum indices, and
+  grouping information that defines a spectrum as a group of detectors.
+
+  The interface of IndexInfo is designed to hide an underlying partitioning of
+  data as in the case of MPI. There are three interconnected index types:
+  - Spectrum numbers are user-defined (instrument-specific) identifiers for a
+    spectrum. In principle these must be unique, but for legacy support this is
+    currently not guaranteed. Most of the key functionality of IndexInfo is not
+    available unless spectrum numbers are unique.
+  - Global spectrum indices are a contiguous way of indexing all spectra,
+    starting at zero. In particular, this index spans all partitions. If there
+    is only a single partition the global spectrum index is equivalent to the
+    index (see next item). Note that in the user interface this is termed
+    `workspace index`.
+  - A contiguous index that is used to access data in workspaces. This index
+    refers only to spectra on this partition and is thus used in all client code
+    when accessing a partitioned workspace.
+  Typically, input from users or files would be in terms of spectrum numbers or
+  global spectrum indices. IndexInfo is then used to translate these into a set
+  of indices, whereby IndexInfo internally takes care of including all indices
+  in question in the set, such that the union of sets on all partitions
+  corresponds to the requested spectrum numbers or global spectrum indices.
+  Client code that treats each spectrum on its own can thus be written without
+  concern or knowledge about the underlying partitioning of the data.
+
 
   @author Simon Heybrock
   @date 2016
