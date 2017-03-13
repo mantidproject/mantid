@@ -79,39 +79,33 @@ MatrixWorkspace::~MatrixWorkspace() {
  * Writing spectrum number or detector ID groupings of any spectrum in the
  * workspace will invalidate this reference. */
 const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
+  std::lock_guard<std::mutex> lock(m_indexInfoMutex);
   // Individual SpectrumDefinitions in SpectrumInfo may have changed. Due to a
   // copy-on-write mechanism the definitions stored in IndexInfo may then be out
   // of sync.
   if (m_indexInfo->spectrumDefinitions() !=
       spectrumInfo().sharedSpectrumDefinitions()) {
-    std::lock_guard<std::mutex> lock(m_indexInfoMutex);
-    if (m_indexInfo->spectrumDefinitions() !=
-        spectrumInfo().sharedSpectrumDefinitions()) {
-      // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
-      // changed.
-      std::vector<std::vector<Indexing::DetectorID>> detIDs;
-      for (size_t i = 0; i < getNumberHistograms(); ++i) {
-        const auto &set = getSpectrum(i).getDetectorIDs();
-        detIDs.emplace_back(set.begin(), set.end());
-      }
-      m_indexInfo->setDetectorIDs(std::move(detIDs));
-      // IndexInfo clears the spectrum definitions when setting new detector IDs
-      // (to reduce the risk for mismatch, when used outside MatrixWorkspace),
-      // we thus set new definitions *after* settings IDs.
-      m_indexInfo->setSpectrumDefinitions(
-          spectrumInfo().sharedSpectrumDefinitions());
+    // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
+    // changed.
+    std::vector<std::vector<Indexing::DetectorID>> detIDs;
+    for (size_t i = 0; i < getNumberHistograms(); ++i) {
+      const auto &set = getSpectrum(i).getDetectorIDs();
+      detIDs.emplace_back(set.begin(), set.end());
     }
+    m_indexInfo->setDetectorIDs(std::move(detIDs));
+    // IndexInfo clears the spectrum definitions when setting new detector IDs
+    // (to reduce the risk for mismatch, when used outside MatrixWorkspace),
+    // we thus set new definitions *after* settings IDs.
+    m_indexInfo->setSpectrumDefinitions(
+        spectrumInfo().sharedSpectrumDefinitions());
   }
   // If spectrum numbers are set in ISpectrum this flag will be true.
   if (m_indexInfoNeedsUpdate) {
-    std::lock_guard<std::mutex> lock(m_indexInfoMutex);
-    if (m_indexInfoNeedsUpdate) {
-      std::vector<Indexing::SpectrumNumber> spectrumNumbers;
-      for (size_t i = 0; i < getNumberHistograms(); ++i)
-        spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
-      m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
-      m_indexInfoNeedsUpdate = false;
-    }
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+    for (size_t i = 0; i < getNumberHistograms(); ++i)
+      spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
+    m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
+    m_indexInfoNeedsUpdate = false;
   }
   return *m_indexInfo;
 }
