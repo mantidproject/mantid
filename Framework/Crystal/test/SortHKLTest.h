@@ -126,8 +126,6 @@ public:
 
   /// Test with a few peaks
   void test_exec() { do_test(2, 4, 4); }
-
-
 };
 
 #endif /* MANTID_CRYSTAL_SORTHKLTEST_H_ */

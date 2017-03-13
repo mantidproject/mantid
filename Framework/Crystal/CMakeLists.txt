@@ -157,7 +157,6 @@ set ( TEST_FILES
 	CombinePeaksWorkspacesTest.h
 	CompositeClusterTest.h
 	ConnectedComponentLabelingTest.h
-        CountReflectionsTest.h
         DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
 	FilterPeaksTest.h
