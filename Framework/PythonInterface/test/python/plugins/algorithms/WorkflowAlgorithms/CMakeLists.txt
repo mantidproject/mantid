@@ -23,6 +23,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
+  IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
@@ -35,7 +36,6 @@ set ( TEST_PY_FILES
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
-  SampleChangerTest.py
   SavePlot1DTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
