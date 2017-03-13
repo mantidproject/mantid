@@ -43,9 +43,9 @@ const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace()
-    : IMDWorkspace(), ExperimentInfo(), m_axes(),
-      m_isInitialized(false), m_YUnit(), m_YUnitLabel(),
-      m_isCommonBinsFlagSet(false), m_isCommonBinsFlag(false), m_masks() {}
+    : IMDWorkspace(), ExperimentInfo(), m_axes(), m_isInitialized(false),
+      m_YUnit(), m_YUnitLabel(), m_isCommonBinsFlagSet(false),
+      m_isCommonBinsFlag(false), m_masks() {}
 
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other) {

@@ -110,8 +110,8 @@ private:
   void makeSpectrumNumberTranslator() const;
   Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
-  Kernel::cow_ptr<std::vector<SpectrumDefinition>>
-      m_spectrumDefinitions{nullptr};
+  Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
+      nullptr};
   mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{
       nullptr};
 };

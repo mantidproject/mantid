@@ -182,7 +182,7 @@ ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
  * pointer set by this method is used to push updates of the detector IDs into
  * the Beamline::SpectrumInfo that is stored in the ExperimentInfo. */
 void ISpectrum::setMatrixWorkspace(MatrixWorkspace *matrixWorkspace,
-                                  const size_t index) {
+                                   const size_t index) {
   m_matrixWorkspace = matrixWorkspace;
   m_index = index;
 }
