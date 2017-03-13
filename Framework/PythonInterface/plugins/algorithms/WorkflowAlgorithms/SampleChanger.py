@@ -90,7 +90,7 @@ class SampleChanger(DataProcessorAlgorithm):
             scan_alg.setProperty('InelasticRange', self._inelastic_range)
             scan_alg.setProperty('DetailedBalance', self._detailed_balance)
             scan_alg.setProperty('GroupingMethod', self._grouping_method)
-            scan_alg.setProperty('SampleEnvironmentLogName', 'Position')
+            scan_alg.setProperty('SampleEnvironmentLogName', self._sample_log_name)
             scan_alg.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
             scan_alg.setProperty('msdFit', self._msdfit)
             scan_alg.setProperty('ReducedWorkspace', output_ws)
@@ -108,18 +108,18 @@ class SampleChanger(DataProcessorAlgorithm):
             inel_elt_ws = scan_ws + '_inel_elt'
             output_workspaces = [q1_ws, q2_ws, eisf_ws, el_elt_ws, inel_elt_ws]
 
-            if self._msdfit:
-                msd_ws = scan_ws + '_msd'
-                msd_output_workspaces = [msd_ws, msd_ws + '_fit']
-                msd_plot.append(msd_ws)
-
             if self._plot:
                 mp.plotSpectrum(q1_ws, 0, error_bars=True)
                 mp.plotSpectrum(q2_ws, 0, error_bars=True)
                 mp.plotSpectrum(eisf_ws, 0, error_bars=True)
+                if self._msdfit:
+                    mp.plotSpectrum(scan_ws + '_msd', 1, error_bars=True)
 
             if self._save:
                 save_alg = self.createChildAlgorithm("SaveNexusProcessed", enableLogging=False)
+                if self._msdfit:
+                    output_workspaces.append(scan_ws + '_msd')
+                    output_workspaces.append(scan_ws + '_msd_fit')
                 for ws in output_workspaces:
                     file_path = os.path.join(workdir, ws + '.nxs')
                     save_alg.setProperty("InputWorkspace", ws)
@@ -127,15 +127,13 @@ class SampleChanger(DataProcessorAlgorithm):
                     save_alg.execute()
                     logger.information('Output file : %s' % file_path)
                 if self._msdfit:
-                    for ws in msd_output_workspaces:
+                    for ws in [scan_ws + '_msd', scan_ws + '_msd_fit']:
                         file_path = os.path.join(workdir, ws + '.nxs')
                         save_alg.setProperty("InputWorkspace", ws)
                         save_alg.setProperty("Filename", file_path)
                         save_alg.execute()
                         logger.information('Output file : %s' % file_path)
-        if self._plot:
-            if self._msdfit:
-                mp.plotSpectrum(msd_plot, 1, error_bars=True)
+
 
     def _setup(self):
         self._run_first = self.getProperty('FirstRun').value
