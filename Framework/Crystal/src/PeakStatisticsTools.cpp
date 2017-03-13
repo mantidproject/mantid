@@ -170,7 +170,7 @@ UniqueReflectionCollection::getUnobservedUniqueReflections() const {
 /// Number of observed reflections.
 size_t UniqueReflectionCollection::getObservedReflectionCount() const {
   return std::accumulate(
-      m_reflections.cbegin(), m_reflections.cend(), 0,
+      m_reflections.cbegin(), m_reflections.cend(), size_t(0),
       [](size_t totalReflections,
          const std::pair<Kernel::V3D, UniqueReflection> &item) {
         return totalReflections + item.second.count();
