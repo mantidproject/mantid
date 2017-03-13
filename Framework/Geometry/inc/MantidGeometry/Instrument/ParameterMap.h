@@ -22,6 +22,7 @@ class DetectorInfo;
 }
 namespace Geometry {
 class BoundingBox;
+class Instrument;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -345,8 +346,10 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
+  size_t detectorIndex(const detid_t detID) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+  void setInstrument(const Instrument *instrument);
 
 private:
   boost::shared_ptr<Parameter> create(const std::string &className,
@@ -378,6 +381,9 @@ private:
   /// Pointer to the DetectorInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
+  /// Pointer to the owning instrument for translating detector IDs into
+  /// detector indices when accessing the DetectorInfo object.
+  const Instrument *m_instrument{nullptr};
 };
 
 /// ParameterMap shared pointer typedef

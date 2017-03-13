@@ -475,7 +475,7 @@ V3D CompAssembly::getPos() const {
  * creates it if it is not available.
  * @returns A vector of the absolute position
  */
-const Quat CompAssembly::getRotation() const {
+Quat CompAssembly::getRotation() const {
   if (!m_map)
     return Component::getRotation();
   else {

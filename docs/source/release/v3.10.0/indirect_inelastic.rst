@@ -12,8 +12,10 @@ Algorithms
 ##########
 
 - A new input property *RebinCanToSample* was added to :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` which enables or disables the rebinning of the empty container workspace.
+- :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` and :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>` algorithms are extended for `Efixed` mode, where the correction will be computed for a single wavelength point.
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` can now load NeXus files as well as raw files
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
+- :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 
 Data Reduction
 ##############
@@ -31,6 +33,7 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+- The Delta Function option can now be used with StretchedExpFT mode
 
 Jump Fit
 ~~~~~~~~
