@@ -464,7 +464,7 @@ public:
 
   void test_merge_multiple_associative() {
     // Test that (A + B) + C == A + (B + C)
-    // This is currently true given the implementation, but not a guarentee of
+    // This is currently true given the implementation, but not a guarantee of
     // the interface.
     DetectorInfo a1(PosVec(1), RotVec(1));
     a1.setRotation(0, Eigen::Quaterniond::Identity());
