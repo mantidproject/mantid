@@ -6,6 +6,7 @@
 #include "MantidKernel/Statistics.h"
 
 #include <boost/make_shared.hpp>
+#include <numeric>
 
 namespace Mantid {
 namespace Crystal {
