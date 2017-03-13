@@ -190,7 +190,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         divide_alg.setProperty("OutputWorkspace", self._scan_ws + '_eisf')
         divide_alg.execute()
 
-
         delete_alg.setProperty("Workspace", self._scan_ws + '_el_elf')
         delete_alg.execute()
         delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
@@ -214,7 +213,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             msd_alg.setProperty("OutputWorkspace", self._scan_ws + '_msd')
             msd_alg.setProperty("FitWorkspaces", self._scan_ws + '_msd_fit')
             msd_alg.execute()
-
 
     def validateInputs(self):
         """
@@ -322,6 +320,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(EnergyWindowScan)

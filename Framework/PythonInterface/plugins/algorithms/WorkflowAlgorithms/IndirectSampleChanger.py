@@ -6,7 +6,7 @@ from mantid.kernel import *
 from mantid.simpleapi import *
 
 
-class SampleChanger(DataProcessorAlgorithm):
+class IndirectSampleChanger(DataProcessorAlgorithm):
     _plot = False
     _save = False
     _instrument = 'IRIS'
@@ -168,4 +168,4 @@ class SampleChanger(DataProcessorAlgorithm):
         self._save = self.getProperty('Save').value
 
 
-AlgorithmFactory.subscribe(SampleChanger)  # Register algorithm with Mantid
+AlgorithmFactory.subscribe(IndirectSampleChanger)  # Register algorithm with Mantid
