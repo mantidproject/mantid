@@ -209,8 +209,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        if (!std::string(nxclass).empty()) {
-
           // Go down to one level
           std::string p_nxname(
               nxname); // current names can be useful for next level
@@ -218,7 +216,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
 
           recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
                                           p_nxclass, level + 1);
-        }
+
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
@@ -254,16 +252,25 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
             if ((rank == 1) && (dims[0] <= 9)) {
               build_small_float_array = true;
             } else {
-              g_log.debug() << indent_str
-                            << "ignored multi dimension float data on "
+              g_log.debug() << indent_str << "ignored multi dimensional number "
+                                             "data with more than 10 elements "
                             << property_name << '\n';
+              continue;
             }
           } else if (type != NX_CHAR) {
-            if ((rank != 1) || (dims[0] != 1) || (dims[1] != 1) ||
-                (dims[2] != 1) || (dims[3] != 1)) {
-              g_log.debug() << indent_str << "ignored multi dimension data on "
+            if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
+                (dims[2] > 1) || (dims[3] > 1)) {
+              g_log.debug() << indent_str
+                            << "ignored non-scalar numeric data on "
                             << property_name << '\n';
+              continue;
             }
+          } else {
+              if (rank > 1 || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
+              g_log.debug() << indent_str << "ignored string array data on "
+                            << property_name << '\n';
+              continue;
+              }
           }
 
           void *dataBuffer;
@@ -271,6 +278,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
 
           if (NXgetdata(nxfileID, dataBuffer) != NX_OK) {
             NXfree(&dataBuffer);
+            dataBuffer = nullptr;
             throw std::runtime_error("Cannot read data from NeXus file");
           }
 
