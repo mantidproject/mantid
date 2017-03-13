@@ -72,7 +72,8 @@ public:
     void advance(int64_t delta) {
       m_index = delta < 0 ? std::max(static_cast<int64_t>(0),
                                      static_cast<int64_t>(m_index) + delta)
-                          : std::min(m_indexSet.size(), m_index + delta);
+                          : std::min(m_indexSet.size(),
+                                     m_index + static_cast<size_t>(delta));
     }
     int64_t distance_to(const const_iterator &other) const {
       return static_cast<int64_t>(other.m_index) -
