@@ -5,8 +5,8 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>

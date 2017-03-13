@@ -71,6 +71,8 @@ public:
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
+  bool isEquivalent(const DetectorInfo &other) const;
+
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
@@ -109,11 +111,10 @@ private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
-  void setCachedDetector(
-      size_t index,
-      boost::shared_ptr<const Geometry::IDetector> detector) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
+  const std::vector<size_t> &
+  getAssemblyDetectorIndices(const Geometry::IComponent &comp) const;
 
   void cacheSource() const;
   void cacheSample() const;
@@ -146,6 +147,9 @@ private:
 
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
+  mutable std::vector<
+      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
+      m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 
