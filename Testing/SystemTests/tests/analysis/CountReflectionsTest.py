@@ -2,6 +2,7 @@ import stresstesting
 from mantid.simpleapi import *
 from SortHKLTest import HKLStatisticsTestMixin
 
+
 class CountReflectionsTest(HKLStatisticsTestMixin, stresstesting.MantidStressTest):
     '''
     This systemtest follows the same principle as the one for SortHKL. It loads data,
@@ -20,7 +21,7 @@ class CountReflectionsTest(HKLStatisticsTestMixin, stresstesting.MantidStressTes
             reference_statistics = self._load_reference_statistics(space_group)
 
             statistics = self._run_count_reflections(reflections, space_group)
-            
+
             self._compare_statistics(vars(statistics), reference_statistics)
 
     def _run_count_reflections(self, reflections, space_group):
