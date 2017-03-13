@@ -1,0 +1,39 @@
+from __future__ import (absolute_import, division, print_function)
+
+import unittest
+from mantid.simpleapi import SampleChanger
+from mantid.api import mtd
+
+
+class SampleChangerTest(unittest.TestCase):
+
+    def test_sampleChanger(self):
+        """
+        Basic test for sample changer
+        """
+        SampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=1, Instrument='IRIS', Analyser='graphite',
+                      Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
+                      InelasticRange='0, 0.5', GroupingMethod='All')
+        scan_ws = mtd['iris72462_to_72465_s0_scan_eisf']
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0452707)
+
+    def test_msdFit(self):
+        """
+        Basic test for sample changer with MSDFit
+        """
+        SampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=1, Instrument='IRIS', Analyser='graphite',
+                      Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
+                      InelasticRange='0, 0.5', GroupingMethod='Individual',msdFit=True)
+        scan_ws = mtd['iris72462_to_72465_s0_scan_eisf']
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.1014862)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.1648556)
+
+        msd_ws = mtd['iris72462_to_72465_s0_scan_msd']
+        self.assertEqual(round(scan_ws.readY(0)[1], 7), 1.1355038)
+        self.assertEqual(round(scan_ws.readY(1)[2], 7), 1.1431749)
+
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
   SANSDarkRunBackgroundCorrectionTest.py
   SANSFitShiftScaleTest.py
   SANSStitchTest.py
+  SampleChangerTest.py
   SavePlot1DTest.py
   SimulatedDensityOfStatesTest.py
   SofQWMomentsTest.py
