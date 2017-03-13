@@ -90,7 +90,7 @@ class SampleChanger(DataProcessorAlgorithm):
             scan_alg.setProperty('InelasticRange', self._inelastic_range)
             scan_alg.setProperty('DetailedBalance', self._detailed_balance)
             scan_alg.setProperty('GroupingMethod', self._grouping_method)
-            scan_alg.setProperty('SampleEnvironmentLogName', self._sample_log_name)
+            scan_alg.setProperty('SampleEnvironmentLogName', 'Position')
             scan_alg.setProperty('SampleEnvironmentLogValue', self._sample_log_value)
             scan_alg.setProperty('msdFit', self._msdfit)
             scan_alg.setProperty('ReducedWorkspace', output_ws)
@@ -169,77 +169,6 @@ class SampleChanger(DataProcessorAlgorithm):
 
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
-
-    def _msd_fit(self, ws, ws_name):
-        # Fit line to each of the spectra
-        function = 'name=LinearBackground, A0=0, A1=0'
-        input_params = [ws + ',i%d' % i for i in range(0, self._number_runs)]
-        input_params = ';'.join(input_params)
-        x = mtd[ws].readX(0)
-        PlotPeakByLogValue(Input=input_params,
-                           OutputWorkspace=ws_name,
-                           Function=function,
-                           StartX=x[0], EndX=x[-1],
-                           FitType='Sequential',
-                           CreateOutput=True)
-
-        delete_alg = self.createChildAlgorithm("DeleteWorkspace", enableLogging=False)
-        delete_alg.setProperty("Workspace", ws_name + '_NormalisedCovarianceMatrices')
-        delete_alg.execute()
-        delete_alg.setProperty("Workspace", ws_name + '_Parameters')
-        delete_alg.execute()
-        rename_alg = self.createChildAlgorithm("RenameWorkspace", enableLogging=False)
-        rename_alg.setProperty("InputWorkspace", ws_name)
-        rename_alg.setProperty("OutputWorkspace", ws_name + '_Parameters')
-        rename_alg.execute()
-        mtd.addOrReplace(ws_name + '_Parameters', rename_alg.getProperty("OutputWorkspace").value)
-
-        params_table = mtd[ws_name + '_Parameters']
-
-        # MSD value should be positive, but the fit output is negative
-        msd = params_table.column('A1')
-        for i, value in enumerate(msd):
-            params_table.setCell('A1', i, value * -1)
-
-        # Create workspaces for each of the parameters
-        parameter_ws_group = []
-
-        # A0 workspace
-        msd_name = ws_name + '_A0'
-        parameter_ws_group.append(msd_name)
-        ConvertTableToMatrixWorkspace(ws_name + '_Parameters', OutputWorkspace=msd_name,
-                                      ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
-        xunit = mtd[msd_name].getAxis(0).setUnit('Label')
-        xunit.setLabel('Temperature', 'K')
-
-        # A1 workspace
-        msd_name = ws_name + '_A1'
-        parameter_ws_group.append(msd_name)
-        ConvertTableToMatrixWorkspace(ws_name + '_Parameters', OutputWorkspace=msd_name,
-                                      ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
-        xunit = mtd[msd_name].getAxis(0).setUnit('Label')
-        xunit.setLabel('Temperature', 'K')
-        sort_alg = self.createChildAlgorithm("SortXAxis", enableLogging=False)
-        sort_alg.setProperty("InputWorkspace", msd_name)
-        sort_alg.setProperty("OutputWorkspace", msd_name)
-        sort_alg.execute()
-        mtd.addOrReplace(msd_name, sort_alg.getProperty("OutputWorkspace").value)
-
-        # Group parameter workspaces
-        group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
-        group_alg.setProperty("InputWorkspaces", ','.join(parameter_ws_group))
-        group_alg.setProperty("OutputWorkspace", ws_name)
-        group_alg.execute()
-        mtd.addOrReplace(ws_name, group_alg.getProperty("OutputWorkspace").value)
-
-        # Add sample logs to output workspace
-        copy_log_alg = self.createChildAlgorithm("CopyLogs", enableLogging=False)
-        copy_log_alg.setProperty("InputWorkspace", ws)
-        copy_log_alg.setProperty("OutputWorkspace", ws_name)
-        copy_log_alg.execute()
-        copy_log_alg.setProperty("InputWorkspace", ws_name + '_A0')
-        copy_log_alg.setProperty("OutputWorkspace", ws_name + '_Workspaces')
-        copy_log_alg.execute()
 
 
 AlgorithmFactory.subscribe(SampleChanger)  # Register algorithm with Mantid

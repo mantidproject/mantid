@@ -224,7 +224,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             transpose_alg.setProperty("OutputWorkspace", self._elf_workspace)
             transpose_alg.execute()
 
-            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace"))
+            sort_alg.setProperty("InputWorkspace",transpose_alg.getProperty("OutputWorkspace").value)
             sort_alg.setProperty("OutputWorkspace", self._elf_workspace)
             sort_alg.execute()
 
