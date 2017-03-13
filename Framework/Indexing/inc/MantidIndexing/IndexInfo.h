@@ -42,6 +42,15 @@ class SpectrumNumberTranslator;
   Client code that treats each spectrum on its own can thus be written without
   concern or knowledge about the underlying partitioning of the data.
 
+  Note that currently IndexInfo also carries information about grouping in terms
+  of detector IDs. This mechanism has been added for supporting the current
+  legacy in Mantid: Grouping is stored in terms of detector IDs in ISpectrum (in
+  addition to the new way of storing grouping with the class SpectrumDefinition
+  in terms of indices). We also store detector IDs such that grouping
+  information can be transferred to another workspace, without the need for a
+  costly (and potentially impossible, since invalid IDs are allowed) rebuild of
+  the sets of detector IDs that need to be part of ISpectrum.
+
 
   @author Simon Heybrock
   @date 2016
