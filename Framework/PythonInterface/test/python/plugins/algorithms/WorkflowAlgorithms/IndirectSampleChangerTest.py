@@ -17,6 +17,21 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0452707)
 
+    def test_multiple_samples(self):
+        """
+        Test for running with different material in the sample changer
+        """
+        IndirectSampleChanger(FirstRun=72462, LastRun=72465, NumberSamples=2, Instrument='IRIS', Analyser='graphite',
+                              Reflection='002', SpectraRange='3, 50', ElasticRange='-0.5, 0',
+                              InelasticRange='0, 0.5', GroupingMethod='All')
+        scan_ws = mtd['iris72462_to_72464_s0_scan_eisf']
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0487223)
+
+        scan_ws = mtd['iris72463_to_72465_s0_scan_eisf']
+        self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
+        self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0452707)
+
     def test_msdFit(self):
         """
         Basic test for sample changer with MSDFit
