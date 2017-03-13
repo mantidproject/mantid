@@ -42,10 +42,11 @@ namespace MantidWidgets {
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
-                                         const bool showTiledOption)
+                                         const bool showTiledOption,
+                                         const bool isAdvanced)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_plotOptions(), m_wsNames(wsNames), m_wsIndexIntervals(),
+      m_plotOptions(), m_wsNames(wsNames), m_advanced(isAdvanced), m_wsIndexIntervals(),
       m_spectraNumIntervals(), m_wsIndexChoice(), m_spectraIdChoice() {
   checkForSpectraAxes();
   // Generate the intervals allowed to be plotted by the user.
@@ -66,9 +67,16 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
   options.simple = is1DPlotSelected();
   options.waterfall = isWaterfallPlotSelected();
   options.tiled = isTiledPlotSelected();
-  options.errors = isErrorBarsSelected();
-  options.surface = isSurfacePlotSelected();
-  options.contour = isContourPlotSelected();
+  if (m_advanced) {
+    options.surface = isSurfacePlotSelected();
+    options.errors = isErrorBarsSelected();
+    options.contour = isContourPlotSelected();
+  }
+  else {
+    options.surface = false;
+    options.errors = false;
+    options.contour = false;
+  }
 
   // Contour and Surface options
   if (options.surface || options.contour) {
@@ -331,7 +339,7 @@ void MantidWSIndexWidget::init() {
   initSpectraBox();
   initWorkspaceBox();
   initOptionsBoxes();
-  if (isSuitableForContourOrSurfacePlot()) {
+  if (m_advanced && isSuitableForContourOrSurfacePlot()) {
     initLogs();
   }
   setLayout(m_outer);
@@ -395,8 +403,10 @@ void MantidWSIndexWidget::initSpectraBox() {
 void MantidWSIndexWidget::initOptionsBoxes() {
   m_optionsBox = new QHBoxLayout;
 
-  m_showErrorBars = new QCheckBox("Show Error Bars");
-  m_optionsBox->addWidget(m_showErrorBars);
+  if (m_advanced) {
+    m_showErrorBars = new QCheckBox("Show Error Bars");
+    m_optionsBox->addWidget(m_showErrorBars);
+  }
 
   if (m_waterfall || m_tiled) {
     m_plotOptions = new QComboBox();
@@ -407,14 +417,16 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     if (m_tiled) {
       m_plotOptions->addItem(tr("Tiled Plot"));
     }
-    if (isSuitableForContourOrSurfacePlot()) {
+    if (m_advanced && isSuitableForContourOrSurfacePlot()) {
       m_plotOptions->addItem(SURFACE_PLOT);
       m_plotOptions->addItem(CONTOUR_PLOT);
+      connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
+        SLOT(onPlotOptionChanged(const QString &)));
     }
     m_optionsBox->addWidget(m_plotOptions);
+
   }
-  connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
-    SLOT(onPlotOptionChanged(const QString &)));
+
   m_outer->addItem(m_optionsBox);
 }
 
@@ -645,9 +657,10 @@ MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,
-                                         const bool showTiledOption)
+                                         const bool showTiledOption,
+                                         const bool isAdvanced)
     : QDialog(parent, flags),
-      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption),
+      m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption, isAdvanced),
       m_plotAll(showPlotAll) {
   // Set up UI.
   init();

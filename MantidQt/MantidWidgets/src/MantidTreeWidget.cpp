@@ -230,7 +230,7 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * options
 */
 MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
-    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt) const {
+    bool showWaterfallOpt, bool showPlotAll, bool showTiledOpt, bool isAdvanced) const {
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
@@ -264,7 +264,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
 
   // Else, one or more workspaces
   auto dio = m_mantidUI->createWorkspaceIndexDialog(
-      0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll, showTiledOpt);
+    0, selectedMatrixWsNameList, showWaterfallOpt, showPlotAll, showTiledOpt, isAdvanced);
   dio->exec();
   return dio->getSelections();
 }

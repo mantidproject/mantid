@@ -30,7 +30,8 @@ public:
   MantidWSIndexWidget::UserInput
   chooseSpectrumFromSelected(bool showWaterfallOpt = true,
                              bool showPlotAll = true,
-                             bool showTiledOpt = true) const;
+                             bool showTiledOpt = true,
+                             bool isAdvanced = false) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

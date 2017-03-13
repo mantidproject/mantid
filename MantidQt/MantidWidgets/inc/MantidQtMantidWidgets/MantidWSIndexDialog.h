@@ -286,7 +286,8 @@ public:
   /// list of the names of workspaces to be plotted.
   MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
                       const bool showWaterfallOption = false,
-                      const bool showTiledOption = false);
+                      const bool showTiledOption = false,
+                      const bool isAdvanced = false);
 
   /// Returns a structure holding all of the selected options
   UserInput getSelections();
@@ -374,6 +375,9 @@ private:
   /// Do we allow the display of the tiled option
   bool m_tiled;
 
+    /// Is the plotting advanced?
+  bool m_advanced;
+
   /// Pointers to the obligatory Qt objects:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_logLabel, *m_customLogLabel, *m_axisLabel;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
@@ -399,7 +403,8 @@ public:
   MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags, QList<QString> wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
-                      const bool showTiledOption = false );
+                      const bool showTiledOption = false,
+                      const bool isAdvanced = false );
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections();
   /// Returns the QMultiMap that contains all the workspaces that are to be
