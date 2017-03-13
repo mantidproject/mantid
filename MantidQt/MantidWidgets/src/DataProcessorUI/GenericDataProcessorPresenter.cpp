@@ -605,12 +605,14 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
     // The value for which preprocessing can be conducted on
-    std::string preProcessValue = data.at(i);
-    if (preProcessValue.empty()) {
-      if (preProcessStrMap.count(columnName))
-        preProcessValue = preProcessStrMap[columnName];
-      else
-        continue;
+    std::string preProcessValue;
+    if (!data.at(i).empty()) {
+      preProcessValue = data.at(i);
+    } else if (preProcessStrMap.count(columnName) &&
+               !preProcessStrMap[columnName].empty()) {
+      preProcessValue = preProcessStrMap[columnName];
+    } else {
+      continue;
     }
 
     if (m_preprocessMap.count(columnName)) {
