@@ -3970,10 +3970,11 @@ MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                                           QStringList wsNames,
                                                           bool showWaterfall,
                                                           bool showPlotAll,
-                                                          bool showTiledOpt) {
+                                                          bool showTiledOpt,
+                                                          bool isAdvanced) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),
                                  wsNames, showWaterfall, showPlotAll,
-                                 showTiledOpt);
+                                 showTiledOpt, isAdvanced);
 }
 
 void MantidUI::showSurfacePlot() {

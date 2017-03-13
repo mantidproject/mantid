@@ -1525,7 +1525,8 @@ void QWorkspaceDockView::onClickPlotSpectraAdv() {
 * @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting. 
 */
 void QWorkspaceDockView::plotSpectrum(std::string type) {
-  const auto userInput = m_tree->chooseSpectrumFromSelected();
+  const bool isAdvanced = type == "Advanced";
+  const auto userInput = m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty()) {

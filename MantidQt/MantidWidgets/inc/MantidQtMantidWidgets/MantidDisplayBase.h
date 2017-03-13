@@ -135,7 +135,7 @@ public:
                           const QString &plotType) = 0;
   virtual MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
-                             bool showPlotAll, bool showTiledOpt) = 0;
+                             bool showPlotAll, bool showTiledOpt, bool isAdvanced=false ) = 0;
 
   virtual void updateProject() = 0;
   virtual void showCritical(const QString &) {}

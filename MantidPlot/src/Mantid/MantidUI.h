@@ -216,7 +216,7 @@ public:
                           const QString &plotType) override;
   MantidQt::MantidWidgets::MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
-                             bool showPlotAll, bool showTiledOpt) override;
+                             bool showPlotAll, bool showTiledOpt, bool isAdvanced) override;
 
   /// Create a 1d graph form a Table
   MultiLayer *createGraphFromTable(Table *t, int type = 0);
