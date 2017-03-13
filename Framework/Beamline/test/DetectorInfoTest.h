@@ -404,6 +404,28 @@ public:
     TS_ASSERT_EQUALS(a.scanCount(1), 1);
   }
 
+  void test_merge_idempotent() {
+    DetectorInfo a(PosVec(2), RotVec(2), {1});
+    // Monitor at index 1, set up for identical interval
+    std::pair<int64_t, int64_t> monitorInterval(0, 2);
+    a.setScanInterval({1, 0}, monitorInterval);
+    a.setPosition(1, {0, 0, 0});
+    auto b(a);
+    Eigen::Vector3d pos1(1, 0, 0);
+    Eigen::Vector3d pos2(2, 0, 0);
+    a.setPosition(0, pos1);
+    b.setPosition(0, pos2);
+    std::pair<int64_t, int64_t> interval1(0, 1);
+    std::pair<int64_t, int64_t> interval2(1, 2);
+    a.setScanInterval({0, 0}, interval1);
+    b.setScanInterval({0, 0}, interval2);
+
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    auto a0(a);
+    TS_ASSERT_THROWS_NOTHING(a.merge(b));
+    TS_ASSERT(a.isEquivalent(a0));
+  }
+
   void test_merge_multiple() {
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval

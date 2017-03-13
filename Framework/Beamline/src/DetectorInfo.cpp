@@ -239,12 +239,12 @@ void DetectorInfo::merge(const DetectorInfo &other) {
       const auto index2 = linearIndex({detIndex, timeIndex});
       const auto &interval2 = (*m_scanIntervals)[index2];
       if (interval1 == interval2) {
-        if ((*m_isMasked)[index1] != (*other.m_isMasked)[index2])
+        if ((*m_isMasked)[index2] != (*other.m_isMasked)[index1])
           failMerge("matching scan interval but mask flags differ");
-        if ((*m_positions)[index1] != (*other.m_positions)[index2])
+        if ((*m_positions)[index2] != (*other.m_positions)[index1])
           failMerge("matching scan interval but positions differ");
-        if ((*m_rotations)[index1].coeffs() !=
-            (*other.m_rotations)[index2].coeffs())
+        if ((*m_rotations)[index2].coeffs() !=
+            (*other.m_rotations)[index1].coeffs())
           failMerge("matching scan interval but rotations differ");
         merge[index1] = false;
       } else if ((interval1.first < interval2.second) &&
