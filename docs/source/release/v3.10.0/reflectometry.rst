@@ -25,6 +25,7 @@ ISIS Reflectometry
 - Interface `ISIS Reflectometry (Polref)` has been renamed to `ISIS Reflectometry`.
 - Fixed a bug where the contents of the processing table where not saved to the selected table workspace.
 - Fixed a bug when removing rows from the processing table.
+- Fixed a bug where if either `Instrument` and/or `Experiments` was disabled, their respective entries would still be applied in the reduction.
 
 ISIS Reflectometry (Old)
 ########################
