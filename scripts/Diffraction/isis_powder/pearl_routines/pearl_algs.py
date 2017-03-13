@@ -9,12 +9,17 @@ from isis_powder.routines.RunDetails import RunDetails
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
+    original_units = ws_to_correct.getAxis(0).getUnit().unitID()
     wc_attenuated = mantid.PearlMCAbsorption(attenuation_file_path)
     wc_attenuated = mantid.ConvertToHistogram(InputWorkspace=wc_attenuated, OutputWorkspace=wc_attenuated)
+    ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
+                                        Target=wc_attenuated.getAxis(0).getUnit().unitID())
     wc_attenuated = mantid.RebinToWorkspace(WorkspaceToRebin=wc_attenuated, WorkspaceToMatch=ws_to_correct,
                                             OutputWorkspace=wc_attenuated)
     pearl_attenuated_ws = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=wc_attenuated)
     common.remove_intermediate_workspace(workspaces=wc_attenuated)
+    pearl_attenuated_ws = mantid.ConvertUnits(InputWorkspace=pearl_attenuated_ws, OutputWorkspace=pearl_attenuated_ws,
+                                              Target=original_units)
     return pearl_attenuated_ws
 
 
@@ -34,6 +39,15 @@ def apply_vanadium_absorb_corrections(van_ws, run_details):
 
     common.remove_intermediate_workspace(absorb_ws)
     return van_ws
+
+
+def generate_out_name(run_number_string, absorb_on, long_mode_on, tt_mode):
+    output_name = "PRL" + str(run_number_string)
+    # Append each mode of operation
+    output_name += "_" + str(tt_mode)
+    output_name += "_absorb" if absorb_on else ""
+    output_name += "_long" if long_mode_on else ""
+    return output_name
 
 
 def generate_vanadium_absorb_corrections(van_ws):
@@ -56,7 +70,12 @@ def generate_vanadium_absorb_corrections(van_ws):
 
 
 def get_run_details(run_number_string, inst_settings):
-    mapping_dict = yaml_parser.get_run_dictionary(run_number=run_number_string, file_path=inst_settings.cal_map_path)
+    if isinstance(run_number_string, str) and not run_number_string.isdigit():
+        run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+        first_run_number = run_number_list[0]
+    else:
+        first_run_number = run_number_string
+    mapping_dict = yaml_parser.get_run_dictionary(run_number_string=first_run_number, file_path=inst_settings.cal_map_path)
 
     calibration_file_name = mapping_dict["calibration_file"]
     empty_run_numbers = mapping_dict["empty_run_numbers"]
@@ -65,18 +84,24 @@ def get_run_details(run_number_string, inst_settings):
 
     splined_vanadium_name = _generate_splined_van_name(absorb_on=inst_settings.absorb_corrections,
                                                        vanadium_run_string=vanadium_run_numbers,
-                                                       long_mode_on=inst_settings.long_mode)
+                                                       long_mode_on=inst_settings.long_mode,
+                                                       tt_mode=inst_settings.tt_mode)
 
     calibration_dir = inst_settings.calibration_dir
     cycle_calibration_dir = os.path.join(calibration_dir, label)
 
     absorption_file_path = os.path.join(calibration_dir, inst_settings.van_absorb_file)
     calibration_file_path = os.path.join(cycle_calibration_dir, calibration_file_name)
-    tt_grouping_key = inst_settings.tt_mode.lower() + '_grouping'
-    grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
+    tt_grouping_key = str(inst_settings.tt_mode).lower() + '_grouping'
+    try:
+        grouping_file_path = os.path.join(calibration_dir, getattr(inst_settings, tt_grouping_key))
+    except AttributeError:
+        raise ValueError("The tt_mode: " + str(inst_settings.tt_mode).lower() + " is unknown")
+
     splined_vanadium_path = os.path.join(cycle_calibration_dir, splined_vanadium_name)
 
-    run_details = RunDetails(run_number=run_number_string)
+    run_details = RunDetails(run_number=first_run_number)
+    run_details.user_input_run_number = run_number_string
     run_details.calibration_file_path = calibration_file_path
     run_details.grouping_file_path = grouping_file_path
     run_details.empty_runs = empty_run_numbers
@@ -92,6 +117,7 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
                                                 XMin=lambda_values[0], XMax=lambda_values[-1])
+    # TODO move these masks to the adv. config file
     ex_regions = numpy.zeros((2, 4))
     ex_regions[:, 0] = [3.45, 3.7]
     ex_regions[:, 1] = [2.96, 3.2]
@@ -119,10 +145,26 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
     return normalised_ws
 
 
-def _generate_splined_van_name(absorb_on, long_mode_on, vanadium_run_string):
-    output_string = "SVan_" + str(vanadium_run_string)
-    output_string += "_absorb" if absorb_on else ""
-    output_string += "_long" if long_mode_on else ""
+def strip_bragg_peaks(ws_list_to_correct):
+    # TODO move hardcoded spline values into adv. config
 
-    output_string += ".nxs"
+    # Strip peaks on banks 1-12 (or 0-11 using 0 based index)
+    for index, ws in enumerate(ws_list_to_correct[:12]):
+        ws_list_to_correct[index] = mantid.StripPeaks(InputWorkspace=ws, OutputWorkspace=ws, FWHM=15, Tolerance=8)
+
+    # Banks 13 / 14 have broad peaks which are missed so compensate for that and run twice as peaks are very broad
+    for _ in range(2):
+        ws_list_to_correct[12] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[12],
+                                                   OutputWorkspace=ws_list_to_correct[12], FWHM=100, Tolerance=10)
+
+        ws_list_to_correct[13] = mantid.StripPeaks(InputWorkspace=ws_list_to_correct[13],
+                                                   OutputWorkspace=ws_list_to_correct[13], FWHM=60, Tolerance=10)
+
+    return ws_list_to_correct
+
+
+def _generate_splined_van_name(vanadium_run_string, absorb_on, long_mode_on, tt_mode):
+    generated_out_name = generate_out_name(run_number_string=vanadium_run_string, absorb_on=absorb_on,
+                                           long_mode_on=long_mode_on, tt_mode=tt_mode)
+    output_string = "SplinedVan_" + generated_out_name + ".nxs"
     return output_string

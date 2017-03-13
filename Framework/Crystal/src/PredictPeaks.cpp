@@ -102,11 +102,6 @@ void PredictPeaks::init() {
                   "checked.\n"
                   "Keep unchecked to use the original values");
 
-  declareProperty("PredictPeaksOutsideDetectors", false,
-                  "Use an extended detector space (if defined for the"
-                  " instrument) to predict peaks which do not fall onto any"
-                  "detector. This may produce a very high number of results.");
-
   setPropertySettings("RoundHKL", make_unique<EnabledWhenProperty>(
                                       "HKLPeaksWorkspace", IS_NOT_DEFAULT));
 
@@ -125,6 +120,11 @@ void PredictPeaks::init() {
   declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "An output PeaksWorkspace.");
+
+  declareProperty("PredictPeaksOutsideDetectors", false,
+                  "Use an extended detector space (if defined for the"
+                  " instrument) to predict peaks which do not fall onto any"
+                  "detector. This may produce a very high number of results.");
 }
 
 /** Execute the algorithm.
@@ -258,6 +258,13 @@ void PredictPeaks::exec() {
 
     size_t allowedPeakCount = 0;
 
+    bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+    if (useExtendedDetectorSpace &&
+        !m_inst->getComponentByName("extended-detector-space")) {
+      g_log.warning() << "Attempting to find peaks outside of detectors but "
+                         "no extended detector space has been defined\n";
+    }
+
     for (auto &possibleHKL : possibleHKLs) {
       if (lambdaFilter.isAllowed(possibleHKL)) {
         ++allowedPeakCount;
@@ -266,13 +273,42 @@ void PredictPeaks::exec() {
       prog.report();
     }
 
-    g_log.notice() << "Out of " << allowedPeakCount
-                   << " allowed peaks within parameters, "
-                   << m_pw->getNumberPeaks()
-                   << " were found to hit a detector.\n";
+    logNumberOfPeaksFound(allowedPeakCount);
   }
 
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+}
+
+/**
+ * Log the number of peaks found to fall on and off detectors
+ *
+ * @param allowedPeakCount :: number of candidate peaks found
+ */
+void PredictPeaks::logNumberOfPeaksFound(size_t allowedPeakCount) const {
+  const bool usingExtendedDetectorSpace =
+      getProperty("PredictPeaksOutsideDetectors");
+  const auto &peaks = m_pw->getPeaks();
+  size_t offDetectorPeakCount = 0;
+  size_t onDetectorPeakCount = 0;
+
+  for (const auto &peak : peaks) {
+    if (peak.getDetectorID() == -1) {
+      offDetectorPeakCount++;
+    } else {
+      onDetectorPeakCount++;
+    }
+  }
+
+  g_log.notice() << "Out of " << allowedPeakCount
+                 << " allowed peaks within parameters, " << onDetectorPeakCount
+                 << " were found to hit a detector";
+
+  if (usingExtendedDetectorSpace) {
+    g_log.notice() << " and " << offDetectorPeakCount << " were found in "
+                   << "extended detector space.";
+  }
+
+  g_log.notice() << "\n";
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.

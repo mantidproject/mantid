@@ -3,12 +3,12 @@ from __future__ import (absolute_import, division, print_function)
 import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, InstrumentSettings, yaml_parser
-from isis_powder.routines.common_enums import InputBatchingEnum
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
 
 
 class Pearl(AbstractInst):
+
     def __init__(self, **kwargs):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
 
@@ -23,56 +23,58 @@ class Pearl(AbstractInst):
         self._cached_run_details = None
         self._cached_run_details_number = None
 
-    def focus(self, run_number, **kwargs):
+    def focus(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number=run_number, input_batching=InputBatchingEnum.Summed,
+        return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.van_norm)
 
-    def create_calibration_vanadium(self, run_in_range, **kwargs):
+    def create_vanadium(self, **kwargs):
         self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
-        kwargs["perform_attenuation"] = False
+        kwargs["perform_attenuation"] = None  # Hard code this off as we do not need an attenuation file
         self._inst_settings.update_attributes(kwargs=kwargs)
 
-        run_details = self.get_run_details(run_number_string=run_in_range)
-        run_details.run_number = run_details.vanadium_run_numbers
+        if str(self._inst_settings.tt_mode).lower() == "all":
+            for new_tt_mode in ["tt35", "tt70", "tt88"]:
+                self._inst_settings.tt_mode = new_tt_mode
+                self._run_create_vanadium()
+        else:
+            self._run_create_vanadium()
 
-        return self._create_calibration_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
-                                                 empty_runs=run_details.empty_runs,
-                                                 do_absorb_corrections=self._inst_settings.absorb_corrections)
+    def _run_create_vanadium(self):
+        # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
+        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
+        run_details.run_number = run_details.vanadium_run_numbers
+        return self._create_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
+                                     empty_runs=run_details.empty_runs,
+                                     do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     # Params #
 
-    def get_run_details(self, run_number_string):
-        input_run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
-        first_run = input_run_number_list[0]
-        if self._cached_run_details_number == first_run:
+    def _get_run_details(self, run_number_string):
+        if self._cached_run_details_number == run_number_string:
             return self._cached_run_details
 
         run_details = pearl_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings)
 
-        self._cached_run_details_number = first_run
+        self._cached_run_details_number = run_number_string
         self._cached_run_details = run_details
         return run_details
 
     @staticmethod
-    def generate_input_file_name(run_number):
-        return _generate_file_name(run_number=run_number)
+    def _generate_input_file_name(run_number):
+        return _generate_inst_padding(run_number=run_number)
 
-    def generate_output_file_name(self, run_number_string):
+    def _generate_output_file_name(self, run_number_string):
+        inst = self._inst_settings
+        return pearl_algs.generate_out_name(run_number_string=run_number_string, absorb_on=inst.absorb_corrections,
+                                            long_mode_on=inst.long_mode, tt_mode=inst.tt_mode)
 
-        output_name = "PRL" + str(run_number_string)
-        # Append each mode of operation
-        output_name += "_" + self._inst_settings.tt_mode
-        output_name += "_absorb" if self._inst_settings.absorb_corrections else ""
-        output_name += "_long" if self._inst_settings.long_mode else ""
-        return output_name
-
-    def attenuate_workspace(self, input_workspace):
-        attenuation_path = self._attenuation_full_path
+    def _attenuate_workspace(self, input_workspace):
+        attenuation_path = self._inst_settings.attenuation_file_path
         return pearl_algs.attenuate_workspace(attenuation_file_path=attenuation_path, ws_to_correct=input_workspace)
 
-    def normalise_ws_current(self, ws_to_correct, run_details=None):
+    def _normalise_ws_current(self, ws_to_correct, run_details=None):
         monitor_ws = common.get_monitor_ws(ws_to_process=ws_to_correct, run_number_string=run_details.run_number,
                                            instrument=self)
         normalised_ws = pearl_algs.normalise_ws_current(ws_to_correct=ws_to_correct, monitor_ws=monitor_ws,
@@ -82,41 +84,40 @@ class Pearl(AbstractInst):
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
-    def get_monitor_spectra_index(self, run_number):
+    def _get_monitor_spectra_index(self, run_number):
         return self._inst_settings.monitor_spec_no
 
-    def spline_vanadium_ws(self, focused_vanadium_spectra):
+    def _spline_vanadium_ws(self, focused_vanadium_spectra):
+        focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)
         return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
                                                    num_splines=self._inst_settings.spline_coefficient)
 
-    def _focus_processing(self, run_number, input_workspace, perform_vanadium_norm):
-        return self._perform_focus_loading(run_number, input_workspace, perform_vanadium_norm)
-
-    def output_focused_ws(self, processed_spectra, run_details, output_mode=None):
+    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
             output_mode = self._inst_settings.focus_mode
         output_spectra = \
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
                                                         run_details=run_details, focus_mode=output_mode,
                                                         perform_attenuation=self._inst_settings.perform_atten)
-        group_name = "PEARL" + str(run_details.run_number) + "-Results-D-Grp"
+        group_name = "PEARL" + str(run_details.user_input_run_number)
+        group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
         return grouped_d_spacing
 
-    def crop_banks_to_user_tof(self, focused_banks):
+    def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
 
-    def crop_raw_to_expected_tof_range(self, ws_to_crop):
+    def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_vals[0],
                                     x_max=self._inst_settings.raw_data_crop_vals[-1])
         return out_ws
 
-    def crop_van_to_expected_tof_range(self, van_ws_to_crop):
+    def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_crop=van_ws_to_crop, x_min=self._inst_settings.van_tof_cropping[0],
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
         if gen_absorb:
             pearl_algs.generate_vanadium_absorb_corrections(van_ws=van_ws)
 
@@ -127,7 +128,7 @@ class Pearl(AbstractInst):
                                               suppress_warnings=True)
 
 
-def _generate_file_name(run_number):
+def _generate_inst_padding(run_number):
     digit = len(str(run_number))
 
     number_of_digits = 8
