@@ -238,21 +238,22 @@ void DetectorInfo::merge(const DetectorInfo &other) {
 
   std::vector<bool> merge(other.m_positions->size(), true);
 
-  for (size_t index1 = 0; index1 < other.m_positions->size(); ++index1) {
-    const size_t detIndex = getIndex(other.m_indices, index1).first;
-    const auto &interval1 = (*other.m_scanIntervals)[index1];
+  for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
+       ++linearIndex1) {
+    const size_t detIndex = getIndex(other.m_indices, linearIndex1).first;
+    const auto &interval1 = (*other.m_scanIntervals)[linearIndex1];
     for (size_t timeIndex = 0; timeIndex < scanCount(detIndex); ++timeIndex) {
-      const auto index2 = linearIndex({detIndex, timeIndex});
-      const auto &interval2 = (*m_scanIntervals)[index2];
+      const auto linearIndex2 = linearIndex({detIndex, timeIndex});
+      const auto &interval2 = (*m_scanIntervals)[linearIndex2];
       if (interval1 == interval2) {
-        if ((*m_isMasked)[index2] != (*other.m_isMasked)[index1])
+        if ((*m_isMasked)[linearIndex2] != (*other.m_isMasked)[linearIndex1])
           failMerge("matching scan interval but mask flags differ");
-        if ((*m_positions)[index2] != (*other.m_positions)[index1])
+        if ((*m_positions)[linearIndex2] != (*other.m_positions)[linearIndex1])
           failMerge("matching scan interval but positions differ");
-        if ((*m_rotations)[index2].coeffs() !=
-            (*other.m_rotations)[index1].coeffs())
+        if ((*m_rotations)[linearIndex2].coeffs() !=
+            (*other.m_rotations)[linearIndex1].coeffs())
           failMerge("matching scan interval but rotations differ");
-        merge[index1] = false;
+        merge[linearIndex1] = false;
       } else if ((interval1.first < interval2.second) &&
                  (interval1.second > interval2.first)) {
         failMerge("scan intervals overlap but not identical");
@@ -266,19 +267,20 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     initIndices();
   // Temporary to accumulate scan counts (need original for index offset).
   auto scanCounts(m_scanCounts);
-  for (size_t index = 0; index < other.m_positions->size(); ++index) {
-    if (!merge[index])
+  for (size_t linearIndex = 0; linearIndex < other.m_positions->size();
+       ++linearIndex) {
+    if (!merge[linearIndex])
       continue;
-    auto newIndex = getIndex(other.m_indices, index);
+    auto newIndex = getIndex(other.m_indices, linearIndex);
     const size_t detIndex = newIndex.first;
     newIndex.second += scanCount(detIndex);
     scanCounts.access()[detIndex]++;
     m_indexMap.access()[detIndex].push_back((*m_indices).size());
     m_indices.access().push_back(newIndex);
-    m_isMasked.access().push_back((*other.m_isMasked)[index]);
-    m_positions.access().push_back((*other.m_positions)[index]);
-    m_rotations.access().push_back((*other.m_rotations)[index]);
-    m_scanIntervals.access().push_back((*other.m_scanIntervals)[index]);
+    m_isMasked.access().push_back((*other.m_isMasked)[linearIndex]);
+    m_positions.access().push_back((*other.m_positions)[linearIndex]);
+    m_rotations.access().push_back((*other.m_rotations)[linearIndex]);
+    m_scanIntervals.access().push_back((*other.m_scanIntervals)[linearIndex]);
   }
   m_scanCounts = std::move(scanCounts);
 }
