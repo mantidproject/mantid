@@ -217,7 +217,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
           recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
                                           p_nxclass, level + 1);
 
-
         NXclosegroup(nxfileID);
       } // if(NXopengroup
       else if ((opendata_status = NXopendata(nxfileID, nxname)) == NX_OK) {
@@ -258,19 +257,19 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               continue;
             }
           } else if (type != NX_CHAR) {
-            if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
-                (dims[2] > 1) || (dims[3] > 1)) {
+            if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) || (dims[2] > 1) ||
+                (dims[3] > 1)) {
               g_log.debug() << indent_str
                             << "ignored non-scalar numeric data on "
                             << property_name << '\n';
               continue;
             }
           } else {
-              if (rank > 1 || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
+            if (rank > 1 || (dims[1] > 1) || (dims[2] > 1) || (dims[3] > 1)) {
               g_log.debug() << indent_str << "ignored string array data on "
                             << property_name << '\n';
               continue;
-              }
+            }
           }
 
           void *dataBuffer;
