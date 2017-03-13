@@ -561,7 +561,7 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
 /**
  * Set the values in the map to be the same as those in the output workspace.
  *
- * @param ws the merged workspace
+ * @param outWS the merged workspace
  */
 void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &outWS) {
   for (auto &item : m_logMap) {
