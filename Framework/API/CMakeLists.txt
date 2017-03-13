@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CommonBinsValidator.cpp
+	src/ComponentInfo.cpp
 	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
@@ -50,10 +51,10 @@ set ( SRC_FILES
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
+	src/HistoWorkspace.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
-	src/HistoWorkspace.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -174,6 +175,7 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CommonBinsValidator.h
+	inc/MantidAPI/ComponentInfo.h
 	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
@@ -290,7 +292,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
 	inc/MantidAPI/NearestNeighbourInfo.h
-        inc/MantidAPI/NearestNeighbours.h
+	inc/MantidAPI/NearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -351,6 +353,7 @@ set ( TEST_FILES
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CommonBinsValidatorTest.h
+	ComponentInfoTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h

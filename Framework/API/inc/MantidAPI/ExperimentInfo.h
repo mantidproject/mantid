@@ -30,7 +30,7 @@ class XMLInstrumentParameter;
 
 namespace API {
 class ChopperModel;
-// class ComponentInfo;
+class ComponentInfo;
 class DetectorInfo;
 class ModeratorModel;
 class Run;
@@ -167,7 +167,7 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
-  const Beamline::ComponentInfo &componentInfo() const;
+  const ComponentInfo &componentInfo() const;
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
@@ -230,7 +230,7 @@ private:
   mutable std::mutex m_detectorInfoMutex;
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
-  //  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
+  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
 
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;

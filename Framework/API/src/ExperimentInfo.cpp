@@ -1,6 +1,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -190,12 +191,13 @@ void checkComponentInfoSize(const Instrument &instr,
     throw std::runtime_error("ExperimentInfo: size mismatch between "
                              "ComponentInfo and number of components in "
                              "instrument");
-  }
+}
 }
 }
 
-void registerComponentInfo(
+std::vector<size_t> registerComponentInfo(
     std::vector<std::vector<size_t>> &componentDetectorIndexes,
+    std::vector<Mantid::Geometry::ComponentID> &componentIds,
     const IComponent &component, const DetectorInfo &detectorInfo) {
 
   std::vector<size_t> localDetectorIndexes;
@@ -209,22 +211,33 @@ void registerComponentInfo(
       if (const auto *detector =
               dynamic_cast<const Mantid::Geometry::IDetector *>(child.get())) {
         localDetectorIndexes.push_back(detectorInfo.indexOf(detector->getID()));
+        componentDetectorIndexes.emplace_back(std::vector<size_t>());
+        componentIds.emplace_back(detector->getComponentID());
       } else {
-        registerComponentInfo(componentDetectorIndexes, *child, detectorInfo);
+        auto childIndexes = registerComponentInfo(
+            componentDetectorIndexes, componentIds, *child, detectorInfo);
+        localDetectorIndexes.reserve(childIndexes.size() +
+                                     localDetectorIndexes.size());
+        localDetectorIndexes.insert(localDetectorIndexes.end(),
+                                    childIndexes.begin(), childIndexes.end());
       }
     }
   }
 
-  componentDetectorIndexes.push_back(localDetectorIndexes);
+  componentDetectorIndexes.emplace_back(localDetectorIndexes);
+  componentIds.emplace_back(component.getComponentID());
+  return localDetectorIndexes;
 }
 
 boost::shared_ptr<Beamline::ComponentInfo>
 makeComponentInfo(const Instrument &oldInstr,
-                  const API::DetectorInfo &detectorInfo) {
+                  const API::DetectorInfo &detectorInfo,
+                  std::vector<Geometry::ComponentID> &componentIds) {
 
   std::vector<std::vector<size_t>> componentDetectorIndexes;
   componentDetectorIndexes.reserve(detectorInfo.size());
-  registerComponentInfo(componentDetectorIndexes, oldInstr, detectorInfo);
+  registerComponentInfo(componentDetectorIndexes, componentIds, oldInstr,
+                        detectorInfo);
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
       componentDetectorIndexes);
@@ -272,7 +285,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   }
   m_detectorInfo = makeDetectorInfo(*sptr_instrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
-  m_componentInfo = makeComponentInfo(*instr, detectorInfo());
+
+  std::vector<Geometry::ComponentID> componentIds;
+  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), componentIds);
+  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      *m_componentInfo, std::move(componentIds));
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -1188,8 +1205,8 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return *m_spectrumInfoWrapper;
 }
 
-const Beamline::ComponentInfo &ExperimentInfo::componentInfo() const {
-  return *m_componentInfo;
+const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfoWrapper;
 }
 
 /// Sets the SpectrumDefinition for all spectra.

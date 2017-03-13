@@ -14,7 +14,17 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
-};
+  void test_size() {
+    std::vector<std::vector<size_t>> indexes{{0, 1}, {2, 3, 4}};
+    ComponentInfo info(indexes);
+    TS_ASSERT_EQUALS(info.size(), 2);
+  }
 
+  void test_detector_indexes() {
+    std::vector<std::vector<size_t>> indexes{{0, 1}, {2, 3, 4}};
+    ComponentInfo info(indexes);
+    TS_ASSERT_EQUALS(info.detectorIndexes(0), std::vector<size_t>({0, 1}));
+    TS_ASSERT_EQUALS(info.detectorIndexes(1), std::vector<size_t>({2, 3, 4}));
+  }
+};
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

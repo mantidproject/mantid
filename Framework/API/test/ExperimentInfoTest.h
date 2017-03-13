@@ -1,6 +1,7 @@
 #ifndef MANTID_API_EXPERIMENTINFOTEST_H_
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
@@ -16,7 +17,6 @@
 #include "MantidKernel/Matrix.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidBeamline/ComponentInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
@@ -766,19 +766,44 @@ public:
 
   void test_create_componentInfo() {
 
+    const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
-        1 /*n banks*/, 10 /*10 by 10 dets in bank*/,
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
         1 /*sample-bank distance*/);
-
-    std::vector<IComponent_const_sptr> allComponents;
-    inst->getChildren(allComponents, true);
-    size_t nComponents = allComponents.size();
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::Beamline::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
 
+    size_t nComponents = nPixels * nPixels;
+    nComponents += nPixels; // One additional CompAssembly per row.
+    nComponents += 1;       // Rectangular Detector (bank)
+    nComponents += 1;       // source
+    nComponents += 1;       // sample
+    nComponents += 1;       // Instrument itself
     TS_ASSERT_EQUALS(compInfo.size(), nComponents);
+  }
+
+  void test_component_info_entries() {
+
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
+
+    // Get the id of the single rectangular bank
+    auto bankID = inst->getComponentByName("bank1")->getComponentID();
+    auto bankIndex = compInfo.indexOf(bankID);
+    auto detectorIndexes = compInfo.detectorIndexes(bankIndex);
+
+    TS_ASSERT_EQUALS(
+        detectorIndexes.size(),
+        detInfo.size()); // Should have all detectors under this bank
   }
 
 private:

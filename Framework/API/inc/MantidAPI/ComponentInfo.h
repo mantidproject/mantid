@@ -1,11 +1,22 @@
-#ifndef MANTID_BEAMLINE_COMPONENTINFO_H_
-#define MANTID_BEAMLINE_COMPONENTINFO_H_
+#ifndef MANTID_API_COMPONENTINFO_H_
+#define MANTID_API_COMPONENTINFO_H_
 
-#include "MantidBeamline/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
+#include <unordered_map>
 #include <vector>
 
 namespace Mantid {
+
+namespace Geometry {
+
+class IComponent;
+}
+
 namespace Beamline {
+class ComponentInfo;
+}
+
+namespace API {
 
 /** ComponentInfo : Provides a component centric view on the instrument. Indexes
   are per component.
@@ -31,18 +42,23 @@ namespace Beamline {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_BEAMLINE_DLL ComponentInfo {
-
+class MANTID_API_DLL ComponentInfo {
 private:
-  std::vector<std::vector<size_t>> m_detectorIndexes;
+  /// Reference to the actual ComponentInfo object (non-wrapping part).
+  const Beamline::ComponentInfo &m_componentInfo;
+  std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  std::unordered_map<Geometry::IComponent *, size_t> m_compIDToIndex;
 
 public:
   ComponentInfo() = default;
-  ComponentInfo(std::vector<std::vector<size_t>> &detectorIndexes);
+  ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
+                std::vector<Mantid::Geometry::IComponent *> &&componentIds);
   std::vector<size_t> detectorIndexes(size_t componentIndex) const;
   size_t size() const;
+  size_t indexOf(Geometry::IComponent *id) const;
 };
-} // namespace Beamline
+
+} // namespace API
 } // namespace Mantid
 
-#endif /* MANTID_BEAMLINE_COMPONENTINFO_H_ */
+#endif /* MANTID_API_COMPONENTINFO_H_ */
