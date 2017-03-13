@@ -179,7 +179,10 @@ size_t DetectorInfo::scanCount(const size_t index) const {
   return (*m_scanCounts)[index];
 }
 
-/// Returns the scan interval of the detector with given index.
+/** Returns the scan interval of the detector with given index.
+ *
+ * The interval start and end values would typically correspond to nanoseconds
+ * since 1990, as in Kernel::DateAndTime. */
 std::pair<int64_t, int64_t>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
   if (!m_scanIntervals)
@@ -187,7 +190,10 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
   return (*m_scanIntervals)[linearIndex(index)];
 }
 
-/// Set the scan interval of the detector with given index.
+/* Set the scan interval of the detector with given index.
+ *
+ * The interval start and end values would typically correspond to nanoseconds
+ * since 1990, as in Kernel::DateAndTime. */
 void DetectorInfo::setScanInterval(const std::pair<size_t, size_t> index,
                                    std::pair<int64_t, int64_t> interval) {
   if (!m_scanIntervals)
