@@ -61,12 +61,12 @@ class SampleChanger(DataProcessorAlgorithm):
                              doc='Plot options')
 
     def PyExec(self):
-        import mantidplot as mp
+        from IndirectImport import import_mantidplot
+        mp = import_mantidplot()
         workdir = config['defaultsave.directory']
         self._setup()
 
         q2_workspaces = []
-        msd_plot = list()
         scan_alg = self.createChildAlgorithm("EnergyWindowScan", 0.05, 0.95)
         for numb in range(self._number_samples):
             run_numbers = []
@@ -133,7 +133,6 @@ class SampleChanger(DataProcessorAlgorithm):
                         save_alg.setProperty("Filename", file_path)
                         save_alg.execute()
                         logger.information('Output file : %s' % file_path)
-
 
     def _setup(self):
         self._run_first = self.getProperty('FirstRun').value
