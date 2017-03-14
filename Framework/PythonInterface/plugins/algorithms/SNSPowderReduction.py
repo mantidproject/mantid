@@ -125,7 +125,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _outPrefix = None
     _outTypes = None
     _chunks = None
-    _splitws = None
+    _splittersWS = None
     _splitinfotablews = None
     _normalisebycurrent = None
     _lowResTOFoffset = None
@@ -279,12 +279,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._info = None
         self._chunks = self.getProperty("MaxChunkSize").value
 
-        self._splitws = self.getProperty("SplittersWorkspace").value
-        if self._splitws is not None:
-            self.log().information("SplittersWorkspace is %s" % (str(self._splitws)))
+        # define splitters workspace and filter wall time
+        self._splittersWS = self.getProperty("SplittersWorkspace").value
+        if self._splittersWS is not None:
+            # user specifies splitters workspace
+            self.log().information("SplittersWorkspace is %s" % (str(self._splittersWS)))
             if len(samRuns) != 1:
-                raise NotImplementedError("Reducing data with splitting cannot happen when there are more than 1 sample run.")
-            timeFilterWall = self._getTimeFilterWall(self._splitws, samRuns[0])
+                # TODO/FUTURE - This should be supported
+                raise RuntimeError("Reducing data with splitters cannot happen when there are more than 1 sample run.")
+            # define range of wall-time to import data
+            timeFilterWall = self._get_time_filter_wall(self._splittersWS, samRuns[0])
             self.log().information("The time filter wall is %s" %(str(timeFilterWall)))
         else:
             timeFilterWall = (0.0, 0.0)
@@ -329,7 +333,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self.getProperty("Sum").value:
             # Sum input sample runs and then do reduction
-            if self._splitws is not None:
+            if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
             sam_ws_name = self._focusAndSum(samRuns, timeFilterWall, calib,
@@ -345,7 +349,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for sam_run_number in samRuns:
                 # first round of processing the sample
                 self._info = None
-                returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splitws,
+                returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splittersWS,
                                              normalisebycurrent=self._normalisebycurrent,
                                              preserveEvents=preserveEvents)
 
@@ -1040,7 +1044,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-    def _getTimeFilterWall(self, splitws, filename):
+    def _get_time_filter_wall(self, splitws, filename):
         """ Get filter wall from splitter workspace, i.e.,
         get the earlies and latest TIME stamp in input splitter workspace
 
@@ -1051,12 +1055,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         Return: tuple of start-time and stop-time relative to run start time and in unit of second
                 If there is no split workspace defined, filter is (0., 0.) as the default
         """
-        # None case
-        if splitws is None:
-            self.log().warning("Split workspace is None.  Unable to make a filter wall.  Return with default value. ")
-            return (0.0, 0.0)
+        # supported case: support both workspace and workspace name
+        if splitws is None or str(splitws) == '':
+            raise RuntimeError('It is not supported to take a None-splitters workspace in this method.)'
 
-        # Load data
+        # Load meta data to determine wall time
         metawsname = "temp_" + getBasename(filename)
 
         api.Load(Filename=str(filename), OutputWorkspace=str(metawsname), MetaDataOnly=True)
