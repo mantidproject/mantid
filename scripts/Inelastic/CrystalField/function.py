@@ -229,10 +229,9 @@ class CompositeProperties(object):
             the value is a tie string or a number. For example:
                 tie({'A0': 0.1, 'A1': '2*A0'})
         """
-        print (self.function)
         for param, tie in ties_dict.items():
-            print ('Tie', self.prefix + param)
-            self.function.tie(self.prefix + param, str(tie))
+            tie = re.sub(parNamePattern, '%s\\1' % self.prefix, tie)
+            self.function.tie(self.prefix + param, tie)
 
     def constraints(self, *args):
         """

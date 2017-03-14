@@ -1073,7 +1073,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fun = FunctionFactory.createInitialized(s)
         self.assertTrue(fun is not None)
 
-    def test_constraints_multi_spectrum(self):
+    def xtest_constraints_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
 
@@ -1094,21 +1094,21 @@ class CrystalFieldFitTest(unittest.TestCase):
 
         s = cf.makeMultiSpectrumFunction()
 
-        self.assertTrue('IntensityScaling0 > 0' in s)
-        self.assertTrue('IntensityScaling1 < 2' in s)
+        self.assertTrue('0<IntensityScaling0' in s)
+        self.assertTrue('IntensityScaling1<2' in s)
         self.assertTrue('f0.f0.f0.Height=10.1' in s)
         self.assertTrue('f1.f0.f0.Height=20.2' in s)
-        self.assertTrue('f0.f0.f0.Sigma > 0.1' in s)
-        self.assertTrue('f1.f0.f0.Sigma > 0.2' in s)
-        self.assertTrue('f0.f1.FWHM < 2.2' in s)
-        self.assertTrue('f1.f1.FWHM > 1.1' in s)
-        self.assertTrue('1 < f1.f4.FWHM < 2.2' in s)
+        self.assertTrue('0.1<f0.f0.f0.Sigma' in s)
+        self.assertTrue('0.2<f1.f0.f0.Sigma' in s)
+        self.assertTrue('f0.f1.FWHM<2.2' in s)
+        self.assertTrue('1.1<f1.f1.FWHM' in s)
+        self.assertTrue('1<f1.f4.FWHM<2.2' in s)
         self.assertTrue('f1.f2.FWHM=2*f1.f1.FWHM' in s)
         self.assertTrue('f1.f3.FWHM=2*f1.f2.FWHM' in s)
 
         fun = FunctionFactory.createInitialized(s)
 
-    def x_test_all_peak_ties_multi_spectrum(self):
+    def xtest_all_peak_ties_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
 
@@ -1135,7 +1135,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         fun = FunctionFactory.createInitialized(s)
         self.assertTrue(fun is not None)
 
-    def x_test_all_peak_constraints_multi_spectrum_range(self):
+    def xtest_all_peak_constraints_multi_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
 
@@ -1145,22 +1145,22 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf.peaks[1].constrainAll('FWHM > 12.1', 3, 5)
 
         s = cf.makeMultiSpectrumFunction()
-        self.assertTrue('0.1 < f0.f0.FWHM <=2.1' not in s)
-        self.assertTrue('0.1 < f0.f1.FWHM <=2.1' in s)
-        self.assertTrue('0.1 < f0.f2.FWHM <=2.1' in s)
-        self.assertTrue('0.1 < f0.f4.FWHM <=2.1' not in s)
+        self.assertTrue('0.1<f0.f0.FWHM<2.1' not in s)
+        self.assertTrue('0.1<f0.f1.FWHM<2.1' in s)
+        self.assertTrue('0.1<f0.f2.FWHM<2.1' in s)
+        self.assertTrue('0.1<f0.f4.FWHM<2.1' not in s)
 
-        self.assertTrue('f1.f2.FWHM > 12.1' not in s)
-        self.assertTrue('f1.f3.FWHM > 12.1' in s)
-        self.assertTrue('f1.f4.FWHM > 12.1' in s)
-        self.assertTrue('f1.f5.FWHM > 12.1' in s)
-        self.assertTrue('f1.f6.FWHM > 12.1' not in s)
+        self.assertTrue('12.1<f1.f2.FWHM' not in s)
+        self.assertTrue('12.1<f1.f3.FWHM' in s)
+        self.assertTrue('12.1<f1.f4.FWHM' in s)
+        self.assertTrue('12.1<f1.f5.FWHM' in s)
+        self.assertTrue('12.1<f1.f6.FWHM' not in s)
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
         self.assertTrue(fun is not None)
 
-    def x_test_constraints_multi_ion_multi_spectrum(self):
+    def xtest_constraints_multi_ion_multi_spectrum(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from CrystalField.fitting import makeWorkspace
         from mantid.simpleapi import FunctionFactory
@@ -1179,87 +1179,79 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
 
-        cf1.setPeaks('Lorentzian')
-        cf1.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
-                         background=Function('FlatBackground', A0=1.0))
+        cf1.PeakShape = 'Lorentzian'
+        cf1.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                                    background=Function('FlatBackground', A0=1.0))
         cf1.constraints('IntensityScaling0 > 0', '0 < IntensityScaling1 < 2', 'B22 < 4')
         cf1.background[0].peak.ties(Height=10.1)
         cf1.background[0].peak.constraints('Sigma > 0.1')
         cf1.background[1].peak.ties(Height=20.2)
         cf1.background[1].peak.constraints('Sigma > 0.2')
 
-        cf1.peaks[1].ties('f2.FWHM=2*f1.FWHM', 'f3.FWHM=2*f2.FWHM')
+        cf1.peaks[1].ties({'f2.FWHM': '2*f1.FWHM', 'f3.FWHM': '2*f2.FWHM'})
         cf1.peaks[0].constraints('f1.FWHM < 2.2')
         cf1.peaks[1].constraints('f1.FWHM > 1.1', '1 < f4.FWHM < 2.2')
 
-        cf2.setPeaks('Gaussian')
-        cf2.setBackground(peak=Function('Lorentzian', Amplitude=8, FWHM=0.33),
-                         background=Function('FlatBackground', A0=1.0))
+        cf2.PeakShape = 'Gaussian'
+        cf2.background = Background(peak=Function('Lorentzian', Amplitude=8, FWHM=0.33),
+                                    background=Function('FlatBackground', A0=1.0))
         cf2.background[0].peak.ties(Amplitude=8.1)
         cf2.background[0].peak.constraints('FWHM > 0.1')
         cf2.background[1].peak.ties(Amplitude=16.2)
         cf2.background[1].peak.constraints('FWHM > 0.2')
-        cf2.peaks[1].ties('f2.Sigma=2*f1.Sigma', 'f3.Sigma=2*f2.Sigma')
+        cf2.peaks[1].ties({'f2.Sigma': '2*f1.Sigma', 'f3.Sigma': '2*f2.Sigma'})
         cf2.peaks[0].constraints('f1.Sigma < 2.2')
         cf2.peaks[1].constraints('f1.Sigma > 1.1', '1 < f4.Sigma < 2.2')
 
         s = cf.makeMultiSpectrumFunction()
 
-        self.assertTrue('IntensityScaling0 > 0' in s)
-        self.assertTrue('IntensityScaling1 < 2' in s)
+        self.assertTrue('0<IntensityScaling0' in s)
+        self.assertTrue('IntensityScaling1<2' in s)
         self.assertTrue('f0.f0.f0.Height=10.1' in s)
         self.assertTrue('f1.f0.f0.Height=20.2' in s)
-        self.assertTrue('f0.f0.f0.Sigma > 0.1' in s)
-        self.assertTrue('f1.f0.f0.Sigma > 0.2' in s)
-        self.assertTrue('f0.f1.FWHM < 2.2' in s)
-        self.assertTrue('f1.f1.FWHM > 1.1' in s)
-        self.assertTrue('1 < f1.f4.FWHM < 2.2' in s)
+        self.assertTrue('0.1<f0.f0.f0.Sigma' in s)
+        self.assertTrue('0.2<f1.f0.f0.Sigma' in s)
+        self.assertTrue('f0.f1.FWHM<2.2' in s)
+        self.assertTrue('1.1<f1.f1.FWHM' in s)
+        self.assertTrue('1<f1.f4.FWHM<2.2' in s)
         self.assertTrue('f1.f2.FWHM=2*f1.f1.FWHM' in s)
         self.assertTrue('f1.f3.FWHM=2*f1.f2.FWHM' in s)
 
         self.assertTrue('f0.f0.f0.Amplitude=8.1' in s)
         self.assertTrue('f1.f0.f0.Amplitude=16.2' in s)
-        self.assertTrue('f0.f0.f0.FWHM > 0.1' in s)
-        self.assertTrue('f1.f0.f0.FWHM > 0.2' in s)
+        self.assertTrue('0.1<f0.f0.f0.FWHM' in s)
+        self.assertTrue('0.2<f1.f0.f0.FWHM' in s)
         self.assertTrue('f1.f2.Sigma=2*f1.f1.Sigma' in s)
         self.assertTrue('f1.f3.Sigma=2*f1.f2.Sigma' in s)
-        self.assertTrue('f0.f1.Sigma < 2.2' in s)
-        self.assertTrue('f1.f1.Sigma > 1.1' in s)
-        self.assertTrue('1 < f1.f4.Sigma < 2.2' in s)
+        self.assertTrue('f0.f1.Sigma<2.2' in s)
+        self.assertTrue('1.1<f1.f1.Sigma' in s)
+        self.assertTrue('1<f1.f4.Sigma<2.2' in s)
 
         fun = FunctionFactory.createInitialized(s)
 
-    def x_test_bad_input(self):
+    def xtest_bad_input(self):
         from CrystalField import CrystalField
-        from mantid.simpleapi import FunctionFactory
 
-        cf = CrystalField('Ce', 'C2v', B20='aaa', B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
-                      Temperature=44.0, FWHM=1.0)
-        s = cf.makeSpectrumFunction()
-        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
-
-        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=[-0.0317], B42=-0.116, B44=-0.12,
+        self.assertRaises(Exception, CrystalField, 'Ce', 'C2v', B20='aaa', B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                           Temperature=44.0, FWHM=1.0)
-        s = cf.makeSpectrumFunction()
-        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
 
-        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=np.array([-0.0317]), B42=-0.116, B44=-0.12,
+        self.assertRaises(Exception, CrystalField, 'Ce', 'C2v', B20=1, B22=3.97, B40=[-0.0317], B42=-0.116, B44=-0.12,
                           Temperature=44.0, FWHM=1.0)
-        s = cf.makeSpectrumFunction()
-        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
 
-        cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=np.array([1.2, 2.3]), B42=-0.116, B44=-0.12,
-                          Temperature=44.0, FWHM=1.0)
-        s = cf.makeSpectrumFunction()
-        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
+        self.assertRaises(Exception, CrystalField, 'Ce', 'C2v', B20=1, B22=3.97, B40=np.array([-0.0317]), B42=-0.116,
+                          B44=-0.12, Temperature=44.0, FWHM=1.0)
+
+        self.assertRaises(Exception, CrystalField, 'Ce', 'C2v', B20=1, B22=3.97, B40=np.array([1.2, 2.3]), B42=-0.116,
+                          B44=-0.12, Temperature=44.0, FWHM=1.0)
 
         cf = CrystalField('Ce', 'C2v', B20=1, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                           Temperature=44.0, FWHM=1.0)
-        cf.peaks.param[1]["FWHM"] = 'aaa'
-        s = cf.makeSpectrumFunction()
-        self.assertRaises(RuntimeError, FunctionFactory.createInitialized, s)
 
-    def x_test_resolution_single_spectrum(self):
+        def set_peak_parameter():
+            cf.peaks.param[1]["FWHM"] = 'aaa'
+        self.assertRaises(Exception, set_peak_parameter)
+
+    def test_resolution_single_spectrum(self):
         from CrystalField import CrystalField
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
