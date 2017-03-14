@@ -37,7 +37,7 @@ public:
   }
 
   std::vector<SpectrumNumber>
-  makeSpectrumNumbers(std::initializer_list<int64_t> init) {
+  makeSpectrumNumbers(std::initializer_list<int32_t> init) {
     return std::vector<SpectrumNumber>(init.begin(), init.end());
   }
 
