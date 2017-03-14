@@ -244,7 +244,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                         << property_name << '\n';
 
           // Get the value
-          if ((getinfo_status = NXgetrawinfo(nxfileID, &rank, dims, &type)) ==
+          if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) ==
               NX_OK) {
 
             g_log.debug() << indent_str << "Rank of " << property_name << " is "
