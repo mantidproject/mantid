@@ -14,8 +14,9 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
                              std::vector<Geometry::ComponentID> &&componentIds)
     : m_componentInfo(componentInfo), m_componentIds(componentIds) {
 
-  if (m_componentInfo.size() != m_componentIds.size()){
-      throw std::invalid_argument("Mismatch between size of DetectorInfo and number of ComponentIDs provided");
+  if (m_componentInfo.size() != m_componentIds.size()) {
+    throw std::invalid_argument("Mismatch between size of DetectorInfo and "
+                                "number of ComponentIDs provided");
   }
   for (size_t i = 0; i < m_componentInfo.size(); ++i) {
     m_compIDToIndex[m_componentIds[i]] = i;

@@ -799,22 +799,28 @@ public:
     // Get the id of the single rectangular bank
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
-    auto allBankDetectorIndexes = compInfo.detectorIndexes(compInfo.indexOf(bankID));
+    auto allBankDetectorIndexes =
+        compInfo.detectorIndexes(compInfo.indexOf(bankID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank",
-        allBankDetectorIndexes.size(),
-        detInfo.size()); //
+                      allBankDetectorIndexes.size(),
+                      detInfo.size()); //
 
-    auto bankRowID = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)->getChild(0)->getComponentID();
-    auto allRowDetectorIndexes = compInfo.detectorIndexes(compInfo.indexOf(bankRowID));
+    auto bankRowID =
+        boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
+            ->getChild(0)
+            ->getComponentID();
+    auto allRowDetectorIndexes =
+        compInfo.detectorIndexes(compInfo.indexOf(bankRowID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row",
-        allRowDetectorIndexes.size(),
-        10);//
+                      allRowDetectorIndexes.size(),
+                      10); //
 
     const auto detCompId = detInfo.detector(0).getComponentID();
-    TSM_ASSERT_EQUALS("Detector should have no nested detector", compInfo.detectorIndexes(compInfo.indexOf(detCompId)).size(), 0);
-
+    TSM_ASSERT_EQUALS(
+        "Detector should have no nested detector",
+        compInfo.detectorIndexes(compInfo.indexOf(detCompId)).size(), 0);
   }
 
 private:

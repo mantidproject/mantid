@@ -180,7 +180,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-
 }
 
 std::vector<size_t> registerComponentInfo(
@@ -529,9 +528,8 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
  *
  * This method should not need to be called explicitly. Groupings are updated
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void
-ExperimentInfo::setDetectorGrouping(const size_t index,
-                                    const std::set<detid_t> &detIDs) const {
+void ExperimentInfo::setDetectorGrouping(
+    const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
@@ -1225,8 +1223,8 @@ void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
   m_spectrumDefinitionNeedsUpdate.at(index) = 1;
 }
 
-void
-ExperimentInfo::updateSpectrumDefinitionIfNecessary(const size_t index) const {
+void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
+    const size_t index) const {
   if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
     updateCachedDetectorGrouping(index);
 }
@@ -1390,10 +1388,9 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void
-ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
-                                                std::string &instrumentName,
-                                                std::string &instrumentXml) {
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
+    ::NeXus::File *file, std::string &instrumentName,
+    std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
 
