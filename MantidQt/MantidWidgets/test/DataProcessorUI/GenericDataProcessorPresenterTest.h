@@ -1044,6 +1044,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1128,6 +1131,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1223,6 +1229,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1312,6 +1321,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1394,6 +1406,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -1486,6 +1501,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -3141,6 +3159,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(0);
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
@@ -3341,6 +3362,9 @@ public:
     EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
