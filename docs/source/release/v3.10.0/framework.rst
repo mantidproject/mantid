@@ -23,9 +23,10 @@ New
 Improved
 ########
 
-- :ref`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
-- :ref`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
+- :ref:`RawFileInfo <algm-RawFileInfo-v1>` now provides sample information.
+- :ref:`SetInstrumentParameter <algm-SetInstrumentParameter-v1>` now supports also boolean parameters, and better validates the inputs.
 - Two new properties were added to :ref:`algm-Integration`: *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
+- :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
 
 Bug Fixes
 #########
