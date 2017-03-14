@@ -138,5 +138,47 @@ class ISISPowderCommonTest(unittest.TestCase):
             expected_name = input_name + '-' + str(i + 1)
             self.assertEqual(expected_name, ws.getName())
 
+    def test_generate_run_numbers(self):
+        # Mantid handles most of this for us
+
+        # First check it can handle int types
+        test_int_input = 123
+        int_input_return = common.generate_run_numbers(run_number_string=test_int_input)
+        # Expect the returned type is a list
+        self.assertEqual(int_input_return, [test_int_input])
+
+        # Check it can handle 10-12 and is inclusive
+        input_string = "10-12"
+        expected_values = [10, 11, 12]
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
+        # Check that the underscore syntax used by older pearl_routines scripts is handled
+        input_string = "10_12"
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
+        # Check that the comma notation is working
+        input_string = "20, 22, 24"
+        expected_values = [20, 22, 24]
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
+        # Check we can use a combination of both
+        input_string = "30-33, 36, 38-39"
+        expected_values = [30, 31, 32, 33, 36, 38, 39]
+        returned_values = common.generate_run_numbers(run_number_string=input_string)
+        self.assertEqual(expected_values, returned_values)
+
+    def test_generate_run_numbers_fails(self):
+
+        run_input_sting = "text-string"
+        with self.assertRaisesRegexp(ValueError, "Could not generate run numbers from this input"):
+            common.generate_run_numbers(run_number_string=run_input_sting)
+
+        # Check it says what the actual string was
+        with self.assertRaisesRegexp(ValueError, run_input_sting):
+            common.generate_run_numbers(run_number_string=run_input_sting)
+
 if __name__ == "__main__":
     unittest.main()

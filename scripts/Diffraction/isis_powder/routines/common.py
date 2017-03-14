@@ -422,4 +422,4 @@ def _run_number_generator(processed_string):
         number_generator = kernel.IntArrayProperty('array_generator', processed_string)
         return number_generator.value.tolist()
     except RuntimeError:
-        raise RuntimeError("Could not generate run numbers from this input: " + processed_string)
+        raise ValueError("Could not generate run numbers from this input: " + processed_string)
