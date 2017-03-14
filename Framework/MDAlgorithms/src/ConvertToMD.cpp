@@ -327,22 +327,24 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
-  bool dector_found(false);
+  bool detector_found(false);
   const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMonitor(i)) {
       spectra_index = i;
-      dector_found = true;
+      detector_found = true;
       g_log.debug() << "Using spectra N " << i
                     << " as the source of the bin "
                        "boundaries for the resolution corrections \n";
       break;
     }
   }
-  if (!dector_found)
-    g_log.warning() << "No detectors in the workspace are associated with "
-                       "spectra. Using spectrum 0 trying to retrieve the bin "
-                       "boundaries \n";
+  if (!detector_found) {
+    g_log.information()
+        << "No spectra in the workspace have detectors associated "
+           "with them. Storing bin boundaries from first spectrum for"
+           "resolution calculation\n";
+  }
 
   // retrieve representative bin boundaries
   auto binBoundaries = m_InWS2D->x(spectra_index);
@@ -359,8 +361,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (auto &binBoundarie : binBoundaries) {
-        binBoundarie = unitConv.convertUnits(binBoundarie);
+      for (auto &binBoundary : binBoundaries) {
+        binBoundary = unitConv.convertUnits(binBoundary);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
