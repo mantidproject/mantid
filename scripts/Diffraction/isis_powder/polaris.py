@@ -2,24 +2,21 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 
-import mantid.simpleapi as mantid
-
-import isis_powder.routines.common as common
-from isis_powder.routines import yaml_parser, InstrumentSettings
+from isis_powder.routines import common, InstrumentSettings, yaml_parser
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_output, polaris_param_mapping
+from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
 
 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
         self._inst_settings = InstrumentSettings.InstrumentSettings(
-            attr_mapping=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
+            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
             basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
-                                      output_dir=self._inst_settings.output_dir)
+                                      output_dir=self._inst_settings.output_dir, inst_prefix="POL")
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_last_run_number = None
@@ -37,14 +34,11 @@ class Polaris(AbstractInst):
         run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
         run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_vanadium(
-            vanadium_runs=run_details.vanadium_run_numbers, empty_runs=run_details.empty_runs,
-            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-            gen_absorb_correction=None)  # TODO POLARIS doesn't need this flag to gen abs. corrections does PEARL?
+        return self._create_vanadium(run_details=run_details,
+                                     do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     # Overrides
-
-    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws):
         return polaris_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
                                                          multiple_scattering=self._inst_settings.multiple_scattering)
 
@@ -53,7 +47,7 @@ class Polaris(AbstractInst):
         return True
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
+        return common.crop_banks_in_tof(focused_banks, self._inst_settings.focused_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_values[0],
@@ -111,10 +105,6 @@ class Polaris(AbstractInst):
 
         return run_details
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
-        normalised_ws = mantid.NormaliseByCurrent(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct)
-        return normalised_ws
-
     def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
         masking_file_name = self._inst_settings.masking_file_name
         spline_coeff = self._inst_settings.spline_coeff
@@ -123,13 +113,3 @@ class Polaris(AbstractInst):
                                                             spline_number=spline_coeff,
                                                             mask_path=masking_file_path)
         return output
-
-    def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
-        d_spacing_group, tof_group = polaris_algs.split_into_tof_d_spacing_groups(run_details=run_details,
-                                                                                  processed_spectra=processed_spectra)
-        output_paths = self._generate_out_file_paths(run_details=run_details)
-
-        polaris_output.save_polaris_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
-                                                 output_paths=output_paths,
-                                                 run_number_string=run_details.user_input_run_number)
-        return d_spacing_group
