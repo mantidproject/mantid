@@ -31,13 +31,13 @@ int LoadILLReflectometry::confidence(
     Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
-       descriptor.pathExists("/entry0/theta"))        // ILL Figaro
+  if ((descriptor.pathExists("/entry0/wavelength") || // ILL d17
+       descriptor.pathExists("/entry0/theta"))        // ILL figaro
       &&
       descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
-      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
-       descriptor.pathExists("/entry0/instrument/Theta")) // ILL Figaro
+      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL d17
+       descriptor.pathExists("/entry0/instrument/Theta")) // ILL figaro
       )
     return 80;
   else
@@ -57,17 +57,19 @@ void LoadILLReflectometry::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  const std::vector<std::string> theta{"san", "dan", "theta"};
+  const std::vector<std::string> theta{"sample angle", "detector angle",
+                                       "user defined"};
   declareProperty(
-      "Theta", "san", boost::make_shared<StringListValidator>(theta),
+      "BraggAngleIs", "sample angle",
+      boost::make_shared<StringListValidator>(theta),
       "Optional angle for calculating the scattering angle.\n"
-      "San (sample angle), dan (detector angle), theta (user defined angle)");
+      "Sample angle, detector angle or a user defined Bragg angle)");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(1.0);
-  declareProperty("ThetaUserDefined", EMPTY_DBL(), positiveDouble,
-                  "For selected Theta equals theta, the user must provide an "
-                  "angle in degree");
+  declareProperty("BraggAngle", EMPTY_DBL(), positiveDouble,
+                  "If BraggAngleIs user defined, the must provide an angle"
+                  " in degrees for computing the scattering angle");
 
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
@@ -92,25 +94,27 @@ void LoadILLReflectometry::init() {
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
   // check input file
-  const std::string fileName = getProperty("Filename");
+  const std::string fileName{getPropertyValue("Filename")};
   if (!fileName.empty() &&
       (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
     result["Filename"] = "Instrument not supported.";
   // check user defined angle
-  const double thetaUserDefined{getProperty("ThetaUserDefined")};
-  const std::string angleOption = getProperty("Theta");
-  if ((angleOption == "theta") && (thetaUserDefined == EMPTY_DBL()))
-    result["ThetaUserDefined"] =
-        "User defined theta option requires an input value";
-  if ((angleOption != "theta") && (thetaUserDefined != EMPTY_DBL()))
-    result["ThetaUserDefined"] =
-        "No input value required for user defined theta option";
+  const double thetaUserDefined{getProperty("BraggAngle")};
+  const std::string angleOption{getPropertyValue("BraggAngleIs")};
+  if ((angleOption == "user defined") && (thetaUserDefined == EMPTY_DBL()))
+    result["BraggAngle"] =
+        "User defined BraggAngle option requires an input value";
+  if ((angleOption != "user defined") && (thetaUserDefined != EMPTY_DBL()))
+    result["BraggAngle"] = "No input value required";
   // check direct beam file
-  const std::string directBeam = getProperty("DirectBeam");
+  const std::string directBeam{getPropertyValue("DirectBeam")};
   if (!directBeam.empty() &&
       (m_supportedInstruments.find(directBeam) != m_supportedInstruments.end()))
     result["DirectBeam"] = "Instrument not supported.";
-
+  if (directBeam.empty() && (angleOption == "detector angle")) {
+    result["BraggAngleIs"] = "DirectBeam input required";
+  }
+  // add input validation for det option: only figaro
   return result;
 }
 
@@ -127,7 +131,6 @@ void LoadILLReflectometry::runLoadInstrument() {
                           Mantid::Kernel::OptionalBool(true));
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->execute();
-
   } catch (std::runtime_error &e) {
     g_log.information()
         << "Unable to successfully run LoadInstrument Child Algorithm : "
@@ -141,75 +144,68 @@ void LoadILLReflectometry::runLoadInstrument() {
 void LoadILLReflectometry::exec() {
   // retrieve filename
   const std::string filenameData{getPropertyValue("Filename")};
-
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
   NXEntry firstEntry{dataRoot.openFirstEntry()};
-
   // load Monitor details: n. monitors x monitor contents
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
-
+  // set instrument name
   std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
-
   // load Data details (number of tubes, channels, etc)
   loadDataDetails(firstEntry);
-
-  initWorkspace(firstEntry, monitorsData, filenameData);
-
-  g_log.debug("Building properties...");
+  // initialise workspace
+  initWorkspace(m_localWorkspace, monitorsData);
+  // get properties
   loadNexusEntriesIntoProperties(filenameData);
-
+  // get acquisition mode
+  m_acqMode =
+      m_localWorkspace->run().getPropertyAsIntegerValue("acquisition_mode");
+  m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
   // load the instrument from the IDF if it exists
   g_log.debug("Loading instrument definition...");
   runLoadInstrument();
-  if (m_instrumentName == "D17")
-    placeDetector();
-
-  Mantid::Kernel::NexusDescriptor descriptor(filenameData);
-
+  // position the detector
+  placeDetector();
+  // get TOF values
   std::vector<double> xVals;
-  // Set the channel width property and get x values
-  if (descriptor.pathExists("/entry0/monitor1/time_of_flight")) {
-    auto channel_width = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
+  if (m_channelWidth) {
     m_localWorkspace->mutableRun().addProperty<double>(
-        "channel_width", *channel_width, true); // overwrite
-    m_channelWidth = *channel_width;
+        "channel_width", m_channelWidth, true); // overwrite
     getXValues(xVals);
   } else {
-    g_log.debug() << "Did not find Nexus entry monitor1.time_of_flight \n";
-    m_channelWidth = 0;
-
-    g_log.debug() << "No monitor TOF values for axis description (no "
+    g_log.debug() << "No TOF values for axis description (no "
                      "conversion to wavelength possible). \n";
-
     xVals.reserve(m_localWorkspace->x(0).size());
     for (size_t t = 0; t <= m_numberOfChannels; ++t) {
       double dt = double(t);
       xVals.push_back(dt);
     }
   }
-  g_log.debug() << "Channel width: " << m_channelWidth
-                << "\n"; // UNIT??cm supposed
-  g_log.debug("Loading data...");
+  // load data into the workspace
   loadData(firstEntry, monitorsData, xVals);
   const std::string unit = getPropertyValue("XUnit");
-  if (descriptor.pathExists("/entry0/monitor1/time_of_flight") &&
-      (unit == "Wavelength")) {
-    auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
-    convertToWavelength->initialize();
-    convertToWavelength->setLogging(true);
-    convertToWavelength->enableHistoryRecordingForChild(true);
-    convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                                           m_localWorkspace);
-    convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
-                                                           m_localWorkspace);
-    convertToWavelength->setPropertyValue("Target", "Wavelength");
-    convertToWavelength->execute();
+  if (m_channelWidth > 0 && m_acqMode && (unit == "Wavelength")) {
+    convertToWavelength();
   }
   // Set the output workspace property
   setProperty("OutputWorkspace", m_localWorkspace);
+}
+
+/**
+  * Call child algorithm ConvertUnits for conversion from TOF to wavelength
+  */
+void LoadILLReflectometry::convertToWavelength() {
+  auto convertToWavelength = createChildAlgorithm("ConvertUnits", true);
+  convertToWavelength->initialize();
+  convertToWavelength->setLogging(true);
+  convertToWavelength->enableHistoryRecordingForChild(true);
+  convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                                         m_localWorkspace);
+  convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
+                                                         m_localWorkspace);
+  convertToWavelength->setPropertyValue("Target", "Wavelength");
+  convertToWavelength->execute();
 }
 
 /**
@@ -225,7 +221,7 @@ void LoadILLReflectometry::setInstrumentName(
   }
   m_instrumentName =
       m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
-  boost::to_upper(m_instrumentName);
+  boost::to_lower(m_instrumentName);
   g_log.debug() << "Instrument name : " + m_instrumentName << '\n';
 }
 
@@ -233,52 +229,65 @@ void LoadILLReflectometry::setInstrumentName(
  * Creates the workspace and initialises member variables with
  * the corresponding values
  *
- * @param entry :: The Nexus entry
+ * @param workspace :: The Workspace2D to be created
  * @param monitorsData :: Monitors data already loaded
- *
  */
 void LoadILLReflectometry::initWorkspace(
-    NeXus::NXEntry & /*entry*/, std::vector<std::vector<int>> monitorsData,
-    const std::string &filename) {
+    API::MatrixWorkspace_sptr &workspace,
+    std::vector<std::vector<int>> monitorsData) {
 
   g_log.debug() << "Number of monitors: " << monitorsData.size() << '\n';
-  for (size_t i = 0; i < monitorsData.size(); ++i)
-    g_log.debug() << "Data size of monitor" << i << ": "
-                  << monitorsData[i].size() << '\n';
-
-  // create the output workspace
-  m_localWorkspace = WorkspaceFactory::Instance().create(
-      "Workspace2D", m_numberOfHistograms + monitorsData.size(),
-      m_numberOfChannels + 1, m_numberOfChannels);
-
-  Mantid::Kernel::NexusDescriptor descriptor(filename);
-
-  if (descriptor.pathExists("/entry0/monitor1/time_of_flight"))
-    m_localWorkspace->getAxis(0)->unit() =
-        UnitFactory::Instance().create("TOF");
-
-  m_localWorkspace->setYUnitLabel("Counts");
+  for (size_t i = 0; i < monitorsData.size(); ++i) {
+    if (monitorsData[i].size() != m_numberOfChannels)
+      g_log.debug() << "Data size of monitor" << i << ": "
+                    << monitorsData[i].size() << '\n';
+  }
+  // create the workspace
+  try {
+    workspace = WorkspaceFactory::Instance().create(
+        "Workspace2D", m_numberOfHistograms + monitorsData.size(),
+        m_numberOfChannels + 1, m_numberOfChannels);
+  } catch (std::out_of_range &) {
+    throw std::runtime_error(
+        "Workspace2D cannot be created, check number of "
+        "histograms (" +
+        std::to_string(m_numberOfHistograms) + "), monitors (" +
+        std::to_string(monitorsData.size()) + "), and channels (" +
+        std::to_string(m_numberOfChannels) + ")\n");
+  }
+  if (m_acqMode)
+    workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+  workspace->setYUnitLabel("Counts");
 }
 
 /**
  * Load Data details (number of tubes, channels, etc)
+ *
  * @param entry First entry of nexus file
  */
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
-  // read in the data
-  NXData dataGroup{entry.openNXData("data")};
-  NXInt data{dataGroup.openIntData()};
+  // PSD data D17 256 x 1 x 1000
+  // PSD data figaro 1 x 256 x 1000
 
-  m_numberOfTubes = static_cast<size_t>(data.dim0());
-  m_numberOfPixelsPerTube = static_cast<size_t>(data.dim1());
-  m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
-  m_numberOfChannels = static_cast<size_t>(data.dim2());
+  NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
+  timeOfFlight.load();
+  m_channelWidth = static_cast<double>(timeOfFlight[0]);
+  m_numberOfChannels = size_t(timeOfFlight[1]);
+  m_tofDelay = timeOfFlight[2];
 
-  g_log.debug() << "Number of tubes (banks): " << m_numberOfTubes << '\n';
-  g_log.debug() << "Number of pixels per tube: " << m_numberOfPixelsPerTube
-                << '\n';
-  g_log.debug() << "Number of detectors: " << m_numberOfHistograms << '\n';
+  NXInt nChannels = entry.openNXInt("instrument/PSD/detsize");
+  nChannels.load();
+  m_numberOfHistograms = nChannels[0];
+
+  g_log.debug() << "Please note that ILL reflectometry instruments have "
+                   "several tubes, after integration one "
+                   "tube remains in the Nexus file.\n";
+  g_log.debug() << "Number of tubes (banks): 1\n";
+  g_log.debug() << "Number of pixels per tube (number of detectors and number "
+                   "of histograms): " << m_numberOfHistograms << '\n';
   g_log.debug() << "Number of time channels: " << m_numberOfChannels << '\n';
+  g_log.debug() << "Channel width: " << m_channelWidth << " 10e-6 sec\n";
+  g_log.debug() << "TOF delay: " << m_tofDelay << "\n";
 }
 
 /**
@@ -305,7 +314,6 @@ LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
  *
  * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors containing values from all monitors
- *
  */
 std::vector<std::vector<int>>
 LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
@@ -322,45 +330,62 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  * Determine x values
  *
  * @param xVals :: vector holding the x values
- *
  */
 void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
   try {
-    // use Chopper1.phase
-    auto chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("Chopper1.phase"));
-    auto tof_1 = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("monitor1.time_of_flight_2"));
-    auto POFF = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("VirtualChopper.poff"));
-    auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty("VirtualChopper.open_offset"));
-    auto chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper1_speed_average"));
-    auto chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper2_speed_average"));
-    auto chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
-        m_localWorkspace->run().getProperty(
-            "VirtualChopper.chopper2_phase_average"));
-
+    std::string ch1{""}, ch2{""}, offsetFrom{""}, offsetName{""};
     std::string chopper;
-    if (*chop1_speed && *chop2_speed && *chop2_phase) {
-      // virtual Chopper entries are valid
+    PropertyWithValue<double> *chop1_speed{NULL}, *chop2_speed{NULL},
+        *chop2_phase{NULL};
+    if (m_instrumentName == "figaro") {
+      // figaro: find out which of the four choppers are used
+      auto firstChopper = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty("ChopperSetting.firstChopper"));
+      auto secondChopper = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty("ChopperSetting.secondChopper"));
+      ch1 = "CH" + std::to_string(int(*firstChopper));
+      ch2 = "CH" + std::to_string(int(*secondChopper));
+      offsetFrom = "CollAngle";
+      offsetName = "openOffset";
+      chopper = "Chopper";
+    } else if (m_instrumentName == "d17") {
+      ch1 = "Chopper1";
+      ch2 = "Chopper2";
+      offsetFrom = "VirtualChopper";
+      offsetName = "open_offset";
+      chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty(
+              "VirtualChopper.chopper1_speed_average"));
+      chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty(
+              "VirtualChopper.chopper2_speed_average"));
+      chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty(
+              "VirtualChopper.chopper2_phase_average"));
+    }
+    // use phase of first chopper
+    auto chop1_phase = dynamic_cast<PropertyWithValue<double> *>(
+        m_localWorkspace->run().getProperty(ch1 + ".phase"));
+    auto POFF = dynamic_cast<PropertyWithValue<double> *>(
+        m_localWorkspace->run().getProperty(offsetFrom + ".poff"));
+    auto open_offset = dynamic_cast<PropertyWithValue<double> *>(
+        m_localWorkspace->run().getProperty(offsetFrom + "." + offsetName));
+
+    if (chop1_speed && chop2_speed && chop2_phase && *chop1_speed != 0.0 &&
+        *chop1_speed != 0.0 && *chop2_phase != 0.0) { // only for d17
+      // virtual chopper entries are valid
       chopper = "Virtual chopper";
     } else {
-      // use Chopper values instead
+      // use chopper values
       chop1_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper1.rotation_speed"));
+          m_localWorkspace->run().getProperty(ch2 + ".rotation_speed"));
       chop2_speed = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper2.rotation_speed"));
+          m_localWorkspace->run().getProperty(ch2 + ".rotation_speed"));
       chop2_phase = dynamic_cast<PropertyWithValue<double> *>(
-          m_localWorkspace->run().getProperty("Chopper2.phase"));
+          m_localWorkspace->run().getProperty(ch2 + ".phase"));
       chopper = "Chopper";
     }
     // logging
-    g_log.debug() << "TOF delay: " << *tof_1 << '\n';
     g_log.debug() << "Poff: " << *POFF << '\n';
     g_log.debug() << "Open offset: " << *open_offset << '\n';
     g_log.debug() << "Chopper 1 phase : " << *chop1_phase << '\n';
@@ -375,25 +400,27 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     //lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
     parref.channelwidth + parref.delay) / temp1)
     */
-    double t_TOF2 = 0.0;
-    if (!chop1_speed) {
-      g_log.warning() << "Warning: chop1_speed is null.\n";
-    } else {
+    double t_TOF2{0.0};
+    if (chop1_speed && chop1_phase && chop2_phase && open_offset && POFF &&
+        *chop1_speed != 0.0) {
       t_TOF2 = -1.e+6 * 60.0 *
                (*POFF - 45.0 + *chop2_phase - *chop1_phase + *open_offset) /
                (2.0 * 360 * *chop1_speed);
     }
     g_log.debug() << "t_TOF2 : " << t_TOF2 << '\n';
+    if (!t_TOF2)
+      g_log.warning() << "TOF values may be incorrect, check chopper values\n";
     // compute tof values
     xVals.reserve(m_localWorkspace->x(0).size());
     for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
          ++timechannelnumber) {
       double t_TOF1 =
-          (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth + *tof_1;
+          (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
+          m_tofDelay;
       xVals.push_back(t_TOF1 + t_TOF2);
     }
   } catch (std::runtime_error &e) {
-    g_log.information() << "Unable to access Nexus file entries : " << e.what()
+    g_log.information() << "Unable to access Nexus file entry : " << e.what()
                         << '\n';
   }
 }
@@ -404,22 +431,19 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
  * @param entry :: The Nexus file entry
  * @param monitorsData :: Monitors data already loaded
  * @param xVals :: X values
- *
  */
 void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
                                     std::vector<std::vector<int>> monitorsData,
                                     std::vector<double> &xVals) {
-
-  // read in the data
+  g_log.debug("Loading data...");
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   // load the counts from the file into memory
   data.load();
   size_t nb_monitors = monitorsData.size();
-  Progress progress(this, 0, 1,
-                    m_numberOfTubes * m_numberOfPixelsPerTube + nb_monitors);
+  Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
 
-  if (m_instrumentName == "D17") {
+  if (m_instrumentName == "d17") {
     m_wavelength = entry.getFloat("wavelength");
     double ei = m_loader.calculateEnergy(m_wavelength);
     m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
@@ -437,19 +461,16 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
 
     // write data
     size_t spec = 0;
-    for (size_t i = 0; i < m_numberOfTubes; ++i) {
-      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-        const HistogramData::Counts histoCounts(data_p,
-                                                data_p + m_numberOfChannels);
-        m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
-                                       std::move(histoCounts));
-        ++spec;
-        progress.report();
-      }
+    for (size_t j = 0; j < m_numberOfHistograms; ++j) {
+      int *data_p = &data(0, static_cast<int>(j), 0);
+      const HistogramData::Counts histoCounts(data_p,
+                                              data_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
+                                     std::move(histoCounts));
+      ++spec;
+      progress.report();
     }
-  }
-  if (m_instrumentName == "Figaro") {
+  } else if (m_instrumentName == "figaro") {
   }
 
 } // LoadILLIndirect::loadData
@@ -460,9 +481,8 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
  */
 void LoadILLReflectometry::loadNexusEntriesIntoProperties(
     std::string nexusfilename) {
-
+  g_log.debug("Building properties...");
   API::Run &runDetails = m_localWorkspace->mutableRun();
-
   // Open NeXus file
   NXhandle nxfileID;
   NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
@@ -472,103 +492,123 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-
-  // Add also "Facility"
   runDetails.addProperty("Facility", std::string("ILL"));
-
   stat = NXclose(&nxfileID);
 }
 
 /**
- * Utility to place detector in space, according to data file
- */
-void LoadILLReflectometry::placeDetector() {
-  g_log.debug() << "Move the detector bank \n";
-  std::string thetaIn = getPropertyValue("Theta");
-  double theta = getProperty("ThetaUserDefined");
-  if (theta == EMPTY_DBL()) {
-    const std::string name = thetaIn + ".value";
-    // error message without this check would be: Unknown property search object
-    // "name" and thus not be meaningful
-    if (m_localWorkspace->run().hasProperty(name)) {
-      theta = m_localWorkspace->run().getPropertyValueAsType<double>(name);
+  * Gaussian fit to determine peak position
+  *
+  * @param beam :: Name of the beam. This is the ReflectedBeam by default and
+  *the DirectBeam if explicitely mentioned
+  */
+double LoadILLReflectometry::fitPeakPosition(std::string beam) {
+  MatrixWorkspace_sptr beamWS;
+  if (beam == "DirectBeam") {
+    const std::string directBeam{getPropertyValue("DirectBeam")};
+    // open the root node
+    NeXus::NXRoot dataRoot(directBeam);
+    NXEntry entry{dataRoot.openFirstEntry()};
+    // load data into a Workspace2D
+    NXData dataGroup = entry.openNXData("data");
+    NXInt data = dataGroup.openIntData();
+    // load the counts from the file into memory
+    data.load();
+    // load Monitor details: n. monitors x monitor contents
+    std::vector<std::vector<int>> monitorsData{loadMonitors(entry)};
+    // initialise workspace
+    initWorkspace(beamWS, monitorsData);
+  } else
+    beamWS = m_localWorkspace;
+  double peakPosition{0.0};
+  // need transposed workspace for fitting routines
+  // The algorithm FindReflectometryLines seems to be well suited, but does not
+  // use Gaussian fitting
+
+  return peakPosition;
+}
+
+/**
+  * Compute Bragg angle
+  */
+double LoadILLReflectometry::computeBraggAngle() {
+  // compute bragg angle
+  const std::string thetaIn = getPropertyValue("BraggAngleIs");
+  std::string thetaAngle{""};
+  if (thetaIn == "sample angle" || thetaIn == "detector angle") {
+    if (m_instrumentName == "d17") {
+      thetaIn == "sample angle" ? thetaAngle = "san.value" : thetaAngle =
+                                                                 "dan.value";
     } else {
-      throw std::runtime_error("Theta (san or dan option) is not defined");
+      thetaIn == "sample angle" ? thetaAngle = "san.value"
+                                : thetaAngle = "VirtualAxis.dan_actual_angle";
+    }
+  } else
+    thetaAngle = "user defined";
+  double theta = getProperty("BraggAngle");
+  // no user input for theta means we take sample or detector angle value
+  if (theta == EMPTY_DBL()) {
+    // error message without this check would be: Unknown property search
+    // object ... and thus not be meaningful
+    if (m_localWorkspace->run().hasProperty(thetaAngle)) {
+      theta =
+          m_localWorkspace->run().getPropertyValueAsType<double>(thetaAngle);
+    } else {
+      throw std::runtime_error("BraggAngleIs (sample or detector option) "
+                               "is not defined in Nexus file");
     }
   }
-  g_log.debug() << "Using " << thetaIn << " to calculate theta " << theta
-                << " degrees\n";
-  double twotheta_rad = (2. * theta) * M_PI / 180.0;
-  // incident theta angle for being able to call the algorithm
-  // ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta",
-                                             double(twotheta_rad / 2.));
-  auto dist = dynamic_cast<PropertyWithValue<double> *>(
-      m_localWorkspace->run().getProperty("det.value"));
-  double distance = *dist / 1000.0; // convert to meter
-  g_log.debug() << "Sample - detector distance in millimeter " << *dist << '\n';
-
+  // user angle and sample angle behave equivalently for d17
+  const std::string scatteringType = getProperty("ScatteringType");
+  if (thetaIn == "detector angle") {
+    const std::string directBeam = getProperty("DirectBeam");
+    Mantid::Kernel::NexusDescriptor descriptor(directBeam);
+    if (descriptor.pathExists("/entry0/instrument/dan")) {
+      auto thetaDirectBeam = dynamic_cast<PropertyWithValue<double> *>(
+          m_localWorkspace->run().getProperty(thetaAngle)); // to check
+      double angleCentre = ((theta - *thetaDirectBeam) / 2.) * M_PI / 180.;
+      double fittedPeakPosDB = fitPeakPosition("DirectBeam");
+      double fittedPeakPosRB = fitPeakPosition();
+      double d17pcen = 135.79;
+      // sdetd = par1[25]*1.0e-3
+      // figaro c_params.pcen = (float(par1[100]-par1[99])/2)-0.5
+      // sdetd = par1[18]*1.0e-3
+    }
+    if (scatteringType == "incoherent") {
+      /*
+      theta = angleCentre +
+      0.5*atan((fittedPeakPosDB-pcen)*pixelwidth/pardir.sdetd)  -
+      0.5*atan((fittedPeakPosRB-pcen)*pixelwidth/parref.sdetd)
+      */
+    } else if (scatteringType == "coherent") {
+      /*
+      theta = angleCentre +
+      0.5*atan((fittedPeakPosDB-pcen)*pixelwidth/pardir.sdetd)  -
+      0.5*atan((((peakref)+0.5)-pcen)*pixelwidth/parref.sdetd)
+      we have to use the middle of the coherent center pixel
+      */
+    }
+  } else if (scatteringType == "coherent") {
+    /*
+    peakref : centre of reflected peak in x direction
+    theta = theta * M_PI / 180.) -
+    0.5*atan((peakref-pcen)*c_params.pixelwidth/parref.sdetd)  +
+    0.5*atan((fittedPeakPosRB-pcen)*c_params.pixelwidth/parref.sdetd)
+    */
+  }
+  g_log.debug() << "Using " << thetaIn << " to calculate the Bragg angle "
+                << theta << " degrees\n";
+  return theta;
   /*
-  Lamp
-
+  Cosmos
   conversion to radians *pi/180
   conversion to grad    *180/pi
-
   parref: parameters from reflected beam
-
-  bragg angle (rad)
-
-  ============================================================================================
-
-  parref.san in grad
-
-  san coherent
-  --------------------------------------------------------------------------------------------
-
-  angle_bragg = (parref.san * !pi / 180.) -
-                0.5*atan((float(peakref)-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
-  +
-                0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
-
-  san incoherent
-  --------------------------------------------------------------------------------------------
-
-  angle_bragg = parref.san * !pi / 180.
-
-  ============================================================================================
-
-  dan     Direct peak position (new from gaussian fit) = newpeakdir
-  dan     Reflect peak position (new from gaussian fit) = newpeakref
-  angle_centre = ((parref.dan - pardir.dan) / 2.) * !pi / 180.
-
-  dan coherent
-  --------------------------------------------------------------------------------------------
+  bragg angle (rad), parref.san in grad
 
   detector pixels projected onto a given pixel, so we need
   to select middle of specular pixel (peakref) instead of value from fit
-
-  angle_bragg = angle_centre +
-                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd)
-  -
-                0.5*atan(((float(peakref)+0.5)-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
-                we have to use the middle of the coherent center pixel
-
-  dan incoherent
-  --------------------------------------------------------------------------------------------
-
-  angle_bragg = angle_centre +
-                0.5*atan((newpeakdir-c_params.pcen)*c_params.pixelwidth/pardir.sdetd)
-  -
-                0.5*atan((newpeakref-c_params.pcen)*c_params.pixelwidth/parref.sdetd)
-
-  ============================================================================================
-
-    - user defined using theta value from table
-
-  ============================================================================================
-
-  twotheta = 2.0 * angle_bragg (rad)
-
+  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   ; calculate angle offset for flat detector surface
   function cosmos_anal_calcangleoffset, peakpos, xoff, density, distance
@@ -580,7 +620,8 @@ void LoadILLReflectometry::placeDetector() {
   return distance / cos(cosmos_anal_calcangleoffset(peakpos, xoff, density,
   distance))
 
-  calculate lambda (wavelength in angstroms) determined for reflected beam only
+  calculate lambda (wavelength in angstroms) determined for reflected beam
+  only
 
   temp1 = cosmos_anal_correctdistance(peakref, parref.x_min,
   parref.pixeldensity, parref.tofd)
@@ -592,18 +633,50 @@ void LoadILLReflectometry::placeDetector() {
   from direct and reflect runs.'
   lambda = 1e10 * (c_params.planckperkg * ((findgen(tsize) + 0.5) *
   parref.channelwidth + parref.delay) / temp1)
-
-
   */
+}
 
+/**
+ * Utility to place detector in space, according to data file
+ */
+void LoadILLReflectometry::placeDetector() {
+  g_log.debug() << "Move the detector bank \n";
+  double theta = computeBraggAngle();
+  double twotheta_rad = (2. * theta) * M_PI / 180.;
+  // incident theta angle for easier calling the algorithm
+  // ConvertToReflectometryQ
+  m_localWorkspace->mutableRun().addProperty("stheta",
+                                             double(twotheta_rad / 2.));
+  std::string detectorAngleName{""}, detectorDistance{""};
+  if (m_instrumentName == "d17") {
+    detectorDistance = "det";
+    detectorAngleName = "dan.value";
+  } else { // figaro
+    detectorDistance = "DTR";
+    detectorAngleName = "VirtualAxis.dan_actual_angle";
+  }
+  double detectorAngle =
+      m_localWorkspace->run().getPropertyValueAsType<double>(detectorAngleName);
+  auto dist = dynamic_cast<PropertyWithValue<double> *>(
+      m_localWorkspace->run().getProperty(detectorDistance + ".value"));
+  double distance = *dist / 1000.0; // convert to meter
+  g_log.debug() << "Sample-detector distance in millimeter " << *dist << '\n';
   const std::string componentName = "bank";
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
   V3D newpos(distance * sin(twotheta_rad), pos.Y(),
              distance * cos(twotheta_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
+  // offset angle
+  double sampleAngle =
+      m_localWorkspace->run().getPropertyValueAsType<double>("san.value");
+  g_log.debug() << "sample angle " << sampleAngle << "\n";
+  g_log.debug() << "detector angle " << detectorAngle << "\n";
+  double offsetAngle = detectorAngle / 2. * sampleAngle;
+  g_log.debug() << "Offset angle of the direct beam (will be added to the "
+                   "scattering angle) " << offsetAngle << " degrees\n";
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
-  Quat rotation(2. * theta, axis);
+  const Quat rotation(2. * theta + offsetAngle, axis);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 } // namespace DataHandling

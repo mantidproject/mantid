@@ -44,7 +44,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
-    return "Loads an ILL reflectometry nexus file (instruments D17 and "
+    return "Loads an ILL reflectometry nexus file (instrument D17 or "
            "Figaro).";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
@@ -54,13 +54,13 @@ private:
   void init() override;
   void exec() override;
 
-  void initWorkspace(NeXus::NXEntry &entry,
-                     std::vector<std::vector<int>> monitorsData,
-                     const std::string &filename);
+  void initWorkspace(API::MatrixWorkspace_sptr &workspace,
+                     std::vector<std::vector<int>> monitorsData);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
   void getXValues(std::vector<double> &xVals);
+  void convertToWavelength();
   void loadData(NeXus::NXEntry &entry,
                 std::vector<std::vector<int>> monitorsData,
                 std::vector<double> &xVals);
@@ -69,16 +69,19 @@ private:
                                      std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
+  double fitPeakPosition(std::string beam = "ReflectedBeam");
+  double computeBraggAngle();
   void placeDetector();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
   /* Values parsed from the nexus file */
-  std::string m_instrumentName;      ///< Name of the instrument
-  size_t m_numberOfTubes{0};         // number of tubes - X
-  size_t m_numberOfPixelsPerTube{0}; // number of pixels per tube - Y
-  size_t m_numberOfChannels{0};      // time channels - Z
-  size_t m_numberOfHistograms{0};
+  std::string m_instrumentName; ///< Name of the instrument
+  size_t m_acqMode{1}; // acquisition mode (TOF (default), monochromatic)
+  size_t m_numberOfChannels{0};
+  double m_tofDelay{0.0};
+  size_t m_numberOfHistograms{
+      0}; // number of tubes (always 1) times number of pixels per tube
   double m_wavelength{0};
   double m_channelWidth{0};
   std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",

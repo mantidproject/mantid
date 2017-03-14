@@ -62,48 +62,52 @@ public:
         output->run().getPropertyValueAsType<double>("channel_width"), 57.0);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("dan.value"),
                      3.1909999847412109);
-    AnalysisDataService::Instance().remove(outWSName);
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
+                     0.013958706061406229);
+    AnalysisDataService::Instance().clear();
   }
 
   // void testInputThetaD17() { loadSpecificThrows(m_d17File, outWSName,
-  // "Theta", "theta");
+  // "BraggAngleIs", "theta");
   // }
 
   // void testThetaUserDefinedD17() {
-  //  loadSpecificThrows(m_d17File, outWSName, "ThetaUserDefined", "0.5");
+  //  loadSpecificThrows(m_d17File, outWSName, "BraggAngle", "0.5");
   //}
 
   void testWavelengthD17() {
     // default "XUnit" = "Wavelength"
     MatrixWorkspace_sptr output = getWorkspaceFor(m_d17File, outWSName);
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
-    // Test x values, minimum and maximum
-    TS_ASSERT_DELTA(output->x(2)[0], -0.23369886776335402, 1e-16);
-    TS_ASSERT_DELTA(output->x(2)[1000], 30.784049961143634, 1e-16);
-    AnalysisDataService::Instance().remove(outWSName);
+    // Test x values, minimum and maximum, first detector
+    TS_ASSERT_DELTA(output->x(2)[0], -0.22089473, 1e-6);
+    TS_ASSERT_DELTA(output->x(2)[1000], 30.79137933, 1e-6);
+    AnalysisDataService::Instance().clear();
   }
 
   void testTOFD17() {
     MatrixWorkspace_sptr output =
         getWorkspaceFor(m_d17File, outWSName, "XUnit", "TimeOfFlight");
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
-    // Test x values, minimum and maximum
-    TS_ASSERT_DELTA(output->x(2)[0], -429.4584, 1e-16);
-    TS_ASSERT_DELTA(output->x(2)[1000], 56570.5415, 1e-16);
-    AnalysisDataService::Instance().remove(outWSName);
+    // Test x values, minimum and maximum, first detector
+    TS_ASSERT_DELTA(output->x(2)[0], -406.00052788, 1e-6);
+    TS_ASSERT_DELTA(output->x(2)[1000], 56593.99947212, 1e-6);
+    AnalysisDataService::Instance().clear();
   }
 
   void test2ThetaD17() {
-    // default Theta = "san"
+    // default BraggAngleIs = "sample angle"
     MatrixWorkspace_sptr output = getWorkspaceFor(m_d17File, outWSName);
     // Compare angles in rad
     const auto &spectrumInfo = output->spectrumInfo();
     // Check twoTheta between two center detectors 128 and 129 using workspace
     // indices
-    TS_ASSERT_LESS_THAN_EQUALS(
-        spectrumInfo.twoTheta(130) * 180.0 / M_PI,
-        2. * output->run().getPropertyValueAsType<double>("san.value"));
-    AnalysisDataService::Instance().remove(outWSName);
+    double san = output->run().getPropertyValueAsType<double>("san.value");
+    double dan = output->run().getPropertyValueAsType<double>("dan.value");
+    double offsetAngle = dan / 2. * san;
+    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(130) * 180.0 / M_PI,
+                               2. * san + offsetAngle);
+    AnalysisDataService::Instance().clear();
   }
 
   // Figaro
@@ -111,9 +115,13 @@ public:
   void testPropertiesFigaro() {
     MatrixWorkspace_sptr output = getWorkspaceFor(m_figaroFile, outWSName);
     commonProperties(output);
+    TS_ASSERT_EQUALS(
+        output->run().getPropertyValueAsType<double>("channel_width"), 40.0);
     TS_ASSERT_DELTA(output->run().getPropertyValueAsType<double>("san.value"),
                     1.3877788e-17, 1e-16);
-    AnalysisDataService::Instance().remove(outWSName);
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
+                     2.4221309013948832e-19);
+    AnalysisDataService::Instance().clear();
   }
 
   // helpers
@@ -174,6 +182,21 @@ public:
     TS_ASSERT(output->spectrumInfo().isMonitor(1));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2);
     TS_ASSERT_EQUALS(output->blocksize(), 1000);
+    // check the sum of all detector counts against Nexus file entry detsum
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
+                     detCounts(output));
+  }
+
+  double detCounts(MatrixWorkspace_sptr output) {
+    // sum of detector counts
+    double counts{0.0};
+    for (size_t i = 2; i < output->getNumberHistograms(); ++i) {
+      auto &values = output->y(i);
+      for (size_t k = 0; k < output->blocksize(); ++k) {
+        counts += values[k];
+      }
+    }
+    return counts;
   }
 };
 
