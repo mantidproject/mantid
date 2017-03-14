@@ -2,8 +2,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
-from isis_powder.routines import common
 
+from isis_powder.routines import common, common_enums
+import isis_powder.abstract_inst
 
 class ISISPowderCommonTest(unittest.TestCase):
 
@@ -171,14 +172,40 @@ class ISISPowderCommonTest(unittest.TestCase):
         self.assertEqual(expected_values, returned_values)
 
     def test_generate_run_numbers_fails(self):
-
         run_input_sting = "text-string"
+
         with self.assertRaisesRegexp(ValueError, "Could not generate run numbers from this input"):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
         # Check it says what the actual string was
         with self.assertRaisesRegexp(ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
+
+    def test_load_current_normalised_ws_list(self):
+        mock_inst = UnitTestMockInstrument(file_name_prefix="POL")
+
+        empty_inst_run = "95597"
+        vanadium_inst_run = "95598"
+
+        # Load a single workspace
+        single_ws_load = common.load_current_normalised_ws_list(run_number_string=empty_inst_run, instrument=mock_inst,
+                                                                input_batching=common_enums.INPUT_BATCHING.Individual)
+        single_ws_load = single_ws_load[0]
+        self.assertAlmostEqual(single_ws_load.dataY(140)[825], 0.000440675, delta=1e-8)
+
+
+class UnitTestMockInstrument(isis_powder.abstract_inst.AbstractInst):
+    # Implements essential methods required within the class
+    def __init__(self, file_name_prefix):
+        super(UnitTestMockInstrument, self).__init__("UnitTest", None, None, None)
+        self._file_name_prefix = file_name_prefix
+
+    def _get_run_details(self, run_number_string):
+        return None
+
+    def _generate_input_file_name(self, run_number):
+        return self._file_name_prefix + str(run_number)
+
 
 if __name__ == "__main__":
     unittest.main()
