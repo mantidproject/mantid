@@ -28,7 +28,7 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0487223)
 
-        scan_ws = mtd['iris72463_to_72465_s0_scan_eisf']
+        scan_ws = mtd['iris72463_to_72465_s1_scan_eisf']
         self.assertEqual(round(scan_ws.readY(0)[0], 7), 1.0519965)
         self.assertEqual(round(scan_ws.readY(1)[0], 7), 1.0452707)
 
