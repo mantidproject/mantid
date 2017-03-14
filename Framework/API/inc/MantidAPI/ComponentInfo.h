@@ -46,11 +46,13 @@ class MANTID_API_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
   const Beamline::ComponentInfo &m_componentInfo;
+  /// Collection of component ids
   std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  /// Map of component ids to indexes
   std::unordered_map<Geometry::IComponent *, size_t> m_compIDToIndex;
 
 public:
-  ComponentInfo() = default;
+
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
                 std::vector<Mantid::Geometry::IComponent *> &&componentIds);
   std::vector<size_t> detectorIndexes(size_t componentIndex) const;

@@ -181,18 +181,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-void checkComponentInfoSize(const Instrument &instr,
-                            const Beamline::ComponentInfo &compInfo) {
-  std::vector<IComponent_const_sptr> children;
-  instr.getChildren(children, true); // Horribly wasteful
-  const auto nComps = children.size();
-  if (nComps != compInfo.size()) {
-
-    throw std::runtime_error("ExperimentInfo: size mismatch between "
-                             "ComponentInfo and number of components in "
-                             "instrument");
-}
-}
 }
 
 std::vector<size_t> registerComponentInfo(
@@ -216,6 +204,7 @@ std::vector<size_t> registerComponentInfo(
       } else {
         auto childIndexes = registerComponentInfo(
             componentDetectorIndexes, componentIds, *child, detectorInfo);
+        // We add all detector indexes from lower branches of the tree.
         localDetectorIndexes.reserve(childIndexes.size() +
                                      localDetectorIndexes.size());
         localDetectorIndexes.insert(localDetectorIndexes.end(),

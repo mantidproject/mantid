@@ -15,16 +15,30 @@ public:
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
   void test_size() {
-    std::vector<std::vector<size_t>> indexes{{0, 1}, {2, 3, 4}};
+    std::vector<std::vector<size_t>> indexes{{1}, {}};
     ComponentInfo info(indexes);
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
+  void test_default_size(){
+      ComponentInfo info;
+      TS_ASSERT_EQUALS(info.size(), 0);
+  }
+
   void test_detector_indexes() {
-    std::vector<std::vector<size_t>> indexes{{0, 1}, {2, 3, 4}};
+
+      /*
+             |
+       ------------
+       |         | 30
+      -------
+      | 10  | 20
+      */
+
+    std::vector<std::vector<size_t>> indexes{{10, 20, 30}, {10, 20}, {}, {}, {}};
     ComponentInfo info(indexes);
-    TS_ASSERT_EQUALS(info.detectorIndexes(0), std::vector<size_t>({0, 1}));
-    TS_ASSERT_EQUALS(info.detectorIndexes(1), std::vector<size_t>({2, 3, 4}));
+    TS_ASSERT_EQUALS(info.detectorIndexes(0 /*component index*/), std::vector<size_t>({10, 20, 30}));
+    TS_ASSERT_EQUALS(info.detectorIndexes(1 /*component index*/), std::vector<size_t>({10, 20}));
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

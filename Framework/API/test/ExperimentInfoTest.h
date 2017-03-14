@@ -784,7 +784,7 @@ public:
     TS_ASSERT_EQUALS(compInfo.size(), nComponents);
   }
 
-  void test_component_info_entries() {
+  void test_component_info_detector_entries() {
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -797,13 +797,24 @@ public:
     const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
 
     // Get the id of the single rectangular bank
-    auto bankID = inst->getComponentByName("bank1")->getComponentID();
-    auto bankIndex = compInfo.indexOf(bankID);
-    auto detectorIndexes = compInfo.detectorIndexes(bankIndex);
+    auto bank = inst->getComponentByName("bank1");
+    auto bankID = bank->getComponentID();
+    auto allBankDetectorIndexes = compInfo.detectorIndexes(compInfo.indexOf(bankID));
 
-    TS_ASSERT_EQUALS(
-        detectorIndexes.size(),
-        detInfo.size()); // Should have all detectors under this bank
+    TSM_ASSERT_EQUALS("Should have all detectors under this bank",
+        allBankDetectorIndexes.size(),
+        detInfo.size()); //
+
+    auto bankRowID = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)->getChild(0)->getComponentID();
+    auto allRowDetectorIndexes = compInfo.detectorIndexes(compInfo.indexOf(bankRowID));
+
+    TSM_ASSERT_EQUALS("Should have all detectors under this row",
+        allRowDetectorIndexes.size(),
+        10);//
+
+    const auto detCompId = detInfo.detector(0).getComponentID();
+    TSM_ASSERT_EQUALS("Detector should have no nested detector", compInfo.detectorIndexes(compInfo.indexOf(detCompId)).size(), 0);
+
   }
 
 private:
