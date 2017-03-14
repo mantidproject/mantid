@@ -245,7 +245,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_10_20"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_20_30"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
