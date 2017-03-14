@@ -638,10 +638,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
       auto runWS =
           prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
-      } else {
-        // No pre-processing needed
-        alg->setPropertyValue(propertyName, preProcessValue);
-      }
+    } else {
+      // No pre-processing needed
+      alg->setPropertyValue(propertyName, preProcessValue);
+    }
   }
 
   // Global processing options as a string
@@ -651,11 +651,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      std::cout << "Prop = " << kvp->first << ", oldVal = " << alg->getPropertyValue(kvp->first) << ", newVal = " << kvp->second << "\n";
-      if (restrictedProps.find(kvp->first) == restrictedProps.end()) {
-        std::cout << "Prop = " << kvp->first << ", oldVal = " << alg->getPropertyValue(kvp->first) << ", newVal = " << kvp->second << "\n";
+      if (restrictedProps.find(kvp->first) == restrictedProps.end())
         alg->setProperty(kvp->first, kvp->second);
-      }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);

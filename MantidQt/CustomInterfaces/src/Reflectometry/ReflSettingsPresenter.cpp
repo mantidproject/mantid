@@ -66,8 +66,6 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   auto runs = m_view->getTransmissionRuns();
-  if (runs.empty())
-    return "";
 
   std::vector<std::string> transRuns;
   boost::split(transRuns, runs, boost::is_any_of(","));
@@ -78,10 +76,16 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
                                 "are allowed.");
 
   if (loadRuns) {
-    // Return them as options for reduction
-    runs = "FirstTransmissionRun=TRANS_" + transRuns[0];
-    if (transRuns.size() > 1)
-      runs += ",SecondTransmissionRun=TRANS_" + transRuns[1];
+    for (const auto &run : transRuns) {
+      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
+        continue;
+      // Load transmission runs and put them in the ADS
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
+      alg->setProperty("Filename", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->execute();
+    }
   }
 
   return runs;
@@ -282,7 +286,11 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
   // Add transmission runs
   auto transRuns = this->getTransmissionRuns(true);
   if (!transRuns.empty()) {
-    options.push_back(transRuns);
+    std::vector<std::string> splitRuns;
+    boost::split(splitRuns, transRuns, boost::is_any_of(","));
+    options.push_back("FirstTransmissionRun=TRANS_" + splitRuns[0]);
+    if (splitRuns.size() > 1)
+      options.push_back("SecondTransmissionRun=TRANS_" + splitRuns[1]);
   }
 
   return boost::algorithm::join(options, ",");
