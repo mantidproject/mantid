@@ -248,10 +248,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               NX_OK) {
 
             g_log.debug() << indent_str << "Rank of " << property_name << " is "
-                          << rank << "\n"
-                          << indent_str << "Dimensions are " << dims[0] << ", "
-                          << dims[1] << ", " << dims[2] << ", " << dims[3]
-                          << "\n";
+                          << rank << "\n" << indent_str << "Dimensions are "
+                          << dims[0] << ", " << dims[1] << ", " << dims[2]
+                          << ", " << dims[3] << "\n";
 
             // Note, we choose to only build properties on small float arrays
             // filter logic is below
