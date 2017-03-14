@@ -405,6 +405,7 @@ public:
   }
 
   void test_merge_idempotent() {
+    // Test that A + B + B = A + B
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 2);
@@ -464,8 +465,7 @@ public:
 
   void test_merge_multiple_associative() {
     // Test that (A + B) + C == A + (B + C)
-    // This is currently true given the implementation, but not a guarantee of
-    // the interface.
+    // This is implied by the ordering guaranteed by merge().
     DetectorInfo a1(PosVec(1), RotVec(1));
     a1.setRotation(0, Eigen::Quaterniond::Identity());
     auto b(a1);

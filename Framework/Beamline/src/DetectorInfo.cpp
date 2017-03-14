@@ -225,7 +225,13 @@ getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
  *
  * Scan intervals in both other and this must be set. Intervals must be
  * identical or non-overlapping. If they are identical all other parameters (for
- * that index) must match. */
+ * that index) must match.
+ *
+ * Time indices in `this` are preserved. Time indices added from `other` are
+ * incremented by the scan count of that detector in `this`. The relative order
+ * of time indices added from `other` is preserved. If the interval for a time
+ * index in `other` is identical to a corresponding interval in `this`, it is
+ * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
   if (size() != other.size())
     failMerge("size mismatch");
