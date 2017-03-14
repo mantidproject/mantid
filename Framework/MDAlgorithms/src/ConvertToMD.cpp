@@ -25,6 +25,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
@@ -196,6 +197,25 @@ void ConvertToMD::exec() {
   // get the min and max values for the dimensions from the input properties
   std::vector<double> dimMin = getProperty("MinValues");
   std::vector<double> dimMax = getProperty("MaxValues");
+
+  // Sanity check some options
+  if (QModReq != MDTransfQ3D().transfID()) {
+    MDWSTransform transform;
+    const std::string autoSelect =
+        transform.getTargetFrames()[CnvrtToMD::AutoSelect];
+    if (QFrame != autoSelect) {
+      g_log.warning("Q3DFrames value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      QFrame = autoSelect;
+    }
+    const std::string noScaling =
+        transform.getQScalings()[CnvrtToMD::NoScaling];
+    if (convertTo_ != noScaling) {
+      g_log.warning("QConversionScales value ignored with QDimensions !=" +
+                    MDTransfQ3D().transfID());
+      convertTo_ = noScaling;
+    }
+  }
 
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
