@@ -13,7 +13,7 @@ Mantid::Kernel::Logger g_log("Stretch");
 namespace MantidQt {
 namespace CustomInterfaces {
 Stretch::Stretch(QWidget *parent)
-    : IndirectBayesTab(parent), m_save(false), m_previewSpec(0) {
+    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false)  {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -275,7 +275,7 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   MatrixWorkspace_const_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           filename.toStdString());
-  const int spectra = sampleWs->getNumberHistograms();
+  const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
   m_uiForm.spPreviewSpectrum->setMaximum(spectra);
 }
 

@@ -220,7 +220,7 @@ void IndirectTab::plotMultipleSpectra(
 
   if (workspaceNames.isEmpty())
     return;
-  if (workspaceNames.size() != workspaceIndices.size())
+  if (workspaceNames.length() != static_cast<int>(workspaceIndices.size()))
     return;
 
   QString pyInput = "from mantidplot import plotSpectrum\n";
