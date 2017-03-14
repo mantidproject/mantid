@@ -140,18 +140,18 @@ public:
     const auto &indexInfo = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(indexInfo.detectorIDs(0),
-                     std::vector<Indexing::DetectorID>({0}));
+                     (std::vector<Indexing::DetectorID>{0}));
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).addDetectorID(7);
     // No changes -- old and new interface should not be mixed!
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(indexInfo.detectorIDs(0),
-                     std::vector<Indexing::DetectorID>({0}));
+                     (std::vector<Indexing::DetectorID>{0}));
     // After getting a new reference we should see the changes.
     const auto &indexInfo2 = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo2.spectrumNumber(0), 7);
     TS_ASSERT_EQUALS(indexInfo2.detectorIDs(0),
-                     std::vector<Indexing::DetectorID>({0, 7}));
+                     (std::vector<Indexing::DetectorID>{0, 7}));
   }
 
   void test_IndexInfo_copy() {
