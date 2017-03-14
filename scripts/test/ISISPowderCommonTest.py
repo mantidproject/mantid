@@ -192,6 +192,24 @@ class ISISPowderCommonTest(unittest.TestCase):
                                                                 input_batching=common_enums.INPUT_BATCHING.Individual)
         single_ws_load = single_ws_load[0]
         self.assertAlmostEqual(single_ws_load.dataY(140)[825], 0.000440675, delta=1e-8)
+        mantid.DeleteWorkspace(single_ws_load)
+
+        # Check we get two workspaces back when using a list and individual batching
+        batching = empty_inst_run + ',' + vanadium_inst_run
+        loaded_list = common.load_current_normalised_ws_list(run_number_string=batching, instrument=mock_inst,
+                                                             input_batching=common_enums.INPUT_BATCHING.Individual)
+        self.assertEqual(len(loaded_list), 2)
+        self.assertAlmostEqual(loaded_list[0].dataY(140)[825], 0.000440675, delta=1e-8)
+        for ws in loaded_list:
+            mantid.DeleteWorkspace(ws)
+
+        # Finally check summed workspaces work correctly - this is slightly incorrect as we sum a raw and vanadium
+        loaded_list = common.load_current_normalised_ws_list(run_number_string=batching, instrument=mock_inst,
+                                                             input_batching=common_enums.INPUT_BATCHING.Summed)
+        self.assertEqual(len(loaded_list), 1)
+        self.assertAlmostEqual(loaded_list[0].dataY(140)[825], 0.00265304, delta=1e-8)
+        for ws in loaded_list:
+            mantid.DeleteWorkspace(ws)
 
 
 class UnitTestMockInstrument(isis_powder.abstract_inst.AbstractInst):
