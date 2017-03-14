@@ -1,19 +1,14 @@
-#include "MantidCurveFitting/Functions/FunctionGenerator.h"
+#include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 
 namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
-
-using namespace CurveFitting;
+namespace API {
 
 using namespace Kernel;
 
-using namespace API;
-
 /// Constructor
-FunctionGenerator::FunctionGenerator(API::IFunction_sptr source)
+FunctionGenerator::FunctionGenerator(IFunction_sptr source)
     : m_source(source), m_nOwnParams(source->nParams()), m_dirty(true) {
   if (!m_source) {
     throw std::logic_error(
@@ -128,30 +123,23 @@ void FunctionGenerator::setError(size_t i, double err) {
   }
 }
 
-/// Check if a declared parameter i is fixed
-bool FunctionGenerator::isFixed(size_t i) const {
-  checkTargetFunction();
-  return i < m_nOwnParams ? m_source->isFixed(i)
-                          : m_target->isFixed(i - m_nOwnParams);
-}
-
-/// Removes a declared parameter i from the list of active
-void FunctionGenerator::fix(size_t i) {
+/// Change status of parameter
+void FunctionGenerator::setParameterStatus(size_t i, IFunction::ParameterStatus status) {
   if (i < m_nOwnParams) {
-    m_source->fix(i);
+    m_source->setParameterStatus(i, status);
   } else {
     checkTargetFunction();
-    m_target->fix(i - m_nOwnParams);
+    m_target->setParameterStatus(i - m_nOwnParams, status);
   }
 }
 
-/// Restores a declared parameter i to the active status
-void FunctionGenerator::unfix(size_t i) {
+/// Get status of parameter
+IFunction::ParameterStatus FunctionGenerator::getParameterStatus(size_t i) const {
   if (i < m_nOwnParams) {
-    m_source->unfix(i);
+    return m_source->getParameterStatus(i);
   } else {
     checkTargetFunction();
-    m_target->unfix(i - m_nOwnParams);
+    return m_target->getParameterStatus(i - m_nOwnParams);
   }
 }
 
@@ -202,7 +190,7 @@ std::vector<std::string> FunctionGenerator::getAttributeNames() const {
 }
 
 /// Return a value of attribute attName
-API::IFunction::Attribute
+IFunction::Attribute
 FunctionGenerator::getAttribute(const std::string &attName) const {
   if (IFunction::hasAttribute(attName)) {
     return IFunction::getAttribute(attName);
@@ -244,8 +232,8 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
 }
 
 // Evaluates the function
-void FunctionGenerator::function(const API::FunctionDomain &domain,
-                                 API::FunctionValues &values) const {
+void FunctionGenerator::function(const FunctionDomain &domain,
+                                 FunctionValues &values) const {
   updateTargetFunction();
   if (!m_target) {
     throw std::logic_error(
@@ -276,7 +264,7 @@ void FunctionGenerator::checkTargetFunction() const {
 }
 
 /// Get the tie for i-th parameter
-API::ParameterTie *FunctionGenerator::getTie(size_t i) const {
+ParameterTie *FunctionGenerator::getTie(size_t i) const {
   auto tie = IFunction::getTie(i);
   if (tie == nullptr) {
     if (i < m_nOwnParams) {
@@ -290,7 +278,7 @@ API::ParameterTie *FunctionGenerator::getTie(size_t i) const {
 }
 
 /// Get the i-th constraint
-API::IConstraint *FunctionGenerator::getConstraint(size_t i) const {
+IConstraint *FunctionGenerator::getConstraint(size_t i) const {
   auto constraint = IFunction::getConstraint(i);
   if (constraint == nullptr) {
     if (i < m_nOwnParams) {
@@ -305,6 +293,5 @@ API::IConstraint *FunctionGenerator::getConstraint(size_t i) const {
 
 
 
-} // namespace Functions
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid

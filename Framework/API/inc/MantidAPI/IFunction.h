@@ -414,11 +414,11 @@ public:
   virtual void setError(size_t i, double err) = 0;
 
   /// Check if a declared parameter i is fixed
-  virtual bool isFixed(size_t i) const = 0;
+  bool isFixed(size_t i) const;
   /// Removes a declared parameter i from the list of active
-  virtual void fix(size_t i) = 0;
+  void fix(size_t i);
   /// Restores a declared parameter i to the active status
-  virtual void unfix(size_t i) = 0;
+  void unfix(size_t i);
   /// Fix a parameter
   void fixParameter(const std::string &name);
   /// Free a parameter
@@ -448,7 +448,7 @@ public:
   /// Returns the name of active parameter i
   virtual std::string descriptionOfActive(size_t i) const;
   /// Check if an active parameter i is actually active
-  virtual bool isActive(size_t i) const;
+  bool isActive(size_t i) const;
   //@}
 
   /** @name Ties */
@@ -468,8 +468,6 @@ public:
   virtual bool removeTie(size_t i);
   /// Get the tie of i-th parameter
   virtual ParameterTie *getTie(size_t i) const;
-  /// Add a new tie. Derived classes must provide storage for ties
-  virtual void addTie(std::unique_ptr<ParameterTie> tie);
   /// Write a parameter tie to a string
   std::string writeTies() const;
   //@}
@@ -544,6 +542,12 @@ public:
   FunctionHandler *getHandler() const { return m_handler; }
 
 protected:
+  /// Describe parameter status in relation to fitting:
+  /// Active: Fit varies such parameter directly.
+  /// Fixed:  Value doesn't change during fit.
+  /// Tied:   Value depends on values of other parameters.
+  enum ParameterStatus {Active, Fixed, Tied};
+
   /// Function initialization. Declare function parameters in this method.
   virtual void init();
   /// Declare a new parameter
@@ -573,10 +577,17 @@ protected:
   /// A read-only ("mutable") attribute can be stored in a const method
   void storeReadOnlyAttribute(const std::string &name,
                               const API::IFunction::Attribute &value) const;
+  /// Add a new tie. Derived classes must provide storage for ties
+  virtual void addTie(std::unique_ptr<ParameterTie> tie);
+  /// Change status of parameter
+  virtual void setParameterStatus(size_t i, ParameterStatus status) = 0;
+  /// Get status of parameter
+  virtual ParameterStatus getParameterStatus(size_t i) const = 0;
 
   friend class ParameterTie;
   friend class CompositeFunction;
   friend class FunctionParameterDecorator;
+  friend class FunctionGenerator;
 
   /// Flag to hint that the function is being used in parallel computations
   bool m_isParallel;

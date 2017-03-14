@@ -1,9 +1,9 @@
 #ifndef MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 #define MANTID_CURVEFITTING_CRYSTALFIELDMULTISPECTRUM_H_
 
+#include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FortranDefs.h"
-#include "MantidCurveFitting/Functions/FunctionGenerator.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CrystalFieldMultiSpectrum : public FunctionGenerator {
+class DLLExport CrystalFieldMultiSpectrum : public API::FunctionGenerator {
 public:
   CrystalFieldMultiSpectrum();
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }

@@ -107,7 +107,44 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  * @param i :: Index of a parameter.
  */
 bool IFunction::isActive(size_t i) const {
-  return !(isFixed(i) || getTie(i) != nullptr);
+  return getParameterStatus(i) == Active;
+}
+
+/**
+ * Query if the parameter is fixed
+ * @param i :: The index of a declared parameter
+ * @return true if parameter i is active
+ */
+bool IFunction::isFixed(size_t i) const {
+  if (i >= nParams()) {
+    throw std::out_of_range("Parameter index " + std::to_string(i) +
+                            " out of range " + std::to_string(nParams()));
+  }
+  return getParameterStatus(i) == Fixed;
+}
+
+/** This method doesn't create a tie
+ * @param i :: A declared parameter index to be fixed
+ */
+void IFunction::fix(size_t i) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot fix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  setParameterStatus(i, Fixed);
+}
+
+/** Makes a parameter active again. It doesn't change the parameter's tie.
+ * @param i :: A declared parameter index to be restored to active
+ */
+void IFunction::unfix(size_t i) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot unfix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  setParameterStatus(i, Active);
 }
 
 /**
@@ -187,6 +224,7 @@ std::string IFunction::writeTies() const {
  * @param tie :: A pointer to a new tie
  */
 void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
+
   auto iPar = getParameterIndex(*tie);
   bool found = false;
   for (auto &m_tie : m_ties) {
@@ -199,6 +237,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   }
   if (!found) {
     m_ties.push_back(std::move(tie));
+    setParameterStatus(iPar, Tied);
   }
 }
 
@@ -242,7 +281,7 @@ bool IFunction::removeTie(size_t i) {
   auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
   if (it != m_ties.end()) {
     m_ties.erase(it);
-    unfix(i);
+    setParameterStatus(i, Active);
     return true;
   }
   unfix(i);
@@ -268,7 +307,7 @@ ParameterTie *IFunction::getTie(size_t i) const {
  */
 void IFunction::clearTies() {
   for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
+    setParameterStatus(i, Active);
   }
   m_ties.clear();
 }

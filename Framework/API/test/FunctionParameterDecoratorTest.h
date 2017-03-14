@@ -212,7 +212,7 @@ public:
 
   void testFixUnfixIsFixed() {
     TestableFunctionParameterDecorator invalidFn;
-    TS_ASSERT_THROWS(invalidFn.isFixed(0), std::runtime_error);
+    TS_ASSERT_THROWS(invalidFn.isFixed(0), std::out_of_range);
     TS_ASSERT_THROWS(invalidFn.fix(0), std::runtime_error);
     TS_ASSERT_THROWS(invalidFn.unfix(0), std::runtime_error);
 

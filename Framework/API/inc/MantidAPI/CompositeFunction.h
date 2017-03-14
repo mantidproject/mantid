@@ -111,13 +111,6 @@ public:
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
 
-  /// Check if a parameter is active
-  bool isFixed(size_t i) const override;
-  /// Removes a parameter from the list of active
-  void fix(size_t i) override;
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i) override;
-
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
   double activeParameter(size_t i) const override;
@@ -223,6 +216,10 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 

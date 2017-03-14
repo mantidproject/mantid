@@ -37,9 +37,7 @@ void ParamFunction::setParameter(size_t i, const double &value,
     g_log.warning(errmsg.str());
   }
 
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   if (explicitlySet && value != m_parameters[i]) {
     m_explicitlySet[i] = true;
   }
@@ -52,9 +50,7 @@ void ParamFunction::setParameter(size_t i, const double &value,
  */
 void ParamFunction::setParameterDescription(size_t i,
                                             const std::string &description) {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   m_parameterDescriptions[i] = description;
 }
 
@@ -63,9 +59,7 @@ void ParamFunction::setParameterDescription(size_t i,
  *  @return the value of the requested parameter
  */
 double ParamFunction::getParameter(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return m_parameters[i];
 }
 
@@ -164,9 +158,7 @@ size_t ParamFunction::parameterIndex(const std::string &name) const {
  * @return the name of the parameter at the requested index
  */
 std::string ParamFunction::parameterName(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return m_parameterNames[i];
 }
 
@@ -175,9 +167,7 @@ std::string ParamFunction::parameterName(size_t i) const {
  * @return the description of the parameter at the requested index
  */
 std::string ParamFunction::parameterDescription(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return m_parameterDescriptions[i];
 }
 
@@ -187,9 +177,7 @@ std::string ParamFunction::parameterDescription(size_t i) const {
  * @return :: the error
  */
 double ParamFunction::getError(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return m_errors[i];
 }
 
@@ -199,9 +187,7 @@ double ParamFunction::getError(size_t i) const {
  * @param err :: The error value to set
  */
 void ParamFunction::setError(size_t i, double err) {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   m_errors[i] = err;
 }
 
@@ -220,41 +206,12 @@ void ParamFunction::declareParameter(const std::string &name, double initValue,
     throw std::invalid_argument(msg.str());
   }
 
-  m_isFixed.push_back(false);
+  m_parameterStatus.push_back(Active);
   m_parameterNames.push_back(name);
   m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
   m_errors.push_back(0.0);
   m_explicitlySet.push_back(false);
-}
-
-/**
- * query if the parameter is fixed
- * @param i :: The index of a declared parameter
- * @return true if parameter i is active
- */
-bool ParamFunction::isFixed(size_t i) const {
-  if (i >= nParams())
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  return m_isFixed[i];
-}
-
-/** This method doesn't create a tie
- * @param i :: A declared parameter index to be fixed
- */
-void ParamFunction::fix(size_t i) {
-  if (isFixed(i))
-    return;
-  m_isFixed[i] = true;
-}
-
-/** Makes a parameter active again. It doesn't change the parameter's tie.
- * @param i :: A declared parameter index to be restored to active
- */
-void ParamFunction::unfix(size_t i) {
-  if (!isFixed(i))
-    return;
-  m_isFixed[i] = false;
 }
 
 /// Nonvirtual member which removes all declared parameters
@@ -264,24 +221,36 @@ void ParamFunction::clearAllParameters() {
   m_parameters.clear();
   m_parameterNames.clear();
   m_parameterDescriptions.clear();
-  m_isFixed.clear();
+  m_parameterStatus.clear();
+}
+
+/// Change status of parameter
+/// @param i :: Index of a parameter.
+/// @param status :: New parameter status.
+void ParamFunction::setParameterStatus(size_t i, ParameterStatus status) {
+  checkParameterIndex(i);
+  m_parameterStatus[i] = status;
+}
+
+/// Get status of parameter
+/// @param i :: Index of a parameter.
+/// @return Parameter status.
+IFunction::ParameterStatus ParamFunction::getParameterStatus(size_t i) const {
+  checkParameterIndex(i);
+  return m_parameterStatus[i];
 }
 
 /// Get the address of the parameter
 /// @param i :: the index of the parameter required
 /// @returns the address of the parameter
 double *ParamFunction::getParameterAddress(size_t i) {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return &m_parameters[i];
 }
 
 /// Checks if a parameter has been set explicitly
 bool ParamFunction::isExplicitlySet(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
+  checkParameterIndex(i);
   return m_explicitlySet[i];
 }
 

@@ -468,20 +468,20 @@ public:
         "name=Gaussian;name=LinearBackground;"
         "ties=(f0.Height=2, f1.A0=f1.A1)");
     TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,PeakCentre=0,Sigma=0,ties="
-                                      "(Height=2);name=LinearBackground,A0=0,"
+                                      "(Height=2);name=LinearBackground,"
                                       "A1=0;ties=(f1.A0=f1.A1)");
 
     fun = FunctionFactory::Instance().createInitialized(
         "name=Gaussian;name=LinearBackground;"
         "ties=(f0.Height=f1.A0=f1.A1)");
-    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,Height=0,PeakCentre=0,"
-                                      "Sigma=0;name=LinearBackground,A0=0,A1=0;"
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,PeakCentre=0,"
+                                      "Sigma=0;name=LinearBackground,A1=0;"
                                       "ties=(f1.A0=f1.A1,f0.Height=f1.A1)");
 
     fun = FunctionFactory::Instance().createInitialized(
         "name=Gaussian,ties=(Height=0);name=LinearBackground,"
         "ties=(A0=A1);ties=(f0.Sigma=f1.A1)");
-    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,PeakCentre=0,Sigma=0,ties="
+    TS_ASSERT_EQUALS(fun->asString(), "name=Gaussian,PeakCentre=0,ties="
                                       "(Height=0);name=LinearBackground,A1=0,"
                                       "ties=(A0=A1);ties=(f0.Sigma=f1.A1)");
 

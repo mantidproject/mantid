@@ -81,13 +81,6 @@ public:
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
 
-  /// Check if a declared parameter i is active
-  bool isFixed(size_t i) const override;
-  /// Removes a declared parameter i from the list of active
-  void fix(size_t i) override;
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i) override;
-
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -100,16 +93,27 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
-
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double *getParameterAddress(size_t i);
-
   /// Nonvirtual member which removes all declared parameters
   void clearAllParameters();
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
 private:
-  /// The index map. m_indexMap[i] gives the total index for active parameter i
-  std::vector<bool> m_isFixed;
+  /// Check that a parameter index is in a valid range.
+  /// @param i :: Index to check.
+  inline void checkParameterIndex(size_t i) const {
+    if (i >= nParams()) {
+      throw std::out_of_range("ParamFunction parameter index " +
+                              std::to_string(i) + " out of range " +
+                              std::to_string(nParams()));
+    }
+  }
+  /// Keeps status for each parameter.
+  std::vector<ParameterStatus> m_parameterStatus;
   /// Keeps parameter names
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values

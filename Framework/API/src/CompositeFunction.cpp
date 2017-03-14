@@ -325,30 +325,16 @@ std::string CompositeFunction::descriptionOfActive(size_t i) const {
   return ostr.str();
 }
 
-/**
- * query to see in the function is active
- * @param i :: The index of a declared parameter
- * @return true if parameter i is active
- */
-bool CompositeFunction::isFixed(size_t i) const {
+/// Change status of parameter
+void CompositeFunction::setParameterStatus(size_t i, IFunction::ParameterStatus status) {
   size_t iFun = functionIndex(i);
-  return m_functions[iFun]->isFixed(i - m_paramOffsets[iFun]);
+  m_functions[iFun]->setParameterStatus(i - m_paramOffsets[iFun], status);
 }
 
-/**
- * @param i :: A declared parameter index to be removed from active
- */
-void CompositeFunction::fix(size_t i) {
+/// Get status of parameter
+IFunction::ParameterStatus CompositeFunction::getParameterStatus(size_t i) const {
   size_t iFun = functionIndex(i);
-  m_functions[iFun]->fix(i - m_paramOffsets[iFun]);
-}
-
-/** Makes a parameter active again. It doesn't change the parameter's tie.
- * @param i :: A declared parameter index to be restored to active
- */
-void CompositeFunction::unfix(size_t i) {
-  size_t iFun = functionIndex(i);
-  m_functions[iFun]->unfix(i - m_paramOffsets[iFun]);
+  return m_functions[iFun]->getParameterStatus(i - m_paramOffsets[iFun]);
 }
 
 /** Makes sure that the function is consistent.
