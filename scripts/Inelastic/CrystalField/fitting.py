@@ -203,7 +203,7 @@ class CrystalField(object):
 
     def _makeFunction(self, ion, symmetry, temperature):
         from mantid.simpleapi import FunctionFactory
-        if temperature is not None and isinstance(temperature, list):
+        if temperature is not None and islistlike(temperature) and len(temperature) > 1:
             self.function = FunctionFactory.createFunction('CrystalFieldMultiSpectrum')
             self._isMultiSpectrum = True
         else:
@@ -608,18 +608,31 @@ class CrystalField(object):
 
     @property
     def IntensityScaling(self):
-        n = self.NumberOfSpectra
-        if n == 1:
+        if not self._isMultiSpectrum:
             return self.crystalFieldFunction.getParameterValue('IntensityScaling')
         iscaling = []
-        for i in range(n):
-            attrName = 'IntensityScaling%s' % i
-            iscaling.append(self.crystalFieldFunction.getParameterValue(attrName))
+        for i in range(self.NumberOfSpectra):
+            paramName = 'IntensityScaling%s' % i
+            iscaling.append(self.crystalFieldFunction.getParameterValue(paramName))
         return iscaling
 
     @IntensityScaling.setter
     def IntensityScaling(self, value):
-        self.crystalFieldFunction.setAttributeValue('IntensityScaling', value)
+        if not self._isMultiSpectrum:
+            if islistlike(value):
+                if len(value) == 1:
+                    value = value[0]
+                else:
+                    raise ValueError('IntensityScaling is expected to be a single floating point value')
+            self.crystalFieldFunction.setParameter('IntensityScaling', value)
+        else:
+            n = self.NumberOfSpectra
+            if not islistlike(value) or len(value) != n:
+                raise ValueError('IntensityScaling is expected to be a list of %s values' % n)
+            for i in range(n):
+                paramName = 'IntensityScaling%s' % i
+                self.crystalFieldFunction.setParameter(paramName, value[i])
+
         self._dirty_peaks = True
         self._dirty_spectra = True
 
@@ -635,13 +648,12 @@ class CrystalField(object):
             if not isinstance(value, list):
                 self._makeFunction(self.Ion, self.Symmetry, value)
                 return
-            attrName = 'Temperatures'
+            self.crystalFieldFunction.setAttributeValue('Temperatures', value)
         else:
             if isinstance(value, list):
                 self._makeFunction(self.Ion, self.Symmetry, value)
                 return
-            attrName = 'Temperature'
-        self.crystalFieldFunction.setAttributeValue(attrName, float(value))
+            self.crystalFieldFunction.setAttributeValue('Temperature', float(value))
 # =======
 #         lenval = len(value) if islistlike(value) else 1
 #         lentemp = len(self._temperature) if islistlike(self._temperature) else 1
@@ -656,17 +668,21 @@ class CrystalField(object):
     @property
     def FWHM(self):
         attrName = 'FWHMs' if self._isMultiSpectrum else 'FWHM'
-        return self.crystalFieldFunction.getAttributeValue(attrName)
+        fwhm = self.crystalFieldFunction.getAttributeValue(attrName)
+        if self._isMultiSpectrum:
+            nDatasets = len(self.Temperature)
+            if len(fwhm) != nDatasets:
+                return list(fwhm) * nDatasets
+        return fwhm
 
     @FWHM.setter
     def FWHM(self, value):
         if self._isMultiSpectrum:
-            attrName = 'FWHMs'
             if not hasattr(value, '__len__'):
                 value = [value] * self.NumberOfSpectra
+            self.crystalFieldFunction.setAttributeValue('FWHMs', value)
         else:
-            attrName = 'FWHM'
-        self.crystalFieldFunction.setAttributeValue(attrName, float(value))
+            self.crystalFieldFunction.setAttributeValue('FWHM', float(value))
         self._dirty_spectra = True
 
     @property
@@ -1247,55 +1263,58 @@ class CrystalField(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
-        if not self._temperature:
-            return 0
-        # Number of datasets is implied by temperature.
-        nDataset = len(self._temperature) if islistlike(self._temperature) else 1
-        nFWHM = len(self._FWHM) if islistlike(self._FWHM) else 1
-        nIntensity = len(self._intensityScaling) if islistlike(self._intensityScaling) else 1
-        nPeaks = len(self.peaks) if islistlike(self.peaks) else 1
-        # Consistent if temperature, FWHM, intensityScale are lists with same len
-        # Or if FWHM, intensityScale are 1-element list or scalar
-        if (nFWHM != nDataset and nFWHM != 1) or (nIntensity != nDataset and nIntensity != 1):
-            errmsg = 'The Temperature, FWHM, and IntensityScaling properties have different '
-            errmsg += 'number of elements implying different number of spectra.'
-            raise ValueError(errmsg)
-        # This should not occur, but may do if the user changes the temperature(s) after
-        # initialisation. In which case, we reset the peaks, giving a warning.
-        if nPeaks != nDataset:
-            from .function import PeaksFunction
-            errmsg = 'Internal inconsistency between number of spectra and list of '
-            errmsg += 'temperatures. Changing number of spectra to match temperature. '
-            errmsg += 'This may reset some peaks constraints / limits'
-            warnings.warn(errmsg, RuntimeWarning)
-            if len(self.peaks) > nDataset:           # Truncate
-                self.peaks = self.peaks[0:nDataset]
-            else:                                    # Append empty PeaksFunctions
-                for i in range(len(self.peaks), nDataset):
-                    self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
-        # Convert to all scalars if only one dataset
-        if nDataset == 1:
-            if islistlike(self._temperature) and self._temperature is not None:
-                self._temperature = self._temperature[0]
-                if islistlike(self.peaks):
-                    self.peaks = self.peaks[0]
-            if islistlike(self._FWHM) and self._FWHM is not None:
-                self._FWHM = self._FWHM[0]
-            if islistlike(self._intensityScaling) and self._intensityScaling is not None:
-                self._intensityScaling = self._intensityScaling[0]
-        # Convert to list of same size if multidatasets
-        else:
-            if nFWHM == 1 and self._FWHM is not None:
-                if islistlike(self._FWHM):
-                    self._FWHM *= nDataset
-                else:
-                    self._FWHM = nDataset * [self._FWHM]
-            if nIntensity == 1 and self._intensityScaling is not None:
-                if islistlike(self._intensityScaling):
-                    self._intensityScaling *= nDataset
-                else:
-                    self._intensityScaling = nDataset * [self._intensityScaling]
-        return nDataset
+        return self.NumberOfSpectra
+    #     if not self.Temperature:
+    #         return 0
+    #     # Number of datasets is implied by temperature.
+    #     nDataset = len(self.Temperature) if islistlike(self.Temperature) else 1
+    #     nFWHM = len(self.FWHM) if islistlike(self.FWHM) else 1
+    #     nIntensity = len(self.IntensityScaling) if islistlike(self.IntensityScaling) else 1
+    #     nPeaks = len(self.peaks) if islistlike(self.peaks) else 1
+    #     # Consistent if temperature, FWHM, intensityScale are lists with same len
+    #     # Or if FWHM, intensityScale are 1-element list or scalar
+    #     if (nFWHM != nDataset and nFWHM != 1) or (nIntensity != nDataset and nIntensity != 1):
+    #         errmsg = 'The Temperature, FWHM, and IntensityScaling properties have different '
+    #         errmsg += 'number of elements implying different number of spectra.'
+    #         raise ValueError(errmsg)
+    #     # This should not occur, but may do if the user changes the temperature(s) after
+    #     # initialisation. In which case, we reset the peaks, giving a warning.
+    #     if nPeaks != nDataset:
+    #         from .function import PeaksFunction
+    #         errmsg = 'Internal inconsistency between number of spectra and list of '
+    #         errmsg += 'temperatures. Changing number of spectra to match temperature. '
+    #         errmsg += 'This may reset some peaks constraints / limits'
+    #         warnings.warn(errmsg, RuntimeWarning)
+    #         if len(self.peaks) > nDataset:           # Truncate
+    #             self.peaks = self.peaks[0:nDataset]
+    #         else:                                    # Append empty PeaksFunctions
+    #             for i in range(len(self.peaks), nDataset):
+    #                 self.peaks.append(PeaksFunction(self.peaks[0].name(), firstIndex=0))
+    #     # Convert to all scalars if only one dataset
+    #     if nDataset == 1:
+    #         if islistlike(self.Temperature) and self.Temperature is not None:
+    #             self.Temperature = self.Temperature[0]
+    #             if islistlike(self.peaks):
+    #                 self.peaks = self.peaks[0]
+    #         if islistlike(self.FWHM) and self.FWHM is not None:
+    #             self.FWHM = self.FWHM[0]
+    #         if islistlike(self.IntensityScaling) and self.IntensityScaling is not None:
+    #             self.IntensityScaling = self.IntensityScaling[0]
+    #     # Convert to list of same size if multidatasets
+    #     else:
+    #         if nFWHM == 1 and self.FWHM is not None:
+    #             # raise RuntimeError('FWHM is inconsistent with Temperature in length.')
+    #             if islistlike(self.FWHM):
+    #                 self.FWHM = list(self.FWHM) * nDataset
+    #             else:
+    #                 self.FWHM = nDataset * [self.FWHM]
+    #         if nIntensity == 1 and self.IntensityScaling is not None:
+    #             raise RuntimeError('IntensityScaling is inconsistent with Temperature in length.')
+    #             # if islistlike(self.IntensityScaling):
+    #             #     self.IntensityScaling *= nDataset
+    #             # else:
+    #             #     self.IntensityScaling = nDataset * [self.IntensityScaling]
+    #     return nDataset
 
     def __add__(self, other):
         if isinstance(other, CrystalFieldMulti):

@@ -122,9 +122,7 @@ class Function(object):
         """
         for arg in args:
             constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
-            print(constraint)
             self.function.addConstraints(constraint)
-        print(self.function.name())
 
     def toString(self):
         """Create function initialisation string"""
@@ -231,7 +229,9 @@ class CompositeProperties(object):
             the value is a tie string or a number. For example:
                 tie({'A0': 0.1, 'A1': '2*A0'})
         """
+        print (self.function)
         for param, tie in ties_dict.items():
+            print ('Tie', self.prefix + param)
             self.function.tie(self.prefix + param, str(tie))
 
     def constraints(self, *args):
@@ -348,11 +348,13 @@ class PeaksFunction(object):
             start = iFirstN
             end = iLast + 1
         else:
-            start = self._firstIndex
-            end = iFirstN + self._firstIndex
-        pattern = 'f%s.' + tie
-        ties = [pattern % i for i in range(start, end)]
-        self.ties(*ties)
+            start = self._params.first_index
+            end = iFirstN + self._params.first_index
+        name, expr = tuple(tie.split('='))
+        name = 'f%s.' + name.strip()
+        expr = expr.strip()
+        ties = {(name % i): expr for i in range(start, end)}
+        self.ties(ties)
 
     def constrainAll(self, constraint, iFirstN, iLast=-1):
         """
@@ -371,8 +373,8 @@ class PeaksFunction(object):
             start = iFirstN
             end = iLast + 1
         else:
-            start = self._firstIndex
-            end = iFirstN + self._firstIndex
+            start = self._params.first_index
+            end = iFirstN + self._params.first_index
 
         pattern = re.sub(parNamePattern, 'f%s.\\1', constraint)
         self.constraints(*[pattern % i for i in range(start, end)])

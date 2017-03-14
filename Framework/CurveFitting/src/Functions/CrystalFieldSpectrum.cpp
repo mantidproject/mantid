@@ -150,7 +150,7 @@ std::string CrystalFieldSpectrum::asString() const {
   std::string constraints = writeConstraints();
   // print constraints
   if (!constraints.empty()) {
-    ostr << ";constraints=(" << constraints << ")";
+    ostr << ",constraints=(" << constraints << ")";
   }
 
   // collect the non-default ties
