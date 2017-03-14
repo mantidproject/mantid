@@ -13,7 +13,7 @@ Mantid::Kernel::Logger g_log("Stretch");
 namespace MantidQt {
 namespace CustomInterfaces {
 Stretch::Stretch(QWidget *parent)
-    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false)  {
+    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
