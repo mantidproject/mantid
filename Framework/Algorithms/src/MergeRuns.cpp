@@ -188,8 +188,10 @@ void MergeRuns::exec() {
       // Update the sample logs
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
+        sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
         outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
+        sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
         if (sampleLogsFailBehaviour == SKIP_BEHAVIOUR) {
           g_log.error()
@@ -201,7 +203,6 @@ void MergeRuns::exec() {
           throw std::invalid_argument(e);
         }
       }
-      sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       m_progress->report();
     }
 

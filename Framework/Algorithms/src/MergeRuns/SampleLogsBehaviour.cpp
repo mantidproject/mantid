@@ -443,7 +443,6 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
     const Property *addeeWSProperty = addeeWS.mutableRun().getProperty(name);
     m_addeeLogMap.push_back(
         std::shared_ptr<Property>(addeeWSProperty->clone()));
-    addeeWS.mutableRun().removeProperty(name);
   }
 }
 
@@ -575,6 +574,21 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace &outWS) {
     const Property *outWSProperty =
         outWS.mutableRun().getProperty(propertyToReset);
     item.second.property = std::shared_ptr<Property>(outWSProperty->clone());
+  }
+}
+
+/**
+ * When doing a time series merge we need to remove, then add back the sample
+ *log in the addee workspace to supress a warning about it not being a
+ *TimeSeriesProperty. Here we remove the original property.
+ *
+ * @param addeeWS the workspace being merged
+ */
+void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
+    MatrixWorkspace &addeeWS) {
+  for (const auto &prop : m_addeeLogMap) {
+    const auto &propName = prop->name();
+    addeeWS.mutableRun().removeProperty(propName);
   }
 }
 

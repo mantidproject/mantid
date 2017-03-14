@@ -63,6 +63,7 @@ public:
   void mergeSampleLogs(API::MatrixWorkspace &addeeWS,
                        API::MatrixWorkspace &outWS);
   void setUpdatedSampleLogs(API::MatrixWorkspace &outWS);
+  void removeSampleLogsFromWorkspace(API::MatrixWorkspace &addeeWS);
   void readdSampleLogToWorkspace(API::MatrixWorkspace &addeeWS);
   void resetSampleLogs(API::MatrixWorkspace &ws);
 

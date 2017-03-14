@@ -1130,7 +1130,8 @@ public:
     do_test_mergeSampleLogs(gws, "prop1", mergeTypeTimeSeries, "", 1, true);
   }
 
-  void test_mergeSampleLogs_log_used_twice_with_different_merge_types_fails() {
+  void
+  test_mergeSampleLogs_log_used_twice_with_incompatible_merge_types_fails() {
     std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
     std::string mergeTypeList = SampleLogsBehaviour::LIST_MERGE;
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
@@ -1144,6 +1145,23 @@ public:
     do_test_mergeSampleLogs(
         gws, "prop1", mergeTypeTimeSeries,
         "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2, true);
+  }
+
+  void
+  test_mergeSampleLogs_log_used_twice_with_compatible_merge_types_suceeds() {
+    std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeTypeWarn = SampleLogsBehaviour::WARN_MERGE;
+    WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
+        mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
+    MatrixWorkspace_sptr a =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
+                                        mergeTypeWarn, "prop1");
+
+    // Error is caught by Algorithm, but check no output workspace created
+    do_test_mergeSampleLogs(
+        gws, "prop1", mergeTypeTimeSeries,
+        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
