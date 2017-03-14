@@ -24,7 +24,7 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
 
 def crop_banks_in_tof(bank_list, crop_values_list):
     """
-    Crops the each bank by the specified tuple values from a list of tuples in TOF. The number
+    Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop
     bank 1 to the values 100, 200 and bank 2 to 150 and 250 in TOF.
     :param bank_list: The list of workspaces each containing one bank of data to crop
@@ -32,11 +32,12 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     :return: A list of cropped workspaces
     """
     if not isinstance(crop_values_list, list):
-        if isinstance(bank_list, list):
-            raise ValueError("The cropping values were not in a list type")
-        else:
-            raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+        raise ValueError("The cropping values were not in a list type")
+    elif not isinstance(bank_list, list):
+        # This error is probably internal as we control the bank lists
+        raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
 
+    # Finally check the number of elements are equal
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
