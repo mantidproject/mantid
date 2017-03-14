@@ -22,7 +22,7 @@ def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None)
     return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
 
 
-def crop_banks_in_tof(bank_list, crop_values_list):
+def crop_banks_using_crop_list(bank_list, crop_values_list):
     """
     Crops each bank by the specified tuple values from a list of tuples in TOF. The number
     of tuples must match the number of banks to crop. A list of [(100,200), (150,250)] would crop

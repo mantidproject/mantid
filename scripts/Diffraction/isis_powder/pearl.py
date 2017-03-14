@@ -109,7 +109,7 @@ class Pearl(AbstractInst):
         return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
-        return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
+        return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.tof_cropping_values)
 
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         out_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_vals[0],
