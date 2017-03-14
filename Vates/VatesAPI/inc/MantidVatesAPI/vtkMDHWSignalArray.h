@@ -13,7 +13,7 @@
 
 =========================================================================*/
 
-// .NAME vtkMDHWSignalArray - Map native Exodus II results arrays
+// .NAME vtkMDHWSignalArray - Map native MDHistoWorkspace arrays
 // into the vtkDataArray interface.
 //
 // .SECTION Description
@@ -28,8 +28,11 @@
 #include "vtkGenericDataArray.h"
 #include "vtkObjectFactory.h"
 
-#include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidVatesAPI/Normalization.h"
+enum class Norm {
+  None = 0,
+  Volume = 1,
+  NumEvents = 2,
+};
 
 namespace Mantid {
 namespace VATES {
@@ -48,9 +51,9 @@ public:
   static vtkMDHWSignalArray *New();
   vtkMDHWSignalArray(const vtkMDHWSignalArray &) = delete;
   void operator=(const vtkMDHWSignalArray &) = delete;
-
-  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *ws,
-                       VisualNormalization normalization, std::size_t offset);
+  void InitializeArray(ValueTypeT *signal, ValueTypeT *numEvents,
+                       ValueTypeT inverseVolume, int normalization,
+                       vtkIdType size, vtkIdType offset);
   ValueTypeT GetValue(vtkIdType valueIdx) const;
   void SetValue(vtkIdType valueIdx, ValueTypeT value);
   void GetTypedTuple(vtkIdType tupleIdx, ValueTypeT *tuple) const;
@@ -85,9 +88,11 @@ protected:
   }
 private:
   friend class vtkGenericDataArray<vtkMDHWSignalArray<ValueTypeT>, ValueTypeT>;
+  ValueTypeT *m_signal{nullptr};
+  ValueTypeT *m_numEvents{nullptr};
+  ValueTypeT m_inverseVolume{1.0};
   vtkIdType m_offset{0};
-  API::MDNormalization m_normalization;
-  DataObjects::MDHistoWorkspace *m_ws;
+  int m_normalization{0};
 };
 
 template <class ValueTypeT>
@@ -98,25 +103,18 @@ vtkMDHWSignalArray<ValueTypeT> *vtkMDHWSignalArray<ValueTypeT>::New() {
 //------------------------------------------------------------------------------
 template <class ValueTypeT>
 void vtkMDHWSignalArray<ValueTypeT>::InitializeArray(
-    Mantid::DataObjects::MDHistoWorkspace *ws,
-    Mantid::VATES::VisualNormalization normalization, std::size_t offset) {
+    ValueTypeT *signal, ValueTypeT *numEvents, ValueTypeT inverseVolume,
+    int normalization, vtkIdType size, vtkIdType offset) {
+
+  this->m_signal = signal;
+  this->m_numEvents = numEvents;
+  this->m_inverseVolume = inverseVolume;
+  this->m_normalization = normalization;
+
   this->NumberOfComponents = 1;
-  this->m_ws = ws;
   this->m_offset = offset;
-
-  const vtkIdType nBinsX = m_ws->getXDimension()->getNBins();
-  const vtkIdType nBinsY = m_ws->getYDimension()->getNBins();
-  const vtkIdType nBinsZ = m_ws->getZDimension()->getNBins();
-  this->Size = nBinsX * nBinsY * nBinsZ;
+  this->Size = size;
   this->MaxId = this->Size - 1;
-
-  if (normalization == AutoSelect) {
-    // enum to enum.
-    m_normalization =
-        static_cast<API::MDNormalization>(m_ws->displayNormalization());
-  } else {
-    m_normalization = static_cast<API::MDNormalization>(normalization);
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -124,15 +122,15 @@ template <class ValueTypeT>
 ValueTypeT vtkMDHWSignalArray<ValueTypeT>::GetValue(vtkIdType idx) const {
   auto pos = m_offset + idx;
   switch (m_normalization) {
-  case API::NoNormalization:
-    return m_ws->getSignalAt(pos);
-  case API::VolumeNormalization:
-    return m_ws->getSignalAt(pos) * m_ws->getInverseVolume();
-  case API::NumEventsNormalization:
-    return m_ws->getSignalAt(pos) / m_ws->getNumEventsAt(pos);
+  case 0:
+    return m_signal[pos];
+  case 1:
+    return m_signal[pos] * m_inverseVolume;
+  case 2:
+    return m_signal[pos] / m_numEvents[pos];
   }
   // Should not reach here
-  return std::numeric_limits<signal_t>::quiet_NaN();
+  return std::numeric_limits<ValueTypeT>::quiet_NaN();
 }
 
 //------------------------------------------------------------------------------
@@ -160,32 +158,43 @@ void vtkMDHWSignalArray<ValueTypeT>::SetValue(vtkIdType, ValueTypeT) {
 
 //------------------------------------------------------------------------------
 template <class ValueTypeT>
+void vtkMDHWSignalArray<ValueTypeT>::SetTypedTuple(vtkIdType,
+                                                   const ValueTypeT *) {
+  vtkErrorMacro("Read only container.");
+}
+
+//------------------------------------------------------------------------------
+template <class ValueTypeT>
 void vtkMDHWSignalArray<ValueTypeT>::SetTypedComponent(vtkIdType, int,
                                                        ValueTypeT) {
-  vtkErrorMacro("Read only container.") return;
+  vtkErrorMacro("Read only container.");
 }
 
 //------------------------------------------------------------------------------
 template <class ValueTypeT>
 bool vtkMDHWSignalArray<ValueTypeT>::AllocateTuples(vtkIdType) {
-  vtkErrorMacro("Read only container.") return true;
+  vtkErrorMacro("Read only container.");
+  return true;
 }
 
 //------------------------------------------------------------------------------
 template <class ValueTypeT>
 bool vtkMDHWSignalArray<ValueTypeT>::ReallocateTuples(vtkIdType) {
-  vtkErrorMacro("Read only container.") return false;
+  vtkErrorMacro("Read only container.");
+  return false;
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 int vtkMDHWSignalArray<Scalar>::Allocate(vtkIdType, vtkIdType) {
-  vtkErrorMacro("Read only container.") return 0;
+  vtkErrorMacro("Read only container.");
+  return 0;
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar> int vtkMDHWSignalArray<Scalar>::Resize(vtkIdType) {
-  vtkErrorMacro("Read only container.") return 0;
+  vtkErrorMacro("Read only container.");
+  return 0;
 }
 
 //------------------------------------------------------------------------------

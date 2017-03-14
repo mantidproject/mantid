@@ -69,15 +69,15 @@ void vtkMDHistoHexFactory::validateWsNotNull() const {
 void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
 namespace {
+
 struct CellGhostArrayWorker {
-  vtkMDHWSignalArray<double> *m_signal;
+  vtkDataArray *m_signal;
   vtkUnsignedCharArray *m_cga;
-  CellGhostArrayWorker(vtkMDHWSignalArray<double> *signal,
-                       vtkUnsignedCharArray *cga)
+  CellGhostArrayWorker(vtkDataArray *signal, vtkUnsignedCharArray *cga)
       : m_signal(signal), m_cga(cga) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     for (vtkIdType index = begin; index < end; ++index) {
-      if (!std::isfinite(m_signal->GetValue(index))) {
+      if (!std::isfinite(m_signal->GetComponent(index, 0))) {
         m_cga->SetValue(index, m_cga->GetValue(index) |
                                    vtkDataSetAttributes::HIDDENCELL);
       }
@@ -128,6 +128,26 @@ struct PointsWorker {
 };
 } // end anon namespace
 
+template <class ValueTypeT>
+static void InitializevtkMDHWSignalArray(
+    MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
+    vtkMDHWSignalArray<ValueTypeT> *signal) {
+  const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
+  const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
+  const vtkIdType nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
+  const vtkIdType imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+
+  int norm;
+  if (normalization == AutoSelect) {
+    // enum to enum.
+    norm = static_cast<int>(ws.displayNormalization());
+  } else {
+    norm = static_cast<int>(normalization);
+  }
+  signal->InitializeArray(ws.getSignalArray(), ws.getNumEventsArray(),
+                          ws.getInverseVolume(), norm, imageSize, offset);
+}
+
 /** Method for creating a 3D or 4D data set
  *
  * @param timestep :: index of the time step (4th dimension) in the workspace.
@@ -166,19 +186,37 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   // Array with true where the voxel should be shown
 
-  std::size_t offset = 0;
+  vtkIdType offset = 0;
   if (nDims == 4) {
     offset = timestep * indexMultiplier[2];
   }
 
-  vtkNew<vtkMDHWSignalArray<double>> signal;
+  API::MDNormalization norm;
+  if (m_normalizationOption == AutoSelect) {
+    // enum to enum.
+    norm = m_workspace->displayNormalization();
+  } else {
+    norm = static_cast<API::MDNormalization>(m_normalizationOption);
+  }
+
+  vtkDataArray *signal = nullptr;
+  if (norm == API::NoNormalization) {
+    vtkNew<vtkDoubleArray> raw;
+    signal = raw.Get();
+    raw->SetVoidArray(m_workspace->getSignalArray(), imageSize, 1);
+    visualDataSet->GetCellData()->SetScalars(raw.Get());
+  } else {
+    vtkNew<vtkMDHWSignalArray<double>> normalized;
+    signal = normalized.Get();
+    InitializevtkMDHWSignalArray(*m_workspace, m_normalizationOption, offset,
+                                 normalized.Get());
+    visualDataSet->GetCellData()->SetScalars(normalized.GetPointer());
+  }
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
-  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
-  auto cga = visualDataSet->AllocateCellGhostArray();
 
-  CellGhostArrayWorker cgafunc(signal.GetPointer(), cga);
+  auto cga = visualDataSet->AllocateCellGhostArray();
+  CellGhostArrayWorker cgafunc(signal, cga);
   progress.eventRaised(0.0);
   vtkSMPTools::For(0, imageSize, cgafunc);
   progress.eventRaised(0.33);
