@@ -55,6 +55,9 @@ public:
 
   /// Return values to perform pre-processing on
   virtual std::map<std::string, std::string> getPreprocessingValues() const = 0;
+  /// Return property names associated with pre-processing values
+  virtual std::map<std::string, std::set<std::string>>
+  getPreprocessingProperties() const = 0;
   /// Return global options for pre-processing
   virtual std::map<std::string, std::string>
   getPreprocessingOptions() const = 0;

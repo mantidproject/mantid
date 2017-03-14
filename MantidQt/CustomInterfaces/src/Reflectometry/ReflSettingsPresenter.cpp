@@ -78,17 +78,6 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
                                 "are allowed.");
 
   if (loadRuns) {
-    for (const auto &run : transRuns) {
-      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
-        continue;
-      // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("LoadISISNexus");
-      alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-      alg->execute();
-    }
-
     // Return them as options for reduction
     runs = "FirstTransmissionRun=TRANS_" + transRuns[0];
     if (transRuns.size() > 1)

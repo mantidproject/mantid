@@ -363,11 +363,24 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
 std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingValues() const {
 
-  std::map<std::string, std::string> values;
-  values["Transmission Run(s)"] =
+  std::map<std::string, std::string> valuesMap;
+  valuesMap["Transmission Run(s)"] =
       m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
 
-  return values;
+  return valuesMap;
+}
+
+/** Requests property names associated with pre-processing values.
+* @return :: Pre-processing property names.
+*/
+std::map<std::string, std::set<std::string>>
+ReflRunsTabPresenter::getPreprocessingProperties() const {
+
+  std::map<std::string, std::set<std::string>> propertiesMap;
+  propertiesMap["Transmission Run(s)"] = {"FirstTransmissionRun",
+                                          "SecondTransmissionRun"};
+
+  return propertiesMap;
 }
 
 /** Requests global pre-processing options. Options are supplied by the main

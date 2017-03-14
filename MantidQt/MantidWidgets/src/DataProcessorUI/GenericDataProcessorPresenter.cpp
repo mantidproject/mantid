@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -592,9 +593,12 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   if (!m_preprocessMap.empty())
     globalOptions = m_mainPresenter->getPreprocessingOptions();
 
-  // If a preprocessing value is not found in the table, these external values
-  // can be substituted in
-  auto preProcessStrMap = m_mainPresenter->getPreprocessingValues();
+  // Pre-processing values and their associated properties
+  auto preProcessValMap = m_mainPresenter->getPreprocessingValues();
+  auto preProcessPropMap = m_mainPresenter->getPreprocessingProperties();
+
+  // Properties not to be used in processing
+  std::set<std::string> restrictedProps;
 
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
@@ -606,17 +610,24 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
     // The value for which preprocessing can be conducted on
     std::string preProcessValue;
-    if (!data.at(i).empty()) {
+
+    if (preProcessValMap.count(columnName) &&
+        !preProcessValMap[columnName].empty()) {
+      preProcessValue = preProcessValMap[columnName];
+    } else if (!data.at(i).empty()) {
       preProcessValue = data.at(i);
-    } else if (preProcessStrMap.count(columnName) &&
-               !preProcessStrMap[columnName].empty()) {
-      preProcessValue = preProcessStrMap[columnName];
     } else {
       continue;
     }
 
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
+
+      // We do not want the associated properties to be set again in
+      // processing
+      for (auto &prop : preProcessPropMap[columnName]) {
+        restrictedProps.insert(prop);
+      }
 
       auto preprocessor = m_preprocessMap[columnName];
 
@@ -627,10 +638,10 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
       auto runWS =
           prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
-    } else {
-      // No pre-processing needed
-      alg->setPropertyValue(propertyName, preProcessValue);
-    }
+      } else {
+        // No pre-processing needed
+        alg->setPropertyValue(propertyName, preProcessValue);
+      }
   }
 
   // Global processing options as a string
@@ -640,7 +651,11 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      std::cout << "Prop = " << kvp->first << ", oldVal = " << alg->getPropertyValue(kvp->first) << ", newVal = " << kvp->second << "\n";
+      if (restrictedProps.find(kvp->first) == restrictedProps.end()) {
+        std::cout << "Prop = " << kvp->first << ", oldVal = " << alg->getPropertyValue(kvp->first) << ", newVal = " << kvp->second << "\n";
+        alg->setProperty(kvp->first, kvp->second);
+      }
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
