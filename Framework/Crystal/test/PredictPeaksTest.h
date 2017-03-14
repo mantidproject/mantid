@@ -212,4 +212,59 @@ public:
   }
 };
 
+class PredictPeaksTestPerformance : public CxxTest::TestSuite {
+public:
+  static PredictPeaksTestPerformance *createSuite() {
+    return new PredictPeaksTestPerformance();
+  }
+
+  static void destroySuite(PredictPeaksTestPerformance *suite) { delete suite; }
+
+  void test_many_peaks_rectangular() {
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
+    alg.setPropertyValue("WavelengthMin", ".5");
+    alg.setPropertyValue("WavelengthMax", "15.0");
+    alg.setPropertyValue("MinDSpacing", ".1");
+    alg.setPropertyValue("ReflectionCondition", "Primitive");
+    alg.execute();
+  }
+
+  void test_many_peaks() {
+    MatrixWorkspace_sptr inWS =
+        WorkspaceCreationHelper::create2DWorkspace(10000, 1);
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0,0,-1), V3D(0,0,0), 1.6, 1.0);
+    inWS->setInstrument(inst);
+
+    // Set ub and Goniometer rotation
+    WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
+    WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
+
+    PredictPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
+    alg.setPropertyValue("WavelengthMin", ".5");
+    alg.setPropertyValue("WavelengthMax", "15.0");
+    alg.setPropertyValue("MinDSpacing", ".1");
+    alg.setPropertyValue("ReflectionCondition", "Primitive");
+    alg.execute();
+  }
+
+};
+
+
 #endif /* MANTID_CRYSTAL_PREDICTPEAKSTEST_H_ */
