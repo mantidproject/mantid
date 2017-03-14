@@ -38,7 +38,7 @@ private:
 
 public:
   ComponentInfo() = default;
-  ComponentInfo(std::vector<std::vector<size_t>> &detectorIndexes);
+  ComponentInfo(const std::vector<std::vector<size_t>> &detectorIndexes);
   std::vector<size_t> detectorIndexes(size_t componentIndex) const;
   size_t size() const;
 };

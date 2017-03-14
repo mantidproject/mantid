@@ -1,5 +1,5 @@
 #include "MantidAPI/ExperimentInfo.h"
-
+#include <chrono>
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
@@ -14,6 +14,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -181,13 +182,10 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-}
-
 std::vector<size_t> registerComponentInfo(
     std::vector<std::vector<size_t>> &componentDetectorIndexes,
     std::vector<Mantid::Geometry::ComponentID> &componentIds,
     const IComponent &component, const DetectorInfo &detectorInfo) {
-
   std::vector<size_t> localDetectorIndexes;
   if (const auto *bank =
           dynamic_cast<const Mantid::Geometry::ICompAssembly *>(&component)) {
@@ -218,18 +216,80 @@ std::vector<size_t> registerComponentInfo(
   return localDetectorIndexes;
 }
 
+class GeometryVisitor : public Mantid::Geometry::ComponentVisitor {
+private:
+  std::vector<Mantid::Geometry::ComponentID> m_componentIds;
+  std::vector<std::vector<size_t>> m_componentDetectorIndexes;
+
+public:
+  virtual void registerComponentAssembly(
+      const ICompAssembly &bank,
+      std::vector<size_t> &parentDetectorIndexes) override {
+
+    std::vector<size_t> localDetectorIndexes;
+    std::vector<IComponent_const_sptr> bankChildren;
+    bank.getChildren(bankChildren, false /*is recursive*/);
+
+    for (const auto &child : bankChildren) {
+      child->registerContents(*this, localDetectorIndexes);
+    }
+
+    parentDetectorIndexes.reserve(parentDetectorIndexes.size() +
+                                  localDetectorIndexes.size());
+    parentDetectorIndexes.insert(parentDetectorIndexes.end(),
+                                 localDetectorIndexes.begin(),
+                                 localDetectorIndexes.end());
+    m_componentDetectorIndexes.emplace_back(localDetectorIndexes);
+    m_componentIds.emplace_back(bank.getComponentID());
+  }
+  virtual void registerGenericComponent(const IComponent &component,
+                                        std::vector<size_t> &) override {
+    m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
+    m_componentIds.emplace_back(component.getComponentID());
+  }
+  virtual void
+  registerDetector(const IDetector &detector,
+                   std::vector<size_t> &parentDetectorIndexes) override {
+
+    parentDetectorIndexes.push_back(detector.index());
+    m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
+    m_componentIds.emplace_back(detector.getComponentID());
+  }
+  virtual ~GeometryVisitor() {}
+  std::vector<Mantid::Geometry::ComponentID> componentIds() const {
+    return m_componentIds;
+  }
+  std::vector<std::vector<size_t>> componentDetectorIndexes() const {
+    return m_componentDetectorIndexes;
+  }
+};
+}
+
 boost::shared_ptr<Beamline::ComponentInfo>
 makeComponentInfo(const Instrument &oldInstr,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  std::vector<std::vector<size_t>> componentDetectorIndexes;
-  componentDetectorIndexes.reserve(detectorInfo.size());
-  registerComponentInfo(componentDetectorIndexes, componentIds, oldInstr,
-                        detectorInfo);
+  using Time = std::chrono::high_resolution_clock;
+  auto start = Time::now();
+  // registerComponentInfo(componentDetectorIndexes, componentIds,
+  // oldInstr,detectorInfo);
 
+  GeometryVisitor visitor;
+  std::vector<size_t> detectorIndexes; // Not strictly needed at this level
+  oldInstr.registerContents(visitor, detectorIndexes);
+
+  auto stop = Time::now();
+  auto dur = stop - start;
+  auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
+  std::cout << "registerComponentInfo Duration Milliseconds: " << millis.count()
+            << std::endl;
+
+  componentIds = visitor.componentIds();
+
+  auto componentDetectorIndexes = visitor.componentDetectorIndexes();
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      componentDetectorIndexes);
+      std::move(componentDetectorIndexes));
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
@@ -529,9 +589,8 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
  *
  * This method should not need to be called explicitly. Groupings are updated
  * automatically when modifying detector IDs in a workspace (via ISpectrum). */
-void
-ExperimentInfo::setDetectorGrouping(const size_t index,
-                                    const std::set<detid_t> &detIDs) const {
+void ExperimentInfo::setDetectorGrouping(
+    const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
   for (const auto detID : detIDs) {
     try {
@@ -1225,8 +1284,8 @@ void ExperimentInfo::invalidateSpectrumDefinition(const size_t index) {
   m_spectrumDefinitionNeedsUpdate.at(index) = 1;
 }
 
-void
-ExperimentInfo::updateSpectrumDefinitionIfNecessary(const size_t index) const {
+void ExperimentInfo::updateSpectrumDefinitionIfNecessary(
+    const size_t index) const {
   if (m_spectrumDefinitionNeedsUpdate.at(index) != 0)
     updateCachedDetectorGrouping(index);
 }
@@ -1390,10 +1449,9 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string &nxFilename,
  * @param[out] instrumentXml  :: XML string of embedded instrument definition or
  * empty if not found
  */
-void
-ExperimentInfo::loadEmbeddedInstrumentInfoNexus(::NeXus::File *file,
-                                                std::string &instrumentName,
-                                                std::string &instrumentXml) {
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus(
+    ::NeXus::File *file, std::string &instrumentName,
+    std::string &instrumentXml) {
 
   file->readData("name", instrumentName);
 

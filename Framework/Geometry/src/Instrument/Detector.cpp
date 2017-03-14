@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Logger.h"
 
@@ -129,6 +130,11 @@ size_t Detector::index() const { return m_index; }
 
 /// Helper for legacy access mode. Sets the index of the detector.
 void Detector::setIndex(const size_t index) { m_index = index; }
+
+void Detector::registerContents(ComponentVisitor &componentVisitor,
+                                std::vector<size_t> &detectorIndexes) const {
+  componentVisitor.registerDetector(*this, detectorIndexes);
+}
 
 } // Namespace Geometry
 } // Namespace Mantid

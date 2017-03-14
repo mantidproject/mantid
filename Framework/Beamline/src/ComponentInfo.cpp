@@ -3,7 +3,8 @@
 namespace Mantid {
 namespace Beamline {
 
-ComponentInfo::ComponentInfo(std::vector<std::vector<size_t>> &detectorIndexes)
+ComponentInfo::ComponentInfo(
+    const std::vector<std::vector<size_t>> &detectorIndexes)
     : m_detectorIndexes(detectorIndexes) {}
 
 std::vector<size_t>

@@ -86,6 +86,10 @@ public:
   size_t index() const override;
   void setIndex(const size_t index) override;
 
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor,
+                   std::vector<size_t> &detectorIndexes) const override;
+
 private:
   /// Linear index of the detector in the instrument
   size_t m_index{static_cast<size_t>(-1)};

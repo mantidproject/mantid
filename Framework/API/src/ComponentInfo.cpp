@@ -1,7 +1,8 @@
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
-
+#include <exception>
+#include <string>
 namespace Mantid {
 namespace API {
 
@@ -15,7 +16,8 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
     : m_componentInfo(componentInfo), m_componentIds(componentIds) {
 
   if (m_componentInfo.size() != m_componentIds.size()){
-      throw std::invalid_argument("Mismatch between size of DetectorInfo and number of ComponentIDs provided");
+    throw std::invalid_argument("Mismatch between size of ComponentInfo and "
+                                "number of ComponentIDs provided");
   }
   for (size_t i = 0; i < m_componentInfo.size(); ++i) {
     m_compIDToIndex[m_componentIds[i]] = i;

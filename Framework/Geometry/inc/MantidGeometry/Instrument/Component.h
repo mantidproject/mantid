@@ -302,6 +302,10 @@ public:
 
   bool isParametrized() const override;
 
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor,
+                   std::vector<size_t> &detectorIndexes) const override;
+
 protected:
   /// Parent component in the tree
   const IComponent *m_parent;
