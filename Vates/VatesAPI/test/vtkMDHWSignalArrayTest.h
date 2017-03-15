@@ -168,8 +168,6 @@ public:
                             SignalArrayNormalization::None, imageSize, offset);
     TS_ASSERT_EQUALS(signal->LookupValue(1.0), -1);
     TS_ASSERT_EQUALS(signal->LookupTypedValue(1.0), -1);
-    TS_ASSERT_EQUALS(signal->LookupValue(8.0), 0);
-    TS_ASSERT_EQUALS(signal->LookupTypedValue(8.0), 0);
   }
 
   void testLookupAllValues() {
