@@ -112,6 +112,16 @@ public:
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({-1}))[0], 3);
   }
 
+  void test_globalSize() {
+    TS_ASSERT_EQUALS(makeTranslator(1, 0).globalSize(), 4);
+    TS_ASSERT_EQUALS(makeTranslator(2, 0).globalSize(), 4);
+  }
+
+  void test_localSize() {
+    TS_ASSERT_EQUALS(makeTranslator(1, 0).localSize(), 4);
+    TS_ASSERT_EQUALS(makeTranslator(2, 0).localSize(), 2);
+  }
+
   void test_spectrumNumber() {
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());

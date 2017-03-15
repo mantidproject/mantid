@@ -50,6 +50,9 @@ public:
                            std::unique_ptr<Partitioner> partitioner,
                            const PartitionIndex &partition);
 
+  size_t globalSize() const;
+  size_t localSize() const;
+
   SpectrumNumber spectrumNumber(const size_t index) const;
 
   SpectrumIndexSet makeIndexSet() const;
