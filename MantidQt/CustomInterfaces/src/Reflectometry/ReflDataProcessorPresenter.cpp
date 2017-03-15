@@ -298,16 +298,12 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
 */
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
+  bool runFound;
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
+  findRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
 
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadEventNexus");
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
-  algLoadRun->setProperty("LoadMonitors", true);
-  algLoadRun->execute();
-  return algLoadRun->isExecuted();
+  return runFound;
 }
 
 /** Loads a non-event workspace and puts it into the ADS
@@ -316,14 +312,10 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 */
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
-
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadISISNexus");
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
-  algLoadRun->execute();
+  bool runFound; // unused but required
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
+  findRun(runNo, instrument, prefix, m_loader, runFound);
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS

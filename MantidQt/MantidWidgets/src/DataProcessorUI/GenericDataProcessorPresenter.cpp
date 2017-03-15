@@ -521,7 +521,7 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
 }
 
 /**
-Loads a run from disk or fetches it from the AnalysisDataService
+Loads a run found from disk or AnalysisDataService
 @param run : The name of the run
 @param instrument : The instrument the run belongs to
 @param prefix : The prefix to be prepended to the run number
@@ -535,7 +535,7 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
 
   bool runFound;
   std::string fileName = instrument + run;
-  std::string outputName = findRun(run, instrument, prefix, runFound);
+  std::string outputName = findRun(run, instrument, prefix, m_loader, runFound);
 
   if (!runFound)
     throw std::runtime_error("Could not open " + fileName);
@@ -548,12 +548,13 @@ Tries fetching a run from AnalysisDataService, or loads it from disk
 @param run : The name of the run
 @param instrument : The instrument the run belongs to
 @param prefix : The prefix to be prepended to the run number
+@param loader : The loader algorithm to be used if run not found in ADS
 @param runFound : Whether or not the run was actually found
 @returns string name of the run
 */
 std::string GenericDataProcessorPresenter::findRun(
     const std::string &run, const std::string &instrument,
-    const std::string &prefix, bool &runFound) {
+    const std::string &prefix, const std::string &loader, bool &runFound) {
 
   runFound = true;
 
@@ -579,11 +580,15 @@ std::string GenericDataProcessorPresenter::findRun(
   // We'll just have to load it ourselves
   const std::string filename = instrument + run;
   const std::string outputName = prefix + run;
-  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(m_loader);
+  IAlgorithm_sptr algLoadRun =
+      AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", filename);
   algLoadRun->setProperty("OutputWorkspace", outputName);
+  if (loader == "LoadEventNexus")
+    algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
+
   if (!algLoadRun->isExecuted()) {
     runFound = false;
     return "";

@@ -125,9 +125,10 @@ protected:
   void postProcessGroup(const GroupData &data);
   // Reduce a row
   std::vector<std::string> reduceRow(const std::vector<std::string> &data);
-  // Finds a run in the ADS, or tries loading it if not found
+  // Finds a run in the AnalysisDataService, or tries loading it if not found
   std::string findRun(const std::string &run, const std::string &instrument,
-                      const std::string &prefix, bool &runFound);
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
 
   // Process selected rows
   virtual void process();
