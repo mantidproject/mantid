@@ -190,22 +190,22 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   return (*m_scanIntervals)[linearIndex(index)];
 }
 
-/** Set the scan interval of the detector with given index.
+/** Set the scan interval of the detector with given detector index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. */
+ * since 1990, as in Kernel::DateAndTime. Note that it is currently not possible
+ * to modify scan intervals for a DetectorInfo with time-dependent detectors,
+ * i.e., time intervals must be set with this method before merging individual
+ * scans. */
 void DetectorInfo::setScanInterval(
-    const std::pair<size_t, size_t> &index,
-    const std::pair<int64_t, int64_t> &interval) {
+    const size_t index, const std::pair<int64_t, int64_t> &interval) {
+  checkNoTimeDependence();
   if (!m_scanIntervals)
     initScanIntervals();
-  // We forbid this since we (currently?) can not verify that the new interval
-  // has no collisions with any of the other intervals for this detector.
-  checkNoTimeDependence();
   if (interval.first >= interval.second)
     throw std::runtime_error(
         "DetectorInfo: cannot set scan interval with start > end");
-  m_scanIntervals.access()[linearIndex(index)] = interval;
+  m_scanIntervals.access()[index] = interval;
 }
 
 namespace {

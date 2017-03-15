@@ -122,7 +122,7 @@ public:
   std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
   scanInterval(const std::pair<size_t, size_t> &index) const;
   void setScanInterval(
-      const std::pair<size_t, size_t> &index,
+      const size_t index,
       const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
 
   void merge(const DetectorInfo &other);

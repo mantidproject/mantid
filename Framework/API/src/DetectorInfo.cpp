@@ -401,16 +401,25 @@ size_t DetectorInfo::scanCount(const size_t index) const {
   return m_detectorInfo.scanCount(index);
 }
 
-/// Returns the scan interval of the detector with given index.
+/** Returns the scan interval of the detector with given index.
+ *
+ * The interval start and end values would typically correspond to nanoseconds
+ * since 1990, as in Kernel::DateAndTime. */
 std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   const auto &interval = m_detectorInfo.scanInterval(index);
   return {interval.first, interval.second};
 }
 
-/// Set the scan interval of the detector with given index.
+/** Set the scan interval of the detector with given detector index.
+ *
+ * The interval start and end values would typically correspond to nanoseconds
+ * since 1990, as in Kernel::DateAndTime. Note that it is currently not possible
+ * to modify scan intervals for a DetectorInfo with time-dependent detectors,
+ * i.e., time intervals must be set with this method before merging individual
+ * scans. */
 void DetectorInfo::setScanInterval(
-    const std::pair<size_t, size_t> &index,
+    const size_t index,
     const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval) {
   m_detectorInfo.setScanInterval(index, {interval.first.totalNanoseconds(),
                                          interval.second.totalNanoseconds()});

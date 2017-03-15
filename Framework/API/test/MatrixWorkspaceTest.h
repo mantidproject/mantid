@@ -1430,8 +1430,8 @@ public:
     auto &detInfo2 = ws2->mutableDetectorInfo();
     detInfo1.setPosition(0, {1, 0, 0});
     detInfo2.setPosition(0, {2, 0, 0});
-    detInfo1.setScanInterval({0, 0}, {10, 20});
-    detInfo2.setScanInterval({0, 0}, {20, 30});
+    detInfo1.setScanInterval(0, {10, 20});
+    detInfo2.setScanInterval(0, {20, 30});
 
     // Merge
     auto merged = WorkspaceFactory::Instance().create(ws1, 2);

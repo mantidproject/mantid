@@ -268,23 +268,23 @@ public:
 
   void test_setScanInterval() {
     DetectorInfo info(PosVec(1), RotVec(1));
-    info.setScanInterval({0, 0}, {1, 2});
+    info.setScanInterval(0, {1, 2});
     TS_ASSERT_EQUALS(info.scanInterval({0, 0}),
                      (std::pair<int64_t, int64_t>(1, 2)));
   }
 
   void test_setScanInterval_failures() {
     DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_THROWS(info.setScanInterval({0, 0}, {1, 1}), std::runtime_error);
-    TS_ASSERT_THROWS(info.setScanInterval({0, 0}, {2, 1}), std::runtime_error);
+    TS_ASSERT_THROWS(info.setScanInterval(0, {1, 1}), std::runtime_error);
+    TS_ASSERT_THROWS(info.setScanInterval(0, {2, 1}), std::runtime_error);
   }
 
   void test_merge_fail_size() {
     DetectorInfo a(PosVec(1), RotVec(1));
     DetectorInfo b(PosVec(2), RotVec(2));
-    a.setScanInterval({0, 0}, {0, 1});
-    b.setScanInterval({0, 0}, {0, 1});
-    b.setScanInterval({1, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
+    b.setScanInterval(0, {0, 1});
+    b.setScanInterval(1, {0, 1});
     TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
   }
 
@@ -293,25 +293,25 @@ public:
     DetectorInfo b(PosVec(1), RotVec(1));
     DetectorInfo c(PosVec(1), RotVec(1));
     TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
-    c.setScanInterval({0, 0}, {0, 1});
+    c.setScanInterval(0, {0, 1});
     TS_ASSERT_THROWS(a.merge(c), std::runtime_error);
-    a.setScanInterval({0, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
     TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
   }
 
   void test_merge_fail_monitor_mismatch() {
     DetectorInfo a(PosVec(2), RotVec(2));
     DetectorInfo b(PosVec(2), RotVec(2), {1});
-    a.setScanInterval({0, 0}, {0, 1});
-    a.setScanInterval({1, 0}, {0, 1});
-    b.setScanInterval({0, 0}, {0, 1});
-    b.setScanInterval({1, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
+    a.setScanInterval(1, {0, 1});
+    b.setScanInterval(0, {0, 1});
+    b.setScanInterval(1, {0, 1});
     TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
   }
 
   void test_merge_identical_interval_failures() {
     DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval({0, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     Eigen::Quaterniond rot1(
@@ -345,7 +345,7 @@ public:
 
   void test_merge_identical_interval() {
     DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval({0, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
     const auto b(a);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isEquivalent(b));
@@ -353,8 +353,8 @@ public:
 
   void test_merge_identical_interval_with_monitor() {
     DetectorInfo a(PosVec(2), RotVec(2), {1});
-    a.setScanInterval({0, 0}, {0, 1});
-    a.setScanInterval({1, 0}, {0, 1});
+    a.setScanInterval(0, {0, 1});
+    a.setScanInterval(1, {0, 1});
     const auto b(a);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isEquivalent(b));
@@ -362,16 +362,16 @@ public:
 
   void test_merge_fail_partial_overlap() {
     DetectorInfo a(PosVec(2), RotVec(2));
-    a.setScanInterval({0, 0}, {0, 10});
-    a.setScanInterval({1, 0}, {0, 10});
+    a.setScanInterval(0, {0, 10});
+    a.setScanInterval(1, {0, 10});
     auto b(a);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
     b = a;
-    b.setScanInterval({1, 0}, {-1, 5});
+    b.setScanInterval(1, {-1, 5});
     TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
-    b.setScanInterval({1, 0}, {1, 5});
+    b.setScanInterval(1, {1, 5});
     TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
-    b.setScanInterval({1, 0}, {1, 11});
+    b.setScanInterval(1, {1, 11});
     TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
   }
 
@@ -379,7 +379,7 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 2);
-    a.setScanInterval({1, 0}, monitorInterval);
+    a.setScanInterval(1, monitorInterval);
     auto b(a);
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
@@ -387,8 +387,8 @@ public:
     b.setPosition(0, pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval({0, 0}, interval1);
-    b.setScanInterval({0, 0}, interval2);
+    a.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isScanning());
     TS_ASSERT(!a.isEquivalent(b));
@@ -409,7 +409,7 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 2);
-    a.setScanInterval({1, 0}, monitorInterval);
+    a.setScanInterval(1, monitorInterval);
     a.setPosition(1, {0, 0, 0});
     auto b(a);
     Eigen::Vector3d pos1(1, 0, 0);
@@ -418,8 +418,8 @@ public:
     b.setPosition(0, pos2);
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
-    a.setScanInterval({0, 0}, interval1);
-    b.setScanInterval({0, 0}, interval2);
+    a.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
 
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     auto a0(a);
@@ -431,7 +431,7 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2), {1});
     // Monitor at index 1, set up for identical interval
     std::pair<int64_t, int64_t> monitorInterval(0, 3);
-    a.setScanInterval({1, 0}, monitorInterval);
+    a.setScanInterval(1, monitorInterval);
     auto b(a);
     auto c(a);
     Eigen::Vector3d pos1(1, 0, 0);
@@ -443,9 +443,9 @@ public:
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
-    a.setScanInterval({0, 0}, interval1);
-    b.setScanInterval({0, 0}, interval2);
-    c.setScanInterval({0, 0}, interval3);
+    a.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
+    c.setScanInterval(0, interval3);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT_THROWS_NOTHING(a.merge(c));
     TS_ASSERT(a.isScanning());
@@ -479,9 +479,9 @@ public:
     std::pair<int64_t, int64_t> interval1(0, 1);
     std::pair<int64_t, int64_t> interval2(1, 2);
     std::pair<int64_t, int64_t> interval3(2, 3);
-    a1.setScanInterval({0, 0}, interval1);
-    b.setScanInterval({0, 0}, interval2);
-    c.setScanInterval({0, 0}, interval3);
+    a1.setScanInterval(0, interval1);
+    b.setScanInterval(0, interval2);
+    c.setScanInterval(0, interval3);
     auto a2(a1);
     TS_ASSERT_THROWS_NOTHING(a1.merge(b));
     TS_ASSERT_THROWS_NOTHING(a1.merge(c));
