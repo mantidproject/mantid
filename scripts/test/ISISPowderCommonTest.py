@@ -211,6 +211,66 @@ class ISISPowderCommonTest(unittest.TestCase):
         for ws in loaded_list:
             mantid.DeleteWorkspace(ws)
 
+    def test_remove_intermediate_workspace(self):
+        ws_list = []
+        ws_names_list = []
+
+        ws_single_name = "remove_intermediate_ws-single"
+        ws_single = mantid.CreateSampleWorkspace(OutputWorkspace=ws_single_name, NumBanks=1, BankPixelWidth=1,
+                                                 XMax=2, BinWidth=1)
+
+        for i in range(0, 3):
+            out_name = "remove_intermediate_ws_" + str(i)
+            ws_names_list.append(out_name)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
+                                                        XMax=2, BinWidth=1))
+
+        # Check single workspaces are removed
+        self.assertEqual(True, mantid.mtd.doesExist(ws_single_name))
+        common.remove_intermediate_workspace(ws_single)
+        self.assertEqual(False, mantid.mtd.doesExist(ws_single_name))
+
+        # Next check lists are handled
+        for ws_name in ws_names_list:
+            self.assertEqual(True, mantid.mtd.doesExist(ws_name))
+
+        common.remove_intermediate_workspace(ws_list)
+
+        for ws_name in ws_names_list:
+            self.assertEqual(False, mantid.mtd.doesExist(ws_name))
+
+    def test_run_normalise_by_current(self):
+        initial_value = 17
+        prtn_charge = '10.0'
+        expected_value = initial_value / float(prtn_charge)
+
+        # Create two workspaces
+        ws = mantid.CreateWorkspace(DataX=0, DataY=initial_value)
+
+        # Add Good Proton Charge Log
+        mantid.AddSampleLog(Workspace=ws, LogName='gd_prtn_chrg', LogText=prtn_charge, LogType='Number')
+
+        self.assertEqual(initial_value, ws.dataY(0)[0])
+        common.run_normalise_by_current(ws)
+        self.assertAlmostEqual(expected_value, ws.dataY(0)[0], delta=1e-8)
+
+    def test_spline_workspaces(self):
+        ws_list = []
+        for i in range(1, 4):
+            out_name = "test_spline_vanadium-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
+                                                        XMax=100, BinWidth=1))
+
+        splined_list = common.spline_workspaces(focused_vanadium_spectra=ws_list, num_splines=10)
+        for ws in splined_list:
+            self.assertAlmostEqual(ws.dataY(0)[25], 0.28576649, delta=1e-8)
+            self.assertAlmostEqual(ws.dataY(0)[50], 0.37745918, delta=1e-8)
+            self.assertAlmostEqual(ws.dataY(0)[75], 0.28133096, delta=1e-8)
+
+        for input_ws, splined_ws in zip(ws_list, splined_list):
+            mantid.DeleteWorkspace(input_ws)
+            mantid.DeleteWorkspace(splined_ws)
+
 
 class UnitTestMockInstrument(isis_powder.abstract_inst.AbstractInst):
     # Implements essential methods required within the class
