@@ -50,30 +50,29 @@ void ISISRunLogs::addStatusLog(API::Run &exptRun) {
  * @param exptRun :: The run for this period
  */
 void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
-  auto periodLog = m_logParser->createPeriodLog(period);
   auto logFilter = std::unique_ptr<LogFilter>();
-  const TimeSeriesProperty<bool> *maskProp(nullptr);
   try {
     auto runningLog =
         exptRun.getTimeSeriesProperty<bool>(LogParser::statusLogName());
-    logFilter = Kernel::make_unique<LogFilter>(runningLog);
+    logFilter = Kernel::make_unique<LogFilter>(*runningLog);
   } catch (std::exception &) {
     g_log.warning(
         "Cannot find status log. Logs will be not be filtered by run status");
   }
 
   // If there is more than 1 period filter the logs by period as well
+  auto periodLog = m_logParser->createPeriodLog(period);
   if (m_logParser->nPeriods() > 1) {
     if (logFilter) {
       logFilter->addFilter(*periodLog);
-      maskProp = logFilter->filter();
-    } else
-      maskProp = periodLog;
+    } else {
+      logFilter = Kernel::make_unique<LogFilter>(*periodLog);
+    }
   }
   // Filter logs if we have anything to filter on
-  if (maskProp)
-    exptRun.filterByLog(*maskProp);
-
+  if (logFilter) {
+    exptRun.filterByLog(*logFilter->filter());
+  }
   exptRun.addProperty(periodLog);
   exptRun.addProperty(m_logParser->createCurrentPeriodLog(period));
   try {
