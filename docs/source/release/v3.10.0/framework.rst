@@ -13,6 +13,8 @@ API
 Algorithms
 ----------
 
+- Removed the optional flag `LocationParameters` from `ClearInstrumentParameters`.
+
 New
 ###
 

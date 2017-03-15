@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -23,6 +24,7 @@ DetectorInfo::DetectorInfo(
     Geometry::ParameterMap *pmap)
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
+      m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
@@ -46,6 +48,19 @@ DetectorInfo &DetectorInfo::operator=(const DetectorInfo &rhs) {
   return *this;
 }
 
+/** Returns true if the content of this is equivalent to the content of other.
+ *
+ * Here "equivalent" implies equality of all member, except for positions and
+ * rotations, which are treated specially:
+ * - Positions that differ by less than 1 nm = 1e-9 m are considered equivalent.
+ * - Rotations that imply relative position changes of less than 1 nm = 1e-9 m
+ *   with a rotation center that is 1000 m away are considered equivalent.
+ * Note that in both cases the actual limit may be lower, but it is guarenteed
+ * that any LARGER differences are NOT considered equivalent. */
+bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
+  return m_detectorInfo.isEquivalent(other.m_detectorInfo);
+}
+
 /// Returns the size of the DetectorInfo, i.e., the number of detectors in the
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
@@ -67,48 +82,65 @@ bool DetectorInfo::isMasked(const size_t index) const {
  */
 double DetectorInfo::l2(const size_t index) const {
   if (!isMonitor(index))
-    return getDetector(index).getDistance(getSample());
+    return position(index).distance(samplePosition());
   else
-    return getDetector(index).getDistance(getSource()) - l1();
+    return position(index).distance(sourcePosition()) - l1();
 }
 
 /// Returns 2 theta (scattering angle w.r.t. to beam direction).
 double DetectorInfo::twoTheta(const size_t index) const {
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
 
-  return getDetector(index).getTwoTheta(samplePos, beamLine);
+  const auto sampleDetVec = position(index) - samplePos;
+  return sampleDetVec.angle(beamLine);
 }
 
 /// Returns signed 2 theta (signed scattering angle w.r.t. to beam direction).
 double DetectorInfo::signedTwoTheta(const size_t index) const {
-  const Kernel::V3D samplePos = samplePosition();
-  const Kernel::V3D beamLine = samplePos - sourcePosition();
+  if (isMonitor(index))
+    throw std::logic_error(
+        "Two theta (scattering angle) is not defined for monitors.");
+
+  const auto samplePos = samplePosition();
+  const auto beamLine = samplePos - sourcePosition();
 
   if (beamLine.nullVector()) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "Source and sample are at same position!");
   }
   // Get the instrument up axis.
-  const Kernel::V3D &instrumentUpAxis =
+  const auto &instrumentUpAxis =
       m_instrument->getReferenceFrame()->vecPointingUp();
-  return getDetector(index)
-      .getSignedTwoTheta(samplePos, beamLine, instrumentUpAxis);
+
+  const auto sampleDetVec = position(index) - samplePos;
+  double angle = sampleDetVec.angle(beamLine);
+
+  const auto cross = beamLine.cross_prod(sampleDetVec);
+  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
+  if (normToSurface.scalar_prod(cross) < 0) {
+    angle *= -1;
+  }
+  return angle;
 }
 
 /// Returns the position of the detector with given index.
 Kernel::V3D DetectorInfo::position(const size_t index) const {
-  return getDetector(index).getPos();
+  return Kernel::toV3D(m_detectorInfo.position(index));
 }
 
 /// Returns the rotation of the detector with given index.
 Kernel::Quat DetectorInfo::rotation(const size_t index) const {
-  return getDetector(index).getRotation();
+  return Kernel::toQuat(m_detectorInfo.rotation(index));
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
@@ -128,66 +160,102 @@ void DetectorInfo::clearMaskFlags() {
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
-  const auto &det = getDetector(index);
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  moveComponent(det, *m_pmap, position, positionType);
+  m_detectorInfo.setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.
 void DetectorInfo::setRotation(const size_t index,
                                const Kernel::Quat &rotation) {
-  const auto &det = getDetector(index);
-  using namespace Geometry::ComponentHelper;
-  TransformType rotationType = Absolute;
-  rotateComponent(det, *m_pmap, rotation, rotationType);
+  m_detectorInfo.setRotation(index, Kernel::toQuaterniond(rotation));
 }
 
-/** Set the absolute position of the component `comp`. Not thread safe.
+/** Set the absolute position of the component `comp`.
  *
  * This may or may not be a detector. Even if it is not a detector it will
- * typically still influence detector positions. */
+ * typically still influence detector positions. Note that this method will be
+ * removed once ComponentInfo::setPosition is available. */
 void DetectorInfo::setPosition(const Geometry::IComponent &comp,
                                const Kernel::V3D &pos) {
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  moveComponent(comp, *m_pmap, pos, positionType);
-
-  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+  if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
+    const auto index = indexOf(det->getID());
+    setPosition(index, pos);
+  } else {
+    // This will go badly wrong if the parameter map in the component is not
+    // identical to ours, but there does not seem to be a way to check?
+    const auto oldPos = comp.getPos();
+    using namespace Geometry::ComponentHelper;
+    TransformType positionType = Absolute;
+    moveComponent(comp, *m_pmap, pos, positionType);
     // If comp is a detector cached positions stay valid. In all other cases
     // (higher level in instrument tree, or other leaf component such as sample
     // or source) we flush all cached positions.
-    if (m_source)
-      m_sourcePos = m_source->getPos();
-    if (m_sample)
-      m_samplePos = m_sample->getPos();
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if (detIndices.size() == 0 || detIndices.size() == size()) {
+      // Update only if comp is not a bank (not detectors) or the full
+      // instrument (all detectors). The should make this thread-safe for
+      // practical purposes such as moving each bank in a separate thread.
+      if (m_source)
+        m_sourcePos = m_source->getPos();
+      if (m_sample)
+        m_samplePos = m_sample->getPos();
+      if (m_source && m_sample)
+        m_L1 = m_sourcePos.distance(m_samplePos);
+    }
     // Detector positions are currently not cached, the cached pointers to
     // detectors stay valid. Once we store positions in DetectorInfo we need to
     // update detector positions here.
+    const auto delta = toVector3d(pos - oldPos);
+    for (const auto index : detIndices) {
+      m_detectorInfo.setPosition(index, m_detectorInfo.position(index) + delta);
+    }
   }
 }
 
-/** Set the absolute rotation of the component `comp`. Not thread safe.
+/** Set the absolute rotation of the component `comp`.
  *
  * This may or may not be a detector. Even if it is not a detector it will
- * typically still influence detector positions rotations. */
+ * typically still influence detector positions rotations. Note that this method
+ * will be removed once ComponentInfo::setRotation is available. */
 void DetectorInfo::setRotation(const Geometry::IComponent &comp,
                                const Kernel::Quat &rot) {
-  using namespace Geometry::ComponentHelper;
-  TransformType rotationType = Absolute;
-  rotateComponent(comp, *m_pmap, rot, rotationType);
-
-  if (!dynamic_cast<const Geometry::Detector *>(&comp)) {
+  if (const auto *det = dynamic_cast<const Geometry::Detector *>(&comp)) {
+    const auto index = indexOf(det->getID());
+    setRotation(index, rot);
+  } else {
+    // This will go badly wrong if the parameter map in the component is not
+    // identical to ours, but there does not seem to be a way to check?
+    const auto pos = toVector3d(comp.getPos());
+    auto invOldRot = comp.getRotation();
+    invOldRot.inverse();
+    const auto delta = toQuaterniond(rot * invOldRot).normalized();
+    using namespace Geometry::ComponentHelper;
+    TransformType rotationType = Absolute;
+    rotateComponent(comp, *m_pmap, rot, rotationType);
     // If comp is a detector cached positions and rotations stay valid. In all
-    // other cases/ (higher level in instrument tree, or other leaf component
+    // other cases (higher level in instrument tree, or other leaf component
     // such as sample or source) we flush all cached positions and rotations.
-    if (m_source)
-      m_sourcePos = m_source->getPos();
-    if (m_sample)
-      m_samplePos = m_sample->getPos();
+    const auto &detIndices = getAssemblyDetectorIndices(comp);
+    if (detIndices.size() == 0 || detIndices.size() == size()) {
+      // Update only if comp is not a bank (not detectors) or the full
+      // instrument (all detectors). The should make this thread-safe for
+      // practical purposes such as moving each bank in a separate thread.
+      if (m_source)
+        m_sourcePos = m_source->getPos();
+      if (m_sample)
+        m_samplePos = m_sample->getPos();
+      if (m_source && m_sample)
+        m_L1 = m_sourcePos.distance(m_samplePos);
+    }
     // Detector positions and rotations are currently not cached, the cached
     // pointers to detectors stay valid. Once we store positions and rotations
     // in DetectorInfo we need to update detector positions and rotations here.
+    auto transformation = Eigen::Matrix3d(delta);
+    for (const auto index : detIndices) {
+      m_detectorInfo.setRotation(index, delta * m_detectorInfo.rotation(index));
+      auto relativePos =
+          transformation * (m_detectorInfo.position(index) - pos);
+      m_detectorInfo.setPosition(index, relativePos + pos);
+    }
   }
 }
 
@@ -239,14 +307,6 @@ DetectorInfo::getDetectorPtr(const size_t index) const {
   return m_lastDetector[thread];
 }
 
-/// Sets the cached detector. This is an optimization used by SpectrumInfo.
-void DetectorInfo::setCachedDetector(
-    size_t index, boost::shared_ptr<const Geometry::IDetector> detector) const {
-  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
-  m_lastIndex[thread] = index;
-  m_lastDetector[thread] = detector;
-}
-
 /// Returns a reference to the source component. The value is cached, so calling
 /// it repeatedly is cheap.
 const Geometry::IComponent &DetectorInfo::getSource() const {
@@ -259,6 +319,27 @@ const Geometry::IComponent &DetectorInfo::getSource() const {
 const Geometry::IComponent &DetectorInfo::getSample() const {
   cacheSample();
   return *m_sample;
+}
+
+/** Returns a reference to a vector of detector indices in a CompAssembly.
+ *
+ * Note that this method will be removed once ComponentInfo provides this
+ * functionality. */
+const std::vector<size_t> &DetectorInfo::getAssemblyDetectorIndices(
+    const Geometry::IComponent &comp) const {
+  const auto *base = comp.getBaseComponent();
+  size_t thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
+  if (m_lastAssemblyDetectorIndices[thread].first != base) {
+    m_lastAssemblyDetectorIndices[thread].first = base;
+    m_lastAssemblyDetectorIndices[thread].second.clear();
+    std::vector<Geometry::IDetector_const_sptr> dets;
+    m_instrument->getDetectorsInBank(dets, *base);
+    for (const auto &det : dets) {
+      const auto index = indexOf(det->getID());
+      m_lastAssemblyDetectorIndices[thread].second.push_back(index);
+    }
+  }
+  return m_lastAssemblyDetectorIndices[thread].second;
 }
 
 void DetectorInfo::cacheSource() const {
