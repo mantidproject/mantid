@@ -101,7 +101,8 @@ class InstrumentSettings(object):
 
         # Does the attribute exist - has it changed and are we suppressing warnings
         if not suppress_warnings:
-            if hasattr(self, attribute_name) and getattr(self, attribute_name) != param_val:
+            previous_value = getattr(self, attribute_name) if hasattr(self, attribute_name) else None
+            if previous_value and previous_value != param_val:
                 # Print warning of what we value we are replacing for which parameter
                 warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
                               str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")

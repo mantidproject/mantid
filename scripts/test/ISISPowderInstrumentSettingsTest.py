@@ -117,6 +117,67 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         self.assertEqual(second_inst_settings_obj.script_facing_name, expected_value)
         self.assertEqual(second_inst_settings_obj.script_facing_name2, expected_value * 2)
 
+    def test_check_enum_check_and_set_works(self):
+        param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+                                                  enum_class=SampleEnum)
+
+        # First test we cannot set it to a different value
+        incorrect_value_dict = {"user_facing_name": "wrong"}
+        with self.assertRaisesRegexp(ValueError, "The user specified value: 'wrong' is unknown"):
+            inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry],
+                                                             adv_conf_dict=incorrect_value_dict)
+
+        # Check that we can set a known good enum
+        good_value_dict = {"user_facing_name": SampleEnum.a_bar}
+        inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry], adv_conf_dict=good_value_dict)
+        self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar)
+
+        # Next check it passes on mixed case and converts it back to the correct case
+        different_case_dict = {"user_facing_name": SampleEnum.a_bar.upper()}
+        inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry], adv_conf_dict=different_case_dict)
+        self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar)
+
+    def test_optional_attribute_works(self):
+        optional_param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+                                                           optional=True)
+
+        param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+                                                  optional=False)
+
+        # Check that not passing an optional and trying to access it works correctly
+        opt_inst_obj = InstrumentSettings.InstrumentSettings(param_map=[optional_param_entry])
+        self.assertIsNone(opt_inst_obj.script_facing_name)
+
+        # Check that setting optional to false still throws
+        inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry])
+        with self.assertRaises(AttributeError):
+            foo = inst_obj.script_facing_name
+
+        # Check if we do set an optional from fresh it does not emit a warning and is set
+        optional_value = 100
+        random_value_dict = {"user_facing_name": 8}
+        optional_value_dict = {"user_facing_name": optional_value}
+
+        # Check that setting a value from fresh does not emit a warning
+        with warnings.catch_warnings(record=True) as warnings_capture:
+            warnings.simplefilter("always")
+            num_warnings_before = len(warnings_capture)
+            opt_inst_obj.update_attributes(kwargs=random_value_dict)
+            self.assertEqual(len(warnings_capture), num_warnings_before)
+
+            # Then check setting it a second time does
+            opt_inst_obj.update_attributes(kwargs=optional_value_dict)
+            self.assertEqual(len(warnings_capture), num_warnings_before + 1)
+
+        self.assertEqual(opt_inst_obj.script_facing_name, optional_value)
+
+
+class SampleEnum(object):
+    enum_friendly_name = "test_enum_name"
+    # The mixed casing is intentional
+    a_foo = "a foo"
+    a_bar = "A BAR"
+    a_baz = "a Baz"
 
 if __name__ == "__main__":
     unittest.main()
