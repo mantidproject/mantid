@@ -130,20 +130,14 @@ struct PointsWorker {
 
 template <class ValueTypeT>
 static void InitializevtkMDHWSignalArray(
-    MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
+    MDHistoWorkspace &ws, API::MDNormalization normalization, vtkIdType offset,
     vtkMDHWSignalArray<ValueTypeT> *signal) {
   const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
   const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
   const vtkIdType nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
   const vtkIdType imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+  auto norm = static_cast<SignalArrayNormalization>(normalization);
 
-  int norm;
-  if (normalization == AutoSelect) {
-    // enum to enum.
-    norm = static_cast<int>(ws.displayNormalization());
-  } else {
-    norm = static_cast<int>(normalization);
-  }
   signal->InitializeArray(ws.getSignalArray(), ws.getNumEventsArray(),
                           ws.getInverseVolume(), norm, imageSize, offset);
 }

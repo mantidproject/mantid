@@ -28,14 +28,7 @@
 #include "vtkGenericDataArray.h"
 #include "vtkObjectFactory.h"
 
-enum class Norm {
-  None = 0,
-  Volume = 1,
-  NumEvents = 2,
-};
-
-namespace Mantid {
-namespace VATES {
+enum class SignalArrayNormalization : char { None, Volume, NumEvents };
 
 template <class ValueTypeT>
 class vtkMDHWSignalArray
@@ -45,15 +38,16 @@ class vtkMDHWSignalArray
 
 public:
   typedef vtkMDHWSignalArray<ValueTypeT> SelfType;
-  vtkAbstractTypeMacro(SelfType, GenericDataArrayType) typedef
-      typename Superclass::ValueType ValueType;
+  vtkAbstractTypeMacro(SelfType, GenericDataArrayType);
+  typedef typename Superclass::ValueType ValueType;
 
   static vtkMDHWSignalArray *New();
   vtkMDHWSignalArray(const vtkMDHWSignalArray &) = delete;
   void operator=(const vtkMDHWSignalArray &) = delete;
   void InitializeArray(ValueTypeT *signal, ValueTypeT *numEvents,
-                       ValueTypeT inverseVolume, int normalization,
-                       vtkIdType size, vtkIdType offset);
+                       ValueTypeT inverseVolume,
+                       SignalArrayNormalization normalization, vtkIdType size,
+                       vtkIdType offset);
   ValueTypeT GetValue(vtkIdType valueIdx) const;
   void SetValue(vtkIdType valueIdx, ValueTypeT value);
   void GetTypedTuple(vtkIdType tupleIdx, ValueTypeT *tuple) const;
@@ -61,11 +55,11 @@ public:
   ValueTypeT GetTypedComponent(vtkIdType tupleIdx, int compIdx) const;
   void SetTypedComponent(vtkIdType tupleIdx, int compIdx, ValueTypeT value);
 
-  int Allocate(vtkIdType size, vtkIdType ext = 1000) override;
-  int Resize(vtkIdType numTuples) override;
   // Description:
   // This container is read only -- this method does nothing but print a
   // warning.
+  int Allocate(vtkIdType size, vtkIdType ext = 1000) override;
+  int Resize(vtkIdType numTuples) override;
   void InsertTuple(vtkIdType i, vtkIdType j, vtkAbstractArray *source) override;
   void InsertTuple(vtkIdType i, const float *source) override;
   void InsertTuple(vtkIdType i, const double *source) override;
@@ -92,7 +86,7 @@ private:
   ValueTypeT *m_numEvents{nullptr};
   ValueTypeT m_inverseVolume{1.0};
   vtkIdType m_offset{0};
-  int m_normalization{0};
+  SignalArrayNormalization m_normalization{SignalArrayNormalization::Volume};
 };
 
 template <class ValueTypeT>
@@ -104,7 +98,7 @@ vtkMDHWSignalArray<ValueTypeT> *vtkMDHWSignalArray<ValueTypeT>::New() {
 template <class ValueTypeT>
 void vtkMDHWSignalArray<ValueTypeT>::InitializeArray(
     ValueTypeT *signal, ValueTypeT *numEvents, ValueTypeT inverseVolume,
-    int normalization, vtkIdType size, vtkIdType offset) {
+    SignalArrayNormalization normalization, vtkIdType size, vtkIdType offset) {
 
   this->m_signal = signal;
   this->m_numEvents = numEvents;
@@ -122,15 +116,15 @@ template <class ValueTypeT>
 ValueTypeT vtkMDHWSignalArray<ValueTypeT>::GetValue(vtkIdType idx) const {
   auto pos = m_offset + idx;
   switch (m_normalization) {
-  case 0:
+  case SignalArrayNormalization::None:
     return m_signal[pos];
-  case 1:
+  case SignalArrayNormalization::Volume:
     return m_signal[pos] * m_inverseVolume;
-  case 2:
+  case SignalArrayNormalization::NumEvents:
     return m_signal[pos] / m_numEvents[pos];
   }
   // Should not reach here
-  return std::numeric_limits<ValueTypeT>::quiet_NaN();
+  std::numeric_limits<ValueTypeT>::quiet_NaN();
 }
 
 //------------------------------------------------------------------------------
@@ -234,8 +228,4 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::Squeeze() {
   // noop
 }
 
-}
-}
 #endif // vtkMDHWSignalArray_h
-
-// VTK-HeaderTest-Exclude: vtkMDHWSignalArray.h
