@@ -246,7 +246,7 @@ void ProcessBankData::run() { // override {
  * Get the workspace index for a given pixel ID. Throws if the pixel ID is
  * not in the expected range.
  *
- * @param The pixel ID to look up
+ * @param pixID :: The pixel ID to look up
  * @return The workspace index for this pixel
  */
 size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
