@@ -118,11 +118,16 @@ protected:
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // Loader
+  std::string m_loader;
 
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
   std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  // Finds a run in the ADS, or tries loading it if not found
+  std::string findRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, bool &runFound);
 
   // Process selected rows
   virtual void process();
@@ -144,8 +149,6 @@ private:
   DataProcessorPostprocessingAlgorithm m_postprocessor;
   // Post-processing map
   std::map<std::string, std::string> m_postprocessMap;
-  // Loader
-  std::string m_loader;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns

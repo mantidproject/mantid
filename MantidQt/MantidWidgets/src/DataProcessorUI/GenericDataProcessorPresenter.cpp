@@ -532,26 +532,48 @@ Workspace_sptr
 GenericDataProcessorPresenter::loadRun(const std::string &run,
                                        const std::string &instrument,
                                        const std::string &prefix) {
+
+  bool runFound;
+  std::string fileName = instrument + run;
+  std::string outputName = findRun(run, instrument, prefix, runFound);
+
+  if (!runFound)
+    throw std::runtime_error("Could not open " + fileName);
+
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+}
+
+/**
+Tries fetching a run from AnalysisDataService, or loads it from disk
+@param run : The name of the run
+@param instrument : The instrument the run belongs to
+@param prefix : The prefix to be prepended to the run number
+@param runFound : Whether or not the run was actually found
+@returns string name of the run
+*/
+std::string GenericDataProcessorPresenter::findRun(
+    const std::string &run, const std::string &instrument,
+    const std::string &prefix, bool &runFound) {
+
+  runFound = true;
+
   // First, let's see if the run given is the name of a workspace in the ADS
   if (AnalysisDataService::Instance().doesExist(run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(run);
+    return run;
   // Try with prefix
   if (AnalysisDataService::Instance().doesExist(prefix + run))
-    return AnalysisDataService::Instance().retrieveWS<Workspace>(prefix + run);
+    return prefix + run;
 
-  // Is the run string is numeric
+  // Is the run string is numeric?
   if (boost::regex_match(run, boost::regex("\\d+"))) {
-    std::string wsName;
 
     // Look for "<run_number>" in the ADS
-    wsName = run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+    if (AnalysisDataService::Instance().doesExist(run))
+      return run;
 
     // Look for "<instrument><run_number>" in the ADS
-    wsName = instrument + run;
-    if (AnalysisDataService::Instance().doesExist(wsName))
-      return AnalysisDataService::Instance().retrieveWS<Workspace>(wsName);
+    if (AnalysisDataService::Instance().doesExist(prefix + run))
+      return prefix + run;
   }
 
   // We'll just have to load it ourselves
@@ -562,11 +584,12 @@ GenericDataProcessorPresenter::loadRun(const std::string &run,
   algLoadRun->setProperty("Filename", filename);
   algLoadRun->setProperty("OutputWorkspace", outputName);
   algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    runFound = false;
+    return "";
+  }
 
-  if (!algLoadRun->isExecuted())
-    throw std::runtime_error("Could not open " + filename);
-
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+  return outputName;
 }
 
 /**
