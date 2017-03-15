@@ -113,7 +113,7 @@ bool DetectorInfo::isMonitor(const size_t index) const {
  *
  * The time component of the index is ignored since a detector is a monitor
  * either for *all* times or for *none*. */
-bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> index) const {
+bool DetectorInfo::isMonitor(const std::pair<size_t, size_t> &index) const {
   // Monitors are not time dependent, ignore time component of index.
   return (*m_isMonitor)[index.first];
 }
@@ -128,7 +128,7 @@ bool DetectorInfo::isMasked(const size_t index) const {
 }
 
 /// Returns true if the detector with given index is masked.
-bool DetectorInfo::isMasked(const std::pair<size_t, size_t> index) const {
+bool DetectorInfo::isMasked(const std::pair<size_t, size_t> &index) const {
   return (*m_isMasked)[linearIndex(index)];
 }
 
@@ -143,31 +143,31 @@ void DetectorInfo::setMasked(const size_t index, bool masked) {
 }
 
 /// Set the mask flag of the detector with given index. Not thread safe.
-void DetectorInfo::setMasked(const std::pair<size_t, size_t> index,
+void DetectorInfo::setMasked(const std::pair<size_t, size_t> &index,
                              bool masked) {
   m_isMasked.access()[linearIndex(index)] = masked;
 }
 
 /// Returns the position of the detector with given index.
 Eigen::Vector3d
-DetectorInfo::position(const std::pair<size_t, size_t> index) const {
+DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
   return (*m_positions)[linearIndex(index)];
 }
 
 /// Returns the rotation of the detector with given index.
 Eigen::Quaterniond
-DetectorInfo::rotation(const std::pair<size_t, size_t> index) const {
+DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
   return (*m_rotations)[linearIndex(index)];
 }
 
 /// Set the position of the detector with given index.
-void DetectorInfo::setPosition(const std::pair<size_t, size_t> index,
+void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
                                const Eigen::Vector3d &position) {
   m_positions.access()[linearIndex(index)] = position;
 }
 
 /// Set the rotation of the detector with given index.
-void DetectorInfo::setRotation(const std::pair<size_t, size_t> index,
+void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
                                const Eigen::Quaterniond &rotation) {
   m_rotations.access()[linearIndex(index)] = rotation.normalized();
 }
@@ -184,7 +184,7 @@ size_t DetectorInfo::scanCount(const size_t index) const {
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Kernel::DateAndTime. */
 std::pair<int64_t, int64_t>
-DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
+DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   if (!m_scanIntervals)
     return {0, 0};
   return (*m_scanIntervals)[linearIndex(index)];
@@ -194,8 +194,9 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> index) const {
  *
  * The interval start and end values would typically correspond to nanoseconds
  * since 1990, as in Kernel::DateAndTime. */
-void DetectorInfo::setScanInterval(const std::pair<size_t, size_t> index,
-                                   std::pair<int64_t, int64_t> interval) {
+void DetectorInfo::setScanInterval(
+    const std::pair<size_t, size_t> &index,
+    const std::pair<int64_t, int64_t> &interval) {
   if (!m_scanIntervals)
     initScanIntervals();
   // We forbid this since we (currently?) can not verify that the new interval

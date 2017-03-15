@@ -71,27 +71,27 @@ public:
   bool isScanning() const;
 
   bool isMonitor(const size_t index) const;
-  bool isMonitor(const std::pair<size_t, size_t> index) const;
+  bool isMonitor(const std::pair<size_t, size_t> &index) const;
   bool isMasked(const size_t index) const;
-  bool isMasked(const std::pair<size_t, size_t> index) const;
+  bool isMasked(const std::pair<size_t, size_t> &index) const;
   void setMasked(const size_t index, bool masked);
-  void setMasked(const std::pair<size_t, size_t> index, bool masked);
+  void setMasked(const std::pair<size_t, size_t> &index, bool masked);
   Eigen::Vector3d position(const size_t index) const;
   Eigen::Vector3d position(const std::pair<size_t, size_t> index) const;
   Eigen::Quaterniond rotation(const size_t index) const;
   Eigen::Quaterniond rotation(const std::pair<size_t, size_t> index) const;
   void setPosition(const size_t index, const Eigen::Vector3d &position);
-  void setPosition(const std::pair<size_t, size_t> index,
+  void setPosition(const std::pair<size_t, size_t> &index,
                    const Eigen::Vector3d &position);
   void setRotation(const size_t index, const Eigen::Quaterniond &rotation);
-  void setRotation(const std::pair<size_t, size_t> index,
+  void setRotation(const std::pair<size_t, size_t> &index,
                    const Eigen::Quaterniond &rotation);
 
   size_t scanCount(const size_t index) const;
   std::pair<int64_t, int64_t>
-  scanInterval(const std::pair<size_t, size_t> index) const;
-  void setScanInterval(const std::pair<size_t, size_t> index,
-                       std::pair<int64_t, int64_t> interval);
+  scanInterval(const std::pair<size_t, size_t> &index) const;
+  void setScanInterval(const std::pair<size_t, size_t> &index,
+                       const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
 
