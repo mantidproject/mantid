@@ -42,7 +42,7 @@ SpectrumInfo::sharedSpectrumDefinitions() const {
 
 /// Returns true if the detector(s) associated with the spectrum are monitors.
 bool SpectrumInfo::isMonitor(const size_t index) const {
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     if (!m_detectorInfo.isMonitor(detIndex))
       return false;
   return true;
@@ -51,7 +51,7 @@ bool SpectrumInfo::isMonitor(const size_t index) const {
 /// Returns true if the detector(s) associated with the spectrum are masked.
 bool SpectrumInfo::isMasked(const size_t index) const {
   bool masked = true;
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     masked &= m_detectorInfo.isMasked(detIndex);
   return masked;
 }
@@ -63,7 +63,7 @@ bool SpectrumInfo::isMasked(const size_t index) const {
  */
 double SpectrumInfo::l2(const size_t index) const {
   double l2{0.0};
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     l2 += m_detectorInfo.l2(detIndex);
   return l2 / static_cast<double>(spectrumDefinition(index).size());
 }
@@ -75,7 +75,7 @@ double SpectrumInfo::l2(const size_t index) const {
  */
 double SpectrumInfo::twoTheta(const size_t index) const {
   double twoTheta{0.0};
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     twoTheta += m_detectorInfo.twoTheta(detIndex);
   return twoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
@@ -87,7 +87,7 @@ double SpectrumInfo::twoTheta(const size_t index) const {
  */
 double SpectrumInfo::signedTwoTheta(const size_t index) const {
   double signedTwoTheta{0.0};
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     signedTwoTheta += m_detectorInfo.signedTwoTheta(detIndex);
   return signedTwoTheta / static_cast<double>(spectrumDefinition(index).size());
 }
@@ -95,7 +95,7 @@ double SpectrumInfo::signedTwoTheta(const size_t index) const {
 /// Returns the position of the spectrum with given index.
 Kernel::V3D SpectrumInfo::position(const size_t index) const {
   Kernel::V3D newPos;
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     newPos += m_detectorInfo.position(detIndex);
   return newPos / static_cast<double>(spectrumDefinition(index).size());
 }
@@ -118,7 +118,7 @@ bool SpectrumInfo::hasUniqueDetector(const size_t index) const {
  *
  * Currently this simply sets the mask flags for the underlying detectors. */
 void SpectrumInfo::setMasked(const size_t index, bool masked) {
-  for (const auto detIndex : getDetectorIndices(index))
+  for (const auto &detIndex : checkAndGetSpectrumDefinition(index))
     m_detectorInfo.setMasked(detIndex, masked);
 }
 
@@ -175,7 +175,7 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
 }
 
 const SpectrumDefinition &
-SpectrumInfo::getDetectorIndices(const size_t index) const {
+SpectrumInfo::checkAndGetSpectrumDefinition(const size_t index) const {
   if (spectrumDefinition(index).size() == 0)
     throw Kernel::Exception::NotFoundError(
         "SpectrumInfo: No detectors for this workspace index.", "");

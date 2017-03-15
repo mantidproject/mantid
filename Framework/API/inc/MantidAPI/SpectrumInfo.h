@@ -103,7 +103,8 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  const SpectrumDefinition &getDetectorIndices(const size_t index) const;
+  const SpectrumDefinition &
+  checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
   DetectorInfo &m_detectorInfo;
