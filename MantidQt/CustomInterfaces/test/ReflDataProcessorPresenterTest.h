@@ -49,46 +49,20 @@ private:
   createPrefilledWorkspace(const std::string &wsName,
                            const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "13460"
-        << "0.7"
-        << "13463,13464"
-        << "0.01"
-        << "0.06"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "0"
-        << "13462"
-        << "2.3"
-        << "13463,13464"
-        << "0.035"
-        << "0.3"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "13469"
-        << "0.7"
-        << "13463,13464"
-        << "0.01"
-        << "0.06"
-        << "0.04"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "1"
-        << "13470"
-        << "2.3"
-        << "13463,13464"
-        << "0.01"
-        << "0.06"
-        << "0.04"
-        << "1"
-        << "";
+    const std::vector<std::string> group{"0", "0", "1", "1"};
+    const std::vector<std::string> run{"13460", "13462", "13469", "13470"};
+    const std::vector<std::string> angle{"0.7", "2.3", "0.7", "2.3"};
+    const std::string transRun = "13463,13464";
+    const std::vector<std::string> qMin{"0.01", "0.035", "0.01", "0.01"};
+    const std::vector<std::string> qMax{"0.06", "0.3", "0.06", "0.06"};
+    const std::string dqq = "0.04";
+    const std::string scale = "1";
+    const std::string options = "";
+    for (int i = 0; i < 4; ++i) {
+      TableRow row = ws->appendRow();
+      row << group[i] << run[i] << angle[i] << transRun << qMin[i] << qMax[i]
+          << dqq << scale << options;
+    }
     return ws;
   }
 
@@ -96,44 +70,40 @@ private:
   createPrefilledMixedWorkspace(const std::string &wsName,
                                 const DataProcessorWhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
-    TableRow row = ws->appendRow();
-    row << "0"
-        << "38415"
-        << "0.5069"
-        << "38393"
-        << "0.0065"
-        << "0.0737"
-        << "0.0148"
-        << "1"
-        << "";
-    row = ws->appendRow();
-    row << "0"
-        << "38417"
-        << "0.5069"
-        << "38393"
-        << "0.0065"
-        << "0.0737"
-        << "0.0198"
-        << "1"
-        << "";
+    const std::string group = "0";
+    const std::vector<std::string> run{"38415", "38417"};
+    const std::string angle = "0.5069";
+    const std::string transRun = "38393";
+    const std::string qMin = "0.0065";
+    const std::string qMax = "0.0737";
+    const std::vector<std::string> dqq{"0.0148", "0.0198"};
+    const std::string scale = "1";
+    const std::string options = "";
+    for (int i = 0; i < 2; ++i) {
+      TableRow row = ws->appendRow();
+      row << group << run[i] << angle << transRun << qMin << qMax << dqq[i]
+          << scale << options;
+    }
     return ws;
   }
 
   ITableWorkspace_sptr
   createPrefilledMinimalWorkspace(const std::string &wsName,
                                   const DataProcessorWhiteList &whitelist) {
+
     auto ws = createWorkspace(wsName, whitelist);
+    const std::string group = "0";
+    const std::string run = "38415";
+    const std::string angle = "0.5069";
+    const std::string transRun = "";
+    const std::string qMin = "0.0065";
+    const std::string qMax = "0.0737";
+    const std::string dqq = "0.0148";
+    const std::string scale = "1";
+    const std::string options = "";
     TableRow row = ws->appendRow();
-    row << "0"
-        << "38415"
-        << "0.5069"
-        << ""
-        << "0.0065"
-        << "0.0737"
-        << "0.0148"
-        << "1"
-        << "";
-    row = ws->appendRow();
+    row << group << run << angle << transRun << qMin << qMax << dqq << scale
+        << options;
     return ws;
   }
 
@@ -166,8 +136,8 @@ public:
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-        .Times(1)
-        .WillRepeatedly(Return("TestWorkspace"));
+      .Times(1)
+      .WillRepeatedly(Return("TestWorkspace"));
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     std::set<int> groupList;
@@ -178,72 +148,59 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-        .Times(1)
-        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+      .Times(1)
+      .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-        .Times(1)
-        .WillRepeatedly(Return(groupList));
+      .Times(1)
+      .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
-        .Times(1)
-        .WillOnce(Return("0,10,20,30"));
+      .Times(1)
+      .WillOnce(Return("0,10,20,30"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-        .Times(6)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+      .Times(6)
+      .WillRepeatedly(Return(std::map<std::string, std::string>()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-        .Times(6)
-        .WillRepeatedly(Return(""));
+      .Times(6)
+      .WillRepeatedly(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-        .Times(3)
-        .WillRepeatedly(Return(""));
+      .Times(3)
+      .WillRepeatedly(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-        .Times(1)
-        .WillOnce(Return(false));
+      .Times(1)
+      .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-        .Times(14)
-        .WillRepeatedly(Return("INTER"));
+      .Times(14)
+      .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Check output workspaces were created as expected
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460_20_30"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13462_20_30"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_20_30"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_20_30"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "IvsQ_13460_0_10_13462_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "IvsQ_13460_10_20_13462_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(
-        "IvsQ_13460_20_30_13462_20_30"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13460_0_10"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13460_10_20"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13460_20_30"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13462_0_10"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13462_10_20"));
-    TS_ASSERT(
-        AnalysisDataService::Instance().doesExist("IvsQ_binned_13462_20_30"));
+    for (size_t i = 0; i < 30; i += 10) {
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_13460_" + std::to_string(i) + "_" + std::to_string(i + 10) +
+          "_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13460_" + std::to_string(i) + "_" +
+          std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13462_" + std::to_string(i) + "_" +
+          std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "TOF_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "TOF_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+    }
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_20_30"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_0_10"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_10_20"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_20_30"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
@@ -251,41 +208,7 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsLam_13460_0_10");
-    AnalysisDataService::Instance().remove("IvsLam_13460_10_20");
-    AnalysisDataService::Instance().remove("IvsLam_13460_20_30");
-    AnalysisDataService::Instance().remove("IvsLam_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsLam_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsLam_13462_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_13460_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13460_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13460_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13462_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_13460_0_10_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13460_10_20_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13460_20_30_13462_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13460_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13460_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13460_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_binned_13462_20_30");
-    AnalysisDataService::Instance().remove("TOF_13460");
-    AnalysisDataService::Instance().remove("TOF_13462");
-    AnalysisDataService::Instance().remove("TOF_13460_0_10");
-    AnalysisDataService::Instance().remove("TOF_13460_10_20");
-    AnalysisDataService::Instance().remove("TOF_13460_20_30");
-    AnalysisDataService::Instance().remove("TOF_13462_0_10");
-    AnalysisDataService::Instance().remove("TOF_13462_10_20");
-    AnalysisDataService::Instance().remove("TOF_13462_20_30");
-    AnalysisDataService::Instance().remove("TOF_13460_monitors");
-    AnalysisDataService::Instance().remove("TOF_13462_monitors");
-    AnalysisDataService::Instance().remove("TRANS_13463");
-    AnalysisDataService::Instance().remove("TRANS_13464");
-    AnalysisDataService::Instance().remove("TRANS_13463_13464");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -338,13 +261,7 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsLam_38415_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_38415_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_binned_38415_0_10");
-    AnalysisDataService::Instance().remove("TOF_38415");
-    AnalysisDataService::Instance().remove("TOF_38415_0_10");
-    AnalysisDataService::Instance().remove("TOF_38415_monitors");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -396,17 +313,7 @@ public:
     presenter->notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsLam_38415");
-    AnalysisDataService::Instance().remove("IvsLam_38417");
-    AnalysisDataService::Instance().remove("IvsQ_38415");
-    AnalysisDataService::Instance().remove("IvsQ_38417");
-    AnalysisDataService::Instance().remove("IvsQ_38415_38417");
-    AnalysisDataService::Instance().remove("IvsQ_binned_38415");
-    AnalysisDataService::Instance().remove("IvsQ_binned_38417");
-    AnalysisDataService::Instance().remove("TOF_38415");
-    AnalysisDataService::Instance().remove("TOF_38417");
-    AnalysisDataService::Instance().remove("TRANS_38393");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -469,13 +376,7 @@ public:
     presenter->notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_13460_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13460_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13460_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13462_20_30");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -537,13 +438,7 @@ public:
     presenter->notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("IvsQ_13460_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13460_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13460_20_30");
-    AnalysisDataService::Instance().remove("IvsQ_13462_0_10");
-    AnalysisDataService::Instance().remove("IvsQ_13462_10_20");
-    AnalysisDataService::Instance().remove("IvsQ_13462_20_30");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -581,8 +476,7 @@ public:
     presenter->notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("13460");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
@@ -621,9 +515,7 @@ public:
     presenter->notify(DataProcessorPresenter::PlotRowFlag);
 
     // Tidy up
-    AnalysisDataService::Instance().remove("TestWorkspace");
-    AnalysisDataService::Instance().remove("13460");
-    AnalysisDataService::Instance().remove("13462");
+    AnalysisDataService::Instance().clear();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
