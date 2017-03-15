@@ -2,12 +2,23 @@
 #define MANTID_API_APICOMPONENTVISITOR_H_
 
 #include "MantidAPI/DllConfig.h"
-
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include <cstddef>
 
 namespace Mantid {
+
+namespace Geometry {
+class IComponent;
+class ICompAssembly;
+class IDetector;
+}
+
 namespace API {
 
-/** APIComponentVisitor : TODO: DESCRIPTION
+class DetectorInfo;
+
+/** APIComponentVisitor : Visitor for components with access to API wrapping
+  features.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,9 +41,31 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL APIComponentVisitor {
-public:};
+class MANTID_API_DLL APIComponentVisitor
+    : public Mantid::Geometry::ComponentVisitor {
+private:
+  std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  std::vector<std::vector<size_t>> m_componentDetectorIndexes;
+  const Mantid::API::DetectorInfo &m_detectorInfo;
 
+public:
+  APIComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo);
+
+  virtual void registerComponentAssembly(
+      const Mantid::Geometry::ICompAssembly &bank,
+      std::vector<size_t> &parentDetectorIndexes) override;
+
+  virtual void
+  registerGenericComponent(const Mantid::Geometry::IComponent &component,
+                           std::vector<size_t> &) override;
+  virtual void
+  registerDetector(const Mantid::Geometry::IDetector &detector,
+                   std::vector<size_t> &parentDetectorIndexes) override;
+
+  virtual ~APIComponentVisitor();
+  std::vector<Mantid::Geometry::IComponent *> componentIds() const;
+  std::vector<std::vector<size_t>> componentDetectorIndexes() const;
+};
 } // namespace API
 } // namespace Mantid
 

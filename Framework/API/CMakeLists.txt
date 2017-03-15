@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/ADSValidator.cpp
+	src/APIComponentVisitor.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp

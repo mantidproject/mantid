@@ -1,5 +1,6 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include <chrono>
+#include "MantidAPI/APIComponentVisitor.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
@@ -185,90 +186,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-std::vector<size_t> registerComponentInfo(
-    std::vector<std::vector<size_t>> &componentDetectorIndexes,
-    std::vector<Mantid::Geometry::ComponentID> &componentIds,
-    const IComponent &component, const DetectorInfo &detectorInfo) {
-  std::vector<size_t> localDetectorIndexes;
-  if (const auto *bank =
-          dynamic_cast<const Mantid::Geometry::ICompAssembly *>(&component)) {
-    std::vector<IComponent_const_sptr> bankChildren;
-    bank->getChildren(bankChildren, false);
-
-    for (const auto &child : bankChildren) {
-
-      if (const auto *detector =
-              dynamic_cast<const Mantid::Geometry::IDetector *>(child.get())) {
-        localDetectorIndexes.push_back(detectorInfo.indexOf(detector->getID()));
-        componentDetectorIndexes.emplace_back(std::vector<size_t>());
-        componentIds.emplace_back(detector->getComponentID());
-      } else {
-        auto childIndexes = registerComponentInfo(
-            componentDetectorIndexes, componentIds, *child, detectorInfo);
-        // We add all detector indexes from lower branches of the tree.
-        localDetectorIndexes.reserve(childIndexes.size() +
-                                     localDetectorIndexes.size());
-        localDetectorIndexes.insert(localDetectorIndexes.end(),
-                                    childIndexes.begin(), childIndexes.end());
-      }
-    }
-  }
-
-  componentDetectorIndexes.emplace_back(localDetectorIndexes);
-  componentIds.emplace_back(component.getComponentID());
-  return localDetectorIndexes;
-}
-
-class APIComponentVisitor : public Mantid::Geometry::ComponentVisitor {
-private:
-  std::vector<Mantid::Geometry::ComponentID> m_componentIds;
-  std::vector<std::vector<size_t>> m_componentDetectorIndexes;
-  const Mantid::API::DetectorInfo &m_detectorInfo;
-
-public:
-  APIComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo)
-      : m_detectorInfo(detectorInfo) {}
-  virtual void registerComponentAssembly(
-      const ICompAssembly &bank,
-      std::vector<size_t> &parentDetectorIndexes) override {
-
-    std::vector<size_t> localDetectorIndexes;
-    std::vector<IComponent_const_sptr> bankChildren;
-    bank.getChildren(bankChildren, false /*is recursive*/);
-
-    for (const auto &child : bankChildren) {
-      child->registerContents(*this, localDetectorIndexes);
-    }
-
-    parentDetectorIndexes.reserve(parentDetectorIndexes.size() +
-                                  localDetectorIndexes.size());
-    parentDetectorIndexes.insert(parentDetectorIndexes.end(),
-                                 localDetectorIndexes.begin(),
-                                 localDetectorIndexes.end());
-    m_componentDetectorIndexes.emplace_back(localDetectorIndexes);
-    m_componentIds.emplace_back(bank.getComponentID());
-  }
-  virtual void registerGenericComponent(const IComponent &component,
-                                        std::vector<size_t> &) override {
-    m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
-    m_componentIds.emplace_back(component.getComponentID());
-  }
-  virtual void
-  registerDetector(const IDetector &detector,
-                   std::vector<size_t> &parentDetectorIndexes) override {
-
-    parentDetectorIndexes.push_back(m_detectorInfo.indexOf(detector.getID()));
-    m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
-    m_componentIds.emplace_back(detector.getComponentID());
-  }
-  virtual ~APIComponentVisitor() {}
-  std::vector<Mantid::Geometry::ComponentID> componentIds() const {
-    return m_componentIds;
-  }
-  std::vector<std::vector<size_t>> componentDetectorIndexes() const {
-    return m_componentDetectorIndexes;
-  }
-};
 }
 
 boost::shared_ptr<Beamline::ComponentInfo>
