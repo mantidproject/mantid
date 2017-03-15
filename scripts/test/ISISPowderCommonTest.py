@@ -6,13 +6,8 @@ import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
 from isis_powder.routines import common, common_enums
 import isis_powder.abstract_inst
 
+
 class ISISPowderCommonTest(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
 
     def test_cal_map_dict_helper(self):
         missing_key_name = "wrong_key"
