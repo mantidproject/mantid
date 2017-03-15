@@ -130,7 +130,7 @@ struct PointsWorker {
 
 template <class ValueTypeT>
 static void InitializevtkMDHWSignalArray(
-    MDHistoWorkspace &ws, API::MDNormalization normalization, vtkIdType offset,
+    MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
     vtkMDHWSignalArray<ValueTypeT> *signal) {
   const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
   const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
@@ -173,7 +173,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const int nBinsY = static_cast<int>(m_workspace->getYDimension()->getNBins());
   const int nBinsZ = static_cast<int>(m_workspace->getZDimension()->getNBins());
 
-  const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+  const vtkIdType imageSize = static_cast<vtkIdType>(nBinsX) * nBinsY * nBinsZ;
 
   auto visualDataSet = vtkSmartPointer<vtkStructuredGrid>::New();
   visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
@@ -185,16 +185,17 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     offset = timestep * indexMultiplier[2];
   }
 
-  API::MDNormalization norm;
+  VisualNormalization norm;
   if (m_normalizationOption == AutoSelect) {
     // enum to enum.
-    norm = m_workspace->displayNormalization();
+    norm =
+        static_cast<VisualNormalization>(m_workspace->displayNormalization());
   } else {
-    norm = static_cast<API::MDNormalization>(m_normalizationOption);
+    norm = static_cast<VisualNormalization>(m_normalizationOption);
   }
 
   vtkDataArray *signal = nullptr;
-  if (norm == API::NoNormalization) {
+  if (norm == NoNormalization) {
     vtkNew<vtkDoubleArray> raw;
     signal = raw.Get();
     raw->SetVoidArray(m_workspace->getSignalArray(), imageSize, 1);

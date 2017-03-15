@@ -37,7 +37,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
 
     for (auto index = 0; index < imageSize; ++index) {
       double output1[1];
@@ -76,7 +76,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> ptIds;
 
@@ -114,7 +114,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> idList1, idList2;
 
@@ -135,7 +135,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(1);
@@ -162,7 +162,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
     TS_ASSERT_EQUALS(signal->LookupValue(1.0), -1);
     TS_ASSERT_EQUALS(signal->LookupTypedValue(1.0), -1);
     TS_ASSERT_EQUALS(signal->LookupValue(8.0), 0);
@@ -181,7 +181,7 @@ public:
     signal->InitializeArray(ws_sptr->getSignalArray(),
                             ws_sptr->getNumEventsArray(),
                             ws_sptr->getInverseVolume(),
-                            Mantid::VATES::NoNormalization, imageSize, offset);
+                            SignalArrayNormalization::None, imageSize, offset);
 
     vtkNew<vtkIdList> idList1, idList2;
     signal->LookupValue(0.0, idList1.GetPointer());
@@ -212,7 +212,7 @@ public:
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     m_signal->InitializeArray(
         ws_sptr->getSignalArray(), ws_sptr->getNumEventsArray(),
-        ws_sptr->getInverseVolume(), Mantid::VATES::NoNormalization, imageSize,
+        ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize,
         offset);
   }
 
