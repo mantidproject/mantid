@@ -55,8 +55,6 @@ class EnggFitPeaks(PythonAlgorithm):
 
     def PyExec(self):
 
-        import pydevd
-        pydevd.settrace('localhost', port=51205, stdoutToServer=True, stderrToServer=True)
         import EnggUtils
 
         # Get peaks in dSpacing from file
