@@ -97,7 +97,9 @@ public:
     }
   }
 
-  void testLookupMaskedValues() {
+  //Enable in next (v5.4) ParaView release
+  //https://gitlab.kitware.com/vtk/vtk/merge_requests/2593
+  void xtestLookupMaskedValues() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);
     vtkNew<vtkMDHWSignalArray<double>> signal;
