@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -452,6 +453,16 @@ const ParameterMap &DetectorGroup::parameterMap() const {
 /// Helper for legacy access mode. Always throws for DetectorGroup.
 size_t DetectorGroup::index() const {
   throw std::runtime_error("A DetectorGroup cannot have an index");
+}
+
+void DetectorGroup::registerContents(
+    class ComponentVisitor &visitor,
+    std::vector<size_t> &detectorIndexes) const {
+
+  // We register all subdetectors ignoring the group itself
+  for (auto it = m_detectors.begin(); it != m_detectors.end(); ++it) {
+    visitor.registerDetector((*it->second), detectorIndexes);
+  }
 }
 
 } // namespace Geometry
