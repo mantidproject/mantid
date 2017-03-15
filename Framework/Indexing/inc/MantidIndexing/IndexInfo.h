@@ -107,8 +107,8 @@ public:
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
-  void makeSpectrumNumberTranslator() const;
-  Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
+  void makeSpectrumNumberTranslator(
+      std::vector<SpectrumNumber> &&spectrumNumbers) const;
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
       nullptr};

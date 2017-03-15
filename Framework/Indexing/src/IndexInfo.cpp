@@ -2,6 +2,7 @@
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
@@ -14,13 +15,12 @@ namespace Indexing {
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
 IndexInfo::IndexInfo(const size_t globalSize)
-    : m_spectrumNumbers(
-          Kernel::make_cow<std::vector<SpectrumNumber>>(globalSize)),
-      m_detectorIDs(
+    : m_detectorIDs(
           Kernel::make_cow<std::vector<std::vector<DetectorID>>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
-  auto &specNums = m_spectrumNumbers.access();
+  std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
+  makeSpectrumNumberTranslator(std::move(specNums));
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -30,20 +30,20 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
   if (spectrumNumbers.size() != detectorIDs.size())
     throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
                              "and detector ID vectors");
-  m_spectrumNumbers.access() = std::move(spectrumNumbers);
   m_detectorIDs.access() = std::move(detectorIDs);
+  makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
-  if (!m_spectrumNumbers)
+  if (!m_detectorIDs)
     return 0;
-  return m_spectrumNumbers->size();
+  return m_detectorIDs->size();
 }
 
 /// Returns the spectrum number for given index.
 SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
-  return (*m_spectrumNumbers)[index];
+  return m_spectrumNumberTranslator->spectrumNumber(index);
 }
 
 /// Return a vector of the detector IDs for given index.
@@ -58,22 +58,19 @@ void IndexInfo::setSpectrumNumbers(
   if (size() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
-  m_spectrumNumbers.access() = std::move(spectrumNumbers);
-  m_spectrumNumberTranslator =
-      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
+  makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
 /// Set a contiguous range of spectrum numbers.
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
                                    const SpectrumNumber max) {
-  if (static_cast<int64_t>(size()) !=
-      static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1)
+  auto newSize = static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1;
+  if (static_cast<int64_t>(size()) != newSize)
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
-  auto &data = m_spectrumNumbers.access();
-  std::iota(data.begin(), data.end(), static_cast<int32_t>(min));
-  m_spectrumNumberTranslator =
-      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
+  std::vector<SpectrumNumber> specNums(newSize);
+  std::iota(specNums.begin(), specNums.end(), static_cast<int32_t>(min));
+  makeSpectrumNumberTranslator(std::move(specNums));
 }
 
 /// Set a single detector ID for each index.
@@ -134,7 +131,6 @@ IndexInfo::spectrumDefinitions() const {
  * If there are multiple partitions (MPI ranks), the returned set contains the
  * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet() const {
-  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet();
 }
 
@@ -145,7 +141,6 @@ SpectrumIndexSet IndexInfo::makeIndexSet() const {
  * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
                                          SpectrumNumber max) const {
-  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
@@ -156,7 +151,6 @@ SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
  * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
                                          GlobalSpectrumIndex max) const {
-  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(min, max);
 }
 
@@ -167,7 +161,6 @@ SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
  * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
-  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
 }
 
@@ -178,25 +171,19 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
  * subset of indices on this partition. */
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
-  makeSpectrumNumberTranslator();
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
 }
 
-void IndexInfo::makeSpectrumNumberTranslator() const {
-  // To support legacy code that creates workspaces with duplicate spectrum
-  // numbers we are currently creating the SpectrumNumberTranslator only when
-  // needed.
-  // Note that the lazy initialization implies that no sharing of
-  // SpectrumNumberTranslator will be set up for workspaces created before the
-  // first access.
+void IndexInfo::makeSpectrumNumberTranslator(
+    std::vector<SpectrumNumber> &&spectrumNumbers) const {
   // TODO We are not setting monitors currently. This is ok as long as we have
   // exactly one partition.
   PartitionIndex partition = 0;
-  RoundRobinPartitioner partitioner(
+  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
       1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
       std::vector<GlobalSpectrumIndex>{});
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
-      *m_spectrumNumbers, partitioner, partition);
+      std::move(spectrumNumbers), std::move(partitioner), partition);
 }
 
 } // namespace Indexing

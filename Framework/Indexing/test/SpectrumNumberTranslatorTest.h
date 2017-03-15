@@ -5,6 +5,7 @@
 
 #include "MantidIndexing/RoundRobinPartitioner.h"
 #include "MantidIndexing/SpectrumNumberTranslator.h"
+#include "MantidKernel/make_unique.h"
 
 using namespace Mantid;
 using namespace Indexing;
@@ -29,7 +30,7 @@ public:
     auto numbers = {2, 1, 4, 5};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     return {spectrumNumbers,
-            RoundRobinPartitioner(
+            Kernel::make_unique<RoundRobinPartitioner>(
                 ranks, PartitionIndex(0),
                 Partitioner::MonitorStrategy::CloneOnEachPartition,
                 std::vector<GlobalSpectrumIndex>{}),
@@ -55,23 +56,43 @@ public:
     auto numbers = {1, 2, 3, 4};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
-        spectrumNumbers, RoundRobinPartitioner(
+        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
         PartitionIndex(0)));
   }
 
-  void test_construct_fail() {
+  void test_construct_bad_spectrum_numbers() {
     auto numbers = {1, 2, 3, 3};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
-    TS_ASSERT_THROWS(SpectrumNumberTranslator(
-                         spectrumNumbers,
-                         RoundRobinPartitioner(
+    // This works, but functionality is limited, see tests below.
+    TS_ASSERT_THROWS_NOTHING(SpectrumNumberTranslator(
+        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
-                         PartitionIndex(0)),
+        PartitionIndex(0)));
+  }
+
+  void test_access_bad_spectrum_numbers() {
+    auto numbers = {1, 2, 3, 3};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    SpectrumNumberTranslator translator(
+        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0));
+
+    TS_ASSERT_THROWS_NOTHING(translator.spectrumNumber(0));
+    TS_ASSERT_THROWS(translator.makeIndexSet(), std::logic_error);
+    TS_ASSERT_THROWS(
+        translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)),
+        std::logic_error);
+    TS_ASSERT_THROWS(translator.makeIndexSet(makeSpectrumNumbers({1})),
+                     std::logic_error);
+    TS_ASSERT_THROWS(translator.makeIndexSet(makeGlobalSpectrumIndices({1})),
                      std::logic_error);
   }
 
@@ -79,7 +100,7 @@ public:
     auto numbers = {1, 0, 4, -1};
     std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
     SpectrumNumberTranslator translator(
-        spectrumNumbers, RoundRobinPartitioner(
+        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
                              1, PartitionIndex(0),
                              Partitioner::MonitorStrategy::CloneOnEachPartition,
                              std::vector<GlobalSpectrumIndex>{}),
@@ -89,6 +110,22 @@ public:
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({0}))[0], 1);
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({4}))[0], 2);
     TS_ASSERT_EQUALS(translator.makeIndexSet(makeSpectrumNumbers({-1}))[0], 3);
+  }
+
+  void test_spectrumNumber() {
+    auto numbers = {1, 0, 4, -1};
+    std::vector<SpectrumNumber> spectrumNumbers(numbers.begin(), numbers.end());
+    SpectrumNumberTranslator translator(
+        spectrumNumbers, Kernel::make_unique<RoundRobinPartitioner>(
+                             1, PartitionIndex(0),
+                             Partitioner::MonitorStrategy::CloneOnEachPartition,
+                             std::vector<GlobalSpectrumIndex>{}),
+        PartitionIndex(0));
+
+    TS_ASSERT_EQUALS(translator.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(translator.spectrumNumber(1), 0);
+    TS_ASSERT_EQUALS(translator.spectrumNumber(2), 4);
+    TS_ASSERT_EQUALS(translator.spectrumNumber(3), -1);
   }
 
   void test_makeIndexSet_full_1_rank() {

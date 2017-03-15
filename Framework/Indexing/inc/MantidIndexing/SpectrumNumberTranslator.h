@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 namespace Mantid {
@@ -46,8 +47,10 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers,
-                           const Partitioner &partitioner,
+                           std::unique_ptr<Partitioner> partitioner,
                            const PartitionIndex &partition);
+
+  SpectrumNumber spectrumNumber(const size_t index) const;
 
   SpectrumIndexSet makeIndexSet() const;
   SpectrumIndexSet makeIndexSet(SpectrumNumber min, SpectrumNumber max) const;
@@ -59,6 +62,8 @@ public:
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
+  void checkUniqueSpectrumNumbers() const;
+
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {
       return std::hash<std::int32_t>()(
@@ -66,11 +71,14 @@ private:
     }
   };
 
+  std::unique_ptr<Partitioner> m_partitioner;
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_partitions;
   std::map<SpectrumNumber, size_t> m_indices;
   std::map<GlobalSpectrumIndex, size_t> m_globalToLocal;
+  std::vector<SpectrumNumber> m_spectrumNumbers;
+  std::vector<SpectrumNumber> m_globalSpectrumNumbers;
 };
 
 } // namespace Indexing
