@@ -72,24 +72,6 @@ class Function(object):
         for param in kwargs:
             self._params[param] = kwargs[param]
 
-        # self._ties = {}
-        # self._constraints = []
-
-    # def copyFrom(self, attrib, params, ties, constraints):
-    #     """Make shallow copies of the member collections"""
-    #     from copy import copy
-    #     self._attrib = copy(attrib)
-    #     self._params = copy(params)
-    #     self._ties = copy(ties)
-    #     self._constraints = copy(constraints)
-    #
-    # def clone(self):
-    #     """Make a copy of self."""
-    #     function = Function(self._name)
-    #     # Make shallow copies of the member collections
-    #     function.copyFrom(self._attrib, self._params, self._ties, self._constraints)
-    #     return function
-
     @property
     def name(self):
         """Read only name of this function"""
@@ -129,48 +111,6 @@ class Function(object):
         if self.prefix != '':
             raise RuntimeError('Cannot convert to string a part of function')
         return str(self.function)
-    #     attrib = ['%s=%s' % item for item in self._attrib.items()] + \
-    #              ['%s=%s' % item for item in self._params.items()]
-    #     if len(attrib) > 0:
-    #         out = 'name=%s,%s' % (self._name, ','.join(attrib))
-    #     else:
-    #         out = 'name=%s' % self._name
-    #     ties = ','.join(['%s=%s' % item for item in self._ties.items()])
-    #     if len(ties) > 0:
-    #         out += ',ties=(%s)' % ties
-    #     constraints = ','.join(self._constraints)
-    #     if len(constraints) > 0:
-    #         out += ',constraints=(%s)' % constraints
-    #     return out
-    #
-    # def paramString(self, prefix):
-    #     """Create a string with only parameters and attributes settings.
-    #         The prefix is prepended to all attribute names.
-    #     """
-    #     attrib = ['%s%s=%s' % ((prefix,) + item) for item in self._attrib.items()] + \
-    #              ['%s%s=%s' % ((prefix,) + item) for item in self._params.items()]
-    #     return ','.join(attrib)
-    #
-    # def tiesString(self, prefix):
-    #     """Create a string with only ties settings.
-    #         The prefix is prepended to all parameter names.
-    #     """
-    #     ties = ['%s%s=%s' % ((prefix,) + item) for item in self._ties.items()]
-    #     return ','.join(ties)
-    #
-    # def constraintsString(self, prefix):
-    #     """Create a string with only constraints settings.
-    #         The prefix is prepended to all parameter names.
-    #     """
-    #     if len(prefix) > 0:
-    #         constraints = []
-    #         for constraint in self._constraints:
-    #             constraint = re.sub(parNamePattern, prefix + '\\1', constraint)
-    #             constraints.append(constraint)
-    #     else:
-    #         constraints = self._constraints
-    #     return ','.join(constraints)
-    #
 
     def update(self, function):
         """
@@ -243,42 +183,6 @@ class CompositeProperties(object):
         for arg in args:
             constraint = re.sub(parNamePattern, '%s\\1' % self.prefix, arg)
             self.function.addConstraints(constraint)
-
-    # def getSize(self):
-    #     """Get number of maps (functions) defined here"""
-    #     keys = list(self._properties.keys())
-    #     if len(keys) > 0:
-    #         return max(keys) + 1
-    #     return 0
-    #
-    # def toStringList(self):
-    #     """Format all properties into a list of strings where each string is a comma-separated
-    #     list of name=value pairs.
-    #     """
-    #     prop_list = []
-    #     for i in range(self.getSize()):
-    #         if i in self._properties:
-    #             props = self._properties[i]
-    #             prop_list.append(','.join(['%s=%s' % item for item in sorted(props.items())]))
-    #         else:
-    #             prop_list.append('')
-    #     return prop_list
-    #
-    # def toCompositeString(self, prefix, shift=0):
-    #     """Format all properties as a comma-separated list of name=value pairs where name is formatted
-    #     in the CompositeFunction style.
-    #
-    #     Example:
-    #         'f0.Height=100,f0.Sigma=1.0,f1.Height=120,f1.Sigma=2.0,f5.Height=300,f5.Sigma=3.0'
-    #     """
-    #     out = ''
-    #     for i in self._properties:
-    #         fullPrefix = '%sf%s.' % (prefix, i + shift)
-    #         props = self._properties[i]
-    #         if len(out) > 0:
-    #             out += ','
-    #         out += ','.join(['%s%s=%s' % ((fullPrefix,) + item) for item in sorted(props.items())])
-    #     return out[:]
 
 
 class PeaksFunction(object):
@@ -378,68 +282,6 @@ class PeaksFunction(object):
         pattern = re.sub(parNamePattern, 'f%s.\\1', constraint)
         self.constraints(*[pattern % i for i in range(start, end)])
 
-    def nPeaks(self):
-        """Get the number of peaks"""
-        numPeaks = max(self._attrib.getSize(), self._params.getSize())
-        if numPeaks == 0:
-            raise RuntimeError('PeaksFunction has no defined parameters or attributes.')
-        return numPeaks
-
-    def toString(self):
-        """Create function initialisation string"""
-        numPeaks = self.nPeaks()
-        attribs = self._attrib.toStringList()
-        params = self._params.toStringList()
-        if len(attribs) < numPeaks:
-            attribs += [''] * (numPeaks - len(attribs))
-        if len(params) < numPeaks:
-            params += [''] * (numPeaks - len(params))
-        peaks = []
-        for i in range(numPeaks):
-            attrib = attribs[i]
-            param = params[i]
-            if len(attrib) != 0 or len(param) != 0:
-                if len(attrib) == 0:
-                    peaks.append('name=%s,%s' % (self._name, param))
-                elif len(param) == 0:
-                    peaks.append('name=%s,%s' % (self._name, attrib))
-                else:
-                    peaks.append('name=%s,%s,%s' % (self._name, attrib,param))
-            else:
-                peaks.append('name=%s' % self._name)
-        out = ';'.join(peaks)
-        if len(self._ties) > 0:
-            out += ';%s' % self.tiesString()
-        return out
-
-    def paramString(self, prefix='', shift=0):
-        """Format a comma-separated list of all peaks attributes and parameters in a CompositeFunction
-        style.
-        """
-        numAttributes = self._attrib.getSize()
-        numParams = self._params.getSize()
-        if numAttributes == 0 and numParams == 0:
-            return ''
-        elif numAttributes == 0:
-            return self._params.toCompositeString(prefix, shift)
-        elif numParams == 0:
-            return self._attrib.toCompositeString(prefix, shift)
-        else:
-            return '%s,%s' % (self._attrib.toCompositeString(prefix, shift),
-                              self._params.toCompositeString(prefix, shift))
-
-    def tiesString(self, prefix=''):
-        if len(self._ties) > 0:
-            ties = ','.join(self._ties)
-            return 'ties=(%s)' % re.sub(parNamePattern, prefix + '\\1', ties)
-        return ''
-
-    def constraintsString(self, prefix=''):
-        if len(self._constraints) > 0:
-            constraints = ','.join(self._constraints)
-            return 'constraints=(%s)' % re.sub(parNamePattern, prefix + '\\1', constraints)
-        return ''
-
 
 class Background(object):
     """Object representing spectrum background: a sum of a central peak and a
@@ -464,16 +306,6 @@ class Background(object):
             aCopy.background = self.background.clone()
         return aCopy
 
-    # def __mul__(self, nCopies):
-    #     """Make expressions like Background(...) * 8 return a list of 8 identical backgrounds."""
-    #     copies = [self] * nCopies
-    #     return list(map(Background.clone, copies))
-    #     # return [self.clone() for i in range(nCopies)]
-    #
-    # def __rmul__(self, nCopies):
-    #     """Make expressions like 2 * Background(...) return a list of 2 identical backgrounds."""
-    #     return self.__mul__(nCopies)
-
     def toString(self):
         if self.peak is None and self.background is None:
             return ''
@@ -482,56 +314,6 @@ class Background(object):
         if self.background is None:
             return self.peak.toString()
         return '(%s;%s)' % (self.peak.toString(), self.background.toString())
-
-    def nameString(self):
-        if self.peak is None and self.background is None:
-            return ''
-        if self.peak is None:
-            return self.background.name
-        if self.background is None:
-            return self.peak.name
-        return '"name=%s;name=%s"' % (self.peak.name, self.background.name)
-
-    def paramString(self, prefix):
-        if self.peak is None and self.background is None:
-            return ''
-        if self.peak is None:
-            return self.background.paramString(prefix)
-        if self.background is None:
-            return self.peak.paramString(prefix)
-        return '%s,%s' % (self.peak.paramString(prefix + 'f0.'), self.background.paramString(prefix + 'f1.'))
-
-    def tiesString(self, prefix):
-        if self.peak is None and self.background is None:
-            return ''
-        if self.peak is None:
-            return self.background.tiesString(prefix)
-        if self.background is None:
-            return self.peak.tiesString(prefix)
-        peakString = self.peak.tiesString(prefix + 'f0.')
-        backgroundString = self.background.tiesString(prefix + 'f1.')
-        if len(peakString) == 0:
-            return backgroundString
-        elif len(backgroundString) == 0:
-            return peakString
-        else:
-            return '%s,%s' % (peakString, backgroundString)
-
-    def constraintsString(self, prefix):
-        if self.peak is None and self.background is None:
-            return ''
-        if self.peak is None:
-            return self.background.constraintsString(prefix)
-        if self.background is None:
-            return self.peak.constraintsString(prefix)
-        peakString = self.peak.constraintsString(prefix + 'f0.')
-        backgroundString = self.background.constraintsString(prefix + 'f1.')
-        if len(peakString) == 0:
-            return backgroundString
-        elif len(backgroundString) == 0:
-            return peakString
-        else:
-            return '%s,%s' % (peakString, backgroundString)
 
     def update(self, func1, func2=None):
         """
@@ -596,6 +378,13 @@ class ResolutionModel:
                 return
         self._checkModel(model)
         self.model = model
+
+    @property
+    def NumberOfSpectra(self):
+        if not self.multi:
+            return 1
+        else:
+            return len(self.model)
 
     def _checkModel(self, model):
         if not isinstance(model, tuple):
