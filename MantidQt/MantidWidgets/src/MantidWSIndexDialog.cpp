@@ -25,6 +25,7 @@ namespace MantidWidgets {
 
   // String for plot types
   const QString MantidWSIndexWidget::SIMPLE_PLOT = "1D Plot";
+  const QString MantidWSIndexWidget::WATERFALL_PLOT = "Waterfall Plot";
   const QString MantidWSIndexWidget::SURFACE_PLOT = "Surface Plot of Group";
   const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot of Group";
 
@@ -240,7 +241,7 @@ bool MantidWSIndexWidget::is1DPlotSelected() const {
  * @returns True if waterfall plot selected
  */
 bool MantidWSIndexWidget::isWaterfallPlotSelected() const {
-  return (m_plotOptions->currentText() == "Waterfall Plot");
+  return (m_plotOptions->currentText() == WATERFALL_PLOT);
 }
 
 /**
@@ -339,7 +340,7 @@ void MantidWSIndexWidget::init() {
   initSpectraBox();
   initWorkspaceBox();
   initOptionsBoxes();
-  if (m_advanced && isSuitableForContourOrSurfacePlot()) {
+  if (m_advanced ) {
     initLogs();
   }
   setLayout(m_outer);
@@ -412,7 +413,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
     m_plotOptions = new QComboBox();
     m_plotOptions->addItem(SIMPLE_PLOT);
     if (m_waterfall) {
-      m_plotOptions->addItem(tr("Waterfall Plot"));
+      m_plotOptions->addItem(WATERFALL_PLOT);
     }
     if (m_tiled) {
       m_plotOptions->addItem(tr("Tiled Plot"));
@@ -477,12 +478,13 @@ void MantidWSIndexWidget::onLogSelected(const QString &logName) {
 
 
 void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
-  auto isSurfaceOrContourOption = plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT;
+  auto useLogNames = m_advanced && 
+    isSuitableForLogNames(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
-  m_logSelector->setEnabled(isSurfaceOrContourOption);
-  m_logValues->setEnabled(isSurfaceOrContourOption && isLogSelectorCustom);
+  m_logSelector->setEnabled(useLogNames);
+  m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
   m_logValues->clear();
-  m_axisNameEdit->setEnabled(isSurfaceOrContourOption);
+  m_axisNameEdit->setEnabled(useLogNames);
 }
 
 
@@ -538,6 +540,10 @@ Mantid::API::MatrixWorkspace_const_sptr MantidWSIndexWidget::getWorkspace(const 
 
 bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const {
   return (m_wsNames.size() > 2);
+}
+
+bool MantidWSIndexWidget::isSuitableForLogNames(const QString &plotOption) const {
+  return (plotOption == SIMPLE_PLOT || plotOption == WATERFALL_PLOT || plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT);
 }
 
 

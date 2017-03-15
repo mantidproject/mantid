@@ -278,6 +278,7 @@ public:
   static const QString CUSTOM;
   /// Strings for plot types
   static const QString SIMPLE_PLOT;
+  static const QString WATERFALL_PLOT;
   static const QString SURFACE_PLOT;
   static const QString CONTOUR_PLOT;
 
@@ -339,6 +340,8 @@ private:
   Mantid::API::MatrixWorkspace_const_sptr getWorkspace(const QString& workspaceName) const;
   /// Check if workspaces are suitable for contour or surface plot
   bool isSuitableForContourOrSurfacePlot() const;
+  /// Check if workspaces are suitable for use of log names
+  bool isSuitableForLogNames(const QString &plotOption) const;
   /// Gets the axis name
   const QString getAxisName() const;
   /// Gets the log name
