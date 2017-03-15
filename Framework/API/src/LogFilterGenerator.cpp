@@ -131,6 +131,8 @@ void LogFilterGenerator::filterByPeriod(LogFilter *filter) const {
 /**
  * Get log data from workspace
  * @param logName :: [input] Name of log to get
+ * @param warnIfNotFound :: If true log a warning if the sample log is not
+ * found, otherwise do not log a warning
  * @returns :: Pointer to log, or null if log does not exist in workspace
  */
 Property *LogFilterGenerator::getLogData(const std::string &logName,
