@@ -12,7 +12,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-//For vtkMDHWSignalArray.h
+// For vtkMDHWSignalArray.h
 #include "vtkArrayDispatchArrayList.h"
 #include "vtkDoubleArray.h"
 #include "vtkIdList.h"
@@ -20,8 +20,6 @@
 #include "vtkPoints.h"
 #include "vtkSmartPointer.h"
 #include "vtkStructuredGrid.h"
-
-
 
 using namespace Mantid::VATES;
 using namespace Mantid::DataObjects;
@@ -100,8 +98,8 @@ public:
     }
   }
 
-  //Enable in next (v5.4) ParaView release
-  //https://gitlab.kitware.com/vtk/vtk/merge_requests/2593
+  // Enable in next (v5.4) ParaView release
+  // https://gitlab.kitware.com/vtk/vtk/merge_requests/2593
   void xtestLookupMaskedValues() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 4);

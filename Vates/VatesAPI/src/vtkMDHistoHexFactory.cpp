@@ -9,7 +9,7 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
-//For vtkMDHWSignalArray.h
+// For vtkMDHWSignalArray.h
 #include "vtkArrayDispatchArrayList.h"
 #include "vtkDoubleArray.h"
 #include "vtkFloatArray.h"
@@ -131,8 +131,8 @@ struct PointsWorker {
 
 template <class ValueTypeT>
 static void InitializevtkMDHWSignalArray(
-    const MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
-    vtkMDHWSignalArray<ValueTypeT> *signal) {
+    const MDHistoWorkspace &ws, VisualNormalization normalization,
+    vtkIdType offset, vtkMDHWSignalArray<ValueTypeT> *signal) {
   const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
   const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
   const vtkIdType nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
