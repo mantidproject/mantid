@@ -1,7 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -9,6 +8,9 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
+
+//For vtkMDHWSignalArray.h
+#include "vtkArrayDispatchArrayList.h"
 
 #include "vtkDoubleArray.h"
 #include "vtkFloatArray.h"

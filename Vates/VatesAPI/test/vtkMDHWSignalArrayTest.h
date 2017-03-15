@@ -6,19 +6,22 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/Normalization.h"
-#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+//For vtkMDHWSignalArray.h
+#include "vtkArrayDispatchArrayList.h"
+#include "vtkDoubleArray.h"
 #include "vtkIdList.h"
-#include <vtkNew.h>
-#include <vtkSmartPointer.h>
-#include <vtkStructuredGrid.h>
-#include <vtkDoubleArray.h>
-#include <vtkPoints.h>
+#include "vtkNew.h"
+#include "vtkPoints.h"
+#include "vtkSmartPointer.h"
+#include "vtkStructuredGrid.h"
+
+
 
 using namespace Mantid::VATES;
 using namespace Mantid::DataObjects;
