@@ -93,6 +93,30 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         # Finally check it has took the new value (most recently set)
         self.assertEqual(inst_settings_obj.script_facing_name, new_value)
 
+    def test_inst_settings_enters_into_dicts(self):
+        param_entries = [
+            ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name"),
+            ParamMapEntry.ParamMapEntry(ext_name="user_facing_name2", int_name="script_facing_name2")
+        ]
+
+        expected_value = 101
+        # Check recursion of a dictionary containing a dictionary takes place
+        example_dict = {"user_facing_name": expected_value}
+        nested_dict = {"some_random_name": example_dict}
+
+        inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=param_entries, adv_conf_dict=nested_dict)
+        self.assertEqual(inst_settings_obj.script_facing_name, expected_value)
+
+        # Next check that any attributes that a mixed dictionary contains are added
+        mixed_dict = {"some_random_name2": example_dict,
+                      "user_facing_name2": expected_value * 2}
+
+        second_inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=param_entries,
+                                                                         adv_conf_dict=mixed_dict)
+
+        self.assertEqual(second_inst_settings_obj.script_facing_name, expected_value)
+        self.assertEqual(second_inst_settings_obj.script_facing_name2, expected_value * 2)
+
 
 if __name__ == "__main__":
     unittest.main()
