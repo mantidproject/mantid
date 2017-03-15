@@ -14,13 +14,13 @@ namespace Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
-IndexInfo::IndexInfo(const size_t globalSize)
-    : m_detectorIDs(
-          Kernel::make_cow<std::vector<std::vector<DetectorID>>>(globalSize)) {
+IndexInfo::IndexInfo(const size_t globalSize) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
   makeSpectrumNumberTranslator(std::move(specNums));
+  m_detectorIDs = Kernel::make_cow<std::vector<std::vector<DetectorID>>>(
+      m_spectrumNumberTranslator->localSize());
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -55,7 +55,7 @@ IndexInfo::detectorIDs(const size_t index) const {
 /// Set a spectrum number for each index.
 void IndexInfo::setSpectrumNumbers(
     std::vector<SpectrumNumber> &&spectrumNumbers) {
-  if (size() != spectrumNumbers.size())
+  if (m_spectrumNumberTranslator->globalSize() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
@@ -65,7 +65,7 @@ void IndexInfo::setSpectrumNumbers(
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
                                    const SpectrumNumber max) {
   auto newSize = static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1;
-  if (static_cast<int64_t>(size()) != newSize)
+  if (static_cast<int64_t>(m_spectrumNumberTranslator->globalSize()) != newSize)
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   std::vector<SpectrumNumber> specNums(newSize);
