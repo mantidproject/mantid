@@ -1987,12 +1987,11 @@ class NormalizeToMonitor(ReductionStep):
         This method sets default prompt peak values in case the user has not provided some. Currently
         we only use default values for LOQ.
         """
-        is_prompt_peak_not_set = reducer.transmission_calculator.removePromptPeakMin is None and\
-                                 reducer.transmission_calculator.removePromptPeakMax is None
-        if is_prompt_peak_not_set:
+        if (reducer.transmission_calculator.removePromptPeakMin is None and
+           reducer.transmission_calculator.removePromptPeakMax is None):
             if reducer.instrument.name() == "LOQ":
-                reducer.transmission_calculator.removePromptPeakMin = 19000.0 # Units of micro-seconds
-                reducer.transmission_calculator.removePromptPeakMax = 20500.0 # Units of micro-seconds
+                reducer.transmission_calculator.removePromptPeakMin = 19000.0  # Units of micro-seconds
+                reducer.transmission_calculator.removePromptPeakMax = 20500.0  # Units of micro-seconds
 
 
 class TransmissionCalc(ReductionStep):
