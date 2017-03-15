@@ -1,8 +1,8 @@
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/APIComponentVisitor.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/InfoComponentVisitor.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -191,7 +191,7 @@ makeComponentInfo(const Instrument &oldInstr,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  APIComponentVisitor visitor(detectorInfo);
+  InfoComponentVisitor visitor(detectorInfo);
   std::vector<size_t> detectorIndexes; // Not strictly needed at this level
 
   // Register everything via visitor

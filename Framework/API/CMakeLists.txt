@@ -1,6 +1,5 @@
 set ( SRC_FILES
 	src/ADSValidator.cpp
-	src/APIComponentVisitor.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -84,6 +83,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/InfoComponentVisitor.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
@@ -157,7 +157,6 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/ADSValidator.h
-	inc/MantidAPI/APIComponentVisitor.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -272,6 +271,7 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/InfoComponentVisitor.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h

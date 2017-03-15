@@ -1,4 +1,4 @@
-#include "MantidAPI/APIComponentVisitor.h"
+#include "MantidAPI/InfoComponentVisitor.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
@@ -9,11 +9,11 @@ namespace API {
 
 using namespace Mantid::Geometry;
 
-APIComponentVisitor::APIComponentVisitor(
+InfoComponentVisitor::InfoComponentVisitor(
     const Mantid::API::DetectorInfo &detectorInfo)
     : m_detectorInfo(detectorInfo) {}
 
-void APIComponentVisitor::registerComponentAssembly(
+void InfoComponentVisitor::registerComponentAssembly(
     const ICompAssembly &bank, std::vector<size_t> &parentDetectorIndexes) {
 
   // Local cache of immediate child detector indexes
@@ -40,7 +40,7 @@ void APIComponentVisitor::registerComponentAssembly(
   m_componentIds.emplace_back(bank.getComponentID());
 }
 
-void APIComponentVisitor::registerGenericComponent(const IComponent &component,
+void InfoComponentVisitor::registerGenericComponent(const IComponent &component,
                                                    std::vector<size_t> &) {
   /*
    * For a generic leaf component we extend the component ids list, but
@@ -49,7 +49,7 @@ void APIComponentVisitor::registerGenericComponent(const IComponent &component,
   m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
   m_componentIds.emplace_back(component.getComponentID());
 }
-void APIComponentVisitor::registerDetector(
+void InfoComponentVisitor::registerDetector(
     const IDetector &detector, std::vector<size_t> &parentDetectorIndexes) {
 
   /*
@@ -60,14 +60,14 @@ void APIComponentVisitor::registerDetector(
   m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
   m_componentIds.emplace_back(detector.getComponentID());
 }
-APIComponentVisitor::~APIComponentVisitor() {}
+InfoComponentVisitor::~InfoComponentVisitor() {}
 
 std::vector<Mantid::Geometry::ComponentID>
-APIComponentVisitor::componentIds() const {
+InfoComponentVisitor::componentIds() const {
   return m_componentIds;
 }
 std::vector<std::vector<size_t>>
-APIComponentVisitor::componentDetectorIndexes() const {
+InfoComponentVisitor::componentDetectorIndexes() const {
   return m_componentDetectorIndexes;
 }
 
