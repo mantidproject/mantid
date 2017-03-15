@@ -615,6 +615,13 @@ public:
     TS_ASSERT_EQUALS(ws_model->String(4, 1), "13469");
   }
 
+  void testCountRowsOfNonexistentGroup() {
+
+    QDataProcessorTwoLevelTreeModel model(oneRowTable(), m_whitelist);
+
+    TS_ASSERT_THROWS_NOTHING(model.rowCount(model.index(1, 0)));
+  }
+
 private:
   DataProcessorWhiteList m_whitelist;
 };
