@@ -1,5 +1,4 @@
 #include "MantidAPI/ExperimentInfo.h"
-#include <chrono>
 #include "MantidAPI/APIComponentVisitor.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ComponentInfo.h"
@@ -193,26 +192,16 @@ makeComponentInfo(const Instrument &oldInstr,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  using Time = std::chrono::high_resolution_clock;
-  auto start = Time::now();
-  // registerComponentInfo(componentDetectorIndexes, componentIds,
-  // oldInstr,detectorInfo);
-
   APIComponentVisitor visitor(detectorInfo);
   std::vector<size_t> detectorIndexes; // Not strictly needed at this level
+
+  // Register everything via visitor
   oldInstr.registerContents(visitor, detectorIndexes);
-
-  auto stop = Time::now();
-  auto dur = stop - start;
-  auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
-  std::cout << "registerComponentInfo Duration Milliseconds: " << millis.count()
-            << std::endl;
-
+  // Extract component ids. We need this for the ComponentInfo wrapper.
   componentIds = visitor.componentIds();
 
-  auto componentDetectorIndexes = visitor.componentDetectorIndexes();
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      std::move(componentDetectorIndexes));
+      visitor.componentDetectorIndexes());
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
