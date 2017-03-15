@@ -11,7 +11,6 @@
 
 //For vtkMDHWSignalArray.h
 #include "vtkArrayDispatchArrayList.h"
-
 #include "vtkDoubleArray.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
@@ -132,7 +131,7 @@ struct PointsWorker {
 
 template <class ValueTypeT>
 static void InitializevtkMDHWSignalArray(
-    MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
+    const MDHistoWorkspace &ws, VisualNormalization normalization, vtkIdType offset,
     vtkMDHWSignalArray<ValueTypeT> *signal) {
   const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
   const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
