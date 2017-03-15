@@ -936,8 +936,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   } // END-FOR (wsgroup)
 
   // Set output and do debug report
-  g_log.debug() << "Output workspace number: "
-                << numoutputws << "\n";
+  g_log.debug() << "Output workspace number: " << numoutputws << "\n";
   setProperty("NumberOutputWS", static_cast<int>(numoutputws));
 
   return;
@@ -1018,8 +1017,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
   } // END-FOR (wsgroup)
 
   // Set output and do debug report
-  g_log.debug() << "Output workspace number: "
-                << numoutputws << "\n";
+  g_log.debug() << "Output workspace number: " << numoutputws << "\n";
   setProperty("NumberOutputWS", static_cast<int>(numoutputws));
 
   return;
@@ -1667,8 +1665,8 @@ void FilterEvents::generateSplitterTSPalpha(
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     const std::vector<Kernel::TimeSeriesProperty<int> *> &split_tsp_vec) {
   if (m_useSplittersWorkspace) {
-    g_log.debug() << "There are " << split_tsp_vec.size() 
-	          << " TimeSeriesPropeties.\n";
+    g_log.debug() << "There are " << split_tsp_vec.size()
+                  << " TimeSeriesPropeties.\n";
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
     for (miter = m_outputWorkspacesMap.begin();
          miter != m_outputWorkspacesMap.end(); ++miter) {
