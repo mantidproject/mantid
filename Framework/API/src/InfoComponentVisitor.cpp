@@ -41,7 +41,7 @@ void InfoComponentVisitor::registerComponentAssembly(
 }
 
 void InfoComponentVisitor::registerGenericComponent(const IComponent &component,
-                                                   std::vector<size_t> &) {
+                                                    std::vector<size_t> &) {
   /*
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
