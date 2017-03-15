@@ -73,8 +73,12 @@ When performing the tolerance check for the warn or fail options it is always
 with respect to the first workspace in the merge. When choosing via the GUI
 this will be the first workspace that was selected.
 
-**Note:** this currently only works when the underying workspaces being merged are
+**Note:** this currently only works when the underlying workspaces being merged are
 Matrix Workspaces.
+
+**Note:** The sample log in the merged workspace is replaced in the case of Sum,
+Time Series and List merges. This means these merge types can not be used together
+for a given sample log.
 
 .. code-block:: xml
 

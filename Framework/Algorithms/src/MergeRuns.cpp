@@ -45,11 +45,10 @@ void MergeRuns::init() {
   declareProperty("SampleLogsTimeSeries", "",
                   "A comma separated list of the sample logs to merge into a "
                   "time series. The initial times are taken as the start times "
-                  "for the run, and the merged sample log is suffixed with "
-                  "\"_time_series\". Sample logs must be numeric.");
+                  "for the run. Sample logs must be numeric.");
   declareProperty("SampleLogsList", "",
                   "A comma separated list of the sample logs to merge into a "
-                  "list. The merged sample log is suffixed with \"_list\". ");
+                  "list. ");
   declareProperty("SampleLogsWarn", "", "A comma separated list of the sample "
                                         "logs to generate a warning if "
                                         "different when merging.");
@@ -68,9 +67,9 @@ void MergeRuns::init() {
                   "single value for all fail sample logs, or a comma "
                   "separated list of values (must be the same length as "
                   "SampleLogsFail).");
-  declareProperty(
-      "SampleLogsSum", "",
-      "A comma separated list of the sample logs to sum into a single entry.");
+  declareProperty("SampleLogsSum", "", "A comma separated list of the sample "
+                                       "logs to sum into a single entry.  "
+                                       "Sample logs must be numeric.");
   const std::vector<std::string> rebinOptions = {REBIN_BEHAVIOUR,
                                                  FAIL_BEHAVIOUR};
   declareProperty("RebinBehaviour", REBIN_BEHAVIOUR,
