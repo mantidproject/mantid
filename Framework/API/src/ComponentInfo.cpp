@@ -15,7 +15,7 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
                              std::vector<Geometry::ComponentID> &&componentIds)
     : m_componentInfo(componentInfo), m_componentIds(componentIds) {
 
-  if (m_componentInfo.size() != m_componentIds.size()){
+  if (m_componentInfo.size() != m_componentIds.size()) {
     throw std::invalid_argument("Mismatch between size of ComponentInfo and "
                                 "number of ComponentIDs provided");
   }

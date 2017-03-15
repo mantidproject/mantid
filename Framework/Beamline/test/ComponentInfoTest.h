@@ -20,25 +20,28 @@ public:
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
-  void test_default_size(){
-      ComponentInfo info;
-      TS_ASSERT_EQUALS(info.size(), 0);
+  void test_default_size() {
+    ComponentInfo info;
+    TS_ASSERT_EQUALS(info.size(), 0);
   }
 
   void test_detector_indexes() {
 
-      /*
-             |
-       ------------
-       |         | 30
-      -------
-      | 10  | 20
-      */
+    /*
+           |
+     ------------
+     |         | 30
+    -------
+    | 10  | 20
+    */
 
-    std::vector<std::vector<size_t>> indexes{{10, 20, 30}, {10, 20}, {}, {}, {}};
+    std::vector<std::vector<size_t>> indexes{
+        {10, 20, 30}, {10, 20}, {}, {}, {}};
     ComponentInfo info(indexes);
-    TS_ASSERT_EQUALS(info.detectorIndexes(0 /*component index*/), std::vector<size_t>({10, 20, 30}));
-    TS_ASSERT_EQUALS(info.detectorIndexes(1 /*component index*/), std::vector<size_t>({10, 20}));
+    TS_ASSERT_EQUALS(info.detectorIndexes(0 /*component index*/),
+                     std::vector<size_t>({10, 20, 30}));
+    TS_ASSERT_EQUALS(info.detectorIndexes(1 /*component index*/),
+                     std::vector<size_t>({10, 20}));
   }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

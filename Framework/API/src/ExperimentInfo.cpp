@@ -184,7 +184,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-
 }
 
 boost::shared_ptr<Beamline::ComponentInfo>
