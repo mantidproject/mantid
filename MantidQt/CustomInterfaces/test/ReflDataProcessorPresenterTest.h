@@ -136,8 +136,8 @@ public:
 
     createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-      .Times(1)
-      .WillRepeatedly(Return("TestWorkspace"));
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     std::set<int> groupList;
@@ -148,29 +148,29 @@ public:
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-      .Times(1)
-      .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-      .Times(1)
-      .WillRepeatedly(Return(groupList));
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
     EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
-      .Times(1)
-      .WillOnce(Return("0,10,20,30"));
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
-      .Times(6)
-      .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-      .Times(6)
-      .WillRepeatedly(Return(""));
+        .Times(6)
+        .WillRepeatedly(Return(""));
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-      .Times(3)
-      .WillRepeatedly(Return(""));
+        .Times(3)
+        .WillRepeatedly(Return(""));
     EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-      .Times(1)
-      .WillOnce(Return(false));
+        .Times(1)
+        .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
-      .Times(14)
-      .WillRepeatedly(Return("INTER"));
+        .Times(14)
+        .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
     presenter->notify(DataProcessorPresenter::ProcessFlag);
