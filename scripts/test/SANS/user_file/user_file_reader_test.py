@@ -54,7 +54,7 @@ class UserFileReaderTest(unittest.TestCase):
                            MonId.spectrum: [monitor_spectrum(1, True, True), monitor_spectrum(1, False, True)],
                            SetId.centre: [position_entry(155.45, -169.6, DetectorType.LAB)],
                            SetId.scales: [set_scales_entry(0.074, 1.0, 1.0, 1.0, 1.0)],
-                           SampleId.offset: [53],
+                           SampleId.offset: [53.0],
                            DetectorId.correction_x: [single_entry_with_detector(-16.0, DetectorType.LAB),
                                                      single_entry_with_detector(-44.0, DetectorType.HAB)],
                            DetectorId.correction_y: [single_entry_with_detector(-20.0, DetectorType.HAB)],
@@ -65,7 +65,7 @@ class UserFileReaderTest(unittest.TestCase):
                            MaskId.clear_detector_mask: [True],
                            MaskId.clear_time_mask: [True],
                            LimitsId.radius: [range_entry(12, 15)],
-                           TransId.spec_shift: [-70],
+                           TransId.spec_shift: [-70.0],
                            PrintId.print_line: ["for changer"],
                            BackId.all_monitors: [range_entry(start=3500, stop=4500)],
                            FitId.monitor_times: [range_entry(start=1000, stop=2000)],
@@ -75,7 +75,7 @@ class UserFileReaderTest(unittest.TestCase):
                            TransId.roi: ["test.xml", "test2.xml"],
                            TransId.mask: ["test3.xml", "test4.xml"],
                            SampleId.path: [True],
-                           LimitsId.radius_cut: [200],
+                           LimitsId.radius_cut: [200.0],
                            LimitsId.wavelength_cut: [8.0],
                            QResolutionId.on: [True],
                            QResolutionId.delta_r: [11.],
@@ -89,11 +89,50 @@ class UserFileReaderTest(unittest.TestCase):
         for key, value in list(expected_values.items()):
             self.assertTrue(key in output)
             self.assertTrue(len(output[key]) == len(value))
-            self.assertTrue(sorted(output[key]) == sorted(value))
+            elements = output[key]
+            # Make sure that the different entries are sorted
+            UserFileReaderTest._sort_list(elements)
+            UserFileReaderTest._sort_list(value)
+            self.assertTrue(elements == value)
 
         # clean up
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
+
+    @staticmethod
+    def _sort_list(elements):
+        if len(elements) == 1:
+            return
+
+        if isinstance(elements[0], single_entry_with_detector):
+            UserFileReaderTest._sort(elements, lambda x: x.entry)
+        elif isinstance(elements[0], simple_range):
+            UserFileReaderTest._sort(elements, lambda x: x.start)
+        elif isinstance(elements[0], complex_range):
+            UserFileReaderTest._sort(elements, lambda x: x.start)
+        elif isinstance(elements[0], back_single_monitor_entry):
+            UserFileReaderTest._sort(elements, lambda x: x.monitor)
+        elif isinstance(elements[0], fit_general):
+            UserFileReaderTest._sort(elements, lambda x: x.start)
+        elif isinstance(elements[0], range_entry_with_detector):
+            UserFileReaderTest._sort(elements, lambda x: x.start)
+        elif isinstance(elements[0], monitor_file):
+            UserFileReaderTest._sort(elements, lambda x: (x.file_path, DetectorType.to_string(x.detector_type)))
+        elif isinstance(elements[0], monitor_spectrum):
+            UserFileReaderTest._sort(elements, lambda x: x.spectrum)
+        elif isinstance(elements[0], position_entry):
+            UserFileReaderTest._sort(elements, lambda x: x.pos1)
+        elif isinstance(elements[0], set_scales_entry):
+            UserFileReaderTest._sort(elements, lambda x: x.s)
+        elif isinstance(elements[0], range_entry):
+            UserFileReaderTest._sort(elements, lambda x: x.start)
+        else:
+            elements.sort()
+
+    @staticmethod
+    def _sort(elements, predicate):
+        elements.sort(key=predicate)
+
 
 if __name__ == "__main__":
     unittest.main()

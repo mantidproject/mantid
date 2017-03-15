@@ -757,7 +757,7 @@ class MaskParser(UserFileComponentParser):
         self._spectrum_single_pattern = re.compile(start_string + self._spectrum + integer_number + end_string)
 
         # Strip Masks
-        self._hab = "\\s*\\HAB|FRONT\\s*"
+        self._hab = "\\s*HAB|FRONT\\s*"
         self._lab = "\\s*LAB|REAR|MAIN\\s*"
         self._detector = "\\s*(" + self._hab + "|" + self._lab + ")?\\s*"
 

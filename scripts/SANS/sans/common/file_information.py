@@ -245,7 +245,7 @@ def get_instrument_name_for_isis_nexus(file_name):
         # Open name data set
         name_data_set = instrument_group["name"]
         # Read value
-        instrument_name = name_data_set[0]
+        instrument_name = name_data_set[0].decode("utf-8")
     return instrument_name
 
 
@@ -290,7 +290,7 @@ def get_event_mode_information(file_name):
         # Open instrument group
         is_event_mode = False
         for value in list(first_entry.values()):
-            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
+            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"].decode("utf-8"):
                 is_event_mode = True
                 break
     return is_event_mode
@@ -344,14 +344,16 @@ def get_added_nexus_information(file_name):  # noqa
         return "event_workspace" in list(entry.keys())
 
     def get_workspace_name(entry):
-        return entry["workspace_name"][0]
+        return entry["workspace_name"][0].decode("utf-8")
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
 
     def has_added_tag(workspace_names, monitor_workspace_names):
+        # Check data
         all_have_added_tag = all([ADDED_SUFFIX in ws_name for ws_name in workspace_names])
         if all_have_added_tag:
+            # Check monitors
             all_have_added_tag = all([ADDED_MONITOR_SUFFIX in ws_name for ws_name in monitor_workspace_names])
         return all_have_added_tag
 
