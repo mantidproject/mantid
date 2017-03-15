@@ -249,14 +249,35 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
   std::vector<double> tolerancesVector(numberNames);
 
   if (numberNames == numberTolerances) {
-    std::transform(tolerances.begin(), tolerances.end(),
-                   tolerancesVector.begin(),
-                   [](const std::string &val) { return std::stod(val); });
+    try {
+      std::transform(tolerances.begin(), tolerances.end(),
+                     tolerancesVector.begin(),
+                     [](const std::string &val) { return std::stod(val); });
+    } catch (std::invalid_argument &) {
+      throw std::invalid_argument("Error when creating tolerances vector. "
+                                  "Please ensure each comma separated value is "
+                                  "numeric.");
+    } catch (std::out_of_range &) {
+      throw std::out_of_range("Error when creating tolerances vector. Please "
+                              "ensure each comma separated value is within "
+                              "double precision range.");
+    }
   } else if (tolerances.empty()) {
     std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
   } else if (numberTolerances == 1) {
-    double value = std::stod(tolerances.front());
-    std::fill(tolerancesVector.begin(), tolerancesVector.end(), value);
+    try {
+      double value = std::stod(tolerances.front());
+      std::fill(tolerancesVector.begin(), tolerancesVector.end(), value);
+    } catch (std::invalid_argument &) {
+      throw std::invalid_argument("The single tolerance value requested can "
+                                  "not be converted to a number. Please ensure "
+                                  "it is a single number, or a comma separated "
+                                  "list of numbers.");
+    } catch (std::out_of_range &) {
+      throw std::out_of_range("The single tolerance value requested can not be "
+                              "converted to a double. Please ensure tolerance "
+                              "is within double precision range.");
+    }
   } else {
     throw std::invalid_argument("Invalid length of tolerances, found " +
                                 std::to_string(numberTolerances) +
