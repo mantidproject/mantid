@@ -119,6 +119,9 @@ void EstimateAsymmetryFromCounts::exec() {
     }
 
     auto xData = inputWS->histogram(specNum).binEdges();
+	auto moo = xData[0];
+	auto baa = xData[xData.size() - 1];
+
     if (startX < xData[0]) {
       g_log.warning() << "Start time is before the first data point. Using "
                          "first data point." << '\n';

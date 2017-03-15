@@ -34,11 +34,13 @@ public:
   MuonGroupCalculator(const Mantid::API::WorkspaceGroup_sptr inputWS,
                       const std::vector<int> summedPeriods,
                       const std::vector<int> subtractedPeriods,
-                      const int groupIndex);
-
+	  const int groupIndex);
+  void SetStartEnd(const double start, const double end);
 protected:
   /// Workspace index of the group to analyse
   const int m_groupIndex;
+  double StartX;
+  double EndX;
 };
 
 } // namespace WorkflowAlgorithms
