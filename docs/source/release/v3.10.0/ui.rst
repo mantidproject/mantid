@@ -45,10 +45,14 @@ Documentation
 Custom Interfaces
 #################
 
-Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+- Indirect > Corrections > CalculatePaalmanPings is upgraded with few new options for computation of the corrections. Those are needed to be able to compute the corrections for different scenarios, like QENS, FWS, diffraction.
+- Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+
 
 Bugs Resolved
 -------------
+
+- Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
 
 SliceViewer Improvements
 ------------------------

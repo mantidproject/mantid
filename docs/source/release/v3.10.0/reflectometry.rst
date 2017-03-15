@@ -19,13 +19,17 @@ ConvertToReflectometryQ
 Reflectometry Reduction Interface
 ---------------------------------
 
-ISIS Reflectometry (Polref)
-###########################
-
 ISIS Reflectometry
 ##################
 
-* Fix a bug where contents of the processing table where not saved to a table workspace.
+- Interface `ISIS Reflectometry (Polref)` has been renamed to `ISIS Reflectometry`.
+- Fixed a bug where the contents of the processing table where not saved to the selected table workspace.
+- Fixed a bug when removing rows from the processing table.
+
+ISIS Reflectometry (Old)
+########################
+
+- Interface `ISIS Reflectometry` has been renamed to `ISIS Reflectometry (Old)`.
 
 |
 

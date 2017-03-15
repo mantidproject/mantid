@@ -229,6 +229,9 @@ public:
     unit = DeltaE_inWavenumber().clone();
     TS_ASSERT(dynamic_cast<DeltaE_inWavenumber *>(unit));
     delete unit;
+    unit = DeltaE_inFrequency().clone();
+    TS_ASSERT(dynamic_cast<DeltaE_inFrequency *>(unit));
+    delete unit;
     unit = Momentum().clone();
     TS_ASSERT(dynamic_cast<Momentum *>(unit));
     delete unit;
@@ -937,6 +940,106 @@ public:
   }
 
   //----------------------------------------------------------------------
+  // Energy transfer in frequency tests
+  //----------------------------------------------------------------------
+
+  void testDeltaEf_unitID() {
+    TS_ASSERT_EQUALS(dEf.unitID(), "DeltaE_inFrequency")
+  }
+
+  void testDeltaEf_caption() {
+    TS_ASSERT_EQUALS(dE.caption(), "Energy transfer")
+  }
+
+  void testDeltaEf_label() {
+    TS_ASSERT_EQUALS(dEf.label().ascii(), "GHz")
+    TS_ASSERT_EQUALS(dEf.label().utf8(), L"GHz")
+  }
+
+  void testDeltaEf_cast() {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING(u = dynamic_cast<Unit *>(&dEf));
+    TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inFrequency");
+  }
+
+  void testDeltaEf_toTOF() {
+    std::vector<double> x(1, 0.26597881882),
+        y(1, 1.0); // 1.1meV = h*0.26597881882Ghz
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 5071.066, 0.001)
+    TS_ASSERT(yy == y)
+
+    x[0] = 0.26597881882;
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 4376.406, 0.001)
+    TS_ASSERT(yy == y)
+
+    // emode = 0
+    TS_ASSERT_THROWS(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+                     std::invalid_argument)
+  }
+
+  void testDeltaEf_fromTOF() {
+    std::vector<double> x(1, 2001.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], -95.4064, 0.0001)
+    TS_ASSERT(yy == y)
+
+    x[0] = 3001.0;
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_DELTA(x[0], 137.7866, 0.0001)
+    TS_ASSERT(yy == y)
+
+    // emode = 0
+    TS_ASSERT_THROWS(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+                     std::invalid_argument)
+  }
+
+  void testDE_fRange() {
+    std::vector<double> sample, rezult;
+    // Direct
+    dEf.initialize(2001.0, 1.0, 1.5, 1, 10., 0.0);
+
+    std::string err_mess =
+        convert_units_check_range(dEf, sample, rezult, DBL_EPSILON);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion t_min: ",
+        sample[0], rezult[0], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion t_max: ",
+        sample[1] / rezult[1], 1., 0.05);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion e_min: ",
+        sample[2], rezult[2], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Direct energy transfer limits Failed for conversion e_max: ",
+        sample[3], rezult[3], 10 * FLT_EPSILON);
+
+    // Indirect
+    dEf.initialize(2001.0, 1.0, 1.5, 2, 10., 0.0);
+
+    err_mess = convert_units_check_range(dEf, sample, rezult);
+    TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
+
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion t_min: ",
+        sample[0], rezult[0], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion t_max: ",
+        sample[1] / rezult[1], 1., 0.05);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion e_min: ",
+        sample[2], rezult[2], 10 * FLT_EPSILON);
+    TSM_ASSERT_DELTA(
+        "Indirect energy transfer limits Failed for conversion e_max: ",
+        sample[3], rezult[3], 10 * FLT_EPSILON);
+  }
+
+  //----------------------------------------------------------------------
   // Momentum tests
   //----------------------------------------------------------------------
 
@@ -1235,6 +1338,7 @@ private:
   Units::QSquared q2;
   Units::DeltaE dE;
   Units::DeltaE_inWavenumber dEk;
+  Units::DeltaE_inFrequency dEf;
   Units::Momentum k_i;
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;

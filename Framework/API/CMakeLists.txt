@@ -119,6 +119,7 @@ set ( SRC_FILES
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
+	src/ResizeRectangularDetectorHelper.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleShapeValidator.cpp
@@ -155,6 +156,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/ADSValidator.h
+	inc/MantidAPI/APIComponentVisitor.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -307,6 +309,7 @@ set ( INC_FILES
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
+	inc/MantidAPI/ResizeRectangularDetectorHelper.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleShapeValidator.h
@@ -421,6 +424,7 @@ set ( TEST_FILES
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
+	ResizeRectangularDetectorHelperTest.h
 	RunTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h

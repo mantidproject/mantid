@@ -16,7 +16,7 @@ class IReflSaveTabView;
 /** @class ReflSaveTabPresenter
 
 ReflSaveTabPresenter is a presenter class for the tab 'Save ASCII' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

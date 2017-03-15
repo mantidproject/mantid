@@ -35,13 +35,19 @@ corresponds to a molecule with 4 Hydrogen atoms, 2 Nitrogen atoms and
 3 Carbon atoms.  Each element in a molecular formula is followed by
 the number of the atoms for that element, specified **without a hyphen**,
 because each element is separated from other elements using a hyphen.
+
 The number of atoms can be integer or float, but must start with a
-digit, e.g. 0.6 is fine but .6 is not. Isotopes may also be included
-in a material composition, and can be specified alone (as in ``Li7``),
-or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).  Note, however,
-that No Spaces or Hyphens are allowed in an isotope symbol specification.
-Also Note that for isotopes specified in a molecular expression, the
-isotope must be enclosed by parenthesis, except for two special cases,
+digit, e.g. 0.6 is fine but .6 is not. This can be used to set elemental ratios
+within a chemical composition. For example 95.1% Vanadium 4.9% Niobium can be
+expressed as ``V0.951 Nb0.049``. *Warning: Using this representation will
+calculate all properties except for SampleNumberDensity which must be
+set manually if required*
+
+Isotopes may also be included in a material composition, and can be specified
+alone (as in ``Li7``), or in a molecular formula (as in ``(Li7)2-C-H4-N-Cl6``).
+Note, however, that No Spaces or Hyphens are allowed in an isotope symbol
+specification. Also Note that for isotopes specified in a molecular expression,
+the isotope must be enclosed by parenthesis, except for two special cases,
 ``D`` and ``T``, which stand for ``H2`` and ``H3``, respectively.
 
 Cross Section Calculations

@@ -7,6 +7,7 @@ from mantid.kernel import *
 from mantid import config
 import os
 
+DEPRECATION_NOTICE = "BASISReduction311 is deprecated (on 2017-03-11). Use BASISReduction instead."
 DEFAULT_BINS = [-740, 1.6, 740]
 DEFAULT_QBINS = [0.4, 0.2, 3.8]
 DEFAULT_WRANGE = [6.24, 6.30]
@@ -48,7 +49,7 @@ class BASISReduction311(PythonAlgorithm):
         return "BASISReduction311"
 
     def summary(self):
-        return "Multiple-file BASIS reduction for the 311 reflection."
+        return DEPRECATION_NOTICE
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -80,6 +81,7 @@ class BASISReduction311(PythonAlgorithm):
                              "Switch for grouping detectors")
 
     def PyExec(self):
+        self.log().error(DEPRECATION_NOTICE)
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
         self._doIndiv = self.getProperty("DoIndividual").value
