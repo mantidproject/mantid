@@ -86,8 +86,12 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             self.assertEqual(warnings_current_length + 1, len(warning_capture))
             warnings_current_length = len(warning_capture)
 
-            # Finally check that the suppress field works by setting it back to second value
+            # Check that the suppress field works by setting it back to second value
             inst_settings_obj.update_attributes(kwargs=config_dict, suppress_warnings=True)
+            self.assertEqual(warnings_current_length, len(warning_capture))
+
+            # Check we only get no additional warnings from setting the value to the same
+            inst_settings_obj.update_attributes(kwargs=config_dict)
             self.assertEqual(warnings_current_length, len(warning_capture))
 
         # Finally check it has took the new value (most recently set)
