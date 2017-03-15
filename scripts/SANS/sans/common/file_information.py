@@ -6,14 +6,51 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 from abc import (ABCMeta, abstractmethod)
-
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType)
-
+from sans.common.constants import (SANS2D, LARMOR, LOQ)
 from six import with_metaclass
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Constants
+# ----------------------------------------------------------------------------------------------------------------------
+# File extensions
+NXS_EXTENSION = "nxs"
+RAW_EXTENSION = "raw"
+RAW_EXTENSION_WITH_DOT = ".RAW"
+
+ADDED_SUFFIX = "-add_added_event_data"
+ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
+ADD_FILE_SUFFIX = "-ADD.NXS"
+
+PARAMETERS_XML_SUFFIX = "_Parameters.xml"
+
+
+# Nexus key words
+RAW_DATA_1 = "raw_data_1"
+PERIODS = "periods"
+PROTON_CHARGE = "proton_charge"
+INSTRUMENT = "instrument"
+NAME = "name"
+START_TIME = "start_time"
+RUN_NUMBER = "run_number"
+NX_CLASS = "NX_class"
+NX_EVENT_DATA = "NXevent_data"
+LOGS = "logs"
+VALUE = "value"
+WORKSPACE_NAME = "workspace_name"
+END_TIME = "r_endtime"
+END_DATE = "r_enddate"
+MANTID_WORKSPACE_PREFIX = 'mantid_workspace_'
+EVENT_WORKSPACE = "event_workspace"
+
+# Other
+ALTERNATIVE_SANS2D_NAME = "SAN"
+DEFINITION = "Definition"
+PARAMETERS = "Parameters"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
@@ -56,9 +93,9 @@ def get_extension_for_file_type(file_info):
     :return: the extension a stirng. This can be either nxs or raw.
     """
     if file_info.get_type() is FileType.ISISNexus or file_info.get_type() is FileType.ISISNexusAdded:
-        extension = "nxs"
+        extension = NXS_EXTENSION
     elif file_info.get_type() is FileType.ISISRaw:
-        extension = "raw"
+        extension = RAW_EXTENSION
     else:
         raise RuntimeError("The file extension type for a file of type {0} is unknown"
                            "".format(str(file_info.get_type())))
@@ -114,13 +151,13 @@ def get_instrument_paths_for_sans_file(file_name):
     def get_ipf_equivalent_name(path):
         # If XXX_Definition_Yyy.xml is the IDF name, then the equivalent  IPF name is: XXX_Parameters_Yyy.xml
         base_file_name = os.path.basename(path)
-        return base_file_name.replace("Definition", "Parameters")
+        return base_file_name.replace(DEFINITION, PARAMETERS)
 
     def get_ipf_standard_name(path):
         # If XXX_Definition_Yyy.xml is the IDF name, then the standard IPF name is: XXX_Parameters.xml
         base_file_name = os.path.basename(path)
         elements = base_file_name.split("_")
-        return elements[0] + "_Parameters.xml"
+        return elements[0] + PARAMETERS_XML_SUFFIX
 
     def check_for_files(directory, path):
         # Check if XXX_Parameters_Yyy.xml exists in the same folder
@@ -202,11 +239,11 @@ def get_isis_nexus_info(file_name):
     try:
         with h5.File(file_name) as h5_file:
             keys = list(h5_file.keys())
-            is_isis_nexus = "raw_data_1" in keys
+            is_isis_nexus = RAW_DATA_1 in keys
             if is_isis_nexus:
-                first_entry = h5_file["raw_data_1"]
-                period_group = first_entry["periods"]
-                proton_charge_data_set = period_group["proton_charge"]
+                first_entry = h5_file[RAW_DATA_1]
+                period_group = first_entry[PERIODS]
+                proton_charge_data_set = period_group[PROTON_CHARGE]
                 number_of_periods = len(proton_charge_data_set)
             else:
                 number_of_periods = -1
@@ -241,9 +278,9 @@ def get_instrument_name_for_isis_nexus(file_name):
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         # Open instrument group
-        instrument_group = first_entry["instrument"]
+        instrument_group = first_entry[INSTRUMENT]
         # Open name data set
-        name_data_set = instrument_group["name"]
+        name_data_set = instrument_group[NAME]
         # Read value
         instrument_name = name_data_set[0].decode("utf-8")
     return instrument_name
@@ -267,12 +304,12 @@ def get_top_level_nexus_entry(file_name, entry_name):
 
 
 def get_date_for_isis_nexus(file_name):
-    value = get_top_level_nexus_entry(file_name, "start_time")
+    value = get_top_level_nexus_entry(file_name, START_TIME)
     return DateAndTime(value)
 
 
 def get_run_number_for_isis_nexus(file_name):
-    return int(get_top_level_nexus_entry(file_name, "run_number"))
+    return int(get_top_level_nexus_entry(file_name, RUN_NUMBER))
 
 
 def get_event_mode_information(file_name):
@@ -290,7 +327,7 @@ def get_event_mode_information(file_name):
         # Open instrument group
         is_event_mode = False
         for value in list(first_entry.values()):
-            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"].decode("utf-8"):
+            if NX_CLASS in value.attrs and NX_EVENT_DATA == value.attrs[NX_CLASS].decode("utf-8"):
                 is_event_mode = True
                 break
     return is_event_mode
@@ -306,20 +343,18 @@ def get_event_mode_information(file_name):
 #    file where the first level entry will be named mantid_workspace_X where X=1,2,3,... . Note that the numbers
 #    correspond  to periods.
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
-# 3.1 TODO
-
 
 def get_date_and_run_number_added_nexus(file_name):
     with h5.File(file_name) as h5_file:
         keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
-        logs = first_entry["logs"]
+        logs = first_entry[LOGS]
         # Start time
-        start_time = logs["start_time"]
-        start_time_value = DateAndTime(start_time["value"][0])
+        start_time = logs[START_TIME]
+        start_time_value = DateAndTime(start_time[VALUE][0])
         # Run number
-        run_number = logs["run_number"]
-        run_number_value = int(run_number["value"][0])
+        run_number = logs[RUN_NUMBER]
+        run_number_value = int(run_number[VALUE][0])
     return start_time_value, run_number_value
 
 
@@ -330,21 +365,18 @@ def get_added_nexus_information(file_name):  # noqa
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
-    ADDED_SUFFIX = "-add_added_event_data"
-    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
-
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
-            if key.startswith('mantid_workspace_'):
+            if key.startswith(MANTID_WORKSPACE_PREFIX):
                 top_level_key_collection.append(key)
         return sorted(top_level_key_collection)
 
     def check_if_event_mode(entry):
-        return "event_workspace" in list(entry.keys())
+        return EVENT_WORKSPACE in list(entry.keys())
 
     def get_workspace_name(entry):
-        return entry["workspace_name"][0].decode("utf-8")
+        return entry[WORKSPACE_NAME][0].decode("utf-8")
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
@@ -442,13 +474,12 @@ def get_added_nexus_information(file_name):  # noqa
 
 
 def get_date_for_added_workspace(file_name):
-    value = get_top_level_nexus_entry(file_name, "start_time")
+    value = get_top_level_nexus_entry(file_name, START_TIME)
     return DateAndTime(value)
 
 
 def has_added_suffix(file_name):
-    suffix = "-ADD.NXS"
-    return file_name.upper().endswith(suffix)
+    return file_name.upper().endswith(ADD_FILE_SUFFIX)
 
 
 def is_added_histogram(file_name):
@@ -467,7 +498,7 @@ def is_added_event(file_name):
 def get_raw_info(file_name):
     # Preselect files which don't end with .raw
     split_file_name, file_extension = os.path.splitext(file_name)
-    if file_extension.upper() != ".RAW":
+    if file_extension.upper() != RAW_EXTENSION_WITH_DOT:
         is_raw = False
         number_of_periods = -1
     else:
@@ -511,7 +542,7 @@ def get_from_raw_header(file_name, index):
 
 
 def instrument_name_correction(instrument_name):
-    return "SANS2D" if instrument_name == "SAN" else instrument_name
+    return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
 
 
 def get_instrument_name_for_raw(file_name):
@@ -558,8 +589,8 @@ def get_date_for_raw(file_name):
 
     keys = run_parameters.getColumnNames()
 
-    time_id = "r_endtime"
-    date_id = "r_enddate"
+    time_id = END_TIME
+    date_id = END_DATE
 
     time = run_parameters.column(keys.index(time_id))
     date = run_parameters.column(keys.index(date_id))
@@ -570,11 +601,11 @@ def get_date_for_raw(file_name):
 
 def get_instrument(instrument_name):
     instrument_name = instrument_name.upper()
-    if instrument_name == "SANS2D":
+    if instrument_name == SANS2D:
         instrument = SANSInstrument.SANS2D
-    elif instrument_name == "LARMOR":
+    elif instrument_name == LARMOR:
         instrument = SANSInstrument.LARMOR
-    elif instrument_name == "LOQ":
+    elif instrument_name == LOQ:
         instrument = SANSInstrument.LOQ
     else:
         instrument = SANSInstrument.NoInstrument
