@@ -121,9 +121,9 @@ public:
   }
 
   void test_StorageMode_Cloned() {
-    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
+    IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
                     IndexInfo::Communicator{2, 0});
-    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
+    IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
                     IndexInfo::Communicator{2, 1});
     TS_ASSERT_EQUALS(rank0.size(), 3);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);

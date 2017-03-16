@@ -180,14 +180,16 @@ void IndexInfo::makeSpectrumNumberTranslator(
     std::vector<SpectrumNumber> &&spectrumNumbers) const {
   // TODO We are not setting monitors currently. This is ok as long as we have
   // exactly one partition.
-  PartitionIndex partition = m_communicator.rank;
+  PartitionIndex partition;
   std::unique_ptr<RoundRobinPartitioner> partitioner;
   if (m_storageMode == StorageMode::Distributed) {
+    partition = PartitionIndex(m_communicator.rank);
     partitioner = Kernel::make_unique<RoundRobinPartitioner>(
         m_communicator.size, partition,
         Partitioner::MonitorStrategy::CloneOnEachPartition,
         std::vector<GlobalSpectrumIndex>{});
   } else {
+    partition = PartitionIndex(0);
     partitioner = Kernel::make_unique<RoundRobinPartitioner>(
         1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
         std::vector<GlobalSpectrumIndex>{});
