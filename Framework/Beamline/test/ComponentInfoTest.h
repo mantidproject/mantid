@@ -20,11 +20,6 @@ public:
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
-  void test_default_size() {
-    ComponentInfo info;
-    TS_ASSERT_EQUALS(info.size(), 0);
-  }
-
   void test_detector_indexes() {
 
     /*

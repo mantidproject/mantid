@@ -4,6 +4,7 @@
 #include "MantidAPI/DllConfig.h"
 #include <unordered_map>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 
@@ -18,7 +19,8 @@ class ComponentInfo;
 
 namespace API {
 
-/** ComponentInfo : Provides a component centric view on the instrument. Indexes
+/** ComponentInfo : Provides a component centric view on to the instrument.
+  Indexes
   are per component.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -47,9 +49,9 @@ private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
   const Beamline::ComponentInfo &m_componentInfo;
   /// Collection of component ids
-  std::vector<Mantid::Geometry::IComponent *> m_componentIds;
+  boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
-  std::unordered_map<Geometry::IComponent *, size_t> m_compIDToIndex;
+  boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>> m_compIDToIndex;
 
 public:
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,

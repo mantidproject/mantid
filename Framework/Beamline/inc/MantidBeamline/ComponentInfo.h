@@ -2,12 +2,14 @@
 #define MANTID_BEAMLINE_COMPONENTINFO_H_
 
 #include "MantidBeamline/DllConfig.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid {
 namespace Beamline {
 
-/** ComponentInfo : Provides a component centric view on the instrument. Indexes
+/** ComponentInfo : Provides a component centric view on to the instrument.
+  Indexes
   are per component.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -34,10 +36,9 @@ namespace Beamline {
 class MANTID_BEAMLINE_DLL ComponentInfo {
 
 private:
-  std::vector<std::vector<size_t>> m_detectorIndexes;
-
+ boost::shared_ptr<const std::vector<std::vector<size_t>>> m_detectorIndexes;
 public:
-  ComponentInfo() = default;
+  ComponentInfo();
   ComponentInfo(const std::vector<std::vector<size_t>> &detectorIndexes);
   std::vector<size_t> detectorIndexes(size_t componentIndex) const;
   size_t size() const;
