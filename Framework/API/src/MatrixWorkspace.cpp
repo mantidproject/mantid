@@ -99,7 +99,10 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
     m_indexInfo->setSpectrumDefinitions(
         spectrumInfo().sharedSpectrumDefinitions());
   }
-  // If spectrum numbers are set in ISpectrum this flag will be true.
+  // If spectrum numbers are set in ISpectrum this flag will be true. However,
+  // for MPI builds we will forbid changing spectrum numbers in this way, so we
+  // should never enter this branch. Thus it is sufficient to set only the local
+  // spectrum numbers here.
   if (m_indexInfoNeedsUpdate) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
     for (size_t i = 0; i < getNumberHistograms(); ++i)

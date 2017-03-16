@@ -78,9 +78,18 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
-  explicit IndexInfo(const size_t globalSize);
+  enum class StorageMode { Cloned, Distributed, MasterOnly };
+  struct Communicator {
+    int size;
+    int rank;
+  };
+  explicit IndexInfo(const size_t globalSize,
+                     const StorageMode storageMode = StorageMode::Cloned,
+                     const Communicator &communicator = Communicator{1, 0});
   IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-            std::vector<std::vector<DetectorID>> &&detectorIDs);
+            std::vector<std::vector<DetectorID>> &&detectorIDs,
+            const StorageMode storageMode = StorageMode::Cloned,
+            const Communicator &communicator = Communicator{1, 0});
 
   size_t size() const;
 
@@ -109,6 +118,10 @@ public:
 private:
   void makeSpectrumNumberTranslator(
       std::vector<SpectrumNumber> &&spectrumNumbers) const;
+
+  StorageMode m_storageMode;
+  Communicator m_communicator;
+
   Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
       nullptr};

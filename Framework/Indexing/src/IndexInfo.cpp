@@ -14,7 +14,9 @@ namespace Indexing {
 
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
-IndexInfo::IndexInfo(const size_t globalSize) {
+IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
+                     const Communicator &communicator)
+    : m_storageMode(storageMode), m_communicator(communicator) {
   // Default to spectrum numbers 1...globalSize
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -26,7 +28,10 @@ IndexInfo::IndexInfo(const size_t globalSize) {
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
 IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-                     std::vector<std::vector<DetectorID>> &&detectorIDs) {
+                     std::vector<std::vector<DetectorID>> &&detectorIDs,
+                     const StorageMode storageMode,
+                     const Communicator &communicator)
+    : m_storageMode(storageMode), m_communicator(communicator) {
   if (spectrumNumbers.size() != detectorIDs.size())
     throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
                              "and detector ID vectors");
@@ -178,10 +183,19 @@ void IndexInfo::makeSpectrumNumberTranslator(
     std::vector<SpectrumNumber> &&spectrumNumbers) const {
   // TODO We are not setting monitors currently. This is ok as long as we have
   // exactly one partition.
-  PartitionIndex partition = 0;
-  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
-      1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
-      std::vector<GlobalSpectrumIndex>{});
+  PartitionIndex partition = m_communicator.rank;
+  std::unique_ptr<RoundRobinPartitioner> partitioner;
+  if (m_storageMode == StorageMode::Distributed) {
+    partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+        m_communicator.size, partition,
+        Partitioner::MonitorStrategy::CloneOnEachPartition,
+        std::vector<GlobalSpectrumIndex>{});
+  } else {
+    partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+        1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
+        std::vector<GlobalSpectrumIndex>{});
+  }
+  // TODO How should we handle StorageMode::MasterOnly?
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(spectrumNumbers), std::move(partitioner), partition);
 }

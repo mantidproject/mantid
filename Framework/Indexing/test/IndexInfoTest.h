@@ -121,6 +121,34 @@ public:
     TS_ASSERT_THROWS_NOTHING(info.setSpectrumDefinitions(defs));
     TS_ASSERT_EQUALS(info.spectrumDefinitions().get(), defs.get());
   }
+
+  void test_StorageMode_Cloned() {
+    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 0});
+    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 1});
+    TS_ASSERT_EQUALS(rank0.size(), 3);
+    TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(rank0.spectrumNumber(2), 3);
+    TS_ASSERT_EQUALS(rank1.size(), 3);
+    TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(rank1.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(rank1.spectrumNumber(2), 3);
+  }
+
+  void test_StorageMode_Distributed() {
+    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 0});
+    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 1});
+    // Current default is RoundRobinPartitioner
+    TS_ASSERT_EQUALS(rank0.size(), 2);
+    TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 3);
+    TS_ASSERT_EQUALS(rank1.size(), 1);
+    TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 2);
+  }
 };
 
 #endif /* MANTID_INDEXING_INDEXINFOTEST_H_ */
