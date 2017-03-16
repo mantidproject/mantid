@@ -4,6 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidPlotUtilities.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <MantidQtMantidWidgets/MantidDisplayBase.h>
 
@@ -220,7 +221,10 @@ double MantidGroupPlotGenerator::getSingleLogValue(
 double MantidGroupPlotGenerator::getSingleLogValue(
     int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
-  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX) {
+
+    return getSingleWorkspaceLogValue(wsIndex, matrixWS, logName );
+
+/*  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX) {
     return wsIndex;
   } else {
     // MatrixWorkspace is an ExperimentInfo
@@ -240,7 +244,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
     } else {
       throw std::invalid_argument("Bad input workspace type");
     }
-  }
+  } */
 }
 
 /**
