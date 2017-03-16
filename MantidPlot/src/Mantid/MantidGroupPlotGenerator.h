@@ -32,7 +32,7 @@ public:
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
-    MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &
+    MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputAdvanced &
           options,
       int nWorkspaces);
 

@@ -1538,24 +1538,32 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
     m_mantidUI->plotSubplots(userInput.plots, MantidQt::DistributionDefault,
                              showErrorBars);
   } else if (userInput.simple || userInput.waterfall) {
-    m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
-                       showErrorBars, nullptr, false, userInput.waterfall);
+    if (userInput.isAdvanced) {
+      m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+        showErrorBars, nullptr, false, userInput.waterfall,
+        userInput.advanced.logName, userInput.advanced.customLogValues);
+    }
+    else {
+      m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
+        showErrorBars, nullptr, false, userInput.waterfall);
+    }
+// TODO straight away: add logname & custumLogValues arguments as below run through to where workspace name would be inserted into plot.
   }
   else if (userInput.surface) {
-    m_mantidUI->plotSurface(userInput.contourSurface.accepted,
-                        userInput.contourSurface.plotIndex,
-                        userInput.contourSurface.axisName,
-                        userInput.contourSurface.logName,
-                        userInput.contourSurface.customLogValues,
-                        userInput.contourSurface.workspaceNames);
+    m_mantidUI->plotSurface(userInput.advanced.accepted,
+                        userInput.advanced.plotIndex,
+                        userInput.advanced.axisName,
+                        userInput.advanced.logName,
+                        userInput.advanced.customLogValues,
+                        userInput.advanced.workspaceNames);
   }
   else if (userInput.contour) {
-    m_mantidUI->plotContour(userInput.contourSurface.accepted,
-                       userInput.contourSurface.plotIndex,
-                       userInput.contourSurface.axisName,
-                       userInput.contourSurface.logName,
-                       userInput.contourSurface.customLogValues,
-                       userInput.contourSurface.workspaceNames);
+    m_mantidUI->plotContour(userInput.advanced.accepted,
+                       userInput.advanced.plotIndex,
+                       userInput.advanced.axisName,
+                       userInput.advanced.logName,
+                       userInput.advanced.customLogValues,
+                       userInput.advanced.workspaceNames);
   }
 }
 

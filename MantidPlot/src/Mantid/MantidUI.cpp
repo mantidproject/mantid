@@ -2964,6 +2964,8 @@ MultiLayer *MantidUI::plot1D(const QStringList &ws_names,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -2971,7 +2973,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, QString log,
+                             std::set<double> customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString, int> pairs;
   // Need to iterate through the workspaces
@@ -3029,6 +3032,8 @@ MultiLayer *MantidUI::plot1D(const QString &wsName,
 @param clearWindow :: Whether to clear specified plotWindow before plotting.
 Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
+@param log :: log name for advanced plotting
+@param customLogValues :: custom log values for advanced plotting
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -3037,7 +3042,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot) {
+                             bool waterfallPlot, QString log, 
+                             std::set<double> customLogValues) {
   if (toPlot.size() == 0)
     return NULL;
 
