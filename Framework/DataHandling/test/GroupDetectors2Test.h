@@ -1,17 +1,18 @@
 #ifndef GROUPDETECTORS2TEST_H_
 #define GROUPDETECTORS2TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
-#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include <Poco/Path.h>
@@ -132,11 +133,10 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(2)), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
-
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
   void testIndexList() {
@@ -167,11 +167,9 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(4.0), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
-
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
     AnalysisDataService::Instance().remove(output);
   }
 
@@ -202,10 +200,9 @@ public:
       TS_ASSERT_DELTA(outputWS->e(0)[i], std::sqrt(double(NHIST)), 0.0001);
     }
 
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT_THROWS_ANYTHING(spectrumInfo.detector(1));
 
     AnalysisDataService::Instance().remove(output);
   }
@@ -266,20 +263,19 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(1)->spectraNo(4), 6);
     TS_ASSERT_EQUALS(outputWS->getSpectrum(4).getSpectrumNo(), 6);
 
-    // the first two spectra should have a group of detectors the other spectra
+    // the first spectrum should have a group of detectors the other spectra
     // a single detector
-
-    boost::shared_ptr<const IDetector> det;
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(0));
-    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(1));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(2));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(3));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
-    TS_ASSERT_THROWS_NOTHING(det = outputWS->getDetector(4));
-    TS_ASSERT(boost::dynamic_pointer_cast<const Detector>(det));
+    const auto &spectrumInfo = outputWS->spectrumInfo();
+    TS_ASSERT(spectrumInfo.hasDetectors(0));
+    TS_ASSERT(!spectrumInfo.hasUniqueDetector(0));
+    TS_ASSERT(spectrumInfo.hasDetectors(1));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(1));
+    TS_ASSERT(spectrumInfo.hasDetectors(2));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(2));
+    TS_ASSERT(spectrumInfo.hasDetectors(3));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(3));
+    TS_ASSERT(spectrumInfo.hasDetectors(4));
+    TS_ASSERT(spectrumInfo.hasUniqueDetector(4));
 
     AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
@@ -681,7 +677,7 @@ public:
       AnalysisDataService::Instance().remove(outputws);
   }
 
-  void test_GroupingWorkspaceUsingMatrixWrokspace() {
+  void test_GroupingWorkspaceUsingMatrixWorkspace() {
     int bankWidth = 8;
     int numBanks = 2;
     int numSpectraInBank = bankWidth * bankWidth;
@@ -773,8 +769,11 @@ public:
     // check output - should match template
     TS_ASSERT_EQUALS(output->getNumberHistograms(),
                      outputGrp->getNumberHistograms());
-    TS_ASSERT_EQUALS(output->getDetector(0)->getID(),
-                     outputGrp->getDetector(0)->getID());
+
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto &spectrumInfoGrp = outputGrp->spectrumInfo();
+    TS_ASSERT_EQUALS(spectrumInfo.detector(0).getID(),
+                     spectrumInfoGrp.detector(0).getID());
 
     AnalysisDataService::Instance().remove(nxsWSname);
     AnalysisDataService::Instance().remove(groupWSName);

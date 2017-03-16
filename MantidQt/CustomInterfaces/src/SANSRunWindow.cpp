@@ -1,26 +1,26 @@
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
 
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/V3D.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/PropertyManagerDataService.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/V3D.h"
 
-#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
+#include "MantidQtAPI/MantidDesktopServices.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtCustomInterfaces/SANSBackgroundCorrectionSettings.h"
 #include "MantidQtCustomInterfaces/SANSEventSlicing.h"
@@ -31,11 +31,11 @@
 #include <QTextStream>
 #include <QUrl>
 
-#include <Poco/StringTokenizer.h>
 #include <Poco/Message.h>
+#include <Poco/StringTokenizer.h>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
@@ -2093,11 +2093,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
 
-  if (sample_workspace && (!sample_workspace->readX(0).empty())) {
-    m_uiForm.tof_min->setText(
-        QString::number(sample_workspace->readX(0).front()));
-    m_uiForm.tof_max->setText(
-        QString::number(sample_workspace->readX(0).back()));
+  if (sample_workspace && (!sample_workspace->x(0).empty())) {
+    m_uiForm.tof_min->setText(QString::number(sample_workspace->x(0).front()));
+    m_uiForm.tof_max->setText(QString::number(sample_workspace->x(0).back()));
   }
 
   // Set the geometry if the sample has been changed
