@@ -24,7 +24,7 @@ public:
     FrameworkManager::Instance();
   }
 
-  void xtest_too_few_iterations() {
+  void test_too_few_iterations() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 * (x * x + 4.0); }, 1, -10.0, 10.0, 0.1);
     Fit fit;
@@ -37,7 +37,7 @@ public:
     TS_ASSERT_EQUALS(status, "Failed to converge after 10 iterations.");
   }
 
-  void xtest_bad_parameter() {
+  void test_bad_parameter() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2.0 + x; }, 1, -10.0, 10.0, 0.1);
     // Parameter (b) that cannot be determined.
