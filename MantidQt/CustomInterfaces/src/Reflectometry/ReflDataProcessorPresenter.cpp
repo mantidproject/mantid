@@ -351,8 +351,8 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
   size_t numTimes = times.size();
 
   // Add the start/stop times
-  startTimes = std::vector<double>(numTimes);
-  stopTimes = std::vector<double>(numTimes);
+  startTimes = std::vector<double>(numTimes - 1);
+  stopTimes = std::vector<double>(numTimes - 1);
 
   if (numTimes == 1) {
     startTimes[0] = 0;
