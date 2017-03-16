@@ -184,7 +184,6 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "DetectorInfo and number of detectors in "
                              "instrument");
 }
-}
 
 boost::shared_ptr<Beamline::ComponentInfo>
 makeComponentInfo(const Instrument &oldInstr,
@@ -259,7 +258,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
         std::move(positions), std::move(rotations), monitors);
   }
 }
-
+}
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
