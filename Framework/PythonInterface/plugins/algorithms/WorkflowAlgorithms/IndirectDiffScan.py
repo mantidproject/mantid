@@ -94,10 +94,14 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         workspace_names = mtd[self._output_ws].getNames()
         scan_workspace = self._output_ws + '_scan'
         temperatures = list()
+        run_numbers = []
         for input_ws in workspace_names:
             temp = self._get_temperature(input_ws)
             if temp is not None:
                 temperatures.append(temp)
+            # Get the run number
+            run_no = self._get_InstrRun(input_ws)[1]
+            run_numbers.append(run_no)
 
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
         append_alg = self.createChildAlgorithm("AppendSpectra", enableLogging=False)
@@ -106,16 +110,16 @@ class IndirectDiffScan(DataProcessorAlgorithm):
                 clone_alg.setProperty("InputWorkspace", workspace_names[0])
                 clone_alg.setProperty("OutputWorkspace", scan_workspace)
                 clone_alg.execute()
-                mtd.addOrReplace(scan_workspace, clone_alg.getProperty("OutputWorkspace").value)
+                scan_workspace = clone_alg.getProperty("OutputWorkspace").value
             else:
                 append_alg.setProperty("InputWorkspace1", scan_workspace)
                 append_alg.setProperty("InputWorkspace2", workspace_names[idx])
                 append_alg.setProperty("OutputWorkspace", scan_workspace)
                 append_alg.execute()
-                mtd.addOrReplace(scan_workspace, append_alg.getProperty("OutputWorkspace").value)
+                scan_workspace = append_alg.getProperty("OutputWorkspace").value
 
         # Set the vertical axis units
-        num_hist = mtd[scan_workspace].getNumberHistograms()
+        num_hist = scan_workspace.getNumberHistograms()
         v_axis_is_temp = num_hist == len(temperatures)
 
         if v_axis_is_temp:
@@ -126,7 +130,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
             unit = ('Run No', 'last 3 digits')
 
         # Create a new vertical axis for the workspaces
-        y_ws_axis = NumericAxis.create(len(scan_workspace))
+        y_ws_axis = NumericAxis.create(len(run_numbers))
         y_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
         # Set the vertical axis values
@@ -137,7 +141,9 @@ class IndirectDiffScan(DataProcessorAlgorithm):
                 y_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
 
         # Add the new vertical axis to each workspace
-        mtd[scan_workspace].replaceAxis(1, y_ws_axis)
+        scan_workspace.replaceAxis(1, y_ws_axis)
+
+        mtd.addOrReplace(self._output_ws + '_scan', scan_workspace)
 
     def validateInputs(self):
         """
