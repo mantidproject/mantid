@@ -101,6 +101,7 @@ private:
   void initScanCounts();
   void initScanIntervals();
   void initIndices();
+  std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
