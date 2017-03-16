@@ -186,6 +186,7 @@ public:
     StrType datatype(0, H5T_VARIABLE);
     DataSet dataset = group.createDataSet(dataname, datatype, dataspace);
     dataset.write(wdata, datatype);
+    dataset.close();
     group.close();
     file.close();
 
