@@ -178,22 +178,18 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 
 void IndexInfo::makeSpectrumNumberTranslator(
     std::vector<SpectrumNumber> &&spectrumNumbers) const {
-  // TODO We are not setting monitors currently. This is ok as long as we have
-  // exactly one partition.
   PartitionIndex partition;
-  std::unique_ptr<RoundRobinPartitioner> partitioner;
+  int numberOfPartitions;
   if (m_storageMode == StorageMode::Distributed) {
     partition = PartitionIndex(m_communicator.rank);
-    partitioner = Kernel::make_unique<RoundRobinPartitioner>(
-        m_communicator.size, partition,
-        Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{});
+    numberOfPartitions = m_communicator.size;
   } else {
     partition = PartitionIndex(0);
-    partitioner = Kernel::make_unique<RoundRobinPartitioner>(
-        1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
-        std::vector<GlobalSpectrumIndex>{});
+    numberOfPartitions = 1;
   }
+  auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
+      numberOfPartitions, partition,
+      Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
   // TODO How should we handle StorageMode::MasterOnly?
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(spectrumNumbers), std::move(partitioner), partition);
