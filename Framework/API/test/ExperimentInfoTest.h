@@ -800,7 +800,7 @@ public:
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
     auto allBankDetectorIndexes =
-        compInfo.detectorIndexes(compInfo.indexOf(bankID));
+        compInfo.detectorIndices(compInfo.indexOf(bankID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this bank",
                       allBankDetectorIndexes.size(),
@@ -811,7 +811,7 @@ public:
             ->getChild(0)
             ->getComponentID();
     auto allRowDetectorIndexes =
-        compInfo.detectorIndexes(compInfo.indexOf(bankRowID));
+        compInfo.detectorIndices(compInfo.indexOf(bankRowID));
 
     TSM_ASSERT_EQUALS("Should have all detectors under this row",
                       allRowDetectorIndexes.size(),
@@ -820,7 +820,7 @@ public:
     const auto detCompId = detInfo.detector(0).getComponentID();
     TSM_ASSERT_EQUALS(
         "Detector should have no nested detector",
-        compInfo.detectorIndexes(compInfo.indexOf(detCompId)).size(), 0);
+        compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 0);
   }
 
 private:

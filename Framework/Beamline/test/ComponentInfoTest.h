@@ -15,8 +15,8 @@ public:
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
   void test_size() {
-    std::vector<std::vector<size_t>> indexes{{1}, {}};
-    ComponentInfo info(indexes);
+    std::vector<std::vector<size_t>> indices{{1}, {}};
+    ComponentInfo info(indices);
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
@@ -30,12 +30,12 @@ public:
     | 10  | 20
     */
 
-    std::vector<std::vector<size_t>> indexes{
+    std::vector<std::vector<size_t>> indices{
         {10, 20, 30}, {10, 20}, {}, {}, {}};
-    ComponentInfo info(indexes);
-    TS_ASSERT_EQUALS(info.detectorIndexes(0 /*component index*/),
+    ComponentInfo info(indices);
+    TS_ASSERT_EQUALS(info.detectorIndices(0 /*component index*/),
                      std::vector<size_t>({10, 20, 30}));
-    TS_ASSERT_EQUALS(info.detectorIndexes(1 /*component index*/),
+    TS_ASSERT_EQUALS(info.detectorIndices(1 /*component index*/),
                      std::vector<size_t>({10, 20}));
   }
 };

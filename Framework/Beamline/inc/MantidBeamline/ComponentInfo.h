@@ -36,11 +36,12 @@ namespace Beamline {
 class MANTID_BEAMLINE_DLL ComponentInfo {
 
 private:
- boost::shared_ptr<const std::vector<std::vector<size_t>>> m_detectorIndexes;
+  boost::shared_ptr<const std::vector<std::vector<size_t>>> m_detectorIndices;
+
 public:
   ComponentInfo();
-  ComponentInfo(const std::vector<std::vector<size_t>> &detectorIndexes);
-  std::vector<size_t> detectorIndexes(size_t componentIndex) const;
+  ComponentInfo(const std::vector<std::vector<size_t>> &detectorIndices);
+  std::vector<size_t> detectorIndices(size_t componentIndex) const;
   size_t size() const;
 };
 } // namespace Beamline
