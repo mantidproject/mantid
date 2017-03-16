@@ -455,14 +455,11 @@ size_t DetectorGroup::index() const {
   throw std::runtime_error("A DetectorGroup cannot have an index");
 }
 
-void DetectorGroup::registerContents(
-    class ComponentVisitor &visitor,
-    std::vector<size_t> &detectorIndexes) const {
-
-  // We register all subdetectors ignoring the group itself
-  for (auto it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    visitor.registerDetector((*it->second), detectorIndexes);
-  }
+void DetectorGroup::registerContents(class ComponentVisitor &,
+                                     std::vector<size_t> &) const {
+  throw std::runtime_error("DetectorGroup::registerContents. This should not "
+                           "be called. DetectorGroups are not part of the "
+                           "instrument. On-the-fly only.");
 }
 
 } // namespace Geometry
