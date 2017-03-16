@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NotebookWriter.h"
@@ -556,44 +557,66 @@ std::string GenericDataProcessorPresenter::findRun(
     const std::string &run, const std::string &instrument,
     const std::string &prefix, const std::string &loader, bool &runFound) {
 
-  runFound = true;
+  runFound = false;
+  std::string outputName;
 
   // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run))
-    return run;
+  if (AnalysisDataService::Instance().doesExist(run)) {
+    runFound = true;
+    outputName = run;
+  }
   // Try with prefix
-  if (AnalysisDataService::Instance().doesExist(prefix + run))
-    return prefix + run;
+  else if (AnalysisDataService::Instance().doesExist(prefix + run)) {
+    runFound = true;
+    outputName = prefix + run;
+  }
 
   // Is the run string is numeric?
-  if (boost::regex_match(run, boost::regex("\\d+"))) {
+  else if (boost::regex_match(run, boost::regex("\\d+"))) {
 
     // Look for "<run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(run))
-      return run;
+    if (AnalysisDataService::Instance().doesExist(run)) {
+      runFound = true;
+      outputName = run;
+    }
 
     // Look for "<instrument><run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(prefix + run))
-      return prefix + run;
+    else if (AnalysisDataService::Instance().doesExist(prefix + run)) {
+      runFound = true;
+      outputName = prefix + run;
+    }
+  }
+
+  if (runFound) {
+    // For event workspaces, monitors must be loaded as well
+    if (loader == "LoadEventNexus")
+      runFound =
+          AnalysisDataService::Instance().doesExist(outputName + "_monitors");
+
+    // A workspace retrieved from ADS must not be an event workspace if we
+    // are not using an event loader!
+    else if (AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                 outputName) != NULL)
+      runFound = false;
+
+    // Run in ADS can be safely used, no need to load
+    if (runFound)
+      return outputName;
   }
 
   // We'll just have to load it ourselves
-  const std::string filename = instrument + run;
-  const std::string outputName = prefix + run;
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create(loader);
+  outputName = prefix + run;
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", filename);
+  algLoadRun->setProperty("Filename", instrument + run);
   algLoadRun->setProperty("OutputWorkspace", outputName);
   if (loader == "LoadEventNexus")
     algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
-
-  if (!algLoadRun->isExecuted()) {
-    runFound = false;
+  if (!algLoadRun->isExecuted())
     return "";
-  }
 
+  runFound = true;
   return outputName;
 }
 
