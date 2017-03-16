@@ -204,7 +204,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   } else {
     vtkNew<vtkMDHWSignalArray<double>> normalized;
     signal = normalized.Get();
-    InitializevtkMDHWSignalArray(*m_workspace, m_normalizationOption, offset,
+    InitializevtkMDHWSignalArray(*m_workspace, norm, offset,
                                  normalized.Get());
     visualDataSet->GetCellData()->SetScalars(normalized.GetPointer());
   }
