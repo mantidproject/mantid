@@ -22,7 +22,7 @@ class CountReflectionsTest(HKLStatisticsTestMixin, stresstesting.MantidStressTes
 
             statistics = self._run_count_reflections(reflections, space_group)
 
-            self._compare_statistics(statistics._todict(), reference_statistics)
+            self._compare_statistics(statistics._asdict(), reference_statistics)
 
     def _run_count_reflections(self, reflections, space_group):
         point_group = self._get_point_group(space_group).getHMSymbol()
