@@ -3023,8 +3023,8 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
-  if (multiFitState==Muon::MultiFitState::Disabled) {
-	  m_dataSelector->clearChosenGroups();
+  if (multiFitState == Muon::MultiFitState::Disabled) {
+    m_dataSelector->clearChosenGroups();
   }
 }
 
