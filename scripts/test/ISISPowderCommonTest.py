@@ -176,36 +176,6 @@ class ISISPowderCommonTest(unittest.TestCase):
         with self.assertRaisesRegexp(ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
-    def test_load_current_normalised_ws_list(self):
-        mock_inst = UnitTestMockInstrument(file_name_prefix="POL")
-
-        empty_inst_run = "95597"
-        vanadium_inst_run = "95598"
-
-        # Load a single workspace
-        single_ws_load = common.load_current_normalised_ws_list(run_number_string=empty_inst_run, instrument=mock_inst,
-                                                                input_batching=common_enums.INPUT_BATCHING.Individual)
-        single_ws_load = single_ws_load[0]
-        self.assertAlmostEqual(single_ws_load.dataY(140)[825], 0.000440675, delta=1e-8)
-        mantid.DeleteWorkspace(single_ws_load)
-
-        # Check we get two workspaces back when using a list and individual batching
-        batching = empty_inst_run + ',' + vanadium_inst_run
-        loaded_list = common.load_current_normalised_ws_list(run_number_string=batching, instrument=mock_inst,
-                                                             input_batching=common_enums.INPUT_BATCHING.Individual)
-        self.assertEqual(len(loaded_list), 2)
-        self.assertAlmostEqual(loaded_list[0].dataY(140)[825], 0.000440675, delta=1e-8)
-        for ws in loaded_list:
-            mantid.DeleteWorkspace(ws)
-
-        # Finally check summed workspaces work correctly - this is slightly incorrect as we sum a raw and vanadium
-        loaded_list = common.load_current_normalised_ws_list(run_number_string=batching, instrument=mock_inst,
-                                                             input_batching=common_enums.INPUT_BATCHING.Summed)
-        self.assertEqual(len(loaded_list), 1)
-        self.assertAlmostEqual(loaded_list[0].dataY(140)[825], 0.00265304, delta=1e-8)
-        for ws in loaded_list:
-            mantid.DeleteWorkspace(ws)
-
     def test_remove_intermediate_workspace(self):
         ws_list = []
         ws_names_list = []
@@ -265,20 +235,6 @@ class ISISPowderCommonTest(unittest.TestCase):
         for input_ws, splined_ws in zip(ws_list, splined_list):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
-
-
-class UnitTestMockInstrument(isis_powder.abstract_inst.AbstractInst):
-    # Implements essential methods required within the class
-    def __init__(self, file_name_prefix):
-        super(UnitTestMockInstrument, self).__init__("UnitTest", None, None, None)
-        self._file_name_prefix = file_name_prefix
-
-    def _get_run_details(self, run_number_string):
-        return None
-
-    def _generate_input_file_name(self, run_number):
-        return self._file_name_prefix + str(run_number)
-
 
 if __name__ == "__main__":
     unittest.main()
