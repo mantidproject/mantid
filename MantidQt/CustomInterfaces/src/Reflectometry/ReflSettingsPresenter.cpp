@@ -66,6 +66,8 @@ void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   auto runs = m_view->getTransmissionRuns();
+  if (runs.empty())
+    return "";
 
   std::vector<std::string> transRuns;
   boost::split(transRuns, runs, boost::is_any_of(","));
