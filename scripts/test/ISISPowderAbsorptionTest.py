@@ -51,5 +51,25 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
                 ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
                                                                         config_dict=modified_dict)
 
+    def test_formula_requires_number_density(self):
+        sample_properties = {
+            "cylinder_sample_height": 4.0,
+            "cylinder_sample_radius": 0.25,
+            "cylinder_position": [0., 0., 0.],
+            "chemical_formula": "V Nb"
+        }
+
+        expected_number_density = 1.234
+
+        ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=2, BinWidth=1)
+        with self.assertRaisesRegexp(KeyError, "The number density is required as the chemical formula"):
+            ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
+                                                                    config_dict=sample_properties)
+
+        sample_properties["number_density"] = expected_number_density
+        ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
+                                                                config_dict=sample_properties)
+        self.assertEqual(ws.sample().getMaterial().numberDensity, expected_number_density)
+
 if __name__ == "__main__":
     unittest.main()
