@@ -62,7 +62,6 @@ public:
   registerDetector(const Mantid::Geometry::IDetector &detector,
                    std::vector<size_t> &parentDetectorIndexes) override;
 
-  virtual ~InfoComponentVisitor();
   std::vector<Mantid::Geometry::IComponent *> componentIds() const;
   std::vector<std::vector<size_t>> componentDetectorIndexes() const;
 };

@@ -60,7 +60,6 @@ void InfoComponentVisitor::registerDetector(
   m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
   m_componentIds.emplace_back(detector.getComponentID());
 }
-InfoComponentVisitor::~InfoComponentVisitor() {}
 
 std::vector<Mantid::Geometry::ComponentID>
 InfoComponentVisitor::componentIds() const {
