@@ -85,6 +85,7 @@ public:
 
   /// Return multiple fitting mode on/off selection
   Muon::MultiFitState getMultiFitState() const;
+  /// Return TF Asymmetry mode on/off selection
   Muon::TFAsymmState getTFAsymmState() const;
 
 signals:
@@ -96,7 +97,7 @@ signals:
 
   /// Emitted when multi fitting mode is turned on/off
   void multiFitStateChanged(int state);
-  /// Emitted when multi fitting mode is turned on/off
+  /// Emitted when TF Asymmetry mode is turned on/off
   void TFAsymmStateChanged(int state);
 private:
   /// Default widget values

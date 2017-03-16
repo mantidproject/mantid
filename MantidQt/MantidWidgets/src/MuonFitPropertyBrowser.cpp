@@ -591,7 +591,7 @@ void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 
 	// Show or hide "Function" and "Data" sections
 	//m_browser->setItemVisible(m_functionsGroup, !enabled);
-	//m_browser->setItemVisible(m_settingsGroup, !enabled);
+	m_browser->setItemVisible(m_settingsGroup, !enabled);
 
 	// Show or hide additional widgets
 	/*for (int i = 0; i < m_widgetSplitter->count(); ++i) {

@@ -2106,6 +2106,7 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  // Set TF Asymmetry mode on/off as appropriate
   const auto &TFAsymmState = m_optionTab->getTFAsymmState();
   m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
@@ -3031,6 +3032,10 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
 }
+/**
+* Called when the "TF Asymmetry" checkbox is changed (settings tab.)
+* Forward this to the fit function presenter.
+*/
 void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
 	const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
 		? Muon::TFAsymmState::Enabled

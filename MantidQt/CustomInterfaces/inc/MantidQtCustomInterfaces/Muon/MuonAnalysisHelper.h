@@ -36,7 +36,7 @@ struct DatasetParams {
 };
 /// Whether multiple fitting is enabled or disabled
 enum class MultiFitState { Enabled, Disabled };
-/// Whether multiple fitting is enabled or disabled
+/// Whether TF Asymmetry is enabled or disabled
 enum class TFAsymmState { Enabled, Disabled };
 }
 

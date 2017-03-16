@@ -47,6 +47,7 @@ public:
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
+  /// Toggle TF Asymmetry mode
   void setTFAsymmState(Muon::TFAsymmState state);
 
   /// Set function in model (fit property browser)
@@ -85,6 +86,7 @@ private:
   MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
   /// Whether multi fitting is disabled(function browser is hidden) or enabled
   Muon::MultiFitState m_multiFitState;
+  /// Whether TF Asymmetry is disabled or enabled
   Muon::TFAsymmState m_TFAsymmState;
 
 };

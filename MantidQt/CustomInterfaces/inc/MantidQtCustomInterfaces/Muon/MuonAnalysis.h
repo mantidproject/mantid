@@ -249,7 +249,7 @@ private slots:
   /// Called when "enable multi fit" checkbox is turned on/off
   void multiFitCheckboxChanged(int state);
 
-  /// Called when "enable multi fit" checkbox is turned on/off
+  /// Called when "TF Asymmetry" checkbox is turned on/off
   void TFAsymmCheckboxChanged(int state);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
