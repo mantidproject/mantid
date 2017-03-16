@@ -94,7 +94,10 @@ public:
   void setExpDefaults(const std::vector<std::string> &) const override;
   void setInstDefaults(const std::vector<double> &,
                        const std::vector<std::string> &) const override;
-
+  /// Check if experiment settings are enabled
+  bool experimentSettingsEnabled() const;
+  /// Check if instrument settings are enabled
+  bool instrumentSettingsEnabled() const;
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;

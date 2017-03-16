@@ -77,6 +77,10 @@ public:
   virtual std::string getProcessingInstructions() const = 0;
   virtual std::string getDetectorCorrectionType() const = 0;
 
+  /// Check if settings are enabled
+  virtual bool experimentSettingsEnabled() const = 0;
+  virtual bool instrumentSettingsEnabled() const = 0;
+
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
   virtual void setInstDefaults(const std::vector<double> &,
