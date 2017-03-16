@@ -72,7 +72,7 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
             run_numbers = []
             run_names = []
             first_run = self._run_first + numb
-            for idx in range(self._number_runs):
+            for idx in range(int(self._number_runs)):
                 run = str(first_run + idx * self._number_samples)
                 run_numbers.append(run)
                 run_names.append(self._instrument + run)
