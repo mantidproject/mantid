@@ -18,7 +18,8 @@ public:
   static void destroySuite(GroupTest *suite) { delete suite; }
 
   void test_size_mismatch_fail() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
     std::vector<SpectrumNumber> specNums{4, 5};
     TS_ASSERT_THROWS(group(source, std::move(specNums), grouping),
@@ -27,7 +28,8 @@ public:
   }
 
   void test_no_grouping() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
     auto result = group(source, {4, 5, 6}, grouping);
     TS_ASSERT_EQUALS(result.size(), 3);
@@ -40,7 +42,8 @@ public:
   }
 
   void test_swap_ids() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{1}, {0}, {2}};
     auto result = group(source, {1, 2, 3}, grouping);
     TS_ASSERT_EQUALS(result.size(), 3);
@@ -53,7 +56,8 @@ public:
   }
 
   void test_extract() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{1}};
     auto result = group(source, {1}, grouping);
     TS_ASSERT_EQUALS(result.size(), 1);
@@ -62,7 +66,8 @@ public:
   }
 
   void test_group() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{0, 2}, {1}};
     auto result = group(source, {1, 2}, grouping);
     TS_ASSERT_EQUALS(result.size(), 2);

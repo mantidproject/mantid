@@ -14,7 +14,9 @@ IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
     specNums.emplace_back(source.spectrumNumber(i));
     detIDs.emplace_back(source.detectorIDs(i));
   }
-  return {std::move(specNums), std::move(detIDs)};
+  IndexInfo result(std::move(specNums));
+  result.setDetectorIDs(std::move(detIDs));
+  return result;
 }
 
 /// Extracts IndexInfo from source IndexInfo, extracting data for all indices
@@ -27,7 +29,9 @@ IndexInfo extract(const IndexInfo &source, const size_t minIndex,
     specNums.emplace_back(source.spectrumNumber(i));
     detIDs.emplace_back(source.detectorIDs(i));
   }
-  return {std::move(specNums), std::move(detIDs)};
+  IndexInfo result(std::move(specNums));
+  result.setDetectorIDs(std::move(detIDs));
+  return result;
 }
 
 } // namespace Indexing

@@ -30,27 +30,24 @@ public:
   }
 
   void test_vector_constructor() {
-    TS_ASSERT_THROWS_NOTHING(IndexInfo({3, 2, 1}, {{}, {10}, {20, 30}}));
+    TS_ASSERT_THROWS_NOTHING(IndexInfo({3, 2, 1}));
   }
 
   void test_vector_constructor_sets_correct_indices() {
-    IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    IndexInfo info({3, 2, 1});
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
     TS_ASSERT_EQUALS(info.detectorIDs(0), (std::vector<DetectorID>{}));
-    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<DetectorID>{10}));
-    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
-  }
-
-  void test_vector_constructor_size_mismatch() {
-    TS_ASSERT_THROWS(IndexInfo({3, 2, 1}, {{}, {10}}), std::runtime_error);
+    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<DetectorID>{}));
   }
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
 
   void test_copy() {
-    const IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    IndexInfo info({3, 2, 1});
+    info.setDetectorIDs({{}, {10}, {20, 30}});
     auto copy(info);
     TS_ASSERT_EQUALS(info.size(), 3);
     TS_ASSERT_EQUALS(copy.size(), 3);
@@ -63,7 +60,8 @@ public:
   }
 
   void test_move() {
-    IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    IndexInfo info({3, 2, 1});
+    info.setDetectorIDs({{}, {10}, {20, 30}});
     auto moved(std::move(info));
     TS_ASSERT_EQUALS(info.size(), 0);
     TS_ASSERT_EQUALS(moved.size(), 3);

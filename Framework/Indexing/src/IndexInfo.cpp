@@ -27,23 +27,20 @@ IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
 
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
-IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-                     std::vector<std::vector<DetectorID>> &&detectorIDs,
+IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const StorageMode storageMode,
                      const Communicator &communicator)
     : m_storageMode(storageMode), m_communicator(communicator) {
-  if (spectrumNumbers.size() != detectorIDs.size())
-    throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
-                             "and detector ID vectors");
-  m_detectorIDs.access() = std::move(detectorIDs);
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
+  m_detectorIDs = Kernel::make_cow<std::vector<std::vector<DetectorID>>>(
+      m_spectrumNumberTranslator->localSize());
 }
 
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
-  if (!m_detectorIDs)
+  if (!m_spectrumNumberTranslator)
     return 0;
-  return m_detectorIDs->size();
+  return m_spectrumNumberTranslator->localSize();
 }
 
 /// Returns the spectrum number for given index.

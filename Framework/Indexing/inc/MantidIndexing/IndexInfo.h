@@ -86,8 +86,7 @@ public:
   explicit IndexInfo(const size_t globalSize,
                      const StorageMode storageMode = StorageMode::Cloned,
                      const Communicator &communicator = Communicator{1, 0});
-  IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-            std::vector<std::vector<DetectorID>> &&detectorIDs,
+  explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
             const StorageMode storageMode = StorageMode::Cloned,
             const Communicator &communicator = Communicator{1, 0});
 

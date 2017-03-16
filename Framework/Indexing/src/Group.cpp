@@ -27,7 +27,9 @@ IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
       newIDs.insert(newIDs.end(), IDs.begin(), IDs.end());
     }
   }
-  return {std::move(specNums), std::move(detIDs)};
+  IndexInfo result(std::move(specNums));
+  result.setDetectorIDs(std::move(detIDs));
+  return result;
 }
 
 } // namespace Indexing

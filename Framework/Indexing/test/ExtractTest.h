@@ -18,7 +18,8 @@ public:
   static void destroySuite(ExtractTest *suite) { delete suite; }
 
   void test_extract() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<size_t> indices{{0, 2}};
     auto result = extract(source, indices);
     TS_ASSERT_EQUALS(result.size(), 2);
@@ -29,7 +30,8 @@ public:
   }
 
   void test_reorder() {
-    IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
+    IndexInfo source({1, 2, 3});
+    source.setDetectorIDs({10, 20, 30});
     std::vector<size_t> indices{{2, 1, 0}};
     auto result = extract(source, indices);
     TS_ASSERT_EQUALS(result.size(), 3);
