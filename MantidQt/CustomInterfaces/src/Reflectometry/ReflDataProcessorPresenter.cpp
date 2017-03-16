@@ -309,7 +309,7 @@ void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
 
   const auto run = mws->run();
   const auto totalDuration = run.endTime() - run.startTime();
-  double totalDurationSec = totalDuration.seconds();
+  double totalDurationSec = totalDuration.total_seconds();
   double sliceDuration = .0;
   int numSlices = 0;
 
