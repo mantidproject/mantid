@@ -181,7 +181,6 @@ class SampleEnum(object):
     # The mixed casing is intentional
     a_foo = "a foo"
     a_bar = "A BAR"
-    a_baz = "a Baz"
 
 if __name__ == "__main__":
     unittest.main()

@@ -47,6 +47,7 @@ set ( TEST_PY_FILES
       test/ISISPowderAbsorptionTest.py
       test/ISISPowderCommonTest.py
       test/ISISPowderInstrumentSettingsTest.py
+      test/ISISPowderYamlParserTest.py
       test/PyChopTest.py
       test/ReductionSettingsTest.py
       test/ReductionWrapperTest.py
