@@ -56,8 +56,8 @@ def _find_dictionary_key(dict_to_search, run_number):
                 generated_runs = common.generate_run_numbers(run_number_string=key)
             except RuntimeError:
                 raise ValueError("Could not parse '" + str(key) + "'\n"
-                                 "This should be a range of runs in this cycle in the mapping file."
-                                 " Please check your indentation if this should be within a cycle.")
+                                 "This should be a range of runs in the mapping file."
+                                 " Please check your indentation if the syntax looks correct.")
             if run_number in generated_runs:
                 return key
 

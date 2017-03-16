@@ -36,7 +36,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         yaml_handle = self.get_temp_file_handle()
         yaml_handle.write("100-200:\n")
         yaml_handle.write("  test_item: '" + expected_value + "'\n")
-        yaml_handle.write("201-300:\n")
+        yaml_handle.write("201-:\n")
         yaml_handle.write("  test_item: '" + second_value + "'\n")
         # Close handle so the test can access it
         yaml_handle.close()
@@ -57,8 +57,8 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         returned_dict = yaml_parser.get_run_dictionary(run_number_string="120-130", file_path=yaml_handle.name)
         self.assertEqual(returned_dict["test_item"], expected_value, "Range returned incorrect value")
 
-        # Check the the second dictionary works at lower bounds
-        returned_dict = yaml_parser.get_run_dictionary(run_number_string="201", file_path=yaml_handle.name)
+        # Check the the second dictionary works with unbounded ranges
+        returned_dict = yaml_parser.get_run_dictionary(run_number_string="205", file_path=yaml_handle.name)
         self.assertEqual(returned_dict["test_item"], second_value)
 
     def test_file_not_found_gives_sane_err(self):
@@ -128,6 +128,28 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         returned_dict = yaml_parser.get_run_dictionary(run_number_string="10", file_path=file_path)
         self.assertEqual(returned_dict["test_key"], expected_val)
 
+    def test_yaml_sanity_check_picks_up_two_unbounded(self):
+        # Check we can detect two unbounded ranges
+        file_handle = self.get_temp_file_handle()
+        file_handle.write("10-:\n")
+        file_handle.write("20-:\n")
+        file_path = file_handle.name
+        file_handle.close()
+
+        with self.assertRaisesRegexp(ValueError, "Seen multiple unbounded keys in mapping file"):
+            yaml_parser.get_run_dictionary(run_number_string="11", file_path=file_path)
+
+    def test_yaml_sanity_detects_val_larger_than_unbound(self):
+        # If we have a value that is larger the the unbounded range can we detect this
+        file_handle = self.get_temp_file_handle()
+        file_handle.write("30-:\n")
+        file_handle.write("35:\n")
+        file_path = file_handle.name
+        file_handle.close()
+
+        with self.assertRaisesRegexp(ValueError, "Found a run range in calibration mapping overlaps an unbounded run "
+                                                 "range"):
+            yaml_parser.get_run_dictionary(run_number_string="32", file_path=file_path)
 
 if __name__ == "__main__":
     unittest.main()
