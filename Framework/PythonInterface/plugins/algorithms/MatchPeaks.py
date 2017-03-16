@@ -274,14 +274,6 @@ class MatchPeaks(PythonAlgorithm):
         # Clean-up unused TableWorkspaces in try-catch
         # Direct deletion causes problems when running in parallel for too many workspaces
         try:
-            DeleteWorkspace('EPPfit_Parameters')
-        except ValueError:
-            logger.debug('Fit parameters workspace already deleted')
-        try:
-            DeleteWorkspace('EPPfit_NormalisedCovarianceMatrix')
-        except ValueError:
-            logger.debug('Fit covariance matrix already deleted')
-        try:
             DeleteWorkspace(fit_table)
         except ValueError:
             logger.debug('Fit table already deleted')
