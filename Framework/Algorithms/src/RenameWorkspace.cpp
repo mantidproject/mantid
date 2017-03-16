@@ -132,7 +132,7 @@ void RenameWorkspace::exec() {
 bool RenameWorkspace::processGroups() {
   // Get the input & output workspace names
   Workspace_sptr inputWS = getProperty("InputWorkspace");
-  const std::string inputwsName = inputWS->name();
+  const std::string inputwsName = inputWS->getName();
   std::string outputwsName = getPropertyValue("OutputWorkspace");
 
   if (inputwsName == outputwsName) {

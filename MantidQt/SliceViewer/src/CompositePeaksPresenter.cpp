@@ -477,7 +477,7 @@ private:
 public:
   explicit MatchWorkspaceName(const QString &name) : m_wsName(name) {}
   bool operator()(SetPeaksWorkspaces::value_type ws) {
-    const std::string wsName = ws->name();
+    const std::string &wsName = ws->getName();
     const std::string toMatch = m_wsName.toStdString();
     const bool result = (wsName == toMatch);
     return result;

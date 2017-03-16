@@ -165,7 +165,8 @@ void ModeControlWidget::enableViewButton(ModeControlWidget::Views mode,
  * @param view A selected view.
  * @returns The selected view as enum or the standard view.
  */
-ModeControlWidget::Views ModeControlWidget::getViewFromString(QString view) {
+ModeControlWidget::Views
+ModeControlWidget::getViewFromString(const QString &view) {
   if (!view.isEmpty() && mapFromStringToView.count(view) == 1) {
     return mapFromStringToView[view];
   } else {

@@ -27,6 +27,18 @@ QPixmap WorkspaceIcons::getIcon(const std::string &workspaceID) const {
     return getQPixmap(m_idToPixmapName.value(workspaceID));
 }
 
+/**
+ * Get the string ID representing the icon
+ * @param workspaceID :: a string representing the ID of the workspace
+ * @return a string with the QPixmap id for this workspace.
+ */
+std::string WorkspaceIcons::getIconID(const std::string &workspaceID) const {
+  if (workspaceID.compare(0, 16, "MDEventWorkspace") == 0)
+    return m_idToPixmapName.value("MDEventWorkspace");
+  else
+    return m_idToPixmapName.value(workspaceID);
+}
+
 //-----------------------------------------------------------------------------
 // Private member functions
 //-----------------------------------------------------------------------------

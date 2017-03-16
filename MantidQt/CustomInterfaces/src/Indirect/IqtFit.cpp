@@ -5,12 +5,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <math.h>
-#include <QFileInfo>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -384,7 +382,7 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
     fname = "Exponential1";
   }
 
-  result->addFunction(createUserFunction(fname, tie));
+  result->addFunction(createExponentialFunction(fname, tie));
 
   if (fitType == 1 || fitType == 3) {
     if (fitType == 1) {
@@ -392,7 +390,7 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
     } else {
       fname = "StretchedExp";
     }
-    result->addFunction(createUserFunction(fname, tie));
+    result->addFunction(createExponentialFunction(fname, tie));
   }
 
   // Return CompositeFunction object to caller.
@@ -400,34 +398,44 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
   return result;
 }
 
-IFunction_sptr IqtFit::createUserFunction(const QString &name, bool tie) {
-  IFunction_sptr result =
-      FunctionFactory::Instance().createFunction("UserFunction");
-  std::string formula;
-
+IFunction_sptr IqtFit::createExponentialFunction(const QString &name,
+                                                 bool tie) {
+  IFunction_sptr result;
   if (name.startsWith("Exp")) {
-    formula = "Intensity*exp(-(x/Tau))";
-  } else {
-    formula = "Intensity*exp(-(x/Tau)^Beta)";
-  }
-
-  IFunction::Attribute att(formula);
-  result->setAttribute("Formula", att);
-
-  QList<QtProperty *> props = m_properties[name]->subProperties();
-  for (int i = 0; i < props.size(); i++) {
-    std::string name = props[i]->propertyName().toStdString();
-    result->setParameter(name, m_dblManager->value(props[i]));
-
-    // add tie if parameter is fixed
-    if (tie || !props[i]->subProperties().isEmpty()) {
-      std::string value = props[i]->valueText().toStdString();
-      result->tie(name, value);
+    IFunction_sptr result =
+        FunctionFactory::Instance().createFunction("ExpDecay");
+    result->setParameter(
+        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime",
+                         m_dblManager->value(m_properties[name + ".Tau"]));
+    if (tie) {
+      result->tie("Height",
+                  m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime",
+                  m_properties[name + ".Tau"]->valueText().toStdString());
     }
+    result->applyTies();
+    return result;
+  } else {
+    IFunction_sptr result =
+        FunctionFactory::Instance().createFunction("StretchExp");
+    result->setParameter(
+        "Height", m_dblManager->value(m_properties[name + ".Intensity"]));
+    result->setParameter("Lifetime",
+                         m_dblManager->value(m_properties[name + ".Tau"]));
+    result->setParameter("Stretching",
+                         m_dblManager->value(m_properties[name + ".Beta"]));
+    if (tie) {
+      result->tie("Height",
+                  m_properties[name + ".Intensity"]->valueText().toStdString());
+      result->tie("Lifetime",
+                  m_properties[name + ".Tau"]->valueText().toStdString());
+      result->tie("Stretching",
+                  m_properties[name + ".Beta"]->valueText().toStdString());
+    }
+    result->applyTies();
+    return result;
   }
-
-  result->applyTies();
-  return result;
 }
 
 QtProperty *IqtFit::createExponential(const QString &name) {
@@ -606,8 +614,8 @@ void IqtFit::setDefaultParameters(const QString &name) {
   double background = m_dblManager->value(m_properties["BackgroundA0"]);
   // intensity is always 1-background
   m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
-  auto x = m_iqtFInputWS->readX(0);
-  auto y = m_iqtFInputWS->readY(0);
+  auto x = m_iqtFInputWS->x(0);
+  auto y = m_iqtFInputWS->y(0);
   double tau = 0;
 
   if (x.size() > 4) {
@@ -716,7 +724,7 @@ void IqtFit::checkBoxUpdate(QtProperty *prop, bool checked) {
 }
 
 void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
-  std::string paramName = "f1.Intensity";
+  std::string paramName = "f1.Height";
   size_t index = func->parameterIndex(paramName);
 
   switch (m_uiForm.cbFitType->currentIndex()) {
@@ -734,11 +742,11 @@ void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
   case 1: // 2 Exp
   case 3: // 1 Exp & 1 Str
     if (!func->isFixed(index)) {
-      func->tie(paramName, "1-f2.Intensity-f0.A0");
+      func->tie(paramName, "1-f2.Height-f0.A0");
     } else {
       std::string paramValue =
           boost::lexical_cast<std::string>(func->getParameter(paramName));
-      func->tie(paramName, "1-f2.Intensity-f0.A0");
+      func->tie(paramName, "1-f2.Height-f0.A0");
       func->tie(paramName, paramValue);
     }
     break;
@@ -794,11 +802,11 @@ void IqtFit::singleFit() {
     switch (fitType) {
     case 0: // 1 Exp
     case 2: // 1 Str
-      m_ties = "f1.Intensity = 1-f0.A0";
+      m_ties = "f1.Height = 1-f0.A0";
       break;
     case 1: // 2 Exp
     case 3: // 1 Exp & 1 Str
-      m_ties = "f1.Intensity=1-f2.Intensity-f0.A0";
+      m_ties = "f1.Height=1-f2.Height-f0.A0";
       break;
     default:
       break;
@@ -877,16 +885,16 @@ void IqtFit::singleFitComplete(bool error) {
   if (fitType != 2) {
     // Exp 1
     m_dblManager->setValue(m_properties["Exponential1.Intensity"],
-                           parameters["f1.Intensity"]);
+                           parameters["f1.Height"]);
     m_dblManager->setValue(m_properties["Exponential1.Tau"],
-                           parameters["f1.Tau"]);
+                           parameters["f1.Lifetime"]);
 
     if (fitType == 1) {
       // Exp 2
       m_dblManager->setValue(m_properties["Exponential2.Intensity"],
-                             parameters["f2.Intensity"]);
+                             parameters["f2.Height"]);
       m_dblManager->setValue(m_properties["Exponential2.Tau"],
-                             parameters["f2.Tau"]);
+                             parameters["f2.Lifetime"]);
     }
   }
 
@@ -900,14 +908,14 @@ void IqtFit::singleFitComplete(bool error) {
     }
 
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"],
-                           parameters[fval + "Intensity"]);
+                           parameters[fval + "Height"]);
     m_dblManager->setValue(m_properties["StretchedExp.Tau"],
-                           parameters[fval + "Tau"]);
+                           parameters[fval + "Lifetime"]);
     m_dblManager->setValue(m_properties["StretchedExp.Beta"],
-                           parameters[fval + "Beta"]);
+                           parameters[fval + "Stretching"]);
   }
 
-  // Can start upddating the guess curve again
+  // Can start updating the guess curve again
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(plotGuess(QtProperty *)));
 
@@ -934,31 +942,20 @@ void IqtFit::plotGuess(QtProperty *) {
       m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
-  std::vector<double> inputXData(nData);
+  const auto &xPoints = m_iqtFInputWS->points(0);
 
-  const Mantid::MantidVec &XValues = m_iqtFInputWS->readX(0);
+  std::vector<double> dataX(nData);
+  std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
 
-  const bool isHistogram = m_iqtFInputWS->isHistogramData();
-
-  for (size_t i = 0; i < nData; i++) {
-    if (isHistogram)
-      inputXData[i] =
-          0.5 * (XValues[binIndxLow + i] + XValues[binIndxLow + i + 1]);
-    else
-      inputXData[i] = XValues[binIndxLow + i];
-  }
-
-  FunctionDomain1DVector domain(inputXData);
+  FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);
   function->function(domain, outputData);
 
-  QVector<double> dataX;
-  QVector<double> dataY;
-
+  std::vector<double> dataY(nData);
   for (size_t i = 0; i < nData; i++) {
-    dataX.append(inputXData[i]);
-    dataY.append(outputData.getCalculated(i));
+    dataY[i] = outputData.getCalculated(i);
   }
+
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("CreateWorkspace");
   createWsAlg->initialize();
@@ -966,8 +963,8 @@ void IqtFit::plotGuess(QtProperty *) {
   createWsAlg->setLogging(false);
   createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
   createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX.toStdVector());
-  createWsAlg->setProperty("DataY", dataY.toStdVector());
+  createWsAlg->setProperty("DataX", dataX);
+  createWsAlg->setProperty("DataY", dataY);
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 

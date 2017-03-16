@@ -114,8 +114,7 @@ void RefinePowderInstrumentParameters3::exec() {
   parseTableWorkspaces();
 
   // 3. Set up main function for peak positions
-  ThermalNeutronDtoTOFFunction rawfunc;
-  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>(rawfunc);
+  m_positionFunc = boost::make_shared<ThermalNeutronDtoTOFFunction>();
   m_positionFunc->initialize();
 
   // 3. Fit
@@ -375,7 +374,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
 
   // 3. Monte Carlo starts
   double chisqx = chisq0;
-  int numtotalacceptance = 0;
   int numrecentacceptance = 0;
   int numrecentsteps = 0;
 
@@ -420,7 +418,6 @@ double RefinePowderInstrumentParameters3::doSimulatedAnnealing(
       }
 
       // e) MC strategy control
-      ++numtotalacceptance;
       ++numrecentacceptance;
       ++numrecentsteps;
     }
@@ -1227,10 +1224,9 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(
         double upperbound = param.maxvalue;
         if (lowerbound >= -DBL_MAX * 0.1 || upperbound <= DBL_MAX * 0.1) {
           // If there is a boundary
-          Constraints::BoundaryConstraint *bc =
-              new Constraints::BoundaryConstraint(
-                  function.get(), parname, lowerbound, upperbound, false);
-          function->addConstraint(bc);
+          auto bc = Kernel::make_unique<Constraints::BoundaryConstraint>(
+              function.get(), parname, lowerbound, upperbound, false);
+          function->addConstraint(std::move(bc));
         }
       } else {
         // If fix.

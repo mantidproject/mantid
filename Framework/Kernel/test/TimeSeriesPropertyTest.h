@@ -271,6 +271,39 @@ public:
     delete log;
   }
 
+  void test_ComparisonOperator() {
+    // Setup two logs and two filters so that logs have different sizes but are
+    // the same size after applying the filter
+
+    TimeSeriesProperty<int> *log1 = new TimeSeriesProperty<int>("count_rate");
+    log1->addValue("2016-03-17T00:00:00", 1);
+    log1->addValue("2016-03-17T00:30:00", 2);
+    log1->addValue("2016-03-17T01:00:00", 3);
+    log1->addValue("2016-03-17T01:30:00", 4);
+    log1->addValue("2016-03-17T02:00:00", 5);
+    TimeSeriesProperty<bool> *filter1 = new TimeSeriesProperty<bool>("filter");
+    filter1->addValue("2016-Mar-17T00:00:00", 1);
+    filter1->addValue("2016-Mar-17T01:00:00", 0);
+    log1->filterWith(filter1);
+
+    TimeSeriesProperty<int> *log2 = new TimeSeriesProperty<int>("count_rate");
+    log2->addValue("2016-03-17T03:00:00", 1);
+    log2->addValue("2016-03-17T04:00:00", 2);
+    log2->addValue("2016-03-17T05:00:00", 3);
+    log2->addValue("2016-03-17T06:00:0", 4);
+    TimeSeriesProperty<bool> *filter2 = new TimeSeriesProperty<bool>("filter");
+    filter2->addValue("2016-Mar-17T03:00:00", 1);
+    filter2->addValue("2016-Mar-17T05:00:00", 0);
+    log2->filterWith(filter2);
+
+    TS_ASSERT(!(*log1 == *log2));
+
+    delete log1;
+    delete log2;
+    delete filter1;
+    delete filter2;
+  }
+
   //----------------------------------------------------------------------------
   void test_filterByTime() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);

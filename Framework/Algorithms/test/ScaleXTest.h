@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/ScaleX.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
@@ -88,13 +89,14 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
-    auto det1 = inputWS->getDetector(0);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det1 = spectrumInfo.detector(0);
     const double det1Factor(5);
-    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
 
-    auto det2 = inputWS->getDetector(1);
+    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();
@@ -136,13 +138,14 @@ public:
     auto &pmap = inputWS->instrumentParameters();
     const std::string parname("factor");
 
-    auto det1 = inputWS->getDetector(0);
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+    const auto &det1 = spectrumInfo.detector(0);
     const double det1Factor(5);
-    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+    pmap.addDouble(det1.getComponentID(), parname, det1Factor);
 
-    auto det2 = inputWS->getDetector(1);
+    const auto &det2 = spectrumInfo.detector(1);
     const double det2Factor(-10);
-    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+    pmap.addDouble(det2.getComponentID(), parname, det2Factor);
 
     const double instFactor(100);
     auto inst = inputWS->getInstrument();

@@ -115,7 +115,7 @@ void IndirectDiffractionReduction::run() {
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
       if (!validateVanCal()) {
-        showInformationBox("Vaniduium and Calibration input is invalid.");
+        showInformationBox("Vanadium and Calibration input is invalid.");
         return;
       }
       runOSIRISdiffonlyReduction();
@@ -125,14 +125,15 @@ void IndirectDiffractionReduction::run() {
             "Calibration and rebinning parameters are incorrect.");
         return;
       }
+      runGenericReduction(instName, mode);
     }
   } else {
     if (!validateRebin()) {
       showInformationBox("Rebinning parameters are incorrect.");
       return;
     }
+    runGenericReduction(instName, mode);
   }
-  runGenericReduction(instName, mode);
 }
 
 /**
@@ -339,6 +340,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
       msgDiffReduction->setProperty("CalFile", calFile);
     }
   }
+  if (mode == "diffspec") {
+    const auto vanFile =
+        m_uiForm.rfVanFile_only->getFilenames().join(",").toStdString();
+    msgDiffReduction->setProperty("VanadiumFiles", vanFile);
+  }
   msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
@@ -359,7 +365,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                     m_uiForm.spCanScale->value());
   }
 
-  // Add the pproperty for grouping policy if needed
+  // Add the property for grouping policy if needed
   if (m_uiForm.ckIndividualGrouping->isChecked())
     msgDiffReduction->setProperty("GroupingPolicy", "Individual");
 
@@ -465,7 +471,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
  *
  * Optionally loads an IPF if a reflection was provided.
  *
- * @param instrumentName Name of an inelastic indiretc instrument (IRIS, OSIRIN,
+ * @param instrumentName Name of an inelastic indirect instrument (IRIS, OSIRIS,
  *TOSCA, VESUVIO)
  * @param reflection Reflection mode to load parameters for (diffspec or
  *diffonly)
@@ -519,6 +525,7 @@ void IndirectDiffractionReduction::instrumentSelected(
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
   m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
+  m_uiForm.rfVanFile_only->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(
       instrumentName.toStdString(), reflectionName.toStdString());
@@ -545,10 +552,24 @@ void IndirectDiffractionReduction::instrumentSelected(
     m_uiForm.swVanadium->setCurrentIndex(0);
   else if (calibNeeded)
     m_uiForm.swVanadium->setCurrentIndex(1);
-  else
+  else if (reflectionName != "diffspec")
     m_uiForm.swVanadium->setCurrentIndex(2);
+  else
+    m_uiForm.swVanadium->setCurrentIndex(1);
 
   // Hide options that the current instrument config cannot process
+
+  // Disable calibration for IRIS
+  if (instrumentName == "IRIS") {
+    m_uiForm.ckUseCalib->setEnabled(false);
+    m_uiForm.ckUseCalib->setToolTip("IRIS does not support calibration files");
+    m_uiForm.ckUseCalib->setChecked(false);
+  } else {
+    m_uiForm.ckUseCalib->setEnabled(true);
+    m_uiForm.ckUseCalib->setToolTip("");
+    m_uiForm.ckUseCalib->setChecked(true);
+  }
+
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip(
@@ -625,7 +646,7 @@ void IndirectDiffractionReduction::saveSettings() {
 /**
  * Validates the rebinning fields and updates invalid markers.
  *
- * @returns True if reinning options are valid, flase otherwise
+ * @returns True if reining options are valid, false otherwise
  */
 bool IndirectDiffractionReduction::validateRebin() {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
@@ -716,7 +737,7 @@ bool IndirectDiffractionReduction::validateCalOnly() {
 }
 
 /**
- * Disables and shows message on run button indicating that run files have benn
+ * Disables and shows message on run button indicating that run files have been
  * changed.
  */
 void IndirectDiffractionReduction::runFilesChanged() {

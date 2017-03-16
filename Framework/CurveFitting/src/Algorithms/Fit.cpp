@@ -227,7 +227,7 @@ void Fit::execConcrete() {
     copyMinimizerOutput(*minimizer);
 
     if (baseName.empty()) {
-      baseName = ws->name();
+      baseName = ws->getName();
       if (baseName.empty()) {
         baseName = "Output";
       }

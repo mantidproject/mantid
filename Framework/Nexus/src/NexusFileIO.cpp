@@ -1,7 +1,7 @@
 // NexusFileIO
 // @author Ronald Fowler
-#include <vector>
 #include <sstream>
+#include <vector>
 
 #ifdef _WIN32
 #include <io.h>
@@ -9,18 +9,18 @@
 // Maximum base file name size on modern windows systems is 260 characters
 #define NAME_MAX 260
 #endif /* _WIN32 */
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NexusFileIO.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/NexusFileIO.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -304,7 +304,7 @@ int NexusFileIO::writeNexusProcessedData2D(
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
     return (2);
-  const size_t nSpectBins = localworkspace->readY(0).size();
+  const size_t nSpectBins = localworkspace->y(0).size();
   const size_t nSpect = spec.size();
   int dims_array[2] = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
@@ -348,7 +348,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXopendata(fileID, name.c_str());
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readY(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->y(s).rawData().data(), start, asize);
       start[0]++;
     }
     if (m_progress != nullptr)
@@ -375,7 +375,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
       int s = spec[i];
-      NXputslab(fileID, localworkspace->readE(s).data(), start, asize);
+      NXputslab(fileID, localworkspace->e(s).rawData().data(), start, asize);
       start[0]++;
     }
 
@@ -422,20 +422,20 @@ int NexusFileIO::writeNexusProcessedData2D(
 
   // write X data, as single array or all values if "ragged"
   if (uniformSpectra) {
-    dims_array[0] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[0] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
     NXopendata(fileID, "axis1");
-    NXputdata(fileID, localworkspace->readX(0).data());
+    NXputdata(fileID, localworkspace->x(0).rawData().data());
 
   } else {
     dims_array[0] = static_cast<int>(nSpect);
-    dims_array[1] = static_cast<int>(localworkspace->readX(0).size());
+    dims_array[1] = static_cast<int>(localworkspace->x(0).size());
     NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
     NXopendata(fileID, "axis1");
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->readX(i).data(), start, asize);
+      NXputslab(fileID, localworkspace->x(i).rawData().data(), start, asize);
       start[0]++;
     }
   }

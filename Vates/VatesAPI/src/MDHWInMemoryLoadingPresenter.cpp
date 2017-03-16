@@ -202,13 +202,13 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   // Set the minimum and maximum of the workspace data.
   QwtDoubleInterval minMaxContainer =
-      m_metaDataExtractor->getMinAndMax(histoWs);
+      m_metaDataExtractor->getMinAndMax(histoWs.get());
   m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
   m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
 
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs));
+      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs.get()));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);

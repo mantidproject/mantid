@@ -5,6 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -307,18 +308,15 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
   bool dector_found(false);
+  const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    try {
-      auto det = m_InWS2D->getDetector(i);
-      if (!det->isMonitor()) {
-        spectra_index = i;
-        dector_found = true;
-        g_log.debug() << "Using spectra N " << i << " as the source of the bin "
-                                                    "boundaries for the "
-                                                    "resolution corrections \n";
-        break;
-      }
-    } catch (...) {
+    if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMonitor(i)) {
+      spectra_index = i;
+      dector_found = true;
+      g_log.debug() << "Using spectra N " << i
+                    << " as the source of the bin "
+                       "boundaries for the resolution corrections \n";
+      break;
     }
   }
   if (!dector_found)
@@ -327,7 +325,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
                        "boundaries \n";
 
   // retrieve representative bin boundaries
-  MantidVec binBoundaries = m_InWS2D->readX(spectra_index);
+  auto binBoundaries = m_InWS2D->x(spectra_index);
+
   // check if the boundaries transformation is necessary
   if (m_Convertor->getUnitConversionHelper().isUnitConverted()) {
 
@@ -340,7 +339,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (double &binBoundarie : binBoundaries) {
+      for (auto &binBoundarie : binBoundaries) {
         binBoundarie = unitConv.convertUnits(binBoundarie);
       }
     }
@@ -367,7 +366,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
   if (nexpts > 0) {
     ExperimentInfo_sptr expt =
         mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
-    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+    expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
     expt->cacheDetectorGroupings(*mapping);
   }
 }

@@ -13,6 +13,7 @@ The first 2 Tests ensures that the result provided by the GUI are the same for t
 Test was first created to apply to Mantid Release 3.0.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import isis_reducer
@@ -26,7 +27,7 @@ BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
 
 
 def s(obj):
-    print '!'+str(obj)+'!',type(obj)
+    print('!'+str(obj)+'!',type(obj))
 
 
 class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):

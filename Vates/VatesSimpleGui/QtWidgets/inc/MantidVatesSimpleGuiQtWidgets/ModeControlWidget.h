@@ -48,7 +48,7 @@ public:
    * Default constructor.
    * @param parent the parent widget of the mode control widget
    */
-  ModeControlWidget(QWidget *parent = 0);
+  ModeControlWidget(QWidget *parent = nullptr);
   /// Default destructor.
   ~ModeControlWidget() override;
 
@@ -73,7 +73,7 @@ public slots:
   void setToSelectedView(ModeControlWidget::Views view);
 
   /// Convert a string into an enum
-  ModeControlWidget::Views getViewFromString(QString view);
+  ModeControlWidget::Views getViewFromString(const QString &view);
 
 signals:
   /**

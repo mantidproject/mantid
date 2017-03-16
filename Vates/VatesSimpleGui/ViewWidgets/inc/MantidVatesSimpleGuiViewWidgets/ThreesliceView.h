@@ -56,8 +56,8 @@ public:
    * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    * @param createRenderProxy :: Whether to create a render proxy for this view
    */
-  ThreeSliceView(QWidget *parent = 0,
-                 RebinnedSourcesManager *rebinnedSourcesManager = 0,
+  ThreeSliceView(QWidget *parent = nullptr,
+                 RebinnedSourcesManager *rebinnedSourcesManager = nullptr,
                  bool createRenderProxy = true);
   /// Default destructor.
   ~ThreeSliceView() override;

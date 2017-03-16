@@ -269,12 +269,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
 
-        samRuns = self.getProperty("Filename").value
-        if type(samRuns[0]) == list:
-            linearizedRuns = []
-            for item in samRuns:
-                linearizedRuns.extend(item)
-            samRuns = linearizedRuns[:] # deep copy
+        samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
 
         preserveEvents = self.getProperty("PreserveEvents").value
@@ -484,6 +479,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.setProperty(propertyName, wksp)
 
         return
+
+    def _getLinearizedFilenames(self, propertyName):
+        runnumbers = self.getProperty(propertyName).value
+        linearizedRuns = []
+        for item in runnumbers:
+            if type(item) == list:
+                linearizedRuns.extend(item)
+            else:
+                linearizedRuns.append(item)
+        return linearizedRuns
 
     def _determineInstrument(self, filename):
         name = getBasename(filename)
@@ -702,7 +707,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # temp_ws = self.get_workspace(sample_ws_name)
             if not (is_event_workspace(sample_ws_name) and get_workspace(sample_ws_name).getNumberEvents() == 0):
                 api.NormaliseByCurrent(InputWorkspace=sample_ws_name,
-                                       OutputWorkspace=sample_ws_name)
+                                       OutputWorkspace=sample_ws_name,
+                                       RecalculatePCharge=True)
                 get_workspace(sample_ws_name).getRun()['gsas_monitor'] = 1
             # END-IF
         # ENDI-IF
@@ -767,7 +773,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         if self._normalisebycurrent is True:
             api.NormaliseByCurrent(InputWorkspace=sumRun,
-                                   OutputWorkspace=sumRun)
+                                   OutputWorkspace=sumRun,
+                                   RecalculatePCharge=True)
             get_workspace(sumRun).getRun()['gsas_monitor'] = 1
 
         return sumRun
@@ -845,7 +852,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Do align and focus
             num_out_wksp = len(output_ws_name_list)
-            for split_index in xrange(num_out_wksp):
+            for split_index in range(num_out_wksp):
                 # Get workspace name
                 out_ws_name_chunk_split = output_ws_name_list[split_index]
                 # Align and focus
@@ -940,7 +947,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             try:
                 if normalisebycurrent is True:
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
-                                           OutputWorkspace=output_wksp_list[split_index])
+                                           OutputWorkspace=output_wksp_list[split_index],
+                                           RecalculatePCharge=True)
                     get_workspace(output_wksp_list[split_index]).getRun()['gsas_monitor'] = 1
             except RuntimeError as e:
                 self.log().warning(str(e))

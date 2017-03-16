@@ -217,7 +217,7 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::Squeeze() {
 template <class Scalar>
 vtkArrayIterator *vtkMDHWSignalArray<Scalar>::NewIterator() {
   vtkErrorMacro(<< "Not implemented.");
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------------

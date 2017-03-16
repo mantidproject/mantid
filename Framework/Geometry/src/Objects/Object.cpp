@@ -262,7 +262,6 @@ int Object::hasComplement() const {
 int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule.get());
-  int Rcount(0);
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
@@ -274,7 +273,6 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
-          Rcount++;
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
                                                  KV->getKeyN());

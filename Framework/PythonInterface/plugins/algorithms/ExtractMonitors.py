@@ -56,9 +56,10 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         monitors = []
         detectors = []
+        spectrumInfo = in_ws.spectrumInfo()
         for i in range(in_ws.getNumberHistograms()):
             try:
-                monitors.append(i) if in_ws.getDetector(i).isMonitor() else detectors.append(i)
+                monitors.append(i) if spectrumInfo.isMonitor(i) else detectors.append(i)
             except RuntimeError:
                 self.log().warning("Missing detector at " + str(i))
 

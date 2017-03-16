@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -17,7 +18,7 @@ class StateMaskTest(unittest.TestCase):
     @staticmethod
     def _set_detector(state, default_settings, custom_settings, detector_key):
         detector = state.detectors[detector_key]
-        for key, value in default_settings.items():
+        for key, value in list(default_settings.items()):
             if key in custom_settings:
                 value = custom_settings[key]
             if value is not None:  # If the value is None, then don't set it
@@ -38,7 +39,7 @@ class StateMaskTest(unittest.TestCase):
                          "spectrum_range_start": [1, 5, 7], "spectrum_range_stop": [2, 6, 8],
                          "idf_path": ""}
 
-        for key, value in mask_settings.items():
+        for key, value in list(mask_settings.items()):
             if key in general_entries:
                 value = general_entries[key]
             if value is not None:  # If the value is None, then don't set it

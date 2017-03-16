@@ -121,6 +121,8 @@ public:
     std::string m_prev;  ///< The previous value for the property
   };
 
+  /// Setup the base directory
+  void setBaseDirectory();
   /// Reset to "factory" settings. Removes current user properties
   void reset();
   /// Wipe out the current configuration and load a new one
@@ -205,6 +207,8 @@ public:
   void appendDataSearchSubDir(const std::string &subdir);
   /// Get the list of user search paths
   const std::vector<std::string> &getUserSearchDirs() const;
+  /// Sets instrument directories
+  void setInstrumentDirectories(const std::vector<std::string> &directories);
   /// Get instrument search directory
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
@@ -297,6 +301,8 @@ private:
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
+  /// Determine the name of the facilities file to use
+  std::string getFacilityFilename(const std::string &fName);
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
   bool addDirectoryifExists(const std::string &directoryName,

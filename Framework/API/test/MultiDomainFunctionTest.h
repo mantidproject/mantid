@@ -444,8 +444,8 @@ public:
     const std::string expected =
         "composite=MultiDomainFunction,NumDeriv=true;"
         "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=2,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=3,$domains=i;ties=(f1.A="
+        "name=MultiDomainFunctionTest_Function,B=2,$domains=i;"
+        "name=MultiDomainFunctionTest_Function,B=3,$domains=i;ties=(f1.A="
         "f0.A,f2.A=f0.A)";
     TS_ASSERT_EQUALS(multi.asString(), expected);
     TS_ASSERT_EQUALS(multi.asString(), multi.clone()->asString());

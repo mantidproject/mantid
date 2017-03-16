@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
   )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
-  target_link_libraries( CurveFittingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries( CurveFittingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             CurveFitting
             API
             DataHandling
@@ -25,7 +25,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES})
+            ${GTEST_LIBRARIES} )
   add_dependencies ( CurveFittingTest Algorithms )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Test data
@@ -34,4 +34,3 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )
 endif ()
-

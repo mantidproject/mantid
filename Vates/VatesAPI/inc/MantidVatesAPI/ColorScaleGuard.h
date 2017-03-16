@@ -25,8 +25,8 @@ private:
 class DLLExport ColorScaleLockGuard {
 public:
   ColorScaleLockGuard(ColorScaleLock *lock) {
-    if (lock == NULL || lock->isLocked()) {
-      m_lock = NULL;
+    if (!lock || lock->isLocked()) {
+      m_lock = nullptr;
     } else {
       m_lock = lock;
       m_lock->lock();
@@ -34,7 +34,7 @@ public:
   }
 
   ~ColorScaleLockGuard() {
-    if (m_lock != NULL) {
+    if (m_lock) {
       m_lock->unlock();
     }
   }

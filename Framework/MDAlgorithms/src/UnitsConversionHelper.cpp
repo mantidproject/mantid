@@ -91,7 +91,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
   if (!pAxis)
     throw(std::invalid_argument(
         "Cannot retrieve numeric X axis from the input workspace: " +
-        inWS2D->name()));
+        inWS2D->getName()));
 
   std::string unitsFrom = inWS2D->getAxis(0)->unit()->unitID();
 

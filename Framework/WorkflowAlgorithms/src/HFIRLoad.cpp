@@ -177,7 +177,7 @@ void HFIRLoad::exec() {
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), dataWS_tmp);
   g_log.debug() << "Calling LoadSpice2D Done. OutputWorkspace name = "
-                << dataWS_tmp->name() << "\n";
+                << dataWS_tmp->getName() << '\n';
   API::MatrixWorkspace_sptr dataWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 

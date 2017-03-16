@@ -32,12 +32,10 @@ const std::vector<std::string> DeltaEMode::availableTypes() {
   const ModeIndex &lookup = typeStringLookup();
   std::vector<std::string> modes;
   modes.reserve(lookup.index.size());
-  size_t index(0);
   for (const auto &iter : lookup.index) {
     if (iter.first == DeltaEMode::Undefined)
       continue;
     modes.push_back(iter.second);
-    ++index;
   }
   return modes;
 }

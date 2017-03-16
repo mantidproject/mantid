@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
 
@@ -24,12 +25,22 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 
+  // Change of input
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(getBeamDefaults(const QString &)));
+
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+
+  // Handle density units
+  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeSampleDensityUnit(int)));
+  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(changeCanDensityUnit(int)));
 }
 
 void AbsorptionCorrections::setup() {}
@@ -57,6 +68,14 @@ void AbsorptionCorrections::run() {
                           sampleChemicalFormula.toStdString());
 
   addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
+
+  // General details
+  absCorAlgo->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
+  absCorAlgo->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
+  long wave = static_cast<long>(m_uiForm.spNumberWavelengths->value());
+  absCorAlgo->setProperty("NumberWavelengths", wave);
+  long events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  absCorAlgo->setProperty("Events", events);
 
   // Can details
   bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -155,8 +174,9 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double sampleThickness = m_uiForm.spFlatSampleThickness->value();
     alg->setProperty("SampleThickness", sampleThickness);
 
-    double elementSize = m_uiForm.spFlatElementSize->value();
-    alg->setProperty("ElementSize", elementSize);
+    double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+    alg->setProperty("SampleAngle", sampleAngle);
+
   } else if (shape == "Annulus") {
     double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     alg->setProperty("SampleInnerRadius", sampleInnerRadius);
@@ -170,14 +190,12 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
     double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
     alg->setProperty("CanOuterRadius", canOuterRadius);
 
-    long events = static_cast<long>(m_uiForm.spAnnEvents->value());
-    alg->setProperty("Events", events);
   } else if (shape == "Cylinder") {
     double sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
 
-    long events = static_cast<long>(m_uiForm.spCylEvents->value());
-    alg->setProperty("Events", events);
+    double sampleHeight = m_uiForm.spCylSampleHeight->value();
+    alg->setProperty("SampleHeight", sampleHeight);
   }
 }
 
@@ -281,6 +299,35 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
+
+void AbsorptionCorrections::getBeamDefaults(const QString &dataName) {
+  auto sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      dataName.toStdString());
+
+  if (!sampleWs) {
+    g_log.warning() << "Failed to find workspace " << dataName.toStdString()
+                    << "\n";
+  }
+
+  auto instrument = sampleWs->getInstrument();
+  const std::string beamWidthParamName = "Workflow.beam-width";
+  if (instrument->hasParameter(beamWidthParamName)) {
+    const auto beamWidth = QString::fromStdString(
+        instrument->getStringParameter(beamWidthParamName)[0]);
+    const auto beamWidthValue = beamWidth.toDouble();
+
+    m_uiForm.spBeamWidth->setValue(beamWidthValue);
+  }
+  const std::string beamHeightParamName = "Workflow.beam-height";
+  if (instrument->hasParameter(beamHeightParamName)) {
+    const auto beamHeight = QString::fromStdString(
+        instrument->getStringParameter(beamHeightParamName)[0]);
+    const auto beamHeightValue = beamHeight.toDouble();
+
+    m_uiForm.spBeamHeight->setValue(beamHeightValue);
+  }
+}
+
 /**
  * Handle saving of workspace
  */
@@ -320,5 +367,30 @@ void AbsorptionCorrections::plotClicked() {
   }
   plotSpectrum(plotData, 0);
 }
+
+/**
+ * Handle changing of the sample density unit
+ */
+void AbsorptionCorrections::changeSampleDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spSampleDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spSampleDensity->setSuffix(" 1/A3");
+  }
+}
+
+/**
+* Handle changing of the container density unit
+*/
+void AbsorptionCorrections::changeCanDensityUnit(int index) {
+
+  if (index == 0) {
+    m_uiForm.spCanDensity->setSuffix(" g/cm3");
+  } else {
+    m_uiForm.spCanDensity->setSuffix(" 1/A3");
+  }
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

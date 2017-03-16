@@ -162,9 +162,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
     if (!PeaksRun1->sample().hasOrientedLattice()) {
       g_log.notice(std::string("Could not find UB for ") +
-                   std::string(PeaksRun1->name()));
+                   std::string(PeaksRun1->getName()));
       throw std::invalid_argument(std::string("Could not find UB for ") +
-                                  std::string(PeaksRun1->name()));
+                                  std::string(PeaksRun1->getName()));
     }
   }
   //-------------get UB raw :No goniometer----------------
@@ -179,9 +179,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   if (N1 < .6 * PeaksRun1->getNumberPeaks()) {
     g_log.notice(std::string("UB did not index well for ") +
-                 std::string(PeaksRun1->name()));
+                 std::string(PeaksRun1->getName()));
     throw std::invalid_argument(std::string("UB did not index well for ") +
-                                std::string(PeaksRun1->name()));
+                                std::string(PeaksRun1->getName()));
   }
 
   //----------------------------------------------
@@ -271,7 +271,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MinData[4] = omchiphi[0];
 
   std::string FunctionArgs =
-      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->name() +
+      "name=PeakHKLErrors, PeakWorkspaceName=" + PeaksRun2->getName() +
       ",OptRuns=" + RunNumStr + ",phi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[2]) + ",chi" + RunNumStr + "=" +
       boost::lexical_cast<std::string>(MinData[3]) + ",omega" + RunNumStr +

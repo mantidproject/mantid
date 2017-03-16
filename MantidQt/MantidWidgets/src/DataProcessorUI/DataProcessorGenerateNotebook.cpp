@@ -182,9 +182,9 @@ std::string plotsString(const std::vector<std::string> &output_ws,
   // 13462,  0
   // 13463,  0
   // output_ws will be:
-  // output_ws [0] = 'IvsQ_TOF_13460, IvsLam_TOF_13460'
-  // output_ws [1] = 'IvsQ_TOF_13462, IvsLam_TOF_13462'
-  // output_ws [3] = 'IvsQ_TOF_13463, IvsLam_TOF_13463'
+  // output_ws [0] = 'IvsQ_binned_TOF_13460, IvsQ_TOF_13460, IvsLam_TOF_13460'
+  // output_ws [1] = 'IvsQ_binned_TOF_13462, IvsQ_TOF_13462, IvsLam_TOF_13462'
+  // output_ws [3] = 'IvsQ_binned_TOF_13463, IvsQ_TOF_13463, IvsLam_TOF_13463'
   // As the reduction algorithm, ReflectometryReductionOneAuto, produces two
   // output workspaces
   // We need to group the 'IvsQ_' workspaces and the 'IvsLam_' workspaces

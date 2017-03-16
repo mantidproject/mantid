@@ -7,7 +7,7 @@ namespace Mantid {
 namespace VATES {
 
 std::string FieldDataToMetadata::operator()(vtkFieldData *fieldData,
-                                            std::string id) const {
+                                            const std::string &id) const {
   return execute(fieldData, id);
 }
 

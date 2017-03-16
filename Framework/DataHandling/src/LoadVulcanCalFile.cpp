@@ -2,23 +2,23 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <fstream>
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
 #include <Poco/Path.h>
-
-#include <sstream>
 #include <fstream>
 
-#include <boost/algorithm/string/trim.hpp>
+#include <fstream>
+#include <sstream>
+
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -291,11 +291,11 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
   std::ostringstream msg;
   auto &spectrumInfo = m_maskWS->mutableSpectrumInfo();
   for (size_t i = 0; i < m_maskWS->getNumberHistograms(); ++i) {
-    if (m_maskWS->readY(i)[0] > 0.5) {
+    if (m_maskWS->y(i)[0] > 0.5) {
       m_maskWS->getSpectrum(i).clearData();
       spectrumInfo.setMasked(i, true);
-      m_maskWS->dataY(i)[0] = 1.0;
-      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->readY(i)[0]
+      m_maskWS->mutableY(i)[0] = 1.0;
+      msg << "Spectrum " << i << " is masked. DataY = " << m_maskWS->y(i)[0]
           << "\n";
     }
   }
@@ -352,11 +352,12 @@ void LoadVulcanCalFile::processOffsets(
     std::map<detid_t, double> map_detoffset) {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
+
   // Map from Mantid instrument to VULCAN offset
   map<detid_t, size_t> map_det2index;
   for (size_t i = 0; i < numspec; ++i) {
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(i);
-    detid_t tmpid = det->getID();
+    detid_t tmpid = spectrumInfo.detector(i).getID();
 
     // Map between detector ID and workspace index
     map_det2index.emplace(tmpid, i);
@@ -374,8 +375,8 @@ void LoadVulcanCalFile::processOffsets(
     } else {
       size_t wsindex = fiter->second;
       // Get bank ID from instrument tree
-      Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(wsindex);
-      Geometry::IComponent_const_sptr parent = det->getParent();
+      const auto &det = spectrumInfo.detector(wsindex);
+      Geometry::IComponent_const_sptr parent = det.getParent();
       string pname = parent->getName();
 
       vector<string> terms;
@@ -456,7 +457,7 @@ void LoadVulcanCalFile::processOffsets(
   map<detid_t, double>::iterator offsetiter;
   map<int, double>::iterator bankcorriter;
   for (size_t iws = 0; iws < numspec; ++iws) {
-    detid_t detid = m_tofOffsetsWS->getDetector(iws)->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     offsetiter = map_detoffset.find(detid);
     if (offsetiter == map_detoffset.end())
       throw runtime_error("It cannot happen!");
@@ -468,7 +469,7 @@ void LoadVulcanCalFile::processOffsets(
       throw runtime_error("It cannot happen!");
 
     double offset = offsetiter->second + bankcorriter->second;
-    m_tofOffsetsWS->dataY(iws)[0] = pow(10., offset);
+    m_tofOffsetsWS->mutableY(iws)[0] = pow(10., offset);
   }
 }
 
@@ -486,7 +487,7 @@ void LoadVulcanCalFile::alignEventWorkspace() {
     PARALLEL_START_INTERUPT_REGION
 
     // Compute the conversion factor
-    double factor = m_tofOffsetsWS->readY(i)[0];
+    double factor = m_tofOffsetsWS->y(i)[0];
 
     // Perform the multiplication on all events
     m_eventWS->getSpectrum(i).convertTof(1. / factor);
@@ -514,40 +515,19 @@ void LoadVulcanCalFile::convertOffsets() {
   size_t numspec = m_tofOffsetsWS->getNumberHistograms();
 
   // Instrument parameters
-  double l1;
-  Kernel::V3D beamline, samplePos;
-  double beamline_norm;
-
-  m_instrument->getInstrumentParameters(l1, beamline, beamline_norm, samplePos);
-  g_log.debug() << "Beam line = " << beamline.X() << ", " << beamline.Y()
-                << ", " << beamline.Z() << "\n";
-
-  // FIXME - The simple version of the algorithm to calculate 2theta is used
-  // here.
-  //         A check will be made to raise exception if the condition is not met
-  //         to use the simple version.
-  double s_r, s_2theta, s_phi;
-  s_r = s_2theta = s_phi = 0.;
-  samplePos.spherical(s_r, s_2theta, s_phi);
-  if (fabs(beamline.X()) > 1.0E-20 || fabs(beamline.Y()) > 1.0E-20 ||
-      s_r > 1.0E-20)
-    throw runtime_error(
-        "Source is not at (0, 0, Z) or sample is not at (0, 0, 0).  "
-        "The simple version to calcualte detector's 2theta fails on this "
-        "situation.");
+  const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
+  double l1 = spectrumInfo.l1();
 
   map<int, pair<double, double>>::iterator mfiter;
   for (size_t iws = 0; iws < numspec; ++iws) {
     // Get detector's information including bank belonged to and geometry
     // parameters
-    Geometry::IDetector_const_sptr det = m_tofOffsetsWS->getDetector(iws);
-    V3D detPos = det->getPos();
 
-    detid_t detid = det->getID();
+    detid_t detid = spectrumInfo.detector(iws).getID();
     int bankid = detid / static_cast<int>(NUMBERRESERVEDPERMODULE);
 
-    double l2, twotheta, phi;
-    detPos.getSpherical(l2, twotheta, phi);
+    double l2 = spectrumInfo.l2(iws);
+    double twotheta = spectrumInfo.twoTheta(iws);
 
     // Get effective
     mfiter = m_effLTheta.find(bankid);
@@ -559,11 +539,11 @@ void LoadVulcanCalFile::convertOffsets() {
     double totL = l1 + l2;
 
     // Calcualte converted offset
-    double vuloffset = m_tofOffsetsWS->readY(iws)[0];
-    double manoffset = (totL * sin(twotheta * 0.5 * M_PI / 180.)) /
+    double vuloffset = m_tofOffsetsWS->y(iws)[0];
+    double manoffset = (totL * sin(twotheta * 0.5)) /
                            (effL * sin(effTheta * M_PI / 180.)) / vuloffset -
                        1.;
-    m_offsetsWS->dataY(iws)[0] = manoffset;
+    m_offsetsWS->mutableY(iws)[0] = manoffset;
   }
 }
 
@@ -682,10 +662,10 @@ void LoadVulcanCalFile::readCalFile(const std::string &calFileName,
           // Not selected, then mask this detector
           maskWS->getSpectrum(wi).clearData();
           maskSpectrumInfo->setMasked(wi, true);
-          maskWS->dataY(wi)[0] = 1.0;
+          maskWS->mutableY(wi)[0] = 1.0;
         } else {
           // Selected, set the value to be 0
-          maskWS->dataY(wi)[0] = 0.0;
+          maskWS->mutableY(wi)[0] = 0.0;
           if (!hasUnmasked)
             hasUnmasked = true;
         }

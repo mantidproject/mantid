@@ -124,8 +124,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(expr.parse("\"(2)\" "));
     TS_ASSERT_EQUALS(expr.str(), "\"(2)\"");
 
-    Expression e;
-    TS_ASSERT_THROWS_NOTHING(e.parse("abc\"xyz\"(1,2)"));
+    Expression expression;
+    TS_ASSERT_THROWS_NOTHING(expression.parse("abc\"xyz\"(1,2)"));
   }
 
   void testOperators() {
@@ -308,51 +308,54 @@ public:
   }
 
   void testNestedUnary() {
-    Expression e;
-    TS_ASSERT_THROWS_NOTHING(e.parse("- - -1"));
-    TS_ASSERT_EQUALS(e.str(), "-( -( -1))"); // this is not the same as input
-    TS_ASSERT_EQUALS(e.size(), 1);
-    TS_ASSERT_EQUALS(e.name(), "-");
-    TS_ASSERT_EQUALS(e[0].name(), "-");
-    TS_ASSERT_EQUALS(e[0][0].name(), "-");
-    TS_ASSERT_EQUALS(e[0][0][0].name(), "1");
+    Expression expression;
+    TS_ASSERT_THROWS_NOTHING(expression.parse("- - -1"));
+    TS_ASSERT_EQUALS(expression.str(),
+                     "-( -( -1))"); // this is not the same as input
+    TS_ASSERT_EQUALS(expression.size(), 1);
+    TS_ASSERT_EQUALS(expression.name(), "-");
+    TS_ASSERT_EQUALS(expression[0].name(), "-");
+    TS_ASSERT_EQUALS(expression[0][0].name(), "-");
+    TS_ASSERT_EQUALS(expression[0][0][0].name(), "1");
 
     Expression e1;
     TS_ASSERT_THROWS(e1.parse("---1"), std::runtime_error);
   }
 
   void testRemoveBrackets() {
-    Expression e;
-    e.parse("(((a+b+sin(x))))");
-    TS_ASSERT_EQUALS(e.str(), "(((a+b+sin(x))))");
-    TS_ASSERT_EQUALS(e.bracketsRemoved().str(), "a+b+sin(x)");
-    TS_ASSERT_EQUALS(e.bracketsRemoved().name(), "+");
-    TS_ASSERT_EQUALS(e.bracketsRemoved().bracketsRemoved().str(), "a+b+sin(x)");
-    TS_ASSERT_EQUALS(e.bracketsRemoved().bracketsRemoved().name(), "+");
+    Expression expression;
+    expression.parse("(((a+b+sin(x))))");
+    TS_ASSERT_EQUALS(expression.str(), "(((a+b+sin(x))))");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().str(), "a+b+sin(x)");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().name(), "+");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().str(),
+                     "a+b+sin(x)");
+    TS_ASSERT_EQUALS(expression.bracketsRemoved().bracketsRemoved().name(),
+                     "+");
   }
 
   void testBrackets1() {
-    Expression e;
-    e.parse("2*(a+b)+(1-sin(x-y))");
-    TS_ASSERT_EQUALS(e.str(), "2*(a+b)+(1-sin(x-y))");
+    Expression expression;
+    expression.parse("2*(a+b)+(1-sin(x-y))");
+    TS_ASSERT_EQUALS(expression.str(), "2*(a+b)+(1-sin(x-y))");
   }
 
   void testBrackets2() {
-    Expression e;
-    e.parse("2*(a+b)-(1-s)");
-    TS_ASSERT_EQUALS(e.str(), "2*(a+b)-(1-s)");
+    Expression expression;
+    expression.parse("2*(a+b)-(1-s)");
+    TS_ASSERT_EQUALS(expression.str(), "2*(a+b)-(1-s)");
   }
 
   void testBrackets3() {
-    Expression e;
-    e.parse("2*(a+b)-(1-sin(x-y))");
-    TS_ASSERT_EQUALS(e.str(), "2*(a+b)-(1-sin(x-y))");
+    Expression expression;
+    expression.parse("2*(a+b)-(1-sin(x-y))");
+    TS_ASSERT_EQUALS(expression.str(), "2*(a+b)-(1-sin(x-y))");
   }
 
   void testGetVariables() {
-    Expression e;
-    e.parse("a+b*sin(x)*fun1(fun2(a+c))");
-    std::unordered_set<std::string> vars = e.getVariables();
+    Expression expression;
+    expression.parse("a+b*sin(x)*fun1(fun2(a+c))");
+    std::unordered_set<std::string> vars = expression.getVariables();
     TS_ASSERT_EQUALS(vars.size(), 4);
     TS_ASSERT(vars.find("a") != vars.end());
     TS_ASSERT(vars.find("b") != vars.end());
@@ -361,152 +364,178 @@ public:
   }
 
   void testToList() {
-    Expression e;
-    e.parse("x");
-    e.toList();
-    TS_ASSERT_EQUALS(e.name(), ",");
+    Expression expression;
+    expression.parse("x");
+    expression.toList();
+    TS_ASSERT_EQUALS(expression.name(), ",");
+  }
+
+  void testEmptyString() {
+    Expression expression;
+    expression.parse("");
+    TS_ASSERT_EQUALS(expression.name(), "EMPTY");
+  }
+
+  void testEmptyStringInBrackets() {
+    {
+      Expression expression;
+      expression.parse("()");
+      TS_ASSERT_EQUALS(expression.name(), "EMPTY");
+    }
+    {
+      Expression expression;
+      expression.parse(" (  ) ");
+      TS_ASSERT_EQUALS(expression.name(), "EMPTY");
+    }
+    {
+      Expression expression;
+      expression.parse(" ((  ) )  ");
+      TS_ASSERT_EQUALS(expression.name(), "EMPTY");
+    }
   }
 
   void testEndOnOperator() {
     {
-      Expression e;
-      TS_ASSERT_THROWS(e.parse("x+y+z +  "), std::runtime_error);
+      Expression expression;
+      TS_ASSERT_THROWS(expression.parse("x+y+z +  "), std::runtime_error);
     }
     {
-      Expression e;
-      TS_ASSERT_THROWS(e.parse("x*z-"), std::runtime_error);
+      Expression expression;
+      TS_ASSERT_THROWS(expression.parse("x*z-"), std::runtime_error);
     }
     {
-      Expression e;
-      TS_ASSERT_THROWS(e.parse("x*z="), std::runtime_error);
+      Expression expression;
+      TS_ASSERT_THROWS(expression.parse("x*z="), std::runtime_error);
     }
     {
-      Expression e;
-      TS_ASSERT_THROWS_NOTHING(e.parse("x;y;z;"));
-      TS_ASSERT_EQUALS(e.size(), 3);
-      TS_ASSERT_EQUALS(e[2].str(), "z");
+      Expression expression;
+      TS_ASSERT_THROWS_NOTHING(expression.parse("x;y;z;"));
+      TS_ASSERT_EQUALS(expression.size(), 3);
+      TS_ASSERT_EQUALS(expression[2].str(), "z");
     }
     {
-      Expression e;
-      TS_ASSERT_THROWS_NOTHING(e.parse("z,y,x,"));
-      TS_ASSERT_EQUALS(e.size(), 3);
-      TS_ASSERT_EQUALS(e[2].str(), "x");
+      Expression expression;
+      TS_ASSERT_THROWS_NOTHING(expression.parse("z,y,x,"));
+      TS_ASSERT_EQUALS(expression.size(), 3);
+      TS_ASSERT_EQUALS(expression[2].str(), "x");
     }
   }
 
   void test_tie_expression_with_brackets() {
-    Expression e;
-    e.parse("ties=(a0=2,a1=4*(2+2))");
-    TS_ASSERT_EQUALS(e.str(), "ties=(a0=2,a1=4*(2+2))");
-    TS_ASSERT_EQUALS(e[1].name(), ",");
+    Expression expression;
+    expression.parse("ties=(a0=2,a1=4*(2+2))");
+    TS_ASSERT_EQUALS(expression.str(), "ties=(a0=2,a1=4*(2+2))");
+    TS_ASSERT_EQUALS(expression[1].name(), ",");
   }
 
   void test_tie_expression_with_brackets_1() {
-    Expression e;
-    e.parse("ties=(a0 = 2,  Height = Sigma/(0.5 * 0.5))");
-    TS_ASSERT_EQUALS(e.str(), "ties=(a0=2,Height=Sigma/(0.5*0.5))");
-    TS_ASSERT_EQUALS(e[1].name(), ",");
+    Expression expression;
+    expression.parse("ties=(a0 = 2,  Height = Sigma/(0.5 * 0.5))");
+    TS_ASSERT_EQUALS(expression.str(), "ties=(a0=2,Height=Sigma/(0.5*0.5))");
+    TS_ASSERT_EQUALS(expression[1].name(), ",");
   }
 
   void test_bad_brackets() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+(y");
+      expression.parse("x+(y");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()),
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
                        "Unmatched bracket at\n\n(y\n^\n");
     }
   }
 
   void test_bad_brackets_1() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+sin(y-3");
+      expression.parse("x+sin(y-3");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()),
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
                        "Unmatched bracket at\n\nsin(y-3\n   ^\n");
     }
   }
 
   void test_bad_brackets_2() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+sinsinsinsinsin(y-3");
+      expression.parse("x+sinsinsinsinsin(y-3");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
+    } catch (Expression::ParsingError &error) {
       TS_ASSERT_EQUALS(
-          std::string(e.what()),
+          std::string(error.what()),
           "Unmatched bracket at\n\n...nsinsinsin(y-3\n             ^\n");
     }
   }
 
   void test_bad_brackets_3() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+sinsinsinsinsin(y-3*1+2+3+4+5+6+7+0");
+      expression.parse("x+sinsinsinsinsin(y-3*1+2+3+4+5+6+7+0");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()), "Unmatched bracket "
-                                              "at\n\n...nsinsinsin(y-3*1+2+3+4+"
-                                              "5+...\n             ^\n");
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
+                       "Unmatched bracket "
+                       "at\n\n...nsinsinsin(y-3*1+2+3+4+"
+                       "5+...\n             ^\n");
     }
   }
 
   void test_bad_brackets_4() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+y+z)");
+      expression.parse("x+y+z)");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()),
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
                        "Unmatched bracket at\n\nx+y+z)\n^\n");
     }
   }
 
   void test_syntax_error() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+y+");
+      expression.parse("x+y+");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
+    } catch (Expression::ParsingError &error) {
       TS_ASSERT_EQUALS(
-          std::string(e.what()),
+          std::string(error.what()),
           "A binary operator isn't followed by a value at\n\nx+y+\n   ^\n");
     }
   }
 
   void test_syntax_error_1() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+y++++z");
+      expression.parse("x+y++++z");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()),
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
                        "Unrecognized operator at\n\nx+y++++z\n   ^\n");
     }
   }
 
   void test_syntax_error_2() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+y+ + + +");
+      expression.parse("x+y+ + + +");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()), "A binary operator isn't "
-                                              "followed by a value at\n\nx+y+ "
-                                              "+ + +\n         ^\n");
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
+                       "A binary operator isn't "
+                       "followed by a value at\n\nx+y+ "
+                       "+ + +\n         ^\n");
     }
   }
 
   void test_syntax_error_3() {
-    Expression e;
+    Expression expression;
     try {
-      e.parse("x+y+ )");
+      expression.parse("x+y+ )");
       TS_FAIL("Expected an exception.");
-    } catch (Expression::ParsingError &e) {
-      TS_ASSERT_EQUALS(std::string(e.what()),
+    } catch (Expression::ParsingError &error) {
+      TS_ASSERT_EQUALS(std::string(error.what()),
                        "Unmatched bracket at\n\nx+y+ )\n^\n");
     }
   }

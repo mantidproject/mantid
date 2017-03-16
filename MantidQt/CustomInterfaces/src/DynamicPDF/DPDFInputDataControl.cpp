@@ -109,7 +109,7 @@ std::string InputDataControl::getWorkspaceName() {
   if (!m_workspace) {
     throw std::runtime_error("InpuDataControl has not set m_workspace!");
   }
-  return m_workspace->name();
+  return m_workspace->getName();
 }
 
 /**

@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample LET reduction script """
 
 from Direct.ReductionWrapper import *

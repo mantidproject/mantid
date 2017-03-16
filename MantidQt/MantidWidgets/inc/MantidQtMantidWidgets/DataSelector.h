@@ -96,6 +96,8 @@ public:
 
   /// Get the current file path in the MWRunFiles widget
   QString getFullFilePath() const;
+  /// Get the workspace name from the list of files
+  QString getWsNameFromFiles() const;
   /// Get the currently available file or workspace name
   QString getCurrentDataName() const;
   /// Get whether the file selector is currently being shown

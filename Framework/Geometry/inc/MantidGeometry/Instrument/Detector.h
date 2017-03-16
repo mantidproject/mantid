@@ -11,6 +11,7 @@
 
 namespace Mantid {
 namespace Geometry {
+class Instrument;
 
 /**
  * This class represents a detector - i.e. a single pixel in an instrument.
@@ -69,31 +70,24 @@ public:
                            const Kernel::V3D &instrumentUp) const override;
   double getPhi() const override;
   double getPhiOffset(const double &offset) const override;
-  bool isMonitor() const override;
   // end IDetector methods
-  void markAsMonitor(const bool flag = true);
   /** returns the detector's topology, namely, the meaning of the detector's
      angular measurements.
       It is different in cartesian and cylindrical (surrounding the beam)
      coordinate system */
   det_topology getTopology(Kernel::V3D &center) const override;
 
-  /// Return the relative position to the parent
-  const Kernel::V3D getRelativePos() const override {
-    return ObjComponent::getRelativePos();
-  }
+  Kernel::V3D getRelativePos() const override;
+  Kernel::V3D getPos() const override;
+  Kernel::Quat getRelativeRot() const override;
+  Kernel::Quat getRotation() const override;
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
-  void setIndex(const size_t index) override;
 
 private:
-  /// Linear index of the detector in the instrument
-  size_t m_index{static_cast<size_t>(-1)};
   /// The detector id
   const detid_t m_id;
-  /// Flags if this is a monitor
-  bool m_isMonitor;
 
 protected:
   /// Constructor for parametrized version

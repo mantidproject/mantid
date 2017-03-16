@@ -173,18 +173,17 @@ operator==(const TimeSeriesProperty<TYPE> &right) const {
     return false;
   }
 
-  { // so vectors can go out of scope
-    std::vector<DateAndTime> lhsTimes = this->timesAsVector();
-    std::vector<DateAndTime> rhsTimes = right.timesAsVector();
+  if (this->realSize() != right.realSize()) {
+    return false;
+  } else {
+    const std::vector<DateAndTime> lhsTimes = this->timesAsVector();
+    const std::vector<DateAndTime> rhsTimes = right.timesAsVector();
     if (!std::equal(lhsTimes.begin(), lhsTimes.end(), rhsTimes.begin())) {
       return false;
     }
-  }
 
-  {
-    // so vectors can go out of scope
-    std::vector<TYPE> lhsValues = this->valuesAsVector();
-    std::vector<TYPE> rhsValues = right.valuesAsVector();
+    const std::vector<TYPE> lhsValues = this->valuesAsVector();
+    const std::vector<TYPE> rhsValues = right.valuesAsVector();
     if (!std::equal(lhsValues.begin(), lhsValues.end(), rhsValues.begin())) {
       return false;
     }
@@ -2289,6 +2288,7 @@ TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   size_t index = 0;
   while (index < m_filter.size()) {
     DateAndTime start, stop;
+    // cppcheck-suppress knownConditionTrueFalse
     if (index == 0) {
       if (m_filter[0].second) {
         start = m_filter[0].first;

@@ -3,7 +3,6 @@ Test of basic 1D plotting methods in MantidPlot
 """
 import mantidplottests
 from mantidplottests import *
-import time
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
@@ -20,7 +19,10 @@ X = np.append(X1, X2)
 Y = np.append(Y1, Y2)
 E = np.sqrt(Y)
 
-CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E), NSpec=2, UnitX="TOF", YUnitLabel="Counts",  WorkspaceTitle="Faked data Workspace")
+CreateWorkspace(OutputWorkspace="fake", DataX=list(X), DataY=list(Y), DataE=list(E),
+                NSpec=2, UnitX="TOF", YUnitLabel="Counts",
+                WorkspaceTitle="Faked data Workspace")
+
 
 class MantidPlot1DPlotTest(unittest.TestCase):
 
@@ -30,13 +32,13 @@ class MantidPlot1DPlotTest(unittest.TestCase):
     def tearDown(self):
         """Clean up by closing the created window """
         if hasattr(self, "g") and self.g is not None:
-          self.g.confirmClose(False)
-          self.g.close()
+            self.g.confirmClose(False)
+            self.g.close()
         try:
-          self.t.confirmClose(False)
-          self.t.close()
+            self.t.confirmClose(False)
+            self.t.close()
         except AttributeError:
-          pass
+            pass
         QtCore.QCoreApplication.processEvents()
 
     def test_plotSpectrum_errorBars(self):
@@ -48,8 +50,49 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         g = plotSpectrum(ws, 0, error_bars=True)
         self.g = g
 
-    def test_plotSpectrum_severalSpectra(self):
+    def test_plotSpectrum_single_integer(self):
+        g = plotSpectrum("fake", 1)
+        self._check_graph_contents(g, ["fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_single_str(self):
+        g = plotSpectrum("fake", "1")
+        self._check_graph_contents(g, ["fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_list_of_spectra(self):
         g = plotSpectrum("fake", [0, 1])
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_tuple_of_spectra(self):
+        g = plotSpectrum("fake", (0, 1))
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list(self):
+        g = plotSpectrum("fake", "0, 1")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_leading_comma(self):
+        g = plotSpectrum("fake", "0, 1,")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_trailing_comma(self):
+        g = plotSpectrum("fake", "0, 1,")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_comma_separated_list_empty_value(self):
+        g = plotSpectrum("fake", "0, ,1")
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
+        self.g = g
+
+    def test_plotSpectrum_range_command(self):
+        g = plotSpectrum("fake", range(0, 2))
+        self._check_graph_contents(g, ["fake-sp-1", "fake-sp-2"])
         self.g = g
 
     def test_Customized1DPlot(self):
@@ -78,7 +121,9 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         self.g = g
         l = g.activeLayer() # Plot columns 2, 3 and 4
         for i in range(0, l.numCurves()):
-            l.setCurveLineColor(i, 1 + i) # Curve color is defined as an integer value. Alternatively, the 2nd argument can be of type QtGui.QColor.
+            # Curve color is defined as an integer value. Alternatively, the
+            # 2nd argument can be of type QtGui.QColor.
+            l.setCurveLineColor(i, 1 + i)
             l.setCurveLineWidth(i, 0.5 + 2*i)
 
             l.setCurveLineStyle(1, QtCore.Qt.DotLine)
@@ -108,6 +153,13 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         self.assertTrue(g is not None)
         self.g = g
 
+    # ---------------- Non-test methods ----------------
+    def _check_graph_contents(self, g, curve_titles):
+        layer = g.activeLayer()
+        self.assertEqual(len(curve_titles), layer.numCurves())
+        for i, title in enumerate(curve_titles):
+            self.assertEqual(title, layer.curveTitle(i))
+
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)
-

@@ -14,7 +14,21 @@ import datetime
 import random
 
 # This is the date string format as returned by the database
-DATE_STR_FORMAT = "%Y-%m-%d %H:%M:%S.%f"
+DATE_STR_FORMAT_MICRO = "%Y-%m-%d %H:%M:%S.%f"
+DATE_STR_FORMAT_NO_MICRO = "%Y-%m-%d %H:%M:%S"
+
+#============================================================================================
+def to_datetime(formatted_str):
+    """Return a datetime object from a formatted string
+
+    It deals with the possible absence of a microseconds field
+    """
+    try:
+        date = datetime.datetime.strptime(formatted_str, DATE_STR_FORMAT_MICRO)
+    except ValueError:
+        date = datetime.datetime.strptime(formatted_str, DATE_STR_FORMAT_NO_MICRO)
+
+    return date
 
 #============================================================================================
 def get_orderby_clause(last_num):
@@ -112,8 +126,7 @@ def smart_ticks(index, values):
         dates = []
         for val in values:
             try:
-                datetime.datetime.strptime(val, DATE_STR_FORMAT)
-                dates.append(val)
+                dates.append(to_datetime(val))
             except:
                 pass
         if len(dates) == 0: return
@@ -402,7 +415,7 @@ def how_long_ago(timestr):
     in human-friendly way """
     import time
     now = datetime.datetime.now()
-    then = datetime.datetime.strptime(timestr, DATE_STR_FORMAT)
+    then = to_datetime(timestr)
     td = (now-then)
     sec = td.seconds
     min = int(sec / 60)
@@ -454,7 +467,7 @@ def get_html_summary_table(test_names):
             html += """<td>%s</td>""" % res['status']
 
             # Friendly date
-            date = datetime.datetime.strptime(res['date'], DATE_STR_FORMAT)
+            date = to_datetime(res['date'])
             html += """<td>%s</td>""" %  date.strftime("%b %d, %H:%M:%S")
 
             html += """<td>%s</td>""" % res['runtime']
@@ -670,4 +683,3 @@ if __name__ == "__main__":
 #    plot_runtime(name='MyFakeTest', x_field='date')
 #    plot_success_count()
 #    show()
-

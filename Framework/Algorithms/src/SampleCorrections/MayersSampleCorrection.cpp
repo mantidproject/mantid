@@ -11,6 +11,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -63,6 +65,16 @@ void MayersSampleCorrection::init() {
       "If True then also correct for the effects of multiple scattering."
       "Please note that the MS correction assumes the scattering is elastic.",
       Direction::Input);
+  declareProperty("MSEvents", 10000, "Controls the number of second-scatter "
+                                     "events generated. Only applicable where "
+                                     "MultipleScattering=True.",
+                  Direction::Input);
+  declareProperty("MSRuns", 10,
+                  "Controls the number of simulations, each containing "
+                  "MSEvents, performed. The final MS correction is "
+                  "computed as the average over the runs. Only applicable"
+                  "where MultipleScattering=True.",
+                  Direction::Input);
   // Outputs
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -74,15 +86,15 @@ void MayersSampleCorrection::init() {
 void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;
-  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-  bool mscatOn = getProperty("MultipleScattering");
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const bool mscatOn = getProperty("MultipleScattering");
+  const int msEvents = getProperty("MSEvents");
+  const int msRuns = getProperty("MSRuns");
+
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Instrument constants
   auto instrument = inputWS->getInstrument();
-  const auto source = instrument->getSource();
-  const auto sample = instrument->getSample();
-  const auto beamLine = sample->getPos() - source->getPos();
   const auto frame = instrument->getReferenceFrame();
 
   // Sample
@@ -112,19 +124,26 @@ void MayersSampleCorrection::exec() {
       continue;
     }
 
-    const auto &det = spectrumInfo.detector(i);
-
     MayersSampleCorrectionStrategy::Parameters params;
     params.mscat = mscatOn;
     params.l1 = spectrumInfo.l1();
     params.l2 = spectrumInfo.l2(i);
-    params.twoTheta = det.getTwoTheta(sample->getPos(), beamLine);
-    params.phi = det.getPhi();
+    params.twoTheta = spectrumInfo.twoTheta(i);
+    // Code requires angle above/below scattering plane not our definition of
+    // phi
+    const auto pos = spectrumInfo.position(i);
+    // Theta here is the angle between beam and neutron path not necessarily
+    // twoTheta if sample not at origin
+    double _(0.0), theta(0.0), phi(0.0);
+    pos.getSpherical(_, theta, phi);
+    params.azimuth = asin(sin(theta) * sin(phi));
     params.rho = sampleMaterial.numberDensity();
     params.sigmaAbs = sampleMaterial.absorbXSection();
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
     params.cylHeight = height;
+    params.msNEvents = static_cast<size_t>(msEvents);
+    params.msNRuns = static_cast<size_t>(msRuns);
 
     MayersSampleCorrectionStrategy correction(params, inputWS->histogram(i));
     outputWS->setHistogram(i, correction.getCorrectedHisto());

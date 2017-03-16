@@ -46,7 +46,8 @@ public:
                        vtkPointSet *inputData, vtkInformation *info);
   /// Apply the scaling and add metadata
   vtkPointSet *execute(double xScale, double yScale, double zScale,
-                       vtkPointSet *inputData, vtkPointSet *outputData = NULL);
+                       vtkPointSet *inputData,
+                       vtkPointSet *outputData = nullptr);
 
 private:
   vtkDataSetToScaledDataSet &operator=(const vtkDataSetToScaledDataSet &other);

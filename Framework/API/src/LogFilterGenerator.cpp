@@ -69,7 +69,7 @@ LogFilterGenerator::generateFilter(const std::string &logName) const {
     break;
   }
 
-  return std::move(flt);
+  return flt;
 }
 
 /**

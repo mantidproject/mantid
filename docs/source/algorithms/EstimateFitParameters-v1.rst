@@ -171,7 +171,7 @@ Output:
 .. testoutput:: Ex2
     :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
-    name=BackToBackExponential,I=...,A=...,B=...,X0=...,S=...,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4),ties=(A=...,B=...)
+    name=BackToBackExponential,I=...,X0=...,S=...,constraints=(0.01<I<200,0.001<A<300,0.001<B<300,-5<X0<5,0.001<S<4),ties=(A=...,B=...)
     
 .. categories::
 

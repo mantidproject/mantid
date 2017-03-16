@@ -47,14 +47,14 @@ public:
     * @param workspace A pointer to the workspace
     * @returns A pair of minimum and maximum values.
     */
-  QwtDoubleInterval getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace);
+  QwtDoubleInterval getMinAndMax(const Mantid::API::IMDWorkspace *workspace);
 
   /**
     * Extracts the instrument from the workspace.
     * @param workspace A pointer to a workspace.
     * @returns The instrument.
     */
-  std::string extractInstrument(Mantid::API::IMDWorkspace_sptr workspace);
+  std::string extractInstrument(const Mantid::API::IMDWorkspace *workspace);
 
 private:
   /**

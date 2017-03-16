@@ -153,6 +153,11 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   connect(m_clearPeakOverlays, SIGNAL(triggered()), this,
           SLOT(clearPeakOverlays()));
 
+  // Clear alignment plane action
+  m_clearAlignment = new QAction("Clear alignment plane", this);
+  connect(m_clearAlignment, SIGNAL(triggered()), this,
+          SLOT(clearAlignmentPlane()));
+
   // confirmClose(app->confirmCloseInstrWindow);
 
   setAttribute(Qt::WA_DeleteOnClose);
@@ -202,6 +207,30 @@ std::string InstrumentWidget::getWorkspaceNameStdString() const {
 
 void InstrumentWidget::renameWorkspace(const std::string &workspace) {
   m_workspaceName = QString::fromStdString(workspace);
+}
+
+/**
+ * Get the axis vector for the surface projection type.
+ * @param surfaceType :: Surface type for this projection
+ * @return a V3D for the axis being projected on
+ */
+Mantid::Kernel::V3D
+InstrumentWidget::getSurfaceAxis(const int surfaceType) const {
+  Mantid::Kernel::V3D axis;
+
+  // define the axis
+  if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
+    axis = Mantid::Kernel::V3D(0, 1, 0);
+  } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
+    axis = Mantid::Kernel::V3D(1, 0, 0);
+  } else // SIDE_BY_SIDE
+  {
+    axis = Mantid::Kernel::V3D(0, 0, 1);
+  }
+
+  return axis;
 }
 
 /**
@@ -381,18 +410,7 @@ void InstrumentWidget::setSurfaceType(int type) {
         throw InstrumentHasNoSampleError();
       }
       Mantid::Kernel::V3D sample_pos = sample->getPos();
-      Mantid::Kernel::V3D axis;
-      // define the axis
-      if (surfaceType == SPHERICAL_Y || surfaceType == CYLINDRICAL_Y) {
-        axis = Mantid::Kernel::V3D(0, 1, 0);
-      } else if (surfaceType == SPHERICAL_Z || surfaceType == CYLINDRICAL_Z) {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      } else if (surfaceType == SPHERICAL_X || surfaceType == CYLINDRICAL_X) {
-        axis = Mantid::Kernel::V3D(1, 0, 0);
-      } else // SIDE_BY_SIDE
-      {
-        axis = Mantid::Kernel::V3D(0, 0, 1);
-      }
+      auto axis = getSurfaceAxis(surfaceType);
 
       // create the surface
       if (surfaceType == FULL3D) {
@@ -908,6 +926,7 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
     if (getSurface()->hasPeakOverlays()) {
       context.addSeparator();
       context.addAction(m_clearPeakOverlays);
+      context.addAction(m_clearAlignment);
     }
     if (!context.isEmpty()) {
       context.exec(QCursor::pos());
@@ -966,6 +985,11 @@ bool InstrumentWidget::overlay(const QString &wsName) {
 */
 void InstrumentWidget::clearPeakOverlays() {
   getSurface()->clearPeakOverlays();
+  updateInstrumentView();
+}
+
+void InstrumentWidget::clearAlignmentPlane() {
+  getSurface()->clearAlignmentPlane();
   updateInstrumentView();
 }
 

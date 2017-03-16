@@ -15,6 +15,14 @@ bool isMaskedDeprecated(const Detector &self) {
   const auto &detInfo = self.parameterMap().detectorInfo();
   return detInfo.isMasked(self.index());
 }
+
+bool isMonitorDeprecated(const Detector &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "'Detector::isMonitor' is deprecated, "
+             "use 'DetectorInfo::isMonitor' instead.");
+  const auto &detInfo = self.parameterMap().detectorInfo();
+  return detInfo.isMonitor(self.index());
+}
 }
 
 /**
@@ -26,5 +34,7 @@ void export_Detector() {
       "Detector", no_init)
       .def("isMasked", &isMaskedDeprecated, arg("self"),
            "Returns the value of the masked flag. True means ignore this "
-           "detector");
+           "detector")
+      .def("isMonitor", &isMonitorDeprecated, arg("self"),
+           "Returns True if the detector is marked as a monitor in the IDF");
 }

@@ -50,7 +50,7 @@ public:
   vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm) void PrintSelf(
       ostream &os, vtkIndent indent) override;
 
-  void SetWsName(std::string wsName);
+  void SetWsName(const std::string &wsName);
   void SetDepth(int depth);
   void SetNormalization(int option);
 

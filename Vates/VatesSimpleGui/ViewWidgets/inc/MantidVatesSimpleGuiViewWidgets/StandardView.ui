@@ -133,9 +133,6 @@
        <height>400</height>
       </size>
      </property>
-     <property name="toolTip">
-      <string>Apply cut filter</string>
-     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>

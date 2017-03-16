@@ -21,6 +21,11 @@ QDataProcessorTwoLevelTreeModel::QDataProcessorTwoLevelTreeModel(
     throw std::invalid_argument("Invalid table workspace. Table workspace must "
                                 "have one extra column accounting for groups");
 
+  // Sort the table workspace by group, i.e. first column
+  std::vector<std::pair<std::string, bool>> criteria = {
+      std::make_pair(tableWorkspace->getColumnNames().at(0), true)};
+  m_tWS->sort(criteria);
+
   setupModelData(tableWorkspace);
 }
 
@@ -446,6 +451,16 @@ void QDataProcessorTwoLevelTreeModel::setupModelData(
 
     m_rowsOfGroup[groupIndex[groupName]].push_back(r);
   }
+}
+
+/** Return the underlying data structure, i.e. the table workspace this model is
+ * representing
+ *
+ * @return :: the underlying table workspace
+ */
+ITableWorkspace_sptr
+QDataProcessorTwoLevelTreeModel::getTableWorkspace() const {
+  return m_tWS;
 }
 
 } // namespace MantidWidgets

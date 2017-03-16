@@ -81,13 +81,6 @@ public:
     TS_ASSERT_DELTA(m_detGroup->getDistance(m_origin), 4.24614987, 1e-08);
   }
 
-  void testIsMonitor() {
-    boost::shared_ptr<DetectorGroup> monitorGroup =
-        ComponentCreationHelper::createGroupOfTwoMonitors();
-    TS_ASSERT(!m_detGroup->isMonitor());
-    TS_ASSERT(monitorGroup->isMonitor());
-  }
-
   void testBoundingBox() {}
 
   void testAddDetector() {

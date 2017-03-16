@@ -6,9 +6,9 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionCalibration.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionParam.h"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -263,8 +263,8 @@ private:
   void saveGSS(std::string inputWorkspace, std::string bank, std::string runNo);
   void saveFocusedXYE(std::string inputWorkspace, std::string bank,
                       std::string runNo);
-  void saveOpenGenie(std::string inputWorkspace, std::string specNums,
-                     std::string bank, std::string runNo);
+  void saveOpenGenie(std::string inputWorkspace, std::string bank,
+                     std::string runNo);
 
   // generates the required file name of the output files
   std::string outFileNameFactory(std::string inputWorkspace, std::string runNo,

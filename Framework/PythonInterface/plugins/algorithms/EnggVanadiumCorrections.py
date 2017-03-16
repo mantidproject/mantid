@@ -193,7 +193,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         with one row per spectrum
         """
         expectedDim = 'Time-of-flight'
-        dimType = vanWS.getXDimension().getName()
+        dimType = vanWS.getXDimension().name
         if expectedDim != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
                              "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
@@ -256,7 +256,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         workspace, and the Y values simulated from the fitted curve
         """
         expectedDim = 'd-Spacing'
-        dimType = vanWS.getXDimension().getName()
+        dimType = vanWS.getXDimension().name
         if expectedDim != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
                              "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))

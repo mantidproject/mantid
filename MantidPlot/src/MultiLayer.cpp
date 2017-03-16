@@ -62,6 +62,7 @@
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "SelectionMoveResizer.h"
+#include "Spectrogram.h"
 #include <ColorButton.h>
 
 #include "Mantid/MantidMDCurve.h"
@@ -1325,7 +1326,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
     IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {
-      QString currentName(imdWS->name().c_str());
+      QString currentName(imdWS->getName().c_str());
       try {
         MantidMDCurve *curve = new MantidMDCurve(currentName, g, showErrors);
         MantidQwtIMDWorkspaceData *data = curve->mantidData();
@@ -1856,6 +1857,39 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</multiLayer>");
 
   return tsv.outputLines();
+}
+
+std::vector<std::string> MultiLayer::getWorkspaceNames() {
+  std::vector<std::string> names;
+  std::string name;
+  MantidMatrixCurve *mmc;
+  Spectrogram *spec;
+  for (auto graph : graphsList) {
+    for (int i = 0; i < graph->getNumCurves(); ++i) {
+      auto item = graph->plotItem(i);
+
+      switch (item->rtti()) {
+      case QwtPlotItem::Rtti_PlotUserItem:
+        mmc = dynamic_cast<MantidMatrixCurve *>(item);
+        if (!mmc)
+          continue;
+
+        name = mmc->workspaceName().toStdString();
+        names.push_back(name);
+        break;
+      case QwtPlotItem::Rtti_PlotSpectrogram:
+        spec = dynamic_cast<Spectrogram *>(item);
+        if (!spec)
+          continue;
+
+        name = spec->workspaceName();
+        names.push_back(name);
+        break;
+      }
+    }
+  }
+
+  return names;
 }
 
 /**

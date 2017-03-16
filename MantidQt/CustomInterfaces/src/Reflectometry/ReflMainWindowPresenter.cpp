@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Reflectometry/ReflMainWindowPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflMainWindowView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflRunsTabPresenter.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflEventTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsTabPresenter.h"
 #include "MantidQtCustomInterfaces/Reflectometry/IReflSaveTabPresenter.h"
 
@@ -10,15 +11,19 @@ namespace CustomInterfaces {
 /** Constructor
 * @param view :: [input] The view we are managing
 * @param runsPresenter :: [input] A pointer to the 'Runs' tab presenter
+* @param eventPresenter :: [input] A pointer to the 'Event Handling' tab
+* presenter
 * @param settingsPresenter :: [input] A pointer to the 'Settings' tab presenter
 * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
 */
 ReflMainWindowPresenter::ReflMainWindowPresenter(
     IReflMainWindowView *view, IReflRunsTabPresenter *runsPresenter,
+    IReflEventTabPresenter *eventPresenter,
     IReflSettingsTabPresenter *settingsPresenter,
     IReflSaveTabPresenter *savePresenter)
     : m_view(view), m_runsPresenter(runsPresenter),
-      m_settingsPresenter(settingsPresenter), m_savePresenter(savePresenter) {
+      m_eventPresenter(eventPresenter), m_settingsPresenter(settingsPresenter),
+      m_savePresenter(savePresenter) {
 
   // Tell the tab presenters that this is going to be the main presenter
   m_runsPresenter->acceptMainPresenter(this);
@@ -41,7 +46,7 @@ ReflMainWindowPresenter::~ReflMainWindowPresenter() {}
 */
 std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 
-  checkPtrValid(m_settingsPresenter);
+  checkSettingsPtrValid(m_settingsPresenter);
 
   return m_settingsPresenter->getTransmissionOptions(group);
 }
@@ -54,7 +59,7 @@ std::string ReflMainWindowPresenter::getTransmissionOptions(int group) const {
 */
 std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
 
-  checkPtrValid(m_settingsPresenter);
+  checkSettingsPtrValid(m_settingsPresenter);
 
   // Request global processing options to 'Settings' presenter
   return m_settingsPresenter->getReductionOptions(group);
@@ -68,10 +73,24 @@ std::string ReflMainWindowPresenter::getReductionOptions(int group) const {
 */
 std::string ReflMainWindowPresenter::getStitchOptions(int group) const {
 
-  checkPtrValid(m_settingsPresenter);
+  checkSettingsPtrValid(m_settingsPresenter);
 
   // Request global post-processing options to 'Settings' presenter
   return m_settingsPresenter->getStitchOptions(group);
+}
+
+/** Returns global time-slicing options
+*
+* @param group :: Index of the group in 'Event Handling' tab from which to get
+*the options
+* @return :: Global time-slicing options
+*/
+std::string ReflMainWindowPresenter::getTimeSlicingOptions(int group) const {
+
+  checkEventPtrValid(m_eventPresenter);
+
+  // Request global time-slicing options to 'Event Handling' presenter
+  return m_eventPresenter->getTimeSlicingOptions(group);
 }
 
 /**
@@ -155,13 +174,22 @@ void ReflMainWindowPresenter::setInstrumentName(
   m_settingsPresenter->setInstrumentName(instName);
 }
 
-/** Checks for null pointer
+/** Checks for Settings Tab null pointer
 * @param pointer :: The pointer
 */
-void ReflMainWindowPresenter::checkPtrValid(
+void ReflMainWindowPresenter::checkSettingsPtrValid(
     IReflSettingsTabPresenter *pointer) const {
   if (pointer == nullptr)
     throw std::invalid_argument("Could not read settings");
+}
+
+/** Checks for Event Handling Tab null pointer
+* @param pointer :: The pointer
+*/
+void ReflMainWindowPresenter::checkEventPtrValid(
+    IReflEventTabPresenter *pointer) const {
+  if (pointer == nullptr)
+    throw std::invalid_argument("Could not read event handling");
 }
 }
 }

@@ -4,8 +4,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
-
-#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyProcess.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyThread.h"
 
@@ -15,6 +13,7 @@
 // This is exclusively for kill/waitpid (interim solution, see below)
 #include <signal.h>
 #include <sys/wait.h>
+
 #endif
 
 using namespace Mantid::API;
@@ -343,9 +342,7 @@ void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
 void TomographyIfaceModel::prepareSubmissionArguments(
     const bool local, std::string &runnable, std::vector<std::string> &args,
     std::string &allOpts) {
-  if (!m_currentToolSettings) {
-    throw std::invalid_argument("Settings for tool not set up");
-  }
+
   const std::string tool = usingTool();
   const std::string cmd = m_currentToolSettings->toCommand();
 
@@ -480,24 +477,27 @@ void TomographyIfaceModel::doRemoteRunReconstructionJob(
  * @param thread This thread will be started after the worker is set up with the
  *    runnable and the arguments
  * @param worker The worker will only be set up with the runnable and arguments
+ * @param workerName The process name with which it will be shown in the
+ *    reconstruction jobs. Default is "Mantid_Local"
  */
 void TomographyIfaceModel::doLocalRunReconstructionJob(
     const std::string &runnable, const std::vector<std::string> &args,
     const std::string &allOpts, TomographyThread &thread,
-    TomographyProcess &worker) {
+    TomographyProcess &worker, const std::string &workerName) {
 
   // Can only run one reconstruction at a time
   // Qt doesn't use exceptions so we can't make sure it ran here
-  worker.setup(runnable, args, allOpts);
+  worker.setup(runnable, args, allOpts, workerName);
   thread.start();
 }
 
 void TomographyIfaceModel::addJobToStatus(const qint64 pid,
                                           const std::string &runnable,
-                                          const std::string &allOpts) {
+                                          const std::string &allOpts,
+                                          const std::string &workerName) {
   Mantid::API::IRemoteJobManager::RemoteJobInfo info;
   info.id = boost::lexical_cast<std::string>(pid);
-  info.name = pid > 0 ? "Mantid_Local" : "none";
+  info.name = pid > 0 ? workerName : "none";
   info.status = pid > 0 ? "Starting" : "Exit";
   info.cmdLine = runnable + " " + allOpts;
   m_jobsStatusLocal.emplace_back(info);
@@ -760,7 +760,7 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
 
   // draw image from workspace
   if (wsg && ws &&
-      Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
+      Mantid::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
     return wsg;
   } else {
     return WorkspaceGroup_sptr();
@@ -781,12 +781,12 @@ void TomographyIfaceModel::logErrMsg(const std::string &msg) {
  * @returns A string like "x1, y1, x2, y2"
  */
 std::string boxCoordinatesToCSV(const ImageStackPreParams::Box2D &coords) {
-  std::string x1 = std::to_string(coords.first.X());
-  std::string y1 = std::to_string(coords.first.Y());
-  std::string x2 = std::to_string(coords.second.X());
-  std::string y2 = std::to_string(coords.second.Y());
+  const std::string s_left = std::to_string(coords.second.X());
+  const std::string s_top = std::to_string(coords.first.Y());
+  const std::string s_right = std::to_string(coords.first.X());
+  const std::string s_bottom = std::to_string(coords.second.Y());
 
-  return x1 + ", " + y1 + ", " + x2 + ", " + y2;
+  return s_left + ", " + s_top + ", " + s_right + ", " + s_bottom;
 }
 
 /**

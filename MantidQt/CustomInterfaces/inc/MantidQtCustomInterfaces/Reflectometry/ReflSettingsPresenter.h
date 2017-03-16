@@ -1,10 +1,10 @@
 #ifndef MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 #define MANTID_CUSTOMINTERFACES_REFLSETTINGSPRESENTER_H
 
-#include "MantidQtCustomInterfaces/DllConfig.h"
-#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtCustomInterfaces/Reflectometry/IReflSettingsPresenter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -15,7 +15,7 @@ class IReflSettingsView;
 /** @class ReflSettingsPresenter
 
 ReflSettingsPresenter is a presenter class for the widget 'Settings' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -59,6 +59,7 @@ private:
   void createStitchHints();
   void getExpDefaults();
   void getInstDefaults();
+  void wrapWithQuotes(std::string &str) const;
   Mantid::API::IAlgorithm_sptr createReductionAlg();
   Mantid::Geometry::Instrument_const_sptr
   createEmptyInstrument(const std::string &instName);

@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <map>
+#include <cctype>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -269,7 +270,7 @@ const std::map<std::string, std::function<void(API::IFunction &)>> SYMMETRY_MAP{
 
 /// Constructor
 CrystalFieldPeaksBase::CrystalFieldPeaksBase()
-    : API::IFunctionGeneral(), API::ParamFunction(), m_defaultDomainSize(0) {
+    : API::ParamFunction(), m_defaultDomainSize(0) {
 
   declareAttribute("Ion", Attribute("Ce"));
   declareAttribute("Symmetry", Attribute("Ci"));
@@ -320,9 +321,13 @@ CrystalFieldPeaksBase::CrystalFieldPeaksBase()
 /// Calculate the crystal field eigensystem
 /// @param en :: Output eigenvalues.
 /// @param wf :: Output eigenvectors.
+/// @param ham :: Output crystal field hamiltonian (without external field)
+/// @param hz :: Output Zeeman hamiltonian (external field term)
 /// @param nre :: Output ion code.
 void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
                                                  ComplexFortranMatrix &wf,
+                                                 ComplexFortranMatrix &ham,
+                                                 ComplexFortranMatrix &hz,
                                                  int &nre) const {
 
   auto ion = getAttribute("Ion").asString();
@@ -332,16 +337,51 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
 
   auto ionIter = ION_2_NRE.find(ion);
   if (ionIter == ION_2_NRE.end()) {
-    throw std::runtime_error("Unknown ion name passed to CrystalFieldPeaks.");
+    // If 'Ion=S2', or 'Ion=J2.5' etc, interpret as arbitrary J values with gJ=2
+    // Allow lower case, but values must be half-integral. E.g. 'Ion=S2.4' fails
+    switch (ion[0]) {
+    case 'S':
+    case 's':
+    case 'J':
+    case 'j': {
+      if (ion.size() > 1 && std::isdigit(ion[1])) {
+        // Need to store as 2J to allow half-integer values
+        try {
+          auto J2 = std::stof(ion.substr(1)) * 2.;
+          if (J2 > 99.) {
+            throw std::out_of_range("");
+          }
+          if (fabs(J2 - (int)J2) < 0.001) {
+            nre = -(int)J2;
+            break;
+          }
+          // Catch exceptions thrown by stof so we get a more meaningful error
+        } catch (const std::invalid_argument &) {
+          throw std::runtime_error("Invalid value '" + ion.substr(1) +
+                                   "' of J passed to CrystalFieldPeaks.");
+        } catch (const std::out_of_range &) {
+          throw std::runtime_error("Value of J: '" + ion.substr(1) +
+                                   "' passed to CrystalFieldPeaks is too big.");
+        }
+      }
+      // fall through
+    }
+    default:
+      throw std::runtime_error("Unknown ion name '" + ion +
+                               "' passed to CrystalFieldPeaks.");
+    }
+  } else {
+    nre = ionIter->second;
   }
-
-  nre = ionIter->second;
 
   DoubleFortranVector bmol(1, 3);
   bmol(1) = getParameter("BmolX");
   bmol(2) = getParameter("BmolY");
   bmol(3) = getParameter("BmolZ");
 
+  // For CrystalFieldSusceptibility and CrystalFieldMagnetisation we need
+  //   to be able to override the external field set here, since in these
+  //   measurements, a different external field is applied.
   DoubleFortranVector bext(1, 3);
   bext(1) = getParameter("BextX");
   bext(2) = getParameter("BextY");
@@ -393,8 +433,7 @@ void CrystalFieldPeaksBase::calculateEigenSystem(DoubleFortranVector &en,
   bkq(6, 5) = ComplexType(B65, IB65);
   bkq(6, 6) = ComplexType(B66, IB66);
 
-  ComplexFortranMatrix ham;
-  calculateEigensystem(en, wf, ham, nre, bmol, bext, bkq);
+  calculateEigensystem(en, wf, ham, hz, nre, bmol, bext, bkq);
   // MaxPeakCount is a read-only "mutable" attribute.
   const_cast<CrystalFieldPeaksBase *>(this)
       ->setAttributeValue("MaxPeakCount", static_cast<int>(en.size()));

@@ -32,7 +32,7 @@ namespace VATES {
  * @returns a clipped object
  */
 vtkSmartPointer<vtkPVClipDataSet>
-getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet) {
+getClippedDataSet(const vtkSmartPointer<vtkDataSet> &dataSet) {
   auto box = vtkSmartPointer<vtkBox>::New();
   box->SetBounds(dataSet->GetBounds());
   auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();

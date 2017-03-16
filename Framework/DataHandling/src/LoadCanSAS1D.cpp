@@ -188,9 +188,10 @@ LoadCanSAS1D::loadEntry(Poco::XML::Node *const workspaceData,
   dataWS->setYUnit("");
 
   // load workspace data
-  MantidVec &X = dataWS->dataX(0);
-  MantidVec &Y = dataWS->dataY(0);
-  MantidVec &E = dataWS->dataE(0);
+  auto &X = dataWS->mutableX(0);
+  auto &Y = dataWS->mutableY(0);
+  auto &E = dataWS->mutableE(0);
+
   dataWS->setPointStandardDeviations(0, nBins);
   auto &Dx = dataWS->mutableDx(0);
   int vecindex = 0;
@@ -381,26 +382,67 @@ void LoadCanSAS1D::createSampleInformation(
       sasInstrumentElement->getChildElement("SAScollimation");
   check(sasCollimationElement, "<SAScollimation>");
 
-  // Get the geometry information
-  auto geometryElement = sasCollimationElement->getChildElement("name");
-  if (geometryElement) {
-    auto geometry = geometryElement->innerText();
-    auto geometryID = getGeometryID(geometry);
-    sample.setGeometryFlag(geometryID);
+  // Since we have shipped a sligthly invalid CanSAS1D format we need to
+  // make sure that we can read those files back in again
+  bool isInValidOldFormat = true;
+  try {
+    auto name = sasCollimationElement->getChildElement("name");
+    check(name, "name");
+  } catch (Kernel::Exception::NotFoundError &) {
+    isInValidOldFormat = false;
   }
 
-  // Get the thickness information
-  auto widthElement = sasCollimationElement->getChildElement("X");
-  if (widthElement) {
-    double width = std::stod(widthElement->innerText());
-    sample.setWidth(width);
-  }
+  if (isInValidOldFormat) {
+    // Get the geometry information
+    auto geometryElement = sasCollimationElement->getChildElement("name");
+    if (geometryElement) {
+      auto geometry = geometryElement->innerText();
+      auto geometryID = getGeometryID(geometry);
+      sample.setGeometryFlag(geometryID);
+    }
 
-  // Get the thickness information
-  auto heightElement = sasCollimationElement->getChildElement("Y");
-  if (heightElement) {
-    double height = std::stod(heightElement->innerText());
-    sample.setHeight(height);
+    // Get the width information
+    auto widthElement = sasCollimationElement->getChildElement("X");
+    if (widthElement) {
+      double width = std::stod(widthElement->innerText());
+      sample.setWidth(width);
+    }
+
+    // Get the height information
+    auto heightElement = sasCollimationElement->getChildElement("Y");
+    if (heightElement) {
+      double height = std::stod(heightElement->innerText());
+      sample.setHeight(height);
+    }
+
+  } else {
+    // Get aperture
+    auto aperture = sasCollimationElement->getChildElement("aperture");
+    if (aperture) {
+      // Get geometry element
+      auto geometry = aperture->getAttribute("name");
+      if (!geometry.empty()) {
+        auto geometryID = getGeometryID(Poco::XML::fromXMLString(geometry));
+        sample.setGeometryFlag(geometryID);
+      }
+
+      // Get size
+      auto size = aperture->getChildElement("size");
+
+      // Get the width information
+      auto widthElement = size->getChildElement("x");
+      if (widthElement) {
+        double width = std::stod(widthElement->innerText());
+        sample.setWidth(width);
+      }
+
+      // Get the height information
+      auto heightElement = size->getChildElement("y");
+      if (heightElement) {
+        double height = std::stod(heightElement->innerText());
+        sample.setHeight(height);
+      }
+    }
   }
 }
 }

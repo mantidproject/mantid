@@ -57,7 +57,7 @@ public:
   vtkSmartPointer<vtkDataSet>
   create(ProgressAction &progressUpdating) const override;
 
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   typedef std::vector<UnstructuredPoint> Column;
 

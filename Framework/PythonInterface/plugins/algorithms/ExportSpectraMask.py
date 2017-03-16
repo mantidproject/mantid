@@ -28,7 +28,7 @@ def export_masks(ws,fileName='',returnMasksOnly=False):
     else:
         pws = ws
 
-    ws_name=pws.getName()
+    ws_name=pws.name()
     nhist = pws.getNumberHistograms()
 
     no_detectors = 0

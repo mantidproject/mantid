@@ -279,7 +279,7 @@ class DirectEnergyConversion(object):
                 bin_size = 2*(bkgd_range[1]-bkgd_range[0])
                 background_int = Rebin(result_ws,
                                        Params=[bkgd_range[0],bin_size,bkgd_range[1]],
-                                       PreserveEvents=False,FullBinsOnly=False)
+                                       PreserveEvents=False,FullBinsOnly=False, IgnoreBinErrors=True)
                 total_counts = Integration(result_ws, IncludePartialBins=True)
                 background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
                 self.prop_man.log("Diagnose: finished convertUnits ",'information')
@@ -888,7 +888,7 @@ class DirectEnergyConversion(object):
         """
         Mask and group detectors based on input parameters
         """
-        ws_name = result_ws.getName()
+        ws_name = result_ws.name()
         if spec_masks is not None:
             MaskDetectors(Workspace=ws_name, MaskedWorkspace=spec_masks)
         if map_file is not None:
@@ -954,7 +954,7 @@ class DirectEnergyConversion(object):
 
         if not mon_ws: # no monitors
             if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
-                                             # have monitors
+#have monitors
                 self.normalise(run,'current',range_offset)
                 ws = run.get_workspace()
                 new_name = ws.name()
@@ -966,10 +966,9 @@ class DirectEnergyConversion(object):
 
         int_range = self.norm_mon_integration_range
         if self._debug_mode:
-            kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
+            kwargs = {'NormFactorWS' : 'NormMon1_WS' + data_ws.name()}
         else:
             kwargs = {}
-
         mon_spect = self.prop_man.mon1_norm_spec
         if separate_monitors:
             kwargs['MonitorWorkspace'] = mon_ws
@@ -1020,7 +1019,7 @@ class DirectEnergyConversion(object):
                                    .format(ws.name(),run.run_number()))
         #
 
-        kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.getName()}
+        kwargs = {'NormFactorWS':'NormMon2_WS' + mon_ws.name()}
 
         mon_spect = self.prop_man.mon2_norm_spec
         mon_index = int(mon_ws.getIndexFromSpectrumNumber(mon_spect))
@@ -1158,7 +1157,7 @@ class DirectEnergyConversion(object):
                               EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
-                    src_name = monitor_ws.getInstrument().getSource().getName()
+                    src_name = monitor_ws.getInstrument().getSource().name()
                 #pylint: disable=bare-except
                 except:
                     src_name = None
@@ -1232,9 +1231,9 @@ class DirectEnergyConversion(object):
                                   'warning')
                 return
             else:
-                save_file = workspace.getName()
+                save_file = workspace.name()
         elif os.path.isdir(save_file):
-            save_file = os.path.join(save_file, workspace.getName())
+            save_file = os.path.join(save_file, workspace.name())
         elif save_file == '':
             raise ValueError('Empty filename is not allowed for saving')
         else:
@@ -1599,10 +1598,10 @@ class DirectEnergyConversion(object):
             else:
                 self._propMan = PropertyManager(instr)
         else:
-            old_name = self._propMan.instrument.getName()
+            old_name = self._propMan.instrument.name()
 #pylint: disable=protected-access
             if isinstance(instr,geometry._geometry.Instrument):
-                new_name = self._propMan.instrument.getName()
+                new_name = self._propMan.instrument.name()
             elif isinstance(instr,PropertyManager):
                 new_name = instr.instr_name
             else:
@@ -1618,7 +1617,7 @@ class DirectEnergyConversion(object):
     def setup_instrument_properties(self, workspace=None,reload_instrument=False):
         if workspace is not None:
             instrument = workspace.getInstrument()
-            name = instrument.getName()
+            name = instrument.name()
             if name != self.prop_man.instr_name:
                 self.prop_man = PropertyManager(name,workspace)
 
@@ -1696,7 +1695,8 @@ class DirectEnergyConversion(object):
 
         energy_bins = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         if energy_bins:
-            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
+            Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False,
+                  IgnoreBinErrors=True)
             if bkgr_ws:
                 #apply data ws normalization to background workspace
                 data_run.export_normalization(bkgr_ws)
@@ -1746,7 +1746,8 @@ class DirectEnergyConversion(object):
                 ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,
                        InstrumentParameter="DelayTime",Combine=True)
         else: # calculate background workspace for future usage
-            bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
+            bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False,
+                            IgnoreBinErrors=True)
             RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
             bkgr_ws = mtd['bkgr_ws_source']
 
@@ -1783,7 +1784,8 @@ class DirectEnergyConversion(object):
         # Make sure that our binning is consistent
         if prop_man.energy_bins:
             bins = PropertyManager.energy_bins.get_abs_range(prop_man)
-            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins)
+            Rebin(InputWorkspace=result_name,OutputWorkspace= result_name,Params=bins,
+                  IgnoreBinErrors=True)
 
         # Masking and grouping
         result_ws = mtd[result_name]
@@ -1859,7 +1861,8 @@ class DirectEnergyConversion(object):
             raise ValueError("White beam integration range is inconsistent. low=%d, upp=%d" % (low,upp))
 
         delta = 2.0 * (upp - low)
-        white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp])
+        white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp],
+                         IgnoreBinErrors=True)
         # Why aren't we doing this...-> because integration does not work properly for event workspaces
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
         AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')

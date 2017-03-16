@@ -132,7 +132,7 @@ private:
     ElementType_sptr typedValue =
         boost::dynamic_pointer_cast<ElementType>(data);
     if (!typedValue) {
-      throw std::invalid_argument("DataItem \"" + data->name() +
+      throw std::invalid_argument("DataItem \"" + data->getName() +
                                   "\" is not of the expected type.");
     }
     return typedValue;

@@ -41,6 +41,12 @@ public:
   void setAttribute(const std::string &name, const Attribute &) override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;
   void buildTargetFunction() const override;
+  enum PhysicalProperty {
+    HeatCapacity = 1,   ///< Specify dataset is magnetic heat capacity Cv(T)
+    Susceptibility = 2, ///< Specify dataset is magnetic susceptibility chi(T)
+    Magnetisation = 3,  ///< Specify dataset is magnetisation vs field M(H)
+    MagneticMoment = 4  ///< Specify dataset is magnetisation vs temp M(T)
+  };
 
 protected:
   void updateTargetFunction() const override;
@@ -51,10 +57,15 @@ private:
                                     const ComplexFortranMatrix &wf,
                                     double temperature, double fwhm,
                                     size_t i) const;
+  API::IFunction_sptr buildPhysprop(int nre, const DoubleFortranVector &en,
+                                    const ComplexFortranMatrix &wf,
+                                    const ComplexFortranMatrix &ham,
+                                    double temperature, size_t iSpec) const;
   /// Update a function for a single spectrum.
   void updateSpectrum(API::IFunction &spectrum, int nre,
                       const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf, double temperature,
+                      const ComplexFortranMatrix &wf,
+                      const ComplexFortranMatrix &ham, double temperature,
                       size_t i) const;
   /// Calculate excitations at given temperature
   void calcExcitations(int nre, const DoubleFortranVector &en,
@@ -62,6 +73,8 @@ private:
                        API::FunctionValues &values, size_t iSpec) const;
   /// Cache number of fitted peaks
   mutable std::vector<size_t> m_nPeaks;
+  /// Cache the list of "spectra" corresponding to physical properties
+  mutable std::vector<int> m_physprops;
   /// Caches of the width functions
   mutable std::vector<std::vector<double>> m_fwhmX;
   mutable std::vector<std::vector<double>> m_fwhmY;

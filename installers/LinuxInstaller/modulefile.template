@@ -1,12 +1,17 @@
 #%Module 1.0
-
-module load /etc/modulefiles/compat-openmpi-x86_64
 module load sns_software
 
 set                     PREFIX          @INSTALL_ROOT@/@CPACK_PACKAGE_FILE_NAME@
+set                     MPI_PREFIX      /sw/fermi/openmpi-1.8.7_nodlopen
+# This is specific to fermi.sns.gov.  If you want to use this modulefile
+# on a different machine, you're probably better off doing a 'module load
+# openmpi' up above.
 
-prepend-path            PATH            $PREFIX/bin
-# Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
-prepend-path            LD_LIBRARY_PATH $PREFIX/lib:/usr/lib64/openmpi/lib
-prepend-path            PYTHONPATH      $PREFIX/bin
+prepend-path            PATH            $PREFIX/bin:$MPI_PREFIX/bin
+
+# /usr/lib64/openmpi/lib is so we pick up boostmpi (not openmpi itself)
+prepend-path            LD_LIBRARY_PATH $PREFIX/lib:$MPI_PREFIX/lib:/usr/lib64/openmpi/lib
+prepend-path            PYTHONPATH      $PREFIX/bin:/usr/lib64/python2.6/site-packages/openmpi
+# For reasons that are unclear, mpi4py is installed in
+# .../site-packages/openmpi/mpi4py insted of .../site-packages/mpi4py
 

@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidCrystal/SelectCellWithForm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -33,10 +34,6 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
-namespace {
-constexpr double RAD_TO_DEG = 180. / M_PI;
-}
-
 const std::string SCDCalibratePanels::name() const {
   return "SCDCalibratePanels";
 }
@@ -45,48 +42,6 @@ int SCDCalibratePanels::version() const { return 1; }
 
 const std::string SCDCalibratePanels::category() const {
   return "Crystal\\Corrections";
-}
-
-/**
- * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz,
- * corresponding to the order
- * Mantid uses in calculating rotations
- * @param Q      The Quaternion. It will be normalized to represent a rotation
- * @param Rotx   The angle in degrees for rotating around the x-axis
- * @param Roty   The angle in degrees for rotating around the y-axis
- * @param Rotz   The angle in degrees for rotating around the z-axis
- */
-void SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,
-                                           double &Roty, double &Rotz) {
-  Quat R(Q);
-  R.normalize();
-  V3D X(1, 0, 0);
-  V3D Y(0, 1, 0);
-  V3D Z(0, 0, 1);
-  R.rotate(X);
-  R.rotate(Y);
-  R.rotate(Z);
-  if (Z[1] != 0 || Z[2] != 0) {
-    double tx = atan2(-Z[1], Z[2]);
-    double tz = atan2(-Y[0], X[0]);
-    double cosy = Z[2] / cos(tx);
-    double ty = atan2(Z[0], cosy);
-    Rotx = (tx * RAD_TO_DEG);
-    Roty = (ty * RAD_TO_DEG);
-    Rotz = (tz * RAD_TO_DEG);
-  } else // roty = 90 0r 270 def
-  {
-    double k = 1;
-    if (Z[0] < 0)
-      k = -1;
-    double roty = k * 90;
-    double rotx = 0;
-    double rotz = atan2(X[2], Y[2]);
-
-    Rotx = (rotx * RAD_TO_DEG);
-    Roty = (roty * RAD_TO_DEG);
-    Rotz = (rotz * RAD_TO_DEG);
-  }
 }
 
 //-----------------------------------------------------------------------------------------
@@ -306,10 +261,11 @@ void SCDCalibratePanels::exec() {
                              parameter_workspaces.end());
 
   // Try again to optimize L1
-  if (changeL1)
+  if (changeL1) {
     findL1(nPeaks, peaksWs);
-  parameter_workspaces.push_back("params_L1");
-  fit_workspaces.push_back("fit_L1");
+    parameter_workspaces.push_back("params_L1");
+    fit_workspaces.push_back("fit_L1");
+  }
   std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
 
@@ -533,220 +489,6 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   alg->executeAsChildAlg();
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
-/**
- *  This is part of the algorithm, LoadIsawDetCal, starting with an existing
- *instrument
- *  to be modified.  Only banks in AllBankName are affected.
- *
- *  @param instrument   The instrument to be modified
- *  @param AllBankName  The bank names in this instrument that will be modified
- *  @param T0           The time offset from the DetCal file
- *  @param L0           The length offset from the DetCal file
- *  @param filename       The DetCal file name
- *  @param bankPrefixName   The prefix to the bank names.
- */
-void SCDCalibratePanels::LoadISawDetCal(
-    boost::shared_ptr<const Instrument> &instrument,
-    boost::container::flat_set<string> &AllBankName, double &T0, double &L0,
-    string filename, string bankPrefixName) {
-
-  V3D beamline, samplePos;
-  double beamlineLen;
-  instrument->getInstrumentParameters(L0, beamline, beamlineLen, samplePos);
-  int count, id, nrows, ncols;
-  double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x,
-      up_y, up_z;
-
-  ifstream input(filename.c_str(), ios_base::in);
-  string line;
-
-  boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap =
-      instrument->getParameterMap();
-  while (getline(input, line)) {
-    if (line[0] == '7') {
-      double mL1;
-      stringstream(line) >> count >> mL1 >> T0;
-      double scaleL0 = .01 * mL1 / beamlineLen;
-      const IComponent_const_sptr source = instrument->getSource();
-      V3D NewSourcePos =
-          samplePos - beamline * scaleL0 * 2.0; // beamLine is 2*length.
-      L0 = beamline.norm() * scaleL0 * 2.0;
-      V3D RelSourcePos =
-          source->getRelativePos() + NewSourcePos - source->getPos();
-      pmap->addPositionCoordinate(source.get(), "x", RelSourcePos.X());
-      pmap->addPositionCoordinate(source.get(), "y", RelSourcePos.Y());
-      pmap->addPositionCoordinate(source.get(), "z", RelSourcePos.Z());
-    }
-
-    if (line[0] != '5')
-      continue;
-    stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >>
-        depth >> detd >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >>
-        up_y >> up_z;
-
-    string bankName = bankPrefixName + std::to_string(id);
-
-    if (!AllBankName.empty() && AllBankName.find(bankName) == AllBankName.end())
-      continue;
-    boost::shared_ptr<const RectangularDetector> det =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
-            instrument->getComponentByName(bankName, 3));
-    if (!det)
-      continue;
-
-    // Adjust pmap to the new scaling
-    double scalex = 1.0; // previous scale factor on this detector
-    double scaley = 1.0;
-    if (pmap->contains(det.get(), "scalex"))
-      scalex = pmap->getDouble(det->getName(), "scalex")[0];
-    if (pmap->contains(det.get(), "scaley"))
-      scaley = pmap->getDouble(det->getName(), "scaley")[0];
-    double ScaleX = scalex * 0.01 * width / det->xsize();
-    double ScaleY = scaley * 0.01 * height / det->ysize();
-    pmap->addDouble(det.get(), "scalex", ScaleX);
-    pmap->addDouble(det.get(), "scaley", ScaleY);
-
-    // Adjust pmap to the new center position. Note:in pmap the pos values
-    //                                          are rel positions to parent
-    x *= 0.01;
-    y *= 0.01;
-    z *= 0.01;
-    V3D pos = det->getPos();
-    V3D RelPos = V3D(x, y, z) - pos;
-    if (pmap->contains(det.get(), "pos"))
-      RelPos += pmap->getV3D(det->getName(), "pos")[0];
-    pmap->addPositionCoordinate(det.get(), "x", RelPos.X());
-    pmap->addPositionCoordinate(det.get(), "y", RelPos.Y());
-    pmap->addPositionCoordinate(det.get(), "z", RelPos.Z());
-
-    // Adjust pmap to the orientation of the panel
-    V3D rX = V3D(base_x, base_y, base_z);
-    rX.normalize();
-    V3D rY = V3D(up_x, up_y, up_z);
-    rY.normalize();
-    // V3D rZ=rX.cross_prod(rY);
-
-    // These are the original axes
-    V3D oX = V3D(1., 0., 0.);
-    V3D oY = V3D(0., 1., 0.);
-
-    // Axis that rotates X
-    V3D ax1 = oX.cross_prod(rX);
-    // Rotation angle from oX to rX
-    double angle1 = oX.angle(rX);
-    angle1 *= 180.0 / M_PI;
-    // Create the first quaternion
-    Quat Q1(angle1, ax1);
-
-    // Now we rotate the original Y using Q1
-    V3D roY = oY;
-    Q1.rotate(roY);
-    // Find the axis that rotates oYr onto rY
-    V3D ax2 = roY.cross_prod(rY);
-    double angle2 = roY.angle(rY);
-    angle2 *= 180.0 / M_PI;
-    Quat Q2(angle2, ax2);
-
-    // Final = those two rotations in succession; Q1 is done first.
-    Quat Rot = Q2 * Q1;
-
-    // Then find the corresponding relative position
-    // boost::shared_ptr<const IComponent> comp =
-    // instrument->getComponentByName(detname);
-    boost::shared_ptr<const IComponent> parent = det->getParent();
-    if (parent) {
-      Quat rot0 = parent->getRelativeRot();
-      rot0.inverse();
-      Rot = Rot * rot0;
-    }
-    boost::shared_ptr<const IComponent> grandparent = parent->getParent();
-    if (grandparent) // Why this is not correct but most Rectangular detectors
-                     // have no grandparent.
-    {
-      Quat rot0 = grandparent->getRelativeRot();
-      rot0.inverse();
-      Rot = Rot * rot0;
-    }
-
-    // Set or overwrite "rot" instrument parameter.
-    pmap->addQuat(det.get(), "rot", Rot);
-
-  } // While reading thru file
-}
-
-void SCDCalibratePanels::createResultWorkspace(const int numGroups,
-                                               const int colNum,
-                                               const vector<string> &names,
-                                               const vector<double> &params,
-                                               const vector<double> &errs) {
-  // make the table the correct size
-  int nn(0);
-  if (getProperty("AllowSampleShift"))
-    nn = 3;
-  if (!Result) {
-    // create the results table
-    Result =
-        Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-    // column for the field names
-    Result->addColumn("str", "Field");
-    // and one for each group
-    for (int g = 0; g < numGroups; ++g) {
-      string GroupName = string("Group") + std::to_string(g);
-      Result->addColumn("double", GroupName);
-    }
-    Result->setRowCount(2 * (10 + nn));
-    Result->setComment(
-        string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
-  }
-
-  // determine the field names, the leading '_' is the break point
-  vector<string> TableFieldNames;
-  for (auto fieldName : names) {
-    size_t dotPos = fieldName.find('_');
-    if (dotPos < fieldName.size())
-      fieldName = fieldName.substr(dotPos + 1);
-
-    if (std::find(TableFieldNames.begin(), TableFieldNames.end(), fieldName) ==
-        TableFieldNames.end())
-      TableFieldNames.push_back(fieldName);
-  }
-
-  // create the row labels
-  for (size_t p = 0; p < TableFieldNames.size(); p++) {
-    Result->cell<string>(p, 0) = TableFieldNames[p];
-    Result->cell<string>(TableFieldNames.size() + p, 0) =
-        "Err_" + TableFieldNames[p];
-  }
-
-  // put in the data
-  for (size_t p = 0; p < names.size(); ++p) {
-    // get the column to update and the name of the field
-    string fieldName = names[p];
-    size_t dotPos = fieldName.find('_');
-    // int colNum = 1;
-    if (dotPos < fieldName.size()) {
-      // the 1 is to skip the leading 'f'
-      // colNum = atoi(fieldName.substr(1, dotPos).c_str()) + 1;
-      // everything after is the field name
-      fieldName = fieldName.substr(dotPos + 1);
-    }
-
-    // find the row
-    int rowNum = 0;
-    auto fieldIter =
-        std::find(TableFieldNames.begin(), TableFieldNames.end(), fieldName);
-    if (fieldIter != TableFieldNames.end()) {
-      rowNum = static_cast<int>(fieldIter - TableFieldNames.begin());
-    }
-
-    // fill in the values
-    Result->cell<double>(rowNum, colNum) = params[p];
-    Result->cell<double>(rowNum + 10 + nn, colNum) = errs[p];
-  }
-
-  // setProperty("ResultWorkspace", Result);
-}
 
 /**
  * Really this is the operator SaveIsawDetCal but only the results of the given
@@ -861,156 +603,6 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("RowFilename", OUTPUTS);
   setPropertyGroup("TofFilename", OUTPUTS);
 }
-void SCDCalibratePanels::updateBankParams(
-    boost::shared_ptr<const Geometry::IComponent> bank_const,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "x", pos.X());
-    pmap->addDouble(bank_const.get(), "y", pos.Y());
-    pmap->addDouble(bank_const.get(), "z", pos.Z());
-    pmap->addV3D(bank_const.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), ("rot"));
-  if (rot) {
-    pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-  }
-
-  vector<double> scalex = pmapSv->getDouble(bank_const->getName(), "scalex");
-  vector<double> scaley = pmapSv->getDouble(bank_const->getName(), "scaley");
-  if (!scalex.empty()) {
-    pmap->addDouble(bank_const.get(), "scalex", scalex[0]);
-  }
-  if (!scaley.empty()) {
-    pmap->addDouble(bank_const.get(), "scaley", scaley[0]);
-  }
-
-  boost::shared_ptr<const Geometry::IComponent> parent =
-      bank_const->getParent();
-  if (parent) {
-    updateBankParams(parent, pmap, pmapSv);
-  }
-}
-
-void SCDCalibratePanels::updateSourceParams(
-    boost::shared_ptr<const Geometry::IComponent> bank_const,
-    boost::shared_ptr<Geometry::ParameterMap> pmap,
-    boost::shared_ptr<const Geometry::ParameterMap> pmapSv) {
-  vector<V3D> posv = pmapSv->getV3D(bank_const->getName(), "pos");
-
-  if (!posv.empty()) {
-    V3D pos = posv[0];
-    pmap->addDouble(bank_const.get(), "x", pos.X());
-    pmap->addDouble(bank_const.get(), "y", pos.Y());
-    pmap->addDouble(bank_const.get(), "z", pos.Z());
-    pmap->addV3D(bank_const.get(), "pos", pos);
-  }
-
-  boost::shared_ptr<Parameter> rot = pmapSv->get(bank_const.get(), "rot");
-  if (rot)
-    pmap->addQuat(bank_const.get(), "rot", rot->value<Quat>());
-}
-
-void SCDCalibratePanels::FixUpSourceParameterMap(
-    boost::shared_ptr<const Instrument> NewInstrument, double const L0,
-    V3D const newSampPos, boost::shared_ptr<const ParameterMap> const pmapOld) {
-  boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
-  IComponent_const_sptr source = NewInstrument->getSource();
-  updateSourceParams(source, pmap, pmapOld);
-
-  IComponent_const_sptr sample = NewInstrument->getSample();
-  V3D SamplePos = sample->getPos();
-  if (SamplePos != newSampPos) {
-    V3D newSampRelPos = newSampPos - SamplePos;
-    pmap->addPositionCoordinate(sample.get(), string("x"), newSampRelPos.X());
-    pmap->addPositionCoordinate(sample.get(), string("y"), newSampRelPos.Y());
-    pmap->addPositionCoordinate(sample.get(), string("z"), newSampRelPos.Z());
-  }
-  V3D sourceRelPos = source->getRelativePos();
-  V3D sourcePos = source->getPos();
-  V3D parentSourcePos = sourcePos - sourceRelPos;
-  V3D source2sampleDir = SamplePos - source->getPos();
-
-  double scalee = L0 / source2sampleDir.norm();
-  V3D newsourcePos = sample->getPos() - source2sampleDir * scalee;
-  V3D newsourceRelPos = newsourcePos - parentSourcePos;
-
-  pmap->addPositionCoordinate(source.get(), string("x"), newsourceRelPos.X());
-  pmap->addPositionCoordinate(source.get(), string("y"), newsourceRelPos.Y());
-  pmap->addPositionCoordinate(source.get(), string("z"), newsourceRelPos.Z());
-}
-
-void SCDCalibratePanels::FixUpBankParameterMap(
-    vector<string> const bankNames,
-    boost::shared_ptr<const Instrument> NewInstrument, V3D const pos,
-    Quat const rot, double const DetWScale, double const DetHtScale,
-    boost::shared_ptr<const ParameterMap> const pmapOld, bool RotCenters) {
-  boost::shared_ptr<ParameterMap> pmap = NewInstrument->getParameterMap();
-
-  for (const auto &bankName : bankNames) {
-
-    boost::shared_ptr<const IComponent> bank1 =
-        NewInstrument->getComponentByName(bankName);
-    boost::shared_ptr<const Geometry::RectangularDetector> bank =
-        boost::dynamic_pointer_cast<const RectangularDetector>(
-            bank1); // Component
-    updateBankParams(bank, pmap, pmapOld);
-
-    Quat RelRot = bank->getRelativeRot();
-    Quat newRelRot = rot * RelRot;
-    double rotx, roty, rotz;
-    Quat2RotxRotyRotz(newRelRot, rotx, roty, rotz);
-
-    pmap->addRotationParam(bank.get(), string("rotx"), rotx);
-    pmap->addRotationParam(bank.get(), string("roty"), roty);
-    pmap->addRotationParam(bank.get(), string("rotz"), rotz);
-    pmap->addQuat(bank.get(), "rot",
-                  newRelRot); // Should not have had to do this???
-    //---------Rotate center of bank ----------------------
-    V3D Center = bank->getPos();
-    V3D Center_orig(Center);
-    if (RotCenters)
-      rot.rotate(Center);
-
-    V3D pos1 = bank->getRelativePos();
-
-    pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X() +
-                                                             Center.X() -
-                                                             Center_orig.X());
-    pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y() +
-                                                             Center.Y() -
-                                                             Center_orig.Y());
-    pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z() +
-                                                             Center.Z() -
-                                                             Center_orig.Z());
-
-    Quat2RotxRotyRotz(rot, rotx, roty, rotz);
-
-    vector<double> oldScalex =
-        pmap->getDouble(bank->getName(), string("scalex"));
-    vector<double> oldScaley =
-        pmap->getDouble(bank->getName(), string("scaley"));
-
-    double scalex, scaley;
-    if (!oldScalex.empty())
-      scalex = oldScalex[0] * DetWScale;
-    else
-      scalex = DetWScale;
-
-    if (!oldScaley.empty())
-      scaley = oldScaley[0] * DetHtScale;
-    else
-      scaley = DetHtScale;
-
-    pmap->addDouble(bank.get(), string("scalex"), scalex);
-    pmap->addDouble(bank.get(), string("scaley"), scaley);
-    // cout<<"Thru param fix for "<<bankName<<". pos="<<bank->getPos()<<'\n';
-  } // For @ bank
-}
 
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
@@ -1043,14 +635,13 @@ void SCDCalibratePanels::saveXmlFile(
     boost::shared_ptr<const IComponent> bank =
         instrument.getComponentByName(bankName);
 
-    Quat RelRot = bank->getRelativeRot();
+    Quat relRot = bank->getRelativeRot();
 
-    double rotx, roty, rotz;
+    std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
 
-    SCDCalibratePanels::Quat2RotxRotyRotz(RelRot, rotx, roty, rotz);
-    writeXmlParameter(oss3, "rotx", rotx);
-    writeXmlParameter(oss3, "roty", roty);
-    writeXmlParameter(oss3, "rotz", rotz);
+    writeXmlParameter(oss3, "rotx", relRotAngles[0]);
+    writeXmlParameter(oss3, "roty", relRotAngles[1]);
+    writeXmlParameter(oss3, "rotz", relRotAngles[2]);
 
     V3D pos1 = bank->getRelativePos();
     writeXmlParameter(oss3, "x", pos1.X());

@@ -49,7 +49,7 @@ public:
   create(ProgressAction &progressUpdating) const override;
 
   /// Initalize with a target workspace.
-  void initialize(Mantid::API::Workspace_sptr) override;
+  void initialize(const Mantid::API::Workspace_sptr &workspace) override;
 
   /// Get the name of the type.
   std::string getFactoryTypeName() const override;

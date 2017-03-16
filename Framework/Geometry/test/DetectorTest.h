@@ -18,7 +18,6 @@ public:
     TS_ASSERT_EQUALS(det.getName(), "det1");
     TS_ASSERT(!det.getParent());
     TS_ASSERT_EQUALS(det.getID(), 0);
-    TS_ASSERT(!det.isMonitor());
     TS_ASSERT(!det.isParametrized());
   }
   void testDetTopology() {
@@ -34,7 +33,6 @@ public:
     TS_ASSERT_EQUALS(det.getName(), "det1");
     TS_ASSERT(det.getParent());
     TS_ASSERT_EQUALS(det.getID(), 0);
-    TS_ASSERT(!det.isMonitor());
   }
 
   void testId() {
@@ -46,15 +44,6 @@ public:
   void testType() {
     Detector det("det", 0, 0);
     TS_ASSERT_EQUALS(det.type(), "DetectorComponent");
-  }
-
-  void testMonitor() {
-    Detector det("det", 0, 0);
-    TS_ASSERT(!det.isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor());
-    TS_ASSERT(det.isMonitor());
-    TS_ASSERT_THROWS_NOTHING(det.markAsMonitor(false));
-    TS_ASSERT(!det.isMonitor());
   }
 
   void testGetNumberParameter() {

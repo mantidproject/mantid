@@ -10,8 +10,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCHelper.h"
 
 #include <boost/lexical_cast.hpp>
-#include <fstream>
 #include <cctype>
+#include <fstream>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -1447,9 +1447,10 @@ void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
     difc = 18400;
     g_log.warning()
         << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
-        << wks->name() << ". Using default, which is not adjusted for this "
-                          "workspace/run: DIFA: " << difa << ", DIFC: " << difc
-        << ", TZERO: " << tzero << ". Error details: " << rexc.what() << '\n';
+        << wks->getName() << ". Using default, which is not adjusted for this "
+                             "workspace/run: DIFA: " << difa
+        << ", DIFC: " << difc << ", TZERO: " << tzero
+        << ". Error details: " << rexc.what() << '\n';
   }
 }
 
@@ -1572,8 +1573,8 @@ void EnggDiffFittingPresenter::setDataToClonedWS(std::string &current_WS,
   AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   auto currentPeakWS = ADS.retrieveWS<MatrixWorkspace>(current_WS);
   auto currentClonedWS = ADS.retrieveWS<MatrixWorkspace>(cloned_WS);
-  currentClonedWS->dataY(0) = currentPeakWS->readY(0);
-  currentClonedWS->dataE(0) = currentPeakWS->readE(0);
+  currentClonedWS->mutableY(0) = currentPeakWS->y(0);
+  currentClonedWS->mutableE(0) = currentPeakWS->e(0);
 }
 
 void EnggDiffFittingPresenter::setBankItems(

@@ -18,6 +18,9 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
+using HistogramData::BinEdges;
+using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 DECLARE_ALGORITHM(ConvertCWPDMDToSpectra)
 
@@ -287,15 +290,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     pdws->getAxis(0)->setUnit("Degrees");
   }
 
-  MantidVec &dataX = pdws->dataX(0);
-  for (size_t i = 0; i < sizex; ++i)
-    dataX[i] = vecx[i];
-  MantidVec &dataY = pdws->dataY(0);
-  MantidVec &dataE = pdws->dataE(0);
-  for (size_t i = 0; i < sizey; ++i) {
-    dataY[i] = vecy[i];
-    dataE[i] = vece[i];
-  }
+  pdws->setHistogram(0, BinEdges(vecx), Counts(vecy),
+                     CountStandardDeviations(vece));
 
   // Interpolation
   m_infitesimal = 0.1 / (maxmonitorcounts);
@@ -463,8 +459,8 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
   while (scancell) {
     // get the number of events of this cell
     size_t numev2 = mditer->getNumEvents();
-    g_log.debug() << "MDWorkspace " << mdws->name() << " Cell " << nextindex - 1
-                  << ": Number of events = " << numev2
+    g_log.debug() << "MDWorkspace " << mdws->getName() << " Cell "
+                  << nextindex - 1 << ": Number of events = " << numev2
                   << " Does NEXT cell exist = " << mditer->next() << "\n";
 
     // loop over all the events in current cell
@@ -499,7 +495,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
             std::stringstream errss;
             errss << "Event " << iev << " has run ID as " << temprun << ". "
                   << "It has no corresponding ExperimentInfo in MDWorkspace "
-                  << mdws->name() << ".";
+                  << mdws->getName() << ".";
             throw std::runtime_error(errss.str());
           }
           currWavelength = miter->second;

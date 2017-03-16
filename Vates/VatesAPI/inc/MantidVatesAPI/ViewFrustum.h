@@ -56,9 +56,9 @@ typedef FrustumPlane<NEARPLANE, double> NearPlane;
 
 class DLLExport ViewFrustum {
 public:
-  ViewFrustum(const LeftPlane leftPlane, const RightPlane rightPlane,
-              const BottomPlane bottomPlane, const TopPlane topPlane,
-              const FarPlane farPlane, const NearPlane nearPlane);
+  ViewFrustum(const LeftPlane &leftPlane, const RightPlane &rightPlane,
+              const BottomPlane &bottomPlane, const TopPlane &topPlane,
+              const FarPlane &farPlane, const NearPlane &nearPlane);
   ViewFrustum(const ViewFrustum &other);
   ~ViewFrustum();
   ViewFrustum &operator=(const ViewFrustum &other);

@@ -39,13 +39,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="thresholdButton">
-       <property name="text">
-        <string>Threshold</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="overridePeakCoordsButton">
        <property name="toolTip">
         <string>Override the peak coordinates instead of matching them to the MD workspace</string>
@@ -91,6 +84,23 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="thresholdButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqThreshold24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqThreshold24.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -129,6 +139,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../icons/ViewWidgetsIcons.qrc"/>
+ </resources>
  <connections/>
 </ui>

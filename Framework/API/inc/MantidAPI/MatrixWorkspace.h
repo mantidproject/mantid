@@ -1,8 +1,6 @@
 #ifndef MANTID_API_MATRIXWORKSPACE_H_
 #define MANTID_API_MATRIXWORKSPACE_H_
 
-#include <mutex>
-
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -27,7 +25,6 @@ class ParameterMap;
 namespace API {
 class Axis;
 class SpectrumDetectorMapping;
-class SpectrumInfo;
 
 /// typedef for the image type
 typedef std::vector<std::vector<double>> MantidImage;
@@ -99,9 +96,6 @@ public:
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const override;
-
-  const SpectrumInfo &spectrumInfo() const;
-  SpectrumInfo &mutableSpectrumInfo();
 
   /**@name Instrument queries */
   //@{
@@ -543,9 +537,8 @@ public:
   // End image methods
   //=====================================================================================
 
-  size_t numberOfDetectorGroups() const override;
-  const std::set<detid_t> &
-  detectorIDsInGroup(const size_t index) const override;
+  void cacheDetectorGroupings(const det2group_map &mapping) override;
+  size_t groupOfDetectorID(const detid_t detID) const override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -564,7 +557,7 @@ protected:
   /// could allow the X values to be changed.
   void invalidateCommonBinsFlag() { m_isCommonBinsFlagSet = false; }
 
-  void invalidateInstrumentReferences() const override;
+  void updateCachedDetectorGrouping(const size_t index) const override;
 
   /// A vector of pointers to the axes for this workspace
   std::vector<Axis *> m_axes;
@@ -609,9 +602,6 @@ private:
   /// A workspace holding monitor data relating to the main data in the
   /// containing workspace (null if none).
   boost::shared_ptr<MatrixWorkspace> m_monitorWorkspace;
-
-  mutable std::unique_ptr<SpectrumInfo> m_spectrumInfo;
-  mutable std::mutex m_spectrumInfoMutex;
 
 protected:
   /// Getter for the dimension id based on the axis.

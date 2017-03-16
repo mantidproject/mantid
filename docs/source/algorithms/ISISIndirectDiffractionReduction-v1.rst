@@ -32,7 +32,7 @@ Usage
 
     ws = mtd['DiffractionReductions'].getItem(0)
 
-    print 'Workspace name: %s' % ws.getName()
+    print 'Workspace name: %s' % ws.name()
     print 'Number of spectra: %d' % ws.getNumberHistograms()
     print 'Number of bins: %s' % ws.blocksize()
 

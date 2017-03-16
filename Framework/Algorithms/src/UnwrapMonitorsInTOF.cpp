@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -62,18 +63,19 @@ MinAndMaxTof getMinAndMaxTofForDistanceFromSoure(double distanceFromSource,
   return MinAndMaxTof(minTof, maxTof);
 }
 
-double
-getDistanceFromSourceForWorkspaceIndex(Mantid::API::MatrixWorkspace *workspace,
-                                       size_t workspaceIndex) {
-  const auto detector = workspace->getDetector(workspaceIndex);
-  return detector->getDistance(*(workspace->getInstrument()->getSource()));
+double getDistanceFromSourceForWorkspaceIndex(
+    Mantid::API::MatrixWorkspace *workspace,
+    const Mantid::API::SpectrumInfo &spectrumInfo, size_t workspaceIndex) {
+  const auto &detector = spectrumInfo.detector(workspaceIndex);
+  return detector.getDistance(*(workspace->getInstrument()->getSource()));
 }
 
 MinAndMaxTof getMinAndMaxTof(Mantid::API::MatrixWorkspace *workspace,
+                             const Mantid::API::SpectrumInfo &spectrumInfo,
                              size_t workspaceIndex, double lowerWavelengthLimit,
                              double upperWavelengthLimit) {
-  const auto distanceFromSource =
-      getDistanceFromSourceForWorkspaceIndex(workspace, workspaceIndex);
+  const auto distanceFromSource = getDistanceFromSourceForWorkspaceIndex(
+      workspace, spectrumInfo, workspaceIndex);
   return getMinAndMaxTofForDistanceFromSoure(
       distanceFromSource, lowerWavelengthLimit, upperWavelengthLimit);
 }
@@ -242,10 +244,10 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
     }
   } else {
     auto numberOfHistograms = workspace->getNumberHistograms();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms;
          ++workspaceIndex) {
-      auto detector = workspace->getDetector(workspaceIndex);
-      if (detector->isMonitor()) {
+      if (spectrumInfo.isMonitor(workspaceIndex)) {
         workspaceIndices.push_back(workspaceIndex);
       }
     }
@@ -331,15 +333,28 @@ void UnwrapMonitorsInTOF::exec() {
   const auto workspaceIndices =
       getWorkspaceIndicesForMonitors(outputWorkspace.get());
 
+  const auto &spectrumInfo = outputWorkspace->spectrumInfo();
+
   for (const auto &workspaceIndex : workspaceIndices) {
     const auto minMaxTof =
-        getMinAndMaxTof(outputWorkspace.get(), workspaceIndex,
+        getMinAndMaxTof(outputWorkspace.get(), spectrumInfo, workspaceIndex,
                         lowerWavelengthLimit, upperWavelengthLimit);
     auto points = getPoints(outputWorkspace.get(), workspaceIndex);
     auto counts =
         getCounts(outputWorkspace.get(), workspaceIndex, minMaxTof, points);
-    Mantid::HistogramData::Histogram histogram(points, counts);
-    outputWorkspace->setHistogram(workspaceIndex, histogram);
+    // Get the input histogram
+    auto inputHistogram = inputWorkspace->histogram(workspaceIndex);
+    auto spectrumIsHistogramData =
+        inputHistogram.xMode() ==
+        Mantid::HistogramData::Histogram::XMode::BinEdges;
+    if (spectrumIsHistogramData) {
+      Mantid::HistogramData::BinEdges binEdges(points);
+      Mantid::HistogramData::Histogram histogram(binEdges, counts);
+      outputWorkspace->setHistogram(workspaceIndex, histogram);
+    } else {
+      Mantid::HistogramData::Histogram histogram(points, counts);
+      outputWorkspace->setHistogram(workspaceIndex, histogram);
+    }
   }
   setProperty("OutputWorkspace", outputWorkspace);
 }

@@ -2,8 +2,8 @@
 #define MANTID_CUSTOMINTERFACES_IREFLSETTINGSVIEW_H
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace MantidQt {
 
@@ -56,6 +56,8 @@ public:
   virtual std::string getAnalysisMode() const = 0;
   virtual std::string getDirectBeam() const = 0;
   virtual std::string getTransmissionRuns() const = 0;
+  virtual std::string getStartOverlap() const = 0;
+  virtual std::string getEndOverlap() const = 0;
   virtual std::string getPolarisationCorrections() const = 0;
   virtual std::string getCRho() const = 0;
   virtual std::string getCAlpha() const = 0;
@@ -73,10 +75,12 @@ public:
   virtual std::string getLambdaMax() const = 0;
   virtual std::string getI0MonitorIndex() const = 0;
   virtual std::string getProcessingInstructions() const = 0;
+  virtual std::string getDetectorCorrectionType() const = 0;
 
   /// Set default values for settings
   virtual void setExpDefaults(const std::vector<std::string> &) const = 0;
-  virtual void setInstDefaults(const std::vector<double> &) const = 0;
+  virtual void setInstDefaults(const std::vector<double> &,
+                               const std::vector<std::string> &) const = 0;
 
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) const = 0;

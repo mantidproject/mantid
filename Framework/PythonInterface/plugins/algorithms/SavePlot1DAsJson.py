@@ -78,7 +78,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         return
 
     def _serialize(self, workspace, plotname):
-        pname = plotname or workspace.getName()
+        pname = plotname or workspace.name()
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"

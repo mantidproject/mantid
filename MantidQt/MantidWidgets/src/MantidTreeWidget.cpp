@@ -234,7 +234,8 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
-    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+    selectedMatrixWsNameList.append(
+        QString::fromStdString(matrixWs->getName()));
   }
 
   // Check to see if all workspaces have only a single spectrum ...
@@ -251,7 +252,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
     const std::set<int> SINGLE_SPECTRUM = {0};
     QMultiMap<QString, std::set<int>> spectrumToPlot;
     foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
-      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->name()),
+      spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()),
                             SINGLE_SPECTRUM);
     }
     MantidWSIndexWidget::UserInput selections;
@@ -282,7 +283,8 @@ MantidTreeWidget::choosePlotOptions(const QString &type,
   auto selectedMatrixWsList = getSelectedMatrixWorkspaces();
   QList<QString> selectedMatrixWsNameList;
   foreach (const auto matrixWs, selectedMatrixWsList) {
-    selectedMatrixWsNameList.append(QString::fromStdString(matrixWs->name()));
+    selectedMatrixWsNameList.append(
+        QString::fromStdString(matrixWs->getName()));
   }
   auto *dlg =
       m_mantidUI->createSurfacePlotDialog(0, selectedMatrixWsNameList, type);

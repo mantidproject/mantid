@@ -113,13 +113,13 @@ void MDEWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   // Set the minimum and maximum of the workspace data.
   QwtDoubleInterval minMaxContainer =
-      m_metaDataExtractor->getMinAndMax(eventWs);
+      m_metaDataExtractor->getMinAndMax(eventWs.get());
   m_metadataJsonManager->setMinValue(minMaxContainer.minValue());
   m_metadataJsonManager->setMaxValue(minMaxContainer.maxValue());
 
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(eventWs));
+      m_metaDataExtractor->extractInstrument(eventWs.get()));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);

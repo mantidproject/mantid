@@ -305,7 +305,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
   auto workspaceProvider = Mantid::Kernel::make_unique<
       Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-          wsName.toStdString(), std::move(workspaceProvider))) {
+          wsName.toStdString(), *workspaceProvider)) {
     vtkSMPropertyHelper(src->getProxy(), "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END
@@ -482,6 +482,9 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z) {
  */
 void ViewBase::onParallelProjection(bool state) {
   pqRenderView *cview = this->getPvActiveView();
+  if (cview == nullptr) {
+    return;
+  }
   vtkSMProxy *proxy = cview->getProxy();
   vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
   proxy->UpdateVTKObjects();

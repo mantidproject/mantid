@@ -343,7 +343,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         comment = 'Some comment on this workspace.'
         ws1.setComment(comment)
         self.assertEquals(comment, ws1.getComment())
-        AnalysisDataService.remove(ws1.getName())
+        AnalysisDataService.remove(ws1.name())
 
     def test_setGetMonitorWS(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='ws1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')

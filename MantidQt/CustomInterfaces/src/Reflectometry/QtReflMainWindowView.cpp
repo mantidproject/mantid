@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflMainWindowView.h"
+#include "MantidQtCustomInterfaces/Reflectometry/QtReflEventTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflRunsTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSaveTabView.h"
 #include "MantidQtCustomInterfaces/Reflectometry/QtReflSettingsTabView.h"
@@ -31,12 +32,13 @@ void QtReflMainWindowView::initLayout() {
 
   // Create the tabs
   auto runsPresenter = createRunsTab();
+  auto eventPresenter = createEventTab();
   auto settingsPresenter = createSettingsTab();
   auto savePresenter = createSaveTab();
 
   // Create the presenter
   m_presenter.reset(new ReflMainWindowPresenter(
-      this, runsPresenter, settingsPresenter, savePresenter));
+      this, runsPresenter, eventPresenter, settingsPresenter, savePresenter));
 }
 
 /** Creates the 'Runs' tab and returns a pointer to its presenter
@@ -48,6 +50,17 @@ IReflRunsTabPresenter *QtReflMainWindowView::createRunsTab() {
   m_ui.mainTab->addTab(runsTab, QString("Runs"));
 
   return runsTab->getPresenter();
+}
+
+/** Creates the 'Event Handling' tab and returns a pointer to its presenter
+* @return :: A pointer to the presenter managing the 'Event Handling' tab
+*/
+IReflEventTabPresenter *QtReflMainWindowView::createEventTab() {
+
+  QtReflEventTabView *eventTab = new QtReflEventTabView(this);
+  m_ui.mainTab->addTab(eventTab, QString("Event Handling"));
+
+  return eventTab->getPresenter();
 }
 
 /** Creates the 'Settings' tab and returns a pointer to its presenter

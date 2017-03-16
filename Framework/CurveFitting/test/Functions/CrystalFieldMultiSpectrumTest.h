@@ -146,16 +146,81 @@ public:
         "Workspace_0");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 59.5010, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 2.0 * c_mbsr, 0.002 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 2.0 * c_mbsr, 0.002 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 2.0 * c_mbsr, 0.002 * c_mbsr);
     out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         "Workspace_1");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
-    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.001 * c_mbsr);
-    TS_ASSERT_DELTA(out->readY(1)[2], 98.1627, 0.001);
+    TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * 3.3 * c_mbsr, 0.003 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[1], 0.738 * 3.3 * c_mbsr, 0.003 * c_mbsr);
+    TS_ASSERT_DELTA(out->readY(1)[2], 0.373 * 3.3 * c_mbsr, 0.003 * c_mbsr);
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_evaluate_physprops() {
+    auto funStr = "name=CrystalFieldMultiSpectrum,Ion=Ce,Temperatures=(44,"
+                  "50,1,10,1),ToleranceIntensity=0.001,B20=0.37737,B22=3.9770,"
+                  "B40=-0.031787,B42=-0.11611,B44=-0.12544,"
+                  "PhysicalProperties=(0,1,2,3,4)," // INS, Cp, chi, M(H), M(T)
+                  "Hdir3=(1,1,1), Hmag4=1, Unit4=cgs, Lambda2=0.0000001,"
+                  "f0.f1.FWHM=1.6,f0.f2.FWHM=2.0,f0.f3.FWHM=2.3";
+    auto ws = createWorkspace();
+    auto alg = AlgorithmFactory::Instance().create("EvaluateFunction", -1);
+    alg->initialize();
+    alg->setPropertyValue("Function", funStr);
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("InputWorkspace_1", ws);
+    alg->setProperty("InputWorkspace_2", ws);
+    alg->setProperty("InputWorkspace_3", ws);
+    alg->setProperty("InputWorkspace_4", ws);
+    alg->setProperty("OutputWorkspace", "out");
+    alg->execute();
+
+    // Test the INS spectrum
+    auto out0 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_0");
+    TS_ASSERT(out0);
+    TS_ASSERT_EQUALS(out0->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out0->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out0->readY(1)[1], 0.738 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(out0->readY(1)[2], 0.373 * c_mbsr, 0.001 * c_mbsr);
+    // Test the heat capacity calculation
+    auto out1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_1");
+    TS_ASSERT(out1);
+    TS_ASSERT_EQUALS(out1->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out1->readY(1)[50], 0.006, 0.001);
+    TS_ASSERT_DELTA(out1->readY(1)[60], 0.032, 0.001);
+    TS_ASSERT_DELTA(out1->readY(1)[70], 0.103, 0.001);
+    // Test the susceptibility calculation
+    auto out2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_2");
+    TS_ASSERT(out2);
+    TS_ASSERT_EQUALS(out2->getNumberHistograms(), 3);
+    // Susceptibility default outputs in cgs units.
+    TS_ASSERT_DELTA(out2->readY(1)[50], 0.00236231, 0.0000001);
+    TS_ASSERT_DELTA(out2->readY(1)[60], 0.00233006, 0.0000001);
+    TS_ASSERT_DELTA(out2->readY(1)[70], 0.00230932, 0.0000001);
+    // Test the magnetisation calculation
+    auto out3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_3");
+    TS_ASSERT(out3);
+    TS_ASSERT_EQUALS(out3->getNumberHistograms(), 3);
+    TS_ASSERT_DELTA(out3->readY(1)[1], 0.05754, 0.0001);
+    TS_ASSERT_DELTA(out3->readY(1)[5], 0.28307, 0.0001);
+    TS_ASSERT_DELTA(out3->readY(1)[10], 0.53932, 0.0001);
+    // Test the moment vs temperature calculation
+    auto out4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        "Workspace_4");
+    TS_ASSERT(out4);
+    TS_ASSERT_EQUALS(out4->getNumberHistograms(), 3);
+    // SI and cgs susceptibility differ by factor of 10.
+    // Dataset 2 in cgs, dataset 4 in SI.
+    TS_ASSERT_DELTA(out4->readY(1)[51], out2->readY(1)[51], 1e-4);
+    TS_ASSERT_DELTA(out4->readY(1)[61], out2->readY(1)[61], 1e-4);
+    TS_ASSERT_DELTA(out4->readY(1)[71], out2->readY(1)[71], 1e-4);
     AnalysisDataService::Instance().clear();
   }
 
@@ -346,9 +411,10 @@ public:
     mc->setRethrows(true);
     mc->setPropertyValue(
         "Function",
-        "name=CrystalFieldMultiSpectrum,Ion=Ce,"
+        "name=CrystalFieldMultiSpectrum,Ion=Ce,FixAllPeaks=1,"
         "Symmetry=C2v,Temperatures=(44.0, 50.0),FWHMs=(1.0, 1.0),NPeaks=3,"
-        "constraints=(0<B20<2,1<B22<4,-0.1<B40<0.1,-0.1<B42<0.1,-0.1<B44<0.1)");
+        "constraints=(0<B20<0.5,3<B22<4,-0.1<B40<0.0,-0.1<B42<0.0,-0.1<B44<0."
+        "0)");
     mc->setProperty("InputWorkspace", ws);
     mc->setProperty("WorkspaceIndex", 0);
     mc->setProperty("InputWorkspace_1", ws);

@@ -58,8 +58,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget {
   Q_OBJECT
 public:
   /// Default constructor.
-  ViewBase(QWidget *parent = 0,
-           RebinnedSourcesManager *rebinnedSourcesManager = 0);
+  ViewBase(QWidget *parent = nullptr,
+           RebinnedSourcesManager *rebinnedSourcesManager = nullptr);
 
   /// Default destructor.
   ~ViewBase() override {}

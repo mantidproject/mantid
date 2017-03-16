@@ -95,7 +95,7 @@ void SaveCalFile::saveCalFile(const std::string &calFileName,
     doMask = true;
     inst = maskWS->getInstrument();
     if (!inst)
-      g_log.warning() << "Mask workspace " << maskWS->name()
+      g_log.warning() << "Mask workspace " << maskWS->getName()
                       << " has no instrument associated with."
                       << "\n";
   }

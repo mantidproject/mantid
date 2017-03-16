@@ -50,9 +50,9 @@ RebinAlgorithmDialogProvider::~RebinAlgorithmDialogProvider() {}
  * @param outputWorkspace The name of the output workspace.
  * @param algorithmType The type of algorithm which is to be used for rebinning.
  */
-void RebinAlgorithmDialogProvider::showDialog(std::string inputWorkspace,
-                                              std::string outputWorkspace,
-                                              std::string algorithmType) {
+void RebinAlgorithmDialogProvider::showDialog(
+    const std::string &inputWorkspace, const std::string &outputWorkspace,
+    const std::string &algorithmType) {
   if (inputWorkspace.empty() || outputWorkspace.empty()) {
     return;
   }
@@ -65,7 +65,7 @@ void RebinAlgorithmDialogProvider::showDialog(std::string inputWorkspace,
   }
 
   MantidQt::API::AlgorithmDialog *rebinDialog =
-      createDialog(algorithm, inputWorkspace, outputWorkspace, algorithmType);
+      createDialog(*algorithm, inputWorkspace, outputWorkspace, algorithmType);
 
   rebinDialog->show();
   rebinDialog->raise();
@@ -124,21 +124,19 @@ RebinAlgorithmDialogProvider::createAlgorithm(const std::string &algorithmName,
  * @returns The algorithm dialog
  */
 MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
-    Mantid::API::IAlgorithm_sptr algorithm, const std::string &inputWorkspace,
+    const Mantid::API::IAlgorithm &algorithm, const std::string &inputWorkspace,
     const std::string &outputWorkspace, const std::string &algorithmType) {
   QHash<QString, QString> presets;
   // Check if a workspace is selected in the dock and set this as a preference
   // for the input workspace
   // This is an optional message displayed at the top of the GUI.
-  QString optional_msg(algorithm->summary().c_str());
-
-  MantidQt::API::AlgorithmDialog *dialog = nullptr;
+  QString optional_msg(algorithm.summary().c_str());
 
   MantidQt::API::InterfaceManager interfaceManager;
   presets.insert(m_lblInputWorkspace, QString::fromStdString(inputWorkspace));
   presets.insert(m_lblOutputWorkspace, QString::fromStdString(outputWorkspace));
 
-  dialog = interfaceManager.createDialogFromName(
+  auto dialog = interfaceManager.createDialogFromName(
       QString::fromStdString(algorithmType), -1, m_parent, false, presets);
 
   // The parent so that the dialog appears on top of it
@@ -170,7 +168,7 @@ MantidQt::API::AlgorithmDialog *RebinAlgorithmDialogProvider::createDialog(
  */
 void RebinAlgorithmDialogProvider::setAxisDimensions(
     MantidQt::MantidWidgets::SlicingAlgorithmDialog *dialog,
-    std::string inputWorkspace) {
+    const std::string &inputWorkspace) {
   Mantid::API::IMDEventWorkspace_sptr eventWorkspace =
       getWorkspace(inputWorkspace);
 

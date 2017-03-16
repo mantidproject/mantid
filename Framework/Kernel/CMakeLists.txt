@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayLengthValidator.cpp
+  src/ArrayOrderedPairsValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
@@ -141,6 +142,7 @@ set ( INC_FILES
 	inc/MantidKernel/ANN/ANNx.h
 	inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/ArrayLengthValidator.h
+	inc/MantidKernel/ArrayOrderedPairsValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
 	inc/MantidKernel/BinFinder.h
@@ -170,6 +172,7 @@ set ( INC_FILES
 	inc/MantidKernel/DllOpen.h
 	inc/MantidKernel/DocumentationHeader.h
 	inc/MantidKernel/DynamicFactory.h
+	inc/MantidKernel/EigenConversionHelpers.h
 	inc/MantidKernel/EmptyValues.h
 	inc/MantidKernel/EnabledWhenProperty.h
 	inc/MantidKernel/EnvironmentHistory.h
@@ -307,6 +310,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	ArrayBoundedValidatorTest.h
 	ArrayLengthValidatorTest.h
+	ArrayOrderedPairsValidatorTest.h
 	ArrayPropertyTest.h
 	AtomTest.h
 	BinFinderTest.h
@@ -334,6 +338,7 @@ set ( TEST_FILES
 	DiskBufferISaveableTest.h
 	DiskBufferTest.h
 	DynamicFactoryTest.h
+	EigenConversionHelpersTest.h
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	EqualBinsCheckerTest.h
@@ -391,7 +396,7 @@ set ( TEST_FILES
 	PropertyManagerDataServiceTest.h
 	PropertyManagerPropertyTest.h
 	PropertyManagerTest.h
-    	PropertyNexusTest.h
+	PropertyNexusTest.h
 	PropertyTest.h
 	PropertyWithValueTest.h
 	ProxyInfoTest.h
@@ -400,8 +405,8 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
-	ShrinkToFitTest.h
 	SLSQPMinimizerTest.h
+	ShrinkToFitTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
 	StartsWithValidatorTest.h

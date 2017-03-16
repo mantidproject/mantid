@@ -14,6 +14,9 @@ namespace Geometry {
 class IComponent;
 class Instrument;
 }
+namespace API {
+class SpectrumInfo;
+}
 }
 
 namespace MantidQt {
@@ -97,6 +100,7 @@ private:
   boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
   boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
   boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
+  const Mantid::API::SpectrumInfo &m_spectrumInfo;
 };
 
 typedef boost::shared_ptr<MatrixWSDataSource> MatrixWSDataSource_sptr;

@@ -234,7 +234,7 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
 }
 
 void vtkMDHistoQuadFactory::initialize(
-    Mantid::API::Workspace_sptr wspace_sptr) {
+    const Mantid::API::Workspace_sptr &wspace_sptr) {
   m_workspace = doInitialize<MDHistoWorkspace, 2>(wspace_sptr);
 }
 

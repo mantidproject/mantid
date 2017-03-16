@@ -175,7 +175,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         input_ws_name = self.getPropertyValue("InputWorkspace")
         if not AnalysisDataService.doesExist(input_ws_name):
             Logger("SANSBeamSpreaderTransmission").error("Could not find input workspace")
-        workspace = AnalysisDataService.retrieve(input_ws_name).getName()
+        workspace = AnalysisDataService.retrieve(input_ws_name).name()
 
         # Clone workspace to make boost-python happy
         api.CloneWorkspace(InputWorkspace=workspace,

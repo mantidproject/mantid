@@ -54,7 +54,7 @@ public:
   const Mantid::Kernel::UnitLabel getUnits() const override {
     throw std::runtime_error("Not implemented");
   }
-  std::string getDimensionId() const override { return m_id; }
+  const std::string &getDimensionId() const override { return m_id; }
   coord_t getMaximum() const override { return 10; }
   coord_t getMinimum() const override { return 0; };
   size_t getNBins() const override { return m_nbins; };
@@ -141,7 +141,7 @@ public:
       create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
   MOCK_CONST_METHOD0(createMeshOnly, vtkDataSet *());
   MOCK_CONST_METHOD0(createScalarArray, vtkFloatArray *());
-  MOCK_METHOD1(initialize, void(Mantid::API::Workspace_sptr));
+  MOCK_METHOD1(initialize, void(const Mantid::API::Workspace_sptr &));
   MOCK_METHOD1(setSuccessorProxy, void(vtkDataSetFactory *));
   MOCK_CONST_METHOD0(hasSuccessor, bool());
   MOCK_CONST_METHOD0(validate, void());

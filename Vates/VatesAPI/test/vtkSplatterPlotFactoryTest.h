@@ -142,7 +142,7 @@ public:
     // New sizes for splatter plot test, after changing the way the points
     // are selected, 5/28/2013
     const size_t expected_n_points = 50;
-    const size_t expected_n_cells = 0;
+    const size_t expected_n_cells = 50;
 
     const size_t expected_n_signals = expected_n_points;
 

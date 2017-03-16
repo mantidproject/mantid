@@ -254,7 +254,7 @@ class ReductionWrapper(object):
 
             Returns:
             True   if reduction for sample_run produces result within Error from the reference file
-                   as reported by CheckWorkspaceMatch.
+                   as reported by CompareWorkspaces.
             False  if CheckWorkspaceMatch comparison between sample and reduction is unsuccessful
 
             True  if was not able to load reference file. In this case, algorithm builds validation
@@ -334,13 +334,13 @@ class ReductionWrapper(object):
                 TOLL=self._tolerr
             else:
                 TOLL = Error
-            result = CheckWorkspacesMatch(Workspace1=reference_ws,Workspace2=reduced,
-                                          Tolerance=TOLL,CheckSample=False,
-                                          CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
+            result = CompareWorkspaces(Workspace1=reference_ws,Workspace2=reduced,
+                                       Tolerance=TOLL,CheckSample=False,
+                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state
-        if result == 'Success!':
+        if result[0]:
             return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
                         .format(TOLL)
         else:

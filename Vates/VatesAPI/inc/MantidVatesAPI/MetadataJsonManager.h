@@ -43,9 +43,9 @@ public:
 
   std::string getSerializedJson();
 
-  void readInSerializedJson(std::string serializedJson);
+  void readInSerializedJson(const std::string &serializedJson);
 
-  void setInstrument(std::string instrument);
+  void setInstrument(const std::string &instrument);
   std::string &getInstrument();
 
   void setMinValue(double minValue);

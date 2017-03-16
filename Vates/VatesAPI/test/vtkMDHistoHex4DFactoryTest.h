@@ -60,9 +60,9 @@ public:
     factory.initialize(ws_sptr);
 
     auto product = factory.create(progressUpdate);
-    TSM_ASSERT_EQUALS(
-        "A single array should be present on the product dataset.", 1,
-        product->GetCellData()->GetNumberOfArrays());
+    TSM_ASSERT_EQUALS("Two arrays (signal and cell ghost array) should be "
+                      "present on the product dataset.",
+                      2, product->GetCellData()->GetNumberOfArrays());
     auto signalData = vtkSmartPointer<vtkDataArray>::Take(
         product->GetCellData()->GetArray(0));
     TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.",

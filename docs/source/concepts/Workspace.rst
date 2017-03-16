@@ -104,7 +104,7 @@ You can look at the :ref:`Workspace API reference <mantid.api.Workspace>` for a 
 .. testcode:: WorkspaceProperties
 
     myWS = CreateSampleWorkspace()
-    print "name = " + myWS.getName()
+    print "name = " + myWS.name()
 
     myWS.setTitle("This is my Title")
     print "getTitle = " + myWS.getTitle()

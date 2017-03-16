@@ -52,7 +52,7 @@ namespace Functions {
 */
 
 class DLLExport FunctionQDepends : public Mantid::API::IFunction1D,
-                                   Mantid::API::ParamFunction {
+                                   public Mantid::API::ParamFunction {
 
 public:
   /* -------------------

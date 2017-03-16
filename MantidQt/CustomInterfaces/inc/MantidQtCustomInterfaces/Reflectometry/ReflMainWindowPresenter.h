@@ -9,6 +9,7 @@ namespace CustomInterfaces {
 
 class IReflMainWindowView;
 class IReflRunsTabPresenter;
+class IReflEventTabPresenter;
 class IReflSettingsTabPresenter;
 class IReflSaveTabPresenter;
 
@@ -44,6 +45,7 @@ public:
   /// Constructor
   ReflMainWindowPresenter(IReflMainWindowView *view,
                           IReflRunsTabPresenter *runsPresenter,
+                          IReflEventTabPresenter *eventPresenter,
                           IReflSettingsTabPresenter *settingsPresenter,
                           IReflSaveTabPresenter *savePresenter);
   /// Destructor
@@ -54,6 +56,8 @@ public:
   std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions(int group) const override;
+  /// Returns global options for time-slicing
+  std::string getTimeSlicingOptions(int group) const override;
 
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,
@@ -70,12 +74,16 @@ public:
   void setInstrumentName(const std::string &instName) const override;
 
 private:
-  /// Check for null pointer
-  void checkPtrValid(IReflSettingsTabPresenter *pointer) const;
+  /// Check for Settings Tab null pointer
+  void checkSettingsPtrValid(IReflSettingsTabPresenter *pointer) const;
+  /// Check for Event Handling Tab null pointer
+  void checkEventPtrValid(IReflEventTabPresenter *pointer) const;
   /// The view we are handling
   IReflMainWindowView *m_view;
   /// The presenter of tab 'Runs'
   IReflRunsTabPresenter *m_runsPresenter;
+  /// The presenter of tab 'Event Handling'
+  IReflEventTabPresenter *m_eventPresenter;
   /// The presenter of tab 'Settings'
   IReflSettingsTabPresenter *m_settingsPresenter;
   /// The presenter of tab 'Save ASCII'

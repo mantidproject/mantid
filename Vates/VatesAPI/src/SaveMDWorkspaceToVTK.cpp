@@ -104,7 +104,7 @@ std::map<std::string, std::string> SaveMDWorkspaceToVTK::validateInputs() {
   }
 
   // Check for the dimensionality
-  if (!saver->is3DWorkspace(inputWS)) {
+  if (!saver->is3DWorkspace(*inputWS)) {
     errorMessage.emplace("InputWorkspace", "The MD workspace must be 3D.");
   }
 

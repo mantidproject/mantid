@@ -2,16 +2,16 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <fstream>
-#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <fstream>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -285,6 +285,53 @@ void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
   ws->setYUnitLabel(ylabel);
 }
 
+size_t calcVecSize(const std::vector<double> &data0,
+                   std::vector<size_t> &numptsvec, size_t &numsets,
+                   bool xascend) {
+  size_t vecsize = 1;
+  auto prex = data0[0];
+  for (size_t i = 1; i < data0.size(); ++i) {
+    double curx = data0[i];
+    if (((xascend) && (curx < prex)) || ((!xascend) && (curx > prex))) {
+      // X in ascending order and hit the end of one set of data
+      // X in descending order and hit the end of one set of data
+      // Record the current data set information and start the next data set
+      numsets += 1;
+      numptsvec.push_back(vecsize);
+      vecsize = 1;
+    } else {
+      // In the middle of a set of data
+      ++vecsize;
+    }
+    // Loop variable udpate
+    prex = curx;
+  } // ENDFOR
+
+  return vecsize;
+}
+
+void LoadPDFgetNFile::checkSameSize(const std::vector<size_t> &numptsvec,
+                                    size_t numsets) {
+  bool samesize = true;
+  for (size_t i = 0; i < numsets; ++i) {
+    if (i > 0) {
+      if (numptsvec[i] != numptsvec[i - 1]) {
+        samesize = false;
+      }
+    }
+    g_log.information() << "Set " << i
+                        << ":  Number of Points = " << numptsvec[i] << '\n';
+  }
+  if (!samesize) {
+    stringstream errmsg;
+    errmsg << "Multiple bank (number of banks = " << numsets
+           << ") have different size of data array.  Unable to handle this "
+              "situation.";
+    g_log.error() << errmsg.str() << '\n';
+    throw std::runtime_error(errmsg.str());
+  }
+}
+
 /** Generate output data workspace
   * Assumption.  One data set must contain more than 1 element.
   */
@@ -308,46 +355,12 @@ void LoadPDFgetNFile::generateDataWorkspace() {
                         "is unphysically too small.");
   }
 
-  double prex = mData[0][0];
-  size_t vecsize = 1;
-  for (size_t i = 1; i < arraysize; ++i) {
-    double curx = mData[0][i];
-    if (((xascend) && (curx < prex)) || ((!xascend) && (curx > prex))) {
-      // X in ascending order and hit the end of one set of data
-      // X in descending order and hit the end of one set of data
-      // Record the current data set information and start the next data set
-      numsets += 1;
-      numptsvec.push_back(vecsize);
-      vecsize = 1;
-    } else {
-      // In the middle of a set of data
-      ++vecsize;
-    }
-    // Loop variable udpate
-    prex = curx;
-  } // ENDFOR
   // Record the last data set information
   ++numsets;
-  numptsvec.push_back(vecsize);
+  numptsvec.push_back(calcVecSize(mData[0], numptsvec, numsets, xascend));
 
-  bool samesize = true;
-  for (size_t i = 0; i < numsets; ++i) {
-    if (i > 0) {
-      if (numptsvec[i] != numptsvec[i - 1]) {
-        samesize = false;
-      }
-    }
-    g_log.information() << "Set " << i
-                        << ":  Number of Points = " << numptsvec[i] << '\n';
-  }
-  if (!samesize) {
-    stringstream errmsg;
-    errmsg << "Multiple bank (number of banks = " << numsets
-           << ") have different size of data array.  Unable to handle this "
-              "situation.";
-    g_log.error() << errmsg.str() << '\n';
-    throw std::runtime_error(errmsg.str());
-  }
+  checkSameSize(numptsvec, numsets);
+
   size_t size = numptsvec[0];
 
   // 2. Generate workspace2D object and set the unit
@@ -360,9 +373,9 @@ void LoadPDFgetNFile::generateDataWorkspace() {
   // 3. Set number
   size_t numspec = outWS->getNumberHistograms();
   for (size_t i = 0; i < numspec; ++i) {
-    MantidVec &X = outWS->dataX(i);
-    MantidVec &Y = outWS->dataY(i);
-    MantidVec &E = outWS->dataE(i);
+    auto &X = outWS->mutableX(i);
+    auto &Y = outWS->mutableY(i);
+    auto &E = outWS->mutableE(i);
 
     size_t baseindex = i * size;
     for (size_t j = 0; j < size; ++j) {
