@@ -82,6 +82,14 @@ public:
         42);
   }
 
+  void test_indexOf_normal_monitors() {
+    PartitionerHelper p(
+        42, PartitionIndex(13),
+        Partitioner::MonitorStrategy::TreatAsNormalSpectrum,
+        std::vector<GlobalSpectrumIndex>{GlobalSpectrumIndex(3)});
+    TS_ASSERT_EQUALS(p.indexOf(GlobalSpectrumIndex(3)), PartitionIndex(0));
+  }
+
   void test_indexOf_cloned_monitors() {
     PartitionerHelper p(
         42, PartitionIndex(13),
