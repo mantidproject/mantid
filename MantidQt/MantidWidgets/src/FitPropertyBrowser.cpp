@@ -428,9 +428,15 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   buttonsLayout->addWidget(btnDisplay, 0, 1);
   buttonsLayout->addWidget(btnSetup, 0, 2);
 
+  m_status = new QLabel("Status:", w);
+  m_status->hide();
+  connect(this, SIGNAL(fitResultsChanged(const QString &, const QString &)), this,
+          SLOT(showFitResultStatus(const QString &, const QString &)), Qt::QueuedConnection);
+
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
   layout->addWidget(m_browser);
+  layout->addWidget(m_status);
 
   setWidget(w);
 
@@ -447,6 +453,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   // Update tooltips when function structure is (or might've been) changed in
   // any way
   connect(this, SIGNAL(functionChanged()), SLOT(updateStructureTooltips()));
+  connect(this, SIGNAL(functionChanged()), SLOT(clearFitResultStatus()));
 
   // Initial call, as function is not changed when it's created for the first
   // time
@@ -1596,10 +1603,38 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
                            QString::number(quality) + ")");
   } else
     emit changeWindowTitle("Fit Function");
+  // Update Status string
+  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  auto iterations = QString::fromStdString(alg->getPropertyValue("OutputNIterations"));
+  emit fitResultsChanged(status, iterations);
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }
 }
+
+/// Display the status string returned from Fit
+/// @param status :: A status string as returned by OutputStatus Fit property.
+/// @param iterations :: Number of iterations taken by Fit.
+void FitPropertyBrowser::showFitResultStatus(const QString &status,
+                                             const QString &iterations) {
+  auto text(status);
+  text.replace("\n", "<br>");
+  QString color("green");
+  if (status != "success") {
+    color = "red";
+  }
+  m_status->setText(
+      QString("Status: <span style='color:%2'>%1</span><br>Iterations: %3")
+          .arg(text, color, iterations));
+  m_status->show();
+}
+
+/// Clear the Fit status display
+void FitPropertyBrowser::clearFitResultStatus() {
+  m_status->setText("Status:");
+  m_status->hide();
+}
+
 
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames() {
@@ -1861,6 +1896,7 @@ void FitPropertyBrowser::undoFit() {
     for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
       compositeFunction()->setParameter(i, m_initialParameters[i]);
     }
+    clearFitResultStatus();
     updateParameters();
     getHandler()->clearErrors();
     emit fitUndone();

@@ -185,7 +185,9 @@ void Fit::execConcrete() {
 
   // return the status flag
   setPropertyValue("OutputStatus", errorString);
-  g_log.notice(errorString);
+  if (!this->isChild()) {
+    g_log.notice(errorString);
+  }
 
   // degrees of freedom
   size_t dof = costFunc->getDomain()->size() - costFunc->nParams();
