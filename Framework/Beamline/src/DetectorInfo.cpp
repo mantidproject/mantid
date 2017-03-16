@@ -204,7 +204,7 @@ void DetectorInfo::setScanInterval(
     initScanIntervals();
   if (interval.first >= interval.second)
     throw std::runtime_error(
-        "DetectorInfo: cannot set scan interval with start > end");
+        "DetectorInfo: cannot set scan interval with start >= end");
   m_scanIntervals.access()[index] = interval;
 }
 

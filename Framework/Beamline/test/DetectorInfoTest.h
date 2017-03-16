@@ -275,8 +275,14 @@ public:
 
   void test_setScanInterval_failures() {
     DetectorInfo info(PosVec(1), RotVec(1));
-    TS_ASSERT_THROWS(info.setScanInterval(0, {1, 1}), std::runtime_error);
-    TS_ASSERT_THROWS(info.setScanInterval(0, {2, 1}), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        info.setScanInterval(0, {1, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "DetectorInfo: cannot set scan interval with start >= end");
+    TS_ASSERT_THROWS_EQUALS(
+        info.setScanInterval(0, {2, 1}), const std::runtime_error &e,
+        std::string(e.what()),
+        "DetectorInfo: cannot set scan interval with start >= end");
   }
 
   void test_merge_fail_size() {
@@ -285,18 +291,26 @@ public:
     a.setScanInterval(0, {0, 1});
     b.setScanInterval(0, {0, 1});
     b.setScanInterval(1, {0, 1});
-    TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(a.merge(b), const std::runtime_error &e,
+                            std::string(e.what()),
+                            "Cannot merge DetectorInfo: size mismatch");
   }
 
   void test_merge_fail_no_intervals() {
     DetectorInfo a(PosVec(1), RotVec(1));
     DetectorInfo b(PosVec(1), RotVec(1));
     DetectorInfo c(PosVec(1), RotVec(1));
-    TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals not defined");
     c.setScanInterval(0, {0, 1});
-    TS_ASSERT_THROWS(a.merge(c), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(c), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals not defined");
     a.setScanInterval(0, {0, 1});
-    TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals not defined");
   }
 
   void test_merge_fail_monitor_mismatch() {
@@ -306,7 +320,9 @@ public:
     a.setScanInterval(1, {0, 1});
     b.setScanInterval(0, {0, 1});
     b.setScanInterval(1, {0, 1});
-    TS_ASSERT_THROWS(a.merge(b), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        a.merge(b), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: monitor flags mismatch");
   }
 
   void test_merge_identical_interval_failures() {
@@ -326,19 +342,28 @@ public:
 
     b = a;
     b.setMasked(0, false);
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "mask flags differ");
     b.setMasked(0, true);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
     b = a;
     b.setPosition(0, pos2);
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "positions differ");
     b.setPosition(0, pos1);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
 
     b = a;
     b.setRotation(0, rot2);
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "rotations differ");
     b.setRotation(0, rot1);
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
   }
@@ -368,11 +393,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
     b = a;
     b.setScanInterval(1, {-1, 5});
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap but not identical");
     b.setScanInterval(1, {1, 5});
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap but not identical");
     b.setScanInterval(1, {1, 11});
-    TS_ASSERT_THROWS(b.merge(a), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        b.merge(a), const std::runtime_error &e, std::string(e.what()),
+        "Cannot merge DetectorInfo: scan intervals overlap but not identical");
   }
 
   void test_merge() {
