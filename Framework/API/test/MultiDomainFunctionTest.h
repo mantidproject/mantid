@@ -462,8 +462,10 @@ public:
 
     auto eqFuns = mfun->createEquivalentFunctions();
     TS_ASSERT_EQUALS(eqFuns.size(), 2);
-    TS_ASSERT_EQUALS(eqFuns[0]->asString(), "name=MultiDomainFunctionTest_Function,A=1,B=2");
-    TS_ASSERT_EQUALS(eqFuns[1]->asString(), "name=MultiDomainFunctionTest_Function,A=2,B=4");
+    TS_ASSERT_EQUALS(eqFuns[0]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=1,B=2");
+    TS_ASSERT_EQUALS(eqFuns[1]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=2,B=4");
   }
 
 private:
