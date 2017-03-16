@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 import mantid
-import os
 import tempfile
+import os
 import unittest
 import warnings
+from six import assertRaisesRegex
 
 from isis_powder.routines import yaml_parser
 
@@ -24,7 +25,8 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         self.temp_file_paths = []
 
     def get_temp_file_handle(self):
-        file_handle = tempfile.NamedTemporaryFile(delete=False)
+        # Set to mode manually so we don't need to convert to binary in Python 3
+        file_handle = tempfile.NamedTemporaryFile(delete=False, mode="w+")
         self.temp_file_paths.append(file_handle.name)
         return file_handle
 
@@ -72,7 +74,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
             self.fail("File exists after deleting cannot continue this test")
 
         # Check the error message is there
-        with self.assertRaisesRegexp(ValueError, "Config file not found at path"):
+        with assertRaisesRegex(self, ValueError, "Config file not found at path"):
             yaml_parser.get_run_dictionary(run_number_string="1", file_path=file_path)
 
     def test_is_run_range_unbounded(self):
@@ -98,7 +100,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_path = file_handle.name
         file_handle.close()
 
-        with self.assertRaisesRegexp(ValueError, "YAML files appears to be empty at"):
+        with assertRaisesRegex(self, ValueError, "YAML files appears to be empty at"):
             yaml_parser.get_run_dictionary(run_number_string=1, file_path=file_path)
 
     def test_run_number_not_found_gives_sane_err(self):
@@ -113,15 +115,15 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_handle.close()
 
         # Test a value in the middle of 1-10
-        with self.assertRaisesRegexp(ValueError, "Run number 5 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 5 not recognised in calibration mapping"):
             yaml_parser.get_run_dictionary(run_number_string="5", file_path=file_path)
 
         # Check on edge of invalid numbers
-        with self.assertRaisesRegexp(ValueError, "Run number 9 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 9 not recognised in calibration mapping"):
             yaml_parser.get_run_dictionary(run_number_string=9, file_path=file_path)
 
         # What about a range of numbers
-        with self.assertRaisesRegexp(ValueError, "Run number 2 not recognised in calibration mapping"):
+        with assertRaisesRegex(self, ValueError, "Run number 2 not recognised in calibration mapping"):
             yaml_parser.get_run_dictionary(run_number_string="2-8", file_path=file_path)
 
         # Check valid number still works
@@ -136,7 +138,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_path = file_handle.name
         file_handle.close()
 
-        with self.assertRaisesRegexp(ValueError, "Seen multiple unbounded keys in mapping file"):
+        with assertRaisesRegex(self, ValueError, "Seen multiple unbounded keys in mapping file"):
             yaml_parser.get_run_dictionary(run_number_string="11", file_path=file_path)
 
     def test_yaml_sanity_detects_val_larger_than_unbound(self):
@@ -147,7 +149,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_path = file_handle.name
         file_handle.close()
 
-        with self.assertRaisesRegexp(ValueError, "Found a run range in calibration mapping overlaps an unbounded run "
+        with assertRaisesRegex(self, ValueError, "Found a run range in calibration mapping overlaps an unbounded run "
                                                  "range"):
             yaml_parser.get_run_dictionary(run_number_string="32", file_path=file_path)
 

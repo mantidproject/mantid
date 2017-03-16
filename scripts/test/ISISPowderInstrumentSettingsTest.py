@@ -4,6 +4,8 @@ import mantid
 import unittest
 import warnings
 
+from six import assertRaisesRegex, assertRegex
+
 from isis_powder.routines import InstrumentSettings, ParamMapEntry
 
 
@@ -14,7 +16,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry])
 
-        with self.assertRaisesRegexp(AttributeError, "is required but was not set or passed"):
+        with assertRaisesRegex(self, AttributeError, "is required but was not set or passed"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -23,7 +25,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry])
 
-        with self.assertRaisesRegexp(AttributeError, "Please contact the development team"):
+        with assertRaisesRegex(self, AttributeError, "Please contact the development team"):
             foo = inst_settings_obj.not_known
             del foo
 
@@ -49,9 +51,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry], kwargs=keyword_args,
                                                                       adv_conf_dict=adv_config)
 
-            self.assertRegexpMatches(str(warning_capture[-1].message), "which was previously set to")
-            self.assertRegexpMatches(str(warning_capture[-1].message), str(original_value))
-            self.assertRegexpMatches(str(warning_capture[-1].message), str(new_value))
+            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
+            assertRegex(self, str(warning_capture[-1].message), str(original_value))
+            assertRegex(self, str(warning_capture[-1].message), str(new_value))
 
         self.assertEqual(inst_settings_obj.script_facing_name, new_value)
 
@@ -76,9 +78,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             warnings.simplefilter("always")
 
             inst_settings_obj.update_attributes(basic_config=config_dict)
-            self.assertRegexpMatches(str(warning_capture[-1].message), "which was previously set to")
-            self.assertRegexpMatches(str(warning_capture[-1].message), str(original_value))
-            self.assertRegexpMatches(str(warning_capture[-1].message), str(new_value))
+            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
+            assertRegex(self, str(warning_capture[-1].message), str(original_value))
+            assertRegex(self, str(warning_capture[-1].message), str(new_value))
             warnings_current_length = len(warning_capture)
 
             # Then check that we only get one additional warning when replacing values again not two
@@ -127,7 +129,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         # First test we cannot set it to a different value
         incorrect_value_dict = {"user_facing_name": "wrong"}
-        with self.assertRaisesRegexp(ValueError, "The user specified value: 'wrong' is unknown"):
+        with assertRaisesRegex(self, ValueError, "The user specified value: 'wrong' is unknown"):
             inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry],
                                                              adv_conf_dict=incorrect_value_dict)
 

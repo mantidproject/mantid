@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 import unittest
-from six import iterkeys
+
+from six import iterkeys, assertRaisesRegex
 
 from isis_powder.routines import absorb_corrections
 
@@ -42,12 +43,12 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
             modified_dict.pop(blacklisted_key)
 
             # Check that is raises an error
-            with self.assertRaisesRegexp(KeyError, "The following key was not found in the advanced configuration"):
+            with assertRaisesRegex(self, KeyError, "The following key was not found in the advanced configuration"):
                 ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
                                                                         config_dict=modified_dict)
 
             # Then check the error actually has the key name in it
-            with self.assertRaisesRegexp(KeyError, blacklisted_key):
+            with assertRaisesRegex(self, KeyError, blacklisted_key):
                 ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
                                                                         config_dict=modified_dict)
 
@@ -62,7 +63,7 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
         expected_number_density = 1.234
 
         ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=2, BinWidth=1)
-        with self.assertRaisesRegexp(KeyError, "The number density is required as the chemical formula"):
+        with assertRaisesRegex(self, KeyError, "The number density is required as the chemical formula"):
             ws = absorb_corrections.run_cylinder_absorb_corrections(ws_to_correct=ws, multiple_scattering=False,
                                                                     config_dict=sample_properties)
 

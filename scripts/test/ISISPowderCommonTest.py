@@ -1,10 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-import unittest
 import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
+import unittest
 
-from isis_powder.routines import common, common_enums
-import isis_powder.abstract_inst
+from six import assertRaisesRegex
+
+from isis_powder.routines import common
 
 
 class ISISPowderCommonTest(unittest.TestCase):
@@ -15,12 +16,12 @@ class ISISPowderCommonTest(unittest.TestCase):
         dict_with_key = {correct_key_name: 123}
 
         # Check it correctly raises
-        with self.assertRaisesRegexp(KeyError, "The field '" + missing_key_name + "' is required"):
+        with assertRaisesRegex(self, KeyError, "The field '" + missing_key_name + "' is required"):
             common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name)
 
         # Check it correctly appends the passed error message when raising
         appended_e_msg = "test append message"
-        with self.assertRaisesRegexp(KeyError, appended_e_msg):
+        with assertRaisesRegex(self, KeyError, appended_e_msg):
             common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name,
                                                  append_to_error_message=appended_e_msg)
 
@@ -40,26 +41,26 @@ class ISISPowderCommonTest(unittest.TestCase):
             bank_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=0, XMax=1100, BinWidth=1))
 
         # Check a list of WS and single cropping value is detected
-        with self.assertRaisesRegexp(ValueError, "The cropping values were not in a list type"):
+        with assertRaisesRegex(self, ValueError, "The cropping values were not in a list type"):
             common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=cropping_value)
 
         # Check a list of cropping values and a single workspace is detected
-        with self.assertRaisesRegexp(RuntimeError, "Attempting to use list based cropping"):
+        with assertRaisesRegex(self, RuntimeError, "Attempting to use list based cropping"):
             common.crop_banks_using_crop_list(bank_list=bank_list[0], crop_values_list=cropping_value_list)
 
         # What about a mismatch between the number of cropping values and workspaces
-        with self.assertRaisesRegexp(RuntimeError, "The number of TOF cropping values does not match"):
+        with assertRaisesRegex(self, RuntimeError, "The number of TOF cropping values does not match"):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
         cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]], crop_values_list=[cropping_value])
-        self.assertEqual(cropped_single_ws_list[0].getNumberBins(), expected_number_of_bins)
+        self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
 
         # Check we can crop a whole list
         cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list[1:])
         for ws in cropped_ws_list[1:]:
-            self.assertEqual(ws.getNumberBins(), expected_number_of_bins)
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
 
     def test_crop_in_tof(self):
@@ -74,13 +75,13 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Crop a single workspace in TOF
         tof_single_ws = common.crop_in_tof(ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
-        self.assertEqual(tof_single_ws.getNumberBins(), expected_number_of_bins)
+        self.assertEqual(tof_single_ws.blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(tof_single_ws)
 
         # Crop a list of workspaces in TOF
         cropped_ws_list = common.crop_in_tof(ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
         for ws in cropped_ws_list:
-            self.assertEqual(ws.getNumberBins(), expected_number_of_bins)
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(ws)
 
     def test_crop_in_tof_coverts_units(self):
@@ -97,13 +98,13 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Crop a single workspace from d_spacing and check the number of bins
         tof_single_ws = common.crop_in_tof(ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
-        self.assertEqual(tof_single_ws.getNumberBins(), expected_number_of_bins)
+        self.assertEqual(tof_single_ws.blocksize(), expected_number_of_bins)
         mantid.DeleteWorkspace(tof_single_ws)
 
         # Crop a list of workspaces in dSpacing
         cropped_ws_list = common.crop_in_tof(ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
         for ws in cropped_ws_list:
-            self.assertEqual(ws.getNumberBins(), expected_number_of_bins)
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(ws)
 
     def test_dictionary_key_helper(self):
@@ -117,7 +118,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             common.dictionary_key_helper(dictionary=test_dictionary, key=bad_key_name)
 
-        with self.assertRaisesRegexp(KeyError, e_msg):
+        with assertRaisesRegex(self, KeyError, e_msg):
             common.dictionary_key_helper(dictionary=test_dictionary, key=bad_key_name, exception_msg=e_msg)
 
         self.assertEqual(common.dictionary_key_helper(dictionary=test_dictionary, key=good_key_name), 123)
@@ -169,11 +170,11 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_generate_run_numbers_fails(self):
         run_input_sting = "text-string"
 
-        with self.assertRaisesRegexp(ValueError, "Could not generate run numbers from this input"):
+        with assertRaisesRegex(self, ValueError, "Could not generate run numbers from this input"):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
         # Check it says what the actual string was
-        with self.assertRaisesRegexp(ValueError, run_input_sting):
+        with assertRaisesRegex(self, ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
     def test_remove_intermediate_workspace(self):
