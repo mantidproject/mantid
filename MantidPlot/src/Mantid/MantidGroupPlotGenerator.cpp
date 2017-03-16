@@ -254,7 +254,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @returns Error string, or empty string if no error
  */
 std::string MantidGroupPlotGenerator::validatePlotOptions(
-  MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputForContourAndSurface &options, int nWorkspaces) {
+  MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputAdvanced &options, int nWorkspaces) {
   std::stringstream err;
   if (options.accepted) {
     if (options.logName == MantidWSIndexWidget::CUSTOM) {

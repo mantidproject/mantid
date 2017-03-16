@@ -252,7 +252,7 @@ public:
    */
 
   /// Struct to hold user input
-  struct UserInputForContourAndSurface {
+  struct UserInputAdvanced {
     bool accepted;
     int plotIndex;
     QString axisName;
@@ -269,7 +269,8 @@ public:
     bool errors;
     bool surface;
     bool contour;
-    UserInputForContourAndSurface contourSurface;
+    bool isAdvanced;
+    UserInputAdvanced advanced;
   };
 
   /// The string "Workspace index"

@@ -79,25 +79,31 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
     options.contour = false;
   }
 
-  // Contour and Surface options
-  if (options.surface || options.contour) {
-    UserInputForContourAndSurface userInputForContourAndSurface;
-    userInputForContourAndSurface.accepted = true;
-    userInputForContourAndSurface.plotIndex = getPlotIndex();
-    userInputForContourAndSurface.axisName = getAxisName();
-    userInputForContourAndSurface.logName = getLogName();
-    userInputForContourAndSurface.workspaceNames = m_wsNames;
-    if (userInputForContourAndSurface.logName == CUSTOM) {
+  // Advanced options
+  if (m_advanced && (options.simple ||options.waterfall || options.surface || options.contour)) {
+    UserInputAdvanced userInputAdvanced;
+    if (options.surface || options.contour) {
+      userInputAdvanced.accepted = true;
+      userInputAdvanced.plotIndex = getPlotIndex();
+      userInputAdvanced.axisName = getAxisName();
+    }
+    userInputAdvanced.logName = getLogName();
+    userInputAdvanced.workspaceNames = m_wsNames;
+    if (userInputAdvanced.logName == CUSTOM) {
       try {
-        userInputForContourAndSurface.customLogValues = getCustomLogValues();
+        userInputAdvanced.customLogValues = getCustomLogValues();
       }
       catch (const std::invalid_argument &ex) {
         QString error("Invalid log value supplied: ");
         showPlotOptionsError(error.append(ex.what()));
-        userInputForContourAndSurface.accepted = false;
+        userInputAdvanced.accepted = false;
       }
     }
-    options.contourSurface = userInputForContourAndSurface;
+    options.isAdvanced = true;
+    options.advanced = userInputAdvanced;
+  }
+  else {
+    options.isAdvanced = false; // We don't want the view to look at options.advanced.
   }
   return options;
 }
