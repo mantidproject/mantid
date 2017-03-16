@@ -12,13 +12,15 @@ namespace API {
 /**
  * Constructor
  * @param componentInfo : Beamline wrapped ComponentInfo
- * @param componentIds : Component ids ordered by component index
+ * @param componentIds : Component Ids ordered by component index
  */
 ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
                              std::vector<Geometry::ComponentID> &&componentIds)
-    : m_componentInfo(componentInfo), m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
-      m_compIDToIndex(boost::make_shared<std::unordered_map<Geometry::IComponent *, size_t>>())
-{
+    : m_componentInfo(componentInfo),
+      m_componentIds(
+          boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
+      m_compIDToIndex(boost::make_shared<
+          std::unordered_map<Geometry::IComponent *, size_t>>()) {
 
   if (m_componentInfo.size() != m_componentIds->size()) {
     throw std::invalid_argument("Mismatch between size of ComponentInfo and "

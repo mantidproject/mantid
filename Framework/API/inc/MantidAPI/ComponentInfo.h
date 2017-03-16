@@ -20,8 +20,7 @@ class ComponentInfo;
 namespace API {
 
 /** ComponentInfo : Provides a component centric view on to the instrument.
-  Indexes
-  are per component.
+  Indexes are per component.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -51,7 +50,8 @@ private:
   /// Collection of component ids
   boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
-  boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>> m_compIDToIndex;
+  boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
+      m_compIDToIndex;
 
 public:
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
