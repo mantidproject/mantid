@@ -85,6 +85,7 @@ public:
 
   /// Return multiple fitting mode on/off selection
   Muon::MultiFitState getMultiFitState() const;
+  Muon::TFAsymmState getTFAsymmState() const;
 
 signals:
   /// Update the plot because something has changed.
@@ -95,7 +96,8 @@ signals:
 
   /// Emitted when multi fitting mode is turned on/off
   void multiFitStateChanged(int state);
-
+  /// Emitted when multi fitting mode is turned on/off
+  void TFAsymmStateChanged(int state);
 private:
   /// Default widget values
   static const QString START_TIME_DEFAULT;

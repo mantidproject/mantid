@@ -2106,6 +2106,8 @@ void MuonAnalysis::loadFittings() {
   // Set multi fit mode on/off as appropriate
   const auto &multiFitState = m_optionTab->getMultiFitState();
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+  const auto &TFAsymmState = m_optionTab->getTFAsymmState();
+  m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
 
 /**
@@ -2475,6 +2477,8 @@ void MuonAnalysis::connectAutoUpdate() {
           SLOT(updateCurrentPlotStyle()));
   connect(m_optionTab, SIGNAL(multiFitStateChanged(int)), this,
           SLOT(multiFitCheckboxChanged(int)));
+  connect(m_optionTab, SIGNAL(TFAsymmStateChanged(int)), this,
+	  SLOT(TFAsymmCheckboxChanged(int)));
 }
 
 /**
@@ -3026,6 +3030,12 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+}
+void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
+	const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
+		? Muon::TFAsymmState::Enabled
+		: Muon::TFAsymmState::Disabled;
+	m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
 }
 
 /**

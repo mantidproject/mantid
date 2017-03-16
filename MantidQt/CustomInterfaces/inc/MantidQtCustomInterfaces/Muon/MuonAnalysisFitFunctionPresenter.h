@@ -47,6 +47,8 @@ public:
       MantidQt::MantidWidgets::IFunctionBrowser *funcBrowser);
   /// Toggle multiple fitting mode
   void setMultiFitState(Muon::MultiFitState state);
+  void setTFAsymmState(Muon::TFAsymmState state);
+
   /// Set function in model (fit property browser)
   void setFunctionInModel(const Mantid::API::IFunction_sptr &function);
 public slots:
@@ -83,6 +85,8 @@ private:
   MantidQt::MantidWidgets::IFunctionBrowser *m_funcBrowser;
   /// Whether multi fitting is disabled(function browser is hidden) or enabled
   Muon::MultiFitState m_multiFitState;
+  Muon::TFAsymmState m_TFAsymmState;
+
 };
 
 } // namespace CustomInterfaces

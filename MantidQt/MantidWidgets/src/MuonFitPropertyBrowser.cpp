@@ -576,7 +576,30 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
     }
   }
 }
+/**
+* Set multiple fitting mode on or off.
+* If turned off, all parts of the fit property browser are shown and all extra
+* widgets (like the function browser or data selector) are hidden, so it looks
+* just like it used to before the changes in Mantid 3.8.
+* If turned on, the "Function" and "Data" sections of the fit property browser
+* are hidden and the extra widgets are shown.
+* @param enabled :: [input] Whether to turn this mode on or off
+*/
+void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
+	// First, clear whatever model is currently set
+	this->clear();
 
+	// Show or hide "Function" and "Data" sections
+	//m_browser->setItemVisible(m_functionsGroup, !enabled);
+	//m_browser->setItemVisible(m_settingsGroup, !enabled);
+
+	// Show or hide additional widgets
+	/*for (int i = 0; i < m_widgetSplitter->count(); ++i) {
+		if (auto *widget = m_widgetSplitter->widget(i)) {
+			widget->setVisible(enabled);
+		}
+	}*/
+}
 /**
  * The pre-fit checks have been successfully completed. Continue by emitting a
  * signal to update the function and request the fit.

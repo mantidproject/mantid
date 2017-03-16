@@ -78,6 +78,8 @@ public:
   }
   /// Set multiple fitting mode on or off
   void setMultiFittingMode(bool enabled) override;
+  void setTFAsymmMode(bool enabled) override;
+
   /// After fit checks done, continue
   void continueAfterChecks(bool sequential) override;
   /// Remove a plotted guess
