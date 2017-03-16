@@ -53,11 +53,14 @@ void InfoComponentVisitor::registerDetector(
     const IDetector &detector, std::vector<size_t> &parentDetectorIndexes) {
 
   /*
-   * Add the detector index to the parent collection, but as each detector
-   * is a leaf this components detector indexes are empty.
+   * Add the detector index to the parent, but also report the "self" detector
+   * index
+   * if te component index passed is one of a detector.
    */
-  parentDetectorIndexes.push_back(m_detectorInfo.indexOf(detector.getID()));
-  m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
+  auto detectorIndex = m_detectorInfo.indexOf(detector.getID());
+  parentDetectorIndexes.push_back(detectorIndex);
+  m_componentDetectorIndexes.emplace_back(
+      std::vector<size_t>(1, detectorIndex));
   m_componentIds.emplace_back(detector.getComponentID());
 }
 

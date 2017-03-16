@@ -817,10 +817,14 @@ public:
                       allRowDetectorIndexes.size(),
                       10); //
 
-    const auto detCompId = detInfo.detector(0).getComponentID();
+    const auto targetDetectorIndex = 0;
+    const auto detCompId =
+        detInfo.detector(targetDetectorIndex).getComponentID();
     TSM_ASSERT_EQUALS(
-        "Detector should have no nested detector",
-        compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 0);
+        "Detector should report the detector index of itself",
+        compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 1);
+    TS_ASSERT_EQUALS(compInfo.detectorIndices(compInfo.indexOf(detCompId))[0],
+                     targetDetectorIndex)
   }
 
 private:
