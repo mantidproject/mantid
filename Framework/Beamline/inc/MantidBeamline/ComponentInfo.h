@@ -4,6 +4,8 @@
 #include "MantidBeamline/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <utility>
+#include <cstddef>
 
 namespace Mantid {
 namespace Beamline {
@@ -36,12 +38,15 @@ namespace Beamline {
 class MANTID_BEAMLINE_DLL ComponentInfo {
 
 private:
-  boost::shared_ptr<const std::vector<std::vector<size_t>>> m_detectorIndices;
+  boost::shared_ptr<std::vector<size_t>> m_detectorIndices;
+  boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_ranges;
+  const size_t m_size = 0;
 
 public:
   ComponentInfo();
-  ComponentInfo(const std::vector<std::vector<size_t>> &detectorIndices);
-  std::vector<size_t> detectorIndices(size_t componentIndex) const;
+  ComponentInfo(const std::vector<std::pair<size_t, size_t>> &ranges,
+                const size_t detectorsSize);
+  std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   size_t size() const;
 };
 } // namespace Beamline

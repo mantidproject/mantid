@@ -4,6 +4,10 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDetector.h"
 
+#include <numeric>
+#include <algorithm>
+#include <iostream>
+
 namespace Mantid {
 namespace API {
 
@@ -11,7 +15,7 @@ using namespace Mantid::Geometry;
 
 InfoComponentVisitor::InfoComponentVisitor(
     const Mantid::API::DetectorInfo &detectorInfo)
-    : m_detectorInfo(detectorInfo) {}
+    : m_componentIds(detectorInfo.size()), m_detectorInfo(detectorInfo) {}
 
 void InfoComponentVisitor::registerComponentAssembly(
     const ICompAssembly &bank, std::vector<size_t> &parentDetectorIndexes) {
@@ -26,6 +30,32 @@ void InfoComponentVisitor::registerComponentAssembly(
     child->registerContents(*this, localDetectorIndexes);
   }
 
+  if (localDetectorIndexes.size() > 0) {
+    /* We need confidence that we will be able to generate a range that
+     * represents a contiguous block. With more confidence we could remove this.
+    */
+    if (!std::is_sorted(localDetectorIndexes.begin(),
+                        localDetectorIndexes.end())) {
+      for (auto index : localDetectorIndexes) {
+        std::cout << index << " ";
+      }
+      throw std::runtime_error(
+          "We expect an ascending list of detector indices for each assembly");
+    }
+    if (localDetectorIndexes.back() !=
+        localDetectorIndexes.front() + (localDetectorIndexes.size() - 1)) {
+      throw std::runtime_error("Detector indices should be increasing +1 for "
+                               "all local detectors in the assembly");
+    }
+    const auto startIndex = localDetectorIndexes.front();
+    const auto endIndex = startIndex + localDetectorIndexes.size();
+    m_ranges.emplace_back(std::make_pair(startIndex, endIndex));
+  } else {
+    m_ranges.emplace_back(std::make_pair(0, 0));
+  }
+  // For any non-detector we extend the m_componetIds from the back
+  m_componentIds.emplace_back(bank.getComponentID());
+
   /*
    * The following allows us to refer to ALL nested
    * detectors from any component in the tree. Otherwise these could
@@ -36,8 +66,6 @@ void InfoComponentVisitor::registerComponentAssembly(
   parentDetectorIndexes.insert(parentDetectorIndexes.end(),
                                localDetectorIndexes.begin(),
                                localDetectorIndexes.end());
-  m_componentDetectorIndexes.emplace_back(localDetectorIndexes);
-  m_componentIds.emplace_back(bank.getComponentID());
 }
 
 void InfoComponentVisitor::registerGenericComponent(const IComponent &component,
@@ -46,32 +74,34 @@ void InfoComponentVisitor::registerGenericComponent(const IComponent &component,
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
    */
-  m_componentDetectorIndexes.emplace_back(std::vector<size_t>());
+  m_ranges.emplace_back(std::make_pair(0, 0)); // Represents an empty range
   m_componentIds.emplace_back(component.getComponentID());
 }
 void InfoComponentVisitor::registerDetector(
     const IDetector &detector, std::vector<size_t> &parentDetectorIndexes) {
 
-  /*
-   * Add the detector index to the parent, but also report the "self" detector
-   * index
-   * if te component index passed is one of a detector.
-   */
-  auto detectorIndex = m_detectorInfo.indexOf(detector.getID());
-  parentDetectorIndexes.push_back(detectorIndex);
-  m_componentDetectorIndexes.emplace_back(
-      std::vector<size_t>(1, detectorIndex));
-  m_componentIds.emplace_back(detector.getComponentID());
+  // detectorIndex == componentIndex
+  auto componentIndex = m_detectorInfo.indexOf(detector.getID());
+
+  /* Already allocated we just need to index into the inital front-detector
+   * part of the collection
+  */
+  m_componentIds[componentIndex] = detector.getComponentID();
+
+  parentDetectorIndexes.push_back(componentIndex);
+}
+
+std::vector<std::pair<size_t, size_t>>
+InfoComponentVisitor::componentDetectorRanges() const {
+  return m_ranges;
 }
 
 std::vector<Mantid::Geometry::ComponentID>
 InfoComponentVisitor::componentIds() const {
   return m_componentIds;
 }
-std::vector<std::vector<size_t>>
-InfoComponentVisitor::componentDetectorIndexes() const {
-  return m_componentDetectorIndexes;
-}
+
+size_t InfoComponentVisitor::size() const { return m_componentIds.size(); }
 
 } // namespace API
 } // namespace Mantid

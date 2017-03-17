@@ -199,7 +199,7 @@ makeComponentInfo(const Instrument &oldInstr,
   componentIds = visitor.componentIds();
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.componentDetectorIndexes());
+      visitor.componentDetectorRanges(), detectorInfo.size());
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,

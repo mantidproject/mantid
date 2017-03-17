@@ -4,6 +4,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include <cstddef>
+#include <utility>
+#include <vector>
 
 namespace Mantid {
 
@@ -44,9 +46,14 @@ class DetectorInfo;
 class MANTID_API_DLL InfoComponentVisitor
     : public Mantid::Geometry::ComponentVisitor {
 private:
+  /// Detectors components always specified first
   std::vector<Mantid::Geometry::IComponent *> m_componentIds;
-  std::vector<std::vector<size_t>> m_componentDetectorIndexes;
+
+  /// Reference to the detector info.
   const Mantid::API::DetectorInfo &m_detectorInfo;
+
+  /// Only Assemblies and other NON-detectors yield ranges
+  std::vector<std::pair<size_t, size_t>> m_ranges;
 
 public:
   InfoComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo);
@@ -63,7 +70,8 @@ public:
                    std::vector<size_t> &parentDetectorIndexes) override;
 
   std::vector<Mantid::Geometry::IComponent *> componentIds() const;
-  std::vector<std::vector<size_t>> componentDetectorIndexes() const;
+  std::vector<std::pair<size_t, size_t>> componentDetectorRanges() const;
+  size_t size() const;
 };
 } // namespace API
 } // namespace Mantid
