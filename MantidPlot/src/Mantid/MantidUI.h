@@ -289,14 +289,14 @@ public slots:
          bool errs = false,
          GraphOptions::CurveType style = GraphOptions::Unspecified,
          MultiLayer *plotWindow = NULL, bool clearWindow = false,
-         bool waterfallPlot = false, QString log="",
+         bool waterfallPlot = false, const QString &log="",
          std::set<double> customLogValues = std::set<double>());
 
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false, MultiLayer *plotWindow = NULL,
-         bool clearWindow = false, bool waterfallPlot = false, QString log = "",
+         bool clearWindow = false, bool waterfallPlot = false, const QString &log = "",
          std::set<double> customLogValues = std::set<double>()) override;
 
   /// Plot contour
