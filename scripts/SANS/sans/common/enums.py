@@ -299,3 +299,28 @@ def convert_int_to_shape(shape_int):
 @serializable_enum("ISISNexus", "ISISNexusAdded", "ISISRaw", "NoFileType")
 class FileType(object):
     pass
+
+
+# ---------------------------
+# OutputMode
+# ---------------------------
+@string_convertible
+@serializable_enum("PublishToADS", "SaveToFile", "Both")
+class OutputMode(object):
+    """
+    Defines the output modes of a batch reduction.
+    """
+    pass
+
+
+# ------------------------------
+# Entries of batch reduction file
+# -------------------------------
+@string_convertible
+@serializable_enum("SampleScatter", "SampleTransmission", "SampleDirect", "CanScatter", "CanTransmission", "CanDirect",
+                   "Output", "UserFile")
+class BatchReductionEntry(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
