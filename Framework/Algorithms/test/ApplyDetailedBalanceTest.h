@@ -42,7 +42,7 @@ public:
         alg.setPropertyValue("InputWorkspace", inputWSname));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300."));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", 300.0));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -123,6 +123,18 @@ public:
     AnalysisDataService::Instance().remove(outputWSname);
 
     AnalysisDataService::Instance().remove(inputWSname);
+  }
+
+  void test_units() {
+    createWorkspace2D(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWSname);
+    alg.setPropertyValue("OutputWorkspace", outputWSname);
+    alg.setPropertyValue("Temperature", 300.0);
+    alg.setPropertyValue("OutputUnits", "Frequency");
+    alg.execute();
+    outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
   }
 
 private:

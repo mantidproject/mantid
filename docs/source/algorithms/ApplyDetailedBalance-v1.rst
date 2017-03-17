@@ -18,7 +18,8 @@ where :math:`E` is the energy transfer to the system. The algorithm
 assumes that the y axis of the input workspace contains the scattering
 function :math:`S`. The y axis of the output workspace will contain the
 dynamic susceptibility. The temperature is extracted from a log attached
-to the workspace, as the mean value. Alternatively, the temperature can
+to the workspace, as the mean value. The entry log must be named "Temperature"
+in order to be detected. Alternatively, the temperature can
 be directly specified. The algorithm will fail if neither option is
 valid.
 
@@ -36,7 +37,7 @@ Usage
 .. testcode:: ExApplyDetailedBalanceSimple
 
    ws = CreateWorkspace(DataX='-5,-4,-3,-2,-1,0,1,2,3,4,5',DataY='2,2,2,2,2,2,2,2,2,2',DataE='1,1,1,1,1,1,1,1,1,1',UnitX='DeltaE')
-   ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100')
+   ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100', OutputUnit='Frequency')
 
    print "The Y values in the Output Workspace are"
    print str(ows.readY(0)[0:5])
