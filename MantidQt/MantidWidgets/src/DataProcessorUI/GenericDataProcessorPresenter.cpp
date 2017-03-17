@@ -539,8 +539,9 @@ GenericDataProcessorPresenter::getRun(const std::string &run,
   std::string fileName = instrument + run;
 
   outName = findRunInADS(run, prefix, runFound);
-  if (!runFound || AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
-                       outName) != NULL) {
+  if (!runFound ||
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) !=
+          NULL) {
     // Workspace must not be an event workspace
     outName = loadRun(run, instrument, prefix, m_loader, runFound);
     if (!runFound)
