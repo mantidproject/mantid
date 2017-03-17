@@ -11,7 +11,7 @@ from mantid.kernel import *
 from mantid import config
 
 
-class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
+class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
     _chopped_data = None
@@ -53,6 +53,11 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
                                  '[[DiffractionFocussing]] child algorithms.')
+
+        self.declareProperty(FileProperty('InstrumentParFile', '',
+                                          action=FileAction.Load,
+                                          extensions=['.dat', '.par']),
+                             doc='PAR file containing instrument definition.')
 
         self.declareProperty(StringArrayProperty(name='VanadiumFiles'),
                              doc='Comma separated array of vanadium runs')
@@ -146,6 +151,7 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
 
         load_opts = dict()
         if self._instrument_name == 'VESUVIO':
+            load_opts['InstrumentParFile'] = self._par_filename
             load_opts['Mode'] = 'FoilOut'
             load_opts['LoadMonitors'] = True
 
@@ -201,6 +207,7 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
                     if self._container_workspace is not None:
                         van_ws = mtd[self._vanadium_ws[index]]
                         cont_ws = mtd[self._container_workspace]
+
                         if van_ws.blocksize() > cont_ws.blocksize():
                             RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
                                              WorkspaceToMatch=self._container_workspace,
@@ -214,14 +221,15 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
                               RHSWorkspace=self._container_workspace,
                               OutputWorkspace=self._vanadium_ws[index])
 
-                    if mtd[ws_name].blocksize() > mtd[self._vanadium_ws[index]].blocksize():
+                    if mtd[ws_name].blocksize() > van_ws.blocksize():
                         RebinToWorkspace(WorkspaceToRebin=ws_name,
                                          WorkspaceToMatch=self._vanadium_ws[index],
                                          OutputWorkspace=ws_name)
-                    elif mtd[self._vanadium_ws[index]].blocksize() > mtd[ws_name].blocksize():
+                    elif van_ws.blocksize() > mtd[ws_name].blocksize():
                         RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
                                          WorkspaceToMatch=ws_name,
                                          OutputWorkspace=self._vanadium_ws[index])
+
                     Divide(LHSWorkspace=ws_name,
                            RHSWorkspace=self._vanadium_ws[index],
                            OutputWorkspace=ws_name,
@@ -288,6 +296,7 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
         self._cal_file = self.getProperty('CalFile').value
+        self._par_filename = self.getPropertyValue('InstrumentParFile')
         self._vanadium_runs = self.getProperty('VanadiumFiles').value
         self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
@@ -365,4 +374,4 @@ class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
 
 # ------------------------------------------------------------------------------
 
-AlgorithmFactory.subscribe(ISISIndirectDiffractionReductionModified)
+AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

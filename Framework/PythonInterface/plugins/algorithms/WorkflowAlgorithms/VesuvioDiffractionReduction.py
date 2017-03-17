@@ -31,10 +31,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty('InputFiles'),
                              doc='Comma separated list of input files.')
 
-        self.declareProperty(FileProperty('InstrumentParFile', '',
-                                          action=FileAction.Load,
-                                          extensions=['.dat', '.par']),
-                             doc='PAR file containing instrument definition.')
+
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
