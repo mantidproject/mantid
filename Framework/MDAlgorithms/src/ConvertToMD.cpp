@@ -211,7 +211,7 @@ void ConvertToMD::exec() {
     const std::string noScaling =
         transform.getQScalings()[CnvrtToMD::NoScaling];
     if (convertTo_ != noScaling) {
-      g_log.warning("QConversionScales value ignored with QDimensions !=" +
+      g_log.warning("QConversionScales value ignored with QDimensions != " +
                     MDTransfQ3D().transfID());
       convertTo_ = noScaling;
     }
@@ -458,19 +458,29 @@ bool ConvertToMD::buildTargetWSDescription(
   double m_AbsMin = getProperty("AbsMinQ");
   targWSDescr.setAbsMin(m_AbsMin);
 
-  // instantiate class, responsible for defining Mslice-type projection
+  // Set optional projections for Q3D mode
   MDAlgorithms::MDWSTransform MsliceProj;
-  // identify if u,v are present among input parameters and use defaults if not
-  std::vector<double> ut = getProperty("UProj");
-  std::vector<double> vt = getProperty("VProj");
-  std::vector<double> wt = getProperty("WProj");
-  try {
-    // otherwise input uv are ignored -> later it can be modified to set ub
-    // matrix if no given, but this may over-complicate things.
-    MsliceProj.setUVvectors(ut, vt, wt);
-  } catch (std::invalid_argument &) {
-    g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]\n";
+  if (QModReq == MDTransfQ3D().transfID()) {
+    try {
+      // otherwise input uv are ignored -> later it can be modified to set ub
+      // matrix if no given, but this may over-complicate things.
+      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"),
+                              getProperty("WProj"));
+    } catch (std::invalid_argument &) {
+      g_log.warning() << "The projections are coplanar. Will use defaults "
+                         "[1,0,0],[0,1,0] and [0,0,1]\n";
+    }
+  } else {
+    auto warnIfSet = [this](const std::string &propName) {
+      Property *prop = this->getProperty(propName);
+      if (!prop->isDefault()) {
+        g_log.warning(propName + " value ignored with QDimensions != " +
+                      MDTransfQ3D().transfID());
+      }
+    };
+    for (const auto &name : {"UProj", "VProj", "WProj"}) {
+      warnIfSet(name);
+    }
   }
 
   if (createNewTargetWs) {
