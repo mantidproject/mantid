@@ -32,11 +32,14 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
 
-        self.declareProperty(name='FirstRun', defaultValue=1,
+        self.declareProperty(name="FirstRun", defaultValue=-1,
+                             validator=IntBoundedValidator(lower=0),
                              doc="First Sample run-number.")
-        self.declareProperty(name='LastRun', defaultValue=2,
+        self.declareProperty(name='LastRun', defaultValue=-1,
+                             validator=IntBoundedValidator(lower=0),
                              doc="Last Sample run-number.")
-        self.declareProperty(name='NumberSamples', defaultValue=1,
+        self.declareProperty(name='NumberSamples', defaultValue=-1,
+                             validator=IntBoundedValidator(lower=0),
                              doc="Increment for run-number.")
 
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
