@@ -391,7 +391,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
   // If we're only given one run, just return that
   if (runs.size() == 1)
-    return loadRun(runs[0], instrument, preprocessor.prefix());
+    return getRun(runs[0], instrument, preprocessor.prefix());
 
   const std::string outputName =
       preprocessor.prefix() + boost::algorithm::join(runs, "_");
@@ -405,7 +405,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
   alg->initialize();
   alg->setProperty(
       preprocessor.lhsProperty(),
-      loadRun(runs[0], instrument, preprocessor.prefix())->getName());
+      getRun(runs[0], instrument, preprocessor.prefix())->getName());
   alg->setProperty(preprocessor.outputProperty(), outputName);
 
   // Drop the first run from the runs list
@@ -426,7 +426,7 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
 
       alg->setProperty(
           preprocessor.rhsProperty(),
-          loadRun(*runIt, instrument, preprocessor.prefix())->getName());
+          getRun(*runIt, instrument, preprocessor.prefix())->getName());
       alg->execute();
 
       if (runIt != --runs.end()) {
@@ -521,102 +521,102 @@ std::string GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   return prefix + boost::join(outputNames, "_");
 }
 
-/**
-Loads a run found from disk or AnalysisDataService
-@param run : The name of the run
-@param instrument : The instrument the run belongs to
-@param prefix : The prefix to be prepended to the run number
-@throws std::runtime_error if the run could not be loaded
-@returns a shared pointer to the workspace
-*/
+/** Loads a run found from disk or AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @throws std::runtime_error if the run could not be loaded
+ * @returns a shared pointer to the workspace
+ */
 Workspace_sptr
-GenericDataProcessorPresenter::loadRun(const std::string &run,
-                                       const std::string &instrument,
-                                       const std::string &prefix) {
+GenericDataProcessorPresenter::getRun(const std::string &run,
+                                      const std::string &instrument,
+                                      const std::string &prefix) {
 
   bool runFound;
+  std::string outName;
   std::string fileName = instrument + run;
-  std::string outputName = findRun(run, instrument, prefix, m_loader, runFound);
 
-  if (!runFound)
-    throw std::runtime_error("Could not open " + fileName);
+  outName = findRunInADS(run, prefix, runFound);
+  if (!runFound || AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                       outName) != NULL) {
+    // Workspace must not be an event workspace
+    outName = loadRun(run, instrument, prefix, m_loader, runFound);
+    if (!runFound)
+      throw std::runtime_error("Could not open " + fileName);
+  }
 
-  return AnalysisDataService::Instance().retrieveWS<Workspace>(outputName);
+  return AnalysisDataService::Instance().retrieveWS<Workspace>(outName);
 }
 
-/**
-Tries fetching a run from AnalysisDataService, or loads it from disk
-@param run : The name of the run
-@param instrument : The instrument the run belongs to
-@param prefix : The prefix to be prepended to the run number
-@param loader : The loader algorithm to be used if run not found in ADS
-@param runFound : Whether or not the run was actually found
-@returns string name of the run
-*/
-std::string GenericDataProcessorPresenter::findRun(
+/** Tries fetching a run from AnalysisDataService
+ *
+ * @param run : The name of the run
+ * @param prefix : The prefix to be prepended to the run number
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::findRunInADS(
+    const std::string &run, const std::string &prefix, bool &runFound) {
+
+  runFound = true;
+
+  // First, let's see if the run given is the name of a workspace in the ADS
+  if (AnalysisDataService::Instance().doesExist(run))
+    return run;
+
+  // Try with prefix
+  if (AnalysisDataService::Instance().doesExist(prefix + run))
+    return prefix + run;
+
+  // Is the run string is numeric?
+  if (boost::regex_match(run, boost::regex("\\d+"))) {
+
+    // Look for "<run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(run))
+      return run;
+
+    // Look for "<instrument><run_number>" in the ADS
+    if (AnalysisDataService::Instance().doesExist(prefix + run))
+      return prefix + run;
+  }
+
+  // Run not found in ADS;
+  runFound = false;
+  return "";
+}
+
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string GenericDataProcessorPresenter::loadRun(
     const std::string &run, const std::string &instrument,
     const std::string &prefix, const std::string &loader, bool &runFound) {
 
-  runFound = false;
-  std::string outputName;
+  runFound = true;
+  const std::string fileName = instrument + run;
+  const std::string outputName = prefix + run;
 
-  // First, let's see if the run given is the name of a workspace in the ADS
-  if (AnalysisDataService::Instance().doesExist(run)) {
-    runFound = true;
-    outputName = run;
-  }
-  // Try with prefix
-  else if (AnalysisDataService::Instance().doesExist(prefix + run)) {
-    runFound = true;
-    outputName = prefix + run;
-  }
-
-  // Is the run string is numeric?
-  else if (boost::regex_match(run, boost::regex("\\d+"))) {
-
-    // Look for "<run_number>" in the ADS
-    if (AnalysisDataService::Instance().doesExist(run)) {
-      runFound = true;
-      outputName = run;
-    }
-
-    // Look for "<instrument><run_number>" in the ADS
-    else if (AnalysisDataService::Instance().doesExist(prefix + run)) {
-      runFound = true;
-      outputName = prefix + run;
-    }
-  }
-
-  if (runFound) {
-    // For event workspaces, monitors must be loaded as well
-    if (loader == "LoadEventNexus")
-      runFound =
-          AnalysisDataService::Instance().doesExist(outputName + "_monitors");
-
-    // A workspace retrieved from ADS must not be an event workspace if we
-    // are not using an event loader!
-    else if (AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
-                 outputName) != NULL)
-      runFound = false;
-
-    // Run in ADS can be safely used, no need to load
-    if (runFound)
-      return outputName;
-  }
-
-  // We'll just have to load it ourselves
-  outputName = prefix + run;
   IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", instrument + run);
+  algLoadRun->setProperty("Filename", fileName);
   algLoadRun->setProperty("OutputWorkspace", outputName);
   if (loader == "LoadEventNexus")
     algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
-  if (!algLoadRun->isExecuted())
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
     return "";
+  }
 
-  runFound = true;
   return outputName;
 }
 

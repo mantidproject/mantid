@@ -292,30 +292,43 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
 }
 
 /** Loads an event workspace and puts it into the ADS
-*
-* @param runNo :: the run number as a string
-* @return :: True if algorithm was executed. False otherwise
-*/
+ *
+ * @param runNo :: the run number as a string
+ * @return :: True if algorithm was executed. False otherwise
+ */
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
   bool runFound;
+  std::string outName;
   std::string prefix = "TOF_";
   std::string instrument = m_view->getProcessInstrument();
-  findRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
+
+  outName = findRunInADS(runNo, prefix, runFound);
+  if (!runFound ||
+      AnalysisDataService::Instance().doesExist(outName + "_monitors") ==
+          false ||
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) ==
+          NULL) {
+    // Monitors must be loaded first and workspace must be an event workspace
+    outName = loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
+  }
 
   return runFound;
 }
 
 /** Loads a non-event workspace and puts it into the ADS
-*
-* @param runNo :: the run number as a string
-*/
+ *
+ * @param runNo :: the run number as a string
+ */
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
   bool runFound; // unused but required
   std::string prefix = "TOF_";
   std::string instrument = m_view->getProcessInstrument();
-  findRun(runNo, instrument, prefix, m_loader, runFound);
+
+  findRunInADS(runNo, prefix, runFound);
+  if (!runFound)
+    loadRun(runNo, instrument, prefix, m_loader, runFound);
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS

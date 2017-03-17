@@ -125,8 +125,11 @@ protected:
   void postProcessGroup(const GroupData &data);
   // Reduce a row
   std::vector<std::string> reduceRow(const std::vector<std::string> &data);
-  // Finds a run in the AnalysisDataService, or tries loading it if not found
-  std::string findRun(const std::string &run, const std::string &instrument,
+  // Finds a run in the AnalysisDataService
+  std::string findRunInADS(const std::string &run, const std::string &prefix,
+                           bool &runFound);
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
                       const std::string &prefix, const std::string &loader,
                       bool &runFound);
 
@@ -159,9 +162,9 @@ private:
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
   // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument,
-                                      const std::string &prefix);
+  Mantid::API::Workspace_sptr getRun(const std::string &run,
+                                     const std::string &instrument,
+                                     const std::string &prefix);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
