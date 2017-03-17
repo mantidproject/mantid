@@ -273,6 +273,65 @@ void FitPropertyBrowser::init() {
 * @param w widget parenting the action menus and the property tree browser
 */
 void FitPropertyBrowser::initLayout(QWidget *w) {
+	QPushButton *btnFit=createFitMenuButton(w);
+	initBasicLayout(w,btnFit);
+}
+
+/**
+* @brief Initialise the layout.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Action menus and associated SIGNALs/SLOTs.
+*   3. Initialize the CompositeFunction, the root from which to build the Model.
+*   4. Update the list of available functions
+* @param w widget parenting the action menus and the property tree browser
+*/
+QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
+	QPushButton *btnFit = new QPushButton("Fit");
+	m_tip = new QLabel("", w);
+
+	m_fitMenu = new QMenu(this);
+	m_fitActionFit = new QAction("Fit", this);
+	m_fitActionSeqFit = new QAction("Sequential Fit", this);
+	m_fitActionUndoFit = new QAction("Undo Fit", this);
+	m_fitActionEvaluate = new QAction("Evaluate function", this);
+	//m_fitActiontest = new QAction("WAAAAA", this);
+
+	m_fitMapper = new QSignalMapper(this);
+	m_fitMapper->setMapping(m_fitActionFit, "Fit");
+	m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
+	m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
+	m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
+	//m_fitMapper->setMapping(m_fitActiontest, "Fit");
+
+	connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+	connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+	connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+	connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+	//connect(m_fitActiontest, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
+
+	connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
+		SLOT(executeFitMenu(const QString &)));
+	m_fitMenu->addAction(m_fitActionFit);
+	m_fitMenu->addAction(m_fitActionSeqFit);
+	m_fitMenu->addAction(m_fitActionEvaluate);
+	m_fitMenu->addSeparator();
+	m_fitMenu->addAction(m_fitActionUndoFit);
+	m_fitMenu->addSeparator();
+	//m_fitMenu->addAction(m_fitActiontest);
+	btnFit->setMenu(m_fitMenu);
+	return btnFit;
+}
+/**
+* @brief Initialise the layout, except for the fit button in the menu bar.
+* This initialization includes:
+*   1. SIGNALs/SLOTs when properties change.
+*   2. Action menus and associated SIGNALs/SLOTs.
+*   3. Initialize the CompositeFunction, the root from which to build the Model.
+*   4. Update the list of available functions
+* @param w widget parenting the action menus and the property tree browser
+*/
+void FitPropertyBrowser::initBasicLayout(QWidget *w, QPushButton *btnFit) {
   // to be able to change windows title from tread
   connect(this, SIGNAL(changeWindowTitle(const QString &)), this,
           SLOT(setWindowTitle(const QString &)));
@@ -307,32 +366,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
   QVBoxLayout *layout = new QVBoxLayout(w);
   QGridLayout *buttonsLayout = new QGridLayout();
 
-  QPushButton *btnFit = new QPushButton("Fit");
 
-  m_tip = new QLabel("", w);
-
-  m_fitMenu = new QMenu(this);
-  m_fitActionFit = new QAction("Fit", this);
-  m_fitActionSeqFit = new QAction("Sequential Fit", this);
-  m_fitActionUndoFit = new QAction("Undo Fit", this);
-  m_fitActionEvaluate = new QAction("Evaluate function", this);
-  m_fitMapper = new QSignalMapper(this);
-  m_fitMapper->setMapping(m_fitActionFit, "Fit");
-  m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
-  m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
-  m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-  connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-  connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-          SLOT(executeFitMenu(const QString &)));
-  m_fitMenu->addAction(m_fitActionFit);
-  m_fitMenu->addAction(m_fitActionSeqFit);
-  m_fitMenu->addAction(m_fitActionEvaluate);
-  m_fitMenu->addSeparator();
-  m_fitMenu->addAction(m_fitActionUndoFit);
-  btnFit->setMenu(m_fitMenu);
 
   QPushButton *btnDisplay = new QPushButton("Display");
   QMenu *displayMenu = new QMenu(this);

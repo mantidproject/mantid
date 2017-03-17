@@ -5,8 +5,13 @@
 #include "MantidQtMantidWidgets/IMuonFitDataModel.h"
 #include "MantidQtMantidWidgets/IMuonFitFunctionModel.h"
 
-/* Forward declarations */
 
+/* Forward declarations */
+class QDockWidget;
+class QLabel;
+class QPushButton;
+class QMenu;
+class QSignalMapper;
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
 class QtDoublePropertyManager;
@@ -119,6 +124,10 @@ private slots:
   void boolChanged(QtProperty *prop) override;
 
 private:
+   /// new menu option
+   QAction *m_fitActiontest;
+   /// Create new fit menu
+   QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit

@@ -89,6 +89,7 @@ private:
   /// Whether TF Asymmetry is disabled or enabled
   Muon::TFAsymmState m_TFAsymmState;
 
+
 };
 
 } // namespace CustomInterfaces

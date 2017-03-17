@@ -374,6 +374,10 @@ protected:
   ///
   void initLayout(QWidget *w);
   ///
+  void initBasicLayout(QWidget *w,QPushButton *btnFit);
+  ///
+  QPushButton *createFitMenuButton(QWidget *w);
+  ///
   void updateDecimals();
   /// Sets the workspace to a function
   void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
@@ -474,6 +478,11 @@ protected:
 
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
+  /// To display a tip text
+  QLabel *m_tip;
+  /// Fit and Display menu
+  QSignalMapper *m_fitMapper;
+  QMenu *m_fitMenu;
 
 private:
   /// load and save function
@@ -517,20 +526,18 @@ private:
   // void validateGroupMember();
 
   /// Fit and Display menu
-  QSignalMapper *m_fitMapper;
-  QMenu *m_fitMenu;
   QAction *m_displayActionPlotGuess;
   QAction *m_displayActionQuality;
   QAction *m_displayActionClearAll;
   QString m_windowBaseString;
+
 
   /// Setup menu
   QAction *m_setupActionCustomSetup;
   QAction *m_setupActionRemove;
   void updateSetupMenus();
 
-  /// To display a tip text
-  QLabel *m_tip;
+ 
 
   // The widget for choosing the fit function.
   QDialog *m_fitSelector;

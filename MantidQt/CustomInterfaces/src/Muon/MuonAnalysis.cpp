@@ -2082,7 +2082,7 @@ void MuonAnalysis::loadFittings() {
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_dataSelector->sizePolicy().setVerticalStretch(0);
-  m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
+  m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);// need to add my widget (maybe to a new list?)
   // Set up fit data and function presenters
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
@@ -3030,7 +3030,19 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
   const Muon::MultiFitState multiFitState = state == Qt::CheckState::Checked
                                                 ? Muon::MultiFitState::Enabled
                                                 : Muon::MultiFitState::Disabled;
+  // If both multiFit and TFAsymm are checked
+  // uncheck the TFAsymm
+  if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)//m_uiForm.chkTFAsymm->isChecked())
+  {
+	  //uncheck the box
+	  m_uiForm.chkTFAsymm->setChecked(false);
+	  TFAsymmCheckboxChanged(0);
+	  // reset the view
+	  m_fitFunctionPresenter->setTFAsymmState(Muon::TFAsymmState::Disabled);
+
+  } 
   m_fitFunctionPresenter->setMultiFitState(multiFitState);
+
 }
 /**
 * Called when the "TF Asymmetry" checkbox is changed (settings tab.)
@@ -3040,7 +3052,18 @@ void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
 	const Muon::TFAsymmState TFAsymmState = state == Qt::CheckState::Checked
 		? Muon::TFAsymmState::Enabled
 		: Muon::TFAsymmState::Disabled;
-	m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+	// If both multiFit and TFAsymm are checked
+	// uncheck the multiFit
+	if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)//m_uiForm.chkTFAsymm->isChecked())
+	{
+		//uncheck the box
+		m_uiForm.chkEnableMultiFit->setChecked(false);
+		multiFitCheckboxChanged(0);
+		// reset the view
+		m_fitFunctionPresenter->setMultiFitState(Muon::MultiFitState::Disabled);
+	}
+		m_fitFunctionPresenter->setTFAsymmState(TFAsymmState);
+
 }
 
 /**
