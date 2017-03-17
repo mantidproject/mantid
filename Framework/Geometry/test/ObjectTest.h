@@ -859,6 +859,17 @@ public:
                     expected, satol);
   }
 
+  void testVolumeUnitCube() {
+    Object_sptr cube = createUnitCube();
+    TS_ASSERT_DELTA(cube->volume(), 1.0, 1e-6)
+  }
+
+  void testVolumeSmallCappedCylinder() {
+    Object_sptr cylinder = createSmallCappedCylinder();
+    const double correctVolume = M_PI * 0.005 * 0.005 * 0.003;
+    TS_ASSERT_DELTA(cylinder->volume(), correctVolume, 1e-6)
+  }
+
   void testGetBoundingBoxForCylinder()
   /**
   Test bounding box for a object capped cylinder

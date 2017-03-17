@@ -3,6 +3,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Strings.h"
@@ -1472,6 +1473,144 @@ double Object::ConeSolidAngle(const V3D &observer,
   delete[] sin_table;
 
   return solid_angle;
+}
+
+double Object::volume() const {
+  // TODO We probably should use the triangulated volume here if it is available.
+  int type;
+  double height;
+  double radius;
+  std::vector<Kernel::V3D> vectors;
+  this->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID:
+  {
+    double volume = 0.0;
+    const Kernel::V3D vertex12 = vectors[1] + vectors[2];
+    const Kernel::V3D vertex13 = vectors[1] + vectors[3];
+    const Kernel::V3D vertex23 = vectors[2] + vectors[3];
+    const Kernel::V3D vertex123 = vectors[1] + vertex23;
+    volume += vertex23.scalar_prod(vectors[3].cross_prod(vectors[2]));
+    volume += vertex23.scalar_prod(vectors[2].cross_prod(vertex123));
+    volume += vertex23.scalar_prod(vertex123.cross_prod(vectors[3]));
+    volume += vertex12.scalar_prod(vectors[2].cross_prod(vectors[1]));
+    volume += vertex12.scalar_prod(vectors[1].cross_prod(vertex13));
+    volume += vertex12.scalar_prod(vertex123.cross_prod(vectors[2]));
+    volume += vectors[1].scalar_prod(vectors[3].cross_prod(vertex13));
+    volume += vertex13.scalar_prod(vectors[3].cross_prod(vertex123));
+    volume += vertex13.scalar_prod(vertex123.cross_prod(vertex23));
+    return volume / 6;
+  }
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return 4.0 / 3.0 * M_PI * radius * radius * radius;
+  case GluGeometryHandler::GeometryType::CYLINDER:
+    return M_PI * radius * radius * height;
+  default:
+    // Fall back to Monte Carlo method.
+    return monteCarloVolume();
+  }
+}
+
+/**
+ * The volume is calculated using the Monte Carlo method.
+ * @returns The volume of this object.
+ */
+double Object::monteCarloVolume() const {
+  const auto &boundingBox = getBoundingBox();
+  if (boundingBox.isNull()) {
+    return 0;
+  }
+  int total = 0;
+  int totalHits = 0;
+  // The maximum number of iterations is chosen by the
+  // Stetson-Harrison method. This means that the following
+  // number may or may not work in every scenario.
+  const int maxIterations = 1000000;
+  const double boundingDx = boundingBox.xMax() - boundingBox.xMin();
+  const double boundingDy = boundingBox.yMax() - boundingBox.yMin();
+  const double boundingDz = boundingBox.yMax() - boundingBox.yMin();
+  PARALLEL
+  {
+    const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
+    const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
+    size_t blocksize = maxIterations / threadCount;
+    if (currentThreadNum == threadCount - 1) {
+      // Last thread may do some extra work.
+      blocksize = maxIterations - (threadCount - 1) * blocksize;
+    }
+    // The Mersenne twister randon number engine has poor performance
+    // with discard(). Use more suitable engine for parallelization.
+    std::ranlux48 rnEngine;
+    // All threads init their engine with the same (defualt) seed.
+    // We discard the random numbers used by the other threads.
+    // This ensures reproducible results independent of the number
+    // of threads.
+    // We need three random numbers for each iteration.
+    rnEngine.discard(currentThreadNum * 3 * blocksize);
+    std::uniform_real_distribution<double> rnDistribution(0, 1);
+    int hits = 0;
+    int localTotal = 0;
+    for (; localTotal < static_cast<int>(blocksize); ++localTotal) {
+      double rnd = rnDistribution(rnEngine);
+      const double x = boundingBox.xMin() + rnd * boundingDx;
+      rnd = rnDistribution(rnEngine);
+      const double y = boundingBox.yMin() + rnd * boundingDy;
+      rnd = rnDistribution(rnEngine);
+      const double z = boundingBox.zMin() + rnd * boundingDz;
+      if (isValid(V3D(x, y, z))) {
+        ++hits;
+      }
+    }
+    // Collect results.
+    PARALLEL_CRITICAL(monteCarloVolume)
+    {
+      total += localTotal;
+      totalHits += hits;
+    }
+  }
+  const double ratio = static_cast<double>(totalHits) / static_cast<double>(total);
+  const double boundingVolume = boundingDx * boundingDy * boundingDz;
+  return ratio * boundingVolume;
+}
+
+/**
+* The volume is calculated using the triangulated mesh.
+* @returns The volume of this object.
+* @throws std::runtime_error In case this object is not triangulated.
+*/
+double Object::triangleVolume() const {
+  const auto nTri = NumberOfTriangles();
+  if (nTri == 0) {
+    throw std::runtime_error("Cannot calculate volume from triangulated mesh: no triangles exist.");
+  }
+  // We need a reference point which should preferably be near the shape
+  // as to not cause numerical instabilities. Otherwise, we use the origin.
+  Kernel::V3D refPoint;
+  getPointInObject(refPoint);
+  const double *vertices = getTriangleVertices();
+  const int *faces = getTriangleFaces();
+  std::array<Kernel::V3D, 3> triPoints;
+  double negativeVolumes = 0;
+  double positiveVolumes = 0;
+  for (int i = 0; i < nTri; ++i) {
+    const int faceIndex = 3 * i;
+    for (int j = 0; j < 3; ++j) {
+      const int vertexIndex = 3 * faces[faceIndex + j];
+      triPoints[j].setX(vertices[vertexIndex]);
+      triPoints[j].setY(vertices[vertexIndex + 1]);
+      triPoints[j].setZ(vertices[vertexIndex + 2]);
+      triPoints[j] -= refPoint;
+    }
+    const double signedVolume = 1.0 / 6.0 * triPoints[0].scalar_prod(triPoints[1].cross_prod(triPoints[2]));
+    if (signedVolume < 0) {
+      negativeVolumes += -signedVolume;
+    } else {
+      positiveVolumes += signedVolume;
+    }
+  }
+  return positiveVolumes - negativeVolumes;
 }
 
 /**
