@@ -123,7 +123,7 @@ def _check_value_is_in_enum(val, enum):
     :return: The correctly cased val. Otherwise raises a value error.
     """
     seen_val_in_enum = False
-    enum_known_keys = []
+    enum_known_vals = []
     lower_string_val = str(val).lower()
 
     for k, enum_val in iteritems(enum.__dict__):
@@ -131,13 +131,13 @@ def _check_value_is_in_enum(val, enum):
         if k.startswith("__") or k.lower() == "enum_friendly_name":
             continue
 
-        enum_known_keys.append(k)
+        enum_known_vals.append(enum_val)
 
         if lower_string_val == enum_val.lower():
             # Get the correctly capitalised value so we no longer have to call lower
             val = enum_val
             seen_val_in_enum = True
-            break
+            # Have to keep looping here in case we hit the err so all known keys are added
 
     # Check to see if the value was seen
     if seen_val_in_enum:
@@ -146,7 +146,7 @@ def _check_value_is_in_enum(val, enum):
     else:
         e_msg = "The user specified value: '" + str(val) + "' is unknown. "
         e_msg += "Known values for " + enum.enum_friendly_name + " are: \n"
-        for key in enum_known_keys:
+        for key in enum_known_vals:
             e_msg += '\'' + key + '\' '
 
         raise ValueError(e_msg)
