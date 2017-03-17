@@ -213,18 +213,18 @@ public:
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     m_signal->InitializeArray(
         ws_sptr->getSignalArray(), ws_sptr->getNumEventsArray(),
-        ws_sptr->getInverseVolume(), SignalArrayNormalization::None, imageSize,
-        offset);
+        ws_sptr->getInverseVolume(), SignalArrayNormalization::Volume,
+        imageSize, offset);
   }
 
   void tearDown() override {}
 
   void testGetTupleValuePerformance() {
+    double expected = ws_sptr->getSignalNormalizedAt(0);
     for (auto index = 0; index < imageSize; ++index) {
       // test member function.
-      double output[1];
-      m_signal->GetTypedTuple(index, output);
-      TS_ASSERT_DELTA(0.25, output[0], 0.0001);
+      double output = m_signal->GetValue(index);
+      TS_ASSERT_DELTA(expected, output, 0.0001);
     }
   }
 };
