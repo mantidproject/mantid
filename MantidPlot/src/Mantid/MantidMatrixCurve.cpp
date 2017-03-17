@@ -28,6 +28,7 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
 
 /**
  *  @param name :: The curve's name - shown in the legend
+ *default name is used, if empty.
  *  @param wsName :: The workspace name.
  *  @param g :: The Graph widget which will display the curve
  *  @param index :: The index of the spectrum or bin in the workspace
@@ -41,7 +42,7 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
  *  @throw std::invalid_argument if the index is out of range for the given
  *workspace
  */
-MantidMatrixCurve::MantidMatrixCurve(const QString &, const QString &wsName,
+MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
                                      Graph *g, int index, IndexDir indexType,
                                      bool err, bool distr,
                                      GraphOptions::CurveType style)
@@ -51,6 +52,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &, const QString &wsName,
     throw std::invalid_argument("MantidMatrixCurve::MantidMatrixCurve - NULL "
                                 "graph pointer not allowed");
   }
+  if(!name.isEmpty()) this->setTitle(name);
   init(g, distr, style);
 }
 
@@ -110,6 +112,7 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   }
 
   // Set the curve name if it the non-naming constructor was called
+  // or the naming constructor was called with empty name.
   if (this->title().isEmpty()) {
     // If there's only one spectrum in the workspace, title is simply workspace
     // name

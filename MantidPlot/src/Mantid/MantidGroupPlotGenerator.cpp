@@ -223,28 +223,6 @@ double MantidGroupPlotGenerator::getSingleLogValue(
     const QString &logName) const {
 
     return getSingleWorkspaceLogValue(wsIndex, matrixWS, logName );
-
-/*  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX) {
-    return wsIndex;
-  } else {
-    // MatrixWorkspace is an ExperimentInfo
-    if (auto ei = boost::dynamic_pointer_cast<const ExperimentInfo>(matrixWS)) {
-      auto log = ei->run().getLogData(logName.toStdString());
-      if (log) {
-        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          return std::stod(log->value());
-        } else {
-          throw std::invalid_argument(
-              "Log is of wrong type (expected single numeric value");
-        }
-      } else {
-        throw std::invalid_argument("Log not present in workspace");
-      }
-    } else {
-      throw std::invalid_argument("Bad input workspace type");
-    }
-  } */
 }
 
 /**

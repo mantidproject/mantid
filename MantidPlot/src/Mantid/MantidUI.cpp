@@ -13,6 +13,7 @@
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 #include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidPlotUtilities.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidTable.h"
@@ -2978,7 +2979,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot, QString log,
+                             bool waterfallPlot, const QString &log,
                              std::set<double> customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString, int> pairs;
@@ -2993,7 +2994,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
 
   // Pass over to the overloaded method
   return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
-                plotWindow, clearWindow, waterfallPlot);
+                plotWindow, clearWindow, waterfallPlot, log, customLogValues);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3047,7 +3048,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
-                             bool waterfallPlot, QString log, 
+                             bool waterfallPlot, const QString &log, 
                              std::set<double> customLogValues) {
   if (toPlot.size() == 0)
     return NULL;
@@ -3055,7 +3056,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   if (toPlot.size() > 10) {
     QMessageBox ask(appWindow());
     QAbstractButton *confirmButton =
-        ask.addButton(tr("Confirm"), QMessageBox::ActionRole);
+    ask.addButton(tr("Confirm"), QMessageBox::ActionRole);
     ask.addButton(tr("Cancel"), QMessageBox::ActionRole);
     ask.setText("You selected " + QString::number(toPlot.size()) +
                 " spectra to plot. "
@@ -3106,10 +3107,21 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   MantidMatrixCurve::IndexDir indexType =
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(NULL);
+  QString logValue("");
   for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-       it != toPlot.end(); ++it) {
+    it != toPlot.end(); ++it) {
+
     try {
-      auto *wsCurve = new MantidMatrixCurve(it.key(), g, it.value(), indexType,
+      if (!log.isEmpty()) { // Get log value from workspace
+        MatrixWorkspace_const_sptr workspace =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            it.key().toStdString());
+        double logVal;
+        logVal = getSingleWorkspaceLogValue(1,workspace,log);
+        logValue = logValue.number(logVal,'g',6);
+      }
+
+      auto *wsCurve = new MantidMatrixCurve(logValue, it.key(), g, it.value(), indexType,
                                             errs, plotAsDistribution, style);
       if (!firstCurve) {
         firstCurve = wsCurve;

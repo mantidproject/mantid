@@ -88,6 +88,10 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       userInputAdvanced.axisName = getAxisName();
     }
     userInputAdvanced.logName = getLogName();
+    if (userInputAdvanced.logName == WORKSPACE_INDEX) {
+      // We want default names in legend, if log is workspace index
+      userInputAdvanced.logName = "";
+    }
     userInputAdvanced.workspaceNames = m_wsNames;
     if (userInputAdvanced.logName == CUSTOM) {
       try {
