@@ -3,8 +3,6 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid import config
 
-import os
-
 
 class IndirectDiffScan(DataProcessorAlgorithm):
     _data_files = None
