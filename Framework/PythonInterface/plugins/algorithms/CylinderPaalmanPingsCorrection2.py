@@ -145,7 +145,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         can_ws_name = self.getPropertyValue('CanWorkspace')
 
         if (self._radii[1] - self._radii[0]) < 1e-4:
-            issues['SampleRadius']='Sample outer radius not > inner radius'
+            issues['SampleOuterRadius']='Sample outer radius must be bigger than inner radius'
 
         logger.information('Sample : inner radius = %f ; outer radius = %f' % (self._radii[0], self._radii[1]))
 
