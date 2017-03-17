@@ -17,6 +17,11 @@ Algorithms
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 
+QuickRuns
+~~~~~~~~~
+
+- :ref:`IndirectDiffScan <algm-IndirectDiffScan>` to to improve diffraction reduction workflow
+
 Data Reduction
 ##############
 
