@@ -12,6 +12,11 @@ ISIS Powder Diffraction Scripts
     :local:
 
 
+Instrument Specific Documentation
+---------------------------------
+
+- :ref:`isis-powder-diffraction-pearl-ref`
+- :ref:`isis-powder-diffraction-polaris-ref`
 
 Overview and General Information
 --------------------------------

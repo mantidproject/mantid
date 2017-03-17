@@ -1,6 +1,7 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -59,6 +60,8 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
     // Create a detector for each spectra
     Detector *det = new Detector("pixel", static_cast<detid_t>(i), inst.get());
+    det->setShape(
+        ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
     inst->add(det);
     inst->markAsDetector(det);
     ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
@@ -1417,6 +1420,59 @@ public:
     }
 
     TSM_ASSERT("Should not have any x resolution values", !ws.hasDx(3));
+  }
+
+  void test_scanning() {
+    // Set up 2 workspaces to be merged
+    auto ws1 = makeWorkspaceWithDetectors(1, 1);
+    auto ws2 = makeWorkspaceWithDetectors(1, 1);
+    auto &detInfo1 = ws1->mutableDetectorInfo();
+    auto &detInfo2 = ws2->mutableDetectorInfo();
+    detInfo1.setPosition(0, {1, 0, 0});
+    detInfo2.setPosition(0, {2, 0, 0});
+    detInfo1.setScanInterval(0, {10, 20});
+    detInfo2.setScanInterval(0, {20, 30});
+
+    // Merge
+    auto merged = WorkspaceFactory::Instance().create(ws1, 2);
+    auto &detInfo = merged->mutableDetectorInfo();
+    detInfo.merge(detInfo2);
+
+    // Set up spectrum definitions with 1:1 mapping such that each spectrum
+    // corresponds to 1 time index of a detector.
+    auto specDefs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
+    specDefs.access()[0].add(0, 0); // detector 0, time index 0
+    specDefs.access()[1].add(0, 1); // detector 0, time index 1
+    auto indexInfo = merged->indexInfo();
+    indexInfo.setDetectorIDs({0, 0}); // both spectra have detector ID 0
+    indexInfo.setSpectrumDefinitions(specDefs);
+    merged->setIndexInfo(indexInfo);
+
+    const auto &specInfo = merged->spectrumInfo();
+    TS_ASSERT(specInfo.hasDetectors(0));
+    TS_ASSERT(specInfo.hasDetectors(1));
+    TS_ASSERT_EQUALS(specInfo.position(0), V3D(1, 0, 0));
+    TS_ASSERT_EQUALS(specInfo.position(1), V3D(2, 0, 0));
+
+    TS_ASSERT_THROWS_NOTHING(specInfo.detector(0));
+    const auto &det = specInfo.detector(0);
+    // Failing legacy methods (use DetectorInfo/SpectrumInfo instead):
+    TS_ASSERT_THROWS(det.getPos(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRelativePos(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRotation(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getRelativeRot(), std::runtime_error);
+    TS_ASSERT_THROWS(det.getPhi(), std::runtime_error);
+    // Failing methods, currently without replacement:
+    TS_ASSERT_THROWS(det.solidAngle(V3D(0, 0, 0)), std::runtime_error);
+    BoundingBox bb;
+    TS_ASSERT_THROWS(det.getBoundingBox(bb), std::runtime_error);
+    // Moving parent not possible since non-detector components do not have time
+    // indices and thus DetectorInfo cannot tell which set of detector positions
+    // to adjust.
+    TS_ASSERT_THROWS(detInfo.setPosition(*det.getParent(), V3D(1, 2, 3)),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
+                     std::runtime_error);
   }
 
 private:

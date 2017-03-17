@@ -217,7 +217,7 @@ class StateMask(StateBase):
                 if not find_full_file_path(mask_file):
                     entry = validation_message("Mask file not found.",
                                                "Makes sure that the mask file is in your path",
-                                               {"mask_file": self.mask_file})
+                                               {"mask_file": self.mask_files})
                     is_invalid.update(entry)
 
         # --------------------
