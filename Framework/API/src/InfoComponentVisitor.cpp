@@ -20,11 +20,15 @@ InfoComponentVisitor::InfoComponentVisitor(
   m_detectorIndices.reserve(detectorInfo.size());
 }
 
+/**
+ * @brief InfoComponentVisitor::registerComponentAssembly
+ * @param assembly : ICompAssembly being visited
+ */
 void InfoComponentVisitor::registerComponentAssembly(
-    const ICompAssembly &bank) {
+    const ICompAssembly &assembly) {
 
   std::vector<IComponent_const_sptr> assemblyChildren;
-  bank.getChildren(assemblyChildren, false /*is recursive*/);
+  assembly.getChildren(assemblyChildren, false /*is recursive*/);
 
   const size_t detectorStart = m_detectorIndices.size();
   for (const auto &child : assemblyChildren) {
@@ -36,9 +40,13 @@ void InfoComponentVisitor::registerComponentAssembly(
   m_ranges.emplace_back(std::make_pair(detectorStart, detectorStop));
 
   // For any non-detector we extend the m_componetIds from the back
-  m_componentIds.emplace_back(bank.getComponentID());
+  m_componentIds.emplace_back(assembly.getComponentID());
 }
 
+/**
+ * @brief InfoComponentVisitor::registerGenericComponent
+ * @param component : IComponent being visited
+ */
 void InfoComponentVisitor::registerGenericComponent(
     const IComponent &component) {
   /*
@@ -48,6 +56,11 @@ void InfoComponentVisitor::registerGenericComponent(
   m_ranges.emplace_back(std::make_pair(0, 0)); // Represents an empty range
   m_componentIds.emplace_back(component.getComponentID());
 }
+
+/**
+ * @brief InfoComponentVisitor::registerDetector
+ * @param detector : IDetector being visited
+ */
 void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
   const auto detectorIndex = m_detectorInfo.indexOf(detector.getID());
@@ -60,20 +73,41 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   m_detectorIndices.push_back(detectorIndex);
 }
 
+/**
+ * @brief InfoComponentVisitor::componentDetectorRanges
+ * @return index ranges into the detectorIndices vector. Gives the
+ * intervals of detectors indices for non-detector components such as banks
+ */
 std::vector<std::pair<size_t, size_t>>
 InfoComponentVisitor::componentDetectorRanges() const {
   return m_ranges;
 }
 
+/**
+ * @brief InfoComponentVisitor::detectorIndices
+ * @return detector indices in the order in which they have been visited
+ */
 std::vector<size_t> InfoComponentVisitor::detectorIndices() const {
   return m_detectorIndices;
 }
 
+/**
+ * @brief InfoComponentVisitor::componentIds
+ * @return  component ids in the order in which they have been visited.
+ * Note that the number of component ids will be >= the number of detector
+ * indices
+ * since all detectors are components but not all components are detectors
+ */
 std::vector<Mantid::Geometry::ComponentID>
 InfoComponentVisitor::componentIds() const {
   return m_componentIds;
 }
 
+/**
+ * @brief InfoComponentVisitor::size
+ * @return The total size of the components visited.
+ * This will be the same as the number of IDs.
+ */
 size_t InfoComponentVisitor::size() const { return m_componentIds.size(); }
 
 } // namespace API

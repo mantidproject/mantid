@@ -22,6 +22,12 @@ class DetectorInfo;
 /** InfoComponentVisitor : Visitor for components with access to Info wrapping
   features.
 
+  This visitor ensures only minimal changes are required to any of the
+  IComponent/Instrument1.0 hierachy in order to fully process it. It also
+  eliminates the need for any dynamic casting. Note that InfoComponentVisitor
+  provides accessors for the client to extract visited information such as
+  ComponentIDs.
+
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
@@ -65,7 +71,7 @@ public:
   InfoComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo);
 
   virtual void registerComponentAssembly(
-      const Mantid::Geometry::ICompAssembly &bank) override;
+      const Mantid::Geometry::ICompAssembly &assembly) override;
 
   virtual void registerGenericComponent(
       const Mantid::Geometry::IComponent &component) override;
@@ -73,8 +79,11 @@ public:
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
   std::vector<Mantid::Geometry::IComponent *> componentIds() const;
+
   std::vector<std::pair<size_t, size_t>> componentDetectorRanges() const;
+
   std::vector<size_t> detectorIndices() const;
+
   size_t size() const;
 };
 } // namespace API

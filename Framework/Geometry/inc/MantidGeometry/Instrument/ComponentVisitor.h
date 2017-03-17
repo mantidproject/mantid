@@ -9,8 +9,10 @@ class ICompAssembly;
 class IDetector;
 class IComponent;
 
-/** ComponentVisitor : Visitor for components. Enables parsing of a full doubly
-  linked InstrumentTree without need for dynamic casts.
+/** ComponentVisitor : Visitor for IComponents. Enables parsing of a full doubly
+  linked InstrumentTree without need for dynamic casts. Public methods are
+  called by
+  accepting IComponent
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
