@@ -49,28 +49,32 @@ private:
   /// Detectors components always specified first
   std::vector<Mantid::Geometry::IComponent *> m_componentIds;
 
+  /// Detector indexes
+  std::vector<size_t> m_detectorIndices;
+
   /// Reference to the detector info.
   const Mantid::API::DetectorInfo &m_detectorInfo;
 
   /// Only Assemblies and other NON-detectors yield ranges
   std::vector<std::pair<size_t, size_t>> m_ranges;
 
+  /// Internal counter for detectors
+  size_t m_detectorCounter;
+
 public:
   InfoComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo);
 
   virtual void registerComponentAssembly(
-      const Mantid::Geometry::ICompAssembly &bank,
-      std::vector<size_t> &parentDetectorIndexes) override;
+      const Mantid::Geometry::ICompAssembly &bank) override;
 
+  virtual void registerGenericComponent(
+      const Mantid::Geometry::IComponent &component) override;
   virtual void
-  registerGenericComponent(const Mantid::Geometry::IComponent &component,
-                           std::vector<size_t> &) override;
-  virtual void
-  registerDetector(const Mantid::Geometry::IDetector &detector,
-                   std::vector<size_t> &parentDetectorIndexes) override;
+  registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
   std::vector<Mantid::Geometry::IComponent *> componentIds() const;
   std::vector<std::pair<size_t, size_t>> componentDetectorRanges() const;
+  std::vector<size_t> detectorIndices() const;
   size_t size() const;
 };
 } // namespace API

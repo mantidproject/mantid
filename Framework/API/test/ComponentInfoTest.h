@@ -18,13 +18,13 @@ public:
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
   void test_size() {
-    std::vector<std::vector<size_t>> detectorIndices{
-        {}, {}}; // No detectors in this example
+
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
     ranges.push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(ranges, 0);
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
     ComponentInfo info(internalInfo, std::vector<Mantid::Geometry::ComponentID>{
@@ -34,11 +34,12 @@ public:
 
   void test_indexOf() {
 
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
     ranges.push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(ranges, 0);
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -50,11 +51,12 @@ public:
 
   void test_throws_if_componentids_and_internalinfo_size_mismatch() {
 
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
     ranges.push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(ranges, 0);
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     TSM_ASSERT_THROWS(
         "Should throw too few ComponentIDs",
         ComponentInfo(internalInfo,
@@ -68,15 +70,16 @@ public:
      Detectors marked with their indices
            |
      ------------
-     |         | 2
+     |         | 1
     -------
-    | 0  | 1
+    | 0  | 2
     */
 
+    std::vector<size_t> detectorIndices{0, 2, 1};
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 3));
-    ranges.push_back(std::make_pair(0, 2));
-    Mantid::Beamline::ComponentInfo internalInfo(ranges, 3);
+    ranges.push_back(std::make_pair(2, 3));
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
     Mantid::Geometry::ObjComponent fakeComposite1("fakeComp1");
     Mantid::Geometry::ObjComponent fakeComposite2("fakeComp2");
     Mantid::Geometry::ObjComponent fakeDetector1("fakeDetector1");
@@ -88,9 +91,9 @@ public:
                            &fakeComposite1, &fakeComposite2, &fakeDetector1,
                            &fakeDetector2, &fakeDetector3});
     TS_ASSERT_EQUALS(info.detectorIndices(0 /*component index*/),
-                     std::vector<size_t>({10, 20, 30}));
+                     std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(info.detectorIndices(1 /*component index*/),
-                     std::vector<size_t>({10, 20}));
+                     std::vector<size_t>({1}));
   }
 };
 

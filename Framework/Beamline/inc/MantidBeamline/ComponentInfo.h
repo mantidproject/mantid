@@ -44,8 +44,8 @@ private:
 
 public:
   ComponentInfo();
-  ComponentInfo(const std::vector<std::pair<size_t, size_t>> &ranges,
-                const size_t detectorsSize);
+  ComponentInfo(const std::vector<size_t> &detectorIndices,
+                const std::vector<std::pair<size_t, size_t>> &ranges);
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   size_t size() const;
 };

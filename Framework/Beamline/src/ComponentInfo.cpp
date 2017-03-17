@@ -14,15 +14,13 @@ ComponentInfo::ComponentInfo()
       m_size(0) {}
 
 ComponentInfo::ComponentInfo(
-    const std::vector<std::pair<size_t, size_t>> &ranges,
-    const size_t detectorsSize)
-    : m_detectorIndices(boost::make_shared<std::vector<size_t>>(detectorsSize)),
+    const std::vector<size_t> &detectorIndices,
+    const std::vector<std::pair<size_t, size_t>> &ranges)
+    : m_detectorIndices(
+          boost::make_shared<std::vector<size_t>>(detectorIndices)),
       m_ranges(boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           ranges)),
-      m_size(detectorsSize + ranges.size()) {
-  // fill 0-n
-  std::iota(m_detectorIndices->begin(), m_detectorIndices->end(), 0);
-}
+      m_size(detectorIndices.size() + ranges.size()) {}
 
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {

@@ -191,15 +191,14 @@ makeComponentInfo(const Instrument &oldInstr,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
   InfoComponentVisitor visitor(detectorInfo);
-  std::vector<size_t> detectorIndexes; // Not strictly needed at this level
 
   // Register everything via visitor
-  oldInstr.registerContents(visitor, detectorIndexes);
+  oldInstr.registerContents(visitor);
   // Extract component ids. We need this for the ComponentInfo wrapper.
   componentIds = visitor.componentIds();
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.componentDetectorRanges(), detectorInfo.size());
+      visitor.detectorIndices(), visitor.componentDetectorRanges());
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,

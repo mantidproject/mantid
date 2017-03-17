@@ -32,8 +32,8 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
 }
 
 std::vector<size_t>
-ComponentInfo::detectorIndices(size_t componentIndices) const {
-  return m_componentInfo.detectorIndices(componentIndices);
+ComponentInfo::detectorIndices(size_t componentIndex) const {
+  return m_componentInfo.detectorIndices(componentIndex);
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }

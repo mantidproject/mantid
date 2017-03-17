@@ -165,9 +165,8 @@ const ParameterMap &Detector::parameterMap() const { return *m_map; }
 /// Helper for legacy access mode. Returns the index of the detector.
 size_t Detector::index() const { return m_map->detectorIndex(m_id); }
 
-void Detector::registerContents(ComponentVisitor &componentVisitor,
-                                std::vector<size_t> &detectorIndexes) const {
-  componentVisitor.registerDetector(*this, detectorIndexes);
+void Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  componentVisitor.registerDetector(*this);
 }
 
 } // Namespace Geometry

@@ -489,10 +489,8 @@ Quat CompAssembly::getRotation() const {
   }
 }
 
-void CompAssembly::registerContents(
-    ComponentVisitor &visitor, std::vector<size_t> &detectorIndexes) const {
-
-  visitor.registerComponentAssembly(*this, detectorIndexes);
+void CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream
