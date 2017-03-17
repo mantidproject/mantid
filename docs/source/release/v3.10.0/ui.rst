@@ -21,6 +21,7 @@ User Interface
 Instrument View
 ###############
  - Fixed a bug preventing the some of the banks from being visible when using a U correction.
+ - Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
  - Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on.
 
 Plotting Improvements
@@ -41,8 +42,15 @@ Scripting Window
 Documentation
 #############
 
+Custom Interfaces
+#################
+
+Indirect > Corrections and Indirect > Analysis interfaces have been configured to not to accept GroupWorkspace as input.
+
 Bugs Resolved
 -------------
+
+- Fixed an issue in the Script Window that caused the Convert Tabs to Spaces and vice versa operations to corrupt the script.
 
 SliceViewer Improvements
 ------------------------
