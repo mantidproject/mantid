@@ -1586,21 +1586,24 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
   }
+  // Update Status string
+  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
+  auto iterations = QString::fromStdString(alg->getPropertyValue("OutputNIterations"));
+  emit fitResultsChanged(status, iterations);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
     double quality = alg->getProperty("OutputChi2overDoF");
     std::string costFunction = alg->getProperty("CostFunction");
     boost::shared_ptr<Mantid::API::ICostFunction> costfun =
         Mantid::API::CostFunctionFactory::Instance().create(costFunction);
+    if (status != "success") {
+      status = "failed";
+    }
     emit changeWindowTitle(QString("Fit Function (") +
                            costfun->shortName().c_str() + " = " +
-                           QString::number(quality) + ")");
+                           QString::number(quality) + ", " + status + ")");
   } else
     emit changeWindowTitle("Fit Function");
-  // Update Status string
-  auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
-  auto iterations = QString::fromStdString(alg->getPropertyValue("OutputNIterations"));
-  emit fitResultsChanged(status, iterations);
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }

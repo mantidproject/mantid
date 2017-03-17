@@ -152,7 +152,12 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   GSLVector dx(n);
   // To find dx solve the system of linear equations   H * dx == -m_der
   dd *= -1.0;
-  H.solve(dd, dx);
+  try {
+    H.solve(dd, dx);
+  } catch(std::runtime_error& error) {
+    m_errorString = error.what();
+    return false;
+  }
 
   if (debug) {
     g_log.warning() << "\nScaling factors:\n";
