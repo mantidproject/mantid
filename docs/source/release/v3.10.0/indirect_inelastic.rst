@@ -42,7 +42,10 @@ Jump Fit
 
 Improvements
 ------------
+
+- Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+
 
 Bugfixes
 --------
