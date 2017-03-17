@@ -62,6 +62,9 @@ class Gem(AbstractInst):
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
         return common.crop_banks_using_crop_list(van_ws_to_crop, self._inst_settings.vanadium_cropping_values)
 
+    def _get_input_batching_mode(self):
+        return self._inst_settings.input_batching
+
     def _get_sample_empty(self):
         sample_empty = self._inst_settings.sample_empty
         if sample_empty:

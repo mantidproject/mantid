@@ -7,7 +7,7 @@ import os
 def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     d_spacing_output = []
     tof_output = []
-    run_number = str(run_details.user_input_run_number)
+    run_number = str(run_details.output_run_string)
     for name_index, ws in enumerate(processed_spectra):
         d_spacing_out_name = run_number + "-ResultD-" + str(name_index + 1)
         tof_out_name = run_number + "-ResultTOF-" + str(name_index + 1)

@@ -213,7 +213,7 @@ class AbstractInst(object):
 
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                         output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.user_input_run_number)
+                                        run_number_string=run_details.output_run_string)
 
         return d_spacing_group, tof_group
 
@@ -227,7 +227,7 @@ class AbstractInst(object):
         """
         output_directory = os.path.join(self._output_dir, run_details.label, self._user_name)
         output_directory = os.path.abspath(os.path.expanduser(output_directory))
-        file_name = str(self._generate_output_file_name(run_number_string=run_details.user_input_run_number))
+        file_name = str(self._generate_output_file_name(run_number_string=run_details.output_run_string))
         nxs_file = os.path.join(output_directory, (file_name + ".nxs"))
         gss_file = os.path.join(output_directory, (file_name + ".gsas"))
         tof_xye_file = os.path.join(output_directory, (file_name + "_tof_xye.dat"))
