@@ -217,8 +217,6 @@ private:
 
   /// Returns the volume.
   double monteCarloVolume() const;
-  /// Returns the volume.
-  double triangleVolume() const;
 
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;

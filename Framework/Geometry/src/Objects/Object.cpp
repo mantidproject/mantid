@@ -1576,44 +1576,6 @@ double Object::monteCarloVolume() const {
 }
 
 /**
-* The volume is calculated using the triangulated mesh.
-* @returns The volume of this object.
-* @throws std::runtime_error In case this object is not triangulated.
-*/
-double Object::triangleVolume() const {
-  const auto nTri = NumberOfTriangles();
-  if (nTri == 0) {
-    throw std::runtime_error("Cannot calculate volume from triangulated mesh: no triangles exist.");
-  }
-  // We need a reference point which should preferably be near the shape
-  // as to not cause numerical instabilities. Otherwise, we use the origin.
-  Kernel::V3D refPoint;
-  getPointInObject(refPoint);
-  const double *vertices = getTriangleVertices();
-  const int *faces = getTriangleFaces();
-  std::array<Kernel::V3D, 3> triPoints;
-  double negativeVolumes = 0;
-  double positiveVolumes = 0;
-  for (int i = 0; i < nTri; ++i) {
-    const int faceIndex = 3 * i;
-    for (int j = 0; j < 3; ++j) {
-      const int vertexIndex = 3 * faces[faceIndex + j];
-      triPoints[j].setX(vertices[vertexIndex]);
-      triPoints[j].setY(vertices[vertexIndex + 1]);
-      triPoints[j].setZ(vertices[vertexIndex + 2]);
-      triPoints[j] -= refPoint;
-    }
-    const double signedVolume = 1.0 / 6.0 * triPoints[0].scalar_prod(triPoints[1].cross_prod(triPoints[2]));
-    if (signedVolume < 0) {
-      negativeVolumes += -signedVolume;
-    } else {
-      positiveVolumes += signedVolume;
-    }
-  }
-  return positiveVolumes - negativeVolumes;
-}
-
-/**
 * Returns an axis-aligned bounding box that will fit the shape
 * @returns A reference to a bounding box for this shape.
 */
