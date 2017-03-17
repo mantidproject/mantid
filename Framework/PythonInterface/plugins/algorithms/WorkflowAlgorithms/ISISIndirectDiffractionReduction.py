@@ -11,7 +11,7 @@ from mantid.kernel import *
 from mantid import config
 
 
-class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
+class ISISIndirectDiffractionReductionModified(DataProcessorAlgorithm):
     _workspace_names = None
     _cal_file = None
     _chopped_data = None
@@ -189,6 +189,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             # Process workspaces
             for ws_name in workspaces:
+                monitor_ws_name = ws_name + '_mon'
+
                 # Subtract empty container if there is one
                 if self._container_workspace is not None:
                     Minus(LHSWorkspace=ws_name,
@@ -196,12 +198,34 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           OutputWorkspace=ws_name)
 
                 if self._vanadium_ws:
+                    if self._container_workspace is not None:
+                        van_ws = mtd[self._vanadium_ws[index]]
+                        cont_ws = mtd[self._container_workspace]
+                        if van_ws.blocksize() > cont_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
+                                             WorkspaceToMatch=self._container_workspace,
+                                             OutputWorkspace=self._vanadium_ws[index])
+                        elif cont_ws.blocksize() > van_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=self._container_workspace,
+                                             WorkspaceToMatch=self._vanadium_ws[index],
+                                             OutputWorkspace=self._container_workspace)
+
+                        Minus(LHSWorkspace=self._vanadium_ws[index],
+                              RHSWorkspace=self._container_workspace,
+                              OutputWorkspace=self._vanadium_ws[index])
+
+                    if mtd[ws_name].blocksize() > mtd[self._vanadium_ws[index]].blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=ws_name,
+                                         WorkspaceToMatch=self._vanadium_ws[index],
+                                         OutputWorkspace=ws_name)
+                    elif mtd[self._vanadium_ws[index]].blocksize() > mtd[ws_name].blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
+                                         WorkspaceToMatch=ws_name,
+                                         OutputWorkspace=self._vanadium_ws[index])
                     Divide(LHSWorkspace=ws_name,
                            RHSWorkspace=self._vanadium_ws[index],
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
-
-                monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):
@@ -341,4 +365,4 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
 # ------------------------------------------------------------------------------
 
-AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)
+AlgorithmFactory.subscribe(ISISIndirectDiffractionReductionModified)
