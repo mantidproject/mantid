@@ -62,7 +62,7 @@ Improved
 Python
 ------
 
-- For multiple output parameters, python algorithms now return a `namedtuple` instead of a tuple. Old scripts should still work,
+- For multiple output parameters, python algorithms now return a ``namedtuple`` instead of a ``tuple``. Old scripts should still work,
   but one can now do
 
   .. code-block:: python
@@ -80,7 +80,7 @@ Python
       3.0
       3.0
 
-
+- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape. 
 
 Python Algorithms
 #################
