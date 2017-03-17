@@ -424,8 +424,9 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 
   m_status = new QLabel("Status:", w);
   m_status->hide();
-  connect(this, SIGNAL(fitResultsChanged(const QString &, const QString &)), this,
-          SLOT(showFitResultStatus(const QString &, const QString &)), Qt::QueuedConnection);
+  connect(this, SIGNAL(fitResultsChanged(const QString &, const QString &)),
+          this, SLOT(showFitResultStatus(const QString &, const QString &)),
+          Qt::QueuedConnection);
 
   layout->addLayout(buttonsLayout);
   layout->addWidget(m_tip);
@@ -1588,7 +1589,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   }
   // Update Status string
   auto status = QString::fromStdString(alg->getPropertyValue("OutputStatus"));
-  auto iterations = QString::fromStdString(alg->getPropertyValue("OutputNIterations"));
+  auto iterations =
+      QString::fromStdString(alg->getPropertyValue("OutputNIterations"));
   emit fitResultsChanged(status, iterations);
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
@@ -1631,7 +1633,6 @@ void FitPropertyBrowser::clearFitResultStatus() {
   m_status->setText("Status:");
   m_status->hide();
 }
-
 
 /// Get and store available workspace names
 void FitPropertyBrowser::populateWorkspaceNames() {

@@ -326,7 +326,6 @@ public:
 
     TS_ASSERT_EQUALS(s.getError(), "cannot reach the specified tolerance in F");
   }
-
 };
 
 #endif /*CURVEFITTING_LEVENBERGMARQUARDTTEST_H_*/

@@ -154,7 +154,7 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   dd *= -1.0;
   try {
     H.solve(dd, dx);
-  } catch(std::runtime_error& error) {
+  } catch (std::runtime_error &error) {
     m_errorString = error.what();
     return false;
   }

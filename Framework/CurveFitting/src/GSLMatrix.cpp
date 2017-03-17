@@ -185,7 +185,8 @@ GSLVector GSLMatrix::operator*(const GSLVector &v) const {
         "Matrix by vector multiplication: wrong size of vector.");
   }
   GSLVector res(size1());
-  auto status = gsl_blas_dgemv(CblasNoTrans, 1.0, gsl(), v.gsl(), 0.0, res.gsl());
+  auto status =
+      gsl_blas_dgemv(CblasNoTrans, 1.0, gsl(), v.gsl(), 0.0, res.gsl());
   if (status != GSL_SUCCESS) {
     std::string message = "Failed to multiply matrix by a vector.\n"
                           "Error message returned by the GSL:\n" +
@@ -262,7 +263,8 @@ void GSLMatrix::solve(const GSLVector &rhs, GSLVector &x) {
   int res = gsl_linalg_LU_solve(gsl(), p, rhs.gsl(), x.gsl());
   if (res != GSL_SUCCESS) {
     std::string message = "Failed to solve system of linear equations.\n"
-      "Error message returned by the GSL:\n" + std::string(gsl_strerror(res));
+                          "Error message returned by the GSL:\n" +
+                          std::string(gsl_strerror(res));
     throw std::runtime_error(message);
   }
   gsl_permutation_free(p);

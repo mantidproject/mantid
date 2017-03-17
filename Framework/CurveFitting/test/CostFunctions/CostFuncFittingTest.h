@@ -14,16 +14,13 @@ using namespace Mantid::API;
 
 namespace {
 
-class CostFuncMock: public CostFuncFitting {
+class CostFuncMock : public CostFuncFitting {
 public:
-
-  std::string name() const {return "CostFuncMock";}
-  double val() const {return 0.0;}
+  std::string name() const { return "CostFuncMock"; }
+  double val() const { return 0.0; }
   void deriv(std::vector<double> &der) const {}
-  double valAndDeriv(std::vector<double> &der) const {return 0.0;}
-
+  double valAndDeriv(std::vector<double> &der) const { return 0.0; }
 };
-
 }
 
 class CostFuncFittingTest : public CxxTest::TestSuite {
@@ -33,13 +30,12 @@ public:
   static CostFuncFittingTest *createSuite() {
     return new CostFuncFittingTest();
   }
-  static void destroySuite(CostFuncFittingTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(CostFuncFittingTest *suite) { delete suite; }
 
   void test_parameterName() {
     CostFuncMock costFun;
-    auto fun = FunctionFactory::Instance().createInitialized("name=LinearBackground;name=ExpDecay");
+    auto fun = FunctionFactory::Instance().createInitialized(
+        "name=LinearBackground;name=ExpDecay");
     auto domain = boost::make_shared<FunctionDomain1DVector>(0);
     auto values = boost::make_shared<FunctionValues>(*domain);
     costFun.setFittingFunction(fun, domain, values);
@@ -54,7 +50,6 @@ public:
     TS_ASSERT_EQUALS(costFun.parameterName(1), "f1.Height");
     TS_ASSERT_EQUALS(costFun.parameterName(2), "f1.Lifetime");
   }
-
 };
 
 #endif /* MANTID_CURVEFITTING_COSTFUNCFITTINGTEST_H_ */

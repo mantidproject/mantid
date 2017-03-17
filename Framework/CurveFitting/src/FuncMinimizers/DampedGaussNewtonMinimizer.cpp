@@ -94,7 +94,7 @@ bool DampedGaussNewtonMinimizer::iterate(size_t) {
   dd *= -1.0;
   try {
     H.solve(dd, dx);
-  } catch(std::runtime_error &e) {
+  } catch (std::runtime_error &e) {
     m_errorString = e.what();
     return false;
   }

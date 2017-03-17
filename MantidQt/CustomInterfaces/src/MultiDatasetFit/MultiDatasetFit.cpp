@@ -424,8 +424,7 @@ void MultiDatasetFit::setFitStatusInfo(const QString &status,
   }
   m_fitStatus =
       QString("Status: <span style='color:%2'>%1</span><br>Iterations: "
-              "%3<br>Chi Squared: %4")
-          .arg(text, color, iterations, chiSquared);
+              "%3<br>Chi Squared: %4").arg(text, color, iterations, chiSquared);
   showInfo("");
 }
 
@@ -448,9 +447,12 @@ void MultiDatasetFit::finishFit(bool error) {
       // After a simultaneous fit
       fun = algorithm->getProperty("Function");
       updateParameters(*fun);
-      auto status = QString::fromStdString(algorithm->getPropertyValue("OutputStatus"));
-      auto iterations = QString::fromStdString(algorithm->getPropertyValue("OutputNIterations"));
-      auto chiSquared = QString::fromStdString(algorithm->getPropertyValue("OutputChi2overDoF"));
+      auto status =
+          QString::fromStdString(algorithm->getPropertyValue("OutputStatus"));
+      auto iterations = QString::fromStdString(
+          algorithm->getPropertyValue("OutputNIterations"));
+      auto chiSquared = QString::fromStdString(
+          algorithm->getPropertyValue("OutputChi2overDoF"));
       setFitStatusInfo(status, iterations, chiSquared);
     } else {
       // After a sequential fit
