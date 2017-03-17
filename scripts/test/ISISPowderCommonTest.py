@@ -13,7 +13,8 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_cal_map_dict_helper(self):
         missing_key_name = "wrong_key"
         correct_key_name = "right_key"
-        dict_with_key = {correct_key_name: 123}
+        expected_val = 123
+        dict_with_key = {correct_key_name: expected_val}
 
         # Check it correctly raises
         with assertRaisesRegex(self, KeyError, "The field '" + missing_key_name + "' is required"):
@@ -26,7 +27,19 @@ class ISISPowderCommonTest(unittest.TestCase):
                                                  append_to_error_message=appended_e_msg)
 
         # Check that it correctly returns the key value where it exists
-        self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=correct_key_name), 123)
+        self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=correct_key_name),
+                         expected_val)
+
+        # Check it is not case sensitive
+        different_case_name = "tEsT_key"
+        dict_with_mixed_key = {different_case_name: expected_val}
+
+        try:
+            self.assertEqual(common.cal_map_dictionary_key_helper(dictionary=dict_with_mixed_key,
+                                                                  key=different_case_name.lower()), expected_val)
+        except KeyError:
+            # It tried to use the key without accounting for the case difference
+            self.fail("cal_map_dictionary_key_helper attempted to use a key without accounting for case")
 
     def test_crop_banks_using_crop_list(self):
         bank_list = []
@@ -122,6 +135,28 @@ class ISISPowderCommonTest(unittest.TestCase):
             common.dictionary_key_helper(dictionary=test_dictionary, key=bad_key_name, exception_msg=e_msg)
 
         self.assertEqual(common.dictionary_key_helper(dictionary=test_dictionary, key=good_key_name), 123)
+
+    def test_dictionary_key_helper_handles_mixed_case(self):
+        mixed_case_name = "tEsT_KeY"
+        lower_case_name = mixed_case_name.lower()
+        expected_val = 456
+
+        mixed_case_dict = {mixed_case_name: expected_val}
+
+        # Check by default it doesn't try to account for key
+        with self.assertRaises(KeyError):
+            common.dictionary_key_helper(dictionary=mixed_case_dict, key=lower_case_name)
+
+        # Next check if we have the flag set to False it still throws
+        with self.assertRaises(KeyError):
+            common.dictionary_key_helper(dictionary=mixed_case_dict, key=lower_case_name, case_insensitive=False)
+
+        # Check we actually get the key when we do ask for case insensitive checks
+        try:
+            val = common.dictionary_key_helper(dictionary=mixed_case_dict, key=lower_case_name, case_insensitive=True)
+            self.assertEqual(val, expected_val)
+        except KeyError:
+            self.fail("dictionary_key_helper did not perform case insensitive lookup")
 
     def test_extract_ws_spectra(self):
         number_of_expected_banks = 5
