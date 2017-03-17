@@ -143,6 +143,12 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry], adv_conf_dict=different_case_dict)
         self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar)
 
+    def test_param_map_rejects_enum_missing_friendly_name(self):
+        # Check that is the friendly name is not set it is correctly detected
+        with assertRaisesRegex(self, RuntimeError, "Enum friendly name was not set. Please contact development team."):
+            ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+                                        enum_class=BadSampleEnum)
+
     def test_optional_attribute_works(self):
         optional_param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
                                                            optional=True)
@@ -183,6 +189,10 @@ class SampleEnum(object):
     # The mixed casing is intentional
     a_foo = "a foo"
     a_bar = "A BAR"
+
+
+class BadSampleEnum(object):
+    a_foo = "a foo"
 
 if __name__ == "__main__":
     unittest.main()

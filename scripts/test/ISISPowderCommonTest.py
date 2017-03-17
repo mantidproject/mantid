@@ -237,5 +237,6 @@ class ISISPowderCommonTest(unittest.TestCase):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
 
+
 if __name__ == "__main__":
     unittest.main()
