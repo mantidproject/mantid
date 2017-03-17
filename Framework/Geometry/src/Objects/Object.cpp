@@ -1475,14 +1475,12 @@ double Object::ConeSolidAngle(const V3D &observer,
   return solid_angle;
 }
 
-
 /**
  * For simple shapes, the volume is calculated exactly. For more
  * complex cases, we fall back to Monte Carlo.
  * @return The volume.
  */
 double Object::volume() const {
-  // TODO We probably should use the triangulated volume here if it is available.
   int type;
   double height;
   double radius;
@@ -1491,8 +1489,7 @@ double Object::volume() const {
   GluGeometryHandler::GeometryType gluType =
       static_cast<GluGeometryHandler::GeometryType>(type);
   switch (gluType) {
-  case GluGeometryHandler::GeometryType::CUBOID:
-  {
+  case GluGeometryHandler::GeometryType::CUBOID: {
     double volume = 0.0;
     const Kernel::V3D vertex12 = vectors[1] + vectors[2];
     const Kernel::V3D vertex13 = vectors[1] + vectors[3];
@@ -1537,8 +1534,7 @@ double Object::monteCarloVolume() const {
   const double boundingDx = boundingBox.xMax() - boundingBox.xMin();
   const double boundingDy = boundingBox.yMax() - boundingBox.yMin();
   const double boundingDz = boundingBox.yMax() - boundingBox.yMin();
-  PARALLEL
-  {
+  PARALLEL {
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = maxIterations / threadCount;
@@ -1570,13 +1566,13 @@ double Object::monteCarloVolume() const {
       }
     }
     // Collect results.
-    PARALLEL_CRITICAL(monteCarloVolume)
-    {
+    PARALLEL_CRITICAL(monteCarloVolume) {
       total += localTotal;
       totalHits += hits;
     }
   }
-  const double ratio = static_cast<double>(totalHits) / static_cast<double>(total);
+  const double ratio =
+      static_cast<double>(totalHits) / static_cast<double>(total);
   const double boundingVolume = boundingDx * boundingDy * boundingDz;
   return ratio * boundingVolume;
 }
