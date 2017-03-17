@@ -3,7 +3,6 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Strings.h"
@@ -28,6 +27,7 @@
 #include <array>
 #include <deque>
 #include <iostream>
+#include <random>
 #include <stack>
 
 namespace Mantid {
