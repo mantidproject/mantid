@@ -1475,6 +1475,12 @@ double Object::ConeSolidAngle(const V3D &observer,
   return solid_angle;
 }
 
+
+/**
+ * For simple shapes, the volume is calculated exactly. For more
+ * complex cases, we fall back to Monte Carlo.
+ * @return The volume.
+ */
 double Object::volume() const {
   // TODO We probably should use the triangulated volume here if it is available.
   int type;
