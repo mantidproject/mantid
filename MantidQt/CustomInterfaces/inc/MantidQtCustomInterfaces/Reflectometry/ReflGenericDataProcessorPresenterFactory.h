@@ -4,8 +4,6 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Reflectometry/ReflDataProcessorPresenter.h"
 
-#include <memory>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 /** @class ReflGenericDataProcessorPresenterFactory
