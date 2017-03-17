@@ -96,8 +96,8 @@ class InstrumentSettings(object):
         attribute_name = param_map.int_name
 
         if param_map.enum_class:
-            # Check value falls within valid enum range
-            _check_value_is_in_enum(param_val, param_map.enum_class)
+            # Check value falls within valid enum range and get the correct capital version
+            param_val = _check_value_is_in_enum(param_val, param_map.enum_class)
 
         # Does the attribute exist - has it changed and are we suppressing warnings
         if not suppress_warnings:
@@ -126,17 +126,18 @@ def _check_value_is_in_enum(val, enum):
     enum_known_keys = []
     lower_string_val = str(val).lower()
 
-    for k, v in iteritems(enum.__dict__):
+    for k, enum_val in iteritems(enum.__dict__):
         # Get all class attribute and value pairs except enum_friendly_name
         if k.startswith("__") or k.lower() == "enum_friendly_name":
             continue
 
         enum_known_keys.append(k)
 
-        if lower_string_val == v.lower():
+        if lower_string_val == enum_val.lower():
             # Get the correctly capitalised value so we no longer have to call lower
-            val = v
+            val = enum_val
             seen_val_in_enum = True
+            break
 
     # Check to see if the value was seen
     if seen_val_in_enum:

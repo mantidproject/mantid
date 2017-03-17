@@ -139,13 +139,13 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar)
 
         # Next check it passes on mixed case and converts it back to the correct case
-        different_case_dict = {"user_facing_name": SampleEnum.a_bar.upper()}
+        different_case_dict = {"user_facing_name": SampleEnum.a_bar.lower()}
         inst_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry], adv_conf_dict=different_case_dict)
-        self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar)
+        self.assertEqual(inst_obj.script_facing_name, SampleEnum.a_bar, "Case is not being converted correctly")
 
     def test_param_map_rejects_enum_missing_friendly_name(self):
         # Check that is the friendly name is not set it is correctly detected
-        with assertRaisesRegex(self, RuntimeError, "Enum friendly name was not set. Please contact development team."):
+        with assertRaisesRegex(self, RuntimeError, "'enum_friendly_name' was not set. Please contact development team."):
             ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
                                         enum_class=BadSampleEnum)
 
