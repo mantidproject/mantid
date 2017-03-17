@@ -2,7 +2,6 @@
 #define MANTID_INDEXING_INDEXINFO_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -87,19 +86,19 @@ public:
                      const StorageMode storageMode = StorageMode::Cloned,
                      const Communicator &communicator = Communicator{1, 0});
   explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
-            const StorageMode storageMode = StorageMode::Cloned,
-            const Communicator &communicator = Communicator{1, 0});
+                     const StorageMode storageMode = StorageMode::Cloned,
+                     const Communicator &communicator = Communicator{1, 0});
 
   size_t size() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
-  const std::vector<DetectorID> &detectorIDs(const size_t index) const;
+  const SpectrumDefinition &spectrumDefinition(const size_t index) const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
-  void setDetectorIDs(const std::vector<DetectorID> &detectorIDs);
-  void setDetectorIDs(std::vector<std::vector<DetectorID>> &&detectorIDs);
 
+  void
+  setSpectrumDefinitions(std::vector<SpectrumDefinition> spectrumDefinitions);
   void setSpectrumDefinitions(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
@@ -121,7 +120,6 @@ private:
   StorageMode m_storageMode;
   Communicator m_communicator;
 
-  Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
       nullptr};
   mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{

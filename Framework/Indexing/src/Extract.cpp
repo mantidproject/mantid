@@ -1,6 +1,6 @@
-#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Indexing {
@@ -9,13 +9,13 @@ namespace Indexing {
 /// specified by vector.
 IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
   std::vector<SpectrumNumber> specNums;
-  std::vector<std::vector<DetectorID>> detIDs;
+  std::vector<SpectrumDefinition> specDefs;
   for (const auto &i : indices) {
     specNums.emplace_back(source.spectrumNumber(i));
-    detIDs.emplace_back(source.detectorIDs(i));
+    specDefs.emplace_back(source.spectrumDefinition(i));
   }
   IndexInfo result(std::move(specNums));
-  result.setDetectorIDs(std::move(detIDs));
+  result.setSpectrumDefinitions(std::move(specDefs));
   return result;
 }
 
@@ -24,13 +24,13 @@ IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
 IndexInfo extract(const IndexInfo &source, const size_t minIndex,
                   const size_t maxIndex) {
   std::vector<SpectrumNumber> specNums;
-  std::vector<std::vector<DetectorID>> detIDs;
+  std::vector<SpectrumDefinition> specDefs;
   for (size_t i = minIndex; i <= maxIndex; ++i) {
     specNums.emplace_back(source.spectrumNumber(i));
-    detIDs.emplace_back(source.detectorIDs(i));
+    specDefs.emplace_back(source.spectrumDefinition(i));
   }
   IndexInfo result(std::move(specNums));
-  result.setDetectorIDs(std::move(detIDs));
+  result.setSpectrumDefinitions(std::move(specDefs));
   return result;
 }
 

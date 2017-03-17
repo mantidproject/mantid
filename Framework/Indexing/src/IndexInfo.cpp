@@ -21,8 +21,8 @@ IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
   makeSpectrumNumberTranslator(std::move(specNums));
-  m_detectorIDs = Kernel::make_cow<std::vector<std::vector<DetectorID>>>(
-      m_spectrumNumberTranslator->localSize());
+  m_spectrumDefinitions =
+      Kernel::make_cow<std::vector<SpectrumDefinition>>(size());
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -32,8 +32,8 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Communicator &communicator)
     : m_storageMode(storageMode), m_communicator(communicator) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
-  m_detectorIDs = Kernel::make_cow<std::vector<std::vector<DetectorID>>>(
-      m_spectrumNumberTranslator->localSize());
+  m_spectrumDefinitions =
+      Kernel::make_cow<std::vector<SpectrumDefinition>>(size());
 }
 
 /// The *local* size, i.e., the number of spectra in this partition.
@@ -48,10 +48,10 @@ SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return m_spectrumNumberTranslator->spectrumNumber(index);
 }
 
-/// Return a vector of the detector IDs for given index.
-const std::vector<DetectorID> &
-IndexInfo::detectorIDs(const size_t index) const {
-  return (*m_detectorIDs)[index];
+/// Returns the spectrum definition for given index.
+const SpectrumDefinition &
+IndexInfo::spectrumDefinition(const size_t index) const {
+  return (*m_spectrumDefinitions)[index];
 }
 
 /// Set a spectrum number for each index.
@@ -75,36 +75,13 @@ void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
   makeSpectrumNumberTranslator(std::move(specNums));
 }
 
-/// Set a single detector ID for each index.
-void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) {
-  if (size() != detectorIDs.size())
+/// Set the spectrum definitions.
+void IndexInfo::setSpectrumDefinitions(
+    std::vector<SpectrumDefinition> spectrumDefinitions) {
+  if (size() != spectrumDefinitions.size())
     throw std::runtime_error(
-        "IndexInfo: Size mismatch when setting new detector IDs");
-
-  auto &detIDs = m_detectorIDs.access();
-  for (size_t i = 0; i < detectorIDs.size(); ++i)
-    detIDs[i] = {detectorIDs[i]};
-  // Setting new detector ID grouping makes definitions outdated.
-  m_spectrumDefinitions =
-      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
-}
-
-/// Set a vector of detector IDs for each index.
-void IndexInfo::setDetectorIDs(
-    std::vector<std::vector<DetectorID>> &&detectorIDs) {
-  if (size() != detectorIDs.size())
-    throw std::runtime_error(
-        "IndexInfo: Size mismatch when setting new detector IDs");
-
-  auto &detIDs = m_detectorIDs.access();
-  detIDs = std::move(detectorIDs);
-  for (auto &ids : detIDs) {
-    std::sort(ids.begin(), ids.end());
-    ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
-  }
-  // Setting new detector ID grouping makes definitions outdated.
-  m_spectrumDefinitions =
-      Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
+        "IndexInfo: Size mismatch when setting new spectrum definitions");
+  m_spectrumDefinitions.access() = std::move(spectrumDefinitions);
 }
 
 /** Set the spectrum definitions.

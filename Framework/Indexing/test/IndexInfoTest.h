@@ -24,9 +24,9 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 3);
-    TS_ASSERT(info.detectorIDs(0).empty());
-    TS_ASSERT(info.detectorIDs(1).empty());
-    TS_ASSERT(info.detectorIDs(2).empty());
+    TS_ASSERT_EQUALS(info.spectrumDefinition(0).size(), 0);
+    TS_ASSERT_EQUALS(info.spectrumDefinition(1).size(), 0);
+    TS_ASSERT_EQUALS(info.spectrumDefinition(2).size(), 0);
   }
 
   void test_vector_constructor() {
@@ -38,39 +38,34 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(info.detectorIDs(0), (std::vector<DetectorID>{}));
-    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<DetectorID>{}));
-    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<DetectorID>{}));
   }
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
 
   void test_copy() {
     IndexInfo info({3, 2, 1});
-    info.setDetectorIDs({{}, {10}, {20, 30}});
+    const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
+    info.setSpectrumDefinitions(defs);
     auto copy(info);
     TS_ASSERT_EQUALS(info.size(), 3);
     TS_ASSERT_EQUALS(copy.size(), 3);
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(copy.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(copy.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<DetectorID>{}));
-    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<DetectorID>{10}));
-    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+    TS_ASSERT_EQUALS(info.spectrumDefinitions(), copy.spectrumDefinitions());
   }
 
   void test_move() {
     IndexInfo info({3, 2, 1});
-    info.setDetectorIDs({{}, {10}, {20, 30}});
+    const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
+    info.setSpectrumDefinitions(defs);
     auto moved(std::move(info));
     TS_ASSERT_EQUALS(info.size(), 0);
     TS_ASSERT_EQUALS(moved.size(), 3);
     TS_ASSERT_EQUALS(moved.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(moved.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(moved.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(moved.detectorIDs(0), (std::vector<DetectorID>{}));
-    TS_ASSERT_EQUALS(moved.detectorIDs(1), (std::vector<DetectorID>{10}));
-    TS_ASSERT_EQUALS(moved.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+    TS_ASSERT_EQUALS(info.spectrumDefinitions(), nullptr);
   }
 
   void test_setSpectrumNumbers_size_mismatch() {
@@ -78,9 +73,12 @@ public:
     TS_ASSERT_THROWS(t.setSpectrumNumbers({1, 2}), std::runtime_error);
   }
 
-  void test_setDetectorIDs_size_mismatch() {
+  void test_setSpectrumDefinitions_size_mismatch() {
     IndexInfo t(3);
-    TS_ASSERT_THROWS(t.setDetectorIDs({1, 2}), std::runtime_error);
+    TS_ASSERT_THROWS_EQUALS(
+        t.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2)),
+        const std::runtime_error &e, std::string(e.what()),
+        "IndexInfo: Size mismatch when setting new spectrum definitions");
   }
 
   void test_setSpectrumNumbers() {
@@ -91,12 +89,16 @@ public:
     TS_ASSERT_EQUALS(t.spectrumNumber(2), 5);
   }
 
-  void test_setDetectorIDs() {
+  void test_setSpectrumDefinitions() {
     IndexInfo t(3);
-    TS_ASSERT_THROWS_NOTHING(t.setDetectorIDs({6, 7, 8}));
-    TS_ASSERT_EQUALS(t.detectorIDs(0), std::vector<DetectorID>{6});
-    TS_ASSERT_EQUALS(t.detectorIDs(1), std::vector<DetectorID>{7});
-    TS_ASSERT_EQUALS(t.detectorIDs(2), std::vector<DetectorID>{8});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(6);
+    specDefs[1].add(7);
+    specDefs[2].add(8);
+    TS_ASSERT_THROWS_NOTHING(t.setSpectrumDefinitions(specDefs));
+    TS_ASSERT_EQUALS(t.spectrumDefinition(0), specDefs[0]);
+    TS_ASSERT_EQUALS(t.spectrumDefinition(1), specDefs[1]);
+    TS_ASSERT_EQUALS(t.spectrumDefinition(2), specDefs[2]);
   }
 
   void test_setSpectrumDefinitions_setting_nullptr_fails() {
@@ -107,13 +109,13 @@ public:
     TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
   }
 
-  void test_setSpectrumDefinitions_size_mismatch() {
+  void test_setSpectrumDefinitions_size_mismatch_cow_ptr() {
     IndexInfo info(3);
     const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
     TS_ASSERT_THROWS(info.setSpectrumDefinitions(defs), std::runtime_error);
   }
 
-  void test_setSpectrumDefinitions() {
+  void test_setSpectrumDefinitions_cow_ptr() {
     IndexInfo info(3);
     const auto defs = Kernel::make_cow<std::vector<SpectrumDefinition>>(3);
     TS_ASSERT_THROWS_NOTHING(info.setSpectrumDefinitions(defs));

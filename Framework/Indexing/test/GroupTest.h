@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid;
 using namespace Indexing;
@@ -19,7 +19,6 @@ public:
 
   void test_size_mismatch_fail() {
     IndexInfo source({1, 2, 3});
-    source.setDetectorIDs({10, 20, 30});
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
     std::vector<SpectrumNumber> specNums{4, 5};
     TS_ASSERT_THROWS(group(source, std::move(specNums), grouping),
@@ -29,52 +28,71 @@ public:
 
   void test_no_grouping() {
     IndexInfo source({1, 2, 3});
-    source.setDetectorIDs({10, 20, 30});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(10);
+    specDefs[1].add(20);
+    specDefs[2].add(30);
+    source.setSpectrumDefinitions(specDefs);
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
     auto result = group(source, {4, 5, 6}, grouping);
     TS_ASSERT_EQUALS(result.size(), 3);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 4);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 5);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{10});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{20});
-    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<DetectorID>{30});
+    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[0]);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[1]);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(2), specDefs[2]);
   }
 
   void test_swap_ids() {
     IndexInfo source({1, 2, 3});
-    source.setDetectorIDs({10, 20, 30});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(10);
+    specDefs[1].add(20);
+    specDefs[2].add(30);
+    source.setSpectrumDefinitions(specDefs);
     std::vector<std::vector<size_t>> grouping{{1}, {0}, {2}};
     auto result = group(source, {1, 2, 3}, grouping);
     TS_ASSERT_EQUALS(result.size(), 3);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 3);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{20});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{10});
-    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<DetectorID>{30});
+    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[1]);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[0]);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(2), specDefs[2]);
   }
 
   void test_extract() {
     IndexInfo source({1, 2, 3});
-    source.setDetectorIDs({10, 20, 30});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(10);
+    specDefs[1].add(20);
+    specDefs[2].add(30);
+    source.setSpectrumDefinitions(specDefs);
     std::vector<std::vector<size_t>> grouping{{1}};
     auto result = group(source, {1}, grouping);
     TS_ASSERT_EQUALS(result.size(), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{20});
+    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[1]);
   }
 
   void test_group() {
     IndexInfo source({1, 2, 3});
-    source.setDetectorIDs({10, 20, 30});
+    std::vector<SpectrumDefinition> specDefs(3);
+    specDefs[0].add(10);
+    specDefs[1].add(20);
+    specDefs[2].add(30);
+    source.setSpectrumDefinitions(specDefs);
     std::vector<std::vector<size_t>> grouping{{0, 2}, {1}};
     auto result = group(source, {1, 2}, grouping);
     TS_ASSERT_EQUALS(result.size(), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>({10, 30}));
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{20});
+    SpectrumDefinition group;
+    group.add(10);
+    group.add(30);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(0), group);
+    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[1]);
   }
 };
 
