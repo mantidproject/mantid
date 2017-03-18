@@ -190,7 +190,9 @@ makeComponentInfo(const Instrument &oldInstr,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  InfoComponentVisitor visitor(detectorInfo);
+  InfoComponentVisitor visitor(
+      detectorInfo.size(),
+      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
 
   // Register everything via visitor
   oldInstr.registerContents(visitor);

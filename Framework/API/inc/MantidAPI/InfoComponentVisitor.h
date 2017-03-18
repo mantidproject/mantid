@@ -6,9 +6,10 @@
 #include <cstddef>
 #include <utility>
 #include <vector>
+#include <functional>
 
 namespace Mantid {
-
+using detid_t = int32_t;
 namespace Geometry {
 class IComponent;
 class ICompAssembly;
@@ -16,8 +17,6 @@ class IDetector;
 }
 
 namespace API {
-
-class DetectorInfo;
 
 /** InfoComponentVisitor : Visitor for components with access to Info wrapping
   features.
@@ -58,8 +57,9 @@ private:
   /// Detector indexes
   std::vector<size_t> m_detectorIndices;
 
-  /// Reference to the detector info.
-  const Mantid::API::DetectorInfo &m_detectorInfo;
+  /// Mapping function to allow us to go from detector id to detecor index
+  std::function<size_t(const Mantid::detid_t)>
+      m_detectorIdToIndexMapperFunction;
 
   /// Only Assemblies and other NON-detectors yield ranges
   std::vector<std::pair<size_t, size_t>> m_ranges;
@@ -68,7 +68,8 @@ private:
   size_t m_detectorCounter;
 
 public:
-  InfoComponentVisitor(const Mantid::API::DetectorInfo &detectorInfo);
+  InfoComponentVisitor(const size_t nDetectors,
+                       std::function<size_t(Mantid::detid_t)> mapperFunc);
 
   virtual void registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
@@ -78,11 +79,11 @@ public:
   virtual void
   registerDetector(const Mantid::Geometry::IDetector &detector) override;
 
-  std::vector<Mantid::Geometry::IComponent *> componentIds() const;
+  const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
 
-  std::vector<std::pair<size_t, size_t>> componentDetectorRanges() const;
+  const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
 
-  std::vector<size_t> detectorIndices() const;
+  const std::vector<size_t> &detectorIndices() const;
 
   size_t size() const;
 };

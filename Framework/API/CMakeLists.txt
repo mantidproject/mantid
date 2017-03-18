@@ -397,6 +397,7 @@ set ( TEST_FILES
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	InfoComponentVisitorTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h

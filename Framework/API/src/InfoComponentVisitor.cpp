@@ -14,10 +14,11 @@ namespace API {
 using namespace Mantid::Geometry;
 
 InfoComponentVisitor::InfoComponentVisitor(
-    const Mantid::API::DetectorInfo &detectorInfo)
-    : m_componentIds(detectorInfo.size()), m_detectorInfo(detectorInfo),
+    const size_t nDetectors,
+    std::function<size_t(const Mantid::detid_t)> mapperFunc)
+    : m_componentIds(nDetectors), m_detectorIdToIndexMapperFunction(mapperFunc),
       m_detectorCounter(0) {
-  m_detectorIndices.reserve(detectorInfo.size());
+  m_detectorIndices.reserve(nDetectors);
 }
 
 /**
@@ -63,7 +64,8 @@ void InfoComponentVisitor::registerGenericComponent(
  */
 void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
-  const auto detectorIndex = m_detectorInfo.indexOf(detector.getID());
+  const auto detectorIndex =
+      m_detectorIdToIndexMapperFunction(detector.getID());
 
   /* Already allocated we just need to index into the inital front-detector
    * part of the collection
@@ -78,7 +80,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
  * @return index ranges into the detectorIndices vector. Gives the
  * intervals of detectors indices for non-detector components such as banks
  */
-std::vector<std::pair<size_t, size_t>>
+const std::vector<std::pair<size_t, size_t>> &
 InfoComponentVisitor::componentDetectorRanges() const {
   return m_ranges;
 }
@@ -87,7 +89,7 @@ InfoComponentVisitor::componentDetectorRanges() const {
  * @brief InfoComponentVisitor::detectorIndices
  * @return detector indices in the order in which they have been visited
  */
-std::vector<size_t> InfoComponentVisitor::detectorIndices() const {
+const std::vector<size_t> &InfoComponentVisitor::detectorIndices() const {
   return m_detectorIndices;
 }
 
@@ -98,7 +100,7 @@ std::vector<size_t> InfoComponentVisitor::detectorIndices() const {
  * indices
  * since all detectors are components but not all components are detectors
  */
-std::vector<Mantid::Geometry::ComponentID>
+const std::vector<Mantid::Geometry::ComponentID> &
 InfoComponentVisitor::componentIds() const {
   return m_componentIds;
 }
