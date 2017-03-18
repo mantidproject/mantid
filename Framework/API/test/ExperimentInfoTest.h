@@ -784,7 +784,7 @@ public:
     TS_ASSERT_EQUALS(compInfo.size(), nComponents);
   }
 
-  void test_component_info_detector_entries() {
+  void test_component_info_detector_indices_for_assembly_component_types() {
 
     const int nPixels = 10;
     auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
@@ -793,10 +793,9 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
-    const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
-
-    // Get the id of the single rectangular bank
+    const auto &compInfo = expInfo.componentInfo();
+    const auto &detInfo = expInfo.detectorInfo();
+    // Test the single bank
     auto bank = inst->getComponentByName("bank1");
     auto bankID = bank->getComponentID();
     auto allBankDetectorIndexes =
@@ -806,6 +805,7 @@ public:
                       allBankDetectorIndexes.size(),
                       detInfo.size()); //
 
+    // Test one of the bank rows
     auto bankRowID =
         boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(bank)
             ->getChild(0)
@@ -816,7 +816,19 @@ public:
     TSM_ASSERT_EQUALS("Should have all detectors under this row",
                       allRowDetectorIndexes.size(),
                       10); //
+  }
+  void test_component_info_detector_indices_for_detector_component_types() {
 
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+    const Mantid::API::DetectorInfo &detInfo = expInfo.detectorInfo();
+    // Test one of the detectors
     const auto targetDetectorIndex = 0;
     const auto detCompId =
         detInfo.detector(targetDetectorIndex).getComponentID();
@@ -824,7 +836,29 @@ public:
         "Detector should report the detector index of itself",
         compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 1);
     TS_ASSERT_EQUALS(compInfo.detectorIndices(compInfo.indexOf(detCompId))[0],
-                     targetDetectorIndex)
+                     targetDetectorIndex);
+  }
+
+  void test_component_info_detector_indices_for_generic_component_types() {
+    const int nPixels = 10;
+    auto inst = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels /*10 by 10 dets in bank*/,
+        1 /*sample-bank distance*/);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    // Test non-detector, non-assembly components
+    auto sampleId = inst->getComponentByName("sample")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Sample should not report any nested detector indexes",
+        compInfo.detectorIndices(compInfo.indexOf(sampleId)).size(), 0);
+
+    auto sourceId = inst->getComponentByName("source")->getComponentID();
+    TSM_ASSERT_EQUALS(
+        "Source should not report any nested detector indexes",
+        compInfo.detectorIndices(compInfo.indexOf(sourceId)).size(), 0);
   }
 
 private:

@@ -22,7 +22,7 @@ public:
   }
   static void destroySuite(InfoComponentVisitorTest *suite) { delete suite; }
 
-  void test_visit_minimal_instrument_basic_sanity_check() {
+  void test_visitor_basic_sanity_check() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
@@ -39,7 +39,7 @@ public:
     TSM_ASSERT_EQUALS("Should have registered 4 components", visitor.size(), 4);
   }
 
-  void test_visit_minimal_instrument_detector_indexes_check() {
+  void test_visitor_detector_indexes_check() {
 
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
@@ -64,7 +64,7 @@ public:
                       std::vector<size_t>{detectorIndex});
   }
 
-  void test_visit_minimal_instrument_component_check() {
+  void test_visitor_component_check() {
     // Create a very basic instrument to visit
     auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
                                            V3D(10, 0, 0) /*sample pos*/
@@ -94,6 +94,40 @@ public:
         "Should contain the detector id", 1,
         componentIds.count(
             visitee->getComponentByName("point-detector")->getComponentID()));
+  }
+
+  void test_visitor_ranges_check() {
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    // Create the visitor.
+    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) { return 0; });
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    auto ranges = visitor.componentDetectorRanges();
+    TSM_ASSERT_EQUALS("There are 3 non-detector components", ranges.size(), 3);
+
+    /*
+     * In this instrument there is only a single assembly (the instrument
+     * itself). All other non-detectors are also non-assembly components.
+     * We therefore EXPECT that the ranges provided are all from 0 to 0 for
+     * those generic components. This is important for subsequent correct
+     * working on ComponentInfo.
+     */
+    // Source has no detectors
+    TS_ASSERT_EQUALS(ranges[0].first, 0);
+    TS_ASSERT_EQUALS(ranges[0].second, 0);
+    // Sample has no detectors
+    TS_ASSERT_EQUALS(ranges[1].first, 0);
+    TS_ASSERT_EQUALS(ranges[1].second, 0);
+    // Instrument has 1 detector.
+    TS_ASSERT_EQUALS(ranges[2].first, 0);
+    TS_ASSERT_EQUALS(ranges[2].second, 1);
   }
 };
 
