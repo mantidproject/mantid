@@ -120,9 +120,8 @@ void SaveHKL::exec() {
   Kernel::DblMatrix UB(3, 3);
   if (cosines) {
     if (peaksW->sample().hasOrientedLattice()) {
-      UB =  peaksW->sample().getOrientedLattice().getUB();
-    }
-    else {
+      UB = peaksW->sample().getOrientedLattice().getUB();
+    } else {
       // Find OrientedLattice
       std::string fileUB = getProperty("UBFilename");
       // Open the file
@@ -132,7 +131,7 @@ void SaveHKL::exec() {
             "A file containing the UB matrix must be input into UBFilename.");
       std::string s;
       double val;
-  
+
       // Read the ISAW UB matrix
       for (size_t row = 0; row < 3; row++) {
         for (size_t col = 0; col < 3; col++) {
