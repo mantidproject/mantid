@@ -11,6 +11,17 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         run_number_string=run_number_string, inst_settings=inst_settings)
     run_number = common.get_first_run_number(run_number_string=run_number_string)
 
+    # Get names of files we will be using
+    calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
+    label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
+    offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
+    
+    # Always make sure the offset file name is included
+    if splined_name_list:
+        splined_name_list.append(offset_file_name)
+    else:
+        splined_name_list = [offset_file_name]
+
     # These can either be generic or custom so defer to another method
     results_dict = _get_customisable_attributes(
         cal_dict=cal_map_dict, inst_settings=inst_settings, empty_run_call=empty_run_call,
@@ -26,19 +37,9 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     else:
         output_run_string = run_number_string
 
-    # Get names of files we will be using
-    calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
-    label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
-    offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
 
     # Sample empty if there is one
     sample_empty = inst_settings.sample_empty if hasattr(inst_settings, "sample_empty") else None
-
-    # Always make sure the offset file name is included
-    if splined_name_list:
-        splined_name_list.append(offset_file_name)
-    else:
-        splined_name_list = [offset_file_name]
 
     # Generate the paths
     grouping_file_path = os.path.join(calibration_dir, results_dict["grouping_file_name"])
