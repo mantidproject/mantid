@@ -460,9 +460,9 @@ public:
     }
     TS_ASSERT_EQUALS(outbraggws->rowCount(), 11);
     TS_ASSERT_EQUALS(outbraggws->columnCount(), 10);
-    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 1.83, 0.01);
+    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 1.83, 0.3);
     TS_ASSERT_DELTA(outbraggws->Double(4, 9), 0.44, 0.01);
-    TS_ASSERT_DELTA(outbraggws->Double(8, 9), 0.52, 0.01);
+    TS_ASSERT_DELTA(outbraggws->Double(8, 9), 0.52, 0.3);
 
     AnalysisDataService::Instance().remove("DataWorkspace");
     AnalysisDataService::Instance().remove("PeakParameters");

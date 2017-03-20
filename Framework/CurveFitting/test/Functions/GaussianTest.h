@@ -52,8 +52,7 @@ public:
         new API::FunctionDomain1DVector(79292.4, 79603.6, 41));
     API::FunctionValues mockData(*domain);
     UserFunction dataMaker;
-    dataMaker.setAttributeValue("Formula", "b+h*exp(-((x-c)/s)^2)");
-    dataMaker.setParameter("b", 0);
+    dataMaker.setAttributeValue("Formula", "h*exp(-((x-c)/s)^2)");
     dataMaker.setParameter("h", 232.11);
     dataMaker.setParameter("c", 79430.1);
     dataMaker.setParameter("s", 26.14);
@@ -63,32 +62,16 @@ public:
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
-    CompositeFunction_sptr fnWithBk(new CompositeFunction());
-
-    boost::shared_ptr<LinearBackground> bk =
-        boost::make_shared<LinearBackground>();
-    bk->initialize();
-
-    bk->setParameter("A0", 0.0);
-    bk->setParameter("A1", 0.0);
-    bk->tie("A1", "0");
-
     // set up Gaussian fitting function
     boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
     fn->initialize();
-    fn->setParameter("PeakCentre", 79450.0);
+    fn->setParameter("PeakCentre", 79440.0);
     fn->setParameter("Height", 200.0);
-    fn->setParameter("Sigma", 300.0);
-    fn->addConstraint(Kernel::make_unique<BoundaryConstraint>(fn.get(), "Sigma",
-                                                              20.0, 100.0));
-
-    fnWithBk->addFunction(bk);
-    fnWithBk->addFunction(fn);
+    fn->setParameter("Sigma", 30.0);
 
     boost::shared_ptr<CostFuncLeastSquares> costFun =
         boost::make_shared<CostFuncLeastSquares>();
-    costFun->setFittingFunction(fnWithBk, domain, values);
-    // TS_ASSERT_EQUALS(costFun->nParams(),3);
+    costFun->setFittingFunction(fn, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;
     s.initialize(costFun);
