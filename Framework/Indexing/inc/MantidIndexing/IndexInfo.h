@@ -77,11 +77,15 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
+  // StorageMode and Communicator are temporary helpers provided here for
+  // testing that will be removed (or rather replaced) once we have proper MPI
+  // support.
   enum class StorageMode { Cloned, Distributed, MasterOnly };
   struct Communicator {
     int size;
     int rank;
   };
+
   explicit IndexInfo(const size_t globalSize,
                      const StorageMode storageMode = StorageMode::Cloned,
                      const Communicator &communicator = Communicator{1, 0});
