@@ -1,10 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
-import os
+
 import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
-from isis_powder.routines.RunDetails import create_run_details_object, RunDetailsFuncWrapper, WrappedFunctionsRunDetails
+from isis_powder.routines.RunDetails import create_run_details_object, RunDetailsFuncWrapper
 
 
 def attenuate_workspace(attenuation_file_path, ws_to_correct):
