@@ -141,7 +141,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "SNSPowderReduction"
 
     def summary(self):
-        " "
+        """
+        summary of the algorithm
+        :return:
+        """
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3) "
 
     def PyInit(self):
@@ -155,6 +158,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
+        self.declareProperty('ReloadIfWorkspaceExists', True,
+                             'Load the event file again if a workspace with default name exists in ADS. '
+                             'if this is specified as True.  Otherwise, skip loading to save time. '
+                             'User should be cautious to use this option as False.')
         arrvalidatorBack = IntArrayBoundedValidator()
         arrvalidatorBack.setLower(-1)
         self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
@@ -162,17 +169,21 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         arrvalidatorVan = IntArrayBoundedValidator()
         arrvalidatorVan.setLower(-1)
         self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidatorVan),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
+                                 "")
         arrvalidatorVanBack = IntArrayBoundedValidator()
         arrvalidatorVanBack.setLower(-1)
         self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
-                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction."
+                                 "")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,
-                                          extensions = [".h5", ".hd5", ".hdf", ".cal"]))
+                                          extensions=[".h5", ".hd5", ".hdf", ".cal"]))
         self.declareProperty(FileProperty(name="GroupingFile",defaultValue="",action=FileAction.OptionalLoad,
-                                          extensions = [".xml"]), "Overrides grouping from CalibrationFile")
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,
-                                          extensions = ["txt"]),"File with characterization runs denoted")
+                                          extensions=[".xml"]), "Overrides grouping from CalibrationFile")
+        self.declareProperty(FileProperty(name="CharacterizationRunsFile",
+                                          defaultValue="",
+                                          action=FileAction.OptionalLoad,
+                                          extensions=["txt"]), "File with characterization runs denoted")
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.declareProperty("UnwrapRef", 0.,
@@ -185,16 +196,21 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.")
         self.declareProperty("RemovePromptPulseWidth", 0.0,
                              "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
-        self.declareProperty("MaxChunkSize", 0.0, "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
+        self.declareProperty("MaxChunkSize", 0.0,
+                             "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterCharacterizations", False,
-                             "Filter the characterization runs using above parameters. This only works for event files.")
-        self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],
-                                                direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
+                             "Filter the characterization runs using above parameters. This only works for event files."
+                             "")
+        self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
+                                                direction=Direction.Input),
+                             "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "+
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "
                              "Negative value means logorithmic binning.")
         self.declareProperty("BinInDspace", True,
-                             "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
+                             "If all three bin parameters a specified, whether they are in dspace (true) or "
+                             "time-of-flight (false)")
+        # section of vanadium run processing
         self.declareProperty("StripVanadiumPeaks", True,
                              "Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, "Default=7")
@@ -204,12 +220,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("VanadiumRadius", .3175, "Radius for MultipleScatteringCylinderAbsorption")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
+
+        # filtering
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("ScaleData", defaultValue=1., validator=FloatBoundedValidator(lower=0., exclusive=True),
-                             doc="Constant to multiply the data before writing out. This does not apply to PDFgetN files.")
+                             doc="Constant to multiply the data before writing out. This does not apply to "
+                                 "PDFgetN files.")
         self.declareProperty("SaveAs", "gsas",
-                             "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', 'pdfgetn', and 'topas'")
+                             "List of all output file types. Allowed values are 'fullprof', 'gsas', 'nexus', "
+                             "'pdfgetn', and 'topas'")
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
@@ -220,8 +240,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
-                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. "+
-                             "Otherwise, ignored.")
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra "
+                             "number. Otherwise, ignored.")
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
@@ -331,12 +351,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     focuspos['Azimuthal'] = phis
         # ENDIF
 
+        # get the user-option whether an existing event workspace will be reloaded or not
+        reload_event_file = self.getProperty('ReloadIfWorkspaceExists').value
+
         if self.getProperty("Sum").value:
             # Sum input sample runs and then do reduction
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
             sam_ws_name = self._focusAndSum(samRuns, timeFilterWall, calib,
+                                            reload_if_loaded=reload_event_file,
                                             preserveEvents=preserveEvents)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
@@ -351,6 +375,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._info = None
                 returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splittersWS,
                                              normalisebycurrent=self._normalisebycurrent,
+                                             reload_if_loaded=reload_event_file,
                                              preserveEvents=preserveEvents)
 
                 if isinstance(returned, list):
@@ -525,7 +550,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._focusPos['Azimuthal'] = results[6]
 
     #pylint: disable=too-many-branches
-    def _loadData(self, filename, filterWall=None, out_ws_name=None, **chunk):
+    def _load_event_data(self, filename, filter_wall=None, out_ws_name=None, reload_if_loaded=True, **chunk):
         """ Load data optionally by chunk strategy
         Purpose:
             Load a complete or partial run, filter bad pulses.
@@ -538,8 +563,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         Guarantees:
             A workspace is created with name described above
         :param filename:
-        :param filterWall:
+        :param filter_wall:
         :param out_ws_name: name of output workspace specified by user. it will override the automatic name
+        :param reload_if_loaded:
         :param chunk:
         :return:
         """
@@ -547,6 +573,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         assert len(filename) > 0, "Input file '%s' does not exist" % filename
         assert (chunk is None) or isinstance(chunk, dict), 'Input chunk must be either a dictionary or None.'
 
+        # get event file's base name
         base_name = getBasename(filename)
 
         # give out the default output workspace name
@@ -564,11 +591,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # Specify the other chunk information including Precount, FilterByTimeStart and FilterByTimeStop.
         if filename.endswith("_event.nxs") or filename.endswith(".nxs.h5"):
             chunk["Precount"] = True
-            if filterWall is not None:
-                if filterWall[0] > 0.:
-                    chunk["FilterByTimeStart"] = filterWall[0]
-                if filterWall[1] > 0.:
-                    chunk["FilterByTimeStop"] = filterWall[1]
+            if filter_wall is not None:
+                if filter_wall[0] > 0.:
+                    chunk["FilterByTimeStart"] = filter_wall[0]
+                if filter_wall[1] > 0.:
+                    chunk["FilterByTimeStop"] = filter_wall[1]
 
         # Call Mantid's Load algorithm to load complete or partial data
         api.Load(Filename=filename, OutputWorkspace=out_ws_name, **chunk)
@@ -725,7 +752,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return outName
 
     #pylint: disable=too-many-arguments
-    def _focusAndSum(self, filenames, filterWall, calib, preserveEvents=True):
+    def _focusAndSum(self, filenames, filterWall, calib, preserveEvents=True, reload_if_loaded=True):
         """Load, sum, and focus data in chunks
         Purpose:
             Load, sum and focus data in chunks;
@@ -748,6 +775,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # focus one run
             out_ws_name = self._focusChunks(filename, filterWall, calib,
+                                            reload_if_loaded=reload_if_loaded,
                                             normalisebycurrent=False,
                                             preserveEvents=preserveEvents)
             assert isinstance(out_ws_name, str), 'Output from _focusChunks() should be a string but' \
@@ -784,12 +812,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return sumRun
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, filename, filterWall, calib,
-                     normalisebycurrent, splitwksp=None, preserveEvents=True):
+    def _focusChunks(self, filename, filter_wall, calib,
+                     normalisebycurrent, splitwksp=None, preserveEvents=True,
+                     reload_if_loaded=True):
         """
         Load, (optional) split and focus data in chunks
-        @param runnumber: integer for run number
-        @param filterWall:  Enabled if splitwksp is defined
+        @param filename: integer for run number
+        @param filter_wall:  Enabled if splitwksp is defined
         @param calib:
         @param normalisebycurrent: Set to False if summing runs for correct math
         @param splitwksp: SplittersWorkspace (if None then no split)
@@ -804,7 +833,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         strategy = self._getStrategy(filename)
 
         # determine event splitting by checking filterWall and number of output workspaces from _focusChunk
-        do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp, filterWall)
+        do_split_raw_wksp, num_out_wksp = self._determine_workspace_splitting(splitwksp, filter_wall)
 
         # Set up the data structure to hold and control output workspaces
         output_wksp_list = [None] * num_out_wksp
@@ -819,7 +848,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # progress on chunk index
             chunk_index += 1
             # Load chunk, i.e., partial data into Mantid
-            raw_ws_name_chunk = self._loadData(filename, filterWall, **chunk)
+            raw_ws_name_chunk = self._load_event_data(filename, filter_wall,
+                                                      out_ws_name=None,
+                                                      reload_if_loaded=reload_if_loaded,
+                                                      **chunk)
 
             if self._info is None:
                 self._info = self._getinfo(raw_ws_name_chunk)
@@ -1057,7 +1089,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # supported case: support both workspace and workspace name
         if splitws is None or str(splitws) == '':
-            raise RuntimeError('It is not supported to take a None-splitters workspace in this method.)'
+            raise RuntimeError('It is not supported to take a None-splitters workspace in this method.')
 
         # Load meta data to determine wall time
         metawsname = "temp_" + getBasename(filename)
@@ -1397,7 +1429,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         else:
             # split with information table
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
-                             SplitterWorkspace=split_ws_name, InformationWorkspace = str(self._splitinfotablews),
+                             SplitterWorkspace=split_ws_name, InformationWorkspace=str(self._splitinfotablews),
                              GroupWorkspaces=True)
         # ENDIF
 
