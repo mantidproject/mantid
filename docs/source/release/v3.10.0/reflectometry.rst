@@ -32,6 +32,8 @@ ISIS Reflectometry
   - Ctrl+V pastes the contents of the clipboard into the selected row(s). If no rows are selected, new ones are added at the end.
   - Ctrl+X copies the selected row(s) to the clipboard and deletes them.
 
+- A brief description about the columns in the table can be now accessed by using the *What's this* tool (last tool in the toolbar) and clicking on the column headers.
+
 ISIS Reflectometry (Old)
 ########################
 
