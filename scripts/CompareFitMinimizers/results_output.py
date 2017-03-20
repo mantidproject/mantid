@@ -216,6 +216,13 @@ def build_group_linked_names(group_names):
     return linked_names
 
 
+def build_visual_display_page(group):
+    """
+    Builds a page containing details of the best fit for a problem.
+    @param group :: the group list containing results
+    """
+
+
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
 
