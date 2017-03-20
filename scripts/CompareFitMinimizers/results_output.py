@@ -221,7 +221,8 @@ def build_visual_display_page(group):
     Builds a page containing details of the best fit for a problem.
     @param group :: the group list containing results
     """
-
+    # Get the best result for a group
+    gb = min((result for result in group), key=lambda result: result.fit_chi2)
 
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
