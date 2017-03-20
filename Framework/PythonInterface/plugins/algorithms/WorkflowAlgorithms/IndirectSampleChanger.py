@@ -43,11 +43,13 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
                              doc="Increment for run-number.")
 
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
-                                              validator=IntArrayMandatoryValidator()),
+                                              validator=IntArrayLengthValidator(2)),
                              doc='Comma separated range of spectra number to use.')
-        self.declareProperty(FloatArrayProperty(name='ElasticRange'),
+        self.declareProperty(FloatArrayProperty(name='ElasticRange',
+                                                validator=FloatArrayLengthValidator(2)),
                              doc='Range of background to subtract from raw data in time of flight.')
-        self.declareProperty(FloatArrayProperty(name='InelasticRange'),
+        self.declareProperty(FloatArrayProperty(name='InelasticRange',
+                                                validator=FloatArrayLengthValidator(2)),
                              doc='Range of background to subtract from raw data in time of flight.')
 
         # Spectra grouping options
@@ -179,6 +181,14 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
 
         if self._number_runs < self._number_samples:
             issues["NumberSamples"] = 'There must be at least 1 run per sample'
+
+        if self._spectra_range[0] > self._spectra_range[1]:
+            issues['SpectraRange'] = 'Range must be in format: lower,upper'
+
+        if self._msdfit and self._grouping_method == 'All':
+            issues["MsdFit"] = 'Unable to perform MSDFit with "All" grouping method'
+
+        return issues
 
 
 AlgorithmFactory.subscribe(IndirectSampleChanger)  # Register algorithm with Mantid
