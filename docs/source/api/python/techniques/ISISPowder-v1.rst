@@ -12,7 +12,6 @@ ISIS Powder Diffraction Scripts
     :local:
 
 
-
 Overview and General Information
 --------------------------------
 These objective of these scripts are to combine the work-flows of several powder

@@ -330,7 +330,8 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const std::string &text) {
 
       int groupId = boost::lexical_cast<int>(values.front());
       int rowId = numRowsInGroup(groupId);
-      insertRow(groupId, rowId);
+      if (!m_model->insertRow(rowId, m_model->index(groupId, 0)))
+        return;
       for (int col = 0; col < m_model->columnCount(); col++) {
         m_model->setData(m_model->index(rowId, col, m_model->index(groupId, 0)),
                          QString::fromStdString(values[col + 1]));
