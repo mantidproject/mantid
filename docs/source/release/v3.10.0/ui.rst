@@ -60,7 +60,8 @@ SliceViewer Improvements
 
 VSI Improvments
 ---------------
-Update ParaView to v5.3.0-RC1
+- ParaView was updated to to `v5.3.0 <https://blog.kitware.com/paraview-5-3-0-release-notes/>`_.
+- The mapped array vtkMDHWSignalArray has been refactored to use the new vtkGenericDataArray class template. This minimized virtual indirection and allows advanced compiler optimizations such as vectorization.
 
 |
 
