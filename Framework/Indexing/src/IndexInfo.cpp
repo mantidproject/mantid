@@ -54,12 +54,6 @@ IndexInfo::spectrumDefinition(const size_t index) const {
   return (*m_spectrumDefinitions)[index];
 }
 
-/// Sets the SpectrumDefinition for given index.
-void IndexInfo::setSpectrumDefinition(const size_t index,
-                                      SpectrumDefinition def) {
-  m_spectrumDefinitions.access()[index] = std::move(def);
-}
-
 /// Set a spectrum number for each index.
 void IndexInfo::setSpectrumNumbers(
     std::vector<SpectrumNumber> &&spectrumNumbers) {

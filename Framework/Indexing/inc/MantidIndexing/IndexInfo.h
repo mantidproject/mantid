@@ -88,7 +88,6 @@ public:
 
   SpectrumNumber spectrumNumber(const size_t index) const;
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
-  void setSpectrumDefinition(const size_t index, SpectrumDefinition def);
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
