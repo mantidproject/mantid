@@ -149,6 +149,12 @@ public:
     TS_ASSERT_EQUALS(rank1.size(), 1);
     TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 2);
   }
+
+  void test_StorageMode_MasterOnly() {
+    TS_ASSERT_THROWS(IndexInfo(3, IndexInfo::StorageMode::MasterOnly,
+                               IndexInfo::Communicator{2, 0}),
+                     std::runtime_error);
+  }
 };
 
 #endif /* MANTID_INDEXING_INDEXINFOTEST_H_ */

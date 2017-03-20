@@ -166,14 +166,18 @@ void IndexInfo::makeSpectrumNumberTranslator(
   if (m_storageMode == StorageMode::Distributed) {
     partition = PartitionIndex(m_communicator.rank);
     numberOfPartitions = m_communicator.size;
-  } else {
+  } else if (m_storageMode == StorageMode::Cloned) {
     partition = PartitionIndex(0);
     numberOfPartitions = 1;
+  } else {
+    // We still need to figure out the required behavior here, will do this when
+    // implementing basic MPI support for MatrixWorkspace.
+    throw std::runtime_error(
+        "IndexInfo does not yet support StorageMode::MasterOnly");
   }
   auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
       numberOfPartitions, partition,
       Partitioner::MonitorStrategy::TreatAsNormalSpectrum);
-  // TODO How should we handle StorageMode::MasterOnly?
   m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
       std::move(spectrumNumbers), std::move(partitioner), partition);
 }
