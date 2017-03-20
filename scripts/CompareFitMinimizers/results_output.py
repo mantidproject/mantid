@@ -224,6 +224,29 @@ def build_visual_display_page(group):
     # Get the best result for a group
     gb = min((result for result in group), key=lambda result: result.fit_chi2)
 
+    # Create various page headings, ensuring the adornment is (at least) the length of the title
+    title = '=' * len(gb.problem.name) + '\n'
+    title += gb.problem.name + '\n'
+    title += '=' * len(gb.problem.name) + '\n\n'
+    header = gb.problem.name + '\n'
+    header += ('=' * len(header)) + '\n\n'
+    data_plot = 'Plot of the data:' + '\n'
+    data_plot += ('-' * len(data_plot)) + '\n\n'
+    data_plot += '.. figure:: ' + '\n'
+    data_plot += '    :include-source:' + '\n\n'
+    starting_plot = 'Plot of the initial starting guess' + '\n'
+    starting_plot += ('-' * len(starting_plot)) + '\n\n'
+    starting_plot += '.. figure:: ' + '\n'
+    starting_plot += '    :include-source:' + '\n\n'
+    solution_plot = 'Plot of the solution found' + '\n'
+    solution_plot += ('-' * len(solution_plot)) + '\n\n'
+    solution_plot += '.. figure:: ' + '\n'
+    solution_plot += '    :include-source:' + '\n\n'
+    problem = 'Fit problem' + '\n'
+    problem += ('-' * len(problem)) + '\n'
+    rst_text = title + header + data_plot + starting_plot + solution_plot + problem
+
+
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
 
