@@ -7,7 +7,7 @@ from isis_powder.routines.common_enums import INPUT_BATCHING
 attr_mapping = \
     [
      ParamMapEntry(ext_name="calibration_directory",    int_name="calibration_dir"),
-     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_file"),
+     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
      ParamMapEntry(ext_name="chopper_on",               int_name="chopper_on"),
      ParamMapEntry(ext_name="config_file",              int_name="config_file"),
      ParamMapEntry(ext_name="do_absorb_corrections",    int_name="do_absorb_corrections"),

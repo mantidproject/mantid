@@ -1,33 +1,103 @@
 from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.routines import common, yaml_parser
+import os
 
 
-def create_run_details_object(run_number_string, inst_settings):
-    pass
-
-
-def get_cal_mapping(run_number_string, inst_settings):
-    # Get the python dictionary from the YAML mapping
+def create_run_details_object(run_number_string, inst_settings, empty_run_call=None,
+                              grouping_file_name_call=None, vanadium_run_call=None,
+                              splined_name_list=None, van_abs_file_name=None):
+    cal_map_dict = WrappedFunctionsRunDetails.get_cal_mapping_dict(
+        run_number_string=run_number_string, inst_settings=inst_settings)
     run_number = common.get_first_run_number(run_number_string=run_number_string)
-    cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
-                                                      file_path=inst_settings.cal_mapping_file)
+    calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
 
-    return cal_mapping_dict
+    # Get names of files we will be using
+    label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
+    offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
+
+    # Sample empty if there is one
+    sample_empty = inst_settings.sample_empty if hasattr(inst_settings, "sample_empty") else None
+
+    # Always make sure the offset file name is included
+    if splined_name_list:
+        splined_name_list.append(offset_file_name)
+    else:
+        splined_name_list = [offset_file_name]
+
+    # These can either be generic or custom so defer to another method
+    results_dict = _get_customisable_attributes(
+        cal_dict=cal_map_dict, inst_settings=inst_settings, empty_run_call=empty_run_call,
+        grouping_name_call=grouping_file_name_call, vanadium_run_call=vanadium_run_call,
+        splined_name_list=splined_name_list)
+
+    # Generate the paths
+    grouping_file_path = os.path.join(calibration_dir, results_dict["grouping_file_name"])
+    # Offset  and splined vanadium is within the correct label folder
+    offset_file_path = os.path.join(calibration_dir, label, offset_file_name)
+    splined_van_path = os.path.join(calibration_dir, label, results_dict["splined_van_name"])
+    van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None
+
+    output_run_string = run_number_string
+
+    return _RunDetails(empty_run_number=results_dict["empty_runs"], run_number=run_number,
+                       output_run_string=output_run_string, label=label, offset_file_path=offset_file_path,
+                       grouping_file_path=grouping_file_path, splined_vanadium_path=splined_van_path,
+                       vanadium_run_number=results_dict["vanadium_runs"], sample_empty=sample_empty,
+                       vanadium_abs_path=van_absorb_path)
 
 
-def cal_map_dictionary_key_helper_wrapper(*args, **kwargs):
-    forwarded_value = kwargs.pop("forwarded_value")
-    return common.cal_map_dictionary_key_helper(forwarded_value, *args, **kwargs)
+def _get_customisable_attributes(cal_dict, inst_settings, empty_run_call, grouping_name_call, vanadium_run_call,
+                                 splined_name_list):
+    dict_to_return = {}
+    if empty_run_call:
+        empty_runs = empty_run_call.get_result()
+    else:
+        empty_runs = common.cal_map_dictionary_key_helper(dictionary=cal_dict, key="empty_run_numbers")
+    dict_to_return["empty_runs"] = empty_runs
+
+    if vanadium_run_call:
+        vanadium_runs = vanadium_run_call.get_result()
+    else:
+        vanadium_runs = common.cal_map_dictionary_key_helper(dictionary=cal_dict, key="vanadium_run_numbers")
+    dict_to_return["vanadium_runs"] = vanadium_runs
+
+    if grouping_name_call:
+        grouping_name = grouping_name_call.get_result()
+    else:
+        grouping_name = inst_settings.grouping_file_name
+    dict_to_return["grouping_file_name"] = grouping_name
+
+    dict_to_return["splined_van_name"] = common.generate_splined_name(vanadium_runs, append_list=splined_name_list)
+
+    return dict_to_return
+
+
+class WrappedFunctionsRunDetails(object):
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_cal_mapping_dict(run_number_string, inst_settings):
+        # Get the python dictionary from the YAML mapping
+        run_number = common.get_first_run_number(run_number_string=run_number_string)
+        cal_mapping_dict = yaml_parser.get_run_dictionary(run_number_string=run_number,
+                                                          file_path=inst_settings.cal_mapping_path)
+        return cal_mapping_dict
+
+    @staticmethod
+    def cal_dictionary_key_helper(key, append_to_error_message=None, **kwargs):
+        forwarded_value = kwargs.pop("forwarded_value")
+        return common.cal_map_dictionary_key_helper(dictionary=forwarded_value, key=key,
+                                                    append_to_error_message=append_to_error_message)
 
 
 class RunDetailsFuncWrapper(object):
     # Holds a callable method, associated args and return value so we can pass it in
     # as a single method
 
-    def __init__(self, function=None, func_args=None, func_kwargs=None):
+    def __init__(self, function=None, func_kwargs=None):
         self.function = function
-        self.function_args = func_args
         self.function_kwargs = func_kwargs
 
         self._previous_callable = None
@@ -43,9 +113,9 @@ class RunDetailsFuncWrapper(object):
 
         if forwarded_value:
             self.function_kwargs["forwarded_value"] = forwarded_value
-            self._returned_value = self.function(*self.function_args, **self.function_kwargs)
+            self._returned_value = self.function(**self.function_kwargs)
         else:
-            self._returned_value = self.function(*self.function_args, **self.function_kwargs)
+            self._returned_value = self.function(**self.function_kwargs)
 
         self._function_is_executed = True
 
@@ -53,13 +123,16 @@ class RunDetailsFuncWrapper(object):
         if not previous_callable:
             return None
         elif not isinstance(previous_callable, RunDetailsFuncWrapper):
-            raise ValueError("previous callable is not a RunDetailsFuncWrapper type")
+            raise ValueError("Previous callable is not a RunDetailsFuncWrapper type")
 
         self._previous_callable = previous_callable
 
-    def add_to_func_chain(self, function, *args, **kwargs):
+    def add_to_func_chain(self, function, *args, **func_kwargs):
+        if args:
+            # If we allow args with position Python gets confused as the forwarded value can be in the first place too
+            raise RuntimeError("Cannot use un-named arguments with callable methods")
         # Construct a new object that will be the next in line
-        next_in_chain = RunDetailsFuncWrapper(function=function, func_args=args, func_kwargs=kwargs)
+        next_in_chain = RunDetailsFuncWrapper(function=function, func_kwargs=func_kwargs)
         next_in_chain._set_previous_callable(self)
         return next_in_chain
 
@@ -69,14 +142,14 @@ class RunDetailsFuncWrapper(object):
         return self._returned_value
 
 
-class RunDetails(object):
+class _RunDetails(object):
     """
     This class holds the full file paths associated with each run and various other useful attributes
     """
 
     def __init__(self, empty_run_number, run_number, output_run_string, label,
                  offset_file_path, grouping_file_path, splined_vanadium_path, vanadium_run_number,
-                 sample_empty=None, vanadium_abs_path=None):
+                 sample_empty, vanadium_abs_path):
         # Essential attribute
         self.empty_runs = empty_run_number
         self.run_number = run_number
