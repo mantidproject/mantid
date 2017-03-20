@@ -7,6 +7,7 @@
 #include "MantidNexus/NexusClasses.h"
 
 namespace {
+
 enum ScanType : size_t {
     NoScan = 0,
     DetectorScan = 1,
@@ -20,8 +21,11 @@ struct ScannedVariables {
   std::string property;
   std::string unit;
 
-  ScannedVariables(int a, int s, std::string n, std::string p, std::string u)
-      : axis(a), scanned(s), name(n), property(p), unit(u) {}
+  ScannedVariables(std::string n, std::string p, std::string u)
+      : axis(0), scanned(0), name(n), property(p), unit(u) {}
+
+  void setAxis(int a) { axis = a; }
+  void setScanned(int s) { scanned = s; }
 };
 }
 
@@ -30,7 +34,8 @@ namespace DataHandling {
 
 /** LoadILLDiffraction : Loads ILL diffraction nexus files.
 
-  @author Gagik Vardanyan, vardanyan@ill.fr
+  @author Gagik Vardanyan
+  @date 01/04/17
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -67,31 +72,33 @@ private:
   void init() override;
   void exec() override;
 
-  void loadDataScan(NeXus::NXEntry &);
-  void loadScannedVariables(NeXus::NXEntry &);
+  std::vector<double> getAxis(const NeXus::NXDouble &) const;
+  std::vector<double> getMonitor(const NeXus::NXDouble &) const;
 
-  void loadMetadata();
-  void loadStaticInstrument();
-
-  void fillMovingInstrumentScan(const NeXus::NXUInt &,
-                                const NeXus::NXDouble &) {}
-  void fillStaticInstrumentScan(const NeXus::NXUInt &,
-                                const NeXus::NXDouble &);
+  void fillDataScanMetaData(const NeXus::NXDouble &) const;
+  void fillMovingInstrumentScan(const NeXus::NXUInt &,const NeXus::NXDouble &) {}
+  void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
+                                const NeXus::NXFloat &);
 
   void initWorkspace();
-  void resolveInstrument(const std::string &);
+  void loadDataScan();
+  void loadMetadata();
+  void loadScannedVariables();
+  void loadStaticInstrument();
+  void moveTwoThetaZero(double);
+  void resolveInstrument();
   void resolveScanType();
 
-  int m_numberDetectorsRead; ///< number of cells read from file
-  int m_numberDetectorsActual; ///< number of cells actually active
-  int m_numberScanPoints; ///< number of scan points
+  size_t m_numberDetectorsRead; ///< number of cells read from file
+  size_t m_numberDetectorsActual; ///< number of cells actually active
+  size_t m_numberScanPoints; ///< number of scan points
 
   std::string m_instName; ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments
   std::string m_fileName; ///< file name to load
-  std::vector<ScannedVariables> m_scanVars; ///< holds the info on what is scanned
-  ScanType m_scanType; ///< scan type
+  ScanType m_scanType; ///< NoScan, DetectorScan or OtherScan
 
+  std::vector<ScannedVariables> m_scanVar; ///< holds the scan info
   LoadHelper m_loadHelper; ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
 };
