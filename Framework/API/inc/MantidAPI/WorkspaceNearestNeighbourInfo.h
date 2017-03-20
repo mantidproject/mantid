@@ -15,7 +15,7 @@ class IDetector;
 namespace API {
 
 class MatrixWorkspace;
-class NearestNeighbours;
+class WorkspaceNearestNeighbours;
 
 /** NearestNeighbourInfo provides easy access to nearest-neighbour information
   for a workspace.
@@ -41,12 +41,12 @@ class NearestNeighbours;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL NearestNeighbourInfo {
+class MANTID_API_DLL WorkspaceNearestNeighbourInfo {
 public:
-  NearestNeighbourInfo(const MatrixWorkspace &workspace,
+  WorkspaceNearestNeighbourInfo(const MatrixWorkspace &workspace,
                        const bool ignoreMaskedDetectors,
                        const int nNeighbours = 8);
-  ~NearestNeighbourInfo();
+  ~WorkspaceNearestNeighbourInfo();
 
   std::map<specnum_t, Kernel::V3D>
   getNeighbours(const Geometry::IDetector *comp,
@@ -57,7 +57,7 @@ public:
 
 private:
   const MatrixWorkspace &m_workspace;
-  std::unique_ptr<NearestNeighbours> m_nearestNeighbours;
+  std::unique_ptr<WorkspaceNearestNeighbours> m_nearestNeighbours;
 };
 
 } // namespace API

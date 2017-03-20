@@ -58,9 +58,9 @@ class SpectrumInfo;
  *  File change history is stored at: <https://github.com/mantidproject/mantid>
  *  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class MANTID_API_DLL NearestNeighbours {
+class MANTID_API_DLL WorkspaceNearestNeighbours {
 public:
-  NearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
+  WorkspaceNearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
                     std::vector<specnum_t> spectrumNumbers,
                     bool ignoreMaskedDetectors = false);
 
