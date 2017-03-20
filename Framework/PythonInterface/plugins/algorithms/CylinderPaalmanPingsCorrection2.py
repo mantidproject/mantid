@@ -151,7 +151,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         if self._use_can:
             self._radii[2] = self._can_outer_radius
-            print(self._radii)
             if (self._radii[2] - self._radii[1]) < 1e-4:
                 issues['CanOuterRadius'] = 'Can outer radius must be bigger than sample outer radius'
             else:
@@ -176,16 +175,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
             if self._use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
                 issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
-
-        if self._efixed == 0. and self._emode != 'Elastic':
-            # In all the modes other than elastic, efixed is needed.
-            # So try to get from instrument if the input is not set.
-            try:
-                self._efixed = self._getEfixed()
-                logger.information('Found Efixed = {0}'.format(self._efixed))
-            except ValueError:
-                issues['Efixed'] = 'Could not find the Efixed parameter in the instrument. '\
-                                   'Please specify manually.'
 
         return issues
 
@@ -342,6 +331,16 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         if self._emode == 'Efixed':
             logger.information('No interpolation is possible in Efixed mode.')
             self._interpolate = False
+
+        if self._efixed == 0. and self._emode != 'Elastic':
+            # In all the modes other than elastic, efixed is needed.
+            # So try to get from instrument if the input is not set.
+            try:
+                self._efixed = self._getEfixed()
+                logger.information('Found Efixed = {0}'.format(self._efixed))
+            except ValueError:
+                raise RuntimeError('Could not find the Efixed parameter in the instrument. '
+                                   'Please specify manually.')
 
         # purge the lists
         self._angles = list()
