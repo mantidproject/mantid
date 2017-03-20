@@ -246,6 +246,17 @@ def build_visual_display_page(group):
     problem += ('-' * len(problem)) + '\n'
     rst_text = title + header + data_plot + starting_plot + solution_plot + problem
 
+    html = publish_string(rst_text)
+    file_name = gb.problem.name + '.'
+    with open(file_name + FILENAME_EXT_TXT, 'w') as visual_rst:
+        print(html, file=visual_rst)
+        print('Saved {file_name}{extension} to {working_directory}'.
+          format(file_name=file_name, extension=FILENAME_EXT_TXT, working_directory=WORKING_DIR))
+    with open(file_name + FILENAME_EXT_HTML, 'w') as visual_html:
+        print(html, file=visual_html)
+        print('Saved {file_name}{extension} to {working_directory}'.
+              format(file_name=file_name, extension=FILENAME_EXT_HTML, working_directory=WORKING_DIR))
+
 
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
