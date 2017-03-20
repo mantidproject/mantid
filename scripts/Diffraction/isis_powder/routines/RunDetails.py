@@ -18,15 +18,17 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
 
     # Always make sure the offset file name is included
     if splined_name_list:
-        splined_name_list.append(offset_file_name)
+        # Force Python to make a copy so we don't modify original
+        new_splined_list = list(splined_name_list)
+        new_splined_list.append(offset_file_name)
     else:
-        splined_name_list = [offset_file_name]
+        new_splined_list = [offset_file_name]
 
     # These can either be generic or custom so defer to another method
     results_dict = _get_customisable_attributes(
         cal_dict=cal_map_dict, inst_settings=inst_settings, empty_run_call=empty_run_call,
         grouping_name_call=grouping_file_name_call, vanadium_run_call=vanadium_run_call,
-        splined_name_list=splined_name_list)
+        splined_name_list=new_splined_list)
 
     vanadium_run_string = results_dict["vanadium_runs"]
 
@@ -36,7 +38,6 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
         output_run_string = vanadium_run_string
     else:
         output_run_string = run_number_string
-
 
     # Sample empty if there is one
     sample_empty = inst_settings.sample_empty if hasattr(inst_settings, "sample_empty") else None
@@ -104,7 +105,11 @@ class RunDetailsFuncWrapper(object):
     # Holds a callable method, associated args and return value so we can pass it in
     # as a single method
 
-    def __init__(self, function=None, func_kwargs=None):
+    def __init__(self, function=None, *args, **func_kwargs):
+        if args:
+            # If we allow args with position Python gets confused as the forwarded value can be in the first place too
+            raise RuntimeError("Cannot use un-named arguments with callable methods")
+
         self.function = function
         self.function_kwargs = func_kwargs
 
@@ -136,11 +141,8 @@ class RunDetailsFuncWrapper(object):
         self._previous_callable = previous_callable
 
     def add_to_func_chain(self, function, *args, **func_kwargs):
-        if args:
-            # If we allow args with position Python gets confused as the forwarded value can be in the first place too
-            raise RuntimeError("Cannot use un-named arguments with callable methods")
         # Construct a new object that will be the next in line
-        next_in_chain = RunDetailsFuncWrapper(function=function, func_kwargs=func_kwargs)
+        next_in_chain = RunDetailsFuncWrapper(function=function, *args, **func_kwargs)
         next_in_chain._set_previous_callable(self)
         return next_in_chain
 
