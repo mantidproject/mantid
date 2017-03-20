@@ -169,11 +169,12 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
     @returns :: list of problems with their description link tags
     """
-    num_tests = len(results_per_test)
     prev_name = ''
     prob_count = 1
     linked_problems = []
-    for test_idx in range(0, num_tests):
+    for test_idx, group in enumerate(results_per_test):
+        if "neutron" in group_name:
+            build_visual_display_page(group)
         raw_name = results_per_test[test_idx][0].problem.name
         name = raw_name.split('.')[0]
         if name == prev_name:
