@@ -235,6 +235,18 @@ public:
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 5);
   }
 
+  void test_indexInfo_legacy_compatibility_partitioned_workspace_failure() {
+    // Sibling of MatrixWorkspace::test_indexInfo_legacy_compatibility().
+    // Setting spectrum numbers via legacy interface should fail for partitioned
+    // workspace.
+    const auto ws = create<Workspace2D>(
+        IndexInfo({1, 2, 3}, IndexInfo::StorageMode::Distributed,
+                  IndexInfo::Communicator{2, 0}),
+        Histogram(BinEdges{1, 2}));
+    ws->getSpectrum(0).setSpectrumNo(7);
+    TS_ASSERT_THROWS(ws->indexInfo(), std::runtime_error);
+  }
+
 private:
   boost::shared_ptr<Geometry::Instrument> m_instrument;
 };
