@@ -177,8 +177,10 @@ public:
       ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
     }
     // Add instrument so detector IDs are valid and get copied.
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false, "");
-    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false, "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws1, false, false,
+                                                           "");
+    InstrumentCreationHelper::addFullInstrumentToWorkspace(*ws2, false, false,
+                                                           "");
 
     auto ws1Log = new TimeSeriesProperty<std::string>("aLog");
     ws1Log->addValue(DateAndTime("2014-06-19T16:40:00"), "Hello");

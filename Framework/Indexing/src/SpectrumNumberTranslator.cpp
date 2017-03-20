@@ -31,9 +31,7 @@ size_t SpectrumNumberTranslator::globalSize() const {
 }
 
 /// Returns the local number of spectra.
-size_t SpectrumNumberTranslator::localSize() const {
-  return m_indices.size();
-}
+size_t SpectrumNumberTranslator::localSize() const { return m_indices.size(); }
 
 /// Returns the spectrum number for given index.
 SpectrumNumber
