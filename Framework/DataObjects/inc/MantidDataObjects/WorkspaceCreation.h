@@ -44,6 +44,7 @@ class Workspace2D;
       EventWorkspace can be created from it.
 
   Other arguments can include:
+  - The instrument.
   - The desired number of spectra (NumSpectra) to be created in the output
     workspace.
   - A reference to an IndexInfo object, defining the number of spectra and

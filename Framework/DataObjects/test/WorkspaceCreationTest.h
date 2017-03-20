@@ -108,6 +108,13 @@ public:
     check_data(*ws);
   }
 
+  void test_create_bad_IndexInfo_Histogram_no_instrument() {
+    // No instrument, so spectrum definitions created by make_indices are bad.
+    TS_ASSERT_THROWS(
+        create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4})),
+        std::runtime_error);
+  }
+
   void test_create_Instrument_size_Histogram() {
     const auto ws =
         create<Workspace2D>(m_instrument, 2, Histogram(BinEdges{1, 2, 4}));
@@ -166,6 +173,14 @@ public:
     // If parent has same size, data in IndexInfo is ignored
     check_default_indices(*ws);
     check_data(*ws);
+  }
+
+  void test_create_parent_bad_IndexInfo_no_instrument() {
+    const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
+    // parent has no instrument set, so spectrum definitions created by
+    // make_indices are bad.
+    TS_ASSERT_THROWS(create<Workspace2D>(*parent, make_indices()),
+                     std::runtime_error);
   }
 
   void test_create_parent_IndexInfo() {
