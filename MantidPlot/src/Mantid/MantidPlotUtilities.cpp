@@ -53,3 +53,23 @@ double getSingleWorkspaceLogValue(
   }
 }
 
+/**
+* Gets the custom, user-provided log value of the given index.
+* i.e. the nth in order from smallest to largest.
+* If the index is outside the range, returns 0.
+* @param wsIndex :: [input] Index of log value to use
+* @param logValues :: [input] User-provided set of log values
+* @returns Numeric log value
+*/
+  double
+  getSingleWorkspaceLogValue(int wsIndex,
+                    const std::set<double> &logValues){
+  double value = 0;
+  if (wsIndex < static_cast<int>(logValues.size())) {
+    auto it = logValues.begin();
+    std::advance(it, wsIndex);
+    value = *it;
+  }
+  return value;
+}
+

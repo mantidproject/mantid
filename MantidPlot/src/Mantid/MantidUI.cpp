@@ -3108,16 +3108,22 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(NULL);
   QString logValue("");
+  int i = 0;
   for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
     it != toPlot.end(); ++it) {
 
     try {
       if (!log.isEmpty()) { // Get log value from workspace
-        MatrixWorkspace_const_sptr workspace =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            it.key().toStdString());
         double logVal;
-        logVal = getSingleWorkspaceLogValue(1,workspace,log);
+        if (customLogValues.size() > 0) {
+          logVal = getSingleWorkspaceLogValue(i++, customLogValues);
+        }
+        else {
+          MatrixWorkspace_const_sptr workspace =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              it.key().toStdString());
+          logVal = getSingleWorkspaceLogValue(1, workspace, log);
+        }
         logValue = logValue.number(logVal,'g',6);
       }
 
