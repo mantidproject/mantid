@@ -165,6 +165,12 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
     }
   }
 
+  // The instrument is also copied by initializeFromParent, but if indexArg is
+  // IndexInfo and contains non-empty spectrum definitions the initialize call
+  // will fail due to invalid indices in the spectrum definitions. Therefore, we
+  // copy the instrument first. This should be cleaned up once we figure out the
+  // future of WorkspaceFactory.
+  ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
 

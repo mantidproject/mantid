@@ -184,9 +184,10 @@ public:
   }
 
   void test_create_parent_IndexInfo() {
-    const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
-    const auto ws = create<Workspace2D>(*parent, make_indices_no_detectors());
-    check_indices_no_detectors(*ws);
+    const auto parent =
+        create<Workspace2D>(m_instrument, 3, Histogram(BinEdges{1, 2, 4}));
+    const auto ws = create<Workspace2D>(*parent, make_indices());
+    check_indices(*ws);
     check_data(*ws);
   }
 
