@@ -20,6 +20,16 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             foo = inst_settings_obj.script_facing_name
             del foo
 
+    def test_user_missing_attribute_prints_enum_values(self):
+        param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
+                                                  enum_class=SampleEnum)
+        inst_settings_obj = InstrumentSettings.InstrumentSettings(param_map=[param_entry])
+
+        # Check it still prints the acceptable values when it fails
+        with assertRaisesRegex(self, AttributeError, "a foo, A BAR"):
+            foo = inst_settings_obj.script_facing_name
+            del foo
+
     def test_developer_missing_attribute_is_detected(self):
         param_entry = ParamMapEntry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name")
 

@@ -15,7 +15,7 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
     offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
-    
+
     # Always make sure the offset file name is included
     if splined_name_list:
         splined_name_list.append(offset_file_name)
