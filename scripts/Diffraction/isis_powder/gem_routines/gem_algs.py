@@ -23,7 +23,7 @@ def gem_get_chopper_config(forwarded_value, inst_settings):
     return common.cal_map_dictionary_key_helper(cal_mapping, inst_settings.mode)
 
 
-def get_run_details(run_number_string, inst_settings):
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     cal_mapping_callable = RunDetailsFuncWrapper().add_to_func_chain(
         WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
         inst_settings=inst_settings
@@ -41,4 +41,5 @@ def get_run_details(run_number_string, inst_settings):
         append_to_error_message=err_message)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     empty_run_call=empty_run_callable, vanadium_run_call=vanadium_run_callable)
+                                     is_vanadium_run=is_vanadium_run, empty_run_call=empty_run_callable,
+                                     vanadium_run_call=vanadium_run_callable)

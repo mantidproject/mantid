@@ -31,10 +31,7 @@ class Polaris(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        run_details = self._get_run_details(run_number_string=int(self._inst_settings.run_in_range))
-        run_details.run_number = run_details.vanadium_run_numbers
-
-        return self._create_vanadium(run_details=run_details,
+        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     # Overrides
@@ -97,7 +94,7 @@ class Polaris(AbstractInst):
             return self._run_details_cached_obj
 
         run_details = polaris_algs.get_run_details(run_number_string=run_number_string,
-                                                   inst_settings=self._inst_settings)
+                                                   inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
         # Hold obj in case same run range is requested
         self._run_details_last_run_number = run_number_string

@@ -43,16 +43,16 @@ class Pearl(AbstractInst):
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
-        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        run_details.run_number = run_details.vanadium_run_numbers
-        return self._create_vanadium(run_details=run_details,
+        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     def _get_run_details(self, run_number_string):
         if self._cached_run_details_number == run_number_string:
             return self._cached_run_details
 
-        run_details = pearl_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings)
+        run_details = pearl_algs.get_run_details(run_number_string=run_number_string,
+                                                 inst_settings=self._inst_settings,
+                                                 is_vanadium_run=self._is_vanadium)
 
         self._cached_run_details_number = run_number_string
         self._cached_run_details = run_details

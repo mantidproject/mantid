@@ -68,7 +68,7 @@ def generate_vanadium_absorb_corrections(van_ws):
     return absorb_ws
 
 
-def get_run_details(run_number_string, inst_settings):
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     splined_name_list = ["_tt-" + inst_settings.tt_mode]
     if inst_settings.absorb_corrections:
         splined_name_list.append("_abs")
@@ -79,8 +79,8 @@ def get_run_details(run_number_string, inst_settings):
                                                                             inst_settings=inst_settings)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
+                                     is_vanadium_run=is_vanadium_run, splined_name_list=splined_name_list,
                                      grouping_file_name_call=grouping_file_name_callable,
-                                     splined_name_list=splined_name_list,
                                      van_abs_file_name=inst_settings.van_absorb_file)
 
 

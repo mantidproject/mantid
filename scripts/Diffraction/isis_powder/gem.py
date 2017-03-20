@@ -27,16 +27,13 @@ class Gem(AbstractInst):
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        # First get a run_details object to find out the vanadium number
-        run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
-        # Set the run and vanadium run equal
-        run_details.run_number = run_details.vanadium_run_numbers
 
-        return self._create_vanadium(run_details=run_details,
+        return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def _get_run_details(self, run_number_string):
-        return gem_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings)
+        return gem_algs.get_run_details(run_number_string=run_number_string, inst_settings=self._inst_settings,
+                                        is_vanadium_run=self._is_vanadium)
 
     def _generate_auto_vanadium_calibration(self, run_details):
         raise NotImplementedError()

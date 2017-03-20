@@ -4,15 +4,30 @@ from isis_powder.routines import common, yaml_parser
 import os
 
 
-def create_run_details_object(run_number_string, inst_settings, empty_run_call=None,
+def create_run_details_object(run_number_string, inst_settings, is_vanadium_run, empty_run_call=None,
                               grouping_file_name_call=None, vanadium_run_call=None,
                               splined_name_list=None, van_abs_file_name=None):
     cal_map_dict = WrappedFunctionsRunDetails.get_cal_mapping_dict(
         run_number_string=run_number_string, inst_settings=inst_settings)
     run_number = common.get_first_run_number(run_number_string=run_number_string)
-    calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
+
+    # These can either be generic or custom so defer to another method
+    results_dict = _get_customisable_attributes(
+        cal_dict=cal_map_dict, inst_settings=inst_settings, empty_run_call=empty_run_call,
+        grouping_name_call=grouping_file_name_call, vanadium_run_call=vanadium_run_call,
+        splined_name_list=splined_name_list)
+
+    vanadium_run_string = results_dict["vanadium_runs"]
+
+    if is_vanadium_run:
+        # The run number should be the vanadium number in this case
+        run_number = vanadium_run_string
+        output_run_string = vanadium_run_string
+    else:
+        output_run_string = run_number_string
 
     # Get names of files we will be using
+    calibration_dir = os.path.normpath(os.path.expanduser(inst_settings.calibration_dir))
     label = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="label")
     offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
 
@@ -25,12 +40,6 @@ def create_run_details_object(run_number_string, inst_settings, empty_run_call=N
     else:
         splined_name_list = [offset_file_name]
 
-    # These can either be generic or custom so defer to another method
-    results_dict = _get_customisable_attributes(
-        cal_dict=cal_map_dict, inst_settings=inst_settings, empty_run_call=empty_run_call,
-        grouping_name_call=grouping_file_name_call, vanadium_run_call=vanadium_run_call,
-        splined_name_list=splined_name_list)
-
     # Generate the paths
     grouping_file_path = os.path.join(calibration_dir, results_dict["grouping_file_name"])
     # Offset  and splined vanadium is within the correct label folder
@@ -38,12 +47,10 @@ def create_run_details_object(run_number_string, inst_settings, empty_run_call=N
     splined_van_path = os.path.join(calibration_dir, label, results_dict["splined_van_name"])
     van_absorb_path = os.path.join(calibration_dir, van_abs_file_name) if van_abs_file_name else None
 
-    output_run_string = run_number_string
-
     return _RunDetails(empty_run_number=results_dict["empty_runs"], run_number=run_number,
                        output_run_string=output_run_string, label=label, offset_file_path=offset_file_path,
                        grouping_file_path=grouping_file_path, splined_vanadium_path=splined_van_path,
-                       vanadium_run_number=results_dict["vanadium_runs"], sample_empty=sample_empty,
+                       vanadium_run_number=vanadium_run_string, sample_empty=sample_empty,
                        vanadium_abs_path=van_absorb_path)
 
 
@@ -150,6 +157,7 @@ class _RunDetails(object):
     def __init__(self, empty_run_number, run_number, output_run_string, label,
                  offset_file_path, grouping_file_path, splined_vanadium_path, vanadium_run_number,
                  sample_empty, vanadium_abs_path):
+
         # Essential attribute
         self.empty_runs = empty_run_number
         self.run_number = run_number

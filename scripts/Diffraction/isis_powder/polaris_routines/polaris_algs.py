@@ -16,7 +16,7 @@ def calculate_absorb_corrections(ws_to_correct, multiple_scattering):
     return ws_to_correct
 
 
-def get_run_details(run_number_string, inst_settings):
+def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     # Get the chopper mode as vanadium and empty run numbers depend on different modes
     chopper_config_callable = RunDetailsFuncWrapper().\
         add_to_func_chain(function=WrappedFunctionsRunDetails.get_cal_mapping_dict, run_number_string=run_number_string,
@@ -35,7 +35,7 @@ def get_run_details(run_number_string, inst_settings):
         append_to_error_message=err_message)
 
     run_details = create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                            empty_run_call=empty_runs_callable,
+                                            empty_run_call=empty_runs_callable, is_vanadium_run=is_vanadium_run,
                                             vanadium_run_call=vanadium_runs_callable)
 
     return run_details

@@ -22,6 +22,7 @@ class AbstractInst(object):
         self._calibration_dir = calibration_dir
         self._inst_prefix = inst_prefix
         self._output_dir = output_dir
+        self._is_vanadium = None
 
     @property
     def calibration_dir(self):
@@ -35,13 +36,14 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_details, do_absorb_corrections=True):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections=True):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
-        :param run_details: The run details for the run to process
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
         :return: d_spacing focused vanadium group
         """
+        self._is_vanadium = True
+        run_details = self._get_run_details(run_number_string)
         return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections)
 
@@ -52,6 +54,7 @@ class AbstractInst(object):
         :param do_van_normalisation: True to divide by the vanadium run, false to not.
         :return:
         """
+        self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
                            instrument=self)
 
