@@ -67,7 +67,7 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
         from IndirectImport import import_mantidplot
         mp = import_mantidplot()
         workdir = config['defaultsave.directory']
-        self._setup()
+        # self._setup()
 
         q2_workspaces = []
         scan_alg = self.createChildAlgorithm("EnergyWindowScan", 0.05, 0.95)
@@ -169,6 +169,16 @@ class IndirectSampleChanger(DataProcessorAlgorithm):
 
         self._plot = self.getProperty('Plot').value
         self._save = self.getProperty('Save').value
+
+    def validateInputs(self):
+        self._setup()
+        issues = dict()
+
+        if self._run_first > self._run_last:
+            issues["FirstRun"] = 'First run must be before last run'
+
+        if self._number_runs < self._number_samples:
+            issues["NumberSamples"] = 'There must be at least 1 run per sample'
 
 
 AlgorithmFactory.subscribe(IndirectSampleChanger)  # Register algorithm with Mantid
