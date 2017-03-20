@@ -16,7 +16,7 @@ using namespace Mantid;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
-using Mantid::Indexing::IndexInfo;
+using namespace Indexing;
 
 class WorkspaceCreationTest : public CxxTest::TestSuite {
 public:
@@ -219,6 +219,20 @@ public:
     const auto parent = create<Workspace2D>(2, Histogram(BinEdges(2)));
     const auto ws = create<EventWorkspace>(*parent);
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
+  }
+
+  void test_create_partitioned() {
+    const auto ws = create<Workspace2D>(
+        IndexInfo({1, 2, 3, 4, 5}, IndexInfo::StorageMode::Distributed,
+                  IndexInfo::Communicator{2, 0}),
+        Histogram(BinEdges{1, 2, 4}));
+    const auto &indexInfo = ws->indexInfo();
+    // Default round-robin partitioning with 2 ranks -> we get every other
+    // spectrum number on this rank.
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 3);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 5);
   }
 
 private:
