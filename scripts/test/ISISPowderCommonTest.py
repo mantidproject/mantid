@@ -202,6 +202,36 @@ class ISISPowderCommonTest(unittest.TestCase):
         returned_values = common.generate_run_numbers(run_number_string=input_string)
         self.assertEqual(expected_values, returned_values)
 
+    def test_generate_spline_vanadium_name(self):
+        reference_vanadium_name = "foo_123"
+        sample_arg_one = "arg1"
+        sample_arg_two = 987
+
+        # Check that it correctly processes unnamed args
+        output = common.generate_splined_name(reference_vanadium_name, sample_arg_one, sample_arg_two)
+        expected_output = "VanSplined_" + reference_vanadium_name + '_' + sample_arg_one + '_' + str(sample_arg_two)
+        expected_output += '.nxs'
+        self.assertEqual(expected_output, output)
+
+        # Check it can handle lists to append
+        sample_arg_list = ["bar", "baz", 567]
+
+        expected_output = "VanSplined_" + reference_vanadium_name
+        for arg in sample_arg_list:
+            expected_output += '_' + str(arg)
+        expected_output += '.nxs'
+        output = common.generate_splined_name(reference_vanadium_name, sample_arg_list)
+        self.assertEqual(expected_output, output)
+
+        # Check is can handle mixed inputs
+        expected_output = "VanSplined_" + reference_vanadium_name + '_' + sample_arg_one
+        for arg in sample_arg_list:
+            expected_output += '_' + str(arg)
+        expected_output += '_' + str(sample_arg_two) + '.nxs'
+
+        output = common.generate_splined_name(reference_vanadium_name, sample_arg_one, sample_arg_list, sample_arg_two)
+        self.assertEqual(expected_output, output)
+
     def test_generate_run_numbers_fails(self):
         run_input_sting = "text-string"
 

@@ -143,23 +143,22 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
-def generate_splined_name(vanadium_string, append_list=None, *args):
+def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
     any properties passed into this method so that the vanadium
     can be later loaded.
     :param vanadium_string: The name of this vanadium run
     :param args: Any identifying properties to append to the name
-    :param append_list: The args can also be passed as a list of values to append
     :return: The splined vanadium name
     """
     out_name = "VanSplined" + '_' + str(vanadium_string)
-    for value in args:
-        out_name += '_' + str(value)
-
-    if append_list:
-        for value in append_list:
-            out_name += '_' + str(value)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for val in passed_arg:
+                out_name += '_' + str(val)
+        else:
+            out_name += '_' + str(passed_arg)
 
     out_name += ".nxs"
     return out_name

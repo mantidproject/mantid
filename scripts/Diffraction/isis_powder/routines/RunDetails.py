@@ -68,7 +68,7 @@ def _get_customisable_attributes(cal_dict, inst_settings, empty_run_call, groupi
         grouping_name = inst_settings.grouping_file_name
     dict_to_return["grouping_file_name"] = grouping_name
 
-    dict_to_return["splined_van_name"] = common.generate_splined_name(vanadium_runs, append_list=splined_name_list)
+    dict_to_return["splined_van_name"] = common.generate_splined_name(vanadium_runs, splined_name_list)
 
     return dict_to_return
 
