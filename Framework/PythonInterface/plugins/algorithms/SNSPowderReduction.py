@@ -318,9 +318,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
-        # Tolerance for compress TOF event
+        # Tolerance for compress TOF event.  If given a negative value, then use default 0.01
         self.COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
-        if self.COMPRESS_TOL_TOF < 0.:
+        if self.COMPRESS_TOL_TOF < -0.:
             self.COMPRESS_TOL_TOF = 0.01
 
         # Process data
@@ -449,7 +449,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                           RHSWorkspace=can_run_ws_name,
                           OutputWorkspace=sam_ws_name)
                 # compress event if the sample run workspace is EventWorkspace
-                if is_event_workspace(sam_ws_name):
+                if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.:
                     api.CompressEvents(InputWorkspace=sam_ws_name,
                                        OutputWorkspace=sam_ws_name,
                                        Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
@@ -473,7 +473,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 normalized = False
 
             # Compress the event again
-            if is_event_workspace(sam_ws_name):
+            if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.:
                 api.CompressEvents(InputWorkspace=sam_ws_name,
                                    OutputWorkspace=sam_ws_name,
                                    Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
@@ -726,8 +726,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                          ClearRHSWorkspace=allEventWorkspaces(sample_ws_name, ws_name))
                 api.DeleteWorkspace(ws_name)
 
-                # comparess events
-                if is_event_workspace(sample_ws_name):
+                # compress events
+                if is_event_workspace(sample_ws_name) and self.COMPRESS_TOL_TOF > 0.:
                     api.CompressEvents(InputWorkspace=sample_ws_name, OutputWorkspace=sample_ws_name,
                                        Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
         # END-FOR
@@ -795,9 +795,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # add current workspace to sub sum
                 api.Plus(LHSWorkspace=sumRun, RHSWorkspace=out_ws_name, OutputWorkspace=sumRun,
                          ClearRHSWorkspace=allEventWorkspaces(sumRun, out_ws_name))
-                if is_event_workspace(sumRun):
+                if is_event_workspace(sumRun) and self.COMPRESS_TOL_TOF > 0.:
                     api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,
-                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                                       Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
                 # after adding all events, delete the current workspace.
                 api.DeleteWorkspace(out_ws_name)
             # ENDIF
@@ -976,10 +976,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Compress events
         for split_index in range(num_out_wksp):
-            if is_event_workspace(output_wksp_list[split_index]):
+            if is_event_workspace(output_wksp_list[split_index]) and self.COMPRESS_TOL_TOF > 0.:
                 api.CompressEvents(InputWorkspace=output_wksp_list[split_index],
                                    OutputWorkspace=output_wksp_list[split_index],
-                                   Tolerance=self.COMPRESS_TOL_TOF) # 100ns
+                                   Tolerance=self.COMPRESS_TOL_TOF)  # 100ns
             try:
                 if normalisebycurrent is True:
                     api.NormaliseByCurrent(InputWorkspace=output_wksp_list[split_index],
@@ -1324,7 +1324,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # END-IF (vanadium background)
 
             # compress events
-            if is_event_workspace(van_run_ws_name):
+            if is_event_workspace(van_run_ws_name) and self.COMPRESS_TOL_TOF > 0.:
                 api.CompressEvents(InputWorkspace=van_run_ws_name,
                                    OutputWorkspace=van_run_ws_name,
                                    Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
