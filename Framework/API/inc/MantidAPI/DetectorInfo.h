@@ -2,6 +2,7 @@
 #define MANTID_API_DETECTORINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -76,18 +77,30 @@ public:
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
+  bool isMonitor(const std::pair<size_t, size_t> &index) const;
   bool isMasked(const size_t index) const;
+  bool isMasked(const std::pair<size_t, size_t> &index) const;
   double l2(const size_t index) const;
+  double l2(const std::pair<size_t, size_t> &index) const;
   double twoTheta(const size_t index) const;
+  double twoTheta(const std::pair<size_t, size_t> &index) const;
   double signedTwoTheta(const size_t index) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
 
   void setMasked(const size_t index, bool masked);
+  void setMasked(const std::pair<size_t, size_t> &index, bool masked);
   void clearMaskFlags();
 
   void setPosition(const size_t index, const Kernel::V3D &position);
+  void setPosition(const std::pair<size_t, size_t> &index,
+                   const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
+  void setRotation(const std::pair<size_t, size_t> &index,
+                   const Kernel::Quat &rotation);
 
   void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
   void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
@@ -104,6 +117,15 @@ public:
   /// Returns the index of the detector with the given detector ID.
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
+
+  size_t scanCount(const size_t index) const;
+  std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+  scanInterval(const std::pair<size_t, size_t> &index) const;
+  void setScanInterval(
+      const size_t index,
+      const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
+
+  void merge(const DetectorInfo &other);
 
   friend class SpectrumInfo;
 

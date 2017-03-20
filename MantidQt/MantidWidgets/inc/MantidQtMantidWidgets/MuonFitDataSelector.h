@@ -62,6 +62,8 @@ public:
   QStringList getChosenGroups() const override;
   /// Set chosen group
   void setChosenGroup(const QString &group) override;
+  /// Clear list of selected groups
+  void clearChosenGroups() const;
   /// Get selected periods
   QStringList getPeriodSelections() const override;
   /// Set selected period

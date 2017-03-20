@@ -371,11 +371,21 @@ bool QDataProcessorTwoLevelTreeModel::removeRows(int position, int count,
 * @return : The number of rows
 */
 int QDataProcessorTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
-  return !parent.isValid()
-             ? static_cast<int>(m_rowsOfGroup.size())
-             : !parent.parent().isValid()
-                   ? static_cast<int>(m_rowsOfGroup[parent.row()].size())
-                   : 0;
+
+  // We are counting the number of groups
+  if (!parent.isValid())
+    return static_cast<int>(m_rowsOfGroup.size());
+
+  // This shouldn't happen
+  if (parent.parent().isValid())
+    return 0;
+
+  // This group does not exist anymore
+  if (parent.row() >= static_cast<int>(m_rowsOfGroup.size()))
+    return 0;
+
+  // Group exists, return number of children
+  return static_cast<int>(m_rowsOfGroup[parent.row()].size());
 }
 
 /** Updates an index with given data

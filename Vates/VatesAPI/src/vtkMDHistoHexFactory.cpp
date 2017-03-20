@@ -1,7 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidVatesAPI/vtkMDHWSignalArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -10,6 +9,8 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
+// For vtkMDHWSignalArray.h
+#include "vtkArrayDispatchArrayList.h"
 #include "vtkDoubleArray.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
@@ -69,15 +70,15 @@ void vtkMDHistoHexFactory::validateWsNotNull() const {
 void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
 namespace {
+
 struct CellGhostArrayWorker {
-  vtkMDHWSignalArray<double> *m_signal;
+  vtkDataArray *m_signal;
   vtkUnsignedCharArray *m_cga;
-  CellGhostArrayWorker(vtkMDHWSignalArray<double> *signal,
-                       vtkUnsignedCharArray *cga)
+  CellGhostArrayWorker(vtkDataArray *signal, vtkUnsignedCharArray *cga)
       : m_signal(signal), m_cga(cga) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     for (vtkIdType index = begin; index < end; ++index) {
-      if (!std::isfinite(m_signal->GetValue(index))) {
+      if (!std::isfinite(m_signal->GetComponent(index, 0))) {
         m_cga->SetValue(index, m_cga->GetValue(index) |
                                    vtkDataSetAttributes::HIDDENCELL);
       }
@@ -128,6 +129,20 @@ struct PointsWorker {
 };
 } // end anon namespace
 
+template <class ValueTypeT>
+static void InitializevtkMDHWSignalArray(
+    const MDHistoWorkspace &ws, VisualNormalization normalization,
+    vtkIdType offset, vtkMDHWSignalArray<ValueTypeT> *signal) {
+  const vtkIdType nBinsX = static_cast<int>(ws.getXDimension()->getNBins());
+  const vtkIdType nBinsY = static_cast<int>(ws.getYDimension()->getNBins());
+  const vtkIdType nBinsZ = static_cast<int>(ws.getZDimension()->getNBins());
+  const vtkIdType imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+  auto norm = static_cast<SignalArrayNormalization>(normalization);
+
+  signal->InitializeArray(ws.getSignalArray(), ws.getNumEventsArray(),
+                          ws.getInverseVolume(), norm, imageSize, offset);
+}
+
 /** Method for creating a 3D or 4D data set
  *
  * @param timestep :: index of the time step (4th dimension) in the workspace.
@@ -159,26 +174,44 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const int nBinsY = static_cast<int>(m_workspace->getYDimension()->getNBins());
   const int nBinsZ = static_cast<int>(m_workspace->getZDimension()->getNBins());
 
-  const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
+  const vtkIdType imageSize = static_cast<vtkIdType>(nBinsX) * nBinsY * nBinsZ;
 
   auto visualDataSet = vtkSmartPointer<vtkStructuredGrid>::New();
   visualDataSet->SetDimensions(nBinsX + 1, nBinsY + 1, nBinsZ + 1);
 
   // Array with true where the voxel should be shown
 
-  std::size_t offset = 0;
+  vtkIdType offset = 0;
   if (nDims == 4) {
     offset = timestep * indexMultiplier[2];
   }
 
-  vtkNew<vtkMDHWSignalArray<double>> signal;
+  VisualNormalization norm;
+  if (m_normalizationOption == AutoSelect) {
+    // enum to enum.
+    norm =
+        static_cast<VisualNormalization>(m_workspace->displayNormalization());
+  } else {
+    norm = static_cast<VisualNormalization>(m_normalizationOption);
+  }
+
+  vtkDataArray *signal = nullptr;
+  if (norm == NoNormalization) {
+    vtkNew<vtkDoubleArray> raw;
+    signal = raw.Get();
+    raw->SetVoidArray(m_workspace->getSignalArray(), imageSize, 1);
+    visualDataSet->GetCellData()->SetScalars(raw.Get());
+  } else {
+    vtkNew<vtkMDHWSignalArray<double>> normalized;
+    signal = normalized.Get();
+    InitializevtkMDHWSignalArray(*m_workspace, norm, offset, normalized.Get());
+    visualDataSet->GetCellData()->SetScalars(normalized.GetPointer());
+  }
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->InitializeArray(m_workspace.get(), m_normalizationOption, offset);
-  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
-  auto cga = visualDataSet->AllocateCellGhostArray();
 
-  CellGhostArrayWorker cgafunc(signal.GetPointer(), cga);
+  auto cga = visualDataSet->AllocateCellGhostArray();
+  CellGhostArrayWorker cgafunc(signal, cga);
   progress.eventRaised(0.0);
   vtkSMPTools::For(0, imageSize, cgafunc);
   progress.eventRaised(0.33);
