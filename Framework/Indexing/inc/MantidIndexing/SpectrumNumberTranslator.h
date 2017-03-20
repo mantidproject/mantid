@@ -74,7 +74,6 @@ private:
     }
   };
 
-  std::unique_ptr<Partitioner> m_partitioner;
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_partitions;

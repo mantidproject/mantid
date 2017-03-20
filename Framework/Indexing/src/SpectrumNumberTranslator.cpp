@@ -6,19 +6,18 @@ namespace Indexing {
 SpectrumNumberTranslator::SpectrumNumberTranslator(
     const std::vector<SpectrumNumber> &spectrumNumbers,
     std::unique_ptr<Partitioner> partitioner, const PartitionIndex &partition)
-    : m_partitioner(std::move(partitioner)), m_partition(partition),
-      m_globalSpectrumNumbers(spectrumNumbers) {
-  m_partitioner->checkValid(m_partition);
+    : m_partition(partition), m_globalSpectrumNumbers(spectrumNumbers) {
+  partitioner->checkValid(m_partition);
 
   size_t currentIndex = 0;
   for (size_t i = 0; i < m_globalSpectrumNumbers.size(); ++i) {
-    auto partition = m_partitioner->indexOf(GlobalSpectrumIndex(i));
+    auto partition = partitioner->indexOf(GlobalSpectrumIndex(i));
     auto number = m_globalSpectrumNumbers[i];
     m_partitions.emplace(number, partition);
     if (partition == m_partition) {
       m_indices.emplace(number, currentIndex);
       m_globalToLocal.emplace(GlobalSpectrumIndex(i), currentIndex);
-      if (m_partitioner->numberOfPartitions() > 1)
+      if (partitioner->numberOfPartitions() > 1)
         m_spectrumNumbers.emplace_back(number);
       ++currentIndex;
     }
@@ -27,7 +26,7 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
 
 /// Returns the global number of spectra.
 size_t SpectrumNumberTranslator::globalSize() const {
-  return m_globalSpectrumNumbers.size();
+  return m_partitions.size();
 }
 
 /// Returns the local number of spectra.
@@ -36,14 +35,13 @@ size_t SpectrumNumberTranslator::localSize() const { return m_indices.size(); }
 /// Returns the spectrum number for given index.
 SpectrumNumber
 SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
-  if (m_partitioner->numberOfPartitions() == 1)
+  if (globalSize() == localSize())
     return m_globalSpectrumNumbers[index];
   return m_spectrumNumbers[index];
 }
 
 // Full set
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
-  checkUniqueSpectrumNumbers();
   return SpectrumIndexSet(m_indices.size());
 }
 
@@ -67,7 +65,6 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
 SpectrumIndexSet
 SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
                                        GlobalSpectrumIndex max) const {
-  checkUniqueSpectrumNumbers();
   if (min > max)
     throw std::logic_error(
         "SpectrumIndexTranslator: specified min is larger than max.");
@@ -96,7 +93,6 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
 
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
-  checkUniqueSpectrumNumbers();
   std::vector<size_t> indices;
   for (const auto &globalIndex : globalIndices) {
     if (globalIndex >= m_partitions.size())

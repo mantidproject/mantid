@@ -86,14 +86,19 @@ public:
         PartitionIndex(0));
 
     TS_ASSERT_THROWS_NOTHING(translator.spectrumNumber(0));
-    TS_ASSERT_THROWS(translator.makeIndexSet(), std::logic_error);
+    // Accessing full set works, does not require spectrum numbers.
+    TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet());
+    // Access via spectrum numbers fails.
     TS_ASSERT_THROWS(
         translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)),
         std::logic_error);
     TS_ASSERT_THROWS(translator.makeIndexSet(makeSpectrumNumbers({1})),
                      std::logic_error);
-    TS_ASSERT_THROWS(translator.makeIndexSet(makeGlobalSpectrumIndices({1})),
-                     std::logic_error);
+    // Access via global spectrum index works.
+    TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet(GlobalSpectrumIndex(1),
+                                                     GlobalSpectrumIndex(2)));
+    TS_ASSERT_THROWS_NOTHING(
+        translator.makeIndexSet(makeGlobalSpectrumIndices({1})));
   }
 
   void test_spectrum_numbers_order_preserved() {
