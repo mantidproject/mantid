@@ -580,6 +580,9 @@ private:
   void setImage(MantidVec &(MatrixWorkspace::*dataVec)(const std::size_t),
                 const MantidImage &image, size_t start, bool parallelExecution);
 
+  void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
+  void rebuildDetectorIDGroupings();
+
   std::unique_ptr<Indexing::IndexInfo> m_indexInfo;
 
   /// Has this workspace been initialised?

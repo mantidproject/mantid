@@ -9,6 +9,9 @@
 #include <type_traits>
 
 namespace Mantid {
+namespace Geometry {
+class Instrument;
+}
 namespace API {
 class MatrixWorkspace;
 class HistoWorkspace;
@@ -56,6 +59,8 @@ class Workspace2D;
   ~~~{.cpp}
   create<T>(NumSpectra, Histogram)
   create<T>(IndexInfo,  Histogram)
+  create<T>(Instrument, NumSpectra, Histogram)
+  create<T>(Instrument, IndexInfo,  Histogram)
   create<T>(ParentWS)
   create<T>(ParentWS, Histogram)
   create<T>(ParentWS, NumSpectra)
@@ -171,6 +176,19 @@ template <class T, class IndexArg, class HistArg,
               nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  return std::move(ws);
+}
+
+template <class T, class IndexArg, class HistArg,
+          typename std::enable_if<
+              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
+              nullptr>
+std::unique_ptr<T>
+create(const boost::shared_ptr<const Geometry::Instrument> instrument,
+       const IndexArg &indexArg, const HistArg &histArg) {
+  auto ws = Kernel::make_unique<T>();
+  ws->setInstrument(std::move(instrument));
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return std::move(ws);
 }

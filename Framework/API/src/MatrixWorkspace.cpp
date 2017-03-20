@@ -1,4 +1,5 @@
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/NumericAxis.h"
@@ -16,6 +17,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 
@@ -82,23 +84,9 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   std::lock_guard<std::mutex> lock(m_indexInfoMutex);
   // Individual SpectrumDefinitions in SpectrumInfo may have changed. Due to a
   // copy-on-write mechanism the definitions stored in IndexInfo may then be out
-  // of sync.
-  if (m_indexInfo->spectrumDefinitions() !=
-      spectrumInfo().sharedSpectrumDefinitions()) {
-    // Changed SpectrumDefinitions implies that detector IDs in ISpectrum have
-    // changed.
-    std::vector<std::vector<Indexing::DetectorID>> detIDs;
-    for (size_t i = 0; i < getNumberHistograms(); ++i) {
-      const auto &set = getSpectrum(i).getDetectorIDs();
-      detIDs.emplace_back(set.begin(), set.end());
-    }
-    m_indexInfo->setDetectorIDs(std::move(detIDs));
-    // IndexInfo clears the spectrum definitions when setting new detector IDs
-    // (to reduce the risk for mismatch, when used outside MatrixWorkspace),
-    // we thus set new definitions *after* settings IDs.
-    m_indexInfo->setSpectrumDefinitions(
-        spectrumInfo().sharedSpectrumDefinitions());
-  }
+  // of sync (definitions in SpectrumInfo have been updated).
+  m_indexInfo->setSpectrumDefinitions(
+      spectrumInfo().sharedSpectrumDefinitions());
   // If spectrum numbers are set in ISpectrum this flag will be true. However,
   // for MPI builds we will forbid changing spectrum numbers in this way, so we
   // should never enter this branch. Thus it is sufficient to set only the local
@@ -124,12 +112,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
                              "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
-    auto &spectrum = getSpectrum(i);
-    spectrum.setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
-    std::set<detid_t> ids;
-    for (const auto id : indexInfo.detectorIDs(i))
-      ids.insert(static_cast<detid_t>(id));
-    spectrum.setDetectorIDs(std::move(ids));
+    getSpectrum(i)
+        .setSpectrumNo(static_cast<specnum_t>(indexInfo.spectrumNumber(i)));
   }
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
@@ -148,7 +132,24 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // are thus assigned by IndexInfo, which acts at a highler level and is
   // typically used at construction time of a workspace, i.e., there is no data
   // in histograms yet which would need to be regrouped.
-  setSpectrumDefinitions(indexInfo.spectrumDefinitions());
+  // Fails if spectrum definitions contain invalid indices.
+  rebuildDetectorIDGroupings();
+  // Internally clears the flags that require spectrum definition updates (set
+  // by rebuildDetectorIDGrouping).
+  setSpectrumDefinitions(m_indexInfo->spectrumDefinitions());
+}
+
+/// Variant of setIndexInfo, used by WorkspaceFactoryImpl.
+void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
+    const Indexing::IndexInfo &indexInfo) {
+  // Comparing the *local* size of the indexInfo.
+  if (indexInfo.size() != getNumberHistograms())
+    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                             "does not match number of histograms in "
+                             "workspace");
+  *m_indexInfo = indexInfo;
+  m_indexInfoNeedsUpdate = false;
+  setSpectrumDefinitions(m_indexInfo->spectrumDefinitions());
 }
 
 /// @returns A human-readable string of the current state
@@ -2007,6 +2008,24 @@ size_t MatrixWorkspace::groupOfDetectorID(const detid_t) const {
  * available and updated in Beamline::SpectrumInfo. */
 void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
   setDetectorGrouping(index, getSpectrum(index).getDetectorIDs());
+}
+
+void MatrixWorkspace::rebuildDetectorIDGroupings() {
+  const auto &allDetIDs = detectorInfo().detectorIDs();
+  for (size_t i = 0; i < m_indexInfo->size(); ++i) {
+    std::set<detid_t> detIDs;
+    for (const auto &index : m_indexInfo->spectrumDefinition(i)) {
+      const size_t detIndex = index.first;
+      if (detIndex >= allDetIDs.size())
+        throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "
+                                 "an out-of-range detector index, i.e., the "
+                                 "spectrum definition does not match the "
+                                 "instrument in the workspace.");
+      // TODO check time indices
+      detIDs.insert(allDetIDs[detIndex]);
+    }
+    getSpectrum(i).setDetectorIDs(std::move(detIDs));
+  }
 }
 
 } // namespace API
