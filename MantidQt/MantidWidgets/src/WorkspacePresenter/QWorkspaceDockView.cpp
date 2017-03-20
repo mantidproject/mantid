@@ -1547,7 +1547,7 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
       m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
         showErrorBars, nullptr, false, userInput.waterfall);
     }
-// TODO straight away: add logname & custumLogValues arguments as below run through to where workspace name would be inserted into plot.
+
   }
   else if (userInput.surface) {
     m_mantidUI->plotSurface(userInput.advanced.accepted,

@@ -462,8 +462,8 @@ void MantidWSIndexWidget::initLogs() {
   m_logBox->addWidget(m_axisLabel);
   m_logBox->addWidget(m_axisNameEdit);
 
-  m_logSelector->setEnabled(false);
-  m_logValues->setEnabled(false);
+  m_logSelector->setEnabled(true);
+  m_logValues->setEnabled(true);
   m_axisNameEdit->setEnabled(false);
 
   m_outer->addItem(m_logBox);
