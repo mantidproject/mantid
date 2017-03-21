@@ -641,19 +641,20 @@ class PhysicalProperties(object):
                     out += ',Lambda=%s' % (self._lambda)
         return out
 
-    def envString(self, dataset=0):
-        """Create environment string for multidataset fitting"""
-        dataset = str(dataset)
-        out = ''
+    def getAttributes(self, dataset=None):
+        """Returns a dictionary of PhysicalProperties attributes for use with IFunction"""
+        dataset = '' if dataset is None else str(dataset)
+        out = {}
         if self._typeid > 1:
-            out += 'Unit%s=%s' % (dataset, self._physpropUnit)
+            out['Unit%s' % (dataset)] = self._physpropUnit
             if 'powder' in self._hdir:
-                out += ',powder%s=1' % (dataset)
+                out['powder%s' % (dataset)] = 1
             else:
-                out += ',Hdir%s=(%s)' % (dataset, ','.join([str(hh) for hh in self._hdir]))
+                out['Hdir%s' % (dataset)] = [float(hh) for hh in self._hdir] # needs to be list
             if self._typeid != 3:  # either susceptibility or M(T)
-                out += ',inverse%s=%s' % (dataset, 1 if self._suscInverseFlag else 0)
-                out += (',Hmag%s=%s' % (dataset, self._hmag)) if self._typeid==3 else ''
+                out['inverse%s' % (dataset)] = 1 if self._suscInverseFlag else 0
+                if self._typeid==3:
+                    out['Hmag%s' % (dataset)] = self._hmag
                 if self._typeid == 2 and self._lambda != 0:
-                    out += ',Lambda%s=%s' % (dataset, self._lambda)
+                    out['Lambda%s=' % (dataset)] = self._lambda
         return out

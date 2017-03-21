@@ -474,7 +474,7 @@ class CrystalFieldTests(unittest.TestCase):
         y /= c_mbsr
         # self.assertAlmostEqual(y[60], 5.52333486, 8)
 
-    def x_test_api_CrystalField_physical_properties(self):
+    def test_api_CrystalField_physical_properties(self):
         from CrystalField import CrystalField
         cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
         # Test Heat capacity calculations
@@ -1712,7 +1712,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertTrue(np.all(out1 / y1 > 1.49))
         self.assertTrue(np.all(out1 / y1 < 1.51))
 
-    def x_test_CrystalFieldFit_physical_properties(self):
+    def test_CrystalFieldFit_physical_properties(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, PhysicalProperties
         origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
