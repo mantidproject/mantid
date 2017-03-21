@@ -87,7 +87,6 @@ set ( SRC_FILES
 	src/MWDiag.cpp
 	src/MWView.cpp
 	src/MantidHelpWindow.cpp
-	src/MantidSurfacePlotDialog.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
 	src/MantidWSIndexDialog.cpp
@@ -154,7 +153,6 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
     inc/MantidQtMantidWidgets/InputController.h
-    inc/MantidQtMantidWidgets/MantidSurfacePlotDialog.h
     inc/MantidQtMantidWidgets/MantidWSIndexDialog.h
     inc/MantidQtMantidWidgets/MantidTreeWidget.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h

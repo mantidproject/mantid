@@ -3964,18 +3964,6 @@ void MantidUI::updateRecentFilesList(const QString &fname) {
   m_appWindow->updateRecentFilesList(fname);
 }
 
-MantidSurfacePlotDialog *
-MantidUI::createSurfacePlotDialog(int flags, QStringList wsNames,
-                                  const QString &plotType) {
-  QList<QString> names;
-
-  for (auto &name : wsNames)
-    names.append(name);
-
-  return new MantidSurfacePlotDialog(this, static_cast<Qt::WFlags>(flags),
-                                     names, plotType);
-}
-
 /**
  * Create a new MantidWSIndexDialog
  * @param flags :: [input] Qt::WindowFlags enum as an integer
@@ -3996,46 +3984,6 @@ MantidWSIndexDialog *MantidUI::createWorkspaceIndexDialog(int flags,
                                  showTiledOpt, isAdvanced);
 }
 
-void MantidUI::showSurfacePlot() {
-  // find the workspace group clicked on
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseSurfacePlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to get rid of MantidUI dependency here.
-#if 0
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotSurface(wsGroup, options);
-#endif
-    }
-  }
-}
-
-void MantidUI::showContourPlot() {
-  auto wksp = m_exploreMantid->getSelectedWorkspace();
-
-  if (wksp) {
-    const auto wsGroup =
-        boost::dynamic_pointer_cast<const WorkspaceGroup>(wksp);
-    if (wsGroup) {
-      auto options = m_exploreMantid->chooseContourPlotOptions(
-          wsGroup->getNumberOfEntries());
-
-      // TODO: Figure out how to remove the MantidUI dependency
-#if 0
-      auto plotter =
-          Mantid::Kernel::make_unique<MantidGroupPlotGenerator>(this);
-      plotter->plotContour(wsGroup, options);
-#endif
-    }
-  }
-}
 
 void MantidUI::plotContour(bool accepted, int plotIndex, const QString &axisName,
   const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) {
