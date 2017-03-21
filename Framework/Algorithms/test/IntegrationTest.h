@@ -9,6 +9,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -25,27 +27,23 @@ public:
   static void destroySuite(IntegrationTest *suite) { delete suite; }
 
   void setUp() override {
+    using namespace Mantid::HistogramData;
     // Set up a small workspace for testing
-    Workspace_sptr space =
-        WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    std::vector<double> a(25);
-    std::vector<double> e(a.size());
-    for (size_t i = 0; i < a.size(); ++i) {
-      a[i] = static_cast<double>(i);
-      e[i] = sqrt(static_cast<double>(i));
+    const size_t nhist(5), nbins(5);
+    const bool isHist = true;
+    auto space2D =
+        WorkspaceCreationHelper::create2DWorkspace123(nhist, nbins, isHist);
+    // replace values
+    // X=0->nbins+1,Y=0->nhist*nbins
+    auto xValues = make_cow<HistogramX>(nbins + 1, LinearGenerator(0., 1.0));
+    for (size_t i = 0; i < nhist; ++i) {
+      Counts counts(nbins,
+                    LinearGenerator(nbins * static_cast<double>(i), 1.0));
+      space2D->setHistogram(i, Histogram(BinEdges(xValues), counts));
     }
-    for (int j = 0; j < 5; ++j) {
-      for (int k = 0; k < 6; ++k) {
-        space2D->dataX(j)[k] = k;
-      }
-      space2D->dataY(j) =
-          Mantid::MantidVec(a.cbegin() + (5 * j), a.cend() + (5 * j) + 5);
-      space2D->dataE(j) =
-          Mantid::MantidVec(e.cbegin() + (5 * j), e.cend() + (5 * j) + 5);
-    }
+
     // Register the workspace in the data service
-    AnalysisDataService::Instance().add("testSpace", space);
+    AnalysisDataService::Instance().add("testSpace", space2D);
   }
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }

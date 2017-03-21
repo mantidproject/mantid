@@ -61,7 +61,7 @@ public:
     return new RectangularDetectorPixel(this, map);
   }
 
-  const Kernel::V3D getRelativePos() const override;
+  Kernel::V3D getRelativePos() const override;
 
 private:
   /// RectangularDetector that is the parent of this pixel.

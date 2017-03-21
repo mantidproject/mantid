@@ -38,8 +38,8 @@ void EQSANSPatchSensitivity::exec() {
 
   const int numberOfSpectra = static_cast<int>(inputWS->getNumberHistograms());
 
+  auto &inSpectrumInfo = inputWS->mutableSpectrumInfo();
   const auto &spectrumInfo = patchWS->spectrumInfo();
-  const auto &inSpectrumInfo = inputWS->spectrumInfo();
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < nx_pixels; i++) {
     std::vector<int> patched_ids;
@@ -57,7 +57,7 @@ void EQSANSPatchSensitivity::exec() {
     for (int j = 0; j < ny_pixels; j++) {
       // EQSANS-specific: get detector ID from pixel coordinates
       int iDet = ny_pixels * i + j;
-      if (iDet > numberOfSpectra) {
+      if (iDet >= numberOfSpectra) {
         g_log.notice() << "Got an invalid detector ID " << iDet << '\n';
         continue;
       }
@@ -70,7 +70,7 @@ void EQSANSPatchSensitivity::exec() {
       const MantidVec &YErrors = inputWS->readE(iDet);
 
       // If this detector is masked, skip to the next one
-      if (spectrumInfo.isMasked(i))
+      if (spectrumInfo.isMasked(iDet))
         patched_ids.push_back(iDet);
       else {
         if (!inSpectrumInfo.isMasked(iDet)) {
@@ -99,9 +99,8 @@ void EQSANSPatchSensitivity::exec() {
 
       // Apply patch
       progress(0.91, "Applying patch");
-      auto &spectrumInfo = inputWS->mutableSpectrumInfo();
       for (auto patched_id : patched_ids) {
-        if (!spectrumInfo.hasDetectors(patched_id)) {
+        if (!inSpectrumInfo.hasDetectors(patched_id)) {
           g_log.warning() << "Spectrum " << patched_id
                           << " has no detector, skipping (not clearing mask)\n";
           continue;
@@ -109,13 +108,13 @@ void EQSANSPatchSensitivity::exec() {
         MantidVec &YValues = inputWS->dataY(patched_id);
         MantidVec &YErrors = inputWS->dataE(patched_id);
         if (useRegression) {
-          YValues[0] = alpha + beta * spectrumInfo.position(patched_id).Y();
+          YValues[0] = alpha + beta * inSpectrumInfo.position(patched_id).Y();
           YErrors[0] = error;
         } else {
           YValues[0] = average;
           YErrors[0] = error;
         }
-        spectrumInfo.setMasked(patched_id, false);
+        inSpectrumInfo.setMasked(patched_id, false);
       }
     }
   }
