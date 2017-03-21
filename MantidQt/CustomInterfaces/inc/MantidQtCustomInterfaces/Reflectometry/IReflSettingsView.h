@@ -86,6 +86,8 @@ public:
   virtual void setInstDefaults(const std::vector<double> &,
                                const std::vector<std::string> &) const = 0;
 
+  /// Sets status of whether polarisation corrections should be enabled/disabled
+  virtual void setIsPolCorrEnabled(bool enable) const = 0;
   /// Set polarisation corrections and parameters enabled/disabled
   virtual void setPolarisationOptionsEnabled(bool enable) const = 0;
 };

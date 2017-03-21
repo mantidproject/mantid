@@ -90,6 +90,8 @@ public:
   std::string getProcessingInstructions() const override;
   /// Return selected detector correction type
   std::string getDetectorCorrectionType() const override;
+  /// Set the status of whether polarisation corrections should be enabled
+  void setIsPolCorrEnabled(bool enable) const override;
   /// Set default values for experiment and instrument settings
   void setExpDefaults(const std::vector<std::string> &) const override;
   void setInstDefaults(const std::vector<double> &,
@@ -101,13 +103,13 @@ public:
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
-  /// Sets enabled status for polarisation corrections and parameters
-  void setPolarisationOptionsEnabled(bool enable) const override;
 
 public slots:
   /// Request presenter to obtain default values for settings
   void requestExpDefaults() const;
   void requestInstDefaults() const;
+  /// Sets enabled status for polarisation corrections and parameters
+  void setPolarisationOptionsEnabled(bool enable) const override;
 
 private:
   /// Initialise the interface
@@ -117,6 +119,8 @@ private:
   Ui::ReflSettingsWidget m_ui;
   /// The presenter
   std::unique_ptr<IReflSettingsPresenter> m_presenter;
+  /// Whether or not polarisation corrections should be enabled
+  mutable bool m_isPolCorrEnabled;
 };
 
 } // namespace Mantid

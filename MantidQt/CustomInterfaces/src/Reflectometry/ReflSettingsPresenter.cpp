@@ -52,9 +52,9 @@ void ReflSettingsPresenter::notify(IReflSettingsPresenter::Flag flag) {
 */
 void ReflSettingsPresenter::setInstrumentName(const std::string &instName) {
   m_currentInstrumentName = instName;
-  m_view->setPolarisationOptionsEnabled(m_view->experimentSettingsEnabled() &&
-                                        instName != "INTER" &&
-                                        instName != "SURF");
+  bool enable = instName != "INTER" && instName != "SURF";
+  m_view->setIsPolCorrEnabled(enable);
+  m_view->setPolarisationOptionsEnabled(enable);
 }
 
 /** Returns global options for 'CreateTransmissionWorkspaceAuto'
@@ -314,8 +314,7 @@ std::string ReflSettingsPresenter::getStitchOptions() const {
   if (m_view->experimentSettingsEnabled())
     return m_view->getStitchOptions();
 
-  else
-    return std::string();
+  return std::string();
 }
 
 /** Creates hints for 'Stitch1DMany'
