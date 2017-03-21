@@ -6,10 +6,11 @@ import os
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, \
-    WorkspaceProperty
+    WorkspaceProperty, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
+from mantid.dataobjects import TableWorkspace, SplittersWorkspace
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
@@ -313,7 +314,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # TODO/FUTURE - This should be supported
                 raise RuntimeError("Reducing data with splitters cannot happen when there are more than 1 sample run.")
             # define range of wall-time to import data
-            sample_time_filter_wall = self._get_time_filter_wall(self._splittersWS, samRuns[0])
+            sample_time_filter_wall = self._get_time_filter_wall(self._splittersWS.name(), samRuns[0])
             self.log().information("The time filter wall is %s" %(str(sample_time_filter_wall)))
         else:
             sample_time_filter_wall = (0.0, 0.0)
@@ -930,7 +931,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Merge among chunks
             for split_index in range(num_out_wksp):
-
                 # determine the final workspace name
                 final_out_ws_name = base_name
                 if num_out_wksp > 1:
@@ -1095,22 +1095,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 If there is no split workspace defined, filter is (0., 0.) as the default
         """
         # supported case: support both workspace and workspace name
-        assert isinstance(split_ws_name, str) and len(splitws) > 0, 'SplittersWorkspace {0} must be a non-empty ' \
-                                                                    'string but not a {1}.' \
-                                                                    ''.format(splitws, type(splitws))
+        assert isinstance(split_ws_name, str) and len(split_ws_name) > 0,\
+            'SplittersWorkspace {0} must be a non-empty string but not a {1}.' \
+            ''.format(split_ws_name, type(split_ws_name))
         if AnalysisDataService.doesExist(split_ws_name):
             split_ws = get_workspace(split_ws_name)
         else:
-            raise RuntimeError('Splitting workspace {0} cannot be found in ADS.'.format(splitws))
+            raise RuntimeError('Splitting workspace {0} cannot be found in ADS.'.format(split_ws_name))
 
         # get the filter wall time according to type of splitting workspace
-        if isinstance(split_ws, mantid.api.MatrixWorkspace):
-            # matrix workspace
-            filter_start_time = split_ws.readX(0)[0]
-            filter_stop_time = split_ws.readX(0)[-1]
+        if isinstance(split_ws, MatrixWorkspace):
+            # matrix workspace: nano seconds of epoch time
+            filter_start_time = split_ws.readX(0)[0] * 1.E-9
+            filter_stop_time = split_ws.readX(0)[-1] * 1.E-9
 
-        elif isinstance(split_ws, mantid.dataobjects.SplittersWorkspace):
-            # splitters workspace: filter start and stop time are in "nano-seconds"!
+        elif isinstance(split_ws, SplittersWorkspace):
+            # splitters workspace: filter start and stop time are in "nano-seconds" and epoch time
             numrow = split_ws.rowCount()
 
             # Searching for the
@@ -1130,7 +1130,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             filter_start_time *= 1.0E-9
             filter_stop_time *= 1.0E-9
 
-        elif isinstance(split_ws, mantid.api.ITableWorkspace):
+        elif isinstance(split_ws, ITableWorkspace):
             # general table workspace: filter start and stop times are in seconds
             if split_ws.columnCount() < 3:
                 raise RuntimeError('Table splitters workspace {0} has too few ({1}) columns.'
@@ -1155,7 +1155,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # END-IF-ELSE
 
         # test relative time or not
-        if filter_start_time < 1 * 356 * 24 * 3600:
+        if filter_start_time > 1 * 356 * 24 * 3600:
             # start time is more than 1 years. then it must be an epoch time
             # Load meta data to determine wall time
             meta_ws_name = "temp_" + getBasename(filename)
@@ -1181,19 +1181,46 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         Return : integer
         """
-        if isinstance(splitwksp, mantid.dataobjects.SplittersWorkspace):
-            # splitws = mtd["PG3_9829_event_splitters"]
-            splitws = AnalysisDataService.retrieve(str(splitwksp))
-            numrows = splitws.rowCount()
+        # get handle on splitting workspace
+        if isinstance(splitwksp, str):
+            split_ws = AnalysisDataService.retrieve(splitwksp)
+        else:
+            split_ws = splitwksp
+
+        # get information
+        if isinstance(split_ws, SplittersWorkspace):
+            # SplittersWorkspace
+            numrows = split_ws.rowCount()
             wscountdict = {}
             for r in range(numrows):
-                wsindex = splitws.cell(r, 2)
+                wsindex = split_ws.cell(r, 2)
                 wscountdict[wsindex] = 0
             num_output_ws = len(list(wscountdict.keys()))
-            num_splitters = splitwksp.rowCount()
+            num_splitters = split_ws.rowCount()
+
+        elif isinstance(split_ws, MatrixWorkspace):
+            # case as MatrixWorkspace splitter
+            vec_y = split_ws.readY(0)
+            set_y = set()
+            for y in vec_y:
+                int_y = int(y+0.1)
+                set_y.add(int_y)
+            num_output_ws = len(set_y)
+            num_splitters = len(vec_y)
+
+        elif isinstance(split_ws, ITableWorkspace):
+            # case as a general TableWorkspace splitter
+            num_rows = split_ws.rowCount()
+            target_ws_set = set()
+            for r in range(num_rows):
+                target_ws = split_ws.cell(r, 2)
+                target_ws_set.add(target_ws)
+            num_output_ws = len(target_ws_set)
+            num_splitters = num_rows
+
         else:
-            # TODO/FIXME/NOW/ -- From here!
-            raise NotImplementedError('TO BE CONTINUED')
+            # Exceptions
+            raise NotImplementedError('Splitters workspace of type {0} is not supported.'.format(type(split_ws)))
 
         return num_output_ws, num_splitters
 
