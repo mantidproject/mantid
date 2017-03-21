@@ -1273,7 +1273,6 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
           outputs.emplace(index, &output_el);
         }
       }
-
       // Get a holder on input workspace's event list of this spectrum
       const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
@@ -1356,9 +1355,11 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                     "input/source EventWorkspace = " << numberOfSpectra
                  << ".\n";
 
+  /*
   for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
     std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
               << m_vecSplitterGroup[i] << "\n";
+  */
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
@@ -1456,9 +1457,10 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
         std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
         wsiter = m_outputWorkspacesMap.find(tindex);
         if (wsiter == m_outputWorkspacesMap.end()) {
-          g_log.error() << "Workspace target (" << tindex
-                        << ") does not have workspace associated."
-                        << "\n";
+          ;
+          //  g_log.error() << "Workspace target (" << tindex
+          //          << ") does not have workspace associated."
+          //        << "\n";
         } else {
           DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
           ws_i->mutableRun().addProperty(output_vector[tindex], true);

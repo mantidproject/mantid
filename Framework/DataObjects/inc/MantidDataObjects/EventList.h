@@ -304,10 +304,12 @@ public:
                        double toffactor, double tofshift) const;
 
   /// Split ...
-  std::string splitByFullTimeMatrixSplitter(
-      const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
-      std::map<int, EventList *> vec_outputEventList, bool docorrection,
-      double toffactor, double tofshift) const;
+  std::string
+  splitByFullTimeMatrixSplitter(const std::vector<int64_t> &vec_splitters_time,
+                                const std::vector<int> &vecgroups,
+                                std::map<int, EventList *> vec_outputEventList,
+                                bool docorrection, double toffactor,
+                                double tofshift) const;
 
   /// Split events by pulse time
   void splitByPulseTime(Kernel::TimeSplitterType &splitter,
@@ -499,6 +501,13 @@ private:
       const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
       std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
       bool docorrection, double toffactor, double tofshift) const;
+
+  template <class T>
+  std::string splitByFullTimeSparseVectorSplitterHelper(
+      const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+      std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
+      bool docorrection, double toffactor, double tofshift) const;
+
   template <class T>
   static void multiplyHelper(std::vector<T> &events, const double value,
                              const double error = 0.0);
