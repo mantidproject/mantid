@@ -8,6 +8,7 @@ try:
     import xml.etree.cElementTree as eTree
 except ImportError:
     import xml.etree.ElementTree as eTree
+from mantid.kernel import DateAndTime
 
 
 def get_named_elements_from_ipf_file(ipf_file, names_to_search, value_type):
@@ -76,3 +77,9 @@ def get_monitor_names_from_idf_file(idf_file):
                 else:
                     continue
     return output
+
+
+def get_valid_to_time_from_idf_string(idf_string):
+    tree_root = eTree.fromstring(idf_string)
+    valid_to_date = tree_root.attrib["valid-to"]
+    return DateAndTime(valid_to_date)

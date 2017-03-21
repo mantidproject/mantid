@@ -5,8 +5,8 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <nexus/napi.h>
@@ -485,58 +485,59 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
   }
 }
 
+/**
+ * @brief LoadHelper::moveComponent
+ * @param ws A MatrixWorkspace
+ * @param componentName The name of the component of the instrument
+ * @param newPos New position of the component
+ */
 void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
                                const std::string &componentName,
                                const V3D &newPos) {
-
-  try {
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-
-    ws->mutableDetectorInfo().setPosition(*component, newPos);
-
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
-  } catch (std::runtime_error &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : runtime_error");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
+  ws->mutableDetectorInfo().setPosition(*component, newPos);
 }
 
+/**
+ * @brief LoadHelper::rotateComponent
+ * @param ws A MantrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @param rot Rotations defined by setting a quaternion from an angle in degrees
+ * and an axis
+ */
 void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
-
-  try {
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-
-    ws->mutableDetectorInfo().setRotation(*component, rot);
-
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
-  } catch (std::runtime_error &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : runtime_error");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
+  ws->mutableDetectorInfo().setRotation(*component, rot);
 }
 
+/**
+ * @brief LoadHelper::getComponentPosition
+ * @param ws A MatrixWorkspace
+ * @param componentName The Name of the component of the instrument
+ * @return The position of the component
+ */
 V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
                                      const std::string &componentName) {
-  try {
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component =
-        instrument->getComponentByName(componentName);
-    V3D pos = component->getPos();
-    return pos;
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    throw std::runtime_error("Error when trying to move the " + componentName +
-                             " : NotFoundError");
+  Geometry::IComponent_const_sptr component =
+      ws->getInstrument()->getComponentByName(componentName);
+  if (!component) {
+    throw std::invalid_argument("Instrument component " + componentName +
+                                " not found");
   }
+  V3D pos = component->getPos();
+  return pos;
 }
 
 } // namespace DataHandling

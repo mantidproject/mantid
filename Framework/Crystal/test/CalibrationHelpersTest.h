@@ -150,7 +150,8 @@ public:
     auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
     const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(0.0, 0.0, 0.0);
-    const auto &newRot = Quat(0.2, 0.2, 0.2, 0.2);
+    auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
+    newRot.normalize();
     const double heightScale = 1.0;
     const double widthScale = 1.0;
 
@@ -180,7 +181,8 @@ public:
     auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
     const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(1.0, 2.0, 3.0);
-    const auto &newRot = Quat(0.2, 0.2, 0.2, 0.2);
+    auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
+    newRot.normalize();
     const double heightScale = 2.0;
     const double widthScale = 3.0;
 
