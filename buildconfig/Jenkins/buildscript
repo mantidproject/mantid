@@ -30,7 +30,7 @@ fi
 ###############################################################################
 # All nodes currently have PARAVIEW_DIR=5.2.0 and PARAVIEW_NEXT_DIR=5.1.2
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_DIR}
+export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -164,7 +164,7 @@ fi
 if [[ ${JOB_NAME} == *python3* ]]; then
   PYTHON3_EXECUTABLE=`which python3`
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
-  PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+  PARAVIEW_DIR="${PARAVIEW_NEXT_DIR}-python3"
 fi
 
 ###############################################################################
@@ -229,7 +229,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} .."
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_NEXT_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} .."
 
 ###############################################################################
 # Coverity build should exit early
