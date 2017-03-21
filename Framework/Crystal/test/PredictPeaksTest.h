@@ -47,7 +47,7 @@ public:
   }
 
   void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1,
+                    std::vector<V3D> hkls, V3D hklTest, int convention = 1,
                     bool useExtendedDetectorSpace = false,
                     bool addExtendedDetectorDefinition = false) {
     // Name of the output workspace.
@@ -57,10 +57,10 @@ public:
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular(1, 100);
+        ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0,0,-1), V3D(0,0,0), 1.6, 1.0);
 
     if (addExtendedDetectorDefinition) {
-      auto extendedSpaceObj = ComponentCreationHelper::createCuboid(5., 5., 5.);
+      auto extendedSpaceObj = ComponentCreationHelper::createCuboid(2., 10., 10.);
       auto extendedSpace = new ObjComponent("extended-detector-space",
                                             extendedSpaceObj, inst.get());
       extendedSpace->setPos(V3D(0.0, 0.0, 0.0));
@@ -73,7 +73,7 @@ public:
     WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
 
-    PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 10000);
+    PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 15);
 
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -103,8 +103,6 @@ public:
       return;
 
     TS_ASSERT_EQUALS(ws->getNumberPeaks(), expectedNumber);
-    V3D hklTest = {-10, -6, 1};
-    hklTest *= convention;
     if (expectedNumber > 1 && !addExtendedDetectorDefinition) {
       TS_ASSERT_EQUALS(ws->getPeak(0).getHKL(), hklTest);
     }
@@ -113,28 +111,28 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_exec() { do_test_exec("Primitive", 10, std::vector<V3D>()); }
+  void test_exec() { do_test_exec("Primitive", 229, std::vector<V3D>(), V3D(-11, 2, 3)); }
 
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition() {
-    do_test_exec("C-face centred", 6, std::vector<V3D>());
+    do_test_exec("C-face centred", 109, std::vector<V3D>(), V3D(-11, 3, 3));
   }
 
   void test_exec_withExtendedDetectorSpace() {
-    do_test_exec("Primitive", 3350, std::vector<V3D>(), 1, true, true);
+    do_test_exec("Primitive", 3350, std::vector<V3D>(), V3D(-11, 3, 3), 1, true, true);
   }
 
   void test_exec_withReflectionConditionAndExtendedDetectorSpace() {
-    do_test_exec("C-face centred", 1690, std::vector<V3D>(), 1, true, true);
+    do_test_exec("C-face centred", 1690, std::vector<V3D>(), V3D(-11, 3, 3), 1, true, true);
   }
 
   void test_exec_withExtendedDetectorSpaceOptionCheckedNoDefinition() {
-    do_test_exec("Primitive", 10, std::vector<V3D>(), 1, true, false);
+    do_test_exec("Primitive", 229, std::vector<V3D>(), V3D(-11, 2, 3),  1, true, false);
   }
 
   void test_exec_withInputHKLList() {
-    std::vector<V3D> hkls{{-6, -9, 1}};
-    do_test_exec("Primitive", 1, hkls);
+    std::vector<V3D> hkls{{-11, 3, 3}};
+    do_test_exec("Primitive", 1, hkls, V3D(-11, 3, 3));
   }
 
   /** More manual test of predict peaks where we build a simple UB
@@ -208,7 +206,7 @@ public:
   void test_crystallography() {
     Kernel::ConfigService::Instance().setString("Q.convention",
                                                 "Crystallography");
-    do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+    do_test_exec("Primitive", 11, std::vector<V3D>(), V3D(11, 4, -1), -1);
   }
 };
 
