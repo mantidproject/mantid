@@ -91,8 +91,6 @@ private:
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
   void clearUBMatrix();
-  void showSurfacePlot();
-  void showContourPlot();
   void refreshWorkspaces();
 
   void workspaceLoaded();

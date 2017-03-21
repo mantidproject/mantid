@@ -648,18 +648,6 @@ public:
     AnalysisDataService::Instance().remove("ws1");
   }
 
-  void testShowSurfacePlot() {
-    EXPECT_CALL(*mockView.get(), showSurfacePlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
-  void testShowContourPlot() {
-    EXPECT_CALL(*mockView.get(), showContourPlot()).Times(Exactly(1));
-    presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
 private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   WorkspacePresenterVN_sptr presenter;

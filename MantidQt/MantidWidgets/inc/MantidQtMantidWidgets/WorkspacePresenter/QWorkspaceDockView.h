@@ -144,8 +144,8 @@ public:
   void showTransposed() override;
   void convertToMatrixWorkspace() override;
   void convertMDHistoToMatrixWorkspace() override;
-  void showSurfacePlot() override;
-  void showContourPlot() override;
+  //void showSurfacePlot() override;
+  //void showContourPlot() override;
 
   bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                              const bool wait = true) override;
@@ -230,8 +230,8 @@ private slots:
   void onClickConvertMDHistoToMatrixWorkspace();
   void onClickShowAlgHistory();
   void onClickShowSampleMaterial();
-  void onClickPlotSurface();
-  void onClickPlotContour();
+ //void onClickPlotSurface();
+ //void onClickPlotContour();
   void onClickClearUB();
   void incrementUpdateCount();
   void filterWorkspaceTree(const QString &text);
@@ -268,7 +268,7 @@ private:
       *m_delete, *m_program, *m_ascendingSortAction, *m_descendingSortAction,
       *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
       *m_convertToMatrixWorkspace, *m_convertMDHistoToMatrixWorkspace,
-      *m_clearUB, *m_plotSurface, *m_plotContour;
+      *m_clearUB;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

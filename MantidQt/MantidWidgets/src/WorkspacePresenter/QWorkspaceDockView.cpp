@@ -691,11 +691,6 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(triggered()), this, SLOT(onClickClearUB()));
 
-  m_plotSurface = new QAction(tr("Plot Surface from Group"), this);
-  connect(m_plotSurface, SIGNAL(triggered()), this, SLOT(onClickPlotSurface()));
-
-  m_plotContour = new QAction(tr("Plot Contour from Group"), this);
-  connect(m_plotContour, SIGNAL(triggered()), this, SLOT(onClickPlotContour()));
 }
 
 /**
@@ -1045,22 +1040,6 @@ void QWorkspaceDockView::addWorkspaceGroupMenuItems(
   menu->addAction(m_plotSpecAdv);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
-
-  // If appropriate, add "plot surface" and "plot contour" options
-  // Only add these if:
-  // - there are >2 workspaces in group
-  // - all are MatrixWorkspaces (otherwise they can't be plotted)
-  // - only one group is selected
-  if (m_tree->selectedItems().size() == 1) {
-    if (groupWS && groupWS->getNumberOfEntries() > 2) {
-      if (isAllMatrixWorkspaces(groupWS)) {
-        menu->addAction(m_plotSurface);
-        m_plotSurface->setEnabled(true);
-        menu->addAction(m_plotContour);
-        m_plotContour->setEnabled(true);
-      }
-    }
-  }
 
   menu->addSeparator();
   menu->addAction(m_saveNexus);
@@ -1717,24 +1696,6 @@ void QWorkspaceDockView::convertMDHistoToMatrixWorkspace() {
 void QWorkspaceDockView::onClickClearUB() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::ClearUBMatrix);
 }
-
-void QWorkspaceDockView::onClickPlotSurface() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowSurfacePlot);
-}
-
-/**
-* Create a 3D surface plot from the selected workspace group
-*/
-void QWorkspaceDockView::showSurfacePlot() { m_mantidUI->showSurfacePlot(); }
-
-void QWorkspaceDockView::onClickPlotContour() {
-  m_presenter->notifyFromView(ViewNotifiable::Flag::ShowContourPlot);
-}
-
-/**
-* Create a contour plot from the selected workspace group
-*/
-void QWorkspaceDockView::showContourPlot() { m_mantidUI->showContourPlot(); }
 
 /**
 * Allows asynchronous execution of algorithms. This method is made

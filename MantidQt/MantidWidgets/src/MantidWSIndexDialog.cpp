@@ -667,7 +667,8 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: If true the waterfall checkbox is created
  * @param showPlotAll :: If true the "Plot all" button is created
- * @param showTiledOption :: If true the "Tiled" checkbox is created
+ * @param showTiledOption :: If true the "Tiled" option is created
+ * @param isAdvanced :: true if adanced plotting dialog is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,

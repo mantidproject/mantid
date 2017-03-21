@@ -149,12 +149,6 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
   case ViewNotifiable::Flag::ClearUBMatrix:
     clearUBMatrix();
     break;
-  case ViewNotifiable::Flag::ShowSurfacePlot:
-    showSurfacePlot();
-    break;
-  case ViewNotifiable::Flag::ShowContourPlot:
-    showContourPlot();
-    break;
   case ViewNotifiable::Flag::RefreshWorkspaces:
     refreshWorkspaces();
     break;
@@ -410,16 +404,6 @@ void WorkspacePresenter::clearUBMatrix() {
     } else
       break;
   }
-}
-
-void WorkspacePresenter::showSurfacePlot() {
-  auto view = lockView();
-  view->showSurfacePlot();
-}
-
-void WorkspacePresenter::showContourPlot() {
-  auto view = lockView();
-  view->showContourPlot();
 }
 
 void WorkspacePresenter::refreshWorkspaces() { updateView(); }
