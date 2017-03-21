@@ -62,7 +62,8 @@ def get_workspace(workspace_name):
     :param workspace_name:
     :return:
     """
-    assert isinstance(workspace_name, str)
+    assert isinstance(workspace_name, str), 'Input workspace name {0} must be a string but not a {1}.' \
+                                            ''.format(workspace_name, type(workspace_name))
 
     return AnalysisDataService.retrieve(workspace_name)
 
@@ -234,8 +235,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
-        tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
-        self.declareProperty(tableprop, "Splitters workspace for split event workspace.")
+        workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
+        self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
+        # replaced for matrix workspace, SplittersWorkspace and table workspace
+        # tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
+        # self.declareProperty(tableprop, "Splitters workspace for split event workspace.")
+
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
@@ -308,10 +313,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # TODO/FUTURE - This should be supported
                 raise RuntimeError("Reducing data with splitters cannot happen when there are more than 1 sample run.")
             # define range of wall-time to import data
-            timeFilterWall = self._get_time_filter_wall(self._splittersWS, samRuns[0])
-            self.log().information("The time filter wall is %s" %(str(timeFilterWall)))
+            sample_time_filter_wall = self._get_time_filter_wall(self._splittersWS, samRuns[0])
+            self.log().information("The time filter wall is %s" %(str(sample_time_filter_wall)))
         else:
-            timeFilterWall = (0.0, 0.0)
+            sample_time_filter_wall = (0.0, 0.0)
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
 
         self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
@@ -359,7 +364,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, timeFilterWall, calib,
+            sam_ws_name = self._focusAndSum(samRuns, sample_time_filter_wall, calib,
                                             reload_if_loaded=reload_event_file,
                                             preserveEvents=preserveEvents)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
@@ -373,7 +378,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             for sam_run_number in samRuns:
                 # first round of processing the sample
                 self._info = None
-                returned = self._focusChunks(sam_run_number, timeFilterWall, calib, splitwksp=self._splittersWS,
+                returned = self._focusChunks(sam_run_number, sample_time_filter_wall, calib,
+                                             splitwksp=self._splittersWS,
                                              normalisebycurrent=self._normalisebycurrent,
                                              reload_if_loaded=reload_event_file,
                                              preserveEvents=preserveEvents)
@@ -409,7 +415,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, timeFilterWall,
+            can_run_ws_name = self._process_container_runs(can_run_numbers, sample_time_filter_wall,
                                                            samRunIndex, calib, preserveEvents)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
@@ -419,7 +425,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             van_run_number_list = ['%s_%d' % (self._instrument, value) for value in van_run_number_list]
             van_specified = not noRunSpecified(van_run_number_list)
             if van_specified:
-                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, timeFilterWall, samRunIndex, calib)
+                van_run_ws_name = self._process_vanadium_runs(van_run_number_list, sample_time_filter_wall, samRunIndex, calib)
                 workspacelist.append(van_run_ws_name)
             else:
                 van_run_ws_name = None
@@ -1076,71 +1082,120 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-    def _get_time_filter_wall(self, splitws, filename):
-        """ Get filter wall from splitter workspace, i.e.,
-        get the earlies and latest TIME stamp in input splitter workspace
+    @staticmethod
+    def _get_time_filter_wall(split_ws_name, filename):
+        """ Get filter wall times (relative time in seconds to run start time)from splitter workspace, i.e.,
+        get the earliest and latest TIME stamp in input splitter workspace
 
         Arguments:
-         - splitws      : splitters workspace
-         - runstarttime : total nanoseconds of run start time (Mantid DateAndTime)
+         - split_ws_name: splitters workspace
+         - filename: file name
 
         Return: tuple of start-time and stop-time relative to run start time and in unit of second
                 If there is no split workspace defined, filter is (0., 0.) as the default
         """
         # supported case: support both workspace and workspace name
-        if splitws is None or str(splitws) == '':
-            raise RuntimeError('It is not supported to take a None-splitters workspace in this method.')
+        assert isinstance(split_ws_name, str) and len(splitws) > 0, 'SplittersWorkspace {0} must be a non-empty ' \
+                                                                    'string but not a {1}.' \
+                                                                    ''.format(splitws, type(splitws))
+        if AnalysisDataService.doesExist(split_ws_name):
+            split_ws = get_workspace(split_ws_name)
+        else:
+            raise RuntimeError('Splitting workspace {0} cannot be found in ADS.'.format(splitws))
 
-        # Load meta data to determine wall time
-        metawsname = "temp_" + getBasename(filename)
+        # get the filter wall time according to type of splitting workspace
+        if isinstance(split_ws, mantid.api.MatrixWorkspace):
+            # matrix workspace
+            filter_start_time = split_ws.readX(0)[0]
+            filter_stop_time = split_ws.readX(0)[-1]
 
-        api.Load(Filename=str(filename), OutputWorkspace=str(metawsname), MetaDataOnly=True)
-        metawksp = get_workspace(metawsname)
-        if metawksp is None:
-            self.log().warning("Unable to open file %s" % (filename))
-            return (0.0, 0.0)
+        elif isinstance(split_ws, mantid.dataobjects.SplittersWorkspace):
+            # splitters workspace: filter start and stop time are in "nano-seconds"!
+            numrow = split_ws.rowCount()
 
-        # Get start time
-        runstarttimens = metawksp.getRun().startTime().totalNanoseconds()
+            # Searching for the
+            filter_start_time = split_ws.cell(0, 0)
+            filter_stop_time = split_ws.cell(0, 1)
 
-        numrow = splitws.rowCount()
+            for r in range(1, numrow):
+                timestart = split_ws.cell(r, 0)
+                timeend = split_ws.cell(r, 1)
+                if timestart < filter_start_time:
+                    filter_start_time = timestart
+                if timeend > filter_stop_time:
+                    filter_stop_time = timeend
+            # END-FOR
 
-        # Searching for the
-        tmin_absns = splitws.cell(0,0)
-        tmax_absns = splitws.cell(0,1)
+            # convert to seconds
+            filter_start_time *= 1.0E-9
+            filter_stop_time *= 1.0E-9
 
-        for r in range(1, numrow):
-            timestart = splitws.cell(r, 0)
-            timeend = splitws.cell(r, 1)
-            if timestart < tmin_absns:
-                tmin_absns = timestart
-            if timeend > tmax_absns:
-                tmax_absns = timeend
-        # ENDFOR
+        elif isinstance(split_ws, mantid.api.ITableWorkspace):
+            # general table workspace: filter start and stop times are in seconds
+            if split_ws.columnCount() < 3:
+                raise RuntimeError('Table splitters workspace {0} has too few ({1}) columns.'
+                                   ''.format(split_ws_name, split_ws.columnCount()))
 
-        tmin = (tmin_absns - runstarttimens) * 1.0E-9
-        tmax = (tmax_absns - runstarttimens) * 1.0E-9
+            num_rows = split_ws.rowCount()
+            # Searching for the table
+            filter_start_time = split_ws.cell(0, 0)
+            filter_stop_time = split_ws.cell(0, 1)
 
-        filterWall = (tmin, tmax)
+            for r in range(1, num_rows):
+                split_start_time = split_ws.cell(r, 0)
+                split_stop_time = split_ws.cell(r, 1)
+                filter_start_time = min(filter_start_time, split_start_time)
+                filter_stop_time = max(filter_stop_time, split_stop_time)
+            # END-FOR
 
-        api.DeleteWorkspace(Workspace=metawsname)
+        else:
+            # unsupported case
+            raise RuntimeError('Input splitters workspace is not a supported type.')
 
-        return filterWall
+        # END-IF-ELSE
+
+        # test relative time or not
+        if filter_start_time < 1 * 356 * 24 * 3600:
+            # start time is more than 1 years. then it must be an epoch time
+            # Load meta data to determine wall time
+            meta_ws_name = "temp_" + getBasename(filename)
+            api.Load(Filename=str(filename), OutputWorkspace=str(meta_ws_name), MetaDataOnly=True)
+            meta_ws = get_workspace(meta_ws_name)
+
+            # Get start time
+            run_start_ns = meta_ws.getRun().startTime().totalNanoseconds()
+
+            # reset the time
+            filter_start_time -= run_start_ns * 1.E-9
+            filter_stop_time -= run_start_ns * 1.E-9
+
+            api.DeleteWorkspace(Workspace=meta_ws_name)
+        # END-IF
+
+        filer_wall = filter_start_time, filter_stop_time
+
+        return filer_wall
 
     def getNumberOfSplittedWorkspace(self, splitwksp):
         """ Get number of splitted workspaces due to input splitwksp
 
         Return : integer
         """
-        # splitws = mtd["PG3_9829_event_splitters"]
-        splitws = AnalysisDataService.retrieve(str(splitwksp))
-        numrows = splitws.rowCount()
-        wscountdict = {}
-        for r in range(numrows):
-            wsindex = splitws.cell(r,2)
-            wscountdict[wsindex] = 0
+        if isinstance(splitwksp, mantid.dataobjects.SplittersWorkspace):
+            # splitws = mtd["PG3_9829_event_splitters"]
+            splitws = AnalysisDataService.retrieve(str(splitwksp))
+            numrows = splitws.rowCount()
+            wscountdict = {}
+            for r in range(numrows):
+                wsindex = splitws.cell(r, 2)
+                wscountdict[wsindex] = 0
+            num_output_ws = len(list(wscountdict.keys()))
+            num_splitters = splitwksp.rowCount()
+        else:
+            # TODO/FIXME/NOW/ -- From here!
+            raise NotImplementedError('TO BE CONTINUED')
 
-        return len(list(wscountdict.keys()))
+        return num_output_ws, num_splitters
 
     @staticmethod
     def does_workspace_exist(workspace_name):
@@ -1160,18 +1215,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         do_split_raw_wksp = False
         num_out_wksp = 1
 
+        assert not isinstance(split_wksp, str), 'Input split workspace cannot be a string.'
+
         if split_wksp is not None:
             # Use splitting workspace
 
             # Check consistency with filterWall
             if filter_wall[0] < 1.0E-20 and filter_wall[1] < 1.0E-20:
                 # Default definition of filterWall when there is no split workspace specified.
-                raise RuntimeError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
+                raise RuntimeError('It is impossible to have a splitters workspace and a non-defined, i.e., (0,0) time '
+                                   'filter wall.')
             # ENDIF
 
             # Note: Unfiltered workspace (remainder) is not considered here
-            num_out_wksp = self.getNumberOfSplittedWorkspace(split_wksp)
-            num_splitters = split_wksp.rowCount()
+            num_out_wksp, num_splitters = self.getNumberOfSplittedWorkspace(split_wksp)
+            # num_out_wksp = self.getNumberOfSplittedWorkspace(split_wksp)
+            # num_splitters = split_wksp.rowCount()
 
             # Do explicit FilterEvents if number of splitters is larger than 1.
             # If number of splitters is equal to 1, then filterWall will do the job itself.
