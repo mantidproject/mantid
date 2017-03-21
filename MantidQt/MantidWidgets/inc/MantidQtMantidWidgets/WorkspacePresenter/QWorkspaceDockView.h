@@ -12,7 +12,6 @@
 #include <MantidAPI/MatrixWorkspace_fwd.h>
 #include <MantidAPI/WorkspaceGroup_fwd.h>
 
-#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
 #include <MantidQtMantidWidgets/WorkspacePresenter/IWorkspaceDockView.h>
 #include <QDockWidget>
 #include <QMap>
@@ -85,11 +84,6 @@ public:
   void init() override;
   MantidQt::MantidWidgets::WorkspacePresenterWN_wptr
   getPresenterWeakPtr() override;
-
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseContourPlotOptions(int nWorkspaces) const;
-  MantidSurfacePlotDialog::UserInputSurface
-  chooseSurfacePlotOptions(int nWorkspaces) const;
 
   SortDirection getSortDirection() const override;
   SortCriteria getSortCriteria() const override;

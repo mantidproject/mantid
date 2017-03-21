@@ -23,7 +23,6 @@ class MantidMatrix;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class MantidSurfacePlotDialog;
 class MantidWSIndexDialog;
 
 /**
@@ -131,9 +130,6 @@ public:
   virtual void showSampleMaterialWindow() = 0;
   virtual void showAlgorithmHistory() = 0;
 
-  virtual MantidSurfacePlotDialog *
-  createSurfacePlotDialog(int flags, QStringList wsNames,
-                          const QString &plotType) = 0;
   virtual MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
                              bool showPlotAll, bool showTiledOpt, bool isAdvanced=false ) = 0;

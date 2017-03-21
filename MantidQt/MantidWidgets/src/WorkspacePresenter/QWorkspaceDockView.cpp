@@ -210,16 +210,6 @@ WorkspacePresenterWN_wptr QWorkspaceDockView::getPresenterWeakPtr() {
   return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
 }
 
-MantidSurfacePlotDialog::UserInputSurface
-QWorkspaceDockView::chooseContourPlotOptions(int nWorkspaces) const {
-  return m_tree->chooseContourPlotOptions(nWorkspaces);
-}
-
-MantidSurfacePlotDialog::UserInputSurface
-QWorkspaceDockView::chooseSurfacePlotOptions(int nWorkspaces) const {
-  return m_tree->chooseSurfacePlotOptions(nWorkspaces);
-}
-
 /** Returns the names of the selected workspaces
 *   in the dock.
 */

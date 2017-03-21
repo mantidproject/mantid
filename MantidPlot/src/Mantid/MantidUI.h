@@ -211,9 +211,8 @@ public:
   // Table.
   Table *createTableFromSelectedRows(MantidMatrix *m, bool errs = true,
                                      bool binCentres = false);
-  MantidQt::MantidWidgets::MantidSurfacePlotDialog *
-  createSurfacePlotDialog(int flags, QStringList wsNames,
-                          const QString &plotType) override;
+
+  // Create dialog box for what to plot and how
   MantidQt::MantidWidgets::MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
                              bool showPlotAll, bool showTiledOpt, bool isAdvanced) override;
@@ -257,9 +256,6 @@ public:
   plotSubplots(const QStringList &wsNames, const QList<int> &indexList,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false, MultiLayer *plotWindow = nullptr);
-
-  void showSurfacePlot() override;
-  void showContourPlot() override;
 
 #ifdef MAKE_VATES
   bool doesVatesSupportOpenGL() override;
