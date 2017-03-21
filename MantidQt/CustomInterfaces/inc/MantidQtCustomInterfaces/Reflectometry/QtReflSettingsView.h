@@ -97,9 +97,9 @@ public:
   void setInstDefaults(const std::vector<double> &,
                        const std::vector<std::string> &) const override;
   /// Check if experiment settings are enabled
-  bool experimentSettingsEnabled() const;
+  bool experimentSettingsEnabled() const override;
   /// Check if instrument settings are enabled
-  bool instrumentSettingsEnabled() const;
+  bool instrumentSettingsEnabled() const override;
   /// Creates hints for 'Stitch1DMany'
   void
   createStitchHints(const std::map<std::string, std::string> &hints) override;
