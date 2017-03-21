@@ -436,7 +436,7 @@ private slots:
 private:
   MantidWSIndexWidget m_widget;
   /// Initializes the layout of the dialog
-  void init();
+  void init(bool isAdvanced);
   /// Initializes the layout of the buttons
   void initButtons();
   /// Do we allow the display of the "Plot all" button

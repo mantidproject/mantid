@@ -679,7 +679,7 @@ MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
       m_widget(this, flags, wsNames, showWaterfallOption, showTiledOption, isAdvanced),
       m_plotAll(showPlotAll) {
   // Set up UI.
-  init();
+  init(isAdvanced);
 }
 
 /**
@@ -770,10 +770,15 @@ void MantidWSIndexDialog::plotAll() {
 //----------------------------------
 // MantidWSIndexDialog private methods
 //----------------------------------
-void MantidWSIndexDialog::init() {
+void MantidWSIndexDialog::init(bool isAdvanced) {
   m_outer = new QVBoxLayout;
 
-  setWindowTitle(tr("MantidPlot"));
+  if (isAdvanced) {
+    setWindowTitle(tr("Plot Spectrum Advanced"));
+  }
+  else {
+    setWindowTitle(tr("Plot Spectrum"));
+  }
   m_outer->insertWidget(1, &m_widget);
   initButtons();
   setLayout(m_outer);
