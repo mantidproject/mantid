@@ -288,6 +288,7 @@ void PredictPeaks::createDetectorCache() {
   const auto & detInfo = m_pw->detectorInfo();
   std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>> points;
   points.reserve(detInfo.size());
+  m_indexMap.reserve(detInfo.size());
 
   for (size_t pointNo = 0; pointNo < detInfo.size(); ++pointNo) {
     if (detInfo.isMonitor(pointNo))
@@ -302,9 +303,12 @@ void PredictPeaks::createDetectorCache() {
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
     Eigen::Array3d point(E1[0], E1[1], E1[2]);
+
     if(point.hasNaN())
       continue;
+
     points.push_back(point);
+    m_indexMap.push_back(pointNo);
   }
 
   m_detectorCacheSearch
@@ -462,8 +466,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
   const V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
-  const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
 
+  const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
   double norm_q = q.norm();
   boost::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
@@ -484,23 +488,38 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 
-  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Array3d(q[0], q[1], q[2]), 1);
+  const auto &detInfo = m_pw->detectorInfo();
+  // find where this Q vector should intersect with "extended" space
+  Geometry::Track track(detInfo.samplePosition(), detectorDir);
+  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Array3d(q[0], q[1], q[2]), 5);
   if (neighbours.size() == 0)
     return;
 
-  const auto index = std::get<1>(neighbours[0]);
-  const auto &detInfo = m_pw->detectorInfo();
-  const auto &det = detInfo.detector(index);
-  bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+  const bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+  bool hitDetector = false;
+  size_t index = -1;
 
-  Geometry::Track track(detInfo.samplePosition(), detectorDir);
-  bool hitDetector = det.interceptSurface(track);
+  for(const auto neighbour : neighbours) {
+    track.reset(detInfo.samplePosition(), detectorDir);
+
+    index = std::get<1>(neighbour);
+    const auto &det = detInfo.detector(m_indexMap[index]);
+
+    Mantid::Geometry::BoundingBox bb;
+    if(!bb.doesLineIntersect(track))
+      continue;
+
+    hitDetector = det.interceptSurface(track) > 0;
+    if (hitDetector)
+      break;
+  }
+
+
   if(!hitDetector && !useExtendedDetectorSpace) {
     return;
   }
 
-  std::unique_ptr<Peak> peak { nullptr };
-
+  const auto &det = detInfo.detector(m_indexMap[index]);
   if(hitDetector) {
     // peak hit a detector to add it to the list
     Peak peak(m_inst, det.getID(), wl);
@@ -519,7 +538,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
 
     // Add it to the workspace
     m_pw->addPeak(peak);
-  } else {
+  } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
     const auto component = m_inst->getComponentByName("extended-detector-space");
     const auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);

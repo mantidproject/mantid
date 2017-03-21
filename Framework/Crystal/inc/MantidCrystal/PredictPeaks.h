@@ -68,6 +68,7 @@ private:
   void createDetectorCache();
 
 private:
+  std::vector<size_t> m_indexMap;
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
   /// Detector search cache for fast look-up of detectors
