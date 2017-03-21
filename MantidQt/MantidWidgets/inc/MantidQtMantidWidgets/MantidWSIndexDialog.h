@@ -27,36 +27,32 @@ class IntervalList;
 
 /**
         The MantidWSIndexDialog class presents users with a dialog so that
-   they may
-        specify which workspace indices / spectra IDs are to be plotted by
-   Mantid.
+   they may specify which workspace indices / spectra IDs are to be plotted 
+   by Mantid and the manner by which they are plotted.
 
         They are prompted with the available range(s) of indices/IDs they
-   can plot.
-        They must enter a range(s) that is(are) enclosed within those
+   can plot.They must enter a range(s) that is(are) enclosed within those
    ranges.
 
         "Ranges" are of a format you've probably seen when inputting page
-   numbers to
-        print into a word processing program or similar, i.e. "2, 4-6" to
-   print out
-        pages 2, 4, 5 and 6.
+   numbers to print into a word processing program or similar, 
+   i.e. "2, 4-6" to print out pages 2, 4, 5 and 6.
 
         Ranges are defined by the "Interval" and "IntervalList" classes.
 
         The IntervalListValidator class overrides QValidator, and allows
-   Mantid
-        to assertain whether a user has attempted to input a valid range or
-   not.
-        Altering this class will affect the behaviour of what is allowed to
-   be
-   typed,
-        and what inputs allow the "OK" button to be pressed.
+   Mantid to assertain whether a user has attempted to input a valid range 
+   or not. Altering this class will affect the behaviour of what is allowed 
+   to be typed, and what inputs allow the "OK" button to be pressed.
 
         TODO - perhaps the interval objects are useful elsewhere, in which
-   case
-   those
-                   three classes are best in thier own header and source.
+   case those three classes are best in thier own header and source.
+
+        This dialog also enables one to choose how to do the plotting.
+   One can choose between simple 1D plot, waterfall or tiled plot.
+   Also the advanced form of this dialog has surface and contour plot
+   and enables you to put a log value into the plot instead of the
+   worksapce index or spectrum number.
 
         @author Peter G Parker, ISIS, RAL
         @date 2011/10/06
@@ -341,8 +337,8 @@ private:
   Mantid::API::MatrixWorkspace_const_sptr getWorkspace(const QString& workspaceName) const;
   /// Check if workspaces are suitable for contour or surface plot
   bool isSuitableForContourOrSurfacePlot() const;
-  /// Check if workspaces are suitable for use of log names
-  bool isSuitableForLogNames(const QString &plotOption) const;
+  /// Check if workspaces are suitable for use of log values
+  bool isSuitableForLogValues(const QString &plotOption) const;
   /// Gets the axis name
   const QString getAxisName() const;
   /// Gets the log name
@@ -358,13 +354,10 @@ private:
   void checkForSpectraAxes();
 
   /// Generates an IntervalList which defines which workspace indices the
-  /// user
-  /// can
-  /// ask to plot.
+  /// user can ask to plot.
   void generateWsIndexIntervals();
-  /// Generates an IntervalList which defines which spectra IDs the user can
-  /// ask
-  /// to plot.
+  /// Generates an IntervalList which defines which spectra IDs the
+  /// user can ask to plot.
   void generateSpectraNumIntervals();
 
   /// Whether or not there are any common spectra IDs between workspaces.
