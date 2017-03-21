@@ -8,9 +8,15 @@
 #include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <Eigen/StdVector>
 
+#include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid {
@@ -248,6 +254,8 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
+  createDetectorCache();
+
   for (auto &goniometerMatrix : gonioVec) {
     // Final transformation matrix (HKL to Q in lab frame)
     DblMatrix orientedUB = goniometerMatrix * ub;
@@ -273,6 +281,34 @@ void PredictPeaks::exec() {
   }
 
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
+}
+
+
+void PredictPeaks::createDetectorCache() {
+  const auto & detInfo = m_pw->detectorInfo();
+  std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>> points;
+  points.reserve(detInfo.size());
+
+  for (size_t pointNo = 0; pointNo < detInfo.size(); ++pointNo) {
+    if (detInfo.isMonitor(pointNo))
+        continue; // skip monitor
+    if (detInfo.isMasked(pointNo))
+        continue; // edge is masked so don't check if not masked
+
+    const auto &det = detInfo.detector(pointNo);
+    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
+    const auto ph1 = det.getPhi();                                // phi
+    auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
+                 1. - std::cos(tt1)); // end of trajectory
+    E1 = E1 * (1. / E1.norm());       // normalize
+    Eigen::Array3d point(E1[0], E1[1], E1[2]);
+    if(point.hasNaN())
+      continue;
+    points.push_back(point);
+  }
+
+  m_detectorCacheSearch
+      = Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -425,37 +461,95 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   // This is in inelastic convention: momentum transfer of the LATTICE!
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
-  V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  const V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
+  const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
 
-  // Create the peak using the Q in the lab framewith all its info:
-  Peak p(m_inst, q);
+  double norm_q = q.norm();
+  boost::shared_ptr<const ReferenceFrame> refFrame =
+      this->m_inst->getReferenceFrame();
+  const V3D refBeamDir = refFrame->vecPointingAlongBeam();
+  // Default for ki-kf has -q
+  double qSign = 1.0;
+  if (convention == "Crystallography")
+    qSign = -1.0;
+  const double qBeam = q.scalar_prod(refBeamDir) * qSign;
+  double one_over_wl = (norm_q * norm_q) / (2.0 * qBeam);
+  double wl = (2.0 * M_PI) / one_over_wl;
+  // Default for ki-kf has -q
+  qSign = -1.0;
+  if (convention == "Crystallography")
+    qSign = 1.0;
 
-  /* The constructor calls setQLabFrame, which already calls findDetector, which
-     is expensive. It's not necessary to call it again, instead it's enough to
-     check whether a detector has already been set.
+  V3D detectorDir = q * qSign;
+  detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
+  detectorDir.normalize();
 
-     Peaks are added if they fall on a detector OR is the extended detector
-     space component is defined which can be used to approximate a peak's
-     position in detector space.
-     */
-  bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
-  if (!p.getDetector() &&
-      !(useExtendedDetectorSpace &&
-        m_inst->getComponentByName("extended-detector-space")))
+  const auto neighbours = m_detectorCacheSearch->findNearest(Eigen::Array3d(q[0], q[1], q[2]), 1);
+  if (neighbours.size() == 0)
     return;
 
-  // Only add peaks that hit the detector
-  p.setGoniometerMatrix(goniometerMatrix);
-  // Save the run number found before.
-  p.setRunNumber(m_runNumber);
-  p.setHKL(hkl * m_qConventionFactor);
+  const auto index = std::get<1>(neighbours[0]);
+  const auto &detInfo = m_pw->detectorInfo();
+  const auto &det = detInfo.detector(index);
+  bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
 
-  if (m_sfCalculator) {
-    p.setIntensity(m_sfCalculator->getFSquared(hkl));
+  Geometry::Track track(detInfo.samplePosition(), detectorDir);
+  bool hitDetector = det.interceptSurface(track);
+  if(!hitDetector && !useExtendedDetectorSpace) {
+    return;
   }
 
-  // Add it to the workspace
-  m_pw->addPeak(p);
+  std::unique_ptr<Peak> peak { nullptr };
+
+  if(hitDetector) {
+    // peak hit a detector to add it to the list
+    Peak peak(m_inst, det.getID(), wl);
+    if (!peak.getDetector())
+      return;
+
+    // Only add peaks that hit the detector
+    peak.setGoniometerMatrix(goniometerMatrix);
+    // Save the run number found before.
+    peak.setRunNumber(m_runNumber);
+    peak.setHKL(hkl * m_qConventionFactor);
+
+    if (m_sfCalculator) {
+      peak.setIntensity(m_sfCalculator->getFSquared(hkl));
+    }
+
+    // Add it to the workspace
+    m_pw->addPeak(peak);
+  } else {
+    // use extended detector space to try and guess peak position
+    const auto component = m_inst->getComponentByName("extended-detector-space");
+    const auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);
+    if(!c)
+      return;
+
+    // find where this Q vector should intersect with "extended" space
+    Geometry::Track track(detInfo.samplePosition(), detectorDir);
+    if(!c->interceptSurface(track))
+      return;
+
+    const auto magnitude = track.back().exitPoint.norm();
+    Peak peak(m_inst, q, boost::optional<double>(magnitude));
+
+    // Only add peaks that hit the detector
+    peak.setGoniometerMatrix(goniometerMatrix);
+    // Save the run number found before.
+    peak.setRunNumber(m_runNumber);
+    peak.setHKL(hkl * m_qConventionFactor);
+
+    if (m_sfCalculator) {
+      peak.setIntensity(m_sfCalculator->getFSquared(hkl));
+    }
+
+    // Add it to the workspace
+    m_pw->addPeak(peak);
+  }
+
+
+
 }
 
 } // namespace Mantid

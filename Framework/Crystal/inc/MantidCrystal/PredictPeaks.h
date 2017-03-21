@@ -5,9 +5,12 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/NearestNeighbours.h"
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidGeometry/Crystal/StructureFactorCalculator.h>
 #include "MantidKernel/Matrix.h"
+
+#include <tuple>
 
 namespace Mantid {
 namespace Crystal {
@@ -62,10 +65,13 @@ private:
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
+  void createDetectorCache();
+
 private:
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
-
+  /// Detector search cache for fast look-up of detectors
+  std::unique_ptr<Kernel::NearestNeighbours<3>> m_detectorCacheSearch;
   /// Run number of input workspace
   int m_runNumber;
   /// Instrument reference
