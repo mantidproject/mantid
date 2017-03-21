@@ -55,7 +55,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                  '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(FileProperty('InstrumentParFile', '',
-                                          action=FileAction.Load,
+                                          action=FileAction.OptionalLoad,
                                           extensions=['.dat', '.par']),
                              doc='PAR file containing instrument definition.')
 
@@ -204,8 +204,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           OutputWorkspace=ws_name)
 
                 if self._vanadium_ws:
+                    van_ws = mtd[self._vanadium_ws[index]]
                     if self._container_workspace is not None:
-                        van_ws = mtd[self._vanadium_ws[index]]
                         cont_ws = mtd[self._container_workspace]
 
                         if van_ws.blocksize() > cont_ws.blocksize():
