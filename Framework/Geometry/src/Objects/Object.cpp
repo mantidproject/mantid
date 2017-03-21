@@ -1578,7 +1578,7 @@ double Object::monteCarloVolume() const {
 double Object::singleShotMonteCarloVolume(const int shotSize, const size_t seed) const {
   const auto &boundingBox = getBoundingBox();
   if (boundingBox.isNull()) {
-    return 0;
+    throw std::runtime_error("Cannot calculate volume: invalid bounding box.");
   }
   int totalHits = 0;
   const double boundingDx = boundingBox.xMax() - boundingBox.xMin();

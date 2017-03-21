@@ -942,6 +942,11 @@ public:
     TS_ASSERT_DELTA(cuboid->volume(), correctVolume, 1e-3 * correctVolume)
   }
 
+  void testVolumeThrowsWhenBoundingBoxIsInvalid() {
+    Object shape("This text gives an invalid Object.");
+    TS_ASSERT_THROWS(shape.volume(), std::runtime_error);
+  }
+
   void testGetBoundingBoxForCylinder()
   /**
   Test bounding box for a object capped cylinder
