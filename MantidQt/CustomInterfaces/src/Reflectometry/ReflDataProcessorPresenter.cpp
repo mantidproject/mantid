@@ -310,7 +310,7 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
       AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) ==
           NULL) {
     // Monitors must be loaded first and workspace must be an event workspace
-    outName = loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
+    loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
   }
 
   return runFound;
