@@ -14,12 +14,10 @@ public:
   static LoadILLDiffractionTest *createSuite() { return new LoadILLDiffractionTest(); }
   static void destroySuite( LoadILLDiffractionTest *suite ) { delete suite; }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     LoadILLDiffraction alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
   void _test_exec()

@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -124,6 +124,7 @@ void LoadILLDiffraction::loadDataScan() {
       firstEntry.openNXInt("data_scan/scanned_variables/variables_names/axis");
   axis.load();
 
+  // read the starting two theta
   NXFloat twoTheta0 = firstEntry.openNXFloat("instrument/2theta/value");
   twoTheta0.load();
 
@@ -322,7 +323,7 @@ void LoadILLDiffraction::resolveScanType() {
   for (const auto &scanVar : m_scanVar) {
     if (scanVar.scanned == 1) {
       result = OtherScan;
-      if (scanVar.name == "Detector") {
+      if (scanVar.name == "2theta") {
         result = DetectorScan;
         break;
       }
@@ -404,17 +405,11 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
 
-  double r, theta, phi;
-  V3D oldPos = component->getPos();
-  oldPos.getSpherical(r, theta, phi);
+  Quat rotation(twoTheta0, V3D(0, 1, 0));
 
-  V3D newPos;
-  newPos.spherical(r, twoTheta0, phi);
+  g_log.debug() << "Setting 2theta0 to " << twoTheta0;
 
-  g_log.debug("Setting 2theta0 from " + std::to_string(theta) + " to " +
-              std::to_string(twoTheta0));
-
-  m_outWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
+  m_outWorkspace->mutableDetectorInfo().setRotation(*component, rotation);
 }
 
 } // namespace DataHandling
