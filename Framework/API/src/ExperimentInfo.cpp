@@ -282,7 +282,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_parmap->setDetectorInfo(m_detectorInfo);
 
   std::vector<Geometry::ComponentID> componentIds;
-  m_componentInfo = makeComponentInfo(*sptr_instrument, detectorInfo(), componentIds);
+  m_componentInfo =
+      makeComponentInfo(*sptr_instrument, detectorInfo(), componentIds);
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
       *m_componentInfo, std::move(componentIds));
   // Detector IDs that were previously dropped because they were not part of the
