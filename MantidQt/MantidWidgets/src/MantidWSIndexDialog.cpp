@@ -39,6 +39,7 @@ namespace MantidWidgets {
  * @param wsNames :: the names of the workspaces to be plotted
  * @param showWaterfallOption :: true if waterfall plot enabled
  * @param showTiledOption :: true if tiled plot enabled
+ * @param isAdvanced :: true if advanced plotting has been selected
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          QList<QString> wsNames,
@@ -486,10 +487,13 @@ void MantidWSIndexWidget::onLogSelected(const QString &logName) {
 }
 
 
-
+/**
+* Called when plot option is changed
+* @param plotOption :: [input] New plot option
+*/
 void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   auto useLogNames = m_advanced && 
-    isSuitableForLogNames(plotOption);
+    isSuitableForLogValues(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
@@ -548,11 +552,13 @@ Mantid::API::MatrixWorkspace_const_sptr MantidWSIndexWidget::getWorkspace(const 
 }
 
 
+// True if selected plot is suitable for plotting as contour of surface plot
 bool MantidWSIndexWidget::isSuitableForContourOrSurfacePlot() const {
   return (m_wsNames.size() > 2);
 }
 
-bool MantidWSIndexWidget::isSuitableForLogNames(const QString &plotOption) const {
+// True if selected plot is suitable for putting log values in
+bool MantidWSIndexWidget::isSuitableForLogValues(const QString &plotOption) const {
   return (plotOption == SIMPLE_PLOT || plotOption == WATERFALL_PLOT || plotOption == SURFACE_PLOT || plotOption == CONTOUR_PLOT);
 }
 
