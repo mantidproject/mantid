@@ -103,8 +103,6 @@ public:
   virtual void showTransposed() = 0;
   virtual void convertToMatrixWorkspace() = 0;
   virtual void convertMDHistoToMatrixWorkspace() = 0;
-  virtual void showSurfacePlot() = 0;
-  virtual void showContourPlot() = 0;
 
   virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                                      const bool wait = true) = 0;

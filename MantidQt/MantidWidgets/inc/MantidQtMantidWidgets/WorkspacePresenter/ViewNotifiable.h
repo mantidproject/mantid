@@ -68,8 +68,6 @@ public:
     ConvertToMatrixWorkspace,
     ConvertMDHistoToMatrixWorkspace,
     ClearUBMatrix,
-    ShowSurfacePlot,
-    ShowContourPlot,
     RefreshWorkspaces
   };
 
