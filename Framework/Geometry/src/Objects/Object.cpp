@@ -1538,7 +1538,7 @@ double Object::volume() const {
 /**
  * Calculates the volume of this object by the Monte Carlo method.
  * This method manages singleShotMonteCarloVolume() and uses the
- * variance as the convergence criteria.
+ * standard error as the convergence criteria.
  * @returns The simulated volume of this object.
  */
 double Object::monteCarloVolume() const {
@@ -1589,7 +1589,8 @@ double Object::singleShotMonteCarloVolume(const int shotSize, const size_t seed)
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = shotSize / threadCount;
     if (currentThreadNum == threadCount - 1) {
-      // Last thread may do some extra work.
+      // Last thread may have to do threadCount extra iterations in
+      // the worst case.
       blocksize = shotSize - (threadCount - 1) * blocksize;
     }
     boost::random::mt19937 rnEngine(static_cast<boost::random::mt19937::result_type>(seed));
