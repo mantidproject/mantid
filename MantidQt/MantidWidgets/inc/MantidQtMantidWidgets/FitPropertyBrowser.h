@@ -484,6 +484,9 @@ protected:
   QSignalMapper *m_fitMapper;
   QMenu *m_fitMenu;
 
+  /// Should the data be normalised before fitting?
+  bool m_shouldBeNormalised;
+
 private:
   /// load and save function
   void loadFunction(const QString &funcString);
@@ -596,8 +599,6 @@ private:
   /// store current workspace name
   std::string m_storedWorkspaceName;
 
-  /// Should the data be normalised before fitting?
-  bool m_shouldBeNormalised;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

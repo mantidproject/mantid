@@ -50,6 +50,7 @@ void CalculateAsymmetry::init() {
       "FittingFunction",
       "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
       "The additional fitting functions to be used.");
+
 }
 
 /** Executes the algorithm
@@ -205,6 +206,7 @@ double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->execute();
+
 
   std::string fitStatus = fit->getProperty("OutputStatus");
   API::IFunction_sptr result = fit->getProperty("Function");

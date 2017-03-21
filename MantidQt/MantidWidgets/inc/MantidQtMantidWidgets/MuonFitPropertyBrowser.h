@@ -94,12 +94,14 @@ public:
   /// Whether a guess is plotted or not
   bool hasGuess() const override;
 
+  void TFAsymmFit(int maxIterations);
+
 public slots:
   /// Perform the fit algorithm
   void fit() override;
   /// Open sequential fit dialog
   void sequentialFit() override;
-
+  void executeMuonFitMenu(const QString &item);
 signals:
   /// Emitted when sequential fit is requested by user
   void sequentialFitRequested();
@@ -128,6 +130,7 @@ private:
    QAction *m_fitActiontest;
    /// Create new fit menu
    QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w);
+
   /// Get the registered function names
   void populateFunctionNames() override;
   /// Check if the workspace can be used in the fit

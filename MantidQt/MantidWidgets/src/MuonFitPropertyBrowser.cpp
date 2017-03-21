@@ -185,7 +185,15 @@ void MuonFitPropertyBrowser::init() {
     parentLayout->setContentsMargins(0, 0, 0, 0);
   }
 }
-
+// Set up the execution of the muon fit menu 
+void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
+ if (item == "TFAsymm") {
+		TFAsymmFit(1000);
+	}
+ else {
+	 FitPropertyBrowser::executeFitMenu(item);
+ }
+}
 /**
 * @brief Initialise the layout.
 * This initialization includes:
@@ -211,7 +219,7 @@ QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w) {
 	m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
 	m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
 	m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-	m_fitMapper->setMapping(m_fitActiontest, "Fit");
+	m_fitMapper->setMapping(m_fitActiontest, "TFAsymm");
 
 	connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 	connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
@@ -220,14 +228,14 @@ QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w) {
 	connect(m_fitActiontest, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 
 	connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
-		SLOT(executeFitMenu(const QString &)));
+		SLOT(executeMuonFitMenu(const QString &)));
 	m_fitMenu->addAction(m_fitActionFit);
 	m_fitMenu->addAction(m_fitActionSeqFit);
 	m_fitMenu->addAction(m_fitActionEvaluate);
 	m_fitMenu->addSeparator();
 	m_fitMenu->addAction(m_fitActionUndoFit);
 	m_fitMenu->addSeparator();
-	m_fitMenu->addAction(m_fitActiontest);
+	m_fitMenu->addAction(m_fitActiontest); 
 	btnFit->setMenu(m_fitMenu);
 	return btnFit;
 }
@@ -339,6 +347,85 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
       m_registeredOther << qfnName;
     }
   }
+}
+
+//#include "../FitDialog.h"
+/**
+* Creates an instance of Fit algorithm, sets its properties and launches it.
+*/
+void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
+	const std::string wsName = workspaceName();
+
+	if (wsName.empty()) {
+		QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
+		return;
+	}
+
+	const auto ws = getWorkspace();
+	if (!ws) {
+		return;
+	}
+
+	try {
+		m_initialParameters.resize(compositeFunction()->nParams());
+		for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
+			m_initialParameters[i] = compositeFunction()->getParameter(i);
+		}
+		m_fitActionUndoFit->setEnabled(true);
+
+		//Calculate the asymmetry 
+		
+		std::string funStr = getFittingFunction()->asString();
+		
+		Mantid::API::IAlgorithm_sptr asymmAlg =
+			Mantid::API::AlgorithmManager::Instance().create("CalculateAsymmetry");
+		asymmAlg->initialize();
+		asymmAlg->setPropertyValue("FittingFunction", funStr);
+
+		asymmAlg->setProperty("InputWorkspace", ws);// try the raw workspace.... 
+		//asymmAlg->setProperty("Spectra", workspaceIndex());
+		asymmAlg->setProperty("StartX", startX());
+		asymmAlg->setProperty("EndX", endX());
+		asymmAlg->setPropertyValue("OutputWorkspace", "mooo");// outputName());
+		observeFinish(asymmAlg);
+		asymmAlg->executeAsync();
+		auto tmpWS = asymmAlg->getPropertyValue("OutputWorkSpace");
+		
+		// calculate the fit 
+
+		Mantid::API::IAlgorithm_sptr alg =
+			Mantid::API::AlgorithmManager::Instance().create("Fit");
+		alg->initialize();
+		if (isHistogramFit()) {
+			alg->setProperty("EvaluationType", "Histogram");
+		}
+		alg->setPropertyValue("Function", funStr);
+		alg->setProperty("InputWorkspace",tmpWS );// try the raw workspace.... 
+		alg->setProperty("WorkspaceIndex", workspaceIndex());
+		alg->setProperty("StartX", startX());
+		alg->setProperty("EndX", endX());
+		alg->setPropertyValue("Output", "boo");// outputName());
+		alg->setPropertyValue("Minimizer", minimizer(true));
+		alg->setProperty("IgnoreInvalidData", ignoreInvalidData());
+		alg->setPropertyValue("CostFunction", costFunction());
+		alg->setProperty("MaxIterations", maxIterations);
+		alg->setProperty("PeakRadius", getPeakRadius());
+		if (!isHistogramFit()) {
+			alg->setProperty("Normalise", m_shouldBeNormalised);
+			// Always output each composite function but not necessarily plot it
+			alg->setProperty("OutputCompositeMembers", true);
+			if (alg->existsProperty("ConvolveMembers")) {
+				alg->setProperty("ConvolveMembers", convolveMembers());
+			}
+		}
+		observeFinish(alg);
+		alg->executeAsync();
+
+	}
+	catch (const std::exception &e) {
+		QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
+		QMessageBox::critical(this, "Mantid - Error", msg);
+	}
 }
 
 /**
@@ -639,16 +726,14 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 	// First, clear whatever model is currently set
 	this->clear();
+	// Show or hide the TFAsymmetry fit
+	if (enabled) {
+		m_fitMenu->addAction(m_fitActiontest);
+	}
+	else {
+		m_fitMenu->removeAction(m_fitActiontest);
 
-	// Show or hide "Function" and "Data" sections
-	//m_browser->setItemVisible(m_functionsGroup, !enabled);
-	m_browser->setItemVisible(m_settingsGroup, !enabled);
-	// Show or hide additional widgets
-	/*for (int i = 0; i < m_widgetSplitter->count(); ++i) {
-		if (auto *widget = m_widgetSplitter->widget(i)) {
-			widget->setVisible(enabled);
-		}
-	}*/
+	}
 }
 /**
  * The pre-fit checks have been successfully completed. Continue by emitting a
