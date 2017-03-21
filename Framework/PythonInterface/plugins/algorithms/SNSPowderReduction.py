@@ -10,7 +10,7 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessor
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
-from mantid.dataobjects import TableWorkspace, SplittersWorkspace
+# from mantid.dataobjects import TableWorkspace, SplittersWorkspace
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
@@ -264,7 +264,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return
 
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
-    def PyExec(self):
+    def PyExec(self):  # noqa
         """ Main execution body
         """
         # get generic information
@@ -819,9 +819,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return sumRun
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, filename, filter_wall, calib,
+    def _focusChunks(self, filename, filter_wall, calib,  # noqa
                      normalisebycurrent, splitwksp=None, preserveEvents=True,
-                     reload_if_loaded=True):
+                     reload_if_loaded=True):  # noqa
         """
         Load, (optional) split and focus data in chunks
         @param filename: integer for run number
