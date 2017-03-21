@@ -14,10 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
 using namespace MantidQt::CustomInterfaces;
-using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
@@ -137,7 +134,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     std::set<int> groupList;
     groupList.insert(0);
@@ -172,7 +170,8 @@ public:
         .WillRepeatedly(Return("INTER"));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
     for (size_t i = 0; i < 30; i += 10) {
@@ -225,7 +224,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     std::set<int> groupList;
     groupList.insert(0);
@@ -257,7 +257,8 @@ public:
         .WillOnce(Return(true));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -278,7 +279,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     std::set<int> groupList;
     groupList.insert(0);
@@ -309,7 +311,8 @@ public:
         .Times(8)
         .WillRepeatedly(Return("INTER"));
 
-    presenter->notify(DataProcessorPresenter::ProcessFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -330,7 +333,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     createSampleEventWS("IvsQ_13460_0_10");
     createSampleEventWS("IvsQ_13460_10_20");
@@ -372,7 +376,8 @@ public:
         "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
-    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::PlotRowFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -393,7 +398,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     createSampleEventWS("IvsQ_13460_0_10");
     createSampleEventWS("IvsQ_13460_10_20");
@@ -434,7 +440,8 @@ public:
         "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
-    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::PlotRowFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -455,7 +462,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     createSampleEventWS("13460");
 
@@ -472,7 +480,11 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::PlotRowFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
@@ -493,7 +505,8 @@ public:
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
         .Times(1)
         .WillRepeatedly(Return("TestWorkspace"));
-    presenter->notify(DataProcessorPresenter::OpenTableFlag);
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
     createSampleEventWS("13460");
     createSampleEventWS("13462");
@@ -511,7 +524,11 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    presenter->notify(DataProcessorPresenter::PlotRowFlag);
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+        .Times(1)
+        .WillOnce(Return("0,10,20,30"));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::PlotGroupFlag));
 
     // Tidy up
     AnalysisDataService::Instance().clear();
