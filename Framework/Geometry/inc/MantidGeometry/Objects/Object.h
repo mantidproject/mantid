@@ -217,6 +217,8 @@ private:
 
   /// Returns the volume.
   double monteCarloVolume() const;
+  /// Returns the volume.
+  double singleShotMonteCarloVolume(const int shotSize, const size_t seed) const;
 
   /// Top rule [ Geometric scope of object]
   std::unique_ptr<Rule> TopRule;

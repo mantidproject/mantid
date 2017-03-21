@@ -1,29 +1,35 @@
 #include "MantidGeometry/Objects/Object.h"
+
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/Strings.h"
-
-#include "MantidGeometry/Surfaces/Cone.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/make_unique.h"
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/ranlux.hpp>
+#include <boost/random/uniform_01.hpp>
 
 #include <array>
 #include <deque>
@@ -1490,20 +1496,33 @@ double Object::volume() const {
       static_cast<GluGeometryHandler::GeometryType>(type);
   switch (gluType) {
   case GluGeometryHandler::GeometryType::CUBOID: {
+    // Here, the volume is calculated by the triangular method.
+    // We use one of the vertices (vectors[0]) as the reference
+    // point.
     double volume = 0.0;
-    const Kernel::V3D vertex12 = vectors[1] + vectors[2];
-    const Kernel::V3D vertex13 = vectors[1] + vectors[3];
-    const Kernel::V3D vertex23 = vectors[2] + vectors[3];
-    const Kernel::V3D vertex123 = vectors[1] + vertex23;
-    volume += vertex23.scalar_prod(vectors[3].cross_prod(vectors[2]));
-    volume += vertex23.scalar_prod(vectors[2].cross_prod(vertex123));
-    volume += vertex23.scalar_prod(vertex123.cross_prod(vectors[3]));
-    volume += vertex12.scalar_prod(vectors[2].cross_prod(vectors[1]));
-    volume += vertex12.scalar_prod(vectors[1].cross_prod(vertex13));
-    volume += vertex12.scalar_prod(vertex123.cross_prod(vectors[2]));
-    volume += vectors[1].scalar_prod(vectors[3].cross_prod(vertex13));
-    volume += vertex13.scalar_prod(vectors[3].cross_prod(vertex123));
-    volume += vertex13.scalar_prod(vertex123.cross_prod(vertex23));
+    // Vertices. Name codes follow flb = front-left-bottom etc.
+    const Kernel::V3D &flb = vectors[0];
+    const Kernel::V3D &flt = vectors[1];
+    const Kernel::V3D &frb = vectors[3];
+    const Kernel::V3D frt = frb + flt - flb;
+    const Kernel::V3D &blb = vectors[2];
+    const Kernel::V3D blt = blb + flt - flb;
+    const Kernel::V3D brb = blb + frb - flb;
+    const Kernel::V3D brt = frt + blb - flb;
+    // Normals point out, follow right-handed rule when
+    // defining the triangle faces.
+    volume += flb.scalar_prod(flt.cross_prod(blb));
+    volume += blb.scalar_prod(flt.cross_prod(blt));
+    volume += flb.scalar_prod(frb.cross_prod(flt));
+    volume += frb.scalar_prod(frt.cross_prod(flt));
+    volume += flb.scalar_prod(blb.cross_prod(frb));
+    volume += blb.scalar_prod(brb.cross_prod(frb));
+    volume += frb.scalar_prod(brb.cross_prod(frt));
+    volume += brb.scalar_prod(brt.cross_prod(frt));
+    volume += flt.scalar_prod(frt.cross_prod(blt));
+    volume += frt.scalar_prod(brt.cross_prod(blt));
+    volume += blt.scalar_prod(brt.cross_prod(blb));
+    volume += brt.scalar_prod(brb.cross_prod(blb));
     return volume / 6;
   }
   case GluGeometryHandler::GeometryType::SPHERE:
@@ -1517,44 +1536,72 @@ double Object::volume() const {
 }
 
 /**
- * The volume is calculated using the Monte Carlo method.
- * @returns The volume of this object.
+ * Calculates the volume of this object by the Monte Carlo method.
+ * This method manages singleShotMonteCarloVolume() and uses the
+ * variance as the convergence criteria.
+ * @returns The simulated volume of this object.
  */
 double Object::monteCarloVolume() const {
+  using namespace boost::accumulators;
+  const int singleShotIterations = 10000;
+  accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>> accumulate;
+  // For seeding the single shot runs.
+  boost::random::ranlux48 rnEngine;
+  // Warm up statistics.
+  for (int i = 0; i < 10; ++i) {
+    const auto seed = rnEngine();
+    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+  }
+  const double relativeErrorTolerance = 1e-3;
+  double currentMean;
+  double currentError;
+  do {
+    const auto seed = rnEngine();
+    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+    currentMean = mean(accumulate);
+    currentError = error_of<tag::mean>(accumulate);
+    if (std::isnan(currentError)) {
+      currentError = 0;
+    }
+  } while (currentError / currentMean > relativeErrorTolerance);
+  return currentMean;
+}
+
+/**
+ * Calculates the volume using the Monte Carlo method.
+ * @param shotSize Number of iterations.
+ * @param seed A number to seed the random number generator.
+ * @returns The simulated volume of this object.
+ */
+double Object::singleShotMonteCarloVolume(const int shotSize, const size_t seed) const {
   const auto &boundingBox = getBoundingBox();
   if (boundingBox.isNull()) {
     return 0;
   }
-  int total = 0;
   int totalHits = 0;
-  // The maximum number of iterations is chosen by the
-  // Stetson-Harrison method. This means that the following
-  // number may or may not work in every scenario.
-  const int maxIterations = 1000000;
   const double boundingDx = boundingBox.xMax() - boundingBox.xMin();
   const double boundingDy = boundingBox.yMax() - boundingBox.yMin();
-  const double boundingDz = boundingBox.yMax() - boundingBox.yMin();
+  const double boundingDz = boundingBox.zMax() - boundingBox.zMin();
   PARALLEL {
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
-    size_t blocksize = maxIterations / threadCount;
+    size_t blocksize = shotSize / threadCount;
     if (currentThreadNum == threadCount - 1) {
       // Last thread may do some extra work.
-      blocksize = maxIterations - (threadCount - 1) * blocksize;
+      blocksize = shotSize - (threadCount - 1) * blocksize;
     }
-    // The Mersenne twister randon number engine has poor performance
-    // with discard(). Use more suitable engine for parallelization.
-    std::ranlux48 rnEngine;
-    // All threads init their engine with the same (defualt) seed.
+    boost::random::mt19937 rnEngine(static_cast<boost::random::mt19937::result_type>(seed));
+    // All threads init their engine with the same seed.
     // We discard the random numbers used by the other threads.
     // This ensures reproducible results independent of the number
     // of threads.
     // We need three random numbers for each iteration.
     rnEngine.discard(currentThreadNum * 3 * blocksize);
-    std::uniform_real_distribution<double> rnDistribution(0, 1);
+    boost::random::uniform_01<double> rnDistribution;
     int hits = 0;
-    int localTotal = 0;
-    for (; localTotal < static_cast<int>(blocksize); ++localTotal) {
+    for (int i = 0; i < static_cast<int>(blocksize); ++i) {
       double rnd = rnDistribution(rnEngine);
       const double x = boundingBox.xMin() + rnd * boundingDx;
       rnd = rnDistribution(rnEngine);
@@ -1566,13 +1613,11 @@ double Object::monteCarloVolume() const {
       }
     }
     // Collect results.
-    PARALLEL_CRITICAL(monteCarloVolume) {
-      total += localTotal;
-      totalHits += hits;
-    }
+    PARALLEL_ATOMIC
+    totalHits += hits;
   }
   const double ratio =
-      static_cast<double>(totalHits) / static_cast<double>(total);
+      static_cast<double>(totalHits) / static_cast<double>(shotSize);
   const double boundingVolume = boundingDx * boundingDy * boundingDz;
   return ratio * boundingVolume;
 }
