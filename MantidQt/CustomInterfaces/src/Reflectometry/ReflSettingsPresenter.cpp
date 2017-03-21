@@ -71,15 +71,15 @@ std::string ReflSettingsPresenter::getTransmissionOptions() const {
     if (!analysisMode.empty())
       options.push_back("AnalysisMode=" + analysisMode);
 
-	// Add start overlap
-	auto startOv = m_view->getStartOverlap();
-	if (!startOv.empty())
-		options.push_back("StartOverlap=" + startOv);
+    // Add start overlap
+    auto startOv = m_view->getStartOverlap();
+    if (!startOv.empty())
+      options.push_back("StartOverlap=" + startOv);
 
-	// Add end overlap
-	auto endOv = m_view->getEndOverlap();
-	if (!endOv.empty())
-		options.push_back("EndOverlap=" + endOv);
+    // Add end overlap
+    auto endOv = m_view->getEndOverlap();
+    if (!endOv.empty())
+      options.push_back("EndOverlap=" + endOv);
   }
 
   if (m_view->instrumentSettingsEnabled()) {
