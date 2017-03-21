@@ -238,13 +238,11 @@ public:
     MockSettingsView mockView;
     ReflSettingsPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(2)
-        .WillRepeatedly(Return(true));
-
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(true)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
@@ -256,9 +254,7 @@ public:
     MockMainWindowPresenter mainPresenter;
 
     // Set instrument to 'POLREF'
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(true)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(true))
         .Times(Exactly(1));
     presenter.setInstrumentName("POLREF");
@@ -281,9 +277,7 @@ public:
     ReflSettingsPresenter presenter(&mockView);
 
     // Set instrument to 'INTER'
-    EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(1)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, setIsPolCorrEnabled(false)).Times(Exactly(1));
     EXPECT_CALL(mockView, setPolarisationOptionsEnabled(false))
         .Times(Exactly(1));
     presenter.setInstrumentName("INTER");
@@ -304,7 +298,7 @@ public:
     ReflSettingsPresenter presenter(&mockView);
 
     EXPECT_CALL(mockView, experimentSettingsEnabled())
-        .Times(2)
+        .Times(3)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockView, instrumentSettingsEnabled())
         .Times(2)
@@ -314,6 +308,7 @@ public:
     EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(0));
     EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(0));
     EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(0));
 
     // Instrument settings should be called
     EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(1));
@@ -329,13 +324,55 @@ public:
 
     auto transmissionOptions = presenter.getTransmissionOptions();
     auto reductionOptions = presenter.getReductionOptions();
+    auto stitchOptions = presenter.getStitchOptions();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
   void testInstrumentSettingsDisabled() {
 
-    // TODO: add a similar test here, see above
+    MockSettingsView mockView;
+    ReflSettingsPresenter presenter(&mockView);
+
+    EXPECT_CALL(mockView, experimentSettingsEnabled())
+        .Times(3)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockView, instrumentSettingsEnabled())
+        .Times(2)
+        .WillRepeatedly(Return(false));
+
+    // Instrument settings shouldn't be called
+    EXPECT_CALL(mockView, getMonitorIntegralMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorIntegralMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorBackgroundMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getMonitorBackgroundMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getLambdaMin()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getLambdaMax()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getI0MonitorIndex()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getProcessingInstructions()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getIntMonCheck()).Times(Exactly(0));
+    EXPECT_CALL(mockView, getDetectorCorrectionType()).Times(Exactly(0));
+
+    // Experiment settings should be called
+    EXPECT_CALL(mockView, getAnalysisMode()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getCRho()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCAlpha()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCAp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getCPp()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getDirectBeam()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getPolarisationCorrections()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getScaleFactor()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getMomentumTransferStep()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getStartOverlap()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getEndOverlap()).Times(Exactly(2));
+    EXPECT_CALL(mockView, getTransmissionRuns()).Times(Exactly(1));
+    EXPECT_CALL(mockView, getStitchOptions()).Times(Exactly(1));
+
+    auto transmissionOptions = presenter.getTransmissionOptions();
+    auto reductionOptions = presenter.getReductionOptions();
+    auto stitchOptions = presenter.getStitchOptions();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 };
 
