@@ -2,6 +2,7 @@
 #define MANTID_CRYSTAL_PREDICTPEAKS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DetectorSearcher.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/System.h"
@@ -68,11 +69,10 @@ private:
   void createDetectorCache();
 
 private:
-  std::vector<size_t> m_indexMap;
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
   /// Detector search cache for fast look-up of detectors
-  std::unique_ptr<Kernel::NearestNeighbours<3>> m_detectorCacheSearch;
+  std::unique_ptr<API::DetectorSearcher> m_detectorCacheSearch;
   /// Run number of input workspace
   int m_runNumber;
   /// Instrument reference

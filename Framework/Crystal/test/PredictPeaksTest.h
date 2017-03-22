@@ -111,7 +111,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_exec() { do_test_exec("Primitive", 229, std::vector<V3D>(), V3D(-11, 2, 3)); }
+  void test_exec() { do_test_exec("Primitive", 738, std::vector<V3D>(), V3D(-11, 2, 3)); }
 
   /** Fewer HKLs if they are not allowed */
   void test_exec_withReflectionCondition() {
@@ -127,7 +127,7 @@ public:
   }
 
   void test_exec_withExtendedDetectorSpaceOptionCheckedNoDefinition() {
-    do_test_exec("Primitive", 229, std::vector<V3D>(), V3D(-11, 2, 3),  1, true, false);
+    do_test_exec("Primitive", 738, std::vector<V3D>(), V3D(-11, 2, 3),  1, true, false);
   }
 
   void test_exec_withInputHKLList() {
