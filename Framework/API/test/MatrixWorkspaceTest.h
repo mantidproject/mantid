@@ -1587,13 +1587,15 @@ public:
     auto &detInfo = merged->mutableDetectorInfo();
     detInfo.merge(detInfo2);
 
-    // Setting IndexInfo withoutspectrum definitions will set up a 1:1 mapping
+    // Setting IndexInfo without spectrum definitions will set up a 1:1 mapping
     // such that each spectrum corresponds to 1 time index of a detector.
     merged->setIndexInfo(IndexInfo(merged->getNumberHistograms()));
 
     const auto &specInfo = merged->spectrumInfo();
     TS_ASSERT(specInfo.hasDetectors(0));
     TS_ASSERT(specInfo.hasDetectors(1));
+    // This is the order we get currently from the default mapping, but it is
+    // not guaranteed by the interface and might change.
     TS_ASSERT_EQUALS(specInfo.position(0), V3D(1, 0, 0));
     TS_ASSERT_EQUALS(specInfo.position(1), V3D(2, 0, 0));
 
