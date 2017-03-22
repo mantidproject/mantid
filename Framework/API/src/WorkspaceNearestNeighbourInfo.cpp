@@ -13,9 +13,9 @@ namespace API {
 * @param ignoreMaskedDetectors :: if true, masked detectors are ignored
 * @param nNeighbours :: number of neighbours to include
 */
-WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(const MatrixWorkspace &workspace,
-                                           const bool ignoreMaskedDetectors,
-                                           const int nNeighbours)
+WorkspaceNearestNeighbourInfo::WorkspaceNearestNeighbourInfo(
+    const MatrixWorkspace &workspace, const bool ignoreMaskedDetectors,
+    const int nNeighbours)
     : m_workspace(workspace) {
   std::vector<specnum_t> spectrumNumbers;
   for (size_t i = 0; i < m_workspace.getNumberHistograms(); ++i)
@@ -38,7 +38,7 @@ WorkspaceNearestNeighbourInfo::~WorkspaceNearestNeighbourInfo() = default;
 */
 std::map<specnum_t, Kernel::V3D>
 WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
-                                    const double radius) const {
+                                             const double radius) const {
   // Find the spectrum number
   std::vector<specnum_t> spectra = m_workspace.getSpectraFromDetectorIDs(
       std::vector<detid_t>(1, comp->getID()));
@@ -58,7 +58,8 @@ WorkspaceNearestNeighbourInfo::getNeighbours(const Geometry::IDetector *comp,
 * @return map of DetectorID to distance for the nearest neighbours
 */
 std::map<specnum_t, Kernel::V3D>
-WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec, const double radius) const {
+WorkspaceNearestNeighbourInfo::getNeighbours(specnum_t spec,
+                                             const double radius) const {
   return m_nearestNeighbours->neighboursInRadius(spec, radius);
 }
 

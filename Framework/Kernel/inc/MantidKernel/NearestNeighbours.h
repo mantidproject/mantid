@@ -36,9 +36,7 @@ public:
    *
    * @return handle to the raw ANNpointArray
    */
-  ANNpointArray rawData() {
-    return m_data;
-  }
+  ANNpointArray rawData() { return m_data; }
 
   /** Access a raw point in the collection of points
    *
@@ -48,7 +46,7 @@ public:
    * @param i :: the index of the point to return a handle to
    * @return handle to a single point in the collection of points
    */
-  ANNcoord* mutablePoint(const size_t i) {
+  ANNcoord *mutablePoint(const size_t i) {
     if (i < m_nPts)
       return m_data[i];
     else
@@ -56,7 +54,7 @@ public:
   }
 
   ~NNDataPoints() { annDeallocPts(m_data); }
-  NNDataPoints(const NNDataPoints&) = delete;
+  NNDataPoints(const NNDataPoints &) = delete;
 
 private:
   /// Number of points stored
@@ -69,23 +67,24 @@ private:
 // NearestNeighbours implementation
 //------------------------------------------------------------------------------
 
-template <size_t N = 3>
-class MANTID_KERNEL_DLL NearestNeighbours {
+template <size_t N = 3> class MANTID_KERNEL_DLL NearestNeighbours {
 
 public:
   // typedefs for code brevity
   typedef Eigen::Array<double, N, 1> ArrayType;
-  typedef std::vector<std::tuple<ArrayType, size_t, double>> NearestNeighbourResults;
+  typedef std::vector<std::tuple<ArrayType, size_t, double>>
+      NearestNeighbourResults;
 
   /** Create a nearest neighbour search object
    *
    * @param points :: vector of Eigen::Arrays to search through
    */
-  NearestNeighbours(const std::vector<ArrayType, Eigen::aligned_allocator<ArrayType>> & points)
-  {
+  NearestNeighbours(const std::vector<
+      ArrayType, Eigen::aligned_allocator<ArrayType>> &points) {
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
-      std::runtime_error("Need at least one point to initilise NearestNeighbours.");
+      std::runtime_error(
+          "Need at least one point to initilise NearestNeighbours.");
 
     m_dataPoints = make_unique<NNDataPoints>(numPoints, N);
 
@@ -95,11 +94,9 @@ public:
     m_kdTree = make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints, N);
   }
 
-  ~NearestNeighbours() {
-    annClose();
-  }
+  ~NearestNeighbours() { annClose(); }
 
-  NearestNeighbours(const NearestNeighbours&) = delete;
+  NearestNeighbours(const NearestNeighbours &) = delete;
 
   /** Find the k nearest neighbours to a given point
    *
@@ -111,7 +108,8 @@ public:
    * 	zero then exact neighbours will be found. (default = 0.0).
    * @return vector neighbours as tuples of (position, index, distance)
    */
-  NearestNeighbourResults findNearest(const ArrayType& pos, const size_t k = 1, const double error = 0.0) {
+  NearestNeighbourResults findNearest(const ArrayType &pos, const size_t k = 1,
+                                      const double error = 0.0) {
     const auto numNeighbours = static_cast<int>(k);
     // create arrays to store the indices & distances of nearest neighbours
     auto nnIndexList = std::unique_ptr<ANNidx[]>(new ANNidx[numNeighbours]);
@@ -122,25 +120,29 @@ public:
     Eigen::Map<ArrayType>(point.get(), N, 1) = pos;
 
     // find the k nearest neighbours
-    m_kdTree->annkSearch(point.get(), numNeighbours, nnIndexList.get(), nnDistList.get(), error);
+    m_kdTree->annkSearch(point.get(), numNeighbours, nnIndexList.get(),
+                         nnDistList.get(), error);
 
     return makeResults(k, std::move(nnIndexList), std::move(nnDistList));
   }
 
 private:
-
   /** Helper function to create a instance of NearestNeighbourResults
    *
    * @param k :: the number of neighbours searched for
-   * @param nnIndexList :: the ordered list of indicies matching the closest k neighbours
-   * @param nnDistList :: the ordered list of distances matching the closest k neighbours
+   * @param nnIndexList :: the ordered list of indicies matching the closest k
+   *neighbours
+   * @param nnDistList :: the ordered list of distances matching the closest k
+   *neighbours
    * @return a new NearestNeighbourResults object from the found items
    */
-  NearestNeighbourResults makeResults(const size_t k, const std::unique_ptr<ANNidx[]> nnIndexList, const std::unique_ptr<ANNdist[]> nnDistList) {
+  NearestNeighbourResults
+  makeResults(const size_t k, const std::unique_ptr<ANNidx[]> nnIndexList,
+              const std::unique_ptr<ANNdist[]> nnDistList) {
     NearestNeighbourResults results;
     results.reserve(k);
 
-    for(size_t i = 0; i < k; ++i) {
+    for (size_t i = 0; i < k; ++i) {
       // create Eigen array from ANNpoint
       auto pos = m_dataPoints->mutablePoint(nnIndexList[i]);
       ArrayType point = Eigen::Map<ArrayType>(pos, N, 1);
@@ -156,7 +158,6 @@ private:
   /// handle to the ANN KD-tree used for searching
   std::unique_ptr<ANNkd_tree> m_kdTree;
 };
-
 }
 }
 

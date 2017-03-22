@@ -330,7 +330,8 @@ void SofQWNormalisedPolygon::initAngularCachesPSD(
 
   bool ignoreMasked = true;
   const int numNeighbours = 4;
-  WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked, numNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*workspace, ignoreMasked,
+                                              numNeighbours);
 
   this->m_theta = std::vector<double>(nHistos);
   this->m_thetaWidths = std::vector<double>(nHistos);

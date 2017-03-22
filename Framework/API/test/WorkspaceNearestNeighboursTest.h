@@ -50,12 +50,14 @@ class WorkspaceNearestNeighboursTest : public CxxTest::TestSuite {
 private:
   /// Helper type giving access to protected methods. Makes testing of NN
   /// internals possible.
-  class ExposedNearestNeighbours : public Mantid::API::WorkspaceNearestNeighbours {
+  class ExposedNearestNeighbours
+      : public Mantid::API::WorkspaceNearestNeighbours {
   public:
     ExposedNearestNeighbours(const SpectrumInfo &spectrumInfo,
                              const std::vector<specnum_t> spectrumNumbers,
                              bool ignoreMasked = false)
-        : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers, ignoreMasked) {}
+        : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers,
+                                     ignoreMasked) {}
 
     // Direct access to intermdiate spectra detectors
     std::vector<size_t> getSpectraDetectors() {
@@ -72,7 +74,7 @@ public:
 
     // Create the NearestNeighbours object directly.
     WorkspaceNearestNeighbours nn(actualNeighboursNumber, ws->spectrumInfo(),
-                         getSpectrumNumbers(*ws));
+                                  getSpectrumNumbers(*ws));
 
     // Check distances calculated in NearestNeighbours compare with those using
     // getDistance on component
@@ -88,7 +90,8 @@ public:
         ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
+                                  getSpectrumNumbers(*ws));
 
     detid2det_map m_detectors;
     ws->getInstrument()->getDetectors(m_detectors);
@@ -144,7 +147,8 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(2, 16));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
+                                  getSpectrumNumbers(*ws));
 
     const auto &m_instrument = ws->getInstrument();
     // Correct # of detectors
@@ -209,7 +213,8 @@ public:
         ComponentCreationHelper::createTestInstrumentCylindrical(2));
 
     // Create the NearestNeighbours object directly.
-    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(), getSpectrumNumbers(*ws));
+    WorkspaceNearestNeighbours nn(8, ws->spectrumInfo(),
+                                  getSpectrumNumbers(*ws));
     for (size_t i = 0; i < 2000; i++) {
       nn.neighboursInRadius(1, 5.0);
     }

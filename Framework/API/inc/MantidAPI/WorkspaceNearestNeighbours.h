@@ -61,8 +61,8 @@ class SpectrumInfo;
 class MANTID_API_DLL WorkspaceNearestNeighbours {
 public:
   WorkspaceNearestNeighbours(int nNeighbours, const SpectrumInfo &spectrumInfo,
-                    std::vector<specnum_t> spectrumNumbers,
-                    bool ignoreMaskedDetectors = false);
+                             std::vector<specnum_t> spectrumNumbers,
+                             bool ignoreMaskedDetectors = false);
 
   // Neighbouring spectra by radius
   std::map<specnum_t, Mantid::Kernel::V3D>

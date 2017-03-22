@@ -233,7 +233,8 @@ public:
 
     PredictPeaks alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setProperty("InputWorkspace",
+                    boost::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -246,7 +247,8 @@ public:
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspace(10000, 1);
     Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentCylindrical(3, V3D(0,0,-1), V3D(0,0,0), 1.6, 1.0);
+        ComponentCreationHelper::createTestInstrumentCylindrical(
+            3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
     inWS->setInstrument(inst);
 
     // Set ub and Goniometer rotation
@@ -255,7 +257,8 @@ public:
 
     PredictPeaks alg;
     alg.initialize();
-    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS));
+    alg.setProperty("InputWorkspace",
+                    boost::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -263,8 +266,6 @@ public:
     alg.setPropertyValue("ReflectionCondition", "Primitive");
     alg.execute();
   }
-
 };
-
 
 #endif /* MANTID_CRYSTAL_PREDICTPEAKSTEST_H_ */

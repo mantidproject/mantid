@@ -24,10 +24,9 @@ using Kernel::V3D;
  * @param ignoreMaskedDetectors :: flag indicating that masked detectors should
  * be ignored.
  */
-WorkspaceNearestNeighbours::WorkspaceNearestNeighbours(int nNeighbours,
-                                     const SpectrumInfo &spectrumInfo,
-                                     std::vector<specnum_t> spectrumNumbers,
-                                     bool ignoreMaskedDetectors)
+WorkspaceNearestNeighbours::WorkspaceNearestNeighbours(
+    int nNeighbours, const SpectrumInfo &spectrumInfo,
+    std::vector<specnum_t> spectrumNumbers, bool ignoreMaskedDetectors)
     : m_spectrumInfo(spectrumInfo),
       m_spectrumNumbers(std::move(spectrumNumbers)),
       m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_radius(0),
@@ -56,7 +55,7 @@ WorkspaceNearestNeighbours::neighbours(const specnum_t spectrum) const {
  */
 std::map<specnum_t, V3D>
 WorkspaceNearestNeighbours::neighboursInRadius(const specnum_t spectrum,
-                                      const double radius) const {
+                                               const double radius) const {
   // If the radius is stupid then don't let it continue as well be stuck forever
   if (radius < 0.0 || radius > 10.0) {
     throw std::invalid_argument(

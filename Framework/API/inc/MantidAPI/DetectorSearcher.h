@@ -44,22 +44,27 @@ namespace API {
 class DetectorSearcher {
 
 public:
-  DetectorSearcher(Geometry::Instrument_const_sptr instrument, const DetectorInfo& info);
-  const std::tuple<bool, size_t> findDetectorIndex(const Kernel::V3D& q);
+  DetectorSearcher(Geometry::Instrument_const_sptr instrument,
+                   const DetectorInfo &info);
+  const std::tuple<bool, size_t> findDetectorIndex(const Kernel::V3D &q);
 
 private:
   void createDetectorCache();
-  const std::tuple<bool, size_t> searchUsingInstrumentRayTracing(const Kernel::V3D& q);
-  const std::tuple<bool, size_t> searchUsingNearestNeighbours(const Kernel::V3D& q);
-  const std::tuple<bool, size_t> checkInteceptWithNeighbours(const Kernel::V3D& direction,
-                                                             const Kernel::NearestNeighbours<3>::NearestNeighbourResults& neighbours) const;
-  Kernel::V3D convertQtoDirection(const Kernel::V3D& q) const;
+  const std::tuple<bool, size_t>
+  searchUsingInstrumentRayTracing(const Kernel::V3D &q);
+  const std::tuple<bool, size_t>
+  searchUsingNearestNeighbours(const Kernel::V3D &q);
+  const std::tuple<bool, size_t> checkInteceptWithNeighbours(
+      const Kernel::V3D &direction,
+      const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
+      const;
+  Kernel::V3D convertQtoDirection(const Kernel::V3D &q) const;
 
   // Instance variables
 
   const bool m_usingFullRayTrace;
   const bool m_crystallography_convention;
-  const DetectorInfo& m_detInfo;
+  const DetectorInfo &m_detInfo;
   Geometry::Instrument_const_sptr m_instrument;
   /// vector of detector indicies used in the search
   std::vector<size_t> m_indexMap;
@@ -68,7 +73,6 @@ private:
   /// instrument ray tracer object for searching in rectangular detectors
   std::unique_ptr<Geometry::InstrumentRayTracer> m_rayTracer;
 };
-
 }
 }
 

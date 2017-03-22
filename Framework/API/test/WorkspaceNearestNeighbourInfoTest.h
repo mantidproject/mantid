@@ -17,7 +17,9 @@ public:
   static WorkspaceNearestNeighbourInfoTest *createSuite() {
     return new WorkspaceNearestNeighbourInfoTest();
   }
-  static void destroySuite(WorkspaceNearestNeighbourInfoTest *suite) { delete suite; }
+  static void destroySuite(WorkspaceNearestNeighbourInfoTest *suite) {
+    delete suite;
+  }
 
   WorkspaceNearestNeighbourInfoTest() {
     workspace.initialize(100, 1, 1);

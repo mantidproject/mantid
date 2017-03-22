@@ -329,7 +329,8 @@ void SmoothNeighbours::findNeighboursUbiqutious() {
   m_neighbours.resize(inWS->getNumberHistograms());
 
   bool ignoreMaskedDetectors = getProperty("IgnoreMaskedDetectors");
-  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors, nNeighbours);
+  WorkspaceNearestNeighbourInfo neighbourInfo(*inWS, ignoreMaskedDetectors,
+                                              nNeighbours);
 
   // Cull by radius
   RadiusFilter radiusFilter(Radius);

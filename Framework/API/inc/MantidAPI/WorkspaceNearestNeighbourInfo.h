@@ -44,8 +44,8 @@ class WorkspaceNearestNeighbours;
 class MANTID_API_DLL WorkspaceNearestNeighbourInfo {
 public:
   WorkspaceNearestNeighbourInfo(const MatrixWorkspace &workspace,
-                       const bool ignoreMaskedDetectors,
-                       const int nNeighbours = 8);
+                                const bool ignoreMaskedDetectors,
+                                const int nNeighbours = 8);
   ~WorkspaceNearestNeighbourInfo();
 
   std::map<specnum_t, Kernel::V3D>

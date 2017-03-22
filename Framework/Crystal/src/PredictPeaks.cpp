@@ -254,7 +254,8 @@ void PredictPeaks::exec() {
   Progress prog(this, 0.0, 1.0, possibleHKLs.size() * gonioVec.size());
   prog.setNotifyStep(0.01);
 
-  m_detectorCacheSearch = Kernel::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
+  m_detectorCacheSearch =
+      Kernel::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
   for (auto &goniometerMatrix : gonioVec) {
     // Final transformation matrix (HKL to Q in lab frame)
@@ -283,36 +284,38 @@ void PredictPeaks::exec() {
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
-
 void PredictPeaks::createDetectorCache() {
-//  const auto & detInfo = m_pw->detectorInfo();
-//  std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>> points;
-//  points.reserve(detInfo.size());
-//  m_indexMap.reserve(detInfo.size());
+  //  const auto & detInfo = m_pw->detectorInfo();
+  //  std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>>
+  //  points;
+  //  points.reserve(detInfo.size());
+  //  m_indexMap.reserve(detInfo.size());
 
-//  for (size_t pointNo = 0; pointNo < detInfo.size(); ++pointNo) {
-//    if (detInfo.isMonitor(pointNo))
-//        continue; // skip monitor
-//    if (detInfo.isMasked(pointNo))
-//        continue; // edge is masked so don't check if not masked
+  //  for (size_t pointNo = 0; pointNo < detInfo.size(); ++pointNo) {
+  //    if (detInfo.isMonitor(pointNo))
+  //        continue; // skip monitor
+  //    if (detInfo.isMasked(pointNo))
+  //        continue; // edge is masked so don't check if not masked
 
-//    const auto &det = detInfo.detector(pointNo);
-//    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two theta
-//    const auto ph1 = det.getPhi();                                // phi
-//    auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
-//                 1. - std::cos(tt1)); // end of trajectory
-//    E1 = E1 * (1. / E1.norm());       // normalize
-//    Eigen::Array3d point(E1[0], E1[1], E1[2]);
+  //    const auto &det = detInfo.detector(pointNo);
+  //    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two
+  //    theta
+  //    const auto ph1 = det.getPhi();                                // phi
+  //    auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) *
+  //    std::sin(ph1),
+  //                 1. - std::cos(tt1)); // end of trajectory
+  //    E1 = E1 * (1. / E1.norm());       // normalize
+  //    Eigen::Array3d point(E1[0], E1[1], E1[2]);
 
-//    if(point.hasNaN())
-//      continue;
+  //    if(point.hasNaN())
+  //      continue;
 
-//    points.push_back(point);
-//    m_indexMap.push_back(pointNo);
-//  }
+  //    points.push_back(point);
+  //    m_indexMap.push_back(pointNo);
+  //  }
 
-//  m_detectorCacheSearch
-//      = Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
+  //  m_detectorCacheSearch
+  //      = Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
 /// Tries to set the internally stored instrument from an ExperimentInfo-object.
@@ -467,7 +470,8 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   // Also, q does have a 2pi factor = it is equal to 2pi/wavelength.
   const V3D q = orientedUB * hkl * (2.0 * M_PI * m_qConventionFactor);
 
-  const auto convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  const auto convention =
+      Kernel::ConfigService::Instance().getString("Q.convention");
   double norm_q = q.norm();
   boost::shared_ptr<const ReferenceFrame> refFrame =
       this->m_inst->getReferenceFrame();
@@ -488,18 +492,19 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
   detectorDir[refFrame->pointingAlongBeam()] = one_over_wl - qBeam;
   detectorDir.normalize();
 
-  const bool useExtendedDetectorSpace = getProperty("PredictPeaksOutsideDetectors");
+  const bool useExtendedDetectorSpace =
+      getProperty("PredictPeaksOutsideDetectors");
   const auto result = m_detectorCacheSearch->findDetectorIndex(q);
   const auto hitDetector = std::get<0>(result);
   const auto index = std::get<1>(result);
 
-  if(!hitDetector && !useExtendedDetectorSpace) {
+  if (!hitDetector && !useExtendedDetectorSpace) {
     return;
   }
 
-  const auto& detInfo = m_pw->detectorInfo();
+  const auto &detInfo = m_pw->detectorInfo();
   const auto &det = detInfo.detector(index);
-  if(hitDetector) {
+  if (hitDetector) {
     // peak hit a detector to add it to the list
     Peak peak(m_inst, det.getID(), wl);
     if (!peak.getDetector())
@@ -519,14 +524,15 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     m_pw->addPeak(peak);
   } else if (useExtendedDetectorSpace) {
     // use extended detector space to try and guess peak position
-    const auto component = m_inst->getComponentByName("extended-detector-space");
+    const auto component =
+        m_inst->getComponentByName("extended-detector-space");
     const auto c = boost::dynamic_pointer_cast<const ObjComponent>(component);
-    if(!c)
+    if (!c)
       return;
 
     // find where this Q vector should intersect with "extended" space
     Geometry::Track track(detInfo.samplePosition(), detectorDir);
-    if(!c->interceptSurface(track))
+    if (!c->interceptSurface(track))
       return;
 
     const auto magnitude = track.back().exitPoint.norm();
@@ -545,9 +551,6 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
     // Add it to the workspace
     m_pw->addPeak(peak);
   }
-
-
-
 }
 
 } // namespace Mantid
