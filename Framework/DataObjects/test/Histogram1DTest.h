@@ -43,6 +43,45 @@ public:
     h2.setCountStandardDeviations(100);
   }
 
+  void testcheckAndSanitizeHistogramFillsBothYAndEData() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    h.setHistogram(edges);
+    TS_ASSERT_EQUALS(h.size(), 1)
+    TS_ASSERT_EQUALS(h.x()[0], -0.04)
+    TS_ASSERT_EQUALS(h.x()[1], 1.7);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts)
+    TS_ASSERT_EQUALS(h.y()[0], 0.0)
+    TS_ASSERT_EQUALS(h.e()[0], 0.0)
+  }
+
+  void testcheckAndSanitizeHistogramFillsEData() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    Frequencies counts{{5.9}};
+    h.setHistogram(edges, counts);
+    TS_ASSERT_EQUALS(h.size(), 1);
+    TS_ASSERT_EQUALS(h.x()[0], -0.04)
+    TS_ASSERT_EQUALS(h.x()[1], 1.7);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies)
+    TS_ASSERT_EQUALS(h.y()[0], 5.9)
+    TS_ASSERT_DELTA(h.e()[0], std::sqrt(5.9), 1e-6)
+  }
+
+  void testcheckAndSanitizeHistogramDoesntChangeValidData() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    Frequencies counts{{-5.9}};
+    FrequencyStandardDeviations stdDevs{{2.3}};
+    h.setHistogram(edges, counts, stdDevs);
+    TS_ASSERT_EQUALS(h.size(), 1);
+    TS_ASSERT_EQUALS(h.x()[0], -0.04)
+    TS_ASSERT_EQUALS(h.x()[1], 1.7);
+    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies)
+    TS_ASSERT_EQUALS(h.y()[0], -5.9)
+    TS_ASSERT_EQUALS(h.e()[0], 2.3)
+  }
+
   void testsetgetXvector() {
     h.setPoints(x1);
     TS_ASSERT_EQUALS(x1, h.dataX());

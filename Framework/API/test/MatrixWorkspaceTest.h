@@ -319,14 +319,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(3));
   }
 
-  void testSetHistogramProvidingBinEdgesOnly() {
-    WorkspaceTester ws;
-    ws.initialize(1, 2, 1);
-    HistogramData::BinEdges binEdges{0.0, 1.0};
-    ws.setHistogram(0, binEdges);
-    TS_ASSERT_THROWS_NOTHING(ws.y(0))
-  }
-
   /** Get a detector sptr for each spectrum */
   void testGetDetector() {
     // Workspace has 3 spectra, each 1 in length

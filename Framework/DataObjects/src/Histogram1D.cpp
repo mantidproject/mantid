@@ -66,15 +66,13 @@ const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
 const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 
 /**
- * Sanitizes a histogram. If y data is NULL, it will be set to zero Counts.
- * Similarly, NULL e data will be set to zeros.
+ * Makes sure the histogram has valid Y data. If Y data is NULL, it will be set
+ * to zero Counts and E data gets zeroed.
  * @param histogram
  */
 void Histogram1D::checkAndSanitizeHistogram(HistogramData::Histogram &histogram) {
   if (!histogram.sharedY()) {
     histogram.setCounts(histogram.size(), 0.0);
-  }
-  if (!histogram.sharedE()) {
     histogram.setCountVariances(histogram.size(), 0.0);
   }
 }
