@@ -71,11 +71,12 @@ private:
 
 template <size_t N = 3>
 class MANTID_KERNEL_DLL NearestNeighbours {
+
+public:
   // typedefs for code brevity
   typedef Eigen::Array<double, N, 1> ArrayType;
   typedef std::vector<std::tuple<ArrayType, size_t, double>> NearestNeighbourResults;
 
-public:
   /** Create a nearest neighbour search object
    *
    * @param points :: vector of Eigen::Arrays to search through

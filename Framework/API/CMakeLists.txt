@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/DetectorInfo.cpp
+        src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -185,6 +186,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DetectorInfo.h
+        inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -356,6 +358,7 @@ set ( TEST_FILES
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
 	DetectorInfoTest.h
+        DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
