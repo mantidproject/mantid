@@ -65,5 +65,20 @@ const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
 /// Deprecated, use dx() instead.
 const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 
+/**
+ * Sanitizes a histogram. If y data is NULL, it will be set to zero Counts.
+ * Similarly, NULL e data will be set to zeros.
+ * @param histogram
+ */
+void Histogram1D::checkAndSanitizeHistogram(HistogramData::Histogram &histogram) {
+  if (!histogram.sharedY()) {
+    histogram.setCounts(histogram.size(), 0.0);
+  }
+  if (!histogram.sharedE()) {
+    histogram.setCountVariances(histogram.size(), 0.0);
+  }
+}
+
+
 } // namespace DataObjects
 } // namespace Mantid
