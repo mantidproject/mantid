@@ -4346,7 +4346,7 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
     bool docorrection, double toffactor, double tofshift) const {
   // Define variables for events
   // size_t numevents = events.size();
-  typename std::vector<T>::iterator eviter;
+  // typename std::vector<T>::iterator eviter;
   std::stringstream msgss;
 
   size_t num_splitters = vecgroups.size();
@@ -4359,9 +4359,11 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
     int64_t start_i64 = vectimes[i];
     int64_t stop_i64 = vectimes[i + 1];
     int group = vecgroups[i];
+    // std::cout << "working on splitter: " << i << "\n";
 
     // go over events
     while (iter_events != iter_events_end) {
+      // std::cout << "  event " << iter_events - vecEvents.begin() << "\n";
       int64_t absolute_time;
       if (docorrection)
         absolute_time =
@@ -4374,7 +4376,8 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
 
       if (absolute_time < start_i64) {
         // event occurs before the splitter. only can happen with first
-        // splitter. Then ignore
+        // splitter. Then ignore and move to next
+        ++ iter_events;
         continue;
       }
 
