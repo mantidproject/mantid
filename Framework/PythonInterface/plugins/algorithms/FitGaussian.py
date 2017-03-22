@@ -83,7 +83,7 @@ class FitGaussian(PythonAlgorithm):
         endX   = tryCentre + 3.0*fwhm
 
         # pylint: disable = unpacking-non-sequence, assignment-from-none
-        fitStatus, _, _, paramTable = Fit(
+        fitStatus, _, _, _, paramTable = Fit(
             InputWorkspace=workspace, WorkspaceIndex=index,
             Function=fitFun, CreateOutput=True, OutputParametersOnly=True,
             StartX=startX, EndX=endX)
