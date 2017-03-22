@@ -914,8 +914,9 @@ void GenericDataProcessorPresenter::importTable() {
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName = QString::fromStdString(result);
-  auto toOpen = outputWorkspaceName.trimmed().toStdString();
-  m_view->setModel(toOpen);
+  std::string toOpen = outputWorkspaceName.trimmed().toStdString();
+  if (!toOpen.empty())
+    m_view->setModel(toOpen);
 }
 
 /**
