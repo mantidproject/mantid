@@ -47,7 +47,7 @@ public:
   Peak(const Peak &other);
 
 // MSVC 2015/17 can build with noexcept = default however
-// intellisense still incorrectly reports this as an error despite compiling. 
+// intellisense still incorrectly reports this as an error despite compiling.
 // https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
 // For that reason we still use the supplied default which should be noexcept
 // once the above is fixed we can remove this workaround
