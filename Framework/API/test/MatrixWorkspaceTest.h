@@ -96,9 +96,12 @@ public:
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs().size(), 1);
     // ... but spectrum definitions in IndexInfo are empty...
-    TS_ASSERT_EQUALS(indexInfo.spectrumDefinition(0), SpectrumDefinition{});
-    TS_ASSERT_EQUALS(indexInfo.spectrumDefinition(1), SpectrumDefinition{});
-    TS_ASSERT_EQUALS(indexInfo.spectrumDefinition(2), SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
+                     SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[1],
+                     SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[2],
+                     SpectrumDefinition{});
     // ... since there is no instrument, i.e., all detector IDs are invalid.
     TS_ASSERT_EQUALS(ws.detectorInfo().size(), 0);
   }
@@ -127,6 +130,54 @@ public:
                             "out-of-range detector index, i.e., the spectrum "
                             "definition does not match the instrument in the "
                             "workspace.");
+  }
+
+  void test_setIndexInfo_default_mapping_failure() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    // 2x2 = 4 pixels
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    IndexInfo indices(3);
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "MatrixWorkspace: IndexInfo does not contain "
+                            "spectrum definitions so building a 1:1 mapping "
+                            "from spectra to detectors was attempted, but the "
+                            "number of spectra in the workspace is not equal "
+                            "to the number of detectors in the instrument.");
+  }
+
+  void test_setIndexInfo_default_mapping() {
+    WorkspaceTester ws;
+    ws.initialize(4, 1, 1);
+    // 2x2 = 4 pixels
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
+    IndexInfo indices(4);
+
+    TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
+
+    const auto &info = ws.indexInfo();
+    TS_ASSERT(info.spectrumDefinitions());
+    std::vector<SpectrumDefinition> specDefs(4);
+    specDefs[0].add(0);
+    specDefs[1].add(1);
+    specDefs[2].add(2);
+    specDefs[3].add(3);
+    TS_ASSERT_EQUALS(*info.spectrumDefinitions(), specDefs);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 2);
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getSpectrumNo(), 3);
+    TS_ASSERT_EQUALS(ws.getSpectrum(3).getSpectrumNo(), 4);
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
+                     (std::set<detid_t>{4}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
+                     (std::set<detid_t>{5}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(2).getDetectorIDs(),
+                     (std::set<detid_t>{6}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(3).getDetectorIDs(),
+                     (std::set<detid_t>{7}));
   }
 
   void test_setIndexInfo_updates_ISpectrum() {
@@ -170,18 +221,20 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     const auto &indexInfo = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(indexInfo.spectrumDefinition(0), SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
+                     SpectrumDefinition{});
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).setDetectorID(7);
     // No changes -- old and new interface should not be mixed!
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(indexInfo.spectrumDefinition(0), SpectrumDefinition{});
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0],
+                     SpectrumDefinition{});
     // After getting a new reference we should see the changes.
     const auto &indexInfo2 = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo2.spectrumNumber(0), 7);
     SpectrumDefinition specDef;
     specDef.add(ws.detectorInfo().indexOf(7));
-    TS_ASSERT_EQUALS(indexInfo2.spectrumDefinition(0), specDef);
+    TS_ASSERT_EQUALS((*indexInfo.spectrumDefinitions())[0], specDef);
   }
 
   void test_IndexInfo_copy() {
@@ -208,9 +261,7 @@ public:
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
     TS_ASSERT_EQUALS(copy.spectrumNumber(1), 4);
     TS_ASSERT_EQUALS(copy.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(copy.spectrumDefinition(0), specDefs[0]);
-    TS_ASSERT_EQUALS(copy.spectrumDefinition(1), specDefs[1]);
-    TS_ASSERT_EQUALS(copy.spectrumDefinition(2), specDefs[2]);
+    TS_ASSERT_EQUALS(*copy.spectrumDefinitions(), specDefs);
     // Changing data in workspace affects indexInfo, but not copy
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).addDetectorID(7);
@@ -219,9 +270,9 @@ public:
     SpectrumDefinition specDef;
     specDef.add(ws.detectorInfo().indexOf(4));
     specDef.add(ws.detectorInfo().indexOf(7));
-    TS_ASSERT_EQUALS(indexInfo2.spectrumDefinition(0), specDef);
+    TS_ASSERT_EQUALS((*indexInfo2.spectrumDefinitions())[0], specDef);
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
-    TS_ASSERT_EQUALS(copy.spectrumDefinition(0), specDefs[0]);
+    TS_ASSERT_EQUALS((*copy.spectrumDefinitions())[0], specDefs[0]);
   }
 
   void test_setIndexInfo_shares_spectrumDefinition() {
@@ -248,8 +299,7 @@ public:
     const auto &info2 = clone->indexInfo();
     // Spectrum numbers should also be shared, but there is no access by
     // reference, so we cannot check.
-    TS_ASSERT_EQUALS(&info1.spectrumDefinition(0),
-                     &info2.spectrumDefinition(0));
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
     TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
     TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
   }
@@ -264,8 +314,7 @@ public:
     const auto &info2 = copy->indexInfo();
     // Spectrum numbers should also be shared, but there is no access by
     // reference, so we cannot check.
-    TS_ASSERT_EQUALS(&info1.spectrumDefinition(0),
-                     &info2.spectrumDefinition(0));
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
     TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
     TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
   }

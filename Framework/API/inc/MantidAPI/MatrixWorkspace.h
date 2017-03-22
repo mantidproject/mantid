@@ -581,6 +581,7 @@ private:
                 const MantidImage &image, size_t start, bool parallelExecution);
 
   void setIndexInfoWithoutISpectrumUpdate(const Indexing::IndexInfo &indexInfo);
+  void buildDefaultSpectrumDefinitions();
   void rebuildDetectorIDGroupings();
 
   std::unique_ptr<Indexing::IndexInfo> m_indexInfo;

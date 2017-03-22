@@ -17,6 +17,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
@@ -117,6 +118,8 @@ void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   }
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
+  if (!m_indexInfo->spectrumDefinitions())
+    buildDefaultSpectrumDefinitions();
   // This sets the SpectrumDefinitions for the SpectrumInfo, which may seem
   // counterintuitive at first -- why would setting IndexInfo modify internals
   // of SpectrumInfo? However, logically it would not make sense to assign
@@ -2010,11 +2013,30 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
   setDetectorGrouping(index, getSpectrum(index).getDetectorIDs());
 }
 
+void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
+  const auto &detInfo = detectorInfo();
+  // TODO must compare size including time indices!
+  if (detInfo.size() != m_indexInfo->globalSize())
+    throw std::runtime_error("MatrixWorkspace: IndexInfo does not contain "
+                             "spectrum definitions so building a 1:1 mapping "
+                             "from spectra to detectors was attempted, but the "
+                             "number of spectra in the workspace is not equal "
+                             "to the number of detectors in the instrument.");
+  std::vector<SpectrumDefinition> specDefs(m_indexInfo->size());
+  size_t specIndex = 0;
+  for (size_t detIndex = 0; detIndex < detInfo.size(); ++detIndex) {
+    if (m_indexInfo->isOnThisPartition(Indexing::GlobalSpectrumIndex(detIndex)))
+      specDefs[specIndex++].add(detIndex);
+  }
+  m_indexInfo->setSpectrumDefinitions(std::move(specDefs));
+}
+
 void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &allDetIDs = detectorInfo().detectorIDs();
+  const auto &specDefs = m_indexInfo->spectrumDefinitions();
   for (size_t i = 0; i < m_indexInfo->size(); ++i) {
     std::set<detid_t> detIDs;
-    for (const auto &index : m_indexInfo->spectrumDefinition(i)) {
+    for (const auto &index : (*specDefs)[i]) {
       const size_t detIndex = index.first;
       if (detIndex >= allDetIDs.size())
         throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "

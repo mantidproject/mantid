@@ -47,6 +47,7 @@ public:
   IndexInfo make_indices_no_detectors() {
     IndexInfo indices(2);
     indices.setSpectrumNumbers({2, 4});
+    indices.setSpectrumDefinitions(std::vector<SpectrumDefinition>(2));
     return indices;
   }
 
@@ -222,10 +223,11 @@ public:
   }
 
   void test_create_partitioned() {
-    const auto ws = create<Workspace2D>(
-        IndexInfo({1, 2, 3, 4, 5}, IndexInfo::StorageMode::Distributed,
-                  IndexInfo::Communicator{2, 0}),
-        Histogram(BinEdges{1, 2, 4}));
+    IndexInfo indices({1, 2, 3, 4, 5}, IndexInfo::StorageMode::Distributed,
+                      IndexInfo::Communicator{2, 0});
+    indices.setSpectrumDefinitions(
+        std::vector<SpectrumDefinition>(indices.size()));
+    const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
     const auto &indexInfo = ws->indexInfo();
     // Default round-robin partitioning with 2 ranks -> we get every other
     // spectrum number on this rank.
@@ -235,14 +237,33 @@ public:
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 5);
   }
 
+  void test_create_partitioned_with_instrument() {
+    IndexInfo i({1, 2, 3, 4}, IndexInfo::StorageMode::Distributed,
+                IndexInfo::Communicator{2, 0});
+    // should a nullptr spectrum definitions vector indicate building default
+    // defs?
+    // - same length -> build
+    // - different length -> fail (cannot create default mapping)
+    // same for setIndexInfo?
+    const auto ws =
+        create<Workspace2D>(m_instrument, i, Histogram(BinEdges{1, 2, 4}));
+    const auto &indexInfo = ws->indexInfo();
+    // Default round-robin partitioning with 2 ranks -> we get every other
+    // spectrum number on this rank.
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 3);
+  }
+
   void test_indexInfo_legacy_compatibility_partitioned_workspace_failure() {
     // Sibling of MatrixWorkspace::test_indexInfo_legacy_compatibility().
     // Setting spectrum numbers via legacy interface should fail for partitioned
     // workspace.
-    const auto ws = create<Workspace2D>(
-        IndexInfo({1, 2, 3}, IndexInfo::StorageMode::Distributed,
-                  IndexInfo::Communicator{2, 0}),
-        Histogram(BinEdges{1, 2}));
+    IndexInfo indices({1, 2, 3}, IndexInfo::StorageMode::Distributed,
+                      IndexInfo::Communicator{2, 0});
+    indices.setSpectrumDefinitions(
+        std::vector<SpectrumDefinition>(indices.size()));
+    const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
     ws->getSpectrum(0).setSpectrumNo(7);
     TS_ASSERT_THROWS(ws->indexInfo(), std::runtime_error);
   }

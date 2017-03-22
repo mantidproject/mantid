@@ -10,9 +10,10 @@ namespace Indexing {
 IndexInfo extract(const IndexInfo &source, const std::vector<size_t> &indices) {
   std::vector<SpectrumNumber> specNums;
   std::vector<SpectrumDefinition> specDefs;
+  const auto &sourceDefs = source.spectrumDefinitions();
   for (const auto &i : indices) {
     specNums.emplace_back(source.spectrumNumber(i));
-    specDefs.emplace_back(source.spectrumDefinition(i));
+    specDefs.emplace_back((*sourceDefs)[i]);
   }
   IndexInfo result(std::move(specNums));
   result.setSpectrumDefinitions(std::move(specDefs));
@@ -25,9 +26,10 @@ IndexInfo extract(const IndexInfo &source, const size_t minIndex,
                   const size_t maxIndex) {
   std::vector<SpectrumNumber> specNums;
   std::vector<SpectrumDefinition> specDefs;
+  const auto &sourceDefs = source.spectrumDefinitions();
   for (size_t i = minIndex; i <= maxIndex; ++i) {
     specNums.emplace_back(source.spectrumNumber(i));
-    specDefs.emplace_back(source.spectrumDefinition(i));
+    specDefs.emplace_back((*sourceDefs)[i]);
   }
   IndexInfo result(std::move(specNums));
   result.setSpectrumDefinitions(std::move(specDefs));

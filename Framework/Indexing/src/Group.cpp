@@ -19,11 +19,12 @@ IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
     throw std::runtime_error("Indexing::group: Size mismatch between spectrum "
                              "number and grouping vectors");
   std::vector<SpectrumDefinition> specDefs;
+  const auto &sourceDefs = source.spectrumDefinitions();
   for (const auto &group : grouping) {
     specDefs.emplace_back(SpectrumDefinition{});
     for (const auto &i : group) {
       auto &newSpecDef = specDefs.back();
-      for (const auto &specDef : source.spectrumDefinition(i)) {
+      for (const auto &specDef : (*sourceDefs)[i]) {
         newSpecDef.add(specDef.first, specDef.second);
       }
     }

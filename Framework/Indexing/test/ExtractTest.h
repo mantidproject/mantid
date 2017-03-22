@@ -29,8 +29,8 @@ public:
     TS_ASSERT_EQUALS(result.size(), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 3);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[0]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[2]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[0]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[2]);
   }
 
   void test_reorder() {
@@ -46,9 +46,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[2]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[1]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(2), specDefs[0]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[2]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[1]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[2], specDefs[0]);
   }
 };
 

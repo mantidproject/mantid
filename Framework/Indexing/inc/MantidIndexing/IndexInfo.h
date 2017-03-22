@@ -85,9 +85,9 @@ public:
                      const Communicator &communicator = Communicator{1, 0});
 
   size_t size() const;
+  size_t globalSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
-  const SpectrumDefinition &spectrumDefinition(const size_t index) const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
@@ -107,6 +107,8 @@ public:
   makeIndexSet(const std::vector<SpectrumNumber> &spectrumNumbers) const;
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
+
+  bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
 
 private:
   void makeSpectrumNumberTranslator(

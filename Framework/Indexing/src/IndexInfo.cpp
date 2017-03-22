@@ -21,8 +21,6 @@ IndexInfo::IndexInfo(const size_t globalSize, const StorageMode storageMode,
   std::vector<SpectrumNumber> specNums(globalSize);
   std::iota(specNums.begin(), specNums.end(), 1);
   makeSpectrumNumberTranslator(std::move(specNums));
-  m_spectrumDefinitions =
-      Kernel::make_cow<std::vector<SpectrumDefinition>>(size());
 }
 
 /// Construct with given spectrum number and vector of detector IDs for each
@@ -32,8 +30,6 @@ IndexInfo::IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
                      const Communicator &communicator)
     : m_storageMode(storageMode), m_communicator(communicator) {
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
-  m_spectrumDefinitions =
-      Kernel::make_cow<std::vector<SpectrumDefinition>>(size());
 }
 
 /// The *local* size, i.e., the number of spectra in this partition.
@@ -43,15 +39,16 @@ size_t IndexInfo::size() const {
   return m_spectrumNumberTranslator->localSize();
 }
 
+/// The *global* size, i.e., the total number of spectra across all partitions.
+size_t IndexInfo::globalSize() const {
+  if (!m_spectrumNumberTranslator)
+    return 0;
+  return m_spectrumNumberTranslator->globalSize();
+}
+
 /// Returns the spectrum number for given index.
 SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return m_spectrumNumberTranslator->spectrumNumber(index);
-}
-
-/// Returns the spectrum definition for given index.
-const SpectrumDefinition &
-IndexInfo::spectrumDefinition(const size_t index) const {
-  return (*m_spectrumDefinitions)[index];
 }
 
 /// Set a spectrum number for each index.
@@ -81,7 +78,8 @@ void IndexInfo::setSpectrumDefinitions(
   if (size() != spectrumDefinitions.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum definitions");
-  m_spectrumDefinitions.access() = std::move(spectrumDefinitions);
+  m_spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
+      std::move(spectrumDefinitions));
 }
 
 /** Set the spectrum definitions.
@@ -151,6 +149,11 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 SpectrumIndexSet IndexInfo::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
+}
+
+bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
+  const auto helperSet = makeIndexSet(globalIndex, globalIndex);
+  return helperSet.size() == 1;
 }
 
 void IndexInfo::makeSpectrumNumberTranslator(

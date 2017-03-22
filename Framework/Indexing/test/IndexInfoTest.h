@@ -24,9 +24,7 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 3);
-    TS_ASSERT_EQUALS(info.spectrumDefinition(0).size(), 0);
-    TS_ASSERT_EQUALS(info.spectrumDefinition(1).size(), 0);
-    TS_ASSERT_EQUALS(info.spectrumDefinition(2).size(), 0);
+    TS_ASSERT(!info.spectrumDefinitions());
   }
 
   void test_vector_constructor() {
@@ -96,9 +94,10 @@ public:
     specDefs[1].add(7);
     specDefs[2].add(8);
     TS_ASSERT_THROWS_NOTHING(t.setSpectrumDefinitions(specDefs));
-    TS_ASSERT_EQUALS(t.spectrumDefinition(0), specDefs[0]);
-    TS_ASSERT_EQUALS(t.spectrumDefinition(1), specDefs[1]);
-    TS_ASSERT_EQUALS(t.spectrumDefinition(2), specDefs[2]);
+    TS_ASSERT(t.spectrumDefinitions());
+    TS_ASSERT_EQUALS((*t.spectrumDefinitions())[0], specDefs[0]);
+    TS_ASSERT_EQUALS((*t.spectrumDefinitions())[1], specDefs[1]);
+    TS_ASSERT_EQUALS((*t.spectrumDefinitions())[2], specDefs[2]);
   }
 
   void test_setSpectrumDefinitions_setting_nullptr_fails() {

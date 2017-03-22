@@ -39,9 +39,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 4);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 5);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[0]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[1]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(2), specDefs[2]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[0]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[1]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[2], specDefs[2]);
   }
 
   void test_swap_ids() {
@@ -57,9 +57,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 3);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[1]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[0]);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(2), specDefs[2]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[1]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[0]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[2], specDefs[2]);
   }
 
   void test_extract() {
@@ -73,7 +73,7 @@ public:
     auto result = group(source, {1}, grouping);
     TS_ASSERT_EQUALS(result.size(), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), specDefs[1]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], specDefs[1]);
   }
 
   void test_group() {
@@ -91,8 +91,8 @@ public:
     SpectrumDefinition group;
     group.add(10);
     group.add(30);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(0), group);
-    TS_ASSERT_EQUALS(result.spectrumDefinition(1), specDefs[1]);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[0], group);
+    TS_ASSERT_EQUALS((*result.spectrumDefinitions())[1], specDefs[1]);
   }
 };
 
