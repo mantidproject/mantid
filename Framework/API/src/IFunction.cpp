@@ -415,10 +415,9 @@ std::string IFunction::asString() const {
   for (size_t i = 0; i < nParams(); i++) {
     std::ostringstream paramOut;
     paramOut << parameterName(i) << '=' << getParameter(i);
-    auto status = getParameterStatus(i);
-    if (status == Active) {
-      ostr << ',' << paramOut.str();
-    } else if (status == Fixed) {
+    ostr << ',' << paramOut.str();
+    // Output non-default ties only.
+    if (getParameterStatus(i) == Fixed) {
       ties.push_back(paramOut.str());
     }
   }

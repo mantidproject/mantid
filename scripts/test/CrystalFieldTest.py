@@ -282,10 +282,10 @@ class CrystalFieldTests(unittest.TestCase):
         x1, y1 = cf.getSpectrum(1)
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
-        self.assertAlmostEqual(y0[139], 0.10079631528889167, 8)
-        self.assertAlmostEqual(y0[142], 0.081149590501677457, 8)
-        self.assertAlmostEqual(y1[139], 0.17385190317074417, 8)
-        self.assertAlmostEqual(y1[142], 0.17671722408656398, 8)
+        self.assertAlmostEqual(y0[139], 0.069849134145611211, 8)
+        self.assertAlmostEqual(y0[142], 0.049105825374702927, 8)
+        self.assertAlmostEqual(y1[139], 0.17385222868511149, 8)
+        self.assertAlmostEqual(y1[142], 0.17671738547959939, 8)
 
     def test_api_CrystalField_spectrum_background(self):
         from CrystalField import CrystalField, PeaksFunction, Background, Function
@@ -399,14 +399,14 @@ class CrystalFieldTests(unittest.TestCase):
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
-        self.assertAlmostEqual(y0[100], 13.005375384433812, 8)
-        self.assertAlmostEqual(y0[120], 1.2866037160556703, 8)
-        self.assertAlmostEqual(y0[139], 1.1007967443973139, 8)
-        self.assertAlmostEqual(y0[150], 1.3603284484771376, 8)
-        self.assertAlmostEqual(y1[100], 14.056846351753954, 8)
-        self.assertAlmostEqual(y1[120], 2.8425850593501178, 8)
-        self.assertAlmostEqual(y1[139], 2.2108648589970068, 8)
-        self.assertAlmostEqual(y1[150], 2.3249035524813606, 8)
+        self.assertAlmostEqual(y0[100], 13.005373133922404, 8)
+        self.assertAlmostEqual(y0[120], 1.2693402982862221, 8)
+        self.assertAlmostEqual(y0[139], 1.0698495632540335, 8)
+        self.assertAlmostEqual(y0[150], 1.1702576101920288, 8)
+        self.assertAlmostEqual(y1[100], 14.133257594622378, 8)
+        self.assertAlmostEqual(y1[120], 3.0240871164367849, 8)
+        self.assertAlmostEqual(y1[139], 2.5819042190621113, 8)
+        self.assertAlmostEqual(y1[150], 2.8754340499592388, 8)
 
     def test_api_CrystalField_multi_spectrum_background_no_peak(self):
         from CrystalField import CrystalField, PeaksFunction, Background, Function
@@ -447,14 +447,14 @@ class CrystalFieldTests(unittest.TestCase):
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
-        self.assertAlmostEqual(y0[100], 3.035378852753059, 8)
-        self.assertAlmostEqual(y0[120], 1.2226234161980443, 8)
-        self.assertAlmostEqual(y0[139], 1.1007966728536578, 8)
-        self.assertAlmostEqual(y0[150], 1.360328448476652, 8)
-        self.assertAlmostEqual(y1[100], 4.0737328337130903, 8)
-        self.assertAlmostEqual(y1[120], 2.2592728114568361, 8)
-        self.assertAlmostEqual(y1[139], 2.2106029223108581, 8)
-        self.assertAlmostEqual(y1[150], 2.3249032281574027, 8)
+        self.assertAlmostEqual(y0[100], 3.0353766022416497, 8)
+        self.assertAlmostEqual(y0[120], 1.2053599984285959, 8)
+        self.assertAlmostEqual(y0[139], 1.0698494917103774, 8)
+        self.assertAlmostEqual(y0[150], 1.1702576101915432, 8)
+        self.assertAlmostEqual(y1[100], 4.150144076581511, 8)
+        self.assertAlmostEqual(y1[120], 2.4407748685435036, 8)
+        self.assertAlmostEqual(y1[139], 2.5816422823759626, 8)
+        self.assertAlmostEqual(y1[150], 2.8754337256352809, 8)
 
     def test_api_CrystalField_single_multi_check(self):
         from CrystalField import CrystalField
@@ -550,14 +550,14 @@ class CrystalFieldTests(unittest.TestCase):
         # Now use ISIS convention with intensity in milibarn/steradian
         y0 = y0 / c_mbsr
         y1 = y1 / c_mbsr
-        self.assertAlmostEqual(y0[100], 12.005375026869045, 8)
-        self.assertAlmostEqual(y0[120], 0.28660335849090429, 8)
-        self.assertAlmostEqual(y0[139], 0.10079638683254782, 8)
-        self.assertAlmostEqual(y0[150], 0.3603280909123715, 8)
-        self.assertAlmostEqual(y1[100], 12.056845636624418, 8)
-        self.assertAlmostEqual(y1[120], 0.84258434422058537, 8)
-        self.assertAlmostEqual(y1[139], 0.21086414386747487, 8)
-        self.assertAlmostEqual(y1[150], 0.32490283735182823, 8)
+        self.assertAlmostEqual(y0[100], 12.005372776357635, 8)
+        self.assertAlmostEqual(y0[120], 0.26933994072145595, 8)
+        self.assertAlmostEqual(y0[139], 0.069849205689267363, 8)
+        self.assertAlmostEqual(y0[150], 0.17025725262726249, 8)
+        self.assertAlmostEqual(y1[100], 12.133256879492841, 8)
+        self.assertAlmostEqual(y1[120], 1.0240864013072524, 8)
+        self.assertAlmostEqual(y1[139], 0.58190350393257906, 8)
+        self.assertAlmostEqual(y1[150], 0.87543333482970631, 8)
 
 
 class CrystalFieldFitTest(unittest.TestCase):
