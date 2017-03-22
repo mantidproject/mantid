@@ -52,7 +52,7 @@ vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName,
                                                const size_t numPoints,
                                                const double percentToUse)
     : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true),
-      m_wsName(""), slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
+      m_wsName(""), slice(false), m_time(0.0),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
@@ -439,16 +439,6 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
 
   // Set the instrument
   m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
-  double *range = nullptr;
-
-  if (dataSet) {
-    range = dataSet->GetScalarRange();
-  }
-
-  if (range) {
-    m_minValue = range[0];
-    m_maxValue = range[1];
-  }
 
   // Check for the workspace type, i.e. if it is MDHisto or MDEvent
   IMDEventWorkspace_sptr eventWorkspace =
@@ -515,17 +505,6 @@ void vtkSplatterPlotFactory::addMetadata() const {
   const double defaultValue = 0.1;
 
   if (this->dataSet) {
-    double *range = dataSet->GetScalarRange();
-    if (range) {
-      m_minValue = range[0];
-      m_maxValue = range[1];
-    } else {
-      m_minValue = defaultValue;
-      m_maxValue = defaultValue;
-    }
-
-    m_metadataJsonManager->setMinValue(m_minValue);
-    m_metadataJsonManager->setMaxValue(m_maxValue);
     m_metadataJsonManager->setInstrument(
         m_metaDataExtractor->extractInstrument(m_workspace.get()));
     m_metadataJsonManager->setSpecialCoordinates(
@@ -606,18 +585,6 @@ void vtkSplatterPlotFactory::setTime(double time) {
   }
   m_time = time;
 }
-
-/**
-* Getter for the minimum value;
-* @return The minimum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMinValue() { return m_minValue; }
-
-/**
-* Getter for the maximum value;
-* @return The maximum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMaxValue() { return m_maxValue; }
 
 /**
 * Getter for the instrument.

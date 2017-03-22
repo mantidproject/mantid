@@ -300,21 +300,5 @@ std::string MDHWLoadingPresenter::getTimeStepLabel() const {
 const std::string &MDHWLoadingPresenter::getInstrument() {
   return m_metadataJsonManager->getInstrument();
 }
-
-/**
-  * Getter for the minimum value;
-  * @return The minimum value of the data set.
-  */
-double MDHWLoadingPresenter::getMinValue() {
-  return m_metadataJsonManager->getMinValue();
-}
-
-/**
- * Getter for the maximum value;
- * @return The maximum value of the data set.
- */
-double MDHWLoadingPresenter::getMaxValue() {
-  return m_metadataJsonManager->getMaxValue();
-}
 }
 }
