@@ -83,19 +83,24 @@ public:
     if (!m_adaptee->hasChild()) {
       // Sub-menus cannot be added to a toolbar
 
-      QAction *action = getAction();
+      QAction *action = getAction(true);
       toolbar->addAction(action);
     }
   };
 
-  /** Returns the action */
-  QAction *getAction() {
+  /**
+   * Returns the action
+   *
+   * @param shortcut : Whether or not to add a shortcut
+   */
+  QAction *getAction(bool shortcut = false) {
     QAction *action = new QAction(m_adaptee->name(), this);
     action->setIcon(QIcon(m_adaptee->icon()));
     action->setSeparator(m_adaptee->isSeparator());
     action->setToolTip(m_adaptee->tooltip());
     action->setWhatsThis(m_adaptee->whatsthis());
-    action->setShortcut(QKeySequence(m_adaptee->shortcut()));
+    if (shortcut)
+      action->setShortcut(QKeySequence(m_adaptee->shortcut()));
     connect(action, SIGNAL(triggered()), this, SLOT(call()));
 
     return action;
