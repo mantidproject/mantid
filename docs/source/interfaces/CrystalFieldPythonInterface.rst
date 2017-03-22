@@ -328,6 +328,16 @@ To calculate a spectrum call the same method `getSpectrum` but pass the spectrum
   # Calculate first spectrum, use the i-th spectrum of a workspace
   sp = cf.getSpectrum(0, ws, i)
 
+Note that the attributes `Temperature`, `FWHM`, `peaks` and `background` may be set separately from the constructor, e.g.::
+
+    cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
+    cf.Temperature = [5, 50]
+
+However, each time that `Temperature` is set, if it defines a different number of spectra from the previous value
+(e.g. if `Temperature` was initially empty or `None` and is then defined as in the example above, or if `Temperature`
+was initially a scalar value but is then redefined to be a list or vice versa), then all `Ties`, `Constraints`,
+`FWHM` and `peaks` parameters are cleared. Any crystal field parameters previously defined will be retained, however.
+
 
 Multiple Ions
 -------------
@@ -528,7 +538,11 @@ or separately after construction::
     fit_moment.fit()
 
 Unfortunately only 1D datasets can be fitted (e.g. M(H, T) cannot be fitted as a simultaneous function of field and
-temperature).
+temperature). Also, note that setting the `PhysicalProperty` attribute after constructing the `CrystalField` object
+(e.g. running `cf.PhysicalProperty = PhysicalProperties('Cv')`) causes the number of datasets to change and will 
+clear all `Ties` and `Constraints` previously set, and also reset all `FWHM` and `peaks` to the default values (zero 
+for `FWHM` and `Lorentzian` for `peaks`). 
+
 
 Simultaneous Fitting of Physical Properties and Inelastic Neutron Spectra
 -------------------------------------------------------------------------
