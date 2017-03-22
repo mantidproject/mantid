@@ -68,15 +68,15 @@ const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 /**
  * Makes sure the histogram has valid Y data. If Y data is NULL, it will be set
  * to zero Counts and E data gets zeroed.
- * @param histogram
+ * @param histogram A histogram to process.
  */
-void Histogram1D::checkAndSanitizeHistogram(HistogramData::Histogram &histogram) {
+void Histogram1D::checkAndSanitizeHistogram(
+    HistogramData::Histogram &histogram) {
   if (!histogram.sharedY()) {
     histogram.setCounts(histogram.size(), 0.0);
     histogram.setCountVariances(histogram.size(), 0.0);
   }
 }
-
 
 } // namespace DataObjects
 } // namespace Mantid
