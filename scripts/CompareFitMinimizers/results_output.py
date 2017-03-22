@@ -182,10 +182,11 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
         prev_name = name
         name_index = name + ' ' + str(prob_count)
+        if 'neutron' in group_name:
+            name += ' ' + build_visual_display_page(prob_results, group_name)
 
         # TO-DO: move this to the nist loader, not here!
         if 'nist_' in group_name:
-            build_visual_display_page(prob_results, group_name)
             linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
                                    format(name_index, name.lower()))
         else:
@@ -247,15 +248,18 @@ def build_visual_display_page(prob_results, group_name):
     rst_text = title + header + data_plot + starting_plot + solution_plot + problem
 
     html = publish_string(rst_text)
-    file_name = (group_name + '_' + gb.problem.name + '.').lower()
-    with open(file_name + FILENAME_EXT_TXT, 'w') as visual_rst:
+    file_name = (group_name + '_' + gb.problem.name).lower()
+    with open(file_name + '.' + FILENAME_EXT_TXT, 'w') as visual_rst:
         print(html, file=visual_rst)
-        print('Saved {file_name}{extension} to {working_directory}'.
+        print('Saved {file_name}.{extension} to {working_directory}'.
           format(file_name=file_name, extension=FILENAME_EXT_TXT, working_directory=WORKING_DIR))
-    with open(file_name + FILENAME_EXT_HTML, 'w') as visual_html:
+    with open(file_name + '.' + FILENAME_EXT_HTML, 'w') as visual_html:
         print(html, file=visual_html)
-        print('Saved {file_name}{extension} to {working_directory}'.
+        print('Saved {file_name}.{extension} to {working_directory}'.
               format(file_name=file_name, extension=FILENAME_EXT_HTML, working_directory=WORKING_DIR))
+
+    rst_link = '`<' + file_name + '.' + FILENAME_EXT_HTML + '>`_'  # `<cutest_palmer6c.dat.html>`_
+    return rst_link
 
 
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
