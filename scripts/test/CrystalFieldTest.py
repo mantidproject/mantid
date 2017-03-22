@@ -562,24 +562,6 @@ class CrystalFieldTests(unittest.TestCase):
 
 class CrystalFieldFitTest(unittest.TestCase):
 
-    # def _makeMultiWorkspaces(self):
-    #     from CrystalField.fitting import makeWorkspace
-    #     from CrystalField import CrystalField, CrystalFieldFit, Background, Function
-    #
-    #     origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
-    #                           Temperature=[44.0, 50], FWHM=[1.1, 0.9])
-    #     origin.setPeaks('Lorentzian')
-    #     origin.peaks[0].param[0]['FWHM'] = 1.11
-    #     origin.peaks[1].param[1]['FWHM'] = 1.12
-    #     origin.setBackground(peak=Function('Gaussian', Height=10, Sigma=0.3),
-    #                          background=Function('FlatBackground', A0=1.0))
-    #     origin.background[1].peak.param['Sigma'] = 0.8
-    #     origin.background[1].background.param['A0'] = 1.1
-    #
-    #     ws0 = makeWorkspace(*origin.getSpectrum(0))
-    #     ws1 = makeWorkspace(*origin.getSpectrum(1))
-    #     return ws0, ws1
-
     def test_CrystalFieldFit(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function

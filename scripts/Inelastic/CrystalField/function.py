@@ -55,8 +55,7 @@ class Function(object):
         """
         from mantid.simpleapi import FunctionFactory
         if isinstance(name_or_function, str):
-            self._name = name_or_function
-            self.function = FunctionFactory.createFunction(self._name)
+            self.function = FunctionFactory.createFunction(name_or_function)
         else:
             self.function = name_or_function
         if 'prefix' in kwargs:
@@ -71,11 +70,6 @@ class Function(object):
         # The rest of kw arguments are treated as function parameters
         for param in kwargs:
             self._params[param] = kwargs[param]
-
-    @property
-    def name(self):
-        """Read only name of this function"""
-        return self._name
 
     @property
     def attr(self):

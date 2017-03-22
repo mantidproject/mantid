@@ -267,21 +267,6 @@ class CrystalField(object):
             out += ',constraints=(%s)' % constraints
         return out
 
-    def _makeMultiResolutionModel(self):
-        """
-        Make the resolution model part of the function string for makeMultiSpectrumFunction()
-        """
-        out = ''
-        if self._resolutionModel is not None:
-            i = 0
-            for model in self._resolutionModel.model:
-                out += ',FWHMX{0}={1},FWHMY{0}={2}'.format(i, tuple(model[0]), tuple(model[1]))
-                i += 1
-            if self._fwhmVariation is not None:
-                out += ',FWHMVariation=%s' % self._fwhmVariation
-        return out
-
-    # pylint: disable=too-many-public-branches
     def makeMultiSpectrumFunction(self):
         import re
         return re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(self.function))
@@ -1050,9 +1035,6 @@ class CrystalField(object):
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')
         alg.execute()
-        # fun = alg.getProperty('Function').value
-        # if not self._isMultiSpectra():
-        #     self.update(fun)
         out = alg.getProperty('OutputWorkspace').value
         # Create copies of the x and y because `out` goes out of scope when this method returns
         # and x and y get deallocated
