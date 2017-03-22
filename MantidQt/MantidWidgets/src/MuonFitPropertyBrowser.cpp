@@ -385,16 +385,17 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		asymmAlg->initialize();
 		asymmAlg->setPropertyValue("FittingFunction", funStr);
 
-		asymmAlg->setProperty("InputWorkspace", ws);// try the raw workspace.... 
-		//asymmAlg->setProperty("Spectra", workspaceIndex());
+		asymmAlg->setProperty("InputWorkspace", ws);
 		asymmAlg->setProperty("StartX", startX());
 		asymmAlg->setProperty("EndX", endX());
-		asymmAlg->setPropertyValue("OutputWorkspace", wsName);// outputName());
+		asymmAlg->setPropertyValue("OutputWorkspace", wsName);
+		asymmAlg->setPropertyValue("Minimizer", minimizer(true));
+		asymmAlg->setProperty("MaxIterations", maxIterations);
 		asymmAlg->execute();
 		if (!asymmAlg->isExecuted()) {
 			throw std::runtime_error("Asymmetry Calculation has failed.");
 		}
-		// calculate the fit 
+		// calculate the fit explicitly -> above does not get the function exactly right
 		try{
 		Mantid::API::IAlgorithm_sptr alg =
 			Mantid::API::AlgorithmManager::Instance().create("Fit");
