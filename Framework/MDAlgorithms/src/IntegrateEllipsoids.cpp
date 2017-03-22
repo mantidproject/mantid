@@ -94,7 +94,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<double, V3D> > qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
       qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -158,7 +158,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<double, V3D> > qList;
 
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
@@ -218,17 +218,17 @@ void IntegrateEllipsoids::init() {
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
 
-  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace> >(
                       "InputWorkspace", "", Direction::Input, ws_valid),
                   "An input MatrixWorkspace with time-of-flight units along "
                   "X-axis and defined instrument with defined sample");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeaksWorkspace", "", Direction::InOut),
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  boost::shared_ptr<BoundedValidator<double> > mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -252,8 +252,8 @@ void IntegrateEllipsoids::init() {
                   "background region");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutputWorkspace", "",
+                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
 
@@ -331,7 +331,8 @@ void IntegrateEllipsoids::exec() {
     try {
       runMaskDetectors(in_peak_ws, "Tube", "edges");
       runMaskDetectors(in_peak_ws, "Pixel", "edges");
-    } catch (...) {
+    }
+    catch (...) {
       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                   "edge for IntegrateIfOnEdge option");
     }
@@ -350,7 +351,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
-  std::vector<std::pair<double, V3D>> qList;
+  std::vector<std::pair<double, V3D> > qList;
   std::vector<V3D> hkl_vectors;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
@@ -474,20 +475,6 @@ void IntegrateEllipsoids::exec() {
     }
   }
   if (principalaxis1.size() > 1) {
-    size_t histogramNumber = 3;
-    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, principalaxis1.size(),
-        principalaxis1.size());
-    Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
-    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-
-    // set output workspace
-    Points points(principalaxis1.size(), LinearGenerator(0, 1));
-    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
-    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
-    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
-
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
                    << " mean " << stats1.mean << " standard_deviation "
@@ -506,6 +493,20 @@ void IntegrateEllipsoids::exec() {
                    << stats3.standard_deviation << " minimum " << stats3.minimum
                    << " maximum " << stats3.maximum << " median "
                    << stats3.median << "\n";
+    size_t histogramNumber = 3;
+    Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
+        "Workspace2D", histogramNumber, principalaxis1.size(),
+        principalaxis1.size());
+    Workspace2D_sptr wsProfile2D =
+        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+    AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
+
+    // set output workspace
+    Points points(principalaxis1.size(), LinearGenerator(0, 1));
+    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+
     if (cutoffIsigI != EMPTY_DBL()) {
       principalaxis1.clear();
       principalaxis2.clear();
