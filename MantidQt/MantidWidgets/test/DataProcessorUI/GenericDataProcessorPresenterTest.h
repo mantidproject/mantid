@@ -3227,6 +3227,25 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
+
+  void testInstrumentList() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    MockProgressableView mockProgress;
+    GenericDataProcessorPresenter presenter(createReflectometryWhiteList(),
+                                            createReflectometryProcessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+
+    EXPECT_CALL(mockDataProcessorView,
+                setInstrumentList(
+                    QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
+                    QString::fromStdString("INTER")))
+        .Times(1);
+    presenter.setInstrumentList(
+        std::vector<std::string>{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"},
+        "INTER");
+
+	TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+  }
 };
 
 #endif /* MANTID_MANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERTEST_H */

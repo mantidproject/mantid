@@ -95,9 +95,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "key=value pairs, separated by commas. Values "
                              "containing commas must be quoted. In case of "
                              "conflict between options "
-                             "specified via this column and options specified "
-                             "via the <b>Process</b> line edit, the former "
-                             "prevail.");
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
   m_columns = static_cast<int>(m_whitelist.size());
 
   if (m_postprocessor.name().empty()) {
@@ -1081,9 +1080,7 @@ void GenericDataProcessorPresenter::setInstrumentList(
     const std::vector<std::string> &instruments,
     const std::string &defaultInstrument) {
 
-  std::string instrList;
-  for (const auto &instr : instruments)
-    instrList += instr;
+  std::string instrList = boost::algorithm::join(instruments, ",");
 
   m_view->setInstrumentList(QString::fromStdString(instrList),
                             QString::fromStdString(defaultInstrument));
