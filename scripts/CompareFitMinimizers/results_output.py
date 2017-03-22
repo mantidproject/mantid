@@ -172,7 +172,7 @@ def build_indiv_linked_problems(results_per_test, group_name):
     prev_name = ''
     prob_count = 1
     linked_problems = []
-    for test_idx, group in enumerate(results_per_test):
+    for test_idx, prob_results in enumerate(results_per_test):
         raw_name = results_per_test[test_idx][0].problem.name
         name = raw_name.split('.')[0]
         if name == prev_name:
@@ -185,7 +185,7 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
         # TO-DO: move this to the nist loader, not here!
         if 'nist_' in group_name:
-            build_visual_display_page(group, group_name)
+            build_visual_display_page(prob_results, group_name)
             linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
                                    format(name_index, name.lower()))
         else:
@@ -215,14 +215,14 @@ def build_group_linked_names(group_names):
     return linked_names
 
 
-def build_visual_display_page(group, group_name):
+def build_visual_display_page(prob_results, group_name):
     """
     Builds a page containing details of the best fit for a problem.
-    @param group :: the group list containing results
+    @param prob_results:: the list of results for a problem
     @param group_name :: the name of the group, e.g. "nist_lower"
     """
     # Get the best result for a group
-    gb = min((result for result in group), key=lambda result: result.fit_chi2)
+    gb = min((result for result in prob_results), key=lambda result: result.fit_chi2)
 
     # Create various page headings, ensuring the adornment is (at least) the length of the title
     title = '=' * len(gb.problem.name) + '\n'
