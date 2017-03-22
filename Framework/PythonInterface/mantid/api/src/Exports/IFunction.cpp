@@ -51,6 +51,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -141,11 +144,12 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
 
-      .def("fixParameter", &IFunction::fix, (arg("self"), arg("i")),
-           "Fix the ith parameter")
+      .def("fixParameter", &IFunction::fix, fix_Overloads(
+           (arg("self"), arg("i"), arg("isDefault")), "Fix the ith parameter"))
 
-      .def("fixParameter", &IFunction::fixParameter, (arg("self"), arg("name")),
-           "Fix the named parameter")
+      .def("fixParameter", &IFunction::fixParameter,
+           fixParameter_Overloads((arg("self"), arg("name"), arg("isDefault")),
+                                  "Fix the named parameter"))
 
       .def("freeParameter", &IFunction::unfix, (arg("self"), arg("i")),
            "Free the ith parameter")
@@ -156,7 +160,8 @@ void export_IFunction() {
       .def("isFixed", &IFunction::isFixed, (arg("self"), arg("i")),
            "Return whether the ith parameter is fixed or tied")
 
-      .def("fixAll", &IFunction::fixAll, (arg("self")), "Fix all parameters")
+      .def("fixAll", &IFunction::fixAll, fixAll_Overloads((arg("self"), arg("isDefault")),
+           "Fix all parameters"))
 
       .def("freeAll", &IFunction::unfixAll, (arg("self")),
            "Free all parameters")
@@ -185,9 +190,10 @@ void export_IFunction() {
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")
 
-      .def("createEquivalentFunctions", &IFunctionAdapter::createEquivalentFunctions,
-           (arg("self")), "Split this function (if needed) into a list of "
-                          "independent functions")
+      .def("createEquivalentFunctions",
+           &IFunctionAdapter::createEquivalentFunctions, (arg("self")),
+           "Split this function (if needed) into a list of "
+           "independent functions")
 
       //-- Deprecated functions that have the wrong names --
       .def("categories", &getCategories, arg("self"),

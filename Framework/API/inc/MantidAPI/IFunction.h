@@ -416,15 +416,15 @@ public:
   /// Check if a declared parameter i is fixed
   bool isFixed(size_t i) const;
   /// Removes a declared parameter i from the list of active
-  void fix(size_t i);
+  void fix(size_t i, bool isDefault = false);
   /// Restores a declared parameter i to the active status
   void unfix(size_t i);
   /// Fix a parameter
-  void fixParameter(const std::string &name);
+  void fixParameter(const std::string &name, bool isDefault = false);
   /// Free a parameter
   void unfixParameter(const std::string &name);
   /// Fix all parameters
-  void fixAll();
+  void fixAll(bool isDefault = false);
   /// Free all parameters
   void unfixAll();
 
@@ -545,8 +545,10 @@ protected:
   /// Describe parameter status in relation to fitting:
   /// Active: Fit varies such parameter directly.
   /// Fixed:  Value doesn't change during fit.
+  /// FixedByDefault:  Fixed by default, don't show in ties of
+  ///         the output string.
   /// Tied:   Value depends on values of other parameters.
-  enum ParameterStatus {Active, Fixed, Tied};
+  enum ParameterStatus { Active, Fixed, FixedByDefault, Tied };
 
   /// Function initialization. Declare function parameters in this method.
   virtual void init();

@@ -96,7 +96,7 @@ size_t calculateMaxNPeaks(size_t nPeaks) { return nPeaks + nPeaks / 2 + 1; }
 /// @param fwhm :: A width value to pass to the peak.
 inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
   peak.setHeight(0.0);
-  peak.fixAll();
+  peak.fixAll(true);
   peak.setFwhm(fwhm);
 }
 
@@ -112,6 +112,7 @@ API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
     throw std::runtime_error("A peak function is expected.");
   }
   bool useDefaultFWHM = xVec.empty();
+  const bool fixByDefault = true;
   if (isGood) {
     peak->setCentre(centre);
     peak->setIntensity(intensity);
@@ -126,13 +127,13 @@ API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
         ignorePeak(*peak, defaultFWHM);
       }
     }
-    peak->fixCentre();
-    peak->fixIntensity();
+    peak->fixCentre(fixByDefault);
+    peak->fixIntensity(fixByDefault);
   } else {
     ignorePeak(*peak, defaultFWHM);
   }
   if (fixAllPeaks) {
-    peak->fixAll();
+    peak->fixAll(fixByDefault);
   }
   return peak;
 }
@@ -168,6 +169,7 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
   if (nRequiredPeaks > maxNPeaks) {
     maxNPeaks = nRequiredPeaks;
   }
+  const bool fixByDefault = true;
   for (size_t i = 0; i < maxNPeaks; ++i) {
     auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
     auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
@@ -189,13 +191,13 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
           ignorePeak(*peak, defaultFWHM);
         }
       }
-      peak->fixCentre();
-      peak->fixIntensity();
+      peak->fixCentre(fixByDefault);
+      peak->fixIntensity(fixByDefault);
     } else {
       ignorePeak(*peak, defaultFWHM);
     }
     if (fixAllPeaks) {
-      peak->fixAll();
+      peak->fixAll(fixByDefault);
     }
     spectrum.addFunction(peak);
   }
@@ -229,6 +231,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
   size_t maxNPeaks = calculateMaxNPeaks(nGoodPeaks);
   size_t nFunctions = spectrum.nFunctions();
   bool mustUpdateWidth = !xVec.empty();
+  const bool fixByDefault = true;
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
     if (i < nFunctions) {
@@ -249,11 +252,11 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
           }
         }
         peak.unfixIntensity();
-        peak.fixIntensity();
+        peak.fixIntensity(fixByDefault);
       } else {
         peak.setHeight(0.0);
         if (i > nOriginalPeaks) {
-          peak.fixAll();
+          peak.fixAll(fixByDefault);
         }
       }
     } else {

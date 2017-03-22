@@ -120,19 +120,25 @@ bool IFunction::isFixed(size_t i) const {
     throw std::out_of_range("Parameter index " + std::to_string(i) +
                             " out of range " + std::to_string(nParams()));
   }
-  return getParameterStatus(i) == Fixed;
+  auto status = getParameterStatus(i);
+  return status == Fixed || status == FixedByDefault;
 }
 
-/** This method doesn't create a tie
- * @param i :: A declared parameter index to be fixed
- */
-void IFunction::fix(size_t i) {
+/// This method doesn't create a tie
+/// @param i :: A declared parameter index to be fixed
+/// @param isDefault :: If true fix it by default
+///
+void IFunction::fix(size_t i, bool isDefault) {
   auto status = getParameterStatus(i);
   if (status == Tied) {
     throw std::runtime_error("Cannot fix parameter " + std::to_string(i) +
                              " (" + parameterName(i) + "): it has a tie.");
   }
-  setParameterStatus(i, Fixed);
+  if (isDefault) {
+    setParameterStatus(i, FixedByDefault);
+  } else {
+    setParameterStatus(i, Fixed);
+  }
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
@@ -409,9 +415,10 @@ std::string IFunction::asString() const {
   for (size_t i = 0; i < nParams(); i++) {
     std::ostringstream paramOut;
     paramOut << parameterName(i) << '=' << getParameter(i);
-    if (isActive(i)) {
+    auto status = getParameterStatus(i);
+    if (status == Active) {
       ostr << ',' << paramOut.str();
-    } else if (isFixed(i)) {
+    } else if (status == Fixed) {
       ties.push_back(paramOut.str());
     }
   }
@@ -1351,9 +1358,10 @@ size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
 
 /// Fix a parameter
 /// @param name :: A name of a parameter to fix
-void IFunction::fixParameter(const std::string &name) {
+/// @param isDefault :: If true fix it by default
+void IFunction::fixParameter(const std::string &name, bool isDefault) {
   auto i = parameterIndex(name);
-  fix(i);
+  fix(i, isDefault);
 }
 
 /// Free a parameter
@@ -1364,9 +1372,10 @@ void IFunction::unfixParameter(const std::string &name) {
 }
 
 /// Fix all parameters
-void IFunction::fixAll() {
+/// @param isDefault :: If true fix them by default
+void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
+    fix(i, isDefault);
   }
 }
 
