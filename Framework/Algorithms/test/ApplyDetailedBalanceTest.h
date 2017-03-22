@@ -42,7 +42,7 @@ public:
         alg.setPropertyValue("InputWorkspace", inputWSname));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outputWSname));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", 300.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Temperature", "300.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
