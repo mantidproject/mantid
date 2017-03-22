@@ -288,40 +288,6 @@ void PredictPeaks::exec() {
   setProperty<PeaksWorkspace_sptr>("OutputWorkspace", m_pw);
 }
 
-void PredictPeaks::createDetectorCache() {
-  //  const auto & detInfo = m_pw->detectorInfo();
-  //  std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>>
-  //  points;
-  //  points.reserve(detInfo.size());
-  //  m_indexMap.reserve(detInfo.size());
-
-  //  for (size_t pointNo = 0; pointNo < detInfo.size(); ++pointNo) {
-  //    if (detInfo.isMonitor(pointNo))
-  //        continue; // skip monitor
-  //    if (detInfo.isMasked(pointNo))
-  //        continue; // edge is masked so don't check if not masked
-
-  //    const auto &det = detInfo.detector(pointNo);
-  //    const auto tt1 = det.getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)); // two
-  //    theta
-  //    const auto ph1 = det.getPhi();                                // phi
-  //    auto E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) *
-  //    std::sin(ph1),
-  //                 1. - std::cos(tt1)); // end of trajectory
-  //    E1 = E1 * (1. / E1.norm());       // normalize
-  //    Eigen::Array3d point(E1[0], E1[1], E1[2]);
-
-  //    if(point.hasNaN())
-  //      continue;
-
-  //    points.push_back(point);
-  //    m_indexMap.push_back(pointNo);
-  //  }
-
-  //  m_detectorCacheSearch
-  //      = Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
-}
-
 /**
  * Log the number of peaks found to fall on and off detectors
  *

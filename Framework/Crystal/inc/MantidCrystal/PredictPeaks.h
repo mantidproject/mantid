@@ -66,8 +66,6 @@ private:
                                 const Kernel::DblMatrix &orientedUB,
                                 const Kernel::DblMatrix &goniometerMatrix);
 
-  void createDetectorCache();
-
 private:
   void logNumberOfPeaksFound(size_t allowedPeakCount) const;
 
