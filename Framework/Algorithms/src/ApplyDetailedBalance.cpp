@@ -37,9 +37,10 @@ void ApplyDetailedBalance::init() {
                                                    Direction::Output),
                   "An output workspace.");
   std::vector<std::string> unitOptions{"Energy", "Frequency"};
-  declareProperty("OutputUnits", "Energy",
-                  boost::make_shared<StringListValidator>(unitOptions),
-                  "Susceptibility as a function of energy (meV) or frequency (GHz)");
+  declareProperty(
+      "OutputUnits", "Energy",
+      boost::make_shared<StringListValidator>(unitOptions),
+      "Susceptibility as a function of energy (meV) or frequency (GHz)");
 }
 
 /** Execute the algorithm.
@@ -87,7 +88,7 @@ void ApplyDetailedBalance::exec() {
 
   // Select the unit, transform if different than energy
   std::string unit = getProperty("OutputUnits");
-  if(unit=="Frequency") {
+  if (unit == "Frequency") {
     IAlgorithm_sptr convert = createChildAlgorithm("ConvertUnits");
     convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
     convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);

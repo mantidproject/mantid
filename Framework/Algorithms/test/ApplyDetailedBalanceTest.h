@@ -133,7 +133,8 @@ public:
     alg.setPropertyValue("Temperature", 300.0);
     alg.setPropertyValue("OutputUnits", "Frequency");
     alg.execute();
-    outws = AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
+    outws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(outputWSname);
     TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
   }
 
