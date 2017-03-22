@@ -48,5 +48,26 @@ class IndirectSampleChangerTest(unittest.TestCase):
         self.assertEqual(round(scan_ws.readY(1)[2], 7), 1.1431749)
 
 
+#----------------------------------------Failure cases-------------------------------------
+
+    def test_run_numbers(self):
+        """
+        Test for run numbers in wrong order
+        """
+        self.assertRaises(RuntimeError, IndirectSampleChanger,
+                          FirstRun = 72465, LastRun = 72462, NumberSamples=2, Instrument='IRIS',
+                          Analyser='graphite',Reflection='002', SpectraRange='3, 50',
+                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5', GroupingMethod='All')
+
+    def test_number_samples(self):
+        """
+        Test for more samples than runs
+        """
+        self.assertRaises(RuntimeError, IndirectSampleChanger,
+                          FirstRun = 72462, LastRun = 72465, NumberSamples=5, Instrument='IRIS',
+                          Analyser='graphite',Reflection='002', SpectraRange='3, 50',
+                          ElasticRange='-0.5, 0', InelasticRange='0, 0.5', GroupingMethod='All')
+
+
 if __name__ == '__main__':
     unittest.main()
