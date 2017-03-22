@@ -173,8 +173,6 @@ def build_indiv_linked_problems(results_per_test, group_name):
     prob_count = 1
     linked_problems = []
     for test_idx, group in enumerate(results_per_test):
-        if "neutron" in group_name:
-            build_visual_display_page(group)
         raw_name = results_per_test[test_idx][0].problem.name
         name = raw_name.split('.')[0]
         if name == prev_name:
@@ -187,6 +185,7 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
         # TO-DO: move this to the nist loader, not here!
         if 'nist_' in group_name:
+            build_visual_display_page(group, group_name)
             linked_problems.append("`{0} <http://www.itl.nist.gov/div898/strd/nls/data/{1}.shtml>`__".
                                    format(name_index, name.lower()))
         else:
@@ -216,10 +215,11 @@ def build_group_linked_names(group_names):
     return linked_names
 
 
-def build_visual_display_page(group):
+def build_visual_display_page(group, group_name):
     """
     Builds a page containing details of the best fit for a problem.
     @param group :: the group list containing results
+    @param group_name :: the name of the group, e.g. "nist_lower"
     """
     # Get the best result for a group
     gb = min((result for result in group), key=lambda result: result.fit_chi2)
@@ -247,7 +247,7 @@ def build_visual_display_page(group):
     rst_text = title + header + data_plot + starting_plot + solution_plot + problem
 
     html = publish_string(rst_text)
-    file_name = gb.problem.name + '.'
+    file_name = (group_name + '_' + gb.problem.name + '.').lower()
     with open(file_name + FILENAME_EXT_TXT, 'w') as visual_rst:
         print(html, file=visual_rst)
         print('Saved {file_name}{extension} to {working_directory}'.
