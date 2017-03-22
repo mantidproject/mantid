@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_APPLYDETAILEDBALANCETEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
