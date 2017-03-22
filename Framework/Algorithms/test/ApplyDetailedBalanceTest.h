@@ -130,7 +130,7 @@ public:
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWSname);
     alg.setPropertyValue("OutputWorkspace", outputWSname);
-    alg.setPropertyValue("Temperature", 300.0);
+    alg.setPropertyValue("Temperature", "300.0");
     alg.setPropertyValue("OutputUnits", "Frequency");
     alg.execute();
     Workspace2D_sptr outws =
