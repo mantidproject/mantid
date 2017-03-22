@@ -30,7 +30,7 @@ using Mantid::HistogramData::Histogram;
 double getSingleWorkspaceLogValue(
     int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) {
-  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX) {
+  if (logName == MantidWSIndexWidget::WORKSPACE_INDEX || logName == "") {
     return wsIndex;
   } else {
     // MatrixWorkspace is an ExperimentInfo

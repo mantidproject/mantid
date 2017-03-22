@@ -11,7 +11,6 @@
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidSurfacePlotDialog.h"
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 #include "MantidPlotUtilities.h"
 #include "MantidSampleLogDialog.h"
@@ -100,7 +99,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidSurfacePlotDialog;
 using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
