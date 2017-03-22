@@ -51,7 +51,7 @@ FilterEvents::FilterEvents()
       m_useSplittersWorkspace(false), m_useArbTableSplitters(false),
       m_targetWorkspaceIndexSet(), m_splitters(), m_outputWorkspacesMap(),
       m_wsNames(), m_detTofOffsets(), m_detTofFactors(),
-      m_FilterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
+      m_filterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
       m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
@@ -161,7 +161,7 @@ void FilterEvents::exec() {
   processAlgorithmProperties();
 
   // Examine workspace for detectors
-  examineEventWS();
+  examineAndSortEventWS();
 
   // Parse splitters
   m_progress = 0.0;
@@ -286,7 +286,7 @@ void FilterEvents::processAlgorithmProperties() {
     m_hasInfoWS = true;
 
   m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
-  m_FilterByPulseTime = this->getProperty("FilterByPulseTime");
+  m_filterByPulseTime = this->getProperty("FilterByPulseTime");
 
   m_toGroupWS = this->getProperty("GroupWorkspaces");
 
@@ -371,10 +371,12 @@ void FilterEvents::processAlgorithmProperties() {
  * Warning message will be written out
  * @brief FilterEvents::examineEventWS
  */
-void FilterEvents::examineEventWS() {
+void FilterEvents::examineAndSortEventWS() {
+  // get event workspace information
   size_t numhist = m_eventWS->getNumberHistograms();
   m_vecSkip.resize(numhist, false);
 
+  // check whether any detector is skipped
   if (m_specSkipType == EventFilterSkipNoDetTOFCorr &&
       m_tofCorrType == NoneCorrect) {
     // No TOF correction and skip spectrum only if TOF correction is required
@@ -416,6 +418,16 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
+
+  // sort events
+  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
+  if (m_filterByPulseTime)
+    sortType = DataObjects::PULSETIME_SORT;
+  else
+    sortType = DataObjects::PULSETIMETOF_SORT;
+
+  // This runs the SortEvents algorithm in parallel
+  m_eventWS->sortAll(sortType, nullptr);
 
   return;
 }
@@ -1278,7 +1290,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      if (m_FilterByPulseTime) {
+      if (m_filterByPulseTime) {
         input_el.splitByPulseTime(m_splitters, outputs);
       } else if (m_tofCorrType != NoneCorrect) {
         input_el.splitByFullTime(m_splitters, outputs, true,
@@ -1387,7 +1399,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Perform the filtering (using the splitting function and just one
       // output)
       std::string logmessage;
-      if (m_FilterByPulseTime) {
+      if (m_filterByPulseTime) {
         throw runtime_error(
             "It is not a good practice to split fast event by pulse time. ");
       } else if (m_tofCorrType != NoneCorrect) {

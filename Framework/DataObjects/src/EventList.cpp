@@ -4422,12 +4422,14 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
 
 //----------------------------------------------------------------------------------------------
 /**
- * @param vectimes :: vector of splitting times
+ * @brief EventList::splitByFullTimeMatrixSplitter
+ * @param vec_splitters_time  :: vector of splitting times
  * @param vecgroups :: vector of index group for splitters
  * @param vec_outputEventList :: vector of groups of splitted events
  * @param docorrection :: flag to do TOF correction from detector to sample
  * @param toffactor :: factor multiplied to TOF for correction
  * @param tofshift :: shift to TOF in unit of SECOND for correction
+ * @return
  */
 std::string EventList::splitByFullTimeMatrixSplitter(
     const std::vector<int64_t> &vec_splitters_time,
@@ -4439,8 +4441,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
-  // Start by sorting the event list by pulse time.
-  // FIXME - Should find a good algorithm for sorted event list
+  // Start by sorting the event list by pulse time, if its flag is not set up
+  // right
   sortPulseTimeTOF();
 
   // Initialize all the output event list
