@@ -93,7 +93,8 @@ public:
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
 
   // Methods we don't care about
-  std::string getTimeSlicingOptions() const override { return std::string(); };
+  std::string getTimeSlicingValues() const override { return std::string(); };
+  std::string getTimeSlicingType() const override { return std::string(); };
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
