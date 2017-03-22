@@ -17,11 +17,9 @@ susceptibility to the scattering function
 where :math:`E` is the energy transfer to the system. The algorithm
 assumes that the y axis of the input workspace contains the scattering
 function :math:`S`. The y axis of the output workspace will contain the
-dynamic susceptibility. The temperature is extracted from a log attached
-to the workspace, as the mean value. The entry log must be named "Temperature"
-in order to be detected. Alternatively, the temperature can
-be directly specified. The algorithm will fail if neither option is
-valid.
+dynamic susceptibility. The temperature is either extracted as the average of the
+values stored in the appropriate entry of the log attached to the workspace
+(user supplies the name of the entry) or user can pass a number for the temperature.
 
 [1] S. W. Lovesey - Theory of Neutron Scattering from Condensed Matter,
 vol 1
