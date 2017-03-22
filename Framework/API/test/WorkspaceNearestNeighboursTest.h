@@ -1,7 +1,7 @@
 #ifndef MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 #define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
 
-#include "MantidAPI/NearestNeighbours.h"
+#include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"

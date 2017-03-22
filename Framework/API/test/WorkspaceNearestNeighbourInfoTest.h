@@ -5,7 +5,7 @@
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 
 using Mantid::API::WorkspaceNearestNeighbourInfo;
