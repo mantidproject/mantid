@@ -4377,7 +4377,7 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
       if (absolute_time < start_i64) {
         // event occurs before the splitter. only can happen with first
         // splitter. Then ignore and move to next
-        ++ iter_events;
+        ++iter_events;
         continue;
       }
 
