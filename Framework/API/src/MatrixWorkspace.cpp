@@ -2015,8 +2015,15 @@ void MatrixWorkspace::updateCachedDetectorGrouping(const size_t index) const {
 
 void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
   const auto &detInfo = detectorInfo();
-  // TODO must compare size including time indices!
-  if (detInfo.size() != m_indexInfo->globalSize())
+  size_t numberOfDetectors{detInfo.size()};
+  size_t numberOfSpectra{0};
+  if (detInfo.isScanning()) {
+    for (size_t i = 0; i < numberOfDetectors; ++i)
+      numberOfSpectra += detInfo.scanCount(i);
+  } else {
+    numberOfSpectra = numberOfDetectors;
+  }
+  if (numberOfSpectra != m_indexInfo->globalSize())
     throw std::runtime_error("MatrixWorkspace: IndexInfo does not contain "
                              "spectrum definitions so building a 1:1 mapping "
                              "from spectra to detectors was attempted, but the "
@@ -2024,9 +2031,13 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
                              "to the number of detectors in the instrument.");
   std::vector<SpectrumDefinition> specDefs(m_indexInfo->size());
   size_t specIndex = 0;
+  size_t globalSpecIndex = 0;
   for (size_t detIndex = 0; detIndex < detInfo.size(); ++detIndex) {
-    if (m_indexInfo->isOnThisPartition(Indexing::GlobalSpectrumIndex(detIndex)))
-      specDefs[specIndex++].add(detIndex);
+    for (size_t time = 0; time < detInfo.scanCount(detIndex); ++time) {
+      if (m_indexInfo->isOnThisPartition(
+              Indexing::GlobalSpectrumIndex(globalSpecIndex++)))
+      specDefs[specIndex++].add(detIndex, time);
+    }
   }
   m_indexInfo->setSpectrumDefinitions(std::move(specDefs));
 }

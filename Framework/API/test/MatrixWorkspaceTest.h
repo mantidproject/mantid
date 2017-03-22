@@ -1569,15 +1569,9 @@ public:
     auto &detInfo = merged->mutableDetectorInfo();
     detInfo.merge(detInfo2);
 
-    // Set up spectrum definitions with 1:1 mapping such that each spectrum
-    // corresponds to 1 time index of a detector.
-    auto specDefs = Kernel::make_cow<std::vector<SpectrumDefinition>>(2);
-    specDefs.access()[0].add(0, 0); // detector 0, time index 0
-    specDefs.access()[1].add(0, 1); // detector 0, time index 1
-    auto indexInfo = merged->indexInfo();
-    indexInfo.setDetectorIDs({0, 0}); // both spectra have detector ID 0
-    indexInfo.setSpectrumDefinitions(specDefs);
-    merged->setIndexInfo(indexInfo);
+    // Setting IndexInfo withoutspectrum definitions will set up a 1:1 mapping
+    // such that each spectrum corresponds to 1 time index of a detector.
+    merged->setIndexInfo(IndexInfo(merged->getNumberHistograms()));
 
     const auto &specInfo = merged->spectrumInfo();
     TS_ASSERT(specInfo.hasDetectors(0));
