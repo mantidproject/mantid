@@ -16,6 +16,7 @@ Algorithms
 ----------
 
 - Removed the optional flag `LocationParameters` from `ClearInstrumentParameters`.
+- User can select the dynamic susceptibility versus energy or frequency with :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`. 
 
 New
 ###
