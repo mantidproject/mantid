@@ -32,7 +32,7 @@ from .kernel.funcinspect import replace_signature as _replace_signature
 from .kernel.funcinspect import customise_func as _customise_func
 
 # This is a simple API so give access to the aliases by default as well
-from . import __gui__
+from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
 
