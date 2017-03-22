@@ -108,8 +108,6 @@ public:
       const QStringList &wsNames,
       GraphOptions::CurveType curveType = GraphOptions::ColorMap) = 0;
   virtual void showMDPlot() = 0;
-  virtual void showSurfacePlot() = 0;
-  virtual void showContourPlot() = 0;
   virtual MultiLayer *
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,

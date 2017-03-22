@@ -542,6 +542,12 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testPlotSpectrumAdvanced() {
+    EXPECT_CALL(*mockView.get(), plotSpectrum("Advanced")).Times(Exactly(1));
+    presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void testShowColourFillPlot() {
     EXPECT_CALL(*mockView.get(), showColourFillPlot()).Times(Exactly(1));
     presenter->notifyFromView(ViewNotifiable::Flag::ShowColourFillPlot);
