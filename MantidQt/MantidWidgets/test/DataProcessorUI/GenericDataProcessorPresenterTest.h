@@ -3262,13 +3262,12 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER")))
-        .Times(1);
+                    QString::fromStdString("INTER"))).Times(1);
     presenter.setInstrumentList(
         std::vector<std::string>{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"},
         "INTER");
 
-	TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
   }
 };
 
