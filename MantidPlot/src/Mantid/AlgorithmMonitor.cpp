@@ -206,6 +206,9 @@ void MonitorDlg::update() {
        itr != iend; ++itr) {
     IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().getAlgorithm(*itr);
+    if (!alg) {
+      continue;
+    }
     // m_algorithms << alg;
     QStringList iList;
     iList << QString::fromStdString(alg->name());

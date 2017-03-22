@@ -34,6 +34,7 @@
 # run or the loaded matirix instead of the default FFT method
 #
 
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import threading
@@ -45,8 +46,8 @@ sys.path.append("/opt/mantidnightly/bin") # noqa
 
 from mantid.simpleapi import *
 
-print "API Version"
-print apiVersion()
+print("API Version")
+print(apiVersion())
 
 start_time = time.time()
 
@@ -63,7 +64,7 @@ class ProcessThread ( threading.Thread ):
         self.command = command
 
     def run ( self ):
-        print 'STARTING PROCESS: ' + self.command
+        print('STARTING PROCESS: ' + self.command)
         os.system( self.command )
 
 # -------------------------------------------------------------------------
@@ -72,7 +73,7 @@ class ProcessThread ( threading.Thread ):
 # Get the config file name from the command line
 #
 if len(sys.argv) < 2:
-    print "You MUST give the config file name on the command line"
+    print("You MUST give the config file name on the command line")
     exit(0)
 
 config_files = sys.argv[1:]
@@ -148,9 +149,9 @@ while not all_done:
     if len(procList) == 0 and len(active_list) == 0 :
         all_done = True
 
-print "\n**************************************************************************************"
-print   "************** Completed Individual Runs, Starting to Combine Results ****************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("************** Completed Individual Runs, Starting to Combine Results ****************")
+print("**************************************************************************************\n")
 
 #
 # First combine all of the integrated files, by reading the separate files and
@@ -178,8 +179,8 @@ if output_nexus:
                 full_name = str(item)
 
         if not full_name.endswith('nxs'):
-            print "Exiting since the data_directory was not specified and"
-            print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+            print("Exiting since the data_directory was not specified and")
+            print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run))
             exit(0)
     #
     # Load the first data file to find instrument
@@ -282,7 +283,7 @@ if not use_cylindrical_integration:
 
 if use_cylindrical_integration:
     if (cell_type is not None) or (centering is not None):
-        print "WARNING: Cylindrical profiles are NOT transformed!!!"
+        print("WARNING: Cylindrical profiles are NOT transformed!!!")
   # Combine *.profiles files
     filename = output_directory + '/' + exp_name + '.profiles'
     outputFile = open( filename, 'w' )
@@ -316,11 +317,11 @@ if use_cylindrical_integration:
 
 end_time = time.time()
 
-print "\n**************************************************************************************"
-print   "****************************** DONE PROCESSING ALL RUNS ******************************"
-print   "**************************************************************************************\n"
+print("\n**************************************************************************************")
+print("****************************** DONE PROCESSING ALL RUNS ******************************")
+print("**************************************************************************************\n")
 
-print 'Total time:   ' + str(end_time - start_time) + ' sec'
-print 'Config file: ' + ", ".join(config_files)
-print 'Script file:  ' + reduce_one_run_script + '\n'
-print
+print('Total time:   ' + str(end_time - start_time) + ' sec')
+print('Config file: ' + ", ".join(config_files))
+print('Script file:  ' + reduce_one_run_script + '\n')
+print()

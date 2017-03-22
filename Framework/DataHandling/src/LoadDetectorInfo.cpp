@@ -3,7 +3,6 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/Exception.h"
 
 #include <Poco/Path.h>

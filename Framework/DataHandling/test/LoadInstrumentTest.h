@@ -1,27 +1,23 @@
 #ifndef LOADINSTRUMENTTEST_H_
 #define LOADINSTRUMENTTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -94,15 +90,6 @@ public:
 
     TS_ASSERT_EQUALS(loader.getPropertyValue("MonitorList"), "601,602,603,604");
 
-    //    std::vector<detid_t> dets = ws2D->getInstrument()->getDetectorIDs();
-    //    std::cout << dets.size() << " detectors in the instrument" <<
-    //    '\n';
-    //    for (size_t i=0; i<dets.size(); i++)
-    //    {
-    //      if (i % 10 == 0) std::cout << '\n';
-    //      std::cout << dets[i] << ", ";
-    //    }
-
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
@@ -119,14 +106,15 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
-    boost::shared_ptr<const IDetector> ptrDet103 = i->getDetector(103);
-    TS_ASSERT_EQUALS(ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS(ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA(ptrDet103->getPos().X(), 0.4013, 0.01);
-    TS_ASSERT_DELTA(ptrDet103->getPos().Z(), 2.4470, 0.01);
-    double d = ptrDet103->getPos().distance(samplepos->getPos());
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDet103 = detectorInfo.detector(detectorInfo.indexOf(103));
+    TS_ASSERT_EQUALS(ptrDet103.getID(), 103);
+    TS_ASSERT_EQUALS(ptrDet103.getName(), "pixel");
+    TS_ASSERT_DELTA(ptrDet103.getPos().X(), 0.4013, 0.01);
+    TS_ASSERT_DELTA(ptrDet103.getPos().Z(), 2.4470, 0.01);
+    double d = ptrDet103.getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d, 2.512, 0.0001);
-    double cmpDistance = ptrDet103->getDistance(*samplepos);
+    double cmpDistance = ptrDet103.getDistance(*samplepos);
     TS_ASSERT_DELTA(cmpDistance, 2.512, 0.0001);
 
     // test if detector with det_id=603 has been marked as a monitor
@@ -140,17 +128,19 @@ public:
     TS_ASSERT_EQUALS(output->getAxis(1)->spectraNo(257), 258);
 
     auto ids_from_map = output->getSpectrum(257).getDetectorIDs();
-    IDetector_const_sptr det_from_ws = output->getDetector(257);
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto &det_from_ws = spectrumInfo.detector(257);
     TS_ASSERT_EQUALS(ids_from_map.size(), 1);
     TS_ASSERT_EQUALS(*ids_from_map.begin(), 602);
-    TS_ASSERT_EQUALS(det_from_ws->getID(), 602);
+    TS_ASSERT_EQUALS(det_from_ws.getID(), 602);
 
     // also a few tests on the last detector and a test for the one beyond the
     // last
-    boost::shared_ptr<const IDetector> ptrDetLast = i->getDetector(413256);
-    TS_ASSERT_EQUALS(ptrDetLast->getID(), 413256);
-    TS_ASSERT_EQUALS(ptrDetLast->getName(), "pixel");
-    TS_ASSERT_THROWS(i->getDetector(413257), Exception::NotFoundError);
+    const auto &ptrDetLast =
+        detectorInfo.detector(detectorInfo.indexOf(413256));
+    TS_ASSERT_EQUALS(ptrDetLast.getID(), 413256);
+    TS_ASSERT_EQUALS(ptrDetLast.getName(), "pixel");
+    TS_ASSERT_THROWS(detectorInfo.indexOf(413257), std::out_of_range);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
@@ -226,17 +216,18 @@ public:
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(101);
-    TS_ASSERT_EQUALS(ptrDet->getID(), 101);
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(101));
+    TS_ASSERT_EQUALS(ptrDet.getID(), 101);
 
     TS_ASSERT(output->detectorInfo().isMonitor(0));
 
-    boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(102);
-    TS_ASSERT(ptrDetShape->isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape->getPos()));
+    const auto &ptrDetShape = detectorInfo.detector(detectorInfo.indexOf(102));
+    TS_ASSERT(ptrDetShape.isValid(V3D(0.0, 0.0, 0.0) + ptrDetShape.getPos()));
     TS_ASSERT(
-        ptrDetShape->isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape->getPos()));
-    TS_ASSERT(ptrDetShape->isValid(V3D(0.005, 0.1, 0.000002) +
-                                   ptrDetShape->getPos()));
+        ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
+    TS_ASSERT(
+        ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
 
     // test of sample shape
     TS_ASSERT(samplepos->isValid(V3D(0.0, 0.0, 0.005) + samplepos->getPos()));
@@ -284,14 +275,13 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-
-    boost::shared_ptr<const IDetector> ptrDet = i->getDetector(20201001);
-    TS_ASSERT_EQUALS(ptrDet->getName(), "det 1");
-    TS_ASSERT_EQUALS(ptrDet->getID(), 20201001);
-    TS_ASSERT_DELTA(ptrDet->getPos().X(), -0.0909, 0.0001);
-    TS_ASSERT_DELTA(ptrDet->getPos().Y(), 0.3983, 0.0001);
-    TS_ASSERT_DELTA(ptrDet->getPos().Z(), 4.8888, 0.0001);
+    const auto &detectorInfo = output->detectorInfo();
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
+    TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
+    TS_ASSERT_EQUALS(ptrDet.getID(), 20201001);
+    TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Y(), 0.3983, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -400,29 +390,36 @@ public:
     TS_ASSERT_EQUALS(neutronicInst.get(),
                      ws->getInstrument()->baseInstrument().get());
     // Check the neutronic positions
-    TS_ASSERT_EQUALS(neutronicInst->getDetector(1000)->getPos(), V3D(2, 2, 0));
-    TS_ASSERT_EQUALS(neutronicInst->getDetector(1001)->getPos(), V3D(2, 3, 0));
-    TS_ASSERT_EQUALS(neutronicInst->getDetector(1002)->getPos(), V3D(3, 2, 0));
-    TS_ASSERT_EQUALS(neutronicInst->getDetector(1003)->getPos(), V3D(3, 3, 0));
-    // Note that one of the physical pixels doesn't exist in the neutronic space
-    TS_ASSERT_THROWS(neutronicInst->getDetector(1004),
-                     Exception::NotFoundError);
-    TS_ASSERT_EQUALS(neutronicInst->getDetector(1005)->getPos(), V3D(4, 3, 0));
+    const auto &detectorInfo = ws->detectorInfo();
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1000)),
+                     V3D(2, 2, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1001)),
+                     V3D(2, 3, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1002)),
+                     V3D(3, 2, 0));
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1003)),
+                     V3D(3, 3, 0));
+    // Note that one of the physical pixels doesn't exist in the neutronic
+    // space
+    TS_ASSERT_THROWS(detectorInfo.indexOf(1004), std::out_of_range);
+    TS_ASSERT_EQUALS(detectorInfo.position(detectorInfo.indexOf(1005)),
+                     V3D(4, 3, 0));
 
     // Check that the first 2 detectors share the same shape in the physical
     // instrument...
     TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
                      physicalInst->getDetector(1001)->shape())
     // ...but not in the neutronic instrument
-    TS_ASSERT_DIFFERS(neutronicInst->getDetector(1000)->shape(),
+    TS_ASSERT_DIFFERS(detectorInfo.detector(detectorInfo.indexOf(1000)).shape(),
                       neutronicInst->getDetector(1001)->shape())
-    // Also, the same shape is shared between the corresponding '1000' detectors
+    // Also, the same shape is shared between the corresponding '1000'
+    // detectors
     TS_ASSERT_EQUALS(physicalInst->getDetector(1000)->shape(),
-                     neutronicInst->getDetector(1000)->shape())
+                     detectorInfo.detector(detectorInfo.indexOf(1000)).shape())
 
     // Check the monitor is in the same place in each instrument
     TS_ASSERT_EQUALS(physicalInst->getDetector(1)->getPos(),
-                     neutronicInst->getDetector(1)->getPos());
+                     detectorInfo.position(detectorInfo.indexOf(1)));
     // ...but is not the same object
     TS_ASSERT_DIFFERS(physicalInst->getDetector(1).get(),
                       neutronicInst->getDetector(1).get());

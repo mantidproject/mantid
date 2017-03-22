@@ -301,7 +301,7 @@ void ConfigServiceImpl::setBaseDirectory() {
     // code crash.
     m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
     f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists())
+    if (f.exists())
       return;
   }
 
@@ -1619,6 +1619,15 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
  */
 const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
   return m_UserSearchDirs;
+}
+
+/**
+* Sets the search directories for XML instrument definition files (IDFs)
+* @param directories An ordered list of paths for instrument searching
+*/
+void ConfigServiceImpl::setInstrumentDirectories(
+    const std::vector<std::string> &directories) {
+  m_InstrumentDirs = directories;
 }
 
 /**

@@ -12,7 +12,7 @@ namespace CustomInterfaces {
 class IReflEventPresenter;
 
 /** QtReflEventView : Provides an interface for the "Event Handling" widget in
-the Reflectometry (Polref) interface.
+the ISIS Reflectometry interface.
 
 Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source

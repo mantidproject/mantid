@@ -1,9 +1,10 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
-#include <cctype>
+#include <locale>
 
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -25,8 +26,8 @@ using API::MatrixWorkspace_sptr;
 using API::FileProperty;
 using std::size_t;
 
+// Anonymous namespace
 namespace {
-
 /**
  * @brief loadAndApplyMeasurementInfo
  * @param file : Nexus::File pointer
@@ -41,7 +42,7 @@ bool loadAndApplyMeasurementInfo(::NeXus::File *const file,
     file->openGroup("measurement", "NXcollection");
 
     // If we can open the measurement group. We assume that the following will
-    // be avaliable.
+    // be available.
     file->openData("id");
     workspace.mutableRun().addLogData(
         new Mantid::Kernel::PropertyWithValue<std::string>("measurement_id",
@@ -92,7 +93,35 @@ bool loadAndApplyRunTitle(::NeXus::File *const file,
   }
   return successfullyApplied;
 }
+
+/**
+* Checks whether the specified character is invalid or a control
+* character. If it is invalid (i.e. negative) or a control character
+* the method returns true. If it is valid and not a control character
+* it returns false. Additionally if the character is invalid is
+* logs a warning with the property name so users are aware.
+*
+* @param c :: Character to check
+* @param propName :: The name of the property currently being checked for
+*logging
+* @param log :: Reference to logger to print out to
+* @return :: True if control character OR invalid. Else False
+*/
+bool isControlValue(const char &c, const std::string &propName,
+                    Kernel::Logger &log) {
+  // Have to check it falls within range accepted by c style check
+  if (c <= -1) {
+    log.warning("Found an invalid character in property " + propName);
+    // Pretend this is a control value so it is sanitized
+    return true;
+  } else {
+    // Use default global c++ locale within this program
+    std::locale locale{};
+    // Use c++ style call so we don't need to cast from int to bool
+    return std::iscntrl(c, locale);
+  }
 }
+} // End of anonymous namespace
 
 /// Empty default constructor
 LoadNexusLogs::LoadNexusLogs() {}
@@ -367,6 +396,41 @@ void LoadNexusLogs::loadNPeriods(
   if (!run.hasProperty(nPeriodsLabel)) {
     run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
   }
+
+  // For ISIS Nexus only, fabricate an additional log containing an array of
+  // proton charge information from the periods group.
+  try {
+    file.openGroup("periods", "IXperiods");
+
+    // Get the number of periods again
+    file.openData("number");
+    int numberOfPeriods = 0;
+    file.getData(&numberOfPeriods);
+    file.closeData();
+
+    // Get the proton charge vector
+    std::vector<double> protonChargeByPeriod(numberOfPeriods);
+    file.openData("proton_charge");
+    file.getDataCoerce(protonChargeByPeriod);
+    file.closeData();
+
+    // Add the proton charge vector
+    API::Run &run = workspace->mutableRun();
+    const std::string protonChargeByPeriodLabel = "proton_charge_by_period";
+    if (!run.hasProperty(protonChargeByPeriodLabel)) {
+      run.addProperty(new ArrayProperty<double>(protonChargeByPeriodLabel,
+                                                protonChargeByPeriod));
+    }
+    file.closeGroup();
+  } catch (::NeXus::Exception &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
+  } catch (std::runtime_error &) {
+    this->g_log.debug("Cannot read periods information from the nexus file. "
+                      "This group may be absent.");
+    file.closeGroup();
+  }
 }
 
 /**
@@ -620,7 +684,9 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(values.begin(), values.end(), iscntrl, ' ');
+    std::replace_if(values.begin(), values.end(), [&](const char &c) {
+      return isControlValue(c, prop_name, g_log);
+    }, ' ');
     auto tsp = new TimeSeriesProperty<std::string>(prop_name);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);

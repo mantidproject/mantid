@@ -130,5 +130,3 @@ Detailed API Documentation
     :members:
     :undoc-members:
     :inherited-members:
-
-.. categories:: Concepts

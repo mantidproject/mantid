@@ -69,6 +69,8 @@ private:
   void createDetectorCache();
 
 private:
+  void logNumberOfPeaksFound(size_t allowedPeakCount) const;
+
   /// Reflection conditions possible
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
   /// Detector search cache for fast look-up of detectors

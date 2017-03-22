@@ -79,7 +79,7 @@ def get_output_workspace_name(state, reduction_mode):
 
     # 5. Wavelength range
     wavelength = state.wavelength
-    wavelength_range_string = str(wavelength.wavelength_low) + "_" + str(wavelength.wavelength_high)
+    wavelength_range_string = "_" + str(wavelength.wavelength_low) + "_" + str(wavelength.wavelength_high)
 
     # 6. Phi Limits
     mask = state.mask
