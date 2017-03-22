@@ -10,7 +10,7 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessor
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
-# from mantid.dataobjects import TableWorkspace, SplittersWorkspace
+from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
