@@ -499,6 +499,27 @@
                     </property>
                   </spacer>
                 </item>
+                <item row="8" column="0">
+                  <widget class="QLabel" name="detectorCorrectionTypeLabel">
+                    <property name="text">
+                      <string>DetectorCorrectionType</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="8" column="1">
+                  <widget class="QComboBox" name="detectorCorrectionTypeComboBox">
+                    <item>
+                      <property name="text">
+                        <string>VerticalShift</string>
+                      </property>
+                    </item>
+                    <item>
+                      <property name="text">
+                        <string>RotateAroundSample</string>
+                      </property>
+                    </item>
+                  </widget>
+                </item>
               </layout>
             </item>
             <item>

@@ -451,6 +451,23 @@ public:
     TS_ASSERT_EQUALS(multi.asString(), multi.clone()->asString());
   }
 
+  void test_equivalent_functions() {
+    std::string ini =
+        "composite=MultiDomainFunction;"
+        "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=i;"
+        "name=MultiDomainFunctionTest_Function,A=3,B=4,$domains=i;ties=(f1.A="
+        "f0.B)";
+    auto mfun = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createInitialized(ini));
+
+    auto eqFuns = mfun->createEquivalentFunctions();
+    TS_ASSERT_EQUALS(eqFuns.size(), 2);
+    TS_ASSERT_EQUALS(eqFuns[0]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=1,B=2");
+    TS_ASSERT_EQUALS(eqFuns[1]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=2,B=4");
+  }
+
 private:
   MultiDomainFunction multi;
   JointDomain domain;

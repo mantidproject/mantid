@@ -53,7 +53,9 @@ public:
 
   void test_constructor() {
     Beamline::SpectrumInfo specInfo(3);
-    TS_ASSERT_THROWS_NOTHING(SpectrumInfo(specInfo, *makeWorkspace(3)));
+    auto ws = makeWorkspace(3);
+    TS_ASSERT_THROWS_NOTHING(
+        SpectrumInfo(specInfo, *ws, ws->mutableDetectorInfo()));
   }
 
   void test_sourcePosition() {

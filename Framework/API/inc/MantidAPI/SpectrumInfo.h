@@ -67,9 +67,8 @@ class ExperimentInfo;
 class MANTID_API_DLL SpectrumInfo {
 public:
   SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-               const ExperimentInfo &experimentInfo);
-  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
-               ExperimentInfo &experimentInfo);
+               const ExperimentInfo &experimentInfo,
+               DetectorInfo &detectorInfo);
   ~SpectrumInfo();
 
   size_t size() const;
@@ -104,13 +103,11 @@ public:
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  std::vector<boost::shared_ptr<const Geometry::IDetector>>
-  getDetectorVector(const size_t index) const;
-  std::vector<size_t> getDetectorIndices(const size_t index) const;
+  const SpectrumDefinition &
+  checkAndGetSpectrumDefinition(const size_t index) const;
 
   const ExperimentInfo &m_experimentInfo;
-  DetectorInfo *m_mutableDetectorInfo{nullptr};
-  const DetectorInfo &m_detectorInfo;
+  DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;

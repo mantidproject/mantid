@@ -8,23 +8,25 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidMDAlgorithms/MDTransfFactory.h"
-#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -130,7 +132,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
   // loop through the eventlists
 
   int numSpectra = static_cast<int>(wksp->getNumberHistograms());
-  const bool histogramForm = wksp->isHistogramData();
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -145,8 +146,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
 
     std::vector<double> buffer(DIMS);
     // get tof and counts
-    const Mantid::MantidVec &xVals = wksp->readX(i);
-    const Mantid::MantidVec &yVals = wksp->readY(i);
+    const auto &xVals = wksp->points(i);
+    const auto &yVals = wksp->counts(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -163,14 +164,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
       const double &yVal = yVals[j];
       if (yVal > 0) // TODO, is this condition right?
       {
-        // Tof from point data
-        double tof = xVals[j];
-        if (histogramForm) {
-          // Tof is the centre point
-          tof = (tof + xVals[j + 1]) / 2;
-        }
-
-        double val = unitConverter.convertUnits(tof);
+        double val = unitConverter.convertUnits(xVals[j]);
         qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim) {
           buffer[dim] = locCoord[dim]; // TODO. Looks un-necessary to me. Can't
@@ -487,17 +481,13 @@ void IntegrateEllipsoids::exec() {
     Workspace2D_sptr wsProfile2D =
         boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-    for (size_t j = 0; j < principalaxis1.size(); j++) {
-      wsProfile2D->dataX(0)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(0)[j] = principalaxis1[j];
-      wsProfile2D->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-      wsProfile2D->dataX(1)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(1)[j] = principalaxis2[j];
-      wsProfile2D->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-      wsProfile2D->dataX(2)[j] = static_cast<double>(j);
-      wsProfile2D->dataY(2)[j] = principalaxis3[j];
-      wsProfile2D->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-    }
+
+    // set output workspace
+    Points points(principalaxis1.size(), LinearGenerator(0, 1));
+    wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+    wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+    wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
                    << " mean " << stats1.mean << " standard_deviation "
@@ -559,17 +549,12 @@ void IntegrateEllipsoids::exec() {
             boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
-        for (size_t j = 0; j < principalaxis1.size(); j++) {
-          wsProfile2D2->dataX(0)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(0)[j] = principalaxis1[j];
-          wsProfile2D2->dataE(0)[j] = std::sqrt(principalaxis1[j]);
-          wsProfile2D2->dataX(1)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(1)[j] = principalaxis2[j];
-          wsProfile2D2->dataE(1)[j] = std::sqrt(principalaxis2[j]);
-          wsProfile2D2->dataX(2)[j] = static_cast<double>(j);
-          wsProfile2D2->dataY(2)[j] = principalaxis3[j];
-          wsProfile2D2->dataE(2)[j] = std::sqrt(principalaxis3[j]);
-        }
+
+        // set output workspace
+        Points points(principalaxis1.size(), LinearGenerator(0, 1));
+        wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+        wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+        wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
       }
     }
   }

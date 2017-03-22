@@ -74,9 +74,6 @@ public:
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();
 
-  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
-
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
 
@@ -194,6 +191,7 @@ protected:
 private:
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
+                             Geometry::ParameterMap &paramMapForPosAndRot,
                              const std::string &name,
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);

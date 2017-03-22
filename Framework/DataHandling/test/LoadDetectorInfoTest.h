@@ -7,24 +7,17 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
-#include <nexus/NeXusFile.hpp>
-
-#include <algorithm>
-#include <fstream>
 #include <vector>
 
 using namespace Mantid::DataHandling;
