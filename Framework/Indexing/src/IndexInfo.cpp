@@ -152,6 +152,8 @@ SpectrumIndexSet IndexInfo::makeIndexSet(
 }
 
 bool IndexInfo::isOnThisPartition(GlobalSpectrumIndex globalIndex) const {
+  // A map from global index to partition might be faster, consider adding this
+  // if it is used a lot and has performance issues.
   const auto helperSet = makeIndexSet(globalIndex, globalIndex);
   return helperSet.size() == 1;
 }

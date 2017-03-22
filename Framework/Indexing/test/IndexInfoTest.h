@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -127,10 +128,12 @@ public:
     IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
                     IndexInfo::Communicator{2, 1});
     TS_ASSERT_EQUALS(rank0.size(), 3);
+    TS_ASSERT_EQUALS(rank0.globalSize(), 3);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(2), 3);
     TS_ASSERT_EQUALS(rank1.size(), 3);
+    TS_ASSERT_EQUALS(rank1.globalSize(), 3);
     TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(rank1.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(rank1.spectrumNumber(2), 3);
@@ -143,9 +146,11 @@ public:
                     IndexInfo::Communicator{2, 1});
     // Current default is RoundRobinPartitioner
     TS_ASSERT_EQUALS(rank0.size(), 2);
+    TS_ASSERT_EQUALS(rank0.globalSize(), 3);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 3);
     TS_ASSERT_EQUALS(rank1.size(), 1);
+    TS_ASSERT_EQUALS(rank1.globalSize(), 3);
     TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 2);
   }
 
@@ -153,6 +158,32 @@ public:
     TS_ASSERT_THROWS(IndexInfo(3, IndexInfo::StorageMode::MasterOnly,
                                IndexInfo::Communicator{2, 0}),
                      std::runtime_error);
+  }
+
+  void test_isOnThisPartition_StorageMode_Cloned() {
+    IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
+                    IndexInfo::Communicator{2, 0});
+    IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
+                    IndexInfo::Communicator{2, 1});
+    for(size_t i=0; i<rank0.globalSize(); ++i)
+      TS_ASSERT(rank0.isOnThisPartition(i));
+    for(size_t i=0; i<rank1.globalSize(); ++i)
+      TS_ASSERT(rank1.isOnThisPartition(i));
+  }
+
+  void test_isOnThisPartition_StorageMode_Distributed() {
+    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 0});
+    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
+                    IndexInfo::Communicator{2, 1});
+    // Current default is RoundRobinPartitioner
+    for (size_t i = 0; i < rank0.globalSize(); ++i) {
+      if (i % 2 == 0) {
+        TS_ASSERT(rank0.isOnThisPartition(i));
+      } else {
+        TS_ASSERT(rank1.isOnThisPartition(i));
+      }
+    }
   }
 };
 
