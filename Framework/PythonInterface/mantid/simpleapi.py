@@ -37,7 +37,7 @@ from . import apiVersion, __gui__
 from .kernel._aliases import *
 from .api._aliases import *
 
-#------------------------ Specialized function calls --------------------------
+# ------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"]
 # List of specialized algorithms
@@ -101,7 +101,8 @@ def _create_generic_signature(algm_object):
     arg_str = ','.join(arg_list)
     # Calling help(...) will put a * in front of the first parameter name,
     # so we use \b to delete it
-    return ("\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version())
+    return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
+
 
 def Load(*args, **kwargs):
     """
@@ -139,6 +140,12 @@ def Load(*args, **kwargs):
       Load('INSTR00001000.nxs',OutputWorkspace='run_ws')
     """
     filename, = _get_mandatory_args('Load', ["Filename"], *args, **kwargs)
+    if not filename:
+        # If we try to set property with a None type we get a unhelpful error about allocators
+        # so check up front here
+        raise ValueError("Problem with supplied Filename. The value given was a 'None' "
+                         "type and cannot be used. Please ensure the Filename is set"
+                         " to the path of the file.")
 
     # Create and execute
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
