@@ -366,7 +366,10 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		return;
 	}
 
-	try {
+	if (compositeFunction()->nParams() == 0)
+	{
+		throw std::runtime_error("No function has been defiend for fitting");
+	}
 		m_initialParameters.resize(compositeFunction()->nParams());
 		for (size_t i = 0; i < compositeFunction()->nParams(); i++) {
 			m_initialParameters[i] = compositeFunction()->getParameter(i);
@@ -386,13 +389,13 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		//asymmAlg->setProperty("Spectra", workspaceIndex());
 		asymmAlg->setProperty("StartX", startX());
 		asymmAlg->setProperty("EndX", endX());
-		asymmAlg->setPropertyValue("OutputWorkspace", "mooo");// outputName());
-		observeFinish(asymmAlg);
-		asymmAlg->executeAsync();
-		auto tmpWS = asymmAlg->getPropertyValue("OutputWorkSpace");
-		
+		asymmAlg->setPropertyValue("OutputWorkspace", wsName);// outputName());
+		asymmAlg->execute();
+		if (!asymmAlg->isExecuted()) {
+			throw std::runtime_error("Asymmetry Calculation has failed.");
+		}
 		// calculate the fit 
-
+		try{
 		Mantid::API::IAlgorithm_sptr alg =
 			Mantid::API::AlgorithmManager::Instance().create("Fit");
 		alg->initialize();
@@ -400,11 +403,11 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 			alg->setProperty("EvaluationType", "Histogram");
 		}
 		alg->setPropertyValue("Function", funStr);
-		alg->setProperty("InputWorkspace",tmpWS );// try the raw workspace.... 
+		alg->setProperty("InputWorkspace",ws );// try the raw workspace.... 
 		alg->setProperty("WorkspaceIndex", workspaceIndex());
 		alg->setProperty("StartX", startX());
 		alg->setProperty("EndX", endX());
-		alg->setPropertyValue("Output", "boo");// outputName());
+		alg->setPropertyValue("Output",  outputName());
 		alg->setPropertyValue("Minimizer", minimizer(true));
 		alg->setProperty("IgnoreInvalidData", ignoreInvalidData());
 		alg->setPropertyValue("CostFunction", costFunction());
