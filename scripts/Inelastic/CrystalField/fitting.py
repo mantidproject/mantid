@@ -576,6 +576,7 @@ class CrystalField(object):
         if not self.isPhysicalPropertyOnly or islistlike(self.PhysicalProperty):
             fieldParams = self._getFieldParameters()
             tt = self.Temperature if islistlike(self.Temperature) else [self.Temperature]
+            ww = list(self.FWHM) if islistlike(self.FWHM) else [self.FWHM]
             # Last n-set of temperatures correspond to PhysicalProperties
             if nOldPP > 0:
                 tt = tt[:-nOldPP]
@@ -583,6 +584,9 @@ class CrystalField(object):
             tt = [val for val in tt if val > 0]
             pptt = [0 if val.Temperature is None else val.Temperature for val in vlist]
             self._remakeFunction(list(tt)+pptt)
+            if len(tt) > 0 and len(pptt) > 0:
+                ww += [0] * len(pptt)
+            self.FWHM = ww
             ppids = [pp.TypeID for pp in vlist]
             self.function.setAttributeValue('PhysicalProperties', [0]*len(tt)+ppids)
             for attribs in [pp.getAttributes(i+len(tt)) for i, pp in enumerate(vlist)]:

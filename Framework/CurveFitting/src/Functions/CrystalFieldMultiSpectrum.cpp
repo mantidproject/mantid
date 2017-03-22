@@ -198,7 +198,9 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
       fwhms.resize(temperatures.size(), fwhm);
     } else {
       throw std::runtime_error("Vector of FWHMs must either have same size as "
-                               "Temperatures or have size 1.");
+                               "Temperatures (" +
+                               std::to_string(temperatures.size()) +
+                               ") or have size 1.");
     }
   }
   auto nSpec = temperatures.size();
