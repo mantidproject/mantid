@@ -502,8 +502,6 @@ void vtkSplatterPlotFactory::validate() const {
  * Add meta data to the visual data set.
  */
 void vtkSplatterPlotFactory::addMetadata() const {
-  const double defaultValue = 0.1;
-
   if (this->dataSet) {
     m_metadataJsonManager->setInstrument(
         m_metaDataExtractor->extractInstrument(m_workspace.get()));
