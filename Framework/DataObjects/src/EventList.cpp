@@ -4354,16 +4354,19 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
   auto iter_events = vecEvents.begin();
   auto iter_events_end = vecEvents.end();
 
+  // std::stringstream debug_ss;
+  // debug_ss << "\nFilter events...:\n";
+
   for (size_t i = 0; i < num_splitters; ++i) {
     // get one splitter
     int64_t start_i64 = vectimes[i];
     int64_t stop_i64 = vectimes[i + 1];
     int group = vecgroups[i];
-    // std::cout << "working on splitter: " << i << "\n";
+    // debug_ss << "working on splitter: " << i << " from " << start_i64 << " to
+    // " << stop_i64 << "\n";
 
     // go over events
     while (iter_events != iter_events_end) {
-      // std::cout << "  event " << iter_events - vecEvents.begin() << "\n";
       int64_t absolute_time;
       if (docorrection)
         absolute_time =
@@ -4373,6 +4376,9 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
       else
         absolute_time = iter_events->m_pulsetime.totalNanoseconds() +
                         static_cast<int64_t>(iter_events->m_tof * 1000);
+
+      // debug_ss << "  event " << iter_events - vecEvents.begin() << " abs.time
+      // = " << absolute_time << "\n";
 
       if (absolute_time < start_i64) {
         // event occurs before the splitter. only can happen with first
@@ -4408,6 +4414,8 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
     if (iter_events == iter_events_end)
       break;
   } // for splitter
+
+  // std::cout << debug_ss.str();
 
   return (msgss.str());
 }

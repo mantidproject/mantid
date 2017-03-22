@@ -657,7 +657,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS10_0"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     // check sample log "splitter"
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
@@ -847,7 +847,7 @@ public:
             AnalysisDataService::Instance().retrieve("FilteredWS_FromTable_A"));
     TS_ASSERT(filteredws0);
     TS_ASSERT_EQUALS(filteredws0->getNumberHistograms(), 10);
-    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(filteredws0->getSpectrum(0).getNumberEvents(), 4);
 
     TS_ASSERT(filteredws0->run().hasProperty("splitter"));
     // check sample log "splitter"
