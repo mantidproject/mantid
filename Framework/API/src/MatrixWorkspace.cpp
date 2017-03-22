@@ -2043,18 +2043,24 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
 }
 
 void MatrixWorkspace::rebuildDetectorIDGroupings() {
-  const auto &allDetIDs = detectorInfo().detectorIDs();
+  const auto &detInfo = detectorInfo();
+  const auto &allDetIDs = detInfo.detectorIDs();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
   for (size_t i = 0; i < m_indexInfo->size(); ++i) {
     std::set<detid_t> detIDs;
     for (const auto &index : (*specDefs)[i]) {
       const size_t detIndex = index.first;
+      const size_t timeIndex = index.second;
       if (detIndex >= allDetIDs.size())
         throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "
                                  "an out-of-range detector index, i.e., the "
                                  "spectrum definition does not match the "
                                  "instrument in the workspace.");
-      // TODO check time indices
+      if (timeIndex >= detInfo.scanCount(detIndex))
+        throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "
+                                 "an out-of-range time index for a detector, "
+                                 "i.e., the spectrum definition does not match "
+                                 "the instrument in the workspace.");
       detIDs.insert(allDetIDs[detIndex]);
     }
     getSpectrum(i).setDetectorIDs(std::move(detIDs));

@@ -132,6 +132,24 @@ public:
                             "workspace.");
   }
 
+  void test_setIndexInfo_bad_detector_time_index() {
+    WorkspaceTester ws;
+    ws.initialize(1, 1, 1);
+    ws.setInstrument(
+        ComponentCreationHelper::createTestInstrumentRectangular(1, 1));
+    IndexInfo indices(1);
+    indices.setSpectrumNumbers({2});
+    std::vector<SpectrumDefinition> specDefs(1);
+    specDefs[0].add(0, 1);
+    indices.setSpectrumDefinitions(specDefs);
+    TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "MatrixWorkspace: SpectrumDefinition contains an "
+                            "out-of-range time index for a detector, i.e., the "
+                            "spectrum definition does not match the instrument "
+                            "in the workspace.");
+  }
+
   void test_setIndexInfo_default_mapping_failure() {
     WorkspaceTester ws;
     ws.initialize(3, 1, 1);
