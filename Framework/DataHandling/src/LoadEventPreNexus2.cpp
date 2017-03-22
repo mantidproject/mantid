@@ -175,9 +175,17 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   for (auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) &&
         (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
-      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
+      if (Poco::File(std::string(base.path())
+                         .append("/")
+                         .append(dir)
+                         .append("/calibrations/")
+                         .append(mapping))
               .exists())
-        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
+        files.push_back(std::string(base.path())
+                            .append("/")
+                            .append(dir)
+                            .append("/calibrations/")
+                            .append(mapping));
     }
   }
 
