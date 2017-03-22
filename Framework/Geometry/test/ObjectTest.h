@@ -871,9 +871,11 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testCuboid");
-    AutoPtr<Element> shapeElement = createCuboidTypeElement("cuboid-shape", width, height, thickness, shapeDescription);
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "cuboid-shape", width, height, thickness, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "cuboid-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -888,9 +890,11 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testSphere");
-    AutoPtr<Element> shapeElement = createSphereTypeElement("sphere-shape", radius, shapeDescription);
+    AutoPtr<Element> shapeElement =
+        createSphereTypeElement("sphere-shape", radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "sphere-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -906,9 +910,11 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testCylinder");
-    AutoPtr<Element> shapeElement = createCylinderTypeElement("cylinder-shape", height, radius, shapeDescription);
+    AutoPtr<Element> shapeElement = createCylinderTypeElement(
+        "cylinder-shape", height, radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "cylinder-shape");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -926,12 +932,15 @@ public:
     AutoPtr<Document> shapeDescription = new Document;
     AutoPtr<Element> typeElement = shapeDescription->createElement("type");
     typeElement->setAttribute("name", "testShape");
-    AutoPtr<Element> shapeElement = createCuboidTypeElement("solid-cuboid", width, height, thickness, shapeDescription);
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "solid-cuboid", width, height, thickness, shapeDescription);
     typeElement->appendChild(shapeElement);
     const double radius = 0.47 * std::min(std::min(width, height), thickness);
-    shapeElement = createSphereTypeElement("void-sphere", radius, shapeDescription);
+    shapeElement =
+        createSphereTypeElement("void-sphere", radius, shapeDescription);
     typeElement->appendChild(shapeElement);
-    AutoPtr<Element> algebraElement = shapeDescription->createElement("algebra");
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
     algebraElement->setAttribute("val", "solid-cuboid (# void-sphere)");
     typeElement->appendChild(algebraElement);
     ShapeFactory shapeFactory;
@@ -1429,11 +1438,15 @@ private:
     return retVal;
   }
 
-  static Poco::XML::AutoPtr<Poco::XML::Element> createCuboidTypeElement(const std::string &id, const double width, const double height, const double thickness, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCuboidTypeElement(const std::string &id, const double width,
+                          const double height, const double thickness,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
     AutoPtr<Element> shapeElement = document->createElement("cuboid");
     shapeElement->setAttribute("id", id);
-    AutoPtr<Element> element = document->createElement("left-front-bottom-point");
+    AutoPtr<Element> element =
+        document->createElement("left-front-bottom-point");
     element->setAttribute("x", std::to_string(-width / 2));
     element->setAttribute("y", std::to_string(-height / 2));
     element->setAttribute("z", std::to_string(thickness / 2));
@@ -1456,9 +1469,11 @@ private:
     return shapeElement;
   }
 
-  static Poco::XML::AutoPtr<Poco::XML::Element> createSphereTypeElement(const std::string &id, const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createSphereTypeElement(const std::string &id, const double radius,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
-    AutoPtr<Element>shapeElement = document->createElement("sphere");
+    AutoPtr<Element> shapeElement = document->createElement("sphere");
     shapeElement->setAttribute("id", id);
     AutoPtr<Element> element = document->createElement("centre");
     element->setAttribute("x", "0.0");
@@ -1471,9 +1486,12 @@ private:
     return shapeElement;
   }
 
-  static Poco::XML::AutoPtr<Poco::XML::Element> createCylinderTypeElement(const std::string &id, const double height, const double radius, Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCylinderTypeElement(const std::string &id, const double height,
+                            const double radius,
+                            Poco::XML::AutoPtr<Poco::XML::Document> &document) {
     using namespace Poco::XML;
-    AutoPtr<Element>shapeElement = document->createElement("cylinder");
+    AutoPtr<Element> shapeElement = document->createElement("cylinder");
     shapeElement->setAttribute("id", id);
     AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
     element->setAttribute("x", std::to_string(-height / 2));

@@ -1544,13 +1544,15 @@ double Object::volume() const {
 double Object::monteCarloVolume() const {
   using namespace boost::accumulators;
   const int singleShotIterations = 10000;
-  accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>> accumulate;
+  accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>>
+      accumulate;
   // For seeding the single shot runs.
   boost::random::ranlux48 rnEngine;
   // Warm up statistics.
   for (int i = 0; i < 10; ++i) {
     const auto seed = rnEngine();
-    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
     accumulate(volume);
   }
   const double relativeErrorTolerance = 1e-3;
@@ -1558,7 +1560,8 @@ double Object::monteCarloVolume() const {
   double currentError;
   do {
     const auto seed = rnEngine();
-    const double volume = singleShotMonteCarloVolume(singleShotIterations, seed);
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
     accumulate(volume);
     currentMean = mean(accumulate);
     currentError = error_of<tag::mean>(accumulate);
@@ -1575,7 +1578,8 @@ double Object::monteCarloVolume() const {
  * @param seed A number to seed the random number generator.
  * @returns The simulated volume of this object.
  */
-double Object::singleShotMonteCarloVolume(const int shotSize, const size_t seed) const {
+double Object::singleShotMonteCarloVolume(const int shotSize,
+                                          const size_t seed) const {
   const auto &boundingBox = getBoundingBox();
   if (boundingBox.isNull()) {
     throw std::runtime_error("Cannot calculate volume: invalid bounding box.");
@@ -1593,7 +1597,8 @@ double Object::singleShotMonteCarloVolume(const int shotSize, const size_t seed)
       // the worst case.
       blocksize = shotSize - (threadCount - 1) * blocksize;
     }
-    boost::random::mt19937 rnEngine(static_cast<boost::random::mt19937::result_type>(seed));
+    boost::random::mt19937 rnEngine(
+        static_cast<boost::random::mt19937::result_type>(seed));
     // All threads init their engine with the same seed.
     // We discard the random numbers used by the other threads.
     // This ensures reproducible results independent of the number
