@@ -386,21 +386,21 @@ Event Handling tab
 .. figure:: /images/ISISReflectometryPolref_event_handling_tab.png
    :alt: Showing view of the settings tab.
 
-The *Event Handling* tab can be used to analyze event workspaces. It contains four text boxes for
-specifying uniform even, uniform, custom and log value slicing respectively. Only one of these may
-be selected at any time. If the text box for the selected slicing method is empty no event analysis
-will be performed, runs will be loaded using :ref:`LoadISISNexus <algm-LoadISISNexus>` and analyzed
-as histogram workspaces. When this text box is not empty, runs will be loaded using
-:ref:`LoadEventNexus <algm-LoadEventNexus>` and the interface will try to parse the user input to
-obtain a set of start times and stop times. These define different time slices that will bepassed
-on to :ref:`FilterByTime <algm-FilterByTime>`. Each time slice will be normalized by the total
-proton charge and reduced as described in the previous section. Note that, if any of the runs in a
-group could not be loaded as an event workspace, the interface will load the runs within that group
-as histogram workspaces and no event analysis will be performed for that group. A warning message
-will be shown when the reduction is complete indicating that some groups could not be processed as
-event data.
+The *Event Handling* tab can be used to analyze event workspaces. It contains three text boxes for
+specifying uniform even, uniform and custom slicing respectively. Each of these slicing options are
+exclusive, no more than one can be applied. If the text box for the selected slicing method is empty
+no event analysis will be performed, runs will be loaded using
+:ref:`LoadISISNexus <algm-LoadISISNexus>` and analyzed as histogram workspaces. When this text box
+is not empty, runs will be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>` and the
+interface will try to parse the user input to obtain a set of start times and stop times. These
+define different time slices that will bepassed on to :ref:`FilterByTime <algm-FilterByTime>`. Each
+time slice will be normalized by the total proton charge and reduced as described in the previous
+section. Note that, if any of the runs in a group could not be loaded as an event workspace, the
+interface will load the runs within that group as histogram workspaces and no event analysis will
+be performed for that group. A warning message will be shown when the reduction is complete
+indicating that some groups could not be processed as event data.
 
-The four slicing options are described in more detail below:
+The three slicing options are described in more detail below:
 
 - **Uniform Even** - The interface obtains the start and end times of the run and divides it into
   a specified number of evenly-sized slices. For example given a run of duration 100 seconds,
@@ -423,7 +423,6 @@ The four slicing options are described in more detail below:
     slices, the first one starting at ``100`` seconds after the start of the run and ending at
     ``200`` seconds after the start of the run, and the second one starting at ``200`` seconds
     and ending at ``300`` seconds.
-- **Log Value** - Not implemented yet, selecting this does not do anything for now.
 
 Workspaces will be named according to the index of the slice, e.g ``IvsQ_13460_slice_0``, ``IvsQ_13460_slice_1``, etc.
 

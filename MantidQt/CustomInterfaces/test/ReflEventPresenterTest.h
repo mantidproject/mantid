@@ -30,9 +30,7 @@ public:
     MockEventView mockView;
     ReflEventPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, getTimeSlicingValues())
-        .Times(Exactly(1))
-        .WillOnce(Return("5"));
+    EXPECT_CALL(mockView, getTimeSlicingValues()).Times(Exactly(1));
     presenter.getTimeSlicingValues();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -42,9 +40,7 @@ public:
     MockEventView mockView;
     ReflEventPresenter presenter(&mockView);
 
-    EXPECT_CALL(mockView, getTimeSlicingType())
-        .Times(Exactly(1))
-        .WillOnce(Return("UniformEven"));
+    EXPECT_CALL(mockView, getTimeSlicingType()).Times(Exactly(1));
     presenter.getTimeSlicingType();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

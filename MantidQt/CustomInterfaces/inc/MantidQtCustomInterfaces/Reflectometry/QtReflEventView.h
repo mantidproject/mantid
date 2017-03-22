@@ -65,9 +65,6 @@ private:
 
   /// Current slice type
   mutable std::string m_sliceType;
-  /// Available slicing types
-  std::vector<std::string> m_slicingTypes = {"UniformEven", "Uniform", "Custom",
-                                             "LogValue"};
 
   /// List of radio buttons
   std::vector<QRadioButton *> m_buttonList;
