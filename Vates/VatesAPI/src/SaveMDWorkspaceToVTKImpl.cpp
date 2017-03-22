@@ -57,8 +57,8 @@ bool isNDWorkspace(const Mantid::API::IMDWorkspace &workspace,
 namespace Mantid {
 namespace VATES {
 
-const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = "vts";
-const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = "vtu";
+const std::string SaveMDWorkspaceToVTKImpl::structuredGridExtension = ".vts";
+const std::string SaveMDWorkspaceToVTKImpl::unstructuredGridExtension = ".vtu";
 
 SaveMDWorkspaceToVTKImpl::SaveMDWorkspaceToVTKImpl(SaveMDWorkspaceToVTK *parent)
     : m_progress(parent, 0.0, 1.0, 101) {
@@ -313,7 +313,6 @@ SaveMDWorkspaceToVTKImpl::getFullFilename(std::string filename,
   const auto extension =
       isHistoWorkspace ? structuredGridExtension : unstructuredGridExtension;
   if (!has_suffix(filename, extension)) {
-    filename += ".";
     filename += extension;
   }
   return filename;
