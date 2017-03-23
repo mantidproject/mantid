@@ -204,7 +204,7 @@ bool QDataProcessorOneLevelTreeModel::setData(const QModelIndex &index,
 */
 ITableWorkspace_sptr
 QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
-	return m_tWS;
+  return m_tWS;
 }
 
 } // namespace MantidWidgets
