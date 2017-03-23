@@ -61,8 +61,7 @@ public:
    * @param nPts :: the number of data points
    * @param nElems :: the number of elements for each point
    */
-  NNDataPoints(const size_t nPts, const size_t nElems)
-          : m_nPts(nPts) {
+  NNDataPoints(const size_t nPts, const size_t nElems) : m_nPts(nPts) {
     m_data = annAllocPts(static_cast<int>(m_nPts), static_cast<int>(nElems));
   }
 
