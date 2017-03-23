@@ -13,6 +13,16 @@
   DetectorSearcher is a helper class to find a specific detector within
   the instrument geometry.
 
+  This class solves the problem of finding a detector given a Qlab vector. Two
+  search strategies are used depending on the instrument's geometry.
+
+  1) For rectangular detector geometries the InstrumentRayTracer class is used
+  to recursively search the instrument tree.
+
+  2) For geometries which do not use rectangular detectors ray tracing to every
+  component is very expensive. In this case it is quicker to use a
+  NearestNeighbours search to find likely detector positions.
+
   @author Samuel Jackson
   @date 2017
 
@@ -42,29 +52,41 @@ namespace Mantid {
 namespace API {
 
 class DetectorSearcher {
-
 public:
+  typedef std::tuple<bool, size_t> DetectorSearchResult;
+
+  /// Create a new DetectorSearcher with the given instrument & detectors
   DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                    const DetectorInfo &info);
-  const std::tuple<bool, size_t> findDetectorIndex(const Kernel::V3D &q);
+  /// Find a detector that intsects with the given Qlab vector
+  const DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
 private:
-  void createDetectorCache();
-  const std::tuple<bool, size_t>
+  /// Attempt to find a detector using a full instrument ray tracing strategy
+  const DetectorSearchResult
   searchUsingInstrumentRayTracing(const Kernel::V3D &q);
-  const std::tuple<bool, size_t>
+  /// Attempt to find a detector using a nearest neighbours search strategy
+  const DetectorSearchResult
   searchUsingNearestNeighbours(const Kernel::V3D &q);
+  /// Check whether the given direction in detector space intercepts with a detector
   const std::tuple<bool, size_t> checkInteceptWithNeighbours(
       const Kernel::V3D &direction,
       const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
       const;
+  /// Helper function to build the nearest neighbour tree
+  void createDetectorCache();
+  /// Helper function to conver a Qlab vector to a direction in detector space
   Kernel::V3D convertQtoDirection(const Kernel::V3D &q) const;
 
   // Instance variables
 
+  /// flag for whether to use InstrumentRayTracer or NearestNeighbours
   const bool m_usingFullRayTrace;
+  /// flag for whether the crystallography convention is to be used
   const bool m_crystallography_convention;
+  /// detector info for the instrument
   const DetectorInfo &m_detInfo;
+  /// handle to the instrument to search for detectors in
   Geometry::Instrument_const_sptr m_instrument;
   /// vector of detector indicies used in the search
   std::vector<size_t> m_indexMap;

@@ -10,6 +10,14 @@ using Mantid::Geometry::IDetector;
 using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid::API;
 
+/** Create a new DetectorSearcher for the given instrument
+ *
+ * The search strategy will be determined in the constructor based on the
+ * given instrument geometry
+ *
+ * @param instrument :: the instrument to find detectors in
+ * @param detInfo :: the API::DetectorInfo object for this instrument
+ */
 DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
                                    const API::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
@@ -25,6 +33,8 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
   }
 }
 
+/** Create a NearestNeighbours search tree for the current instrument
+ */
 void DetectorSearcher::createDetectorCache() {
   std::vector<Eigen::Vector3d> points;
   points.reserve(m_detInfo.size());
@@ -61,7 +71,14 @@ void DetectorSearcher::createDetectorCache() {
       Kernel::make_unique<Kernel::NearestNeighbours<3>>(points);
 }
 
-const std::tuple<bool, size_t>
+/** Find the index of a detector given a vector in Qlab space
+ *
+ * If no detector is found the first parameter of the returned tuple is false
+ *
+ * @param q :: the Qlab vector to find a detector for
+ * @return tuple with data <detector found, detector index>
+ */
+const DetectorSearcher::DetectorSearchResult
 DetectorSearcher::findDetectorIndex(const V3D &q) {
   // quick check to see if this Q is valid
   if (q.nullVector())
@@ -75,7 +92,15 @@ DetectorSearcher::findDetectorIndex(const V3D &q) {
   }
 }
 
-const std::tuple<bool, size_t>
+/** Find the index of a detector given a vector in Qlab space using a ray
+ * tracing search strategy
+ *
+ * If no detector is found the first parameter of the returned tuple is false
+ *
+ * @param q :: the Qlab vector to find a detector for
+ * @return tuple with data <detector found, detector index>
+ */
+const DetectorSearcher::DetectorSearchResult
 DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
   const auto direction = convertQtoDirection(q);
   m_rayTracer->traceFromSample(direction);
@@ -88,7 +113,15 @@ DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
   return std::make_tuple(true, detIndex);
 }
 
-const std::tuple<bool, size_t>
+/** Find the index of a detector given a vector in Qlab space using a nearest
+ * neighbours search strategy
+ *
+ * If no detector is found the first parameter of the returned tuple is false
+ *
+ * @param q :: the Qlab vector to find a detector for
+ * @return tuple with data <detector found, detector index>
+ */
+const DetectorSearcher::DetectorSearchResult
 DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
@@ -135,6 +168,13 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   return std::make_tuple(false, 0);
 }
 
+/** Check whether the given direction in real space intersects with any of the
+ * k nearest neighbours
+ *
+ * @param direction :: real space direction vector
+ * @param neighbours :: vector of nearest neighbours to check
+ * @return tuple of <detector hit, index of correct index in m_IndexMap>
+ */
 const std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
     const V3D &direction,
     const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)
@@ -159,6 +199,11 @@ const std::tuple<bool, size_t> DetectorSearcher::checkInteceptWithNeighbours(
   return std::make_tuple(false, 0);
 }
 
+/** Helper method to convert a vector in Qlab to a direction in detector space
+ *
+ * @param q :: a Qlab vector
+ * @return a direction in detector space
+ */
 V3D DetectorSearcher::convertQtoDirection(const V3D &q) const {
   const auto norm_q = q.norm();
   const auto refFrame = m_instrument->getReferenceFrame();
