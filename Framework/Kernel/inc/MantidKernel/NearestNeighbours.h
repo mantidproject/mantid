@@ -71,15 +71,15 @@ template <size_t N = 3> class MANTID_KERNEL_DLL NearestNeighbours {
 
 public:
   // typedefs for code brevity
-  typedef Eigen::Array<double, N, 1> ArrayType;
-  typedef std::vector<std::tuple<ArrayType, size_t, double>>
+  typedef Eigen::Matrix<double, N, 1> VectorType;
+  typedef std::vector<std::tuple<VectorType, size_t, double>>
       NearestNeighbourResults;
 
   /** Create a nearest neighbour search object
    *
    * @param points :: vector of Eigen::Arrays to search through
    */
-  NearestNeighbours(const std::vector<ArrayType> &points) {
+  NearestNeighbours(const std::vector<VectorType> &points) {
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
       std::runtime_error(
@@ -88,7 +88,7 @@ public:
     m_dataPoints = make_unique<NNDataPoints>(numPoints, N);
 
     for (size_t i = 0; i < points.size(); ++i) {
-      Eigen::Map<ArrayType>(m_dataPoints->mutablePoint(i), N, 1) = points[i];
+      Eigen::Map<VectorType>(m_dataPoints->mutablePoint(i), N, 1) = points[i];
     }
     m_kdTree = make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints, N);
   }
@@ -107,7 +107,7 @@ public:
    * 	zero then exact neighbours will be found. (default = 0.0).
    * @return vector neighbours as tuples of (position, index, distance)
    */
-  NearestNeighbourResults findNearest(const ArrayType &pos, const size_t k = 1,
+  NearestNeighbourResults findNearest(const VectorType &pos, const size_t k = 1,
                                       const double error = 0.0) {
     const auto numNeighbours = static_cast<int>(k);
     // create arrays to store the indices & distances of nearest neighbours
@@ -116,7 +116,7 @@ public:
 
     // create ANNpoint from Eigen array
     auto point = std::unique_ptr<ANNcoord[]>(annAllocPt(N));
-    Eigen::Map<ArrayType>(point.get(), N, 1) = pos;
+    Eigen::Map<VectorType>(point.get(), N, 1) = pos;
 
     // find the k nearest neighbours
     m_kdTree->annkSearch(point.get(), numNeighbours, nnIndexList.get(),
@@ -144,7 +144,7 @@ private:
     for (size_t i = 0; i < k; ++i) {
       // create Eigen array from ANNpoint
       auto pos = m_dataPoints->mutablePoint(nnIndexList[i]);
-      ArrayType point = Eigen::Map<ArrayType>(pos, N, 1);
+      VectorType point = Eigen::Map<VectorType>(pos, N, 1);
       auto item = std::make_tuple(point, nnIndexList[i], nnDistList[i]);
       results.push_back(item);
     }

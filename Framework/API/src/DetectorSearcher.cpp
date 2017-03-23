@@ -26,7 +26,7 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
 }
 
 void DetectorSearcher::createDetectorCache() {
-  std::vector<Eigen::Array3d> points;
+  std::vector<Eigen::Vector3d> points;
   points.reserve(m_detInfo.size());
   m_indexMap.reserve(m_detInfo.size());
 
@@ -46,7 +46,7 @@ void DetectorSearcher::createDetectorCache() {
             1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());  // normalize
 
-    Eigen::Array3d point(E1[0], E1[1], E1[2]);
+    Eigen::Vector3d point(E1[0], E1[1], E1[2]);
 
     // Ignore nonsensical points
     if (point.hasNaN())
@@ -93,7 +93,7 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   const auto detectorDir = convertQtoDirection(q);
   // find where this Q vector should intersect with "extended" space
   const auto neighbours =
-      m_detectorCacheSearch->findNearest(Eigen::Array3d(q[0], q[1], q[2]), 5);
+      m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
   if (neighbours.size() == 0)
     return std::make_tuple(false, 0);
 
