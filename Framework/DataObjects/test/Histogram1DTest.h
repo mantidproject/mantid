@@ -58,7 +58,7 @@ public:
   void testcheckAndSanitizeHistogramFillsEData() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};
-    Frequencies counts{{5.9}};
+    Frequencies counts{5.9};
     h.setHistogram(edges, counts);
     TS_ASSERT_EQUALS(h.size(), 1);
     TS_ASSERT_EQUALS(h.x()[0], -0.04)
@@ -71,8 +71,8 @@ public:
   void testcheckAndSanitizeHistogramDoesntChangeValidData() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};
-    Frequencies counts{{-5.9}};
-    FrequencyStandardDeviations stdDevs{{2.3}};
+    Frequencies counts{-5.9};
+    FrequencyStandardDeviations stdDevs{2.3};
     h.setHistogram(edges, counts, stdDevs);
     TS_ASSERT_EQUALS(h.size(), 1);
     TS_ASSERT_EQUALS(h.x()[0], -0.04)
