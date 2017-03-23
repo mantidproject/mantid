@@ -1,6 +1,5 @@
 from mantid.api import *
 from mantid.kernel import *
-from mantid import config
 from vesuvio.base import VesuvioBase
 from mantid.simpleapi import *
 
@@ -54,16 +53,16 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         self.setup()
 
-        vesuvio_params = CreateEmptyTableWorkspace()
+        vesuvio_params = CreateEmptyTableWorkspace(OutputWorkspace='vesuvio_'+self._model.lower()+'_params')
         vesuvio_params.setTitle('Vesuvio Peak Parameters')
-        vesuvio_params.addColumn('float', 'Temperature')
-        vesuvio_params.addColumn('float', 'AtomicMass')
+        vesuvio_params.addColumn('float', 'Temperature(K)')
+        vesuvio_params.addColumn('float', 'Atomic Mass(AMU)')
 
         if self._model == 'Einstein':
-            vesuvio_params.addColumn('float', 'Frequency')
-            vesuvio_params.addColumn('float', 'Kinetic Energy')
-            vesuvio_params.addColumn('float', 'Effective Temp')
-            vesuvio_params.addColumn('float', 'RMS Momentum')
+            vesuvio_params.addColumn('float', 'Frequency(mEV)')
+            vesuvio_params.addColumn('float', 'Kinetic Energy(mEV)')
+            vesuvio_params.addColumn('float', 'Effective Temp(K)')
+            vesuvio_params.addColumn('float', 'RMS Momentum(A)')
 
             for temp in self._temperature:
 
@@ -84,12 +83,11 @@ class VesuvioPeakPrediction(VesuvioBase):
                 vesuvio_params.addRow([temp, self._atomic_mass, self._frequency, kinetic_energy, t_star, sig])
 
         if self._model == 'Debye':
-            vesuvio_params.addColumn('float', 'Debye Temp')
-            vesuvio_params.addColumn('float', 'Kinetic Energy')
-            vesuvio_params.addColumn('float', 'RMS Momentum')
-            vesuvio_params.addColumn('float', 'RMS Displacement')
+            vesuvio_params.addColumn('float', 'Debye Temp(K)')
+            vesuvio_params.addColumn('float', 'Kinetic Energy(mEV)')
+            vesuvio_params.addColumn('float', 'RMS Momentum(A-1)')
+            vesuvio_params.addColumn('float', 'RMS Displacement(A)')
 
-            print(self._temperature)
             for temp in self._temperature:
 
                 kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
