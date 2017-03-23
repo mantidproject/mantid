@@ -25,7 +25,7 @@ The mandatory *IntegratedVanadiumWorkspace* should have gone through :ref:`Direc
 Outputs
 #######
 
-The algorithm will transform the time-of-flight and spectrum numbers of *InputWorkspace* into :math:`S(q,\omega)` at its output. For :math:`2\theta` to :math:`q` transformation, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` is used. By default, the output is converted from histograms to point data, and :ref:`Transpose <algm-Transpose>` is applied to it. This behavior can be turned off by the *Transpose* property.
+The algorithm will transform the time-of-flight and spectrum numbers of *InputWorkspace* into :math:`S(q,\omega)` at its output. For :math:`2\theta` to :math:`q` transformation, :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` is used. By default, the output is transposed by :ref:`Transpose <algm-Transpose>`. This behavior can be turned off by the *Transpose* property.
 
 The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofThetaEnergyWorkspace*.
 

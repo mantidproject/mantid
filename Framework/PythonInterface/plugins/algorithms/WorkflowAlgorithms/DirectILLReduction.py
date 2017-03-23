@@ -445,15 +445,10 @@ class DirectILLReduction(DataProcessorAlgorithm):
         transposing = self.getProperty(common.PROP_TRANSPOSE_SAMPLE_OUTPUT).value
         if transposing == common.TRANSPOSING_OFF:
             return mainWS
-        pointDataWSName = wsNames.withSuffix('point_data_converted')
-        pointDataWS = ConvertToPointData(InputWorkspace=mainWS,
-                                         OutputWorkspace=pointDataWSName,
-                                         EnableLogging=subalgLogging)
         transposedWSName = wsNames.withSuffix('transposed')
-        transposedWS = Transpose(InputWorkspace=pointDataWS,
+        transposedWS = Transpose(InputWorkspace=mainWS,
                                  OutputWorkspace=transposedWSName,
                                  EnableLogging=subalgLogging)
-        wsCleanup.cleanup(pointDataWS)
         wsCleanup.cleanup(mainWS)
         return transposedWS
 
