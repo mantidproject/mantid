@@ -9,7 +9,8 @@ from abc import (ABCMeta, abstractmethod)
 from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
-from sans.common.enums import (SANSInstrument, FileType)
+from sans.common.enums import (SANSInstrument, FileType, SampleShape)
+from sans.common.xml_parsing import get_valid_to_time_from_idf_string
 from sans.common.constants import (SANS2D, LARMOR, LOQ)
 from six import with_metaclass
 
@@ -227,6 +228,24 @@ def get_instrument_paths_for_sans_file(file_name):
                        "available for {0}".format(str(idf_path)))
 
 
+def convert_to_shape(shape_flag):
+    """
+    Converts a shape flag to a shape object.
+
+    @param shape_flag: a geometry flag which can be 1, 2 or 3
+    @return: a shape object
+    """
+    if shape_flag == 1:
+        shape = SampleShape.CylinderAxisUp
+    elif shape_flag == 2:
+        shape = SampleShape.Cuboid
+    elif shape_flag == 3:
+        shape = SampleShape.CylinderAxisAlong
+    else:
+        shape = None
+    return shape
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for ISIS Nexus
 # ----------------------------------------------------------------------------------------------------------------------
@@ -334,6 +353,32 @@ def get_event_mode_information(file_name):
     return is_event_mode
 
 
+def get_geometry_information_isis_nexus(file_name):
+    """
+    Gets geometry information from the sample folder in the nexus file
+
+    @param file_name:
+    @return: height, width, thickness, shape
+    """
+    with h5.File(file_name) as h5_file:
+        # Open first entry
+        keys = list(h5_file.keys())
+        top_level = h5_file[keys[0]]
+        sample = top_level['sample']
+        height = float(sample['height'][0])
+        width = float(sample['width'][0])
+        thickness = float(sample['thickness'][0])
+        shape_as_string = sample['shape'][0]
+        if shape_as_string == "Cylinder":
+            shape = SampleShape.CylinderAxisUp
+        elif shape_as_string == "Flat plate":
+            shape = SampleShape.Cuboid
+        elif shape_as_string == "Disc":
+            shape = SampleShape.CylinderAxisAlong
+        else:
+            shape = None
+    return height, width, thickness, shape
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for Added data
 # ----------------------------------------------------------------------------------------------------------------------
@@ -344,49 +389,52 @@ def get_event_mode_information(file_name):
 #    file where the first level entry will be named mantid_workspace_X where X=1,2,3,... . Note that the numbers
 #    correspond  to periods.
 # 3. Scenario 2: Added event data, ie files which were added and saved as event data.
+# 3.1 TODO
+
 
 def get_date_and_run_number_added_nexus(file_name):
     with h5.File(file_name) as h5_file:
-        keys = list(h5_file.keys())
+        keys = h5_file.keys()
         first_entry = h5_file[keys[0]]
-        logs = first_entry[LOGS]
+        logs = first_entry["logs"]
         # Start time
-        start_time = logs[START_TIME]
-        start_time_value = DateAndTime(start_time[VALUE][0])
+        start_time = logs["start_time"]
+        start_time_value = DateAndTime(start_time["value"][0])
         # Run number
-        run_number = logs[RUN_NUMBER]
-        run_number_value = int(run_number[VALUE][0])
+        run_number = logs["run_number"]
+        run_number_value = int(run_number["value"][0])
     return start_time_value, run_number_value
 
 
-def get_added_nexus_information(file_name):  # noqa
+def get_added_nexus_information(file_name):
     """
     Get information if is added data and the number of periods.
 
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
+    ADDED_SUFFIX = "-add_added_event_data"
+    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
+
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
-            if key.startswith(MANTID_WORKSPACE_PREFIX):
+            if key.startswith(u'mantid_workspace_'):
                 top_level_key_collection.append(key)
         return sorted(top_level_key_collection)
 
     def check_if_event_mode(entry):
-        return EVENT_WORKSPACE in list(entry.keys())
+        return "event_workspace" in entry.keys()
 
     def get_workspace_name(entry):
-        return entry[WORKSPACE_NAME][0].decode("utf-8")
+        return entry["workspace_name"][0]
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
 
     def has_added_tag(workspace_names, monitor_workspace_names):
-        # Check data
         all_have_added_tag = all([ADDED_SUFFIX in ws_name for ws_name in workspace_names])
         if all_have_added_tag:
-            # Check monitors
             all_have_added_tag = all([ADDED_MONITOR_SUFFIX in ws_name for ws_name in monitor_workspace_names])
         return all_have_added_tag
 
@@ -418,7 +466,7 @@ def get_added_nexus_information(file_name):  # noqa
         #    random_name-add_monitors_added_event_data_4.s
         if (has_same_number_of_entries(workspace_names, monitor_workspace_names) and
             has_added_tag(workspace_names, monitor_workspace_names) and
-                entries_match(workspace_names, monitor_workspace_names)):
+            entries_match(workspace_names, monitor_workspace_names)):
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:
@@ -443,7 +491,7 @@ def get_added_nexus_information(file_name):  # noqa
         try:
             with h5.File(file_name) as h5_file:
                 # Get all mantid_workspace_X keys
-                keys = list(h5_file.keys())
+                keys = h5_file.keys()
                 top_level_keys = get_all_keys_for_top_level(keys)
 
                 # Check if entries are added event data, if we don't have a hit, then it can always be
@@ -475,12 +523,13 @@ def get_added_nexus_information(file_name):  # noqa
 
 
 def get_date_for_added_workspace(file_name):
-    value = get_top_level_nexus_entry(file_name, START_TIME)
+    value = get_top_level_nexus_entry(file_name, "start_time")
     return DateAndTime(value)
 
 
 def has_added_suffix(file_name):
-    return file_name.upper().endswith(ADD_FILE_SUFFIX)
+    suffix = "-ADD.NXS"
+    return file_name.upper().endswith(suffix)
 
 
 def is_added_histogram(file_name):
@@ -491,6 +540,26 @@ def is_added_histogram(file_name):
 def is_added_event(file_name):
     is_added, _, is_event = get_added_nexus_information(file_name)
     return is_added and is_event
+
+
+def get_geometry_information_isis_added_nexus(file_name):
+    """
+    Gets geometry information from the sample folder in an added nexus file
+
+    @param file_name: the file name
+    @return: height, width, thickness, shape
+    """
+    with h5.File(file_name) as h5_file:
+        # Open first entry
+        keys = list(h5_file.keys())
+        top_level = h5_file[keys[0]]
+        sample = top_level['sample']
+        height = float(sample['geom_height'][0])
+        width = float(sample['geom_width'][0])
+        thickness = float(sample['geom_thickness'][0])
+        shape_id = int(sample['geom_id'][0])
+        shape = convert_to_shape(shape_id)
+    return height, width, thickness, shape
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -613,12 +682,48 @@ def get_instrument(instrument_name):
     return instrument
 
 
+def get_geometry_information_raw(file_name):
+    """
+    Gets the geometry information form the table workspace with the spb information
+
+    @param file_name: the full file name to an existing raw file.
+    @return: height, width, thickness and shape
+    """
+    alg_info = AlgorithmManager.createUnmanaged("RawFileInfo")
+    alg_info.initialize()
+    alg_info.setChild(True)
+    alg_info.setProperty("Filename", file_name)
+    alg_info.setProperty("GetRunParameters", False)
+    alg_info.setProperty("GetSampleParameters", True)
+    alg_info.execute()
+
+    sample_parameters = alg_info.getProperty("SampleParameterTable").value
+    keys = sample_parameters.getColumnNames()
+
+    height_id = "e_height"
+    width_id = "e_width"
+    thickness_id = "e_thick"
+    shape_id = "e_geom"
+
+    height = sample_parameters.column(keys.index(height_id))[0]
+    width = sample_parameters.column(keys.index(width_id))[0]
+    thickness = sample_parameters.column(keys.index(thickness_id))[0]
+    shape_flag = sample_parameters.column(keys.index(shape_id))[0]
+    shape = convert_to_shape(shape_flag)
+    return height, width, thickness, shape
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
 class SANSFileInformation(with_metaclass(ABCMeta, object)):
     def __init__(self, file_name):
         self._file_name = file_name
+        self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
+
+        # Idf and Ipf file path (will be loaded via lazy evaluation)
+        self._idf_file_path = None
+        self._ipf_file_path = None
 
     @abstractmethod
     def get_file_name(self):
@@ -652,6 +757,36 @@ class SANSFileInformation(with_metaclass(ABCMeta, object)):
     def is_added_data(self):
         pass
 
+    @abstractmethod
+    def get_height(self):
+        pass
+
+    @abstractmethod
+    def get_width(self):
+        pass
+
+    @abstractmethod
+    def get_thickness(self):
+        pass
+
+    @abstractmethod
+    def get_shape(self):
+        pass
+
+    def get_idf_file_path(self):
+        if self._idf_file_path is None:
+            idf_path, ipf_path = get_instrument_paths_for_sans_file(self._full_file_name)
+            self._idf_file_path = idf_path
+            self._ipf_file_path = ipf_path
+        return self._idf_file_path
+
+    def get_ipf_file_path(self):
+        if self._ipf_file_path is None:
+            idf_path, ipf_path = get_instrument_paths_for_sans_file(self._full_file_name)
+            self._idf_file_path = idf_path
+            self._ipf_file_path = ipf_path
+        return self._ipf_file_path
+
     @staticmethod
     def get_full_file_name(file_name):
         return find_sans_file(file_name)
@@ -661,7 +796,6 @@ class SANSFileInformationISISNexus(SANSFileInformation):
     def __init__(self, file_name):
         super(SANSFileInformationISISNexus, self).__init__(file_name)
         # Setup instrument name
-        self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
@@ -676,6 +810,13 @@ class SANSFileInformationISISNexus(SANSFileInformation):
 
         # Setup event mode check
         self._is_event_mode = get_event_mode_information(self._full_file_name)
+
+        # Get geometry details
+        height, width, thickness, shape = get_geometry_information_isis_nexus(self._full_file_name)
+        self._height = height if height is not None else 1.
+        self._width = width if width is not None else 1.
+        self._thickness = thickness if thickness is not None else 1.
+        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
 
     def get_file_name(self):
         return self._full_file_name
@@ -701,12 +842,23 @@ class SANSFileInformationISISNexus(SANSFileInformation):
     def is_added_data(self):
         return False
 
+    def get_height(self):
+        return self._height
+
+    def get_width(self):
+        return self._width
+
+    def get_thickness(self):
+        return self._thickness
+
+    def get_shape(self):
+        return self._shape
+
 
 class SANSFileInformationISISAdded(SANSFileInformation):
     def __init__(self, file_name):
         super(SANSFileInformationISISAdded, self).__init__(file_name)
         # Setup instrument name
-        self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
         instrument_name = get_instrument_name_for_isis_nexus(self._full_file_name)
         self._instrument_name = get_instrument(instrument_name)
 
@@ -717,6 +869,13 @@ class SANSFileInformationISISAdded(SANSFileInformation):
         _,  number_of_periods, is_event = get_added_nexus_information(self._full_file_name)
         self._number_of_periods = number_of_periods
         self._is_event_mode = is_event
+
+        # Get geometry details
+        height, width, thickness, shape = get_geometry_information_isis_added_nexus(self._full_file_name)
+        self._height = height if height is not None else 1.
+        self._width = width if width is not None else 1.
+        self._thickness = thickness if thickness is not None else 1.
+        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
 
     def get_file_name(self):
         return self._full_file_name
@@ -742,12 +901,23 @@ class SANSFileInformationISISAdded(SANSFileInformation):
     def is_added_data(self):
         return True
 
+    def get_height(self):
+        return self._height
+
+    def get_width(self):
+        return self._width
+
+    def get_thickness(self):
+        return self._thickness
+
+    def get_shape(self):
+        return self._shape
+
 
 class SANSFileInformationRaw(SANSFileInformation):
     def __init__(self, file_name):
         super(SANSFileInformationRaw, self).__init__(file_name)
         # Setup instrument name
-        self._full_file_name = SANSFileInformation.get_full_file_name(self._file_name)
         instrument_name = get_instrument_name_for_raw(self._full_file_name)
         self._instrument = SANSInstrument.from_string(instrument_name)
 
@@ -759,6 +929,14 @@ class SANSFileInformationRaw(SANSFileInformation):
 
         # Setup run number
         self._run_number = get_run_number_for_raw(self._full_file_name)
+
+        # Set geometry
+        # Raw files don't have the sample information, so set to default
+        height, width, thickness, shape = get_geometry_information_raw(self._full_file_name)
+        self._height = height if height is not None else 1.
+        self._width = width if width is not None else 1.
+        self._thickness = thickness if thickness is not None else 1.
+        self._shape = shape if shape is not None else SampleShape.CylinderAxisAlong
 
     def get_file_name(self):
         return self._full_file_name
@@ -783,6 +961,18 @@ class SANSFileInformationRaw(SANSFileInformation):
 
     def is_added_data(self):
         return False
+
+    def get_height(self):
+        return self._height
+
+    def get_width(self):
+        return self._width
+
+    def get_thickness(self):
+        return self._thickness
+
+    def get_shape(self):
+        return self._shape
 
 
 class SANSFileInformationFactory(object):
