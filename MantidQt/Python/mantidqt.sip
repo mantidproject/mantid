@@ -1554,6 +1554,7 @@ QDataProcessorWidget(const MantidQt::MantidWidgets::DataProcessorWhiteList &,
                      QWidget *parent );
 void accept(MantidQt::MantidWidgets::DataProcessorMainPresenter *);
 void setInstrumentList(const QString &instruments, const QString &defaultInstrument);
+void transfer(const QList<QString> &);
 
 signals:
 void runPythonCode(const QString &);

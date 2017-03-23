@@ -110,6 +110,9 @@ public:
                          int column) override;
   void setClipboard(const std::string &text) override;
 
+  // Transfer runs
+  void transfer(const QList<QString> &runs);
+
   // Accessor methods
   std::map<int, std::set<int>> getSelectedChildren() const override;
   std::set<int> getSelectedParents() const override;

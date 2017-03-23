@@ -41,8 +41,7 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)),
-      m_ws(table) {}
+      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {}
 
 /**
 * Constructor (no table workspace given)
@@ -260,7 +259,6 @@ void DataProcessorOneLevelTreeManager::newTable(
     ITableWorkspace_sptr table, const DataProcessorWhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
-    m_ws = table;
     m_model.reset(new QDataProcessorOneLevelTreeModel(table, whitelist));
   } else
     throw std::runtime_error("Selected table has the incorrect number of "
@@ -336,20 +334,38 @@ void DataProcessorOneLevelTreeManager::transfer(
     const std::vector<std::map<std::string, std::string>> &runs,
     const DataProcessorWhiteList &whitelist) {
 
+  ITableWorkspace_sptr ws = m_model->getTableWorkspace();
+
+  if (ws->rowCount() == 1) {
+    // If the table only has one row, check if it is empty and if so, remove it.
+    // This is to make things nicer when transferring, as the default table has
+    // one empty row
+    size_t cols = ws->columnCount();
+    bool emptyTable = true;
+    for (size_t i = 0; i < cols; i++) {
+      if (!ws->String(0, i).empty())
+        emptyTable = false;
+    }
+    if (emptyTable)
+      ws->removeRow(0);
+  }
+
   // Loop over the rows (vector elements)
   for (const auto &row : runs) {
 
-    if (row.size() != whitelist.size())
-      throw std::invalid_argument(
-          "Data cannot be transferred to the processing table.");
+    TableRow newRow = ws->appendRow();
 
-    TableRow newRow = m_ws->appendRow();
-
-    for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-      newRow << row.at(whitelist.colNameFromColIndex(i));
+    for (int i = 0; i < static_cast<int>(whitelist.size()); i++) {
+      const std::string columnName = whitelist.colNameFromColIndex(i);
+      if (row.count(columnName)) {
+        newRow << row.at(columnName);
+      } else {
+        newRow << "";
+      }
+    }
   }
 
-  m_model.reset(new QDataProcessorOneLevelTreeModel(m_ws, whitelist));
+  m_model.reset(new QDataProcessorOneLevelTreeModel(ws, whitelist));
 }
 
 /** Updates a row with new data
@@ -379,10 +395,11 @@ DataProcessorOneLevelTreeManager::getModel() {
 }
 
 /** Returns the table workspace containing the data
-* @return :: The table workspace
-*/
+ * @return :: The table workspace
+ */
 ITableWorkspace_sptr DataProcessorOneLevelTreeManager::getTableWorkspace() {
-  return m_ws;
+
+  return m_model->getTableWorkspace();
 }
 
 /**

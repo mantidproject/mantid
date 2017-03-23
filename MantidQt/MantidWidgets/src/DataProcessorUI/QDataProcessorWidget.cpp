@@ -536,5 +536,37 @@ QDataProcessorWidget::runPythonAlgorithm(const std::string &pythonCode) {
   emit runPythonAlgorithm(QString::fromStdString(pythonCode));
 }
 
+/** Transfer runs to the table
+ *
+ */
+void QDataProcessorWidget::transfer(const QList<QString> &runs) {
+
+  std::vector<std::map<std::string, std::string>> runsMap(runs.size());
+  size_t row = 0;
+
+  for (QList<QString>::const_iterator it = runs.begin(); it != runs.end();
+       ++it) {
+
+    QStringList map = (*it).split(",");
+
+    for (QList<QString>::iterator jt = map.begin(); jt != map.end(); ++jt) {
+
+      QStringList pair = (*jt).split(":");
+
+      if (pair.size() != 2) {
+        giveUserCritical("Could not transfer runs to processing table",
+                         "Transfer failed");
+        return;
+      }
+
+      runsMap[row][pair[0].toStdString()] = pair[1].toStdString();
+    }
+
+    row++;
+  }
+
+  m_presenter->transfer(runsMap);
+}
+
 } // namespace MantidWidgets
 } // namespace Mantid
