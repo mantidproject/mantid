@@ -39,6 +39,8 @@ public:
   MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(expandAll, void());
+  MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
