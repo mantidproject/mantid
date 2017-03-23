@@ -24,6 +24,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _common_args = {}
     _peak_range = []
     _runs = None
+    _spectrum_axis = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -112,6 +113,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the reduced workspace(s).')
 
+        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+                             validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
+                             doc='The spectrum axis conversion target.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -142,8 +147,21 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
+        self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
-        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        suffix = ''
+        if self._spectrum_axis == 'SpectrumNumber':
+            suffix = '_red'
+        elif self._spectrum_axis == '2Theta':
+            suffix = '_2theta'
+        elif self._spectrum_axis == 'Q':
+            suffix = '_q'
+        elif self._spectrum_axis == 'Q2':
+            suffix = '_q2'
+
+        self._red_ws += suffix
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -151,6 +169,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['CropDeadMonitorChannels'] = self.getProperty('CropDeadMonitorChannels').value
+        self._common_args['SpectrumAxis'] = self._spectrum_axis
 
         if self._sum_all_runs is True:
             self.log().notice('All the sample runs will be summed')

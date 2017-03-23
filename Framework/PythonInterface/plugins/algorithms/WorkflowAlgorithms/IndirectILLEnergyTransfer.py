@@ -92,7 +92,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the reduced workspace(s).')
 
-        self.declareProperty('SpectrumAxis', defaultValue='SpectrumNumber',
+        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 

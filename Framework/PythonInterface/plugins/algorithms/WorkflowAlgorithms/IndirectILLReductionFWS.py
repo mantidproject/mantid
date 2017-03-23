@@ -107,6 +107,10 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output workspace group')
 
+        self.declareProperty(name='SpectrumAxis', defaultValue='SpectrumNumber',
+                             validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
+                             doc='The spectrum axis conversion target.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -123,14 +127,28 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
         self._back_option = self.getPropertyValue('BackgroundOption')
         self._calib_option = self.getPropertyValue('CalibrationOption')
+        self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
         self._common_args['Analyser'] = self.getPropertyValue('Analyser')
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
+        self._common_args['SpectrumAxis'] = self._spectrum_axis
 
-        self._red_ws = self.getPropertyValue('OutputWorkspace') + '_red'
+        self._red_ws = self.getPropertyValue('OutputWorkspace')
+
+        suffix = ''
+        if self._spectrum_axis == 'SpectrumNumber':
+            suffix = '_red'
+        elif self._spectrum_axis == '2Theta':
+            suffix = '_2theta'
+        elif self._spectrum_axis == 'Q':
+            suffix = '_q'
+        elif self._spectrum_axis == 'Q2':
+            suffix = '_q2'
+
+        self._red_ws += suffix
 
         # Nexus metadata criteria for FWS type of data (both EFWS and IFWS)
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
