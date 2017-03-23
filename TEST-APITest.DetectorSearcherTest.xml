@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite name="APITest"  tests="5" errors="0" failures="0" package="APITest" time="0.981715" >
+    <testcase classname="APITest.DetectorSearcherTest" name="test_init" line="21" time="0.137766" totalTime="0.137834" CPUFraction="0.949371"> <measurement><name>CPUFraction</name><value>0.949371</value></measurement>    </testcase>
+    <testcase classname="APITest.DetectorSearcherTest" name="test_search_cylindrical" line="38" time="0.002835" totalTime="0.002881" CPUFraction="0.914286"> <measurement><name>CPUFraction</name><value>0.914286</value></measurement>    </testcase>
+    <testcase classname="APITest.DetectorSearcherTest" name="test_invalid_rectangular" line="81" time="0.127884" totalTime="0.12793" CPUFraction="0.909449"> <measurement><name>CPUFraction</name><value>0.909449</value></measurement>    </testcase>
+    <testcase classname="APITest.DetectorSearcherTest" name="test_invalid_cylindrical" line="97" time="0.001203" totalTime="0.001232" CPUFraction="1"> <measurement><name>CPUFraction</name><value>1</value></measurement>    </testcase>
+    <testcase classname="APITest.DetectorSearcherTest" name="test_search_rectangular" line="112" time="0.711337" totalTime="0.711838" CPUFraction="0.716199"> <measurement><name>CPUFraction</name><value>0.716199</value></measurement>    </testcase>
+</testsuite>

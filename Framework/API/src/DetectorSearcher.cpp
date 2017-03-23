@@ -8,6 +8,7 @@ using Mantid::Kernel::V3D;
 using Mantid::Geometry::InstrumentRayTracer;
 using Mantid::Geometry::IDetector;
 using Mantid::Geometry::ReferenceFrame;
+using namespace Mantid;
 using namespace Mantid::API;
 
 /** Create a new DetectorSearcher for the given instrument
