@@ -315,6 +315,10 @@ public:
   void splitByPulseTime(Kernel::TimeSplitterType &splitter,
                         std::map<int, EventList *> outputs) const;
 
+  /// Split events by pulse time with Matrix splitters
+  void splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
+                                  std::map<int, EventList *> outputs) const;
+
   void multiply(const double value, const double error = 0.0) override;
   EventList &operator*=(const double value);
 
@@ -496,6 +500,15 @@ private:
   void splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
                               std::map<int, EventList *> outputs,
                               typename std::vector<T> &events) const;
+
+  /// Split events (template) by pulse time with matrix splitters
+  template <class T>
+  void splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec_split_times,
+                                                   const std::vector<int> &vec_split_target,
+                                                   std::map<int, EventList *> outputs,
+                                                   typename std::vector<T> &events) const;
+
+
   template <class T>
   std::string splitByFullTimeVectorSplitterHelper(
       const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,

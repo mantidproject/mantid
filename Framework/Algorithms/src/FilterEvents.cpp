@@ -1367,6 +1367,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                     "input/source EventWorkspace = " << numberOfSpectra
                  << ".\n";
 
+  if (m_filterByPulseTime) {
+    size_t num_proton_charges = m_eventWS->run().getProperty("proton_charge")->size();
+    if (num_proton_charges < m_vecSplitterTime.size())
+      throw runtime_error(
+        "It is not a good practice to split fast event by pulse time when there are more splitters than pulse times.");
+    else
+      g_log.warning("User should understand the inaccurancy to filter events by pulse time.");
+  }
+
   /*
   for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
     std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
@@ -1399,10 +1408,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Perform the filtering (using the splitting function and just one
       // output)
       std::string logmessage;
-      if (m_filterByPulseTime) {
-        throw runtime_error(
-            "It is not a good practice to split fast event by pulse time. ");
-      } else if (m_tofCorrType != NoneCorrect) {
+      if (m_tofCorrType != NoneCorrect) {
         logmessage = input_el.splitByFullTimeMatrixSplitter(
             m_vecSplitterTime, m_vecSplitterGroup, outputs, true,
             m_detTofFactors[iws], m_detTofOffsets[iws]);
