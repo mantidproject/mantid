@@ -36,6 +36,5 @@ ANNcoord *NNDataPoints::mutablePoint(const size_t i) {
   else
     return nullptr;
 }
-
 }
 }
