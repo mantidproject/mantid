@@ -22,15 +22,15 @@ public:
   void plotSurface(bool accepted, int plotIndex, const QString &axisName,
                    const QString &logName,
                    const std::set<double> &customLogValues,
-                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-                       &workspaces) const;
+                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &
+                       workspaces) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(bool accepted, int plotIndex, const QString &axisName,
                    const QString &logName,
                    const std::set<double> &customLogValues,
-                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-                       &workspaces) const;
+                   const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &
+                       workspaces) const;
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
