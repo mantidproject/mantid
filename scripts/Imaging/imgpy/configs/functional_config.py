@@ -38,6 +38,7 @@ class FunctionalConfig(object):
         self.save_preproc = False
         self.only_preproc = False
         self.only_postproc = False
+        self.no_postproc = False
         self.reuse_preproc = False
         self.preproc_subdir = 'pre_processed'
         self.swap_axes = False
@@ -227,6 +228,13 @@ class FunctionalConfig(object):
             required=False,
             action='store_true',
             help="The images have already been reconstructed. All pre-processing and reconstruciton steps will be skipped."
+        )
+
+        grp_func.add_argument(
+            "--no-postproc",
+            required=False,
+            action='store_true',
+            help="The images have already been reconstructed. Force skip all post-processing."
         )
 
         grp_func.add_argument(
@@ -472,6 +480,7 @@ class FunctionalConfig(object):
         self.save_preproc = args.save_preproc
         self.only_preproc = args.only_preproc
         self.reuse_preproc = args.reuse_preproc
+        self.no_postproc = args.no_postproc
         self.only_postproc = args.only_postproc
         self.preproc_subdir = args.preproc_subdir
         self.swap_axes = args.swap_axes
