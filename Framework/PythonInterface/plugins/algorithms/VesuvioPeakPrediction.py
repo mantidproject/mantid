@@ -26,19 +26,25 @@ class VesuvioPeakPrediction(VesuvioBase):
                              validator=StringListValidator(['Debye', 'Einstein']),
                              doc='Model used to make predictions')
 
-        self.declareProperty(FloatArrayProperty(name='Temperature', validator=FloatArrayMandatoryValidator()),
+        arrvalid=FloatArrayBoundedValidator()
+        arrvalid.setLower(0.0)
+
+        self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid),
                              doc='Temperature (K)')
 
-        self.declareProperty(name='AtomicMass', defaultValue=0.0,
-                             validator=FloatMandatoryValidator(),
+        floatvalid=FloatBoundedValidator(0.0)
+        floatvalid.setLowerExclusive(True)
+
+        self.declareProperty(name='AtomicMass', defaultValue=1.0,
+                             validator=floatvalid,
                              doc='Atomic Mass (AMU)')
 
-        self.declareProperty(name='Frequency', defaultValue=0.0,
-                             validator=FloatMandatoryValidator(),
+        self.declareProperty(name='Frequency', defaultValue=1.0,
+                             validator=floatvalid,
                              doc='Fundamental frequency of oscillator (mEV)')
 
-        self.declareProperty(name='DebyeTemperature', defaultValue=0.0,
-                             validator=FloatMandatoryValidator(),
+        self.declareProperty(name='DebyeTemperature', defaultValue=1.0,
+                             validator=floatvalid,
                              doc='Debye Temperature (K)')
 
     def setup(self):
@@ -68,8 +74,6 @@ class VesuvioPeakPrediction(VesuvioBase):
 
                 if temp == 0:
                     temp = 1e-6
-                elif temp < 0:
-                    raise ValueError
 
                 # Convert to mEV
                 temp_mev = temp / 11.604
@@ -89,6 +93,9 @@ class VesuvioPeakPrediction(VesuvioBase):
             vesuvio_params.addColumn('float', 'RMS Displacement(A)')
 
             for temp in self._temperature:
+
+                if temp == 0:
+                    temp = 1e-6
 
                 kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
                 rms_disp = self.displacement(temp, self._debye_temp, self._atomic_mass)
