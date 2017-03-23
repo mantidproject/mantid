@@ -68,6 +68,8 @@ void ParameterReference::reset(IFunction *fun, std::size_t index,
 /**
  * Set the parameter
  * @param value :: A value to set.
+ * @param isExplicitlySet :: Flag that user explicitly set this
+ * parameter.
  */
 void ParameterReference::setParameter(const double &value,
                                       bool isExplicitlySet) {

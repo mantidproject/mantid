@@ -208,6 +208,7 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
 /// @param spectrum :: A composite function containings the peaks to update.
 ///                    May contain other functions (background) fix indices
 ///                    < iFirst.
+/// @param peakShape :: A shape of each peak as a name of an IPeakFunction.
 /// @param centresAndIntensities :: A FunctionValues object containing centres
 ///        and intensities for the peaks. First nPeaks calculated values are the
 ///        centres and the following nPeaks values are the intensities.
@@ -218,6 +219,9 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
 /// @param xVec :: x-values of a tabulated width function.
 /// @param yVec :: y-values of a tabulated width function.
 /// @param fwhmVariation :: A variation in the peak width allowed in a fit.
+/// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
+///        are empty.
+/// @param fixAllPeaks :: If true fix all peak parameters
 /// @return :: The new number of fitted peaks.
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::string &peakShape,
