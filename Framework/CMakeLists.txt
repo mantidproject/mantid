@@ -57,6 +57,10 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux" )
   endif ( MPI_BUILD )
 endif ()
 
+if ( MPI_EXPERIMENTAL )
+  include ( BoostMPI )
+endif ()
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
