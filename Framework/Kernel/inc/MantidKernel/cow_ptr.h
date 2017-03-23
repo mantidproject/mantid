@@ -101,7 +101,7 @@ public:
   const DataType *operator->() const {
     return Data.get();
   } ///<indirectrion dereference access
-  bool operator==(const cow_ptr<DataType> &A) noexcept {
+  bool operator==(const cow_ptr<DataType> &A) const noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
   DataType &access();

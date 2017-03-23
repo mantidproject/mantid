@@ -14,6 +14,12 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+Powder Diffraction
+------------------
+
+- :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
+- Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
+
 Single Crystal Diffraction
 --------------------------
 
