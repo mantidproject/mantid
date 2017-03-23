@@ -99,7 +99,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         whitelist.addElement('Plot result', 'PlotResult', 'If enabled, plots results')
 
         # Pre-processing instructions (optional)
-		# Not used in this interface
+        # Not used in this interface
 
         # Processing algorithm (mandatory)
         # The main reduction algorithm
@@ -110,10 +110,10 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         # the whitelist above
         # Additionally (not specified here) a blacklist of properties can be specified as the third
         # argument. These properties will not appear in the 'Options' column when typing
-        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('PoldiDataAnalysis','Poldi_','InputWorkspace,ExpectedPeaks,ProfileFunction,OutputWorkspace')
+        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm('PoldiDataAnalysis','Poldi_','')
 
         # Post-processing algorithm (optional)
-		# Not used in this interface
+        # Not used in this interface
 
         # The table widget
         self.data_processor_table = MantidQt.MantidWidgets.QDataProcessorWidget(whitelist, alg, self)
@@ -142,7 +142,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         self.menuEdit.clear()
         self.menuFile.clear()
 
-		# Demo (unrelated to the data processor widget)
+        # Demo (unrelated to the data processor widget)
         demo = QtGui.QAction('&Demo', self)
         demo.triggered.connect(lambda: self._demo_clicked())
         self.menuFile.addAction(demo)
@@ -175,7 +175,7 @@ class PoldiGui(QtGui.QMainWindow, ui_poldi_window.Ui_PoldiWindow):
         PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi', MaskBadDetectors=False)
         PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m', Atoms='Si 0 0 0 1.0 0.01', a=5.431, LatticeSpacingMin=0.7, OutputWorkspace='Si')
         #self.data_processor_table.transfer(["Run(s):poldi_data_6904"])
-        self.data_processor_table.transfer(["Run(s):poldi_data_6904,Expected peak(s):Si,Pawley fit:1,Maximum number of peaks:8,Plot result:0"])
+        self.data_processor_table.transfer(["Run(s):poldi_data_6904,Expected peak(s):Si,Pawley fit:1,Maximum number of peaks:8"])
 
     def _create_action(self, command, menu, workspace_list = None):
         """
