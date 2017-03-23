@@ -128,7 +128,9 @@ public:
 
   void test_units() {
     createWorkspace2D(true);
-    TS_ASSERT_EQUALS(inputWSname->getAxis(0)->unit()->unitID(),
+    Workspace2D_sptr inws =
+        AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
+    TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(),
                      "DeltaE_inFrequency");
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWSname);
