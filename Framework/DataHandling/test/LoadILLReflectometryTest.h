@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadILLReflectometry.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
@@ -51,10 +51,12 @@ public:
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2);
 
-    double channelWidth = getPropertyFromRun<double>(output, "channel_width");
+    double channelWidth =
+        output->run().getPropertyValueAsType<double>("channel_width");
     TS_ASSERT_EQUALS(channelWidth, 57.0);
 
-    double analyserAngle = getPropertyFromRun<double>(output, "dan.value");
+    double analyserAngle =
+        output->run().getPropertyValueAsType<double>("dan.value");
     TS_ASSERT_EQUALS(analyserAngle, 3.1909999847412109);
 
     if (!output)
@@ -66,18 +68,47 @@ public:
 
 private:
   std::string m_dataFile;
+};
 
-  template <typename T>
-  T getPropertyFromRun(MatrixWorkspace_const_sptr inputWS,
-                       const std::string &propertyName) {
-    if (inputWS->run().hasProperty(propertyName)) {
-      Mantid::Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-      return boost::lexical_cast<T>(prop->value());
-    } else {
-      std::string mesg =
-          "No '" + propertyName + "' property found in the input workspace....";
-      throw std::runtime_error(mesg);
+class LoadILLReflectometryTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
     }
+  }
+
+  void testLoadILLReflectometryPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  std::vector<LoadILLReflectometry *> loadAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string inFileName = "ILLD17-161876-Ni.nxs";
+  const std::string outWSName = "LoadILLReflectomeryWsOut";
+
+  LoadILLReflectometry *setupAlg() {
+    LoadILLReflectometry *loader = new LoadILLReflectometry;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("Filename", inFileName);
+    loader->setPropertyValue("OutputWorkspace", outWSName);
+
+    loader->setRethrows(true);
+    return loader;
   }
 };
 

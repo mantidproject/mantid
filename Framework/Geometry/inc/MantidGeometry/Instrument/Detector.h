@@ -77,18 +77,15 @@ public:
      coordinate system */
   det_topology getTopology(Kernel::V3D &center) const override;
 
-  /// Return the relative position to the parent
-  const Kernel::V3D getRelativePos() const override {
-    return ObjComponent::getRelativePos();
-  }
+  Kernel::V3D getRelativePos() const override;
+  Kernel::V3D getPos() const override;
+  Kernel::Quat getRelativeRot() const override;
+  Kernel::Quat getRotation() const override;
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
-  void setIndex(const size_t index) override;
 
 private:
-  /// Linear index of the detector in the instrument
-  size_t m_index{static_cast<size_t>(-1)};
   /// The detector id
   const detid_t m_id;
 

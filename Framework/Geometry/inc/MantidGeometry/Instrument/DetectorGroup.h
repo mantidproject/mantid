@@ -181,7 +181,6 @@ public:
 
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
-  void setIndex(const size_t index) override;
 
 protected:
   /// The ID of this effective detector
@@ -226,13 +225,13 @@ protected:
   void translate(double, double, double) override {}
   void rotate(const Kernel::Quat &) override {}
   void rotate(double, const Kernel::V3D &) override {}
-  const Kernel::V3D getRelativePos() const override {
+  Kernel::V3D getRelativePos() const override {
     throw std::runtime_error("Cannot call getRelativePos on a DetectorGroup");
   }
-  const Kernel::Quat &getRelativeRot() const override {
+  Kernel::Quat getRelativeRot() const override {
     throw std::runtime_error("Cannot call getRelativeRot on a DetectorGroup");
   }
-  const Kernel::Quat getRotation() const override { return Kernel::Quat(); }
+  Kernel::Quat getRotation() const override { return Kernel::Quat(); }
   void printSelf(std::ostream &) const override {}
 
   // functions inherited from IObjComponent

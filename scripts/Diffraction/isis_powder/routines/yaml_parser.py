@@ -6,13 +6,17 @@ from isis_powder.routines import common as common
 from isis_powder.routines import yaml_sanity
 
 
-def get_run_dictionary(run_number, file_path):
+def get_run_dictionary(run_number_string, file_path):
+    if isinstance(run_number_string, str):
+        run_number_list = common.generate_run_numbers(run_number_string=run_number_string)
+        run_number_string = run_number_list[0]
+
     config_file = open_yaml_file_as_dictionary(file_path)
     yaml_sanity.calibration_file_sanity_check(config_file)
-    run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number)
+    run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number_string)
 
     if not run_key:
-        raise ValueError("Run number " + str(run_number) + " not recognised in calibration mapping")
+        raise ValueError("Run number " + str(run_number_string) + " not recognised in calibration mapping")
 
     return config_file[run_key]
 

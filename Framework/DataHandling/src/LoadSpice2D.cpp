@@ -12,7 +12,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/regex.hpp>

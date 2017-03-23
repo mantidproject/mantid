@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
@@ -38,7 +39,7 @@ class MantidGeom(object):
         """
             Print the XML geometry to the screen
         """
-        print self
+        print(self)
 
     def addSnsDefaults(self):
         """
@@ -82,8 +83,8 @@ class MantidGeom(object):
             if distance > 0:
                 distance *= -1.0
             self._append_child("location", source, z=distance)
-        except (StandardError, StopIteration, Warning):
-            print "PROBLEM with addModerator"
+        except (Exception, StopIteration, Warning):
+            print("PROBLEM with addModerator")
 
         child = self._append_child("type", self._root, name="moderator")
         child.setAttribute("is", "Source")

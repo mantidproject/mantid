@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import (CreateSampleWorkspace, Scale, DeleteWorkspace,
-                              CylinderPaalmanPingsCorrection)
+from mantid import mtd, config
+from mantid.simpleapi import (CreateSampleWorkspace, Scale, DeleteWorkspace, ConvertToPointData,
+                              CylinderPaalmanPingsCorrection, SetInstrumentParameter)
 
 
 class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
@@ -23,6 +22,25 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         self._sample_ws = sample
 
+        # Create empty test data not in wavelength
+        sample_empty_unit = CreateSampleWorkspace(NumBanks=1,
+                                                  BankPixelWidth=1,
+                                                  XUnit='Empty',
+                                                  XMin=6.8,
+                                                  XMax=7.9,
+                                                  BinWidth=0.1)
+
+        SetInstrumentParameter(Workspace=sample_empty_unit,
+                               ParameterName='Efixed',
+                               ParameterType='Number',
+                               Value='5.')
+
+        self._sample_empty_unit = sample_empty_unit
+
+        empty_unit_point = ConvertToPointData(sample_empty_unit)
+
+        self._empty_unit_point = empty_unit_point
+
         can = Scale(InputWorkspace=sample, Factor=1.2)
         self._can_ws = can
 
@@ -35,6 +53,8 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._can_ws)
+        DeleteWorkspace(self._sample_empty_unit)
+        DeleteWorkspace(self._empty_unit_point)
 
         if self._corrections_ws_name in mtd:
             DeleteWorkspace(self._corrections_ws_name)
@@ -215,6 +235,37 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
                           BeamWidth=0.1,
                           Emode='Indirect',
                           Efixed=1.845)
+
+    def test_efixed(self):
+        """
+        Tests in the EFixed mode
+        """
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._sample_empty_unit,
+                                       SampleChemicalFormula='H2-O',
+                                       Emode='Efixed')
+
+        for workspace in mtd[self._corrections_ws_name]:
+            self.assertEqual(workspace.blocksize(), 1)
+            run = workspace.getRun()
+            self.assertEqual(run.getLogData('emode').value,'Efixed')
+            self.assertAlmostEqual(run.getLogData('efixed').value, 5.)
+
+    def test_efixed_override(self):
+        """
+        Tests in the Efixed mode with overridden Efixed value for point data
+        """
+        CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                       SampleWorkspace=self._empty_unit_point,
+                                       SampleChemicalFormula='H2-O',
+                                       Emode='Efixed',
+                                       Efixed=7.5)
+
+        for workspace in mtd[self._corrections_ws_name]:
+            self.assertEqual(workspace.blocksize(), 1)
+            run = workspace.getRun()
+            self.assertEqual(run.getLogData('emode').value,'Efixed')
+            self.assertAlmostEqual(run.getLogData('efixed').value, 7.5)
 
 
 if __name__ == "__main__":
