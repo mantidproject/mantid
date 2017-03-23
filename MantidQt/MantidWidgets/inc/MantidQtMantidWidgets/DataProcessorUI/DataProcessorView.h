@@ -69,9 +69,9 @@ public:
   // produced
   virtual bool getEnableNotebook() = 0;
 
-  // Expand/Close all groups
+  // Expand/Collapse all groups
   virtual void expandAll() = 0;
-  virtual void closeAll() = 0;
+  virtual void collapseAll() = 0;
 
   // Setter methods
   virtual void setTableList(const std::set<std::string> &tables) = 0;

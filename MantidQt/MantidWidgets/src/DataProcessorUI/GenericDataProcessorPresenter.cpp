@@ -738,17 +738,17 @@ void GenericDataProcessorPresenter::groupRows() {
 /**
 Expand all groups
 */
-void GenericDataProcessorPresenter::openAll() {
+void GenericDataProcessorPresenter::expandAll() {
 
   m_view->expandAll();
 }
 
 /**
-Close all groups
+Collapse all groups
 */
-void GenericDataProcessorPresenter::closeAll() {
+void GenericDataProcessorPresenter::collapseAll() {
 
-  m_view->closeAll();
+  m_view->collapseAll();
 }
 
 /**
@@ -820,11 +820,11 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
     break;
-  case DataProcessorPresenter::OpenAllGroupsFlag:
-    openAll();
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
     break;
-  case DataProcessorPresenter::CloseAllGroupsFlag:
-    closeAll();
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's

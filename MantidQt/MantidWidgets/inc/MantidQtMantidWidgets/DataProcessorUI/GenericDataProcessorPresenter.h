@@ -184,9 +184,9 @@ private:
   // expand selection to group
   void expandSelection();
   // expand all groups
-  void openAll();
+  void expandAll();
   // close all groups
-  void closeAll();
+  void collapseAll();
   // table io methods
   void newTable();
   void openTable();

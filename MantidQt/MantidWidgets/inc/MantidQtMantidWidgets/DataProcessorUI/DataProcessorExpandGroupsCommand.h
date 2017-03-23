@@ -1,13 +1,13 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENGROUPSCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENGROUPSCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorOpenGroupsCommand
+/** @class DataProcessorExpandGroupsCommand
 
-DataProcessorOpenGroupsCommand defines the action "Open All Groups"
+DataProcessorExpandGroupsCommand defines the action "Expand All Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -30,25 +30,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorOpenGroupsCommand : public DataProcessorCommandBase {
+class DataProcessorExpandGroupsCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorOpenGroupsCommand(DataProcessorPresenter *tablePresenter)
+  DataProcessorExpandGroupsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorOpenGroupsCommand(){};
+  virtual ~DataProcessorExpandGroupsCommand(){};
 
   void execute() override {
-    m_presenter->notify(DataProcessorPresenter::OpenAllGroupsFlag);
+    m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag);
   };
-  std::string name() override { return std::string("Open All Groups"); }
-  std::string icon() override { return std::string("://open_all.png"); }
-  std::string tooltip() override { return std::string("Opens all groups"); }
+  std::string name() override { return std::string("Expand All Groups"); }
+  std::string icon() override { return std::string("://expand_all.png"); }
+  std::string tooltip() override { return std::string("Expands all groups"); }
   std::string whatsthis() override {
-    return std::string("If any groups in the interface are currently closed "
-                       "this will open all closed groups, revealing their "
+    return std::string("If any groups in the interface are currently collapsed "
+                       "this will expand all collapsed groups, revealing their "
                        "individual runs.");
   }
   std::string shortcut() override { return std::string(); }
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENGROUPSCOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H*/

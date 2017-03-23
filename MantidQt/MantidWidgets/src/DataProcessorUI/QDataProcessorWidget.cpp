@@ -213,9 +213,9 @@ void QDataProcessorWidget::expandAll() {
 }
 
 /**
-Close all currently expanded groups
+Collapse all currently expanded groups
 */
-void QDataProcessorWidget::closeAll() {
+void QDataProcessorWidget::collapseAll() {
 
   ui.viewTable->collapseAll();
 }

@@ -1,13 +1,13 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLOSEGROUPSCOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLOSEGROUPSCOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorCloseGroupsCommand
+/** @class DataProcessorCollapseGroupsCommand
 
-DataProcessorCloseGroupsCommand defines the action "Close All Groups"
+DataProcessorCollapseGroupsCommand defines the action "Collapse All Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -30,25 +30,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCloseGroupsCommand : public DataProcessorCommandBase {
+class DataProcessorCollapseGroupsCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorCloseGroupsCommand(DataProcessorPresenter *tablePresenter)
+  DataProcessorCollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
       : DataProcessorCommandBase(tablePresenter){};
-  virtual ~DataProcessorCloseGroupsCommand(){};
+  virtual ~DataProcessorCollapseGroupsCommand(){};
 
   void execute() override {
-    m_presenter->notify(DataProcessorPresenter::CloseAllGroupsFlag);
+    m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag);
   };
-  std::string name() override { return std::string("Close All Groups"); }
-  std::string icon() override { return std::string("://close_all.png"); }
-  std::string tooltip() override { return std::string("Close all groups"); }
+  std::string name() override { return std::string("Collapse All Groups"); }
+  std::string icon() override { return std::string("://collapse_all.png"); }
+  std::string tooltip() override { return std::string("Collapse all groups"); }
   std::string whatsthis() override {
-    return std::string("If any groups in the interface are currently open "
-                       "this will close all open groups, hiding their "
+    return std::string("If any groups in the interface are currently expanded "
+                       "this will collapse all expanded groups, hiding their "
                        "individual runs.");
   }
   std::string shortcut() override { return std::string(); }
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLOSEGROUPSCOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H*/

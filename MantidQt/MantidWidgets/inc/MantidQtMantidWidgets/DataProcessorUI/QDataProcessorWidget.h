@@ -72,9 +72,9 @@ public:
   // produced
   bool getEnableNotebook() override;
 
-  // Expand/Close all groups
+  // Expand/Collapse all groups
   void expandAll() override;
-  void closeAll() override;
+  void collapseAll() override;
 
   // Settor methods
   void setSelection(const std::set<int> &groups) override;
