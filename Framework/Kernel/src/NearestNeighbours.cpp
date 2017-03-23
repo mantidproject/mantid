@@ -1,7 +1,8 @@
 
 #include "MantidKernel/NearestNeighbours.h"
 
-using namespace Mantid::Kernel;
+namespace Mantid {
+namespace Kernel {
 
 /** Construct a new set of data points
    *
@@ -34,4 +35,7 @@ ANNcoord *NNDataPoints::mutablePoint(const size_t i) {
     return m_data[i];
   else
     return nullptr;
+}
+
+}
 }
