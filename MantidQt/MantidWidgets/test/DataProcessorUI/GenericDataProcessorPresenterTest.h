@@ -1415,15 +1415,15 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
-      createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-      createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-      .Times(1)
-      .WillRepeatedly(Return("TestWorkspace"));
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors
@@ -1440,15 +1440,15 @@ public:
     NiceMock<MockProgressableView> mockProgress;
     NiceMock<MockMainPresenter> mockMainPresenter;
     GenericDataProcessorPresenter presenter(
-      createReflectometryWhiteList(), createReflectometryPreprocessMap(),
-      createReflectometryProcessor(), createReflectometryPostprocessor());
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
     createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
     EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-      .Times(1)
-      .WillRepeatedly(Return("TestWorkspace"));
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     // We should not receive any errors

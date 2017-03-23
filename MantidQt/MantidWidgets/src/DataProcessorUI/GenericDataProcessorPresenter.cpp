@@ -738,18 +738,12 @@ void GenericDataProcessorPresenter::groupRows() {
 /**
 Expand all groups
 */
-void GenericDataProcessorPresenter::expandAll() {
-
-  m_view->expandAll();
-}
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
 
 /**
 Collapse all groups
 */
-void GenericDataProcessorPresenter::collapseAll() {
-
-  m_view->collapseAll();
-}
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
 
 /**
 Used by the view to tell the presenter something has changed
@@ -1082,8 +1076,6 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
   m_view->setInstrumentList(instruments, defaultInstrument);
 }
-
-
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
