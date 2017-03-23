@@ -183,6 +183,10 @@ private:
   void groupRows();
   // expand selection to group
   void expandSelection();
+  // expand all groups
+  void openAll();
+  // close all groups
+  void closeAll();
   // table io methods
   void newTable();
   void openTable();

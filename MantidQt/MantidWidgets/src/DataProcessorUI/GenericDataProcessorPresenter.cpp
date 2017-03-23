@@ -736,6 +736,22 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::openAll() {
+
+  m_view->expandAll();
+}
+
+/**
+Close all groups
+*/
+void GenericDataProcessorPresenter::closeAll() {
+
+  m_view->closeAll();
+}
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
@@ -805,10 +821,10 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     plotGroup();
     break;
   case DataProcessorPresenter::OpenAllGroupsFlag:
-    // Nothing here yet
+    openAll();
     break;
   case DataProcessorPresenter::CloseAllGroupsFlag:
-    // Nothing here yet
+    closeAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1066,6 +1082,8 @@ void GenericDataProcessorPresenter::setInstrumentList(
 
   m_view->setInstrumentList(instruments, defaultInstrument);
 }
+
+
 
 /** Plots any currently selected rows */
 void GenericDataProcessorPresenter::plotRow() {
