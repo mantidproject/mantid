@@ -559,7 +559,6 @@ class CrystalField(object):
         # If a spectrum (temperature) is already defined, or multiple physical properties
         # given, redefine the CrystalFieldMultiSpectrum function.
         if not self.isPhysicalPropertyOnly or islistlike(self.PhysicalProperty):
-            fieldParams = self._getFieldParameters()
             tt = self.Temperature if islistlike(self.Temperature) else [self.Temperature]
             ww = list(self.FWHM) if islistlike(self.FWHM) else [self.FWHM]
             # Last n-set of temperatures correspond to PhysicalProperties
