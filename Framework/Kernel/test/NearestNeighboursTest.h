@@ -20,7 +20,7 @@ public:
 
   void test_construct() {
     std::vector<Array3d> pts1 = {Array3d(1, 1, 1), Array3d(2, 2, 2)};
-    TS_ASSERT_THROWS_NOTHING(NearestNeighbours<> nn(pts1));
+    TS_ASSERT_THROWS_NOTHING(NearestNeighbours<3> nn(pts1));
 
     std::vector<Array2d> pts2 = {Array2d(1, 1), Array2d(2, 2)};
     TS_ASSERT_THROWS_NOTHING(NearestNeighbours<2> nn(pts2));
@@ -28,7 +28,7 @@ public:
 
   void test_find_nearest() {
     std::vector<Eigen::Array3d> pts = {Array3d(1, 1, 1), Array3d(2, 2, 2)};
-    NearestNeighbours<> nn(pts);
+    NearestNeighbours<3> nn(pts);
 
     auto results = nn.findNearest(Array3d(1, 1, 0.9));
     TS_ASSERT_EQUALS(results.size(), 1)

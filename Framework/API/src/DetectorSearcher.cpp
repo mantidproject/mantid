@@ -26,7 +26,7 @@ DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
 }
 
 void DetectorSearcher::createDetectorCache() {
-  std::vector<Eigen::Array3d, Eigen::aligned_allocator<Eigen::Array3d>> points;
+  std::vector<Eigen::Array3d> points;
   points.reserve(m_detInfo.size());
   m_indexMap.reserve(m_detInfo.size());
 

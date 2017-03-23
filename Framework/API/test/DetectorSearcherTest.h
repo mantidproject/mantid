@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
@@ -23,23 +24,23 @@ public:
     auto inst2 =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
 
-    Beamline::DetectorInfo binfo1(inst1->getNumberDetectors());
-    Beamline::DetectorInfo binfo2(inst2->getNumberDetectors());
+    ExperimentInfo expInfo1;
+    expInfo1.setInstrument(inst1);
+    ExperimentInfo expInfo2;
+    expInfo2.setInstrument(inst2);
 
-    API::DetectorInfo info1(binfo1, inst1);
-    API::DetectorInfo info2(binfo2, inst2);
-
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst1, info1))
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst2, info2))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
   }
 
   void test_search_cylindrical() {
     auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
         3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
 
-    DetectorSearcher searcher(inst, info);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+
+    DetectorSearcher searcher(inst, expInfo.detectorInfo());
     const auto checkResult = [&searcher](const V3D &q, size_t index) {
       const auto result = searcher.findDetectorIndex(q);
       TS_ASSERT(std::get<0>(result))
@@ -78,8 +79,10 @@ public:
   void test_invalid_rectangular() {
     auto inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto& info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
@@ -92,8 +95,9 @@ public:
   void test_invalid_cylindrical() {
     auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
         3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto& info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
@@ -106,8 +110,9 @@ public:
   void test_search_rectangular() {
     auto inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto& info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto checkResult = [&searcher](V3D q, size_t index) {
@@ -146,8 +151,9 @@ public:
   void test_rectangular() {
     auto inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto& info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
 
@@ -189,8 +195,10 @@ public:
   void test_cylindrical() {
     auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(
         3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
-    Beamline::DetectorInfo binfo(inst->getNumberDetectors());
-    API::DetectorInfo info(binfo, inst);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(inst);
+    const auto& info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
 
