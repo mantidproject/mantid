@@ -50,8 +50,10 @@ typedef void (IFunction::*setParameterType2)(const std::string &,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(setParameterType2_Overloads,
                                        setParameter, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints,
+                                       1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixParameter_Overloads, fixParameter, 1,
+                                       2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fix_Overloads, fix, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(fixAll_Overloads, fixAll, 0, 1)
 #ifdef __clang__
@@ -144,8 +146,9 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Declare a fitting parameter settings its default value to 0.0")
 
-      .def("fixParameter", &IFunction::fix, fix_Overloads(
-           (arg("self"), arg("i"), arg("isDefault")), "Fix the ith parameter"))
+      .def("fixParameter", &IFunction::fix,
+           fix_Overloads((arg("self"), arg("i"), arg("isDefault")),
+                         "Fix the ith parameter"))
 
       .def("fixParameter", &IFunction::fixParameter,
            fixParameter_Overloads((arg("self"), arg("name"), arg("isDefault")),
@@ -160,8 +163,9 @@ void export_IFunction() {
       .def("isFixed", &IFunction::isFixed, (arg("self"), arg("i")),
            "Return whether the ith parameter is fixed or tied")
 
-      .def("fixAll", &IFunction::fixAll, fixAll_Overloads((arg("self"), arg("isDefault")),
-           "Fix all parameters"))
+      .def("fixAll", &IFunction::fixAll,
+           fixAll_Overloads((arg("self"), arg("isDefault")),
+                            "Fix all parameters"))
 
       .def("freeAll", &IFunction::unfixAll, (arg("self")),
            "Free all parameters")

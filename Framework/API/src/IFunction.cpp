@@ -212,8 +212,9 @@ void IFunction::removeTie(const std::string &parName) {
 std::string IFunction::writeTies() const {
   std::ostringstream tieStream;
   bool first = true;
-  for(auto &tie: m_ties) {
-    if (tie->isDefault()) continue;
+  for (auto &tie : m_ties) {
+    if (tie->isDefault())
+      continue;
     if (!first) {
       tieStream << ',';
     } else {
@@ -267,7 +268,8 @@ class ReferenceEqual {
 
 public:
   /// Constructor
-  explicit ReferenceEqual(const IFunction &fun, size_t i) : m_fun(fun), m_i(i) {}
+  explicit ReferenceEqual(const IFunction &fun, size_t i)
+      : m_fun(fun), m_i(i) {}
   /// Bracket operator
   /// @param p :: the element you are looking for
   /// @return True if found
@@ -284,7 +286,8 @@ bool IFunction::removeTie(size_t i) {
   if (i >= nParams()) {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  auto it = std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
   if (it != m_ties.end()) {
     m_ties.erase(it);
     setParameterStatus(i, Active);
@@ -302,7 +305,8 @@ ParameterTie *IFunction::getTie(size_t i) const {
   if (i >= nParams()) {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  auto it = std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
+  auto it =
+      std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
   if (it != m_ties.cend()) {
     return it->get();
   }
@@ -366,10 +370,7 @@ void IFunction::removeConstraint(const std::string &parName) {
 }
 
 /// Remove all constraints.
-void IFunction::clearConstraints() {
-  m_constraints.clear();
-}
-
+void IFunction::clearConstraints() { m_constraints.clear(); }
 
 void IFunction::setUpForFit() {
   for (auto &constraint : m_constraints) {
@@ -382,8 +383,9 @@ void IFunction::setUpForFit() {
 std::string IFunction::writeConstraints() const {
   std::ostringstream stream;
   bool first = true;
-  for(auto &constrint: m_constraints) {
-    if (constrint->isDefault()) continue;
+  for (auto &constrint : m_constraints) {
+    if (constrint->isDefault())
+      continue;
     if (!first) {
       stream << ',';
     } else {
@@ -574,7 +576,7 @@ private:
 
 /// Copy assignment. Do not copy m_quoteValue flag.
 /// @param attr :: The attribute to copy from.
-IFunction::Attribute& IFunction::Attribute::operator=(const Attribute &attr) {
+IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
   m_data = attr.m_data;
   return *this;
 }
@@ -836,7 +838,8 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
-  if (!isActive(i)) {    throw std::runtime_error("Attempt to use an inactive parameter " +
+  if (!isActive(i)) {
+    throw std::runtime_error("Attempt to use an inactive parameter " +
                              parameterName(i));
   }
   return getParameter(i);

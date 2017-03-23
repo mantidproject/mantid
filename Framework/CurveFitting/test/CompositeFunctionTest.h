@@ -434,7 +434,6 @@ public:
                      "name=Gaussian,Height=0,PeakCentre=0,Sigma=0,constraints=("
                      "0<Height);name=LinearBackground,A0=0,A1=0,constraints=("
                      "A0<0);constraints=(f0.Sigma<0,10<f1.A1)");
-
   }
 
   void test_ties_str() {

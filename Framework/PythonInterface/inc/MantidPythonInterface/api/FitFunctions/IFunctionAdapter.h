@@ -57,9 +57,8 @@ public:
   static PyObject *getAttributeValue(IFunction &self,
                                      const API::IFunction::Attribute &attr);
   /// Set the attribute's value
-  static void setAttributePythonValue(IFunction &self,
-                                           const std::string &name,
-                                           const boost::python::object &value);
+  static void setAttributePythonValue(IFunction &self, const std::string &name,
+                                      const boost::python::object &value);
   /// Called by the framework when an attribute has been set
   void setAttribute(const std::string &attName,
                     const API::IFunction::Attribute &attr) override;

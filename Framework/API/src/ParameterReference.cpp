@@ -26,12 +26,10 @@ ParameterReference::ParameterReference(IFunction *fun, std::size_t index,
 IFunction *ParameterReference::getLocalFunction() const { return m_function; }
 
 /// Return parameter index in the local function
-std::size_t ParameterReference::getLocalIndex() const { 
-  return m_index; 
-}
+std::size_t ParameterReference::getLocalIndex() const { return m_index; }
 
 /// Return parameter index in the owning function
-std::size_t ParameterReference::parameterIndex() const { 
+std::size_t ParameterReference::parameterIndex() const {
   return m_owner->getParameterIndex(*this);
 }
 
@@ -71,7 +69,8 @@ void ParameterReference::reset(IFunction *fun, std::size_t index,
  * Set the parameter
  * @param value :: A value to set.
  */
-void ParameterReference::setParameter(const double &value, bool isExplicitlySet) {
+void ParameterReference::setParameter(const double &value,
+                                      bool isExplicitlySet) {
   m_function->setParameter(m_index, value, isExplicitlySet);
 }
 

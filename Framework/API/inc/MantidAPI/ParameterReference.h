@@ -54,6 +54,7 @@ public:
 
 protected:
   void reset(IFunction *fun, std::size_t index, bool isDefault = false);
+
 private:
   /// Function-owner of this reference. parameterName() and parameterIndex()
   /// return values relative to this function.

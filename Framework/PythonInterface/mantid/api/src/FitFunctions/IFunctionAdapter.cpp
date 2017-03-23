@@ -45,7 +45,7 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
   } else if (PyList_Check(rawptr) == 1) {
     auto n = PyList_Size(rawptr);
     std::vector<double> vec;
-    for(Py_ssize_t i = 0; i < n; ++i) {
+    for (Py_ssize_t i = 0; i < n; ++i) {
       auto v = extract<double>(PyList_GetItem(rawptr, i))();
       vec.push_back(v);
     }
@@ -149,8 +149,8 @@ IFunctionAdapter::getAttributeValue(IFunction &self,
  * @param value :: The value to set
  */
 void IFunctionAdapter::setAttributePythonValue(IFunction &self,
-                                                    const std::string &name,
-                                                    const object &value) {
+                                               const std::string &name,
+                                               const object &value) {
   auto attr = createAttributeFromPythonValue(value);
   self.setAttribute(name, attr);
 }
@@ -178,15 +178,15 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  *    For a single domain function it should have a single element (self).
  * @return A python list of IFunction_sprs.
  */
-boost::python::object IFunctionAdapter::createEquivalentFunctions(IFunction &self) {
+boost::python::object
+IFunctionAdapter::createEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
-  for(auto fun : functions) {
+  for (auto fun : functions) {
     list.append(fun);
   }
   return list;
 }
-
 
 /**
  * Value of i-th active parameter. If this functions is overridden

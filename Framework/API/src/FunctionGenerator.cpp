@@ -124,7 +124,8 @@ void FunctionGenerator::setError(size_t i, double err) {
 }
 
 /// Change status of parameter
-void FunctionGenerator::setParameterStatus(size_t i, IFunction::ParameterStatus status) {
+void FunctionGenerator::setParameterStatus(size_t i,
+                                           IFunction::ParameterStatus status) {
   if (i < m_nOwnParams) {
     m_source->setParameterStatus(i, status);
   } else {
@@ -134,7 +135,8 @@ void FunctionGenerator::setParameterStatus(size_t i, IFunction::ParameterStatus 
 }
 
 /// Get status of parameter
-IFunction::ParameterStatus FunctionGenerator::getParameterStatus(size_t i) const {
+IFunction::ParameterStatus
+FunctionGenerator::getParameterStatus(size_t i) const {
   if (i < m_nOwnParams) {
     return m_source->getParameterStatus(i);
   } else {
@@ -290,8 +292,6 @@ IConstraint *FunctionGenerator::getConstraint(size_t i) const {
   }
   return constraint;
 }
-
-
 
 } // namespace API
 } // namespace Mantid

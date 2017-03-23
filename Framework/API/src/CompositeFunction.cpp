@@ -326,13 +326,15 @@ std::string CompositeFunction::descriptionOfActive(size_t i) const {
 }
 
 /// Change status of parameter
-void CompositeFunction::setParameterStatus(size_t i, IFunction::ParameterStatus status) {
+void CompositeFunction::setParameterStatus(size_t i,
+                                           IFunction::ParameterStatus status) {
   size_t iFun = functionIndex(i);
   m_functions[iFun]->setParameterStatus(i - m_paramOffsets[iFun], status);
 }
 
 /// Get status of parameter
-IFunction::ParameterStatus CompositeFunction::getParameterStatus(size_t i) const {
+IFunction::ParameterStatus
+CompositeFunction::getParameterStatus(size_t i) const {
   size_t iFun = functionIndex(i);
   return m_functions[iFun]->getParameterStatus(i - m_paramOffsets[iFun]);
 }
@@ -409,7 +411,7 @@ void CompositeFunction::removeFunction(size_t i) {
   // Number of parameters in functions preceding the removed one.
   // Indices of those parameters won't change
   size_t nParamsBeforeRemoved = m_paramOffsets[i];
-  // 
+  //
 
   // Shift down the function indeces for parameters
   for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {

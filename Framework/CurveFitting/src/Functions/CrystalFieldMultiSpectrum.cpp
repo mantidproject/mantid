@@ -382,7 +382,8 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
     for (size_t i = 0; i < temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i], fwhms[i], i);
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i],
+                     fwhms[i], i);
     }
   } catch (std::out_of_range &) {
     buildTargetFunction();
@@ -427,8 +428,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     calcExcitations(nre, en, wf, temperature, values, iSpec);
     auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
     m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-        composite, peakShape, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
-        fwhmVariation, fwhm, fixAllPeaks);
+        composite, peakShape, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec],
+        m_fwhmY[iSpec], fwhmVariation, fwhm, fixAllPeaks);
   }
 }
 

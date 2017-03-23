@@ -280,10 +280,9 @@ public:
     icf.applyTies();
 
     auto icfString = icf.asString();
-    TS_ASSERT_EQUALS(
-        icfString.substr(0, 91),
-        "name=ImmutableCompositeFunctionTest_"
-        "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(");
+    TS_ASSERT_EQUALS(icfString.substr(0, 91),
+                     "name=ImmutableCompositeFunctionTest_"
+                     "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(");
     auto icfTies = icfString.substr(91);
     TS_ASSERT(icfTies.find("a2=a1/5") != std::string::npos)
     TS_ASSERT(icfTies.find("b2=b1") != std::string::npos)

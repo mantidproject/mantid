@@ -351,6 +351,7 @@ public:
 /// during fit.
 class MANTID_KERNEL_DLL FitSizeWarning final : public std::exception {
   std::string m_message;
+
 public:
   explicit FitSizeWarning(size_t oldSize);
   FitSizeWarning(size_t oldSize, size_t newSize);

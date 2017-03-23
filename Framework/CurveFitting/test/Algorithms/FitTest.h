@@ -2032,7 +2032,8 @@ public:
 
   void test_fit_size_change() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2*exp(-(5*x + x*x - 3*x*x*x)); }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); },
+        1, 0, 1, 0.1);
     {
       API::IFunction_sptr fun =
           boost::make_shared<TestHelpers::FunctionChangesNParams>();
@@ -2080,7 +2081,7 @@ public:
 
   void test_fit_size_change_1() {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        [](double x, int) { return 2 + x - 0.1*x*x; }, 1, 0, 1, 0.1);
+        [](double x, int) { return 2 + x - 0.1 * x * x; }, 1, 0, 1, 0.1);
     {
       API::IFunction_sptr fun =
           boost::make_shared<TestHelpers::FunctionChangesNParams>();
