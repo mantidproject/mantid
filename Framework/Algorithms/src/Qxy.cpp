@@ -49,6 +49,9 @@ void Qxy::init() {
       "The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy).");
   declareProperty("DeltaQ", -1.0, mustBePositive,
                   "The dimension of a Qx-Qy cell.");
+  declareProperty("IQxQyLogBinning", false,
+                  "I(qx,qy) log binning when binning is not specified.",
+                  Kernel::Direction::Input);
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "PixelAdj", "", Direction::Input, PropertyMode::Optional),
                   "The scaling to apply to each spectrum e.g. for detector "
@@ -357,7 +360,8 @@ API::MatrixWorkspace_sptr
 Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   const double max = getProperty("MaxQxy");
   const double delta = getProperty("DeltaQ");
-
+  const bool log_binning = getProperty("IQxQyLogBinning");
+ 
   int bins = static_cast<int>(max / delta);
   if (bins * delta != max)
     ++bins; // Stop at first boundary past MaxQxy if max is not a multiple of
