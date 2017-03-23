@@ -90,7 +90,6 @@ void CrystalFieldSpectrum::updateTargetFunction() const {
   m_target->setAttribute("NumDeriv", this->getAttribute("NumDeriv"));
   auto &spectrum = dynamic_cast<CompositeFunction &>(*m_target);
   m_nPeaks = CrystalFieldUtils::calculateNPeaks(values);
-  auto maxNPeaks = CrystalFieldUtils::calculateMaxNPeaks(m_nPeaks);
   CrystalFieldUtils::updateSpectrumFunction(
       spectrum, peakShape, values, m_nPeaks, 0, xVec, yVec, fwhmVariation,
       defaultFWHM, fixAllPeaks);
