@@ -1499,7 +1499,7 @@ class DataProcessorWhiteList
 %End
 public:
 DataProcessorWhiteList();
-void addElement(const QString &, const QString &, const QString &, bool, const QString &);
+void addElement(const QString &, const QString &, const QString &, bool showValue = false, const QString &prefix = "");
 };
 
 class DataProcessorPreprocessMap
@@ -1509,7 +1509,7 @@ class DataProcessorPreprocessMap
 %End
 public:
 DataProcessorPreprocessMap();
-void addElement(const QString &, const QString &, const QString &, const QString &);
+void addElement(const QString &, const QString &, const QString &prefix = "", const QString &blacklist = "");
 };
 
 class DataProcessorProcessingAlgorithm
@@ -1518,7 +1518,7 @@ class DataProcessorProcessingAlgorithm
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
 %End
 public:
-DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &);
+DataProcessorProcessingAlgorithm(const QString &, const QString &, const QString &blacklist = "");
 };
 
 class DataProcessorPostprocessingAlgorithm
@@ -1573,7 +1573,6 @@ DataProcessorMainPresenter();
 virtual QString getPreprocessingOptionsAsString() const;
 virtual QString getProcessingOptions() const;
 virtual QString getPostprocessingOptions() const;
-virtual QString getTimeSlicingOptions() const;
 
 virtual void notifyADSChanged(const QSet<QString> &);
 };
