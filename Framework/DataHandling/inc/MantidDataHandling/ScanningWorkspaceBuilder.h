@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** ScanningWorkspaceHelper : TODO: DESCRIPTION
+/** ScanningWorkspaceBuilder : TODO: DESCRIPTION
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -33,14 +33,19 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_DATAHANDLING_DLL ScanningWorkspaceHelper {
+class MANTID_DATAHANDLING_DLL ScanningWorkspaceBuilder {
 
 public:
-  ScanningWorkspaceHelper(size_t nDetectors, size_t nTimeIndexes, size_t nBins);
+  ScanningWorkspaceBuilder(size_t nDetectors, size_t nTimeIndexes,
+                           size_t nBins);
 
   void setInstrument(boost::shared_ptr<const Geometry::Instrument> instrument);
-  void setTimeRanges(const std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
-  void setTimeRanges(const Kernel::DateAndTime &startTime, const std::vector<double> &durations);
+  void setTimeRanges(const std::vector<
+      std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
+  void setTimeRanges(const Kernel::DateAndTime &startTime,
+                     const std::vector<double> &durations);
+  void setPositions(std::vector<std::vector<Kernel::V3D>>);
+  void setRotations(std::vector<std::vector<Kernel::Quat>>);
 
   API::MatrixWorkspace_sptr buildWorkspace();
 
@@ -51,11 +56,14 @@ private:
 
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
+  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_positions;
+  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_rotations;
 
   void verifyTimeIndexSize(size_t inputSize, const std::string &description);
+  void validateInputs();
 };
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_SCANNINGWORKSPACEHELPER_H_ */
+#endif /* MANTID_DATAHANDLING_SCANNINGWORKSPACEBUILDER_H_ */
