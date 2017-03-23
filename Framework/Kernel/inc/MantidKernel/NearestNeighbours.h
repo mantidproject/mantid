@@ -122,7 +122,8 @@ public:
     for (size_t i = 0; i < points.size(); ++i) {
       Eigen::Map<VectorType>(m_dataPoints->mutablePoint(i), N, 1) = points[i];
     }
-    m_kdTree = make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints, static_cast<int>(N));
+    m_kdTree = make_unique<ANNkd_tree>(m_dataPoints->rawData(), numPoints,
+                                       static_cast<int>(N));
   }
 
   ~NearestNeighbours() { annClose(); }
