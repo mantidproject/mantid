@@ -1,10 +1,12 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.simpleapi import *  # noqa
-from mantid.kernel import *  # noqa
-from mantid.api import *  # noqa
-from mantid import mtd
 import numpy
+from mantid import mtd
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, \
+    FloatArrayMandatoryValidator, IntBoundedValidator
+from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
+    FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import *  # noqa
 
 
 class IndirectILLReductionQENS(PythonAlgorithm):

@@ -1,17 +1,18 @@
 from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
-from mantid.simpleapi import *  # noqa
-from mantid.kernel import *  # noqa
-from mantid.api import *  # noqa
 from mantid import config, mtd, logger
+from mantid.kernel import StringListValidator, Direction
+from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
+    WorkspaceGroupProperty, FileAction, Progress
+from mantid.simpleapi import *  # noqa
 
 
 def _ws_or_none(s):
     return mtd[s] if s != '' else None
 
 
-def extract_workspace(ws, ws_out, x_start, x_end):
+def _extract_workspace(ws, ws_out, x_start, x_end):
     """
     Extracts a part of the workspace and
     shifts the x-axis to start from 0
@@ -295,8 +296,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             size = mtd[self._ws].blocksize()
             left = self._ws + '_left'
             right = self._ws + '_right'
-            extract_workspace(self._ws, left, 0, int(size/2))
-            extract_workspace(self._ws, right, int(size/2), size)
+            _extract_workspace(self._ws, left, 0, int(size/2))
+            _extract_workspace(self._ws, right, int(size/2), size)
             DeleteWorkspace(self._ws)
             self._reduce_one_wing(left)
             self._reduce_one_wing(right)

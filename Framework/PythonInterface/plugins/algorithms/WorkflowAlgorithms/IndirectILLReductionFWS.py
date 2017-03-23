@@ -1,12 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-
-from mantid.simpleapi import *  # noqa
-from mantid.kernel import *  # noqa
-from mantid.api import *  # noqa
-from mantid import mtd
 import numpy as np
 import time
+from mantid import mtd
+from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
+from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import *  # noqa
 
 
 def _insert_energy_value(ws_name, energy):
