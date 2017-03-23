@@ -230,9 +230,18 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             right = mtd[groupws].getItem(1).getName()
             sum = '__sum_'+groupws
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
+
+            left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
+            right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
+
             DeleteWorkspace(left)
             DeleteWorkspace(right)
+
+            if left_monitor != 0. and right_monitor != 0.:
+                Scale(InputWorkspace=sum, OutputWorkspace=sum, Factor=0.5)
+
             RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
+
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
 
@@ -376,7 +385,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                     SplineInterpolation(WorkspaceToInterpolate=ws,
                                         WorkspaceToMatch=ref,
                                         OutputWorkspace=ws)
-                    # add Linear2Point=True, when ready
+                    # TODO: add Linear2Point=True when ready
 
     def _subtract_background(self):
         '''

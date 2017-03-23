@@ -403,6 +403,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             if mtd[int].readY(0)[0] !=0: # this needs to be checked
                 Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1. / mtd[int].readY(0)[0])
 
+            # remember the integral of the monitor
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int].readY(0)[0]))
+
             DeleteWorkspace(int)
 
         elif self._reduction_type == 'IFWS':
@@ -424,6 +427,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             if mtd[int].readY(0)[0] != 0: # this needs to be checked
                 Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int].readY(0)[0])
+
+            # remember the integral of the monitor
+            AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number", LogText=str(mtd[int].readY(0)[0]))
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
