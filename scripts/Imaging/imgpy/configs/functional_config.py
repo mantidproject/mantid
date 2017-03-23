@@ -71,7 +71,7 @@ class FunctionalConfig(object):
         self.parallel_load = False
 
         # imopr
-        # self.imopr = None
+        self.imopr = None
 
         # aggregate
         self.aggregate = None
@@ -116,13 +116,13 @@ class FunctionalConfig(object):
                + "Cores: {0}\n".format(str(self.cores)) \
                + "Chunk per worker: {0}\n".format(str(self.chunksize)) \
                + "Load data in parallel: {0}\n".format(str(self.parallel_load)) \
+               + "Image operator mode: {0}\n".format(str(self.imopr)) \
                + "Aggregate mode: {0}\n".format(str(self.aggregate)) \
                + "Aggregate angles: {0}\n".format(str(self.aggregate_angles)) \
                + "Aggregate single folder output: {0}\n".format(str(self.aggregate_single_folder_output)) \
                + "Convert images mode: {0}\n".format(str(self.convert)) \
                + "Prefix for the output converted images: {0}\n".format(str(self.convert_prefix)) \
                + "Running the GUI: {0}\n".format(str(self.gui))
-        #    + "Image operator mode: {0}\n".format(str(self.imopr)) \
 
     def setup_parser(self, parser):
         """
@@ -327,15 +327,15 @@ class FunctionalConfig(object):
             default=self.convert_prefix,
             help='Prefix for saved out files from conversion.')
 
-        # from imopr import imopr
-        # grp_run_modes.add_argument(
-        #     "--imopr",
-        #     nargs='*',
-        #     required=False,
-        #     type=str,
-        #     default=self.imopr,
-        #     help='Image operator currently supports the following operators: '
-        #     + str(imopr.get_available_operators()))
+        from imopr import imopr
+        grp_run_modes.add_argument(
+            "--imopr",
+            nargs='*',
+            required=False,
+            type=str,
+            default=self.imopr,
+            help='Image operator currently supports the following operators: '
+            + str(imopr.get_available_operators()))
 
         grp_run_modes.add_argument(
             "--aggregate",
@@ -519,7 +519,7 @@ class FunctionalConfig(object):
         self.parallel_load = args.parallel_load
         self.convert = args.convert
         self.convert_prefix = args.convert_prefix
-        # self.imopr = args.imopr
+        self.imopr = args.imopr
         self.aggregate = args.aggregate
         self.aggregate_angles = args.aggregate_angles
         self.aggregate_single_folder_output = args.aggregate_single_folder_output

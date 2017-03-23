@@ -48,9 +48,23 @@ def main():
                 stdoutToServer=True,
                 stderrToServer=True)
 
-    from recon import recon
-    cmd_line = " ".join(sys.argv)
-    res = recon.execute(config, cmd_line)
+    # if config.func.gui:
+    #     # this has the highest priority
+    #     from gui import gui
+    #     gui.execute(config)
+    if config.func.imopr:
+        from imopr import imopr
+        res = imopr.execute(config)
+    # elif config.func.aggregate:
+    #     from aggregate import aggregate
+    #     res = aggregate.execute(config)
+    # elif config.func.convert:
+    #     from convert import convert
+    #     res = convert.execute(config)
+    else:
+        from recon import recon
+        cmd_line = " ".join(sys.argv)
+        res = recon.execute(config, cmd_line)
 
     return res
 
