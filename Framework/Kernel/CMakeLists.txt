@@ -71,7 +71,6 @@ set ( SRC_FILES
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
 	src/NDRandomNumberGenerator.cpp
-        src/NearestNeighbours.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
 	src/NormalDistribution.cpp
