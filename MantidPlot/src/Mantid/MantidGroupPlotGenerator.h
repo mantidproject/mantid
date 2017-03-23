@@ -6,7 +6,7 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidMatrix.h"
 #include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
-#include <MantidQtMantidWidgets/MantidSurfacePlotDialog.h>
+#include <MantidQtMantidWidgets/MantidDisplayBase.h>
 
 /**
 * This utility class generates a surface or contour plot from a group of
