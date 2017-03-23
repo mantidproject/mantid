@@ -32,7 +32,9 @@ BoundaryConstraint::BoundaryConstraint()
 /// @param paramName :: The parameter name
 BoundaryConstraint::BoundaryConstraint(const std::string &paramName)
     : API::IConstraint(), m_penaltyFactor(1000.0), m_hasLowerBound(false),
-      m_hasUpperBound(false) {UNUSED_ARG(paramName);}
+      m_hasUpperBound(false) {
+  UNUSED_ARG(paramName);
+}
 
 /** Constructor with boundary arguments
  * @param fun :: The function
