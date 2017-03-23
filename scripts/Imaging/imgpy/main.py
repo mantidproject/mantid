@@ -58,9 +58,9 @@ def main():
     elif config.func.aggregate:
         from aggregate import aggregate
         res = aggregate.execute(config)
-    # elif config.func.convert:
-    #     from convert import convert
-    #     res = convert.execute(config)
+    elif config.func.convert:
+        from convert import convert
+        res = convert.execute(config)
     else:
         from recon import recon
         cmd_line = " ".join(sys.argv)
