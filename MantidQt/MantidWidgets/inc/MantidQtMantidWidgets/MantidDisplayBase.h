@@ -102,7 +102,8 @@ public:
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false, MultiLayer *plotWindow = NULL,
-         bool clearWindow = false, bool waterfallPlot = false, const QString &log = "",
+         bool clearWindow = false, bool waterfallPlot = false,
+         const QString &log = "",
          std::set<double> customLogValues = std::set<double>()) = 0;
   virtual void drawColorFillPlots(
       const QStringList &wsNames,
@@ -112,13 +113,14 @@ public:
   plotSubplots(const QMultiMap<QString, std::set<int>> &toPlot,
                MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                bool errs = false, MultiLayer *plotWindow = nullptr) = 0;
-  virtual void plotSurface( bool accepted, int plotIndex, const QString &axisName, 
-         const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) = 0;
-  virtual void plotContour(bool accepted, int plotIndex, const QString &axisName,
-         const QString &logName, const std::set<double> &customLogValues, const QList<QString> &workspaceNames) = 0;
-
-
-
+  virtual void plotSurface(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) = 0;
+  virtual void plotContour(bool accepted, int plotIndex,
+                           const QString &axisName, const QString &logName,
+                           const std::set<double> &customLogValues,
+                           const QList<QString> &workspaceNames) = 0;
 
   // Interface Methods
   virtual void showVatesSimpleInterface() = 0;
@@ -130,7 +132,8 @@ public:
 
   virtual MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
-                             bool showPlotAll, bool showTiledOpt, bool isAdvanced=false ) = 0;
+                             bool showPlotAll, bool showTiledOpt,
+                             bool isAdvanced = false) = 0;
 
   virtual void updateProject() = 0;
   virtual void showCritical(const QString &) {}

@@ -215,7 +215,8 @@ public:
   // Create dialog box for what to plot and how
   MantidQt::MantidWidgets::MantidWSIndexDialog *
   createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
-                             bool showPlotAll, bool showTiledOpt, bool isAdvanced) override;
+                             bool showPlotAll, bool showTiledOpt,
+                             bool isAdvanced) override;
 
   /// Create a 1d graph form a Table
   MultiLayer *createGraphFromTable(Table *t, int type = 0);
@@ -285,25 +286,28 @@ public slots:
          bool errs = false,
          GraphOptions::CurveType style = GraphOptions::Unspecified,
          MultiLayer *plotWindow = NULL, bool clearWindow = false,
-         bool waterfallPlot = false, const QString &log="",
+         bool waterfallPlot = false, const QString &log = "",
          std::set<double> customLogValues = std::set<double>());
 
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
          MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
          bool errs = false, MultiLayer *plotWindow = NULL,
-         bool clearWindow = false, bool waterfallPlot = false, const QString &log = "",
+         bool clearWindow = false, bool waterfallPlot = false,
+         const QString &log = "",
          std::set<double> customLogValues = std::set<double>()) override;
 
   /// Plot contour
   void plotContour(bool accepted, int plotIndex, const QString &axisName,
-    const QString &logName, const std::set<double> &customLogValues, 
-    const QList<QString> &workspaceNames) override;
+                   const QString &logName,
+                   const std::set<double> &customLogValues,
+                   const QList<QString> &workspaceNames) override;
 
   /// Plot surface
   void plotSurface(bool accepted, int plotIndex, const QString &axisName,
-    const QString &logName, const std::set<double> &customLogValues, 
-    const QList<QString> &workspaceNames) override;
+                   const QString &logName,
+                   const std::set<double> &customLogValues,
+                   const QList<QString> &workspaceNames) override;
 
   /// Draw a color fill plot for each of the listed workspaces
   void drawColorFillPlots(

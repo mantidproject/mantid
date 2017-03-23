@@ -52,7 +52,8 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
     throw std::invalid_argument("MantidMatrixCurve::MantidMatrixCurve - NULL "
                                 "graph pointer not allowed");
   }
-  if(!name.isEmpty()) this->setTitle(name);
+  if (!name.isEmpty())
+    this->setTitle(name);
   init(g, distr, style);
 }
 

@@ -27,7 +27,7 @@ class IntervalList;
 
 /**
         The MantidWSIndexDialog class presents users with a dialog so that
-   they may specify which workspace indices / spectra IDs are to be plotted 
+   they may specify which workspace indices / spectra IDs are to be plotted
    by Mantid and the manner by which they are plotted.
 
         They are prompted with the available range(s) of indices/IDs they
@@ -35,14 +35,14 @@ class IntervalList;
    ranges.
 
         "Ranges" are of a format you've probably seen when inputting page
-   numbers to print into a word processing program or similar, 
+   numbers to print into a word processing program or similar,
    i.e. "2, 4-6" to print out pages 2, 4, 5 and 6.
 
         Ranges are defined by the "Interval" and "IntervalList" classes.
 
         The IntervalListValidator class overrides QValidator, and allows
-   Mantid to assertain whether a user has attempted to input a valid range 
-   or not. Altering this class will affect the behaviour of what is allowed 
+   Mantid to assertain whether a user has attempted to input a valid range
+   or not. Altering this class will affect the behaviour of what is allowed
    to be typed, and what inputs allow the "OK" button to be pressed.
 
         TODO - perhaps the interval objects are useful elsewhere, in which
@@ -334,7 +334,8 @@ private:
   /// Populate the log combo box
   void populateLogComboBox();
   /// Get a handle a workspace by name
-  Mantid::API::MatrixWorkspace_const_sptr getWorkspace(const QString& workspaceName) const;
+  Mantid::API::MatrixWorkspace_const_sptr
+  getWorkspace(const QString &workspaceName) const;
   /// Check if workspaces are suitable for contour or surface plot
   bool isSuitableForContourOrSurfacePlot() const;
   /// Check if workspaces are suitable for use of log values
@@ -372,17 +373,18 @@ private:
   /// Do we allow the display of the tiled option
   bool m_tiled;
 
-    /// Is the plotting advanced?
+  /// Is the plotting advanced?
   bool m_advanced;
 
   /// Pointers to the obligatory Qt objects:
-  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_logLabel, *m_customLogLabel, *m_axisLabel;
+  QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_logLabel,
+      *m_customLogLabel, *m_axisLabel;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox;
   QHBoxLayout *m_optionsBox;
   QComboBox *m_plotOptions, *m_logSelector;
   QCheckBox *m_showErrorBars;
-  QLineEdit* m_axisNameEdit, *m_logValues;
+  QLineEdit *m_axisNameEdit, *m_logValues;
 
   /// A list of names of workspaces which are to be plotted.
   QList<QString> m_wsNames;
@@ -401,7 +403,7 @@ public:
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
                       const bool showTiledOption = false,
-                      const bool isAdvanced = false );
+                      const bool isAdvanced = false);
   /// Returns a structure holding all of the selected options
   MantidWSIndexWidget::UserInput getSelections();
   /// Returns the QMultiMap that contains all the workspaces that are to be

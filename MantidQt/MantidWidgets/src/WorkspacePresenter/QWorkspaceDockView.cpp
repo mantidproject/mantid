@@ -597,7 +597,8 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
           SLOT(onClickPlotSpectraErr()));
 
   m_plotSpecAdv = new QAction(tr("Plot Spectrum Advanced..."), this);
-  connect(m_plotSpecAdv, SIGNAL(triggered()), this, SLOT(onClickPlotSpectraAdv()));
+  connect(m_plotSpecAdv, SIGNAL(triggered()), this,
+          SLOT(onClickPlotSpectraAdv()));
 
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this,
@@ -681,7 +682,6 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
 
   m_clearUB = new QAction(tr("Clear UB Matrix"), this);
   connect(m_clearUB, SIGNAL(triggered()), this, SLOT(onClickClearUB()));
-
 }
 
 /**
@@ -1489,19 +1489,20 @@ void QWorkspaceDockView::onClickPlotSpectraAdv() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
 }
 
-
 /** Plots one or more spectra from each selected workspace
-* @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting. 
+* @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
 */
 void QWorkspaceDockView::plotSpectrum(std::string type) {
   const bool isAdvanced = type == "Advanced";
-  const auto userInput = m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
+  const auto userInput =
+      m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
   // An empty map will be returned if the user clicks cancel in the spectrum
   // selection
   if (userInput.plots.empty()) {
     return;
   }
-  bool showErrorBars = ((type == "Errors") || ( type == "Advanced" && userInput.errors ));
+  bool showErrorBars =
+      ((type == "Errors") || (type == "Advanced" && userInput.errors));
 
   // mantidUI knows nothing about userInput, hence the long argument lists.
   if (userInput.tiled) {
@@ -1510,30 +1511,24 @@ void QWorkspaceDockView::plotSpectrum(std::string type) {
   } else if (userInput.simple || userInput.waterfall) {
     if (userInput.isAdvanced) {
       m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
-        showErrorBars, nullptr, false, userInput.waterfall,
-        userInput.advanced.logName, userInput.advanced.customLogValues);
-    }
-    else {
+                         showErrorBars, nullptr, false, userInput.waterfall,
+                         userInput.advanced.logName,
+                         userInput.advanced.customLogValues);
+    } else {
       m_mantidUI->plot1D(userInput.plots, true, MantidQt::DistributionDefault,
-        showErrorBars, nullptr, false, userInput.waterfall);
+                         showErrorBars, nullptr, false, userInput.waterfall);
     }
 
-  }
-  else if (userInput.surface) {
-    m_mantidUI->plotSurface(userInput.advanced.accepted,
-                        userInput.advanced.plotIndex,
-                        userInput.advanced.axisName,
-                        userInput.advanced.logName,
-                        userInput.advanced.customLogValues,
-                        userInput.advanced.workspaceNames);
-  }
-  else if (userInput.contour) {
-    m_mantidUI->plotContour(userInput.advanced.accepted,
-                       userInput.advanced.plotIndex,
-                       userInput.advanced.axisName,
-                       userInput.advanced.logName,
-                       userInput.advanced.customLogValues,
-                       userInput.advanced.workspaceNames);
+  } else if (userInput.surface) {
+    m_mantidUI->plotSurface(
+        userInput.advanced.accepted, userInput.advanced.plotIndex,
+        userInput.advanced.axisName, userInput.advanced.logName,
+        userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
+  } else if (userInput.contour) {
+    m_mantidUI->plotContour(
+        userInput.advanced.accepted, userInput.advanced.plotIndex,
+        userInput.advanced.axisName, userInput.advanced.logName,
+        userInput.advanced.customLogValues, userInput.advanced.workspaceNames);
   }
 }
 

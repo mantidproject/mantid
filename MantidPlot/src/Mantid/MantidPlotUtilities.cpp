@@ -16,8 +16,6 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::ExperimentInfo;
 using Mantid::HistogramData::Histogram;
 
-
-
 /**
  * Gets the given log value from the given workspace as a double.
  * Should be a single-valued log!
@@ -61,9 +59,8 @@ double getSingleWorkspaceLogValue(
 * @param logValues :: [input] User-provided set of log values
 * @returns Numeric log value
 */
-  double
-  getSingleWorkspaceLogValue(int wsIndex,
-                    const std::set<double> &logValues){
+double getSingleWorkspaceLogValue(int wsIndex,
+                                  const std::set<double> &logValues) {
   double value = 0;
   if (wsIndex < static_cast<int>(logValues.size())) {
     auto it = logValues.begin();
@@ -72,4 +69,3 @@ double getSingleWorkspaceLogValue(
   }
   return value;
 }
-
