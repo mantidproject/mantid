@@ -6,9 +6,42 @@
 #include "MantidKernel/make_unique.h"
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>
-#include <type_traits>
 #include <vector>
+
+/**
+  NearestNeighbours is a thin wrapper class around the ANN library for finding
+  the k nearest neighbours.
+
+  Given a vector of Eigen::Vectors this class will generate a KDTree. The tree
+  can then be interrogated to find the closest k neighbours to a given position.
+
+  This classes is templated with a parameter N which defines the dimensionality
+  of the vector type used. i.e. if N = 3 then Eigen::Vector3d is used.
+
+  @author Samuel Jackson
+  @date 2017
+
+  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 namespace Mantid {
 namespace Kernel {
@@ -23,37 +56,13 @@ namespace Kernel {
  */
 class NNDataPoints {
 public:
-  /** Construct a new set of data points
-   *
-   * @param nPts :: the number of data points
-   * @param nElems :: the number of elements for each point
-   */
-  NNDataPoints(const size_t nPts, const size_t nElems) : m_nPts(nPts) {
-    m_data = annAllocPts(static_cast<int>(m_nPts), static_cast<int>(nElems));
-  }
-
-  /** Return a handle to the raw ANNpointArray wrapped by this class
-   *
-   * @return handle to the raw ANNpointArray
-   */
-  ANNpointArray rawData() { return m_data; }
-
-  /** Access a raw point in the collection of points
-   *
-   * This will check the index used is within bounds and return nullptr if
-   * outside of those bounds
-   *
-   * @param i :: the index of the point to return a handle to
-   * @return handle to a single point in the collection of points
-   */
-  ANNcoord *mutablePoint(const size_t i) {
-    if (i < m_nPts)
-      return m_data[i];
-    else
-      return nullptr;
-  }
-
-  ~NNDataPoints() { annDeallocPts(m_data); }
+  /// Construct a new set of data points
+  NNDataPoints(const size_t nPts, const size_t nElems);
+  ~NNDataPoints();
+  /// Return a handle to the raw ANNpointArray wrapped by this class
+  ANNpointArray rawData();
+  /// Access a raw point in the collection of points
+  ANNcoord *mutablePoint(const size_t i);
   NNDataPoints(const NNDataPoints &) = delete;
 
 private:
@@ -77,7 +86,7 @@ public:
 
   /** Create a nearest neighbour search object
    *
-   * @param points :: vector of Eigen::Arrays to search through
+   * @param points :: vector of Eigen::Vectors to search through
    */
   NearestNeighbours(const std::vector<VectorType> &points) {
     const auto numPoints = static_cast<int>(points.size());
