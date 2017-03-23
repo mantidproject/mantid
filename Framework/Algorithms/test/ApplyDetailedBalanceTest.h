@@ -128,7 +128,8 @@ public:
 
   void test_units() {
     createWorkspace2D(true);
-    TS_ASSERT_EQUALS(inputWSname->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(inputWSname->getAxis(0)->unit()->unitID(),
+                     "DeltaE_inFrequency");
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWSname);
     alg.setPropertyValue("OutputWorkspace", outputWSname);
