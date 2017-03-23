@@ -237,13 +237,13 @@ void ILLEnergyTransfer::run() {
 
   // Keep track of the suffix
   if (target == "SpectrumNumber") {
-      m_suffix = "_red";
+    m_suffix = "_red";
   } else if (target == "2Theta") {
-      m_suffix = "_2theta";
+    m_suffix = "_2theta";
   } else if (target == "Q") {
-      m_suffix = "_q";
+    m_suffix = "_q";
   } else if (target == "Q2") {
-      m_suffix = "_q2";
+    m_suffix = "_q2";
   }
 
   // Handle mapping file
