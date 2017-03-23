@@ -245,10 +245,10 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
   if (m_isButtonPressed && event->button() == Qt::LeftButton) {
     emit zoom();
   } else if (m_isButtonPressed && event->button() == Qt::RightButton) {
-    if(m_rect.width() > 1 && m_rect.height() > 1) {
-        emit unzoom();
+    if (m_rect.width() > 1 && m_rect.height() > 1) {
+      emit unzoom();
     } else {
-        emit resetZoom();
+      emit resetZoom();
     }
   }
   m_rect = QRect(); // reset rect
