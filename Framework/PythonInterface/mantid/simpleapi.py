@@ -24,6 +24,7 @@ from __future__ import (absolute_import, division,
 
 from six import iteritems
 from collections import OrderedDict, namedtuple
+import os
 
 from . import api as _api
 from . import kernel as _kernel
