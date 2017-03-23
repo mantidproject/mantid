@@ -55,9 +55,9 @@ def main():
     if config.func.imopr:
         from imopr import imopr
         res = imopr.execute(config)
-    # elif config.func.aggregate:
-    #     from aggregate import aggregate
-    #     res = aggregate.execute(config)
+    elif config.func.aggregate:
+        from aggregate import aggregate
+        res = aggregate.execute(config)
     # elif config.func.convert:
     #     from convert import convert
     #     res = convert.execute(config)
