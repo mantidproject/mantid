@@ -248,7 +248,7 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
 
   std::vector<double> tolerancesVector(numberNames);
 
-  if (numberNames == numberTolerances) {
+  if (numberNames == numberTolerances && numberTolerances > 1) {
     try {
       std::transform(tolerances.begin(), tolerances.end(),
                      tolerancesVector.begin(),
@@ -262,11 +262,17 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
                               "ensure each comma separated value is within "
                               "double precision range.");
     }
+    for (auto value : tolerancesVector) {
+      if (value < 0)
+        throw std::out_of_range("Error when creating tolerances vector. Please "
+                                "ensure all tolerance values are positive.");
+    }
   } else if (tolerances.empty()) {
     std::fill(tolerancesVector.begin(), tolerancesVector.end(), -1.0);
   } else if (numberTolerances == 1) {
+    double value;
     try {
-      double value = std::stod(tolerances.front());
+      value = std::stod(tolerances.front());
       std::fill(tolerancesVector.begin(), tolerancesVector.end(), value);
     } catch (std::invalid_argument &) {
       throw std::invalid_argument("The single tolerance value requested can "
@@ -278,6 +284,9 @@ std::vector<double> SampleLogsBehaviour::createTolerancesVector(
                               "converted to a double. Please ensure tolerance "
                               "is within double precision range.");
     }
+    if (value < 0)
+      throw std::out_of_range("The single tolerance value requested is "
+                              "negative. Please ensure it is positive.");
   } else {
     throw std::invalid_argument("Invalid length of tolerances, found " +
                                 std::to_string(numberTolerances) +

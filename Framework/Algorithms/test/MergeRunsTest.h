@@ -1455,6 +1455,20 @@ public:
         alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
   }
 
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 0.0, 0.0, 0.0, 0.0, "-1.0");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2, true);
+  }
+
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance_in_a_list() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1, prop2", 0.0, 0.0, 0.0, 0.0, "-0.5, 1.5");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1, true);
+  }
+
 private:
   MergeRuns merge;
 };
