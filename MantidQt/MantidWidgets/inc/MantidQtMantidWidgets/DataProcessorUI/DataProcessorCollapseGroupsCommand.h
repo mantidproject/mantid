@@ -43,9 +43,9 @@ public:
   std::string icon() override { return std::string("://collapse_all.png"); }
   std::string tooltip() override { return std::string("Collapse all groups"); }
   std::string whatsthis() override {
-    return std::string("If any groups in the interface are currently expanded "
-                       "this will collapse all expanded groups, hiding their "
-                       "individual runs.");
+    return std::string(
+        "If any groups in the table are currently expanded this will collapse "
+        "all expanded groups, hiding their individual runs.");
   }
   std::string shortcut() override { return std::string(); }
 };
