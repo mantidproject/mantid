@@ -79,8 +79,7 @@ public:
    *
    * @param points :: vector of Eigen::Arrays to search through
    */
-  NearestNeighbours(const std::vector<
-      ArrayType> &points) {
+  NearestNeighbours(const std::vector<ArrayType> &points) {
     const auto numPoints = static_cast<int>(points.size());
     if (numPoints == 0)
       std::runtime_error(

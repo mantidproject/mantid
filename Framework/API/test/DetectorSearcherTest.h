@@ -29,8 +29,10 @@ public:
     ExperimentInfo expInfo2;
     expInfo2.setInstrument(inst2);
 
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
-    TS_ASSERT_THROWS_NOTHING(DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(
+        DetectorSearcher searcher(inst1, expInfo1.detectorInfo()))
+    TS_ASSERT_THROWS_NOTHING(
+        DetectorSearcher searcher(inst2, expInfo2.detectorInfo()))
   }
 
   void test_search_cylindrical() {
@@ -82,7 +84,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const auto& info = expInfo.detectorInfo();
+    const auto &info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
@@ -97,7 +99,7 @@ public:
         3, V3D(0, 0, -1), V3D(0, 0, 0), 1.6, 1.0);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const auto& info = expInfo.detectorInfo();
+    const auto &info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto resultNull = searcher.findDetectorIndex(V3D(0, 0, 0));
@@ -112,7 +114,7 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const auto& info = expInfo.detectorInfo();
+    const auto &info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
     const auto checkResult = [&searcher](V3D q, size_t index) {
@@ -153,7 +155,7 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 100);
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const auto& info = expInfo.detectorInfo();
+    const auto &info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
 
@@ -198,7 +200,7 @@ public:
 
     ExperimentInfo expInfo;
     expInfo.setInstrument(inst);
-    const auto& info = expInfo.detectorInfo();
+    const auto &info = expInfo.detectorInfo();
 
     DetectorSearcher searcher(inst, info);
 
