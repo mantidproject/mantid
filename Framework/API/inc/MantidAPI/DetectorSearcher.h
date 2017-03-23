@@ -1,11 +1,12 @@
 #ifndef MANTID_DETECTOR_SEARCHER_H_
 #define MANTID_DETECTOR_SEARCHER_H_
 
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/NearestNeighbours.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
+#include "MantidKernel/NearestNeighbours.h"
+#include "MantidKernel/V3D.h"
 
 #include <Eigen/Core>
 
@@ -51,7 +52,7 @@
 namespace Mantid {
 namespace API {
 
-class DetectorSearcher {
+class MANTID_API_DLL DetectorSearcher {
 public:
   typedef std::tuple<bool, size_t> DetectorSearchResult;
 
