@@ -229,6 +229,37 @@ std::string readString(H5::DataSet &dataset) {
   return value;
 }
 
+/**
+ * Returns 1D vector of variable length strings
+ * @param group :: H5::Group already opened
+ * @param name :: name of the dataset in the group (rank must be 1)
+ * @return :: vector of strings
+ */
+std::vector<std::string> readStringVector(Group &group,
+                                          const std::string &name) {
+  hsize_t dims[1];
+  char **rdata;
+  std::vector<std::string> result;
+
+  DataSet dataset = group.openDataSet(name);
+  DataSpace dataspace = dataset.getSpace();
+  DataType datatype = dataset.getDataType();
+
+  dataspace.getSimpleExtentDims(dims, NULL);
+
+  rdata = new char *[dims[0]];
+  dataset.read(rdata, datatype);
+
+  for (size_t i = 0; i < dims[0]; ++i)
+    result.emplace_back(std::string(rdata[i]));
+
+  dataset.vlenReclaim(rdata, datatype, dataspace);
+  dataset.close();
+  delete[] rdata;
+
+  return result;
+}
+
 template <typename LocationType>
 std::string readAttributeAsString(LocationType &location,
                                   const std::string &attributeName) {
