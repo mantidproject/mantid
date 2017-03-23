@@ -49,13 +49,15 @@ public:
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
+  /// Return the detector position of the peak
+  double fitReflectometryPeak(std::string beam = "ReflectedBeam",
+                         std::string angleDirectBeam = "");
 
 private:
   void init() override;
   void exec() override;
 
-  void initWorkspace(API::MatrixWorkspace_sptr &workspace,
-                     std::vector<std::vector<int>> monitorsData);
+  void initWorkspace(std::vector<std::vector<int>> monitorsData);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
@@ -64,12 +66,13 @@ private:
   void loadData(NeXus::NXEntry &entry,
                 std::vector<std::vector<int>> monitorsData,
                 std::vector<double> &xVals);
-  void loadNexusEntriesIntoProperties(std::string nexusfilename);
+  void loadNexusEntriesIntoProperties(NeXus::NXEntry &entry);
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
                                      std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
-  double fitPeakPosition(std::string beam = "ReflectedBeam");
+  void loadBeam(API::MatrixWorkspace_sptr &beamWS, const std::string beam,
+                const std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
 
@@ -82,8 +85,9 @@ private:
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{
       0}; // number of tubes (always 1) times number of pixels per tube
-  double m_wavelength{0};
-  double m_channelWidth{0};
+  double m_wavelength{0.0};
+  double m_channelWidth{0.0};
+  double m_BraggAngleDirectBeam{0.0};
   std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",
                                                          "figaro"};
   Mantid::DataHandling::LoadHelper m_loader;

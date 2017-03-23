@@ -19,8 +19,6 @@ class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17File{"ILLD17-161876-Ni.nxs"};
   const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
-  LoadILLReflectometry loader;
-  LoadEmptyInstrument instr;
 
 public:
   // Name of the output workspace
@@ -32,14 +30,18 @@ public:
   }
   static void destroySuite(LoadILLReflectometryTest *suite) { delete suite; }
 
-  void testInit() {
+  void testName() {
+    LoadILLReflectometry loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT(loader.isInitialized());
+    TS_ASSERT_EQUALS(loader.name(), "LoadILLReflectometry");
   }
 
-  void testName() { TS_ASSERT_EQUALS(loader.name(), "LoadILLReflectometry"); }
-
-  void testVersion() { TS_ASSERT_EQUALS(loader.version(), 1); }
+  void testVersion() {
+    LoadILLReflectometry loader;
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_EQUALS(loader.version(), 1);
+  }
 
   void testInstrumentD17() { checkInstrument("D17", outWSName); }
 
@@ -56,10 +58,12 @@ public:
   // D17
 
   void testPropertiesD17() {
-    MatrixWorkspace_sptr output = getWorkspaceFor(m_d17File, outWSName);
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, outWSName);
     commonProperties(output);
     TS_ASSERT_EQUALS(
-        output->run().getPropertyValueAsType<double>("channel_width"), 57.0);
+        output->run().getPropertyValueAsType<double>("PSD.time_of_flight_0"),
+        57.0);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("dan.value"),
                      3.1909999847412109);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
@@ -67,37 +71,35 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  // void testInputThetaD17() { loadSpecificThrows(m_d17File, outWSName,
-  // "BraggAngleIs", "theta");
-  // }
-
-  // void testThetaUserDefinedD17() {
-  //  loadSpecificThrows(m_d17File, outWSName, "BraggAngle", "0.5");
-  //}
+  void testInputThetaD17() {
+    loadSpecificThrows(m_d17File, outWSName, "BraggAngleIs", "user defined");
+  }
 
   void testWavelengthD17() {
     // default "XUnit" = "Wavelength"
-    MatrixWorkspace_sptr output = getWorkspaceFor(m_d17File, outWSName);
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, outWSName);
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
     // Test x values, minimum and maximum, first detector
-    TS_ASSERT_DELTA(output->x(2)[0], -0.22089473, 1e-6);
-    TS_ASSERT_DELTA(output->x(2)[1000], 30.79137933, 1e-6);
+    TS_ASSERT_EQUALS(output->x(2)[0], -0.23365761888763453);
+    TS_ASSERT_EQUALS(output->x(2)[1000], 30.778616441233407);
     AnalysisDataService::Instance().clear();
   }
 
   void testTOFD17() {
-    MatrixWorkspace_sptr output =
-        getWorkspaceFor(m_d17File, outWSName, "XUnit", "TimeOfFlight");
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, outWSName, "XUnit", "TimeOfFlight");
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "TOF");
     // Test x values, minimum and maximum, first detector
-    TS_ASSERT_DELTA(output->x(2)[0], -406.00052788, 1e-6);
-    TS_ASSERT_DELTA(output->x(2)[1000], 56593.99947212, 1e-6);
+    TS_ASSERT_EQUALS(output->x(2)[0], -429.45848636496885);
+    TS_ASSERT_EQUALS(output->x(2)[1000], 56570.541513635035);
     AnalysisDataService::Instance().clear();
   }
 
   void test2ThetaD17() {
     // default BraggAngleIs = "sample angle"
-    MatrixWorkspace_sptr output = getWorkspaceFor(m_d17File, outWSName);
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_d17File, outWSName);
     // Compare angles in rad
     const auto &spectrumInfo = output->spectrumInfo();
     // Check twoTheta between two center detectors 128 and 129 using workspace
@@ -110,13 +112,56 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testDirectBeamD17() {
+    LoadILLReflectometry loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_d17File));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("BraggAngleIs", "detector angle"));
+    // Direct beam is the reflected beam
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", m_d17File));
+    TS_ASSERT_EQUALS(
+        loader.fitReflectometryPeak("DirectBeam", "detector angle"), 200.463);
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+  }
+
+  void testGaussianFitD17() {
+    LoadILLReflectometry loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_d17File));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("BraggAngleIs", "detector angle"));
+    // Direct beam is the reflected beam
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", m_d17File));
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    if (loader.isExecuted()) {
+      MatrixWorkspace_sptr output =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              outWSName);
+      TS_ASSERT(output);
+    }
+    AnalysisDataService::Instance().clear();
+  }
+
   // Figaro
 
   void testPropertiesFigaro() {
-    MatrixWorkspace_sptr output = getWorkspaceFor(m_figaroFile, outWSName);
+    MatrixWorkspace_sptr output;
+    getWorkspaceFor(output, m_figaroFile, outWSName);
     commonProperties(output);
     TS_ASSERT_EQUALS(
-        output->run().getPropertyValueAsType<double>("channel_width"), 40.0);
+        output->run().getPropertyValueAsType<double>("PSD.time_of_flight_0"),
+        40.0);
     TS_ASSERT_DELTA(output->run().getPropertyValueAsType<double>("san.value"),
                     1.3877788e-17, 1e-16);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
@@ -128,6 +173,7 @@ public:
 
   void checkInstrument(const std::string &instrName,
                        const std::string outFile) {
+    LoadEmptyInstrument instr;
     instr.setRethrows(true);
     instr.initialize();
     TS_ASSERT(instr.isInitialized());
@@ -137,43 +183,47 @@ public:
     TS_ASSERT(instr.isExecuted());
   }
 
-  void loadSpecific(const std::string fileName, const std::string outFile,
+  bool loadSpecific(const std::string fileName, const std::string outFile,
                     std::string property = "", std::string value = "") {
+    LoadILLReflectometry loader;
     loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", fileName));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", outFile));
     if (property != "" && value != "") {
       loader.setPropertyValue(property, value);
     }
-    loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
+    return loader.isExecuted();
   }
 
-  MatrixWorkspace_sptr getWorkspaceFor(const std::string fileName,
-                                       const std::string outFile,
-                                       std::string property = "",
-                                       std::string value = "") {
-    loadSpecific(fileName, outFile, property, value);
-    MatrixWorkspace_sptr output =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outFile);
-    TS_ASSERT(output);
-    return output;
+  void getWorkspaceFor(MatrixWorkspace_sptr &output, const std::string fileName,
+                       const std::string outFile, std::string property = "",
+                       std::string value = "") {
+    bool success = loadSpecific(fileName, outFile, property, value);
+    if (success) {
+      output =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outFile);
+      TS_ASSERT(output);
+    }
   }
 
   void loadSpecificThrows(const std::string fileName, const std::string outFile,
                           std::string property = "", std::string value = "") {
+    LoadILLReflectometry loader;
     loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", fileName));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", outFile));
     if (property != "" && value != "") {
-      loader.setPropertyValue(property, value);
+      TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue(property, value));
     }
-    loader.initialize();
     TS_ASSERT_THROWS_ANYTHING(loader.execute(););
-    TS_ASSERT(loader.isExecuted());
   }
 
   void commonProperties(MatrixWorkspace_sptr output) {
@@ -192,9 +242,7 @@ public:
     double counts{0.0};
     for (size_t i = 2; i < output->getNumberHistograms(); ++i) {
       auto &values = output->y(i);
-      for (size_t k = 0; k < output->blocksize(); ++k) {
-        counts += values[k];
-      }
+      counts = std::accumulate(values.begin(), values.end(), counts);
     }
     return counts;
   }
