@@ -2051,8 +2051,6 @@ public:
       TS_ASSERT_DELTA(fun->getParameter(2), 19.1074, 0.1);
       TS_ASSERT_DELTA(fun->getParameter(3), -17.8434, 0.1);
       TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
-      std::string status = fit.getProperty("OutputStatus");
-      TS_ASSERT_EQUALS(status, "success");
     }
     {
       API::IFunction_sptr fun =

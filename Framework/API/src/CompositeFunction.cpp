@@ -408,10 +408,6 @@ void CompositeFunction::removeFunction(size_t i) {
       j++;
     }
   }
-  // Number of parameters in functions preceding the removed one.
-  // Indices of those parameters won't change
-  size_t nParamsBeforeRemoved = m_paramOffsets[i];
-  //
 
   // Shift down the function indeces for parameters
   for (auto it = m_IFunction.begin(); it != m_IFunction.end();) {

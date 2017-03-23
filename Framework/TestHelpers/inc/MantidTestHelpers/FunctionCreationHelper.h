@@ -12,7 +12,7 @@ class FunctionChangesNParams : public Mantid::API::IFunction1D,
                                public Mantid::API::ParamFunction {
 public:
   FunctionChangesNParams();
-  std::string name() const;
+  std::string name() const override;
   void iterationStarting() override;
   void iterationFinished() override;
 
