@@ -3,14 +3,16 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AsymmetryHelper.h"
 #include "MantidAlgorithms/EstimateAsymmetryFromCounts.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
+
 
 #include <cmath>
 #include <numeric>
@@ -48,6 +50,28 @@ void EstimateAsymmetryFromCounts::init() {
       "The upper limit for calculating the asymmetry  (an X value).");
 }
 
+/*
+* Validate the input parameters
+* @returns map with keys corresponding to properties with errors and values
+* containing the error messages.
+*/
+std::map<std::string, std::string> EstimateAsymmetryFromCounts::validateInputs() {
+	// create the map
+	std::map<std::string, std::string> validationOutput;
+	// check start and end times
+	double startX = getProperty("StartX");
+	double endX = getProperty("EndX");
+	if (startX > endX) {
+		validationOutput["Start"] =
+			"Start time is after the end time.";
+	}
+	else if (startX == endX) {
+		validationOutput["StartX"] = "Start and end times are equal, there is no "
+			"data to apply the algorithm to.";
+	}
+	return validationOutput;
+}
+
 /** Executes the algorithm
  *
  */
@@ -56,12 +80,17 @@ void EstimateAsymmetryFromCounts::exec() {
 
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
+  int numSpectra = inputWS->getNumberHistograms();
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  const Mantid::API::Run &run = inputWS->run();
+  const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
+
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
     outputWS->setSharedX(i, inputWS->sharedX(i));
@@ -69,9 +98,8 @@ void EstimateAsymmetryFromCounts::exec() {
 
   // No spectra specified = process all spectra
   if (spectra.empty()) {
-    std::vector<int> allSpectra(numSpectra);
-    std::iota(allSpectra.begin(), allSpectra.end(), 0);
-    spectra.swap(allSpectra);
+    spectra=std::vector<int>(numSpectra);
+    std::iota(spectra.begin(), spectra.end(), 0);
   }
 
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
@@ -101,44 +129,12 @@ void EstimateAsymmetryFromCounts::exec() {
       throw std::invalid_argument(
           "Spectra size greater than the number of spectra!");
     }
-
-    // check start and end times
-    double startX = getProperty("StartX");
-    double endX = getProperty("EndX");
-
-    if (startX > endX) {
-      g_log.warning()
-          << "Start time is after the end time. Swapping the start and end."
-          << '\n';
-      double tmp = endX;
-      endX = startX;
-      startX = tmp;
-    } else if (startX == endX) {
-      throw std::runtime_error("Start and end times are equal, there is no "
-                               "data to apply the algorithm to.");
-    }
-
-    auto xData = inputWS->histogram(specNum).binEdges();
-    if (startX < xData[0]) {
-      g_log.warning() << "Start time is before the first data point. Using "
-                         "first data point." << '\n';
-    }
-    if (endX > xData[xData.size() - 1]) {
-      g_log.warning()
-          << "End time is after the last data point. Using last data point."
-          << '\n';
-      g_log.warning() << "Data at late times may dominate the normalisation."
-                      << '\n';
-    }
     // Calculate the normalised counts
-    const Mantid::API::Run &run = inputWS->run();
-    const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-
     const double normConst = estimateNormalisationConst(
-        inputWS->histogram(specNum), numGoodFrames, startX, endX);
+		inputWS->histogram(specNum), numGoodFrames, startX, endX);
     // Calculate the asymmetry
     outputWS->setHistogram(
-        specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+		specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;

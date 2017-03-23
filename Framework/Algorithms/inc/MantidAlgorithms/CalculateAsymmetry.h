@@ -77,7 +77,8 @@ private:
   // calculate Muon normalisation constant
   double getNormConstant(API::MatrixWorkspace_sptr ws, int wsIndex,
                          const double estNormConst, const double startX,
-                         const double endX);
+	  const double endX );
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithm

@@ -4,15 +4,17 @@
 #include "MantidAlgorithms/AsymmetryHelper.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Progress.h"
-
-#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Workspace_fwd.h"
 
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
+
+#include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <numeric>
 #include <vector>
 
@@ -81,16 +83,15 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
                                   const double numGoodFrames,
                                   const double startX, const double endX) {
 
-  auto xData = histogram.binEdges();
+  auto &xData = histogram.binEdges();
   auto &yData = histogram.y();
 
   size_t i0 = startIndexFromTime(xData, startX);
-  size_t iN = endIndexFromTime(xData, endX);
-  double summation = 0.0;
+  size_t iN = endIndexFromTime(xData, endX);  
   // remove an extra index as XData is bin boundaries and not point data
-  for (size_t i = i0; i < iN; i++) {
-    summation += yData[i];
-  }
+  auto it0 = std::next(yData.rawData().begin(), i0);
+  auto itN= std::next(yData.rawData().begin(), iN);
+  double summation = std::accumulate(it0, itN, 0);
   double Delta = xData[1] - xData[0];
   double denominator = MUON_LIFETIME_MICROSECONDS * numGoodFrames *
                        (exp(-startX / MUON_LIFETIME_MICROSECONDS) -
@@ -103,22 +104,19 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
 * @param xData :: [input] Input HistogramData as bin edges
 * @param startX :: [input] the start time
 * @returns :: The index to start calculations from
+* @throw :: runtime error if the range is zero. 
 */
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
-                          const double startX) {
-  size_t i;
-
-  if (xData[0] > startX) {
-    i = 0;
-    return i;
-  }
-  for (i = 1; i < xData.size() - 1; i++) {
-    if (xData[i] >= startX) {
-      return i;
-    }
-  }
-  throw std::runtime_error("The start point is equal to or greater than the "
-                           "last data point. There is zero range.");
+	const double startX) {
+	auto upper = std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+	if (upper == xData.rawData().end())
+	{
+		throw std::runtime_error("The start point is equal to or greater than the "
+			"last data point. There is zero range.");
+	}
+	else {
+		return std::distance(xData.rawData().begin(), upper);
+	}
 }
 /**
 * find the first index in bin edges that is after
@@ -126,20 +124,19 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 * @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations
+* @throw :: runtime error if the range is zero.
 */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
-                        const double endX) {
-  size_t i;
-  if (xData[xData.size() - 1] < endX) {
-    i = xData.size() - 1;
-    return i;
-  }
-  for (i = xData.size() - 1; i > 1; i--) {
-    if (xData[i] <= endX) {
-      return i;
-    }
-  }
-  throw std::runtime_error("The end point is less than or equal to the first "
-                           "data point. There is zero range.");
+	const double endX) {
+	auto lower = std::lower_bound(xData.rawData().begin(), xData.rawData().end(), endX);
+
+	if (lower == xData.rawData().end())
+	{
+		throw std::runtime_error("The end point is less than or equal to the first "
+			"data point. There is zero range");
+	}
+	else {
+		return std::distance(xData.rawData().begin(), lower);
+	}
 }
 } // namespace Mantid
