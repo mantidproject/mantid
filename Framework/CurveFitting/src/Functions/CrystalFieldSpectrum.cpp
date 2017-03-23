@@ -124,7 +124,6 @@ std::string CrystalFieldSpectrum::asString() const {
   // Print parameters of the important peaks only
   const CompositeFunction &spectrum =
       dynamic_cast<const CompositeFunction &>(*m_target);
-  size_t nPeakParams = 0;
   for (size_t ip = 0; ip < m_nPeaks; ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
     // Print peak's atributes
@@ -137,7 +136,6 @@ std::string CrystalFieldSpectrum::asString() const {
     }
     // Print peak's parameters
     for (size_t i = 0; i < peak.nParams(); i++) {
-      ++nPeakParams;
       const ParameterTie *tie = peak.getTie(i);
       if (!tie || !tie->isDefault()) {
         ostr << ",f" << ip << "." << peak.parameterName(i) << '='
