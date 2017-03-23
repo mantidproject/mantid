@@ -66,9 +66,9 @@ private:
   const DetectorSearchResult
   searchUsingInstrumentRayTracing(const Kernel::V3D &q);
   /// Attempt to find a detector using a nearest neighbours search strategy
-  const DetectorSearchResult
-  searchUsingNearestNeighbours(const Kernel::V3D &q);
-  /// Check whether the given direction in detector space intercepts with a detector
+  const DetectorSearchResult searchUsingNearestNeighbours(const Kernel::V3D &q);
+  /// Check whether the given direction in detector space intercepts with a
+  /// detector
   const std::tuple<bool, size_t> checkInteceptWithNeighbours(
       const Kernel::V3D &direction,
       const Kernel::NearestNeighbours<3>::NearestNeighbourResults &neighbours)

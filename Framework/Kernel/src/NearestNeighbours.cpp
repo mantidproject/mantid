@@ -8,7 +8,8 @@ using namespace Mantid::Kernel;
    * @param nPts :: the number of data points
    * @param nElems :: the number of elements for each point
    */
-NNDataPoints::NNDataPoints(const size_t nPts, const size_t nElems) : m_nPts(nPts) {
+NNDataPoints::NNDataPoints(const size_t nPts, const size_t nElems)
+    : m_nPts(nPts) {
   m_data = annAllocPts(static_cast<int>(m_nPts), static_cast<int>(nElems));
 }
 
@@ -28,7 +29,7 @@ ANNpointArray NNDataPoints::rawData() { return m_data; }
    * @param i :: the index of the point to return a handle to
    * @return handle to a single point in the collection of points
    */
-ANNcoord * NNDataPoints::mutablePoint(const size_t i) {
+ANNcoord *NNDataPoints::mutablePoint(const size_t i) {
   if (i < m_nPts)
     return m_data[i];
   else

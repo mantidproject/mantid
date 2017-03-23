@@ -45,7 +45,7 @@ public:
 
   void test_find_nearest_2() {
     std::vector<Eigen::Vector2d> pts = {Vector2d(1, 1), Vector2d(2, 2),
-                                       Vector2d(2, 3)};
+                                        Vector2d(2, 3)};
     NearestNeighbours<2> nn(pts);
 
     auto results = nn.findNearest(Vector2d(1, 0.9), 2);
