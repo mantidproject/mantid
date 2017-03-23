@@ -5,9 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+
 API
 ---
 
+- The default multiple file limit is now made facility dependent. It is 1000 for ILL, and 100 for all the others.
 - Frequency unit (GHz) included as an option to represent energy transfer.
 
 Algorithms
@@ -47,6 +49,10 @@ MD Algorithms (VATES CLI)
 
 Performance
 -----------
+
+Following a large effort to change some of the core instrument  aspects of Mantid, we are pleased to announce very significant improvements in performance as part of the 3.10.0 release. :ref:`ConvertUnits <algm-ConvertUnits>`, for example, is running >2x times faster than possible in our last major 3.9.0 release. Amongst others, :ref:`NormaliseVanadium <algm-NormaliseVanadium>` and :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>` now give a 2x speedup. :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>` and :ref:`AnvredCorrection <algm-AnvredCorrection>` are examples, of a few monitored algorithms, that are demonstrating a more modest 10% improvement in speed over the last major Mantid release. Aside from granular improvements at the algorithm level, we have observed that many of the Direct Inelastic technique area workflows are 2x faster than before.
+
+As a consequence of these changes, :ref:`CopyInstrumentParmeters <algm-CopyInstrumentParameters>`, :ref:`LoadInstrument <algm-LoadInstrument>` and several other Load Algorithms are reporting a modest slowdown. We hope to address these as part of our scheduled future work in this area.
 
 Bugs
 ----
