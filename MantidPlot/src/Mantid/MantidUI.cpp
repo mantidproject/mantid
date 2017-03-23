@@ -2981,7 +2981,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              MantidQt::DistributionFlag distr, bool errs,
                              MultiLayer *plotWindow, bool clearWindow,
                              bool waterfallPlot, const QString &log,
-                             std::set<double> customLogValues) {
+                             const std::set<double> &customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString, int> pairs;
   // Need to iterate through the workspaces
@@ -3050,7 +3050,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
                              bool waterfallPlot, const QString &log,
-                             std::set<double> customLogValues) {
+                             const std::set<double> &customLogValues) {
   if (toPlot.size() == 0)
     return NULL;
 

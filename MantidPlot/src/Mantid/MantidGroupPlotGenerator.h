@@ -23,14 +23,14 @@ public:
                    const QString &logName,
                    const std::set<double> &customLogValues,
                    const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-                       workspaces) const;
+                       &workspaces) const;
 
   /// Plots a contour plot from the given workspace group
   void plotContour(bool accepted, int plotIndex, const QString &axisName,
                    const QString &logName,
                    const std::set<double> &customLogValues,
                    const std::vector<Mantid::API::MatrixWorkspace_const_sptr>
-                       workspaces) const;
+                       &workspaces) const;
 
   /// Validates the given options and returns an error string
   static std::string validatePlotOptions(
@@ -39,7 +39,7 @@ public:
 
   /// Tests if WorkspaceGroup contents all have same X for given spectrum
   static bool groupContentsHaveSameX(
-      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
       const size_t index);
 
 private:
@@ -50,13 +50,13 @@ private:
   void
   plot(Type graphType, bool accepted, int plotIndex, const QString &axisName,
        const QString &logName, const std::set<double> &customLogValues,
-       const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces)
+       const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
       const;
 
   /// Creates a single workspace to plot from
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       Type graphType,
-      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
       bool accepted, int plotIndex, const QString &axisName,
       const QString &logName, const std::set<double> &customLogValues) const;
 
@@ -71,12 +71,12 @@ private:
 
   /// Get X axis title
   QString getXAxisTitle(
-      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces)
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
       const;
 
   /// Validate chosen workspaces/spectra
   void validateWorkspaceChoices(
-      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces,
+      const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
       const size_t spectrum) const;
 
   /// Pointer to the Mantid UI

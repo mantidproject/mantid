@@ -287,7 +287,7 @@ public slots:
          GraphOptions::CurveType style = GraphOptions::Unspecified,
          MultiLayer *plotWindow = NULL, bool clearWindow = false,
          bool waterfallPlot = false, const QString &log = "",
-         std::set<double> customLogValues = std::set<double>());
+         const std::set<double> &customLogValues = std::set<double>());
 
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
@@ -295,7 +295,7 @@ public slots:
          bool errs = false, MultiLayer *plotWindow = NULL,
          bool clearWindow = false, bool waterfallPlot = false,
          const QString &log = "",
-         std::set<double> customLogValues = std::set<double>()) override;
+         const std::set<double> &customLogValues = std::set<double>()) override;
 
   /// Plot contour
   void plotContour(bool accepted, int plotIndex, const QString &axisName,

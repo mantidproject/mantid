@@ -104,7 +104,7 @@ public:
          bool errs = false, MultiLayer *plotWindow = NULL,
          bool clearWindow = false, bool waterfallPlot = false,
          const QString &log = "",
-         std::set<double> customLogValues = std::set<double>()) = 0;
+         const std::set<double> &customLogValues = std::set<double>()) = 0;
   virtual void drawColorFillPlots(
       const QStringList &wsNames,
       GraphOptions::CurveType curveType = GraphOptions::ColorMap) = 0;
