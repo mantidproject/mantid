@@ -10,7 +10,6 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.xml_parsing import get_valid_to_time_from_idf_string
 from sans.common.constants import (SANS2D, LARMOR, LOQ)
 from six import with_metaclass
 
@@ -53,6 +52,23 @@ ALTERNATIVE_SANS2D_NAME = "SAN"
 DEFINITION = "Definition"
 PARAMETERS = "Parameters"
 
+# Geometry
+SAMPLE = "sample"
+WIDTH = "width"
+HEIGHT = "height"
+THICKNESS = "thickness"
+SHAPE = 'shape'
+CYLINDER = "Cylinder"
+FLAT_PLATE = "Flat plate"
+DISC = "Disc"
+GEOM_HEIGHT = 'geom_height'
+GEOM_WIDTH = 'geom_width'
+GEOM_THICKNESS = 'geom_thickness'
+GEOM_ID = 'geom_id'
+E_HEIGHT = 'e_height'
+E_WIDTH = 'e_width'
+E_THICK = 'e_thick'
+E_GEOM = 'e_geom'
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
@@ -364,16 +380,16 @@ def get_geometry_information_isis_nexus(file_name):
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
-        sample = top_level['sample']
-        height = float(sample['height'][0])
-        width = float(sample['width'][0])
-        thickness = float(sample['thickness'][0])
-        shape_as_string = sample['shape'][0]
-        if shape_as_string == "Cylinder":
+        sample = top_level[SAMPLE]
+        height = float(sample[HEIGHT][0])
+        width = float(sample[WIDTH][0])
+        thickness = float(sample[THICKNESS][0])
+        shape_as_string = sample[SHAPE][0]
+        if shape_as_string == CYLINDER:
             shape = SampleShape.CylinderAxisUp
-        elif shape_as_string == "Flat plate":
+        elif shape_as_string == FLAT_PLATE:
             shape = SampleShape.Cuboid
-        elif shape_as_string == "Disc":
+        elif shape_as_string == DISC:
             shape = SampleShape.CylinderAxisAlong
         else:
             shape = None
@@ -396,26 +412,23 @@ def get_date_and_run_number_added_nexus(file_name):
     with h5.File(file_name) as h5_file:
         keys = h5_file.keys()
         first_entry = h5_file[keys[0]]
-        logs = first_entry["logs"]
+        logs = first_entry[LOGS]
         # Start time
-        start_time = logs["start_time"]
-        start_time_value = DateAndTime(start_time["value"][0])
+        start_time = logs[START_TIME]
+        start_time_value = DateAndTime(start_time[VALUE][0])
         # Run number
-        run_number = logs["run_number"]
-        run_number_value = int(run_number["value"][0])
+        run_number = logs[RUN_NUMBER]
+        run_number_value = int(run_number[VALUE][0])
     return start_time_value, run_number_value
 
 
-def get_added_nexus_information(file_name):
+def get_added_nexus_information(file_name):  # noqa
     """
     Get information if is added data and the number of periods.
 
     :param file_name: the full file path.
     :return: if the file was a Nexus file and the number of periods.
     """
-    ADDED_SUFFIX = "-add_added_event_data"
-    ADDED_MONITOR_SUFFIX = "-add_monitors_added_event_data"
-
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
@@ -424,10 +437,10 @@ def get_added_nexus_information(file_name):
         return sorted(top_level_key_collection)
 
     def check_if_event_mode(entry):
-        return "event_workspace" in entry.keys()
+        return EVENT_WORKSPACE in entry.keys()
 
     def get_workspace_name(entry):
-        return entry["workspace_name"][0]
+        return entry[WORKSPACE_NAME][0]
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
@@ -466,7 +479,7 @@ def get_added_nexus_information(file_name):
         #    random_name-add_monitors_added_event_data_4.s
         if (has_same_number_of_entries(workspace_names, monitor_workspace_names) and
             has_added_tag(workspace_names, monitor_workspace_names) and
-            entries_match(workspace_names, monitor_workspace_names)):
+                entries_match(workspace_names, monitor_workspace_names)):
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:
@@ -523,13 +536,12 @@ def get_added_nexus_information(file_name):
 
 
 def get_date_for_added_workspace(file_name):
-    value = get_top_level_nexus_entry(file_name, "start_time")
+    value = get_top_level_nexus_entry(file_name, START_TIME)
     return DateAndTime(value)
 
 
 def has_added_suffix(file_name):
-    suffix = "-ADD.NXS"
-    return file_name.upper().endswith(suffix)
+    return file_name.upper().endswith(ADD_FILE_SUFFIX)
 
 
 def is_added_histogram(file_name):
@@ -553,11 +565,11 @@ def get_geometry_information_isis_added_nexus(file_name):
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
-        sample = top_level['sample']
-        height = float(sample['geom_height'][0])
-        width = float(sample['geom_width'][0])
-        thickness = float(sample['geom_thickness'][0])
-        shape_id = int(sample['geom_id'][0])
+        sample = top_level[SAMPLE]
+        height = float(sample[GEOM_HEIGHT][0])
+        width = float(sample[GEOM_WIDTH][0])
+        thickness = float(sample[GEOM_THICKNESS][0])
+        shape_id = int(sample[GEOM_ID][0])
         shape = convert_to_shape(shape_id)
     return height, width, thickness, shape
 
@@ -700,10 +712,10 @@ def get_geometry_information_raw(file_name):
     sample_parameters = alg_info.getProperty("SampleParameterTable").value
     keys = sample_parameters.getColumnNames()
 
-    height_id = "e_height"
-    width_id = "e_width"
-    thickness_id = "e_thick"
-    shape_id = "e_geom"
+    height_id = E_HEIGHT
+    width_id = E_WIDTH
+    thickness_id = E_THICK
+    shape_id = E_GEOM
 
     height = sample_parameters.column(keys.index(height_id))[0]
     width = sample_parameters.column(keys.index(width_id))[0]

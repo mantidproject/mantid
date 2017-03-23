@@ -8,7 +8,7 @@ from six import (with_metaclass)
 import copy
 
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
-                                   FloatWithNoneParameter, StringParameter, rename_descriptor_names)
+                                   FloatWithNoneParameter, rename_descriptor_names)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSInstrument, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file

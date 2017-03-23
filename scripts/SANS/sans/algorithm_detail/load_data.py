@@ -44,11 +44,12 @@ cache.
 """
 from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
+from six import with_metaclass
 import os
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService)
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
-                                              find_full_file_path)
+                                          find_full_file_path)
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
@@ -112,7 +113,7 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return  ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
+    return ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
             (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect))
 
 
@@ -434,7 +435,7 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period, paren
     :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options
     """
-    _ = is_transmission
+    _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME,
@@ -682,9 +683,8 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 # Load classes
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSLoadData(object):
+class SANSLoadData(with_metaclass(ABCMeta, object)):
     """ Base class for all SANSLoad implementations."""
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
@@ -783,9 +783,7 @@ class SANSLoadDataFactory(object):
 #  Corrections for a loaded transmission workspace
 # -------------------------------------------------
 
-class TransmissionCorrection(object):
-    __metaclass__ = ABCMeta
-
+class TransmissionCorrection(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def correct(self, workspaces, parent_alg):
         pass

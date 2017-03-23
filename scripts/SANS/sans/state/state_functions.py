@@ -2,7 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, DetectorType)
+from sans.common.enums import (DetectorType)
 from sans.common.xml_parsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)
 
 

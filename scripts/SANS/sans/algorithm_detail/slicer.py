@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
+from six import with_metaclass
 from mantid.dataobjects import Workspace2D
 
 from sans.common.general_functions import (get_charge_and_time, create_unmanaged_algorithm)
@@ -55,9 +56,7 @@ def get_scaled_workspace(workspace, factor):
     return multiply_alg.getProperty("OutputWorkspace").value
 
 
-class Slicer(object):
-    __metaclass__ = ABCMeta
-
+class Slicer(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(Slicer, self).__init__()
 
@@ -67,8 +66,6 @@ class Slicer(object):
 
 
 class NullSlicer(Slicer):
-    __metaclass__ = ABCMeta
-
     def __init__(self):
         super(NullSlicer, self).__init__()
 
@@ -78,8 +75,6 @@ class NullSlicer(Slicer):
 
 
 class ISISSlicer(Slicer):
-    __metaclass__ = ABCMeta
-
     def __init__(self, data_type):
         super(ISISSlicer, self).__init__()
         self._data_type = data_type

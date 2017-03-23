@@ -8,9 +8,8 @@ import re
 from copy import deepcopy
 import json
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, REDUCED_WORKSPACE_NAME_IN_LOGS,
-                                   REDUCED_WORKSPACE_NAME_BY_USER_IN_LOGS, REDUCED_WORKSPACE_BASE_NAME_IN_LOGS,
-                                   SANS2D, LOQ, LARMOR, ALL_PERIODS, EMPTY_NAME, REDUCED_CAN_TAG)
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS,
+                                   SANS2D, LOQ, LARMOR, EMPTY_NAME, REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
 from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode)
 
@@ -151,7 +150,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
-    if not alg.has_key("InputWorkspace") or not alg.has_key("OutputWorkspace"):
+    if not alg.has_key("InputWorkspace") or not alg.has_key("OutputWorkspace"):  #  noqa
         raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and"
                            " an OutputWorkspace property.".format(alg.name()))
 
