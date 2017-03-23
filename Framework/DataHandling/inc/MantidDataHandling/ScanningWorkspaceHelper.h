@@ -38,8 +38,9 @@ class MANTID_DATAHANDLING_DLL ScanningWorkspaceHelper {
 public:
   ScanningWorkspaceHelper(size_t nDetectors, size_t nTimeIndexes, size_t nBins);
 
-  void setTimeRanges(std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>>);
-  void setTimeRanges(Kernel::DateAndTime startTime, std::vector<double> durations);
+  void setInstrument(boost::shared_ptr<const Geometry::Instrument> instrument);
+  void setTimeRanges(const std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
+  void setTimeRanges(const Kernel::DateAndTime &startTime, const std::vector<double> &durations);
 
   API::MatrixWorkspace_sptr buildWorkspace();
 
@@ -48,9 +49,10 @@ private:
   size_t m_nTimeIndexes;
   size_t m_nBins;
 
+  boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
 
-  void verifyTimeIndexSize(size_t inputSize, std::string description);
+  void verifyTimeIndexSize(size_t inputSize, const std::string &description);
 };
 
 } // namespace DataHandling
