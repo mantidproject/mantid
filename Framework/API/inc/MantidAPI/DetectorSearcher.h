@@ -57,7 +57,7 @@ public:
 
   /// Create a new DetectorSearcher with the given instrument & detectors
   DetectorSearcher(Geometry::Instrument_const_sptr instrument,
-                   const DetectorInfo &info);
+                   const DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
   const DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
