@@ -123,7 +123,7 @@ private:
 
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 27; i++)
+    for (size_t i = 0; i < 29; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     publishCommandsMocked();
