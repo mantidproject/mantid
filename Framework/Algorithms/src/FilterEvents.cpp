@@ -1368,12 +1368,15 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                  << ".\n";
 
   if (m_filterByPulseTime) {
-    size_t num_proton_charges = m_eventWS->run().getProperty("proton_charge")->size();
+    size_t num_proton_charges =
+        m_eventWS->run().getProperty("proton_charge")->size();
     if (num_proton_charges < m_vecSplitterTime.size())
-      throw runtime_error(
-        "It is not a good practice to split fast event by pulse time when there are more splitters than pulse times.");
+      throw runtime_error("It is not a good practice to split fast event by "
+                          "pulse time when there are more splitters than pulse "
+                          "times.");
     else
-      g_log.warning("User should understand the inaccurancy to filter events by pulse time.");
+      g_log.warning("User should understand the inaccurancy to filter events "
+                    "by pulse time.");
   }
 
   /*

@@ -4431,7 +4431,8 @@ std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
  * @param tofshift :: shift to TOF in unit of SECOND for correction
  * @return
  */
-// TODO/FIXME/NOW - Consider to use vector to replace vec_outputEventList and have an option to ignore the un-filtered events!
+// TODO/FIXME/NOW - Consider to use vector to replace vec_outputEventList and
+// have an option to ignore the un-filtered events!
 std::string EventList::splitByFullTimeMatrixSplitter(
     const std::vector<int64_t> &vec_splitters_time,
     const std::vector<int> &vecgroups,
@@ -4612,13 +4613,13 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
   }
 }
 
-
 //----------------------------------------------------------------------------------------------
 /** Split the event list by pulse time
  */
 // TODO/NOW - TEST
-void EventList::splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
-                                           std::map<int, EventList *> outputs) const {
+void EventList::splitByPulseTimeWithMatrix(
+    const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
+    std::map<int, EventList *> outputs) const {
   // Check for supported event type
   if (eventType == WEIGHTED_NOTIME)
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
@@ -4646,10 +4647,12 @@ void EventList::splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times
     // Split
     switch (eventType) {
     case TOF:
-      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs, this->events);
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->events);
       break;
     case WEIGHTED:
-      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs, this->weightedEvents);
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->weightedEvents);
       break;
     case WEIGHTED_NOTIME:
       break;
@@ -4658,21 +4661,21 @@ void EventList::splitByPulseTimeWithMatrix(const std::vector<int64_t> &vec_times
 }
 
 template <class T>
-void EventList::splitByPulseTimeWithMatrixHelper(const std::vector<int64_t> &vec_split_times,
-                                                 const std::vector<int> &vec_split_target,
-                                       std::map<int, EventList *> outputs,
-                                       typename std::vector<T> &events) const {
+void EventList::splitByPulseTimeWithMatrixHelper(
+    const std::vector<int64_t> &vec_split_times,
+    const std::vector<int> &vec_split_target,
+    std::map<int, EventList *> outputs, typename std::vector<T> &events) const {
   // Prepare to TimeSplitter Iterate through the splitter at the same time
   if (vec_split_times.size() != vec_split_target.size() + 1)
-    throw std::runtime_error("Splitter time vector size and splitter target vector size are not correct.");
+    throw std::runtime_error("Splitter time vector size and splitter target "
+                             "vector size are not correct.");
 
   // Prepare to Events Iterate through all events (sorted by tof)
   auto itev = events.begin();
   auto itev_end = events.end();
 
   // Iterate (loop) on all splitters
-  for (size_t i_target = 0; i_target < vec_split_target.size(); ++ i_target)
-  {
+  for (size_t i_target = 0; i_target < vec_split_target.size(); ++i_target) {
     // Get the splitting interval times and destination group
     int64_t start = vec_split_times[i_target];
     int64_t stop = vec_split_times[i_target + 1];
