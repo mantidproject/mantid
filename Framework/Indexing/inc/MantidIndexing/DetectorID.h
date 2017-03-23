@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Indexing {
 
-/** DetectorID : TODO: DESCRIPTION
+/** Unique ID for a detector in a beamline.
 
   @author Simon Heybrock
   @date 2017

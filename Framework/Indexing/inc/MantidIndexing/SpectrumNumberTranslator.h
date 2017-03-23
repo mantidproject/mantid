@@ -14,7 +14,10 @@
 namespace Mantid {
 namespace Indexing {
 
-/** SpectrumNumberTranslator : TODO: DESCRIPTION
+/** Translates spectrum numbers or global spectrum indices into (local) indices.
+  Based on a partitioner, the spectrum numbers or global spectrum indices
+  provided as input are filtered such that the returned qunatities (such as
+  SpectrumIndexSet) contain only the local subset of the input indices.
 
   @author Simon Heybrock
   @date 2017

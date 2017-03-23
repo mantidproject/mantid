@@ -9,7 +9,8 @@
 namespace Mantid {
 namespace Indexing {
 
-/** RoundRobinPartitioner : TODO: DESCRIPTION
+/** A round-robin partitioning pattern, i.e., indices are assigned to partitions
+  one at a time, looping over partitions.
 
   @author Simon Heybrock
   @date 2017

@@ -7,7 +7,8 @@
 namespace Mantid {
 namespace Indexing {
 
-/** SpectrumIndexSet : TODO: DESCRIPTION
+/** A set of spectrum indices, used for accessing spectra in a workspace. The
+  indices in the set are validated and unique.
 
   @author Simon Heybrock
   @date 2017

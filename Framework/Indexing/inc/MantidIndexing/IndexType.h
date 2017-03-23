@@ -7,7 +7,7 @@ namespace Mantid {
 namespace Indexing {
 namespace detail {
 
-/** IndexType : TODO: DESCRIPTION
+/** A base class for strongly-typed integers, without implicit conversion.
 
   @author Simon Heybrock
   @date 2017

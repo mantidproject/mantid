@@ -10,7 +10,12 @@
 namespace Mantid {
 namespace Indexing {
 
-/** Partitioner : TODO: DESCRIPTION
+/** Partitioner defines a partitioning of a contiguous range of indices into a
+  given number of partitions. A partition would typically correspond to an MPI
+  rank, but use is not restricted to MPI.
+
+  Partitioner is a base class and specific partitioning patterns are implemented
+  as child classes.
 
   @author Simon Heybrock
   @date 2017

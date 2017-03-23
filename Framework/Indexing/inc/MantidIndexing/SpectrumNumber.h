@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Indexing {
 
-/** SpectrumNumber : TODO: DESCRIPTION
+/** A unique identifier for a spectrum in a workspace.
 
   @author Simon Heybrock
   @date 2017
