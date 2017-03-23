@@ -24,7 +24,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _runs = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs quasi-elastic neutron scattering (QENS) multiple file reduction ' \

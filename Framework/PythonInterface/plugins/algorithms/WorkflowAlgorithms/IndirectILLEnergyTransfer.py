@@ -42,12 +42,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _red_ws = None
     _psd_int_range = None
     _use_map_file = None
+    _spectrum_axis = None
+    _efixed = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
 
     def summary(self):
-        return 'Performs energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
+        return 'Performs initial energy transfer reduction for ILL indirect geometry data, instrument IN16B.'
 
     def name(self):
         return "IndirectILLEnergyTransfer"
@@ -89,6 +91,10 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the reduced workspace(s).')
 
+        self.declareProperty('SpectrumAxis', defaultValue='SpectrumNumber',
+                             validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
+                             doc='The spectrum axis conversion target.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -112,6 +118,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._reflection = self.getPropertyValue('Reflection')
         self._dead_channels = self.getProperty('CropDeadMonitorChannels').value
         self._red_ws = self.getPropertyValue('OutputWorkspace')
+        self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == 128):
             self._use_map_file = True
@@ -279,6 +286,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         LoadParameterFile(Workspace=self._ws, Filename=self._parameter_file)
 
+        self._efixed = self._instrument.getNumberParameter('Efixed')[0]
+
         self._setup_run_properties()
 
         if self._mirror_sense == 14:      # two wings, extract left and right
@@ -331,6 +340,18 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         DeleteWorkspace(mon)
 
         self._convert_to_energy(ws, n_cropped_bins)
+
+        target = None
+        if self._spectrum_axis == '2Theta':
+            target = 'Theta'
+        elif self._spectrum_axis == 'Q':
+            target = 'ElasticQ'
+        elif self._spectrum_axis == 'Q2':
+            target = 'ElasticQSquared'
+
+        if self._spectrum_axis != 'SpectrumNumber':
+            ConvertSpectrumAxis(InputWorkspace=ws,OutputWorkspace=ws,
+                                EMode='Indirect',Target=target,EFixed=self._efixed)
 
     def _group_detectors_with_range(self, ws):
         """

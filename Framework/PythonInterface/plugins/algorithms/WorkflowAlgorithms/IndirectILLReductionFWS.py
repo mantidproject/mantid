@@ -34,7 +34,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _all_runs = None
 
     def category(self):
-        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction"
+        return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
 
     def summary(self):
         return 'Performs fixed-window scan (FWS) multiple file reduction (both elastic and inelastic) ' \
