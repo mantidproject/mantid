@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import PythonAlgorithm, AlgorithmFactory, IMDHistoWorkspaceProperty, PropertyMode, WorkspaceProperty
+from mantid.api import PythonAlgorithm, AlgorithmFactory, IMDHistoWorkspaceProperty, PropertyMode, WorkspaceProperty, Progress
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
@@ -53,10 +53,12 @@ class DeltaPDF3D(PythonAlgorithm):
         return issues
 
     def PyExec(self):
+        progress = Progress(self, 0.0, 1.0, 4)
         inWS = self.getProperty("InputWorkspace").value
         signal = inWS.getSignalArray().copy()
 
         if self.getProperty("RemoveReflections").value:
+            progress.report("Removing Reflections")
             box_width = self.getProperty("BoxWidth").value
             dimX=inWS.getXDimension()
             dimY=inWS.getYDimension()
@@ -83,6 +85,7 @@ class DeltaPDF3D(PythonAlgorithm):
                             signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
 
         if self.getProperty("Convolution").value:
+            progress.report("Convoluting signal")
             G1D = Gaussian1DKernel(2).array
             G3D = G1D * G1D.reshape((-1,1)) * G1D.reshape((-1,1,1))
             try:
@@ -93,6 +96,7 @@ class DeltaPDF3D(PythonAlgorithm):
                 signal = convolve(signal, G3D)
 
         if self.getProperty("FFT").value:
+            progress.report("Running FFT")
             # Replace any remaining nan's or inf's with 0
             # Otherwise you end up with a lot of nan's
             signal[np.isnan(signal)]=0
@@ -125,6 +129,8 @@ class DeltaPDF3D(PythonAlgorithm):
             cloneWS_alg.execute()
             outWS = cloneWS_alg.getProperty("OutputWorkspace").value
             outWS.setSignalArray(signal)
+
+        progress.report()
 
         self.setProperty("OutputWorkspace", outWS)
 
