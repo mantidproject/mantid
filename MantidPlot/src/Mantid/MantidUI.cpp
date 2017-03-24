@@ -3977,6 +3977,7 @@ void MantidUI::updateRecentFilesList(const QString &fname) {
  * @param showWaterfall :: [input] Whether to show "plot as waterfall" option
  * @param showPlotAll :: [input] Whether to show "plot all" button
  * @param showTiledOpt :: [input] Whether to show "tiled plot" option
+ * @parame isAdvanced :: [input] Whether to do advanced plotting
  * @returns :: New dialog
  */
 MantidWSIndexDialog *

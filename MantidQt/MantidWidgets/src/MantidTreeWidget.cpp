@@ -226,6 +226,7 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
 * @param showPlotAll :: [input] If true, show the "Plot All" button on the
 * dialog
 * @param showTiledOpt :: [input] If true, show the "Tiled" option on the dialog
+* @param isAdvanced :: [input] If true, advanced plotting being done
 * @return :: A MantidWSIndexDialog::UserInput structure listing the selected
 * options
 */

@@ -30,7 +30,7 @@ MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
  * @param plotIndex :: [input] plot index
  * @param axisName :: [input] axis name
  * @param logName :: [input] log name
- * @param custumLogValues :: [input] custom log values
+ * @param customLogValues :: [input] custom log values
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
@@ -49,7 +49,7 @@ void MantidGroupPlotGenerator::plotSurface(
  * @param plotIndex :: [input] plot index
  * @param axisName :: [input] axis name
  * @param logName :: [input] log name
- * @param custumLogValues :: [input] custom log values
+ * @param customLogValues :: [input] custom log values
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
@@ -69,7 +69,7 @@ void MantidGroupPlotGenerator::plotContour(
  * @param plotIndex :: [input] plot index
  * @param axisName :: [input] axis name
  * @param logName :: [input] log name
- * @param custumLogValues :: [input] custom log values
+ * @param customLogValues :: [input] custom log values
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
@@ -136,7 +136,7 @@ void MantidGroupPlotGenerator::plot(
  * @param plotIndex :: [input] plot index
  * @param axisName :: [input] axis name
  * @param logName :: [input] log name
- * @param custumLogValues :: [input] custom log
+ * @param customLogValues :: [input] custom log
  * @returns Pointer to the created workspace
  */
 const MatrixWorkspace_sptr
@@ -270,8 +270,8 @@ std::string MantidGroupPlotGenerator::validatePlotOptions(
 
 /**
  * Generates X axis title for graph based on first workspace in group
- * @param wsGroup :: [input] WorkspaceGroup that contains data for graph - title
- * will be generated from the X label of the first workspace in the group
+ * @param workspaces :: [input] list of workpaces containing data for graph.
+ * The title is generated from the first of these workspaces.
  * @returns :: Title for X axis of graph
  */
 QString MantidGroupPlotGenerator::getXAxisTitle(
@@ -299,7 +299,7 @@ QString MantidGroupPlotGenerator::getXAxisTitle(
  * (At the moment just tests size of X data)
  * Precondition: wsGroup contains only MatrixWorkspaces
  *
- * @param wsGroup :: [input] Group to test
+ * @param workspaces :: [input] Workspaces to test
  * @param index :: [input] Index of spectrum to test
  * @return :: True if X data same, else false.
  * @throw std::logic_error if spectrum index not contained in workspace, or if
@@ -350,11 +350,11 @@ bool MantidGroupPlotGenerator::groupContentsHaveSameX(
 }
 
 /**
- * Validate the supplied workspace group and spectrum index.
+ * Validate the supplied workspaces and spectrum index.
  * - Group must not be empty
  * - Group must only contain MatrixWorkspaces
  * - Group must have same X data for all workspaces
- * @param wsGroup :: [input] Workspace group to test
+ * @param workspaces :: [input] Workspaces to test
  * @param spectrum :: [input] Spectrum index to test
  * @throws std::invalid_argument if validation fails.
  */
