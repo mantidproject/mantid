@@ -9,18 +9,9 @@
 Description
 -----------
 
-This algorithm subtracts empty container data and applies self-shielding corrections to *InputWorkspace*. It can work in three different modes depending on the input workspaces supplied:
-
-* **Only *EmptyContainerWorkspace* is given**: no self-shielding corrections, simply subtract empty container.
-* **No *EmptyContainerWorkspace*, but *SelfShieldingCorrectionWorkspace* is given**: only apply self-shielding corrections to *InputWorkspace*.
-* **Both *EmptyContainerWorkspace* and *SelfShieldingCorrectionWorkspace* are given**: apply self-shielding corrections and subtract empty container.
-
-In all modes where *EmptyContainerWorkspace* is supplied, the container data is multiplied by *EmptyContainerScaling* before subtraction.
+This algorithm subtracts empty container data and applies self-shielding corrections to *InputWorkspace*. Both operations are optional: what is actually done depends on the input properties.
 
 *SelfShieldingCorrectionWorkspace* can be obtained from the :ref:`DirectILLSelfShielding <algm-DirectILLSelfShielding>` algorithm.
-
-.. note::
-    At the moment, there are known issues in the self-shielding correction. Thus only the basic empty container subtraction should be used.
 
 Usage
 -----

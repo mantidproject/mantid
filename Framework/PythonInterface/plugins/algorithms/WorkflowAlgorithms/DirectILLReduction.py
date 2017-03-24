@@ -5,9 +5,8 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, IntBoundedValidator,
-                           StringListValidator)
-from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertToPointData, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
+from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
+from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
                               Divide, GroupDetectors, MaskDetectors, Rebin, SofQWNormalisedPolygon, Transpose)
 import numpy
 import roundinghelper

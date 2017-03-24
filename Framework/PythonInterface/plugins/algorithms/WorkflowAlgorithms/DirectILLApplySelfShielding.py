@@ -4,37 +4,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, MatrixWorkspaceProperty,
-                        Progress, PropertyMode, WorkspaceGroupProperty, WorkspaceProperty, WorkspaceUnitValidator)
+                        Progress, PropertyMode,  WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, StringListValidator)
-from mantid.simpleapi import (ApplyPaalmanPingsCorrection, ConvertUnits, CreateSingleValuedWorkspace, Minus, Multiply)
-
-
-def _applySelfShieldingCorrections(ws, ecWS, ecScaling, correctionsWS, wsNames,
-                                   algorithmLogging):
-    """Apply a self-shielding corrections workspace."""
-    correctedWSName = wsNames.withSuffix('self_shielding_applied')
-    correctedWS = ApplyPaalmanPingsCorrection(
-        SampleWorkspace=ws,
-        CorrectionsWorkspace=correctionsWS,
-        CanWorkspace=ecWS,
-        CanScaleFactor=ecScaling,
-        OutputWorkspace=correctedWSName,
-        RebinCanToSample=False,
-        EnableLogging=algorithmLogging)
-    return correctedWS
-
-
-def _applySelfShieldingCorrectionsNoEC(ws, correctionsWS, wsNames,
-                                       algorithmLogging):
-    """Apply a self-shielding corrections workspace without subtracting an empty container."""
-    correctedWSName = wsNames.withSuffix('self_shielding_applied')
-    correctedWS = ApplyPaalmanPingsCorrection(
-        SampleWorkspace=ws,
-        CorrectionsWorkspace=correctionsWS,
-        OutputWorkspace=correctedWSName,
-        RebinCanToSample=False,
-        EnableLogging=algorithmLogging)
-    return correctedWS
+from mantid.simpleapi import (CreateSingleValuedWorkspace, Divide, Minus, Multiply)
 
 
 def _subtractEC(ws, ecWS, ecScaling, wsNames, wsCleanup, algorithmLogging):
@@ -84,7 +56,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 3)
+        progress = Progress(self, 0.0, 1.0, 4)
         subalgLogging = False
         if self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON:
             subalgLogging = True
@@ -95,43 +67,14 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
 
         progress.report('Loading inputs')
         mainWS = self._inputWS(wsCleanup)
-        ecWS = self.getProperty(common.PROP_EC_WS).value
-        selfShieldingWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
-        if ecWS and not selfShieldingWS:
-            progress.setNumSteps(3)
-            progress.report('Subtracting container')
-            mainWS = self._subtractEC(mainWS, ecWS, wsNames, wsCleanup, subalgLogging)
-            self._finalize(mainWS, wsCleanup)
-            progress.report('Done')
-            return
-        # With Paalman-Pings corrections.
-        progress.report('Applying corrections')
-        wavelengthWSName = wsNames.withSuffix('in_wavelength')
-        wavelengthWS = ConvertUnits(InputWorkspace=mainWS,
-                                    OutputWorkspace=wavelengthWSName,
-                                    Target='Wavelength',
-                                    EMode='Direct',
-                                    EnableLogging=subalgLogging)
-        wsCleanup.cleanup(mainWS)
-        if ecWS:
-            ecScaling = self.getProperty(common.PROP_EC_SCALING).value
-            wavelengthECWSName = wsNames.withSuffix('ec_in_wavelength')
-            wavelengthECWS = \
-                ConvertUnits(InputWorkspace=ecWS,
-                             OutputWorkspace=wavelengthECWSName,
-                             Target='Wavelength',
-                             EMode='Direct',
-                             EnableLogging=subalgLogging)
-            correctedWS = _applySelfShieldingCorrections(wavelengthWS, wavelengthECWS, ecScaling, selfShieldingWS, wsNames, subalgLogging)
-            wsCleanup.cleanup(wavelengthECWS)
-        else:  # No ecWS
-            correctedWS = _applySelfShieldingCorrectionsNoEC(wavelengthWS, selfShieldingWS, wsNames, subalgLogging)
-        wsCleanup.cleanup(wavelengthWS)
-        correctedWS = ConvertUnits(InputWorkspace=correctedWS,
-                                   Target='TOF',
-                                   EMode='Direct',
-                                   EnableLogging=subalgLogging)
-        self._finalize(correctedWS, wsCleanup)
+
+        progress.report('Applying self shielding corrections')
+        mainWS = self._applyCorrections(mainWS, wsNames, wsCleanup, subalgLogging)
+
+        progress.report('Subtracting EC')
+        mainWS = self._subtractEC(mainWS, wsNames, wsCleanup, subalgLogging)
+
+        self._finalize(mainWS, wsCleanup)
         progress.report('Done')
 
     def PyInit(self):
@@ -180,12 +123,25 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='Scaling factor (transmission, if no self ' +
                                  'shielding is applied) for empty container.')
-        self.declareProperty(WorkspaceGroupProperty(
+        self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='A workspace containing self shielding correction factors.')
+
+    def _applyCorrections(self, mainWS, wsNames, wsCleanup, subalgLogging):
+        """Applies self shielding corrections to a workspace, if corrections exist."""
+        if self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).isDefault:
+            return mainWS
+        correctionWS = self.getProperty(common.PROP_SELF_SHIELDING_CORRECTION_WS).value
+        correctedWSName = wsNames.withSuffix('self_shielding_corrected')
+        correctedWS = Divide(LHSWorkspace=mainWS,
+                             RHSWorkspace=correctionWS,
+                             OutputWorkspace=correctedWSName,
+                             EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return correctedWS
 
     def _finalize(self, outWS, wsCleanup):
         """Do final cleanup and set the output property."""
@@ -199,12 +155,15 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         wsCleanup.protect(mainWS)
         return mainWS
 
-    def _subtractEC(self, mainWS, ecInWS, wsNames, wsCleanup, subalgLogging):
+    def _subtractEC(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Subtract the empty container workspace without self-shielding corrections."""
+        if self.getProperty(common.PROP_EC_WS).isDefault:
+            return mainWS
+        ecWS = self.getProperty(common.PROP_EC_WS).value
         ecScaling = self.getProperty(common.PROP_EC_SCALING).value
-        ecSubtractedWS = _subtractEC(mainWS, ecInWS, ecScaling, wsNames, wsCleanup, subalgLogging)
+        subtractedWS = _subtractEC(mainWS, ecWS, ecScaling, wsNames, wsCleanup, subalgLogging)
         wsCleanup.cleanup(mainWS)
-        return ecSubtractedWS
+        return subtractedWS
 
 
 AlgorithmFactory.subscribe(DirectILLApplySelfShielding)
