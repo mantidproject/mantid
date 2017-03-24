@@ -9,9 +9,6 @@
 
 namespace Mantid {
 namespace MPI {
-namespace detail {
-class ThreadingBackend;
-}
 
 /** Runs a callable in parallel. This is mainly a helper for testing code with
   MPI calls. ParallelRunner passes a Communicator as first argument to the

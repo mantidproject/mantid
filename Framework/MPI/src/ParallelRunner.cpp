@@ -11,7 +11,7 @@ ParallelRunner::ParallelRunner() {
   // 3 is an arbitrary choice. We need more than 1 since that would be a trivial
   // case, 2 seems like a special case that might make some bugs invisible.
   int threads =
-      std::min(3, static_cast<int>(std::thread::hardware_concurrency()));
+      std::max(3, static_cast<int>(std::thread::hardware_concurrency()));
   m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
 #endif
 }
