@@ -353,7 +353,6 @@ void Qxy::exec() {
                  << "%) empty Q bins.\n";
 }
 
-
 /**
 Same as scipy:
 # Example: Qmin = 0.1 ; Qmax=1; 10 bins
@@ -364,21 +363,20 @@ array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
 Same here returns:
 0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
 */
-std::vector<double> Qxy::logBinning(double min, double max, int num)
-{
-    if (min < 0 || max <0) std::cerr << "Only positive numbers allowed\n";
-    if (min == 0) min = FLT_EPSILON;
-    std::vector<double> outBins(num);
-    min = log10(min);
-    max = log10(max);
-    double binWidth = fabs((max - min) / (num - 1));
-    for (int i = 0; i <= num; ++i){
-        outBins[i] = pow(10, min + i * binWidth);
-    }
-    return outBins;
+std::vector<double> Qxy::logBinning(double min, double max, int num) {
+  if (min < 0 || max < 0)
+    std::cerr << "Only positive numbers allowed\n";
+  if (min == 0)
+    min = FLT_EPSILON;
+  std::vector<double> outBins(num);
+  min = log10(min);
+  max = log10(max);
+  double binWidth = fabs((max - min) / (num - 1));
+  for (int i = 0; i <= num; ++i) {
+    outBins[i] = pow(10, min + i * binWidth);
+  }
+  return outBins;
 }
-
-
 
 /** Creates the output workspace, setting the X vector to the bins boundaries in
  * Qx.
@@ -389,41 +387,41 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   const double max = getProperty("MaxQxy");
   const double delta = getProperty("DeltaQ");
   const bool log_binning = getProperty("IQxQyLogBinning");
- 
+
   // number of bins
   int nBins = static_cast<int>(max / delta);
 
   HistogramData::BinEdges axis;
   double startVal;
-  if (log_binning){
-      std::vector<double> totalBinning;
-      std::vector<double> positiveBinning = logBinning(0,max,nBins);
-      std::reverse(std::begin(positiveBinning),std::end(positiveBinning));
-      totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning), std::end(positiveBinning));
-      std::for_each(std::begin(totalBinning), std::end(totalBinning), [](auto &n){ n=-1*n; });
-      totalBinning.push_back(0);
-      std::reverse(std::begin(positiveBinning),std::end(positiveBinning));
-      totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning), std::end(positiveBinning));
-      nBins = nBins*2 +1;
-      startVal = totalBinning[0];
-      axis = totalBinning;
+  if (log_binning) {
+    std::vector<double> totalBinning;
+    std::vector<double> positiveBinning = logBinning(0, max, nBins);
+    std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
+    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
+                        std::end(positiveBinning));
+    std::for_each(std::begin(totalBinning), std::end(totalBinning),
+                  [](auto &n) { n = -1 * n; });
+    totalBinning.push_back(0);
+    std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
+    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
+                        std::end(positiveBinning));
+    nBins = nBins * 2 + 1;
+    startVal = totalBinning[0];
+    axis = totalBinning;
 
+  } else {
+    if (nBins * delta != max)
+      ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
+               // delta
+    startVal = -1.0 * delta * nBins;
+    nBins *= 2; // go from -max to +max
+    nBins += 1; // Add 1 - this is a histogram
+
+    // Build up the X values
+    HistogramData::BinEdges linearAxis(
+        nBins, HistogramData::LinearGenerator(startVal, delta));
+    axis = linearAxis;
   }
-  else{
-      if (nBins * delta != max)
-        ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
-                // delta
-      startVal = -1.0 * delta * nBins;
-      nBins *= 2; // go from -max to +max
-      nBins += 1; // Add 1 - this is a histogram
-
-      // Build up the X values
-      HistogramData::BinEdges linearAxis(nBins,
-                                   HistogramData::LinearGenerator(startVal, delta));
-      axis = linearAxis;
-  }
-
-
 
   // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
@@ -435,7 +433,6 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create a numeric axis to replace the vertical one
   Axis *verticalAxis = new BinEdgeAxis(nBins);
   outputWorkspace->replaceAxis(1, verticalAxis);
-
 
   for (int i = 0; i < nBins; ++i) {
     const double currentVal = startVal + i * delta;

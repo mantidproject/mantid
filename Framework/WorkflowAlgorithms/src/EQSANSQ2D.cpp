@@ -132,7 +132,7 @@ void EQSANSQ2D::exec() {
     rebinAlg->setProperty("PreserveEvents", false);
     rebinAlg->executeAsChildAlg();
 
-	const bool log_binning = getProperty("IQxQyLogBinning");
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .5, .65);
     qxyAlg->setProperty<MatrixWorkspace_sptr>(
         "InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
