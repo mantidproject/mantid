@@ -1,9 +1,9 @@
 #ifndef MANTID_MPI_PARALLELRUNNER_H_
 #define MANTID_MPI_PARALLELRUNNER_H_
 
-#include "MantidMPI/CommunicatorBackend.h"
 #include "MantidMPI/Communicator.h"
 #include "MantidMPI/DllConfig.h"
+#include "MantidMPI/ThreadingBackend.h"
 
 #include <functional>
 #include <thread>
@@ -49,7 +49,7 @@ public:
 
 private:
 #ifndef MPI_EXPERIMENTAL
-  boost::shared_ptr<CommunicatorBackend> m_backend;
+  boost::shared_ptr<ThreadingBackend> m_backend;
 #endif
 };
 

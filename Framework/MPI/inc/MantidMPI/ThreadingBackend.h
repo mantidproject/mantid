@@ -1,5 +1,5 @@
-#ifndef MANTID_MPI_COMMUNICATORBACKEND_H_
-#define MANTID_MPI_COMMUNICATORBACKEND_H_
+#ifndef MANTID_MPI_THREADINGBACKEND_H_
+#define MANTID_MPI_THREADINGBACKEND_H_
 
 #include "MantidMPI/DllConfig.h"
 #include "MantidMPI/Request.h"
@@ -19,7 +19,7 @@
 namespace Mantid {
 namespace MPI {
 
-/** CommunicatorBackend provides a backend for data exchange between
+/** ThreadingBackend provides a backend for data exchange between
   Communicators in the case of non-MPI builds when communication between threads
   is used to mimic MPI calls.
 
@@ -47,13 +47,13 @@ namespace MPI {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MPI_DLL CommunicatorBackend {
+class MANTID_MPI_DLL ThreadingBackend {
 public:
-  CommunicatorBackend() = default;
-  explicit CommunicatorBackend(const int size);
+  ThreadingBackend() = default;
+  explicit ThreadingBackend(const int size);
 
-  CommunicatorBackend(const CommunicatorBackend &) = delete;
-  const CommunicatorBackend &operator=(const CommunicatorBackend &) = delete;
+  ThreadingBackend(const ThreadingBackend &) = delete;
+  const ThreadingBackend &operator=(const ThreadingBackend &) = delete;
 
   int size() const;
 
@@ -76,7 +76,7 @@ private:
 };
 
 template <typename... T>
-void CommunicatorBackend::send(int source, int dest, int tag, T &&... args) {
+void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
   std::stringbuf buf;
   std::ostream os(&buf);
   boost::archive::binary_oarchive oa(os);
@@ -86,7 +86,7 @@ void CommunicatorBackend::send(int source, int dest, int tag, T &&... args) {
 }
 
 template <typename... T>
-void CommunicatorBackend::recv(int dest, int source, int tag, T &&... args) {
+void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   const auto key = std::make_tuple(source, dest, tag);
   while (true) {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -106,20 +106,18 @@ void CommunicatorBackend::recv(int dest, int source, int tag, T &&... args) {
 }
 
 template <typename... T>
-Request CommunicatorBackend::isend(int source, int dest, int tag,
-                                   T &&... args) {
+Request ThreadingBackend::isend(int source, int dest, int tag, T &&... args) {
   send(source, dest, tag, std::forward<T>(args)...);
   return Request{};
 }
 
 template <typename... T>
-Request CommunicatorBackend::irecv(int dest, int source, int tag,
-                                   T &&... args) {
-  return Request(std::bind(&CommunicatorBackend::recv<T...>, this, dest, source,
+Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
+  return Request(std::bind(&ThreadingBackend::recv<T...>, this, dest, source,
                            tag, std::ref(std::forward<T>(args)...)));
 }
 
 } // namespace MPI
 } // namespace Mantid
 
-#endif /* MANTID_MPI_COMMUNICATORBACKEND_H_ */
+#endif /* MANTID_MPI_THREADINGBACKEND_H_ */

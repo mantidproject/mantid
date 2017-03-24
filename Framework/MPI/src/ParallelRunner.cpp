@@ -7,7 +7,7 @@ namespace MPI {
 
 ParallelRunner::ParallelRunner() {
 #ifndef MPI_EXPERIMENTAL
-  m_backend = boost::make_shared<CommunicatorBackend>(omp_get_max_threads());
+  m_backend = boost::make_shared<ThreadingBackend>(omp_get_max_threads());
 #endif
 }
 
@@ -19,7 +19,7 @@ ParallelRunner::ParallelRunner(const int threads) {
         "ParallelRunner: number of requested threads does not match number of "
         "MPI ranks");
 #else
-  m_backend = boost::make_shared<CommunicatorBackend>(threads);
+  m_backend = boost::make_shared<ThreadingBackend>(threads);
 #endif
 }
 

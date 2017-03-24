@@ -1,25 +1,25 @@
 set ( SRC_FILES
 	src/Communicator.cpp
-	src/CommunicatorBackend.cpp
 	src/ParallelRunner.cpp
 	src/Request.cpp
 	src/Status.cpp
+	src/ThreadingBackend.cpp
 )
 
 set ( INC_FILES
 	inc/MantidMPI/Communicator.h
-	inc/MantidMPI/CommunicatorBackend.h
 	inc/MantidMPI/ParallelRunner.h
 	inc/MantidMPI/Request.h
 	inc/MantidMPI/Status.h
+	inc/MantidMPI/ThreadingBackend.h
 )
 
 set ( TEST_FILES
-	CommunicatorBackendTest.h
 	CommunicatorTest.h
 	ParallelRunnerTest.h
 	RequestTest.h
 	StatusTest.h
+	ThreadingBackendTest.h
 )
 
 if (COVERALLS)
