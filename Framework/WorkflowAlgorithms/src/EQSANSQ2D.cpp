@@ -171,6 +171,7 @@ void EQSANSQ2D::exec() {
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax / nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
+    qxyAlg->setProperty<bool>("IQxQyLogBinning", log_binning);
     qxyAlg->executeAsChildAlg();
 
     qxy_output = qxyAlg->getProperty("OutputWorkspace");
@@ -188,11 +189,13 @@ void EQSANSQ2D::exec() {
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   } else {
     // When not in frame skipping mode, simply run Qxy
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .3, 0.9);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax / nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
+    qxyAlg->setProperty<bool>("IQxQyLogBinning", log_binning);
     qxyAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");

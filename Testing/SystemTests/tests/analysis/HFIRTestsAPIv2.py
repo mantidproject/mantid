@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
+# pylint:
+# disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
 
 """
     System tests for HFIR SANS reduction.
@@ -18,14 +19,17 @@ from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 
-# Set directory containing the test data, relative to the Mantid release directory.
+# Set directory containing the test data, relative to the Mantid release
+# directory.
 TEST_DIR = "."
-data_search_dirs = ConfigService.Instance()["datasearch.directories"].split(';')
+data_search_dirs = ConfigService.Instance(
+)["datasearch.directories"].split(';')
 for item in data_search_dirs:
     if item.endswith("SANS2D/"):
         TEST_DIR = item
 if len(TEST_DIR) == 0:
-    raise RuntimeError("Could not locate test data directory: [...]/Data/SANS2D")
+    raise RuntimeError(
+        "Could not locate test data directory: [...]/Data/SANS2D")
 
 
 def _diff_iq(x, y):
@@ -139,6 +143,7 @@ def do_cleanup():
 
 
 class HFIRTestsAPIv2(stresstesting.MantidStressTest):
+
     def cleanup(self):
         do_cleanup()
         return True
@@ -168,6 +173,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
     def runTest(self):
 
         class TestStub(object):
+
             def __init__(self, test_method):
                 self._test_method = test_method
                 self._passed = True
@@ -204,7 +210,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
         # any path that definitely exists on a computer with Mantid installed
-        test_path = os.path.normcase(ConfigService.Instance()['instrumentDefinition.directory'])
+        test_path = os.path.normcase(ConfigService.Instance()[
+                                     'instrumentDefinition.directory'])
         DataPath(test_path)
         self.assertEqual(ReductionSingleton()._data_path, test_path)
 
@@ -224,7 +231,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         SetSampleDetectorDistance(6500)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
-        #SetSampleDetectorOffset(500.0)
+        # SetSampleDetectorOffset(500.0)
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
@@ -311,7 +318,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
@@ -320,7 +328,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.assertEqual(sdd, 6000.0)
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_center_calculated.txt", tolerance=1e-4))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_center_calculated.txt", tolerance=1e-4))
 
     def test_reduction_1(self):
         GPSANS()
@@ -353,6 +362,225 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         deltas = map(_diff_iq, data, check)
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
+
+    def test_reduction_iqxqy(self):
+        GPSANS()
+        SetSampleDetectorDistance(6000)
+        DataPath(TEST_DIR)
+        DirectBeamCenter("BioSANS_empty_cell.xml")
+        AppendDataFile("BioSANS_test_data.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml")
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        IQxQy(nbins=100, log_binning=True)
+        Reduce()
+
+        ws = AnalysisDataService.retrieve("BioSANS_test_data_Iqxy")
+        data = ws.dataX(0)
+        check = [-0.11,
+                 -0.0957501197,
+                 -0.0833462312,
+                 -0.0725491965,
+                 -0.0631508568,
+                 -0.0549700191,
+                 -0.0478489628,
+                 -0.0416503993,
+                 -0.0362548247,
+                 -0.0315582164,
+                 -0.0274700273,
+                 -0.02391144,
+                 -0.0208138477,
+                 -0.018117531,
+                 -0.0157705069,
+                 -0.0137275266,
+                 -0.0119492029,
+                 -0.0104012509,
+                 -0.00905382749,
+                 -0.00788095514,
+                 -0.00686002181,
+                 -0.00597134463,
+                 -0.00519779057,
+                 -0.00452444609,
+                 -0.00393832959,
+                 -0.00342814118,
+                 -0.0029840448,
+                 -0.00259747861,
+                 -0.00226098989,
+                 -0.00196809139,
+                 -0.00171313624,
+                 -0.00149120909,
+                 -0.00129803135,
+                 -0.0011298787,
+                 -0.000983509284,
+                 -0.000856101197,
+                 -0.00074519811,
+                 -0.000648661894,
+                 -0.0005646314,
+                 -0.000491486583,
+                 -0.000427817265,
+                 -0.000372395949,
+                 -0.000324154152,
+                 -0.000282161808,
+                 -0.000245609335,
+                 -0.000213792029,
+                 -0.000186096477,
+                 -0.000161988726,
+                 -0.000141004,
+                 -0.000122737726,
+                 -0.000106837745,
+                 -9.2997517e-05,
+                 -8.09502126e-05,
+                 -7.04635686e-05,
+                 -6.13354103e-05,
+                 -5.33897535e-05,
+                 -4.64734117e-05,
+                 -4.0453043e-05,
+                 -3.52125792e-05,
+                 -3.0650988e-05,
+                 -2.66803252e-05,
+                 -2.32240394e-05,
+                 -2.02154959e-05,
+                 -1.75966923e-05,
+                 -1.53171399e-05,
+                 -1.33328908e-05,
+                 -1.16056899e-05,
+                 -1.01022381e-05,
+                 -8.79355011e-06,
+                 -7.65439523e-06,
+                 -6.66281146e-06,
+                 -5.79968177e-06,
+                 -5.04836567e-06,
+                 -4.39437834e-06,
+                 -3.82511138e-06,
+                 -3.32958975e-06,
+                 -2.89826016e-06,
+                 -2.52280689e-06,
+                 -2.19599147e-06,
+                 -1.91151314e-06,
+                 -1.66388739e-06,
+                 -1.44834015e-06,
+                 -1.26071584e-06,
+                 -1.09739721e-06,
+                 -9.55235582e-07,
+                 -8.31490194e-07,
+                 -7.23775324e-07,
+                 -6.30014309e-07,
+                 -5.48399504e-07,
+                 -4.77357438e-07,
+                 -4.15518472e-07,
+                 -3.61690395e-07,
+                 -3.14835442e-07,
+                 -2.74050284e-07,
+                 -2.38548614e-07,
+                 -2.07645985e-07,
+                 -1.80746617e-07,
+                 -1.57331911e-07,
+                 -1.36950449e-07,
+                 -1.1920929e-07,
+                 0.0,
+                 1.1920929e-07,
+                 1.36950449e-07,
+                 1.57331911e-07,
+                 1.80746617e-07,
+                 2.07645985e-07,
+                 2.38548614e-07,
+                 2.74050284e-07,
+                 3.14835442e-07,
+                 3.61690395e-07,
+                 4.15518472e-07,
+                 4.77357438e-07,
+                 5.48399504e-07,
+                 6.30014309e-07,
+                 7.23775324e-07,
+                 8.31490194e-07,
+                 9.55235582e-07,
+                 1.09739721e-06,
+                 1.26071584e-06,
+                 1.44834015e-06,
+                 1.66388739e-06,
+                 1.91151314e-06,
+                 2.19599147e-06,
+                 2.52280689e-06,
+                 2.89826016e-06,
+                 3.32958975e-06,
+                 3.82511138e-06,
+                 4.39437834e-06,
+                 5.04836567e-06,
+                 5.79968177e-06,
+                 6.66281146e-06,
+                 7.65439523e-06,
+                 8.79355011e-06,
+                 1.01022381e-05,
+                 1.16056899e-05,
+                 1.33328908e-05,
+                 1.53171399e-05,
+                 1.75966923e-05,
+                 2.02154959e-05,
+                 2.32240394e-05,
+                 2.66803252e-05,
+                 3.0650988e-05,
+                 3.52125792e-05,
+                 4.0453043e-05,
+                 4.64734117e-05,
+                 5.33897535e-05,
+                 6.13354103e-05,
+                 7.04635686e-05,
+                 8.09502126e-05,
+                 9.2997517e-05,
+                 0.000106837745,
+                 0.000122737726,
+                 0.000141004,
+                 0.000161988726,
+                 0.000186096477,
+                 0.000213792029,
+                 0.000245609335,
+                 0.000282161808,
+                 0.000324154152,
+                 0.000372395949,
+                 0.000427817265,
+                 0.000491486583,
+                 0.0005646314,
+                 0.000648661894,
+                 0.00074519811,
+                 0.000856101197,
+                 0.000983509284,
+                 0.0011298787,
+                 0.00129803135,
+                 0.00149120909,
+                 0.00171313624,
+                 0.00196809139,
+                 0.00226098989,
+                 0.00259747861,
+                 0.0029840448,
+                 0.00342814118,
+                 0.00393832959,
+                 0.00452444609,
+                 0.00519779057,
+                 0.00597134463,
+                 0.00686002181,
+                 0.00788095514,
+                 0.00905382749,
+                 0.0104012509,
+                 0.0119492029,
+                 0.0137275266,
+                 0.0157705069,
+                 0.018117531,
+                 0.0208138477,
+                 0.02391144,
+                 0.0274700273,
+                 0.0315582164,
+                 0.0362548247,
+                 0.0416503993,
+                 0.0478489628,
+                 0.0549700191,
+                 0.0631508568,
+                 0.0725491965,
+                 0.0833462312,
+                 0.0957501197,
+                 0.11]
+        deltas = map(_diff_iq, data, check)
+        delta = reduce(_add, deltas) / len(deltas)
+        self.assertTrue(math.fabs(delta) < 0.00001)
+        print data
 
     def test_no_solid_angle(self):
         GPSANS()
@@ -512,7 +740,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         #_p = property_manager.getProperty("TransmissionAlgorithm")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_transmission.txt", 0.0001))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_transmission.txt", 0.0001))
 
     def test_center_by_hand(self):
         GPSANS()
@@ -520,13 +749,15 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_center_by_hand.txt", 0.0001))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_center_by_hand.txt", 0.0001))
 
     def test_background(self):
         GPSANS()
@@ -534,7 +765,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
@@ -556,7 +788,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml,BioSANS_test_data.xml")
@@ -575,7 +808,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml", "test_data")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         SetTransmission(0.6, 0.1)
@@ -638,13 +872,17 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         SampleHeight(3.0)
         SampleWidth(5.0)
 
-        # we don't need to do a full reduction for this test, do a partial reduction
+        # we don't need to do a full reduction for this test, do a partial
+        # reduction
         ReductionSingleton().pre_process()
-        ReductionSingleton()._reduction_steps[0].execute(ReductionSingleton(), "BioSANS_test_data")
-        ReductionSingleton().geometry_correcter.execute(ReductionSingleton(), "BioSANS_test_data")
+        ReductionSingleton()._reduction_steps[0].execute(
+            ReductionSingleton(), "BioSANS_test_data")
+        ReductionSingleton().geometry_correcter.execute(
+            ReductionSingleton(), "BioSANS_test_data")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
-        data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]
+        data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(
+            2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]
 
         check = [500091.0, 60.0, 40.8333, 13.6333, 13.4667, 13.6667]
         # Check that I(q) is the same for both data sets
@@ -654,7 +892,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
     def test_noDC_eff_with_DC(self):
         ref = [28.06525, 136.94662, -16.20412, 0.00000, 147.79915, 146.42713, 302.00869,
-               0.00000, 0.00000, -1869.20724, -2190.89681, -1892.14939, -2140.79608, -1980.60037,
+               0.00000, 0.00000, -1869.20724, -2190.89681, -
+               1892.14939, -2140.79608, -1980.60037,
                -2096.75974, -2221.30118, -2263.51541, -2264.89989, -2364.83528,
                -2420.58152, -2444.51906, -2418.28886, -2606.16991, -2556.93660,
                -2623.71380, -2547.79671, -2670.60962, -2714.35237, -2717.01692,
@@ -673,7 +912,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1666.47199, -1608.86707, -1544.26178, -1492.78389, -1438.69256,
                -1358.60437, -1299.34476, -1221.57010, -1080.69421, -609.77891, -77.72765]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle() # name clash with SolidAngle algorithm
         MonitorNormalization()
@@ -717,7 +956,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1768.67, -1721.61, -1666.51, -1608.91, -1544.31,
                -1492.83, -1438.74, -1358.65, -1299.39, -1221.61, -1080.73, -609.821, -77.7712]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
@@ -760,7 +999,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1874.31, -1819.05, -1767.14, -1722.35, -1670.38, -1606.61,
                -1544.51, -1496.24, -1438.21, -1360.12, -1299.68, -1221.61, -1080.91, -610.638, -71.9557]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
@@ -768,7 +1007,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=True)
         # IQxQy(nbins=100)
         DirectBeamCenter("BioSANS_empty_cell.xml")
-        SensitivityCorrection('BioSANS_flood_data.xml', min_sensitivity=0.5, max_sensitivity=1.5, use_sample_dc=False)
+        SensitivityCorrection('BioSANS_flood_data.xml', min_sensitivity=0.5,
+                              max_sensitivity=1.5, use_sample_dc=False)
         DivideByThickness(1)
         SetTransmission(1, 0)
         ThetaDependentTransmission(True)
@@ -792,7 +1032,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
                                empty_file="BioSANS_empty_trans.xml",
