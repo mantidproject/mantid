@@ -63,7 +63,7 @@ std::map<std::string, std::string> CalculateAsymmetry::validateInputs() {
 	double startX = getProperty("StartX");
 	double endX = getProperty("EndX");
 	if (startX > endX) {
-		validationOutput["Start"]=
+		validationOutput["StartX"]=
 				"Start time is after the end time.";
 	}
 			else if (startX == endX) {
@@ -129,9 +129,9 @@ void CalculateAsymmetry::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
-      g_log.error("The spectral index is greater than the number of spectra!");
+      g_log.error("The spectral index "+std::to_string(spectra[i])+" is greater than the number of spectra!");
       throw std::invalid_argument(
-          "The spectral index is greater than the number of spectra!");
+          "The spectral index " +std::to_string(spectra[i])+" is greater than the number of spectra!");
     }
 
     // inital estimate of N0

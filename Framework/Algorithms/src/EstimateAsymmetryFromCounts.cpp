@@ -125,9 +125,9 @@ void EstimateAsymmetryFromCounts::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
-      g_log.error("Spectra size greater than the number of spectra!");
+      g_log.error("The spectral index "+std::to_string(spectra[i])+" is greater than the number of spectra!");
       throw std::invalid_argument(
-          "Spectra size greater than the number of spectra!");
+          "The spectral index "+std::to_string(spectra[i])+" is greater than the number of spectra!");
     }
     // Calculate the normalised counts
     const double normConst = estimateNormalisationConst(
