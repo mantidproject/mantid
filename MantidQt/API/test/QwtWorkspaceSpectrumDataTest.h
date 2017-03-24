@@ -5,8 +5,12 @@
 #include <limits>
 #include <QRgb>
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
+using namespace Mantid::HistogramData;
 
 class QwtWorkspaceSpectrumDataTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws;
@@ -15,12 +19,10 @@ public:
   void setUp() override {
     ws = WorkspaceCreationHelper::create2DWorkspace(3, 4);
     for (size_t i = 0; i < 3; i++) {
-      for (size_t j = 0; j < 5; j++)
-        ws->dataX(i)[j] = double(i) + double(j);
-      for (size_t j = 0; j < 4; j++) {
-        ws->dataY(i)[j] = double(i) + double(j) * 2;
-        ws->dataE(i)[j] = double(i) + double(j) * 3;
-      }
+      double index = static_cast<double>(i);
+      ws->setHistogram(i, BinEdges(5, LinearGenerator(index, 1)),
+                       Counts(4, LinearGenerator(index, 2)),
+                       CountStandardDeviations(4, LinearGenerator(index, 3)));
     }
   }
 
@@ -32,14 +34,11 @@ public:
       TS_ASSERT_DELTA(data.e(i), offset + double(i) * 3, 1e-5);
     }
     TS_ASSERT_DELTA(data.x(4), offset + double(4), 1e-5);
-    // Go past the end in Y/E is safe
-    TS_ASSERT_DELTA(data.y(4), offset + double(3) * 2, 1e-5);
   }
 
   void test_histogram() {
     QwtWorkspaceSpectrumData data(*ws, 1, false, false);
     checkHistogramData(data, 1.0);
-    TS_ASSERT(data.isHistogram());
     QwtWorkspaceSpectrumData data2(*ws, 2, false, false);
     checkHistogramData(data2, 2.0);
   }
@@ -59,7 +58,7 @@ public:
 
   /** In log scale, points below a minimum value are clipped to the minimum */
   void test_logScale() {
-    ws->dataY(0)[2] = -10;
+    ws->mutableY(0)[2] = -10;
     QwtWorkspaceSpectrumData data(*ws, 0, true, false);
     TS_ASSERT_DELTA(data.y(1), 2.0, 1e-6);
     TS_ASSERT_DELTA(data.e(1), 3.0, 1e-6);
