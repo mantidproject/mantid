@@ -57,7 +57,7 @@ private:
   const Mantid::API::MatrixWorkspace_sptr createWorkspaceForGroupPlot(
       Type graphType,
       const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-      int plotIndex, const QString &logName, 
+      int plotIndex, const QString &logName,
       const std::set<double> &customLogValues) const;
 
   /// Returns a single log value from the given workspace

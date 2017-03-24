@@ -83,9 +83,8 @@ void MantidGroupPlotGenerator::plot(
     // Set up one new matrix workspace to hold all the data for plotting
     MatrixWorkspace_sptr matrixWS;
     try {
-      matrixWS = createWorkspaceForGroupPlot(graphType, workspaces,
-                                             plotIndex, logName,
-                                             customLogValues);
+      matrixWS = createWorkspaceForGroupPlot(graphType, workspaces, plotIndex,
+                                             logName, customLogValues);
     } catch (const std::logic_error &err) {
       m_mantidUI->showCritical(err.what());
       return;
@@ -143,7 +142,7 @@ const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-    int plotIndex, const QString &logName, 
+    int plotIndex, const QString &logName,
     const std::set<double> &customLogValues) const {
   const auto index =
       static_cast<size_t>(plotIndex); // which spectrum to plot from each WS
