@@ -117,7 +117,7 @@ def generate_run_numbers(run_number_string):
     """
     # Check its not a single run
     if isinstance(run_number_string, int):
-            return [int(run_number_string)]  # Cast into a list and return
+        return [int(run_number_string)]  # Cast into a list and return
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
@@ -130,7 +130,9 @@ def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
     any properties passed into this method so that the vanadium
-    can be later loaded.
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
     :param vanadium_string: The name of this vanadium run
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
@@ -150,10 +152,7 @@ def get_first_run_number(run_number_string):
     :return: The first run for the user input of runs
     """
     run_numbers = generate_run_numbers(run_number_string=run_number_string)
-    if isinstance(run_numbers, list):
-        run_numbers = run_numbers[0]
-
-    return run_numbers
+    return run_numbers[0]
 
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):

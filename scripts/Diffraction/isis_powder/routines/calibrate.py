@@ -7,6 +7,14 @@ from isis_powder.routines.common_enums import INPUT_BATCHING
 
 
 def create_van(instrument, run_details, absorb):
+    """
+    Creates a splined vanadium run for the following instrument. Requires the run_details for the
+    vanadium workspace we will process and whether to apply absorption corrections.
+    :param instrument: The instrument object that will be used to supply various instrument specific methods
+    :param run_details: The run details associated with this vanadium run
+    :param absorb: Boolean flag whether to apply absorption corrections
+    :return: Processed workspace group in dSpacing (but not splined)
+    """
     van = run_details.vanadium_run_numbers
     # Always sum a range of inputs as its a vanadium run over multiple captures
     input_van_ws_list = common.load_current_normalised_ws_list(run_number_string=van, instrument=instrument,
