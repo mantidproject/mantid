@@ -58,8 +58,8 @@ public:
 #elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
   // The noexcept default deceleration was fixed in GCC 4.9.0
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
-  Peak(Peak &&) noexcept;
-  Peak &operator=(Peak &&) noexcept;
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
 #else
   Peak(Peak &&) noexcept = default;
   Peak &operator=(Peak &&) noexcept = default;
