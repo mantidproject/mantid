@@ -15,6 +15,8 @@ public:
   static void destroySuite(RequestTest *suite) { delete suite; }
 
   void test_default() {
+    // Only trivial testing here. Real requests are tested in CommunicatorTest,
+    // since Communicator is needed to create them.
     TS_ASSERT_THROWS_NOTHING(Request());
     Request req;
     TS_ASSERT_THROWS_NOTHING(req.wait());
