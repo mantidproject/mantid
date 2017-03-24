@@ -93,7 +93,9 @@ public:
     const auto ws = create<Workspace2D>(*parent);
     check_indices(*ws);
     TS_ASSERT_EQUALS(ws->x(0).rawData(), std::vector<double>({1, 2, 4}));
-    TS_ASSERT_EQUALS(ws->x(1).rawData(), std::vector<double>({1 + binShift, 2 + binShift, 4 + binShift}));
+    TS_ASSERT_EQUALS(
+        ws->x(1).rawData(),
+        std::vector<double>({1 + binShift, 2 + binShift, 4 + binShift}));
     TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({0, 0}));
     TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({0, 0}));
     TS_ASSERT_EQUALS(ws->e(0).rawData(), std::vector<double>({0, 0}));

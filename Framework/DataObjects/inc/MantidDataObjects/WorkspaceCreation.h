@@ -130,9 +130,8 @@ template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
 createConcreteHelper();
 
-template <class T, class P,
-          class = typename std::enable_if<
-              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+template <class T, class P, class = typename std::enable_if<std::is_base_of<
+                                API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> createUninitialized(const P &parent) {
   std::unique_ptr<T> ws;
 
