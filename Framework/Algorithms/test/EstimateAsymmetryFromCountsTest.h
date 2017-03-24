@@ -102,9 +102,9 @@ public:
     TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800,Delta );
     TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800,Delta );
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(j)[10], 0.0635,Delta );
-    TS_ASSERT_DELTA(outWS->y(j)[19], -0.0727, Delta );
-    TS_ASSERT_DELTA(outWS->y(j)[49], 0.1153, Delta );
+    TS_ASSERT_DELTA(outWS->y(j)[10], 0.0958,Delta );
+    TS_ASSERT_DELTA(outWS->y(j)[19], -0.0444, Delta );
+    TS_ASSERT_DELTA(outWS->y(j)[49], 0.1493, Delta );
     // Test some E values
     TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002,Delta );
     TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003,Delta );
@@ -170,7 +170,6 @@ public:
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
     TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
-    TS_ASSERT(alg->isExecuted())
   }
   void test_BackwardsRange() {
     auto ws = createWorkspace(1, 50);
@@ -179,12 +178,11 @@ public:
     alg->setProperty("StartX", 0.9);
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
-    TS_ASSERT(alg->isExecuted())
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
   void test_NumberOfDataPoints() {
 	
-    double dx=(1.0/static_cast<double>(300.0));
+    double dx=(1.0/300.0);
     auto fineWS   = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
                       yData(), 1, 0.0, 1.0,dx,true,eData());
     fineWS->mutableRun().addProperty("goodfrm", 10);
@@ -209,7 +207,7 @@ public:
     TS_ASSERT(coarseAlg->isExecuted());
     MatrixWorkspace_sptr coarseOutWS = coarseAlg->getProperty("OutputWorkspace");
 
-    double Delta = 0.0001;
+    double Delta = 0.05;//only expect numbers to be similar
     for(int j=0;j<28;j++){
         // Test some X values
     	TS_ASSERT_DELTA(fineOutWS->x(0)[1+j*3],coarseOutWS->x(0)[j] ,Delta);
@@ -218,8 +216,8 @@ public:
     	// Test some E values
     	TS_ASSERT_DELTA(fineOutWS->e(0)[1+j*3],coarseOutWS->e(0)[j] ,Delta);
     }
-  }
 
+  }
 
 };
 

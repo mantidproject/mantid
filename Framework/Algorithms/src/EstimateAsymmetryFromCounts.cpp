@@ -62,7 +62,7 @@ std::map<std::string, std::string> EstimateAsymmetryFromCounts::validateInputs()
 	double startX = getProperty("StartX");
 	double endX = getProperty("EndX");
 	if (startX > endX) {
-		validationOutput["Start"] =
+		validationOutput["StartX"] =
 			"Start time is after the end time.";
 	}
 	else if (startX == endX) {
