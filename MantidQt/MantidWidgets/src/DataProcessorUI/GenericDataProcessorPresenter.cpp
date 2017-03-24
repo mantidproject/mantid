@@ -600,17 +600,17 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
-    if (m_preprocessMap.count(columnName)) {
+    if (m_preprocessMap.count(columnName) && globalOptions.count(columnName)) {
       // This column needs pre-processing
 
       const std::string runStr = data.at(i);
 
       if (!runStr.empty()) {
 
-        auto preprocessor = m_preprocessMap[columnName];
+        auto preprocessor = m_preprocessMap.at(columnName);
 
         // Global pre-processing options for this algorithm as a string
-        const std::string options = globalOptions[columnName];
+        const std::string options = globalOptions.at(columnName);
 
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);

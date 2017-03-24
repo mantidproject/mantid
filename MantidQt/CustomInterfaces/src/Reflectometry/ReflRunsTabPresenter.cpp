@@ -364,6 +364,8 @@ std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   std::map<std::string, std::string> options;
+
+  options["Run(s)"];
   options["Transmission Run(s)"] =
       m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 
