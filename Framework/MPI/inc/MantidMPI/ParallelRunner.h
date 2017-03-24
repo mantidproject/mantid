@@ -3,13 +3,15 @@
 
 #include "MantidMPI/Communicator.h"
 #include "MantidMPI/DllConfig.h"
-#include "MantidMPI/ThreadingBackend.h"
 
 #include <functional>
 #include <thread>
 
 namespace Mantid {
 namespace MPI {
+namespace detail {
+class ThreadingBackend;
+}
 
 /** Runs a callable in parallel. This is mainly a helper for testing code with
   MPI calls. ParallelRunner passes a Communicator as first argument to the
@@ -49,7 +51,7 @@ public:
 
 private:
 #ifndef MPI_EXPERIMENTAL
-  boost::shared_ptr<ThreadingBackend> m_backend;
+  boost::shared_ptr<detail::ThreadingBackend> m_backend;
 #endif
 };
 

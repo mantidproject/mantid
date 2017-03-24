@@ -1,4 +1,5 @@
 #include "MantidMPI/ParallelRunner.h"
+#include "MantidMPI/ThreadingBackend.h"
 
 #include <omp.h>
 
@@ -7,7 +8,8 @@ namespace MPI {
 
 ParallelRunner::ParallelRunner() {
 #ifndef MPI_EXPERIMENTAL
-  m_backend = boost::make_shared<ThreadingBackend>(omp_get_max_threads());
+  m_backend =
+      boost::make_shared<detail::ThreadingBackend>(omp_get_max_threads());
 #endif
 }
 
@@ -19,7 +21,7 @@ ParallelRunner::ParallelRunner(const int threads) {
         "ParallelRunner: number of requested threads does not match number of "
         "MPI ranks");
 #else
-  m_backend = boost::make_shared<ThreadingBackend>(threads);
+  m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
 #endif
 }
 

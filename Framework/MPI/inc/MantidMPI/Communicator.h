@@ -1,9 +1,9 @@
 #ifndef MANTID_MPI_COMMUNICATOR_H_
 #define MANTID_MPI_COMMUNICATOR_H_
 
-#include "MantidMPI/ThreadingBackend.h"
 #include "MantidMPI/DllConfig.h"
-#include "MantidMPI/Status.h"
+#include "MantidMPI/Request.h"
+#include "MantidMPI/ThreadingBackend.h"
 
 #include <boost/make_shared.hpp>
 #ifdef MPI_EXPERIMENTAL
@@ -46,7 +46,8 @@ public:
 #ifdef MPI_EXPERIMENTAL
   explicit Communicator(const boost::mpi::communicator &comm);
 #else
-  Communicator(boost::shared_ptr<ThreadingBackend> backend, const int rank);
+  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
+               const int rank);
 #endif
 
   int rank() const;
@@ -60,8 +61,8 @@ private:
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::communicator m_communicator;
 #else
-  boost::shared_ptr<ThreadingBackend> m_backend{
-      boost::make_shared<ThreadingBackend>()};
+  boost::shared_ptr<detail::ThreadingBackend> m_backend{
+      boost::make_shared<detail::ThreadingBackend>()};
   const int m_rank{0};
 #endif
 };

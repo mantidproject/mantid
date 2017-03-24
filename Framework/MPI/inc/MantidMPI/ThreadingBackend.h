@@ -18,6 +18,7 @@
 
 namespace Mantid {
 namespace MPI {
+namespace detail {
 
 /** ThreadingBackend provides a backend for data exchange between
   Communicators in the case of non-MPI builds when communication between threads
@@ -117,6 +118,7 @@ Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
                            tag, std::ref(std::forward<T>(args)...)));
 }
 
+} // namespace detail
 } // namespace MPI
 } // namespace Mantid
 

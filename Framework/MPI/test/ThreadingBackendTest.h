@@ -5,7 +5,7 @@
 
 #include "MantidMPI/ThreadingBackend.h"
 
-using Mantid::MPI::ThreadingBackend;
+using Mantid::MPI::detail::ThreadingBackend;
 
 class ThreadingBackendTest : public CxxTest::TestSuite {
 public:
