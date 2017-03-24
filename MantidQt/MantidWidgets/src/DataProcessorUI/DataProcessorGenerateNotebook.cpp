@@ -449,7 +449,8 @@ boost::tuple<std::string, std::string> reduceRowString(
     // The algorithm property linked to this column
     const std::string algProp = whitelist.algPropFromColIndex(col);
 
-    if (preprocessMap.count(colName) && preprocessingOptionsMap.count(colName)) {
+    if (preprocessMap.count(colName) &&
+        preprocessingOptionsMap.count(colName)) {
       // This column was pre-processed, we need to print pre-processing
       // instructions
 
