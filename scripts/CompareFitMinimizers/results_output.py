@@ -28,6 +28,9 @@ import numpy as np
 from docutils.core import publish_string
 import post_processing as postproc
 import os
+import mantidplot as mp
+import pymantidplot.qtiplot as qti
+import mantid.simpleapi as msapi
 
 # older version of numpy does not support nanmean and nanmedian
 # and nanmean and nanmedian was removed in scipy 0.18 in favor of numpy
@@ -224,31 +227,30 @@ def build_visual_display_page(prob_results, group_name):
     """
     # Get the best result for a group
     gb = min((result for result in prob_results), key=lambda result: result.fit_chi2)
+    file_name = (group_name + '_' + gb.problem.name).lower()
+
+    wks = msapi.CreateWorkspace(OutputWorkspace=gb.problem.name, DataX=gb.problem.data_pattern_in, DataY=gb.problem.data_pattern_out)
+    plot = qti.plot(wks, 0)
+    ss = mp.screenshot_to_dir(widget=plot, filename=file_name + '.png', screenshot_dir=WORKING_DIR)
 
     # Create various page headings, ensuring the adornment is (at least) the length of the title
     title = '=' * len(gb.problem.name) + '\n'
     title += gb.problem.name + '\n'
     title += '=' * len(gb.problem.name) + '\n\n'
-    header = gb.problem.name + '\n'
-    header += ('=' * len(header)) + '\n\n'
-    data_plot = 'Plot of the data:' + '\n'
+    data_plot = 'Plot of the data' + '\n'
     data_plot += ('-' * len(data_plot)) + '\n\n'
-    data_plot += '.. figure:: ' + '\n'
-    data_plot += '    :include-source:' + '\n\n'
+    data_plot += '.. image:: ' + file_name + '.png' + '\n\n'
     starting_plot = 'Plot of the initial starting guess' + '\n'
     starting_plot += ('-' * len(starting_plot)) + '\n\n'
-    starting_plot += '.. figure:: ' + '\n'
-    starting_plot += '    :include-source:' + '\n\n'
+    starting_plot += '.. figure:: ' + '\n\n'
     solution_plot = 'Plot of the solution found' + '\n'
     solution_plot += ('-' * len(solution_plot)) + '\n\n'
-    solution_plot += '.. figure:: ' + '\n'
-    solution_plot += '    :include-source:' + '\n\n'
+    solution_plot += '.. figure:: ' + '\n\n'
     problem = 'Fit problem' + '\n'
     problem += ('-' * len(problem)) + '\n'
-    rst_text = title + header + data_plot + starting_plot + solution_plot + problem
+    rst_text = title + data_plot + starting_plot + solution_plot + problem
 
-    html = publish_string(rst_text)
-    file_name = (group_name + '_' + gb.problem.name).lower()
+    html = publish_string(rst_text, writer_name='html')
     with open(file_name + '.' + FILENAME_EXT_TXT, 'w') as visual_rst:
         print(html, file=visual_rst)
         print('Saved {file_name}.{extension} to {working_directory}'.
