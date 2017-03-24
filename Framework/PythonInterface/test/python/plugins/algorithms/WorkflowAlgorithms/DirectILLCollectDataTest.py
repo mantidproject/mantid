@@ -1,13 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
-from mantid.simpleapi import (CloneWorkspace, DeleteWorkspace, DirectILLPrepareData)
+from mantid.simpleapi import (CloneWorkspace, DeleteWorkspace, DirectILLCollectData)
 import numpy.testing
 from testhelpers import illhelpers, run_algorithm
 import unittest
 
 
-class DirectILLPrepareDataTest(unittest.TestCase):
+class DirectILLCollectData(unittest.TestCase):
     _BKG_LEVEL = 2.3
     _TEST_WS_NAME = 'testWS_'
 
@@ -28,26 +28,22 @@ class DirectILLPrepareDataTest(unittest.TestCase):
         mtd.clear()
 
     def testBackgroundSubtraction(self):
-        cloneWS = CloneWorkspace(InputWorkspace=self._TEST_WS_NAME)
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
-            'IndexType': 'Detector ID',
-            'Monitor': '0',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgScaling': 1.0,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
             'rethrow': True
         }
-        run_algorithm('DirectILLPrepareData', **algProperties)
+        run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), cloneWS.getNumberHistograms() - 1)
+        self.assertEquals(outWS.getNumberHistograms(), self._testIN5WS.getNumberHistograms() - 1)
         ys = outWS.extractY()
-        cloneYs = cloneWS.extractY()
-        numpy.testing.assert_almost_equal(ys, cloneYs[1:, :] - self._BKG_LEVEL)
+        originalYs = self._testIN5WS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[1:, :] - self._BKG_LEVEL)
 
     def testBackgroundOutput(self):
         outWSName = 'outWS'
@@ -56,41 +52,62 @@ class DirectILLPrepareDataTest(unittest.TestCase):
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
-            'IndexType': 'Detector ID',
-            'Monitor': '0',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgScaling': bkgScaling,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
             'OutputFlatBkgWorkspace': outBkgWSName,
             'rethrow': True
         }
-        run_algorithm('DirectILLPrepareData', **algProperties)
+        run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outBkgWSName))
         outBkgWS = mtd[outBkgWSName]
         numpy.testing.assert_almost_equal(outBkgWS.extractY(), self._BKG_LEVEL)
 
+    def testNormalisationToTime(self):
+        outWSName = 'outWS'
+        duration = 3612.3
+        mtd[self._TEST_WS_NAME].mutableRun().addProperty('duration', duration, True)
+        algProperties = {
+            'InputWorkspace': self._TEST_WS_NAME,
+            'OutputWorkspace': outWSName,
+            'FlatBkgScaling': 0.0,
+            'IncidentEnergyCalibration': 'Energy Calibration OFF',
+            'Normalisation': 'Normalisation Time',
+            'rethrow': True
+        }
+        run_algorithm('DirectILLCollectData', **algProperties)
+        self.assertTrue(mtd.doesExist(outWSName))
+        outWS = mtd[outWSName]
+        ys = outWS.extractY()
+        originalYs = self._testIN5WS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[1:, :] / duration)
+        es = outWS.extractE()
+        originalEs = self._testIN5WS.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs[1:, :] / duration)
+
     def testSuccessWhenEverythingDisabled(self):
-        cloneWS = CloneWorkspace(InputWorkspace=self._TEST_WS_NAME)
         outWSName = 'outWS'
         algProperties = {
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
-            'IndexType': 'Detector ID',
-            'Monitor': '0',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgScaling': 0.0,
             'IncidentEnergyCalibration': 'Energy Calibration OFF',
             'Normalisation': 'Normalisation OFF',
             'rethrow': True
         }
-        run_algorithm('DirectILLPrepareData', **algProperties)
+        run_algorithm('DirectILLCollectData', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
         outWS = mtd[outWSName]
-        self.assertEquals(outWS.getNumberHistograms(), cloneWS.getNumberHistograms() - 1)
+        self.assertEquals(outWS.getNumberHistograms(), self._testIN5WS.getNumberHistograms() - 1)
+        xs = outWS.extractX()
+        originalXs = self._testIN5WS.extractX()
+        numpy.testing.assert_almost_equal(xs, originalXs[1:, :])
         ys = outWS.extractY()
-        cloneYs = cloneWS.extractY()
-        numpy.testing.assert_almost_equal(ys, cloneYs[1:, :])
+        originalYs = self._testIN5WS.extractY()
+        numpy.testing.assert_almost_equal(ys, originalYs[1:, :])
+        es = outWS.extractE()
+        originalEs = self._testIN5WS.extractE()
+        numpy.testing.assert_almost_equal(es, originalEs[1:, :])
 
 
 if __name__ == '__main__':

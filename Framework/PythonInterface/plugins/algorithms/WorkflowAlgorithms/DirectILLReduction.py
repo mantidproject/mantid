@@ -354,7 +354,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         import os
         import tempfile
         groups = _createDetectorGroups(mainWS)
-        instrumentName = mainWS.run().getProperty('instrument.name').value
+        instrumentName = mainWS.getInstrument().getName()
         groupsXml = _detectorGroupsToXml(groups, instrumentName)
         fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
         _writeXml(groupsXml, path)
@@ -379,7 +379,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         """Normalize to vanadium workspace."""
         vanaWS = self.getProperty(common.PROP_VANA_WS).value
         if not vanaWS:
-            return
+            return mainWS
         vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
         vanaNormalizedWS = Divide(LHSWorkspace=mainWS,
                                   RHSWorkspace=vanaWS,

@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd
-from mantid.simpleapi import (DirectILLDiagnostics, DirectILLPrepareData)
+from mantid.simpleapi import (DirectILLDiagnostics, DirectILLCollectData)
 import numpy.testing
 from testhelpers import illhelpers, run_algorithm
 import unittest
@@ -25,13 +25,10 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
         kwargs = {
             'InputWorkspace': self._testIN5WS,
             'OutputWorkspace': self._TEST_WS_NAME,
-            'IndexType': 'Detector ID',
-            'Monitor': 0,
-            'DetectorsAtL2': '130, 390',
             'OutputEPPWorkspace': self._EPP_WS_NAME,
             'OutputFlatBkgWorkspace': self._BKG_WS_NAME,
         }
-        run_algorithm('DirectILLPrepareData', **kwargs)
+        run_algorithm('DirectILLCollectData', **kwargs)
         mtd.remove(inWSName)
 
     def tearDown(self):
@@ -43,8 +40,6 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'IndexType': 'Detector ID',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgWorkspace': self._BKG_WS_NAME,
             'rethrow': True
         }
@@ -75,11 +70,9 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'IndexType': 'Detector ID',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgWorkspace': self._BKG_WS_NAME,
-            'NoisyBkgDiagnosticsLowThreshold': 0.01,
-            'NoisyBkgDiagnosticsHighThreshold': 9.99,
+            'NoisyBkgLowThreshold': 0.01,
+            'NoisyBkgHighThreshold': 9.99,
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)
@@ -113,11 +106,9 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
             'InputWorkspace': self._TEST_WS_NAME,
             'OutputWorkspace': outWSName,
             'EPPWorkspace': self._EPP_WS_NAME,
-            'IndexType': 'Detector ID',
-            'DetectorsAtL2': '130, 390',
             'FlatBkgWorkspace': self._BKG_WS_NAME,
-            'ElasticPeakDiagnosticsLowThreshold': 0.2,
-            'ElasticPeakDiagnosticsHighThreshold': 9.7,
+            'ElasticPeakLowThreshold': 0.2,
+            'ElasticPeakHighThreshold': 9.7,
             'rethrow': True
         }
         run_algorithm('DirectILLDiagnostics', **kwargs)

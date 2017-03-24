@@ -173,9 +173,19 @@ def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
 
 def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     """Normalize to the 'actual_time' sample log."""
+    log = ws.run()
+    if not log.hasProperty('duration'):
+        if not log.hasProperty('actual_time'):
+            raise RuntimeError("Cannot normalise to acquisition time: 'duration' missing from sample logs.")
+        time = log.getProperty('actual_time').value
+    else:
+        time = log.getProperty('duration').value
+    if time == 0:
+        raise RuntimeError("Cannot normalise to acquisition time: time is zero.")
+    if time < 0:
+        raise RuntimeError("Cannot normalise to acquisition time: time is negative.")
     normalizedWSName = wsNames.withSuffix('normalized_to_time')
     normalizationFactorWsName = wsNames.withSuffix('normalization_factor_time')
-    time = ws.getLogData('actual_time').value
     normalizationFactorWS = CreateSingleValuedWorkspace(OutputWorkspace=normalizationFactorWsName,
                                                         DataValue=time,
                                                         EnableLogging=algorithmLogging)
