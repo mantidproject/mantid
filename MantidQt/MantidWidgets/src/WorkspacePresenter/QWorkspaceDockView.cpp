@@ -23,7 +23,6 @@
 #include <Poco/Path.h>
 
 #include <QFileDialog>
-#include <QHash>
 #include <QKeyEvent>
 #include <QMainWindow>
 #include <QMenu>

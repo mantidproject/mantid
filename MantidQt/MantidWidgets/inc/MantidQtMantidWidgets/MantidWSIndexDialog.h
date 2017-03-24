@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
