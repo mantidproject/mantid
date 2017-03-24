@@ -26,7 +26,7 @@ using Mantid::HistogramData::Histogram;
  * @throws invalid_argument if log is wrong type or not present
  */
 double getSingleWorkspaceLogValue(
-    int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
+    size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) {
   if (logName == MantidWSIndexWidget::WORKSPACE_INDEX || logName == "") {
     return wsIndex;
@@ -59,7 +59,7 @@ double getSingleWorkspaceLogValue(
 * @param logValues :: [input] User-provided set of log values
 * @returns Numeric log value
 */
-double getSingleWorkspaceLogValue(int wsIndex,
+double getSingleWorkspaceLogValue(size_t wsIndex,
                                   const std::set<double> &logValues) {
   double value = 0;
   if (wsIndex < static_cast<int>(logValues.size())) {

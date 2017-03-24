@@ -83,8 +83,8 @@ void MantidGroupPlotGenerator::plot(
     // Set up one new matrix workspace to hold all the data for plotting
     MatrixWorkspace_sptr matrixWS;
     try {
-      matrixWS = createWorkspaceForGroupPlot(graphType, workspaces, accepted,
-                                             plotIndex, axisName, logName,
+      matrixWS = createWorkspaceForGroupPlot(graphType, workspaces,
+                                             plotIndex, logName,
                                              customLogValues);
     } catch (const std::logic_error &err) {
       m_mantidUI->showCritical(err.what());
@@ -143,8 +143,8 @@ const MatrixWorkspace_sptr
 MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-    bool accepted, int plotIndex, const QString &axisName,
-    const QString &logName, const std::set<double> &customLogValues) const {
+    int plotIndex, const QString &logName, 
+    const std::set<double> &customLogValues) const {
   const auto index =
       static_cast<size_t>(plotIndex); // which spectrum to plot from each WS
   // const auto &logName = logName; // Log to read for axis of XYZ plot
@@ -154,9 +154,6 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
   // Create workspace to hold the data
   // Each "spectrum" will be the data from one workspace
   const auto nWorkspaces = workspaces.size();
-  if (nWorkspaces < 0) {
-    return MatrixWorkspace_sptr();
-  }
 
   MatrixWorkspace_sptr matrixWS; // Workspace to return
   // Cast succeeds: have already checked group contains only MatrixWorkspaces
@@ -175,7 +172,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
 
   // For each workspace in group, add data and log values
   std::vector<double> logValues;
-  for (int i = 0; i < nWorkspaces; i++) {
+  for (size_t i = 0; i < nWorkspaces; i++) {
     const auto ws =
         boost::dynamic_pointer_cast<const MatrixWorkspace>(workspaces[i]);
     if (ws) {
