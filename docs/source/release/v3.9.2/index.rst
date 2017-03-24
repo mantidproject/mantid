@@ -18,7 +18,7 @@ Citation
 Please cite any usage of Mantid as follows:
 
 - *Mantid 3.9.2: Manipulation and Analysis Toolkit for Instrument Data.; Mantid Project*.
-  `doi: '
+  `doi: 10.5286/Software/Mantid3.9.2 <http://dx.doi.org/10.5286/Software/Mantid3.9.2>`_
 
 
 Changes in this version
