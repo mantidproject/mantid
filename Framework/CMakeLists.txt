@@ -74,6 +74,9 @@ add_subdirectory (Types)
 include_directories (Kernel/inc)
 add_subdirectory (Kernel)
 
+include_directories (MPI/inc)
+add_subdirectory (MPI)
+
 include_directories (HistogramData/inc)
 add_subdirectory (HistogramData)
 
