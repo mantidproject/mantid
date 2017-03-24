@@ -179,7 +179,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
  * @return A python list of IFunction_sprs.
  */
 boost::python::object
-IFunctionAdapter::createEquivalentFunctions(IFunction &self) {
+IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
   for (auto fun : functions) {

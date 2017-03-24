@@ -195,7 +195,7 @@ void export_IFunction() {
            "Get number of domains of a multi-domain function")
 
       .def("createEquivalentFunctions",
-           &IFunctionAdapter::createEquivalentFunctions, (arg("self")),
+           &IFunctionAdapter::createPythonEquivalentFunctions, (arg("self")),
            "Split this function (if needed) into a list of "
            "independent functions")
 
