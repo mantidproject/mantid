@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
 
@@ -23,8 +24,8 @@ public:
     TS_ASSERT_EQUALS(result.size(), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 3);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>{10});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<detid_t>{30});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{10});
+    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{30});
   }
 
   void test_reorder() {
@@ -35,9 +36,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>{30});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<detid_t>{20});
-    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<detid_t>{10});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{30});
+    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{20});
+    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<DetectorID>{10});
   }
 };
 

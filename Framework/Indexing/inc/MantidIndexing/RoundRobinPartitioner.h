@@ -1,22 +1,21 @@
-#ifndef MANTID_INDEXING_GROUP_H_
-#define MANTID_INDEXING_GROUP_H_
+#ifndef MANTID_INDEXING_ROUNDROBINPARTITIONER_H_
+#define MANTID_INDEXING_ROUNDROBINPARTITIONER_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/SpectrumNumber.h"
+#include "MantidIndexing/Partitioner.h"
 
-#include <vector>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Indexing {
-class IndexInfo;
 
-/** Functions for grouping spectra. A new IndexInfo with the desired grouping is
-  created based on an existing one.
+/** A round-robin partitioning pattern, i.e., indices are assigned to partitions
+  one at a time, looping over partitions.
 
   @author Simon Heybrock
-  @date 2016
+  @date 2017
 
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -37,11 +36,15 @@ class IndexInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-MANTID_INDEXING_DLL IndexInfo
-group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
-      const std::vector<std::vector<size_t>> &grouping);
+class MANTID_INDEXING_DLL RoundRobinPartitioner : public Partitioner {
+public:
+  using Partitioner::Partitioner;
+
+private:
+  PartitionIndex doIndexOf(const GlobalSpectrumIndex index) const override;
+};
 
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_GROUP_H_ */
+#endif /* MANTID_INDEXING_ROUNDROBINPARTITIONER_H_ */

@@ -1,22 +1,18 @@
-#ifndef MANTID_INDEXING_GROUP_H_
-#define MANTID_INDEXING_GROUP_H_
+#ifndef MANTID_INDEXING_PARTITIONINDEX_H_
+#define MANTID_INDEXING_PARTITIONINDEX_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/SpectrumNumber.h"
-
-#include <vector>
+#include "MantidIndexing/IndexType.h"
 
 namespace Mantid {
 namespace Indexing {
-class IndexInfo;
 
-/** Functions for grouping spectra. A new IndexInfo with the desired grouping is
-  created based on an existing one.
+/** Partition index. This is an int since it is used as MPI rank.
 
   @author Simon Heybrock
-  @date 2016
+  @date 2017
 
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -37,11 +33,13 @@ class IndexInfo;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-MANTID_INDEXING_DLL IndexInfo
-group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
-      const std::vector<std::vector<size_t>> &grouping);
+class MANTID_INDEXING_DLL PartitionIndex
+    : public detail::IndexType<PartitionIndex, int> {
+  using detail::IndexType<PartitionIndex, int>::IndexType;
+  using detail::IndexType<PartitionIndex, int>::operator=;
+};
 
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_GROUP_H_ */
+#endif /* MANTID_INDEXING_PARTITIONINDEX_H_ */
