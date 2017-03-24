@@ -12,8 +12,7 @@ ParallelRunner::ParallelRunner() {
   // case, 2 seems like a special case that might make some bugs invisible.
   int threads =
       std::min(3, static_cast<int>(std::thread::hardware_concurrency()));
-  m_backend =
-      boost::make_shared<detail::ThreadingBackend>(threads);
+  m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
 #endif
 }
 
@@ -21,9 +20,8 @@ ParallelRunner::ParallelRunner(const int threads) {
 #ifdef MPI_EXPERIMENTAL
   Communicator comm;
   if (comm.size() != threads)
-    throw(
-        "ParallelRunner: number of requested threads does not match number of "
-        "MPI ranks");
+    throw("ParallelRunner: number of requested threads does not match number "
+          "of MPI ranks");
 #else
   m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
 #endif
