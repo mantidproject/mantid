@@ -17,12 +17,15 @@ OS X
 User Interface
 --------------
 
+- MantidPlot now respects the system scaling on high-resolution displays. All icons and bitmaps will now be sized
+  appropriately rather than being too small to be usable (Windows only).
 
 Instrument View
 ###############
- - Fixed a bug preventing the some of the banks from being visible when using a U correction.
- - Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
- - Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on.
+
+- Fixed a bug preventing the some of the banks from being visible when using a U correction.
+- Fixed a bug where pressing delete would delete a workspace even when the dock was not focused.
+- Fixed a bug where the user would not be prompted before deleting workspaces even if confirmations were turned on.
 
 Plotting Improvements
 #####################
@@ -31,7 +34,7 @@ Algorithm Toolbox
 #################
 
 - The Algorithm Progress bar has been improved to handle reporting the progress of multiple algorithms much better.  Now it will correctly show the progress of the most recently started algorithms, and correctly move onto the next most recent should  the first finish sooner.  In addition the "Details" button now shows whether Mantid is Idle or how many algorithms it is running.
-  
+
 .. figure:: ../../images/Progress_running.png
    :class: screenshot
    :width: 396px
