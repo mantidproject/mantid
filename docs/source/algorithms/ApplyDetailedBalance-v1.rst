@@ -35,7 +35,7 @@ Usage
 .. testcode:: ExApplyDetailedBalanceSimple
 
    ws = CreateWorkspace(DataX='-5,-4,-3,-2,-1,0,1,2,3,4,5',DataY='2,2,2,2,2,2,2,2,2,2',DataE='1,1,1,1,1,1,1,1,1,1',UnitX='DeltaE')
-   ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100', OutputUnit='Frequency')
+   ows = ApplyDetailedBalance(InputWorkspace='ws',OutputWorkspace='ows',Temperature='100', OutputUnits='Frequency')
 
    print "The Y values in the Output Workspace are"
    print str(ows.readY(0)[0:5])
