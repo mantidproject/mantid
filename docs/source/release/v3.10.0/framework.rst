@@ -57,7 +57,8 @@ As a consequence of these changes, :ref:`CopyInstrumentParmeters <algm-CopyInstr
 Bugs
 ----
 
-- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
+- We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
+- A bug was fixed where sometimes a workspace created using another one as a template would have incorrect X data. This happened only when the template workspace had varying bins between the histograms. In these cases the binning was not copied correctly from the template. The bug was discovered in :ref:`algm-MonteCarloAbsorption` but other algorithms may have been affected as well.
 
 CurveFitting
 ------------
