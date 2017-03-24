@@ -130,6 +130,28 @@ template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
 createConcreteHelper();
 
+template <class T, class P,
+          class = typename std::enable_if<
+              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> createUninitialized(const P &parent) {
+  std::unique_ptr<T> ws;
+
+  if (std::is_base_of<API::HistoWorkspace, T>::value &&
+      parent.id() == "EventWorkspace") {
+    // Drop events, create Workspace2D or T whichever is more derived.
+    ws = detail::createHelper<T>();
+  } else {
+    try {
+      // If parent is more derived than T: create type(parent)
+      ws = dynamic_cast<const T &>(parent).cloneEmpty();
+    } catch (std::bad_cast &) {
+      // If T is more derived than parent: create T
+      ws = detail::createConcreteHelper<T>();
+    }
+  }
+  return ws;
+}
+
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws);
@@ -144,21 +166,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
   //   supported for EventWorkspace
-  std::unique_ptr<T> ws;
-  if (std::is_base_of<API::HistoWorkspace, T>::value &&
-      parent.id() == "EventWorkspace") {
-    // Drop events, create Workspace2D or T whichever is more derived.
-    ws = detail::createHelper<T>();
-  } else {
-    try {
-      // If parent is more derived than T: create type(parent)
-      ws = dynamic_cast<const T &>(parent).cloneEmpty();
-    } catch (std::bad_cast &) {
-      // If T is more derived than parent: create T
-      ws = detail::createConcreteHelper<T>();
-    }
-  }
-
+  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
 
@@ -179,8 +187,21 @@ template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
-  return create<T>(parent, parent.getNumberHistograms(),
-                   detail::stripData(parent.histogram(0)));
+  const auto numHistograms = parent.getNumberHistograms();
+  if (parent.isCommonBins()) {
+    return create<T>(parent, numHistograms,
+                     detail::stripData(parent.histogram(0)));
+  }
+  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
+  const auto YLength = parent.blocksize();
+  const auto XLength = parent.isHistogramData() ? YLength + 1 : YLength;
+  ws->initialize(numHistograms, XLength, YLength);
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->mutableX(i) = parent.x(i);
+  }
+  detail::initializeFromParent(parent, *ws);
+
+  return ws;
 }
 
 template <class T, class P, class IndexArg,
