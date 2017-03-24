@@ -130,7 +130,7 @@ public:
     createWorkspace2D(true);
     Workspace2D_sptr inws =
         AnalysisDataService::Instance().retrieveWS<Workspace2D>(inputWSname);
-    TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(), "DeltaE_inFrequency");
+    TS_ASSERT_EQUALS(inws->getAxis(0)->unit()->unitID(), "DeltaE");
     alg.initialize();
     alg.setPropertyValue("InputWorkspace", inputWSname);
     alg.setPropertyValue("OutputWorkspace", outputWSname);
