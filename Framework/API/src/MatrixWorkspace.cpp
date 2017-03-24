@@ -2036,7 +2036,7 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
     for (size_t time = 0; time < detInfo.scanCount(detIndex); ++time) {
       if (m_indexInfo->isOnThisPartition(
               Indexing::GlobalSpectrumIndex(globalSpecIndex++)))
-      specDefs[specIndex++].add(detIndex, time);
+        specDefs[specIndex++].add(detIndex, time);
     }
   }
   m_indexInfo->setSpectrumDefinitions(std::move(specDefs));

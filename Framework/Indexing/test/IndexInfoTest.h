@@ -165,9 +165,9 @@ public:
                     IndexInfo::Communicator{2, 0});
     IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
                     IndexInfo::Communicator{2, 1});
-    for(size_t i=0; i<rank0.globalSize(); ++i)
+    for (size_t i = 0; i < rank0.globalSize(); ++i)
       TS_ASSERT(rank0.isOnThisPartition(i));
-    for(size_t i=0; i<rank1.globalSize(); ++i)
+    for (size_t i = 0; i < rank1.globalSize(); ++i)
       TS_ASSERT(rank1.isOnThisPartition(i));
   }
 
