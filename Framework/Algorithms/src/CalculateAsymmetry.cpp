@@ -52,25 +52,23 @@ void CalculateAsymmetry::init() {
       "The additional fitting functions to be used.");
 }
 /*
-* Validate the input parameters 
+* Validate the input parameters
 * @returns map with keys corresponding to properties with errors and values
-* containing the error messages. 
+* containing the error messages.
 */
 std::map<std::string, std::string> CalculateAsymmetry::validateInputs() {
-	// create the map
-	std::map<std::string, std::string> validationOutput;
-	// check start and end times
-	double startX = getProperty("StartX");
-	double endX = getProperty("EndX");
-	if (startX > endX) {
-		validationOutput["StartX"]=
-				"Start time is after the end time.";
-	}
-			else if (startX == endX) {
-				validationOutput["StartX"]="Start and end times are equal, there is no "
-					"data to apply the algorithm to.";
-			}
-			return validationOutput;
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+  // check start and end times
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  if (startX > endX) {
+    validationOutput["StartX"] = "Start time is after the end time.";
+  } else if (startX == endX) {
+    validationOutput["StartX"] = "Start and end times are equal, there is no "
+                                 "data to apply the algorithm to.";
+  }
+  return validationOutput;
 }
 /** Executes the algorithm
  *
@@ -88,12 +86,10 @@ void CalculateAsymmetry::exec() {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
 
-  
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-
 
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
@@ -102,8 +98,8 @@ void CalculateAsymmetry::exec() {
 
   // No spectra specified = process all spectra
   if (spectra.empty()) {
-	  spectra = std::vector<int>(numSpectra);
-	  std::iota(spectra.begin(), spectra.end(), 0);
+    spectra = std::vector<int>(numSpectra);
+    std::iota(spectra.begin(), spectra.end(), 0);
   }
 
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
@@ -129,9 +125,11 @@ void CalculateAsymmetry::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
-      g_log.error("The spectral index "+std::to_string(spectra[i])+" is greater than the number of spectra!");
-      throw std::invalid_argument(
-          "The spectral index " +std::to_string(spectra[i])+" is greater than the number of spectra!");
+      g_log.error("The spectral index " + std::to_string(spectra[i]) +
+                  " is greater than the number of spectra!");
+      throw std::invalid_argument("The spectral index " +
+                                  std::to_string(spectra[i]) +
+                                  " is greater than the number of spectra!");
     }
 
     // inital estimate of N0
@@ -174,51 +172,50 @@ double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
                                            int wsIndex,
                                            const double estNormConstant,
                                            const double startX,
-                                           const double endX ) {
-	double retVal = 1.0;
-	
-	API::IAlgorithm_sptr fit;
-	fit = createChildAlgorithm("Fit", -1, -1, true);
-	std::string tmpString = getProperty("FittingFunction");
+                                           const double endX) {
+  double retVal = 1.0;
 
-	std::string function;
-	function = "composite=ProductFunction;name=FlatBackground,A0=" +std::to_string(estNormConstant);
-	function += ";(name=FlatBackground,A0=1.0,ties=(A0=1.0);";
-	function += tmpString + ")";
+  API::IAlgorithm_sptr fit;
+  fit = createChildAlgorithm("Fit", -1, -1, true);
+  std::string tmpString = getProperty("FittingFunction");
 
-	fit->setPropertyValue("Function", function);
-	fit->setProperty("InputWorkspace", ws);
-	fit->setProperty("WorkspaceIndex", wsIndex);
-	fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
-	fit->setProperty("StartX", startX);
-	fit->setProperty("EndX", endX);
-	fit->execute();
-	
-	std::string fitStatus = fit->getProperty("OutputStatus");
-	API::IFunction_sptr result = fit->getProperty("Function");
-	std::vector<std::string> paramnames = result->getParameterNames();
-	const double A0 = result->getParameter(0);
-	if (fitStatus=="success") {//to be explicit 
+  std::string function;
+  function = "composite=ProductFunction;name=FlatBackground,A0=" +
+             std::to_string(estNormConstant);
+  function += ";(name=FlatBackground,A0=1.0,ties=(A0=1.0);";
+  function += tmpString + ")";
 
-		if (A0 < 0) {
-			g_log.warning() << "When trying to fit Asymmetry normalisation constant "
-				"this constant comes out negative. For workspace "
-				<<wsIndex<<"."
-				<< "To proceed Asym norm constant set to 1.0\n";
-			retVal = 1.0;
-		}
-		else {
-			retVal = A0;
-		}
-	}
-	else {
-		g_log.warning() << "Fit falled. Status = " << fitStatus
-			<< "\nFor workspace index " << wsIndex
-			<< "\nAsym norm constant set to 1.0\n";
-		retVal = 1.0;
-	}
+  fit->setPropertyValue("Function", function);
+  fit->setProperty("InputWorkspace", ws);
+  fit->setProperty("WorkspaceIndex", wsIndex);
+  fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
+  fit->setProperty("StartX", startX);
+  fit->setProperty("EndX", endX);
+  fit->execute();
 
-	return retVal;
+  std::string fitStatus = fit->getProperty("OutputStatus");
+  API::IFunction_sptr result = fit->getProperty("Function");
+  std::vector<std::string> paramnames = result->getParameterNames();
+  const double A0 = result->getParameter(0);
+  if (fitStatus == "success") { // to be explicit
+
+    if (A0 < 0) {
+      g_log.warning() << "When trying to fit Asymmetry normalisation constant "
+                         "this constant comes out negative. For workspace "
+                      << wsIndex << "."
+                      << "To proceed Asym norm constant set to 1.0\n";
+      retVal = 1.0;
+    } else {
+      retVal = A0;
+    }
+  } else {
+    g_log.warning() << "Fit falled. Status = " << fitStatus
+                    << "\nFor workspace index " << wsIndex
+                    << "\nAsym norm constant set to 1.0\n";
+    retVal = 1.0;
+  }
+
+  return retVal;
 }
 
 } // namespace Algorithm

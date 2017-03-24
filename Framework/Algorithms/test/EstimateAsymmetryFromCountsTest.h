@@ -16,40 +16,42 @@ using Mantid::Algorithms::EstimateAsymmetryFromCounts;
 const std::string outputName = "EstimateAsymmetryFromCounts_Output";
 
 namespace {
-struct yData{
-	double operator()(const double x, size_t ){
-  // Create a fake muon dataset
-  double a = 0.1; // Amplitude of the oscillations
-  double w = 25.; // Frequency of the oscillations
-  double tau = Mantid::PhysicalConstants::MuonLifetime *
-               1e6; // Muon life time in microseconds
-  double phi = 0.05;
-  double e = exp(-x / tau);
-  return (20. * (1.0 + a * cos(w * x + phi)) * e);
-}
+struct yData {
+  double operator()(const double x, size_t) {
+    // Create a fake muon dataset
+    double a = 0.1; // Amplitude of the oscillations
+    double w = 25.; // Frequency of the oscillations
+    double tau = Mantid::PhysicalConstants::MuonLifetime *
+                 1e6; // Muon life time in microseconds
+    double phi = 0.05;
+    double e = exp(-x / tau);
+    return (20. * (1.0 + a * cos(w * x + phi)) * e);
+  }
 };
 
-struct eData{
-	double operator()(const double , size_t ){return 0.005;}};
+struct eData {
+  double operator()(const double, size_t) { return 0.005; }
+};
 
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
-  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-	yData(),static_cast<int>(nspec),0.0,1.0,(1.0/static_cast<double>(maxt)),true,eData());
+  MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+          yData(), static_cast<int>(nspec), 0.0, 1.0,
+          (1.0 / static_cast<double>(maxt)), true, eData());
   // Add  number of good frames
   ws->mutableRun().addProperty("goodfrm", 10);
   return ws;
 }
 
-IAlgorithm_sptr  setUpAlg() {
-    IAlgorithm_sptr asymmAlg =
-       AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
-    asymmAlg->initialize();
-    asymmAlg->setChild(true);
-    asymmAlg->setProperty("StartX", 0.1);
-    asymmAlg->setProperty("EndX", 0.9);
-    return asymmAlg;
+IAlgorithm_sptr setUpAlg() {
+  IAlgorithm_sptr asymmAlg =
+      AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
+  asymmAlg->initialize();
+  asymmAlg->setChild(true);
+  asymmAlg->setProperty("StartX", 0.1);
+  asymmAlg->setProperty("EndX", 0.9);
+  return asymmAlg;
 }
-
 }
 
 class EstimateAsymmetryFromCountsTest : public CxxTest::TestSuite {
@@ -74,7 +76,7 @@ public:
 
     auto ws = createWorkspace(1, 50);
 
-    IAlgorithm_sptr alg =setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", outputName);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -94,27 +96,26 @@ public:
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
 
-    
     double Delta = 0.0001;
-    for(int j=0;j<2;j++){
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(j)[10], 0.2000,Delta );
-    TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800,Delta );
-    TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800,Delta );
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(j)[10], 0.0958,Delta );
-    TS_ASSERT_DELTA(outWS->y(j)[19], -0.0444, Delta );
-    TS_ASSERT_DELTA(outWS->y(j)[49], 0.1493, Delta );
-    // Test some E values
-    TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002,Delta );
-    TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003,Delta );
-    TS_ASSERT_DELTA(outWS->e(j)[49], 0.0004,Delta );
+    for (int j = 0; j < 2; j++) {
+      // Test some X values
+      TS_ASSERT_DELTA(outWS->x(j)[10], 0.2000, Delta);
+      TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800, Delta);
+      TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800, Delta);
+      // Test some Y values
+      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0958, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[19], -0.0444, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[49], 0.1493, Delta);
+      // Test some E values
+      TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002, Delta);
+      TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003, Delta);
+      TS_ASSERT_DELTA(outWS->e(j)[49], 0.0004, Delta);
     }
- }
+  }
   void test_SpectrumList() {
 
-    std::vector<MatrixWorkspace_sptr> workspaces;	
-    workspaces.push_back( createWorkspace(2, 50));
+    std::vector<MatrixWorkspace_sptr> workspaces;
+    workspaces.push_back(createWorkspace(2, 50));
 
     // First, run the algorithm without specifying any spectrum
 
@@ -135,17 +136,19 @@ public:
     TS_ASSERT(alg2->isExecuted());
     workspaces.push_back(alg2->getProperty("OutputWorkspace"));
 
-     for(int j=0;j<3;j++){
-	if(j!=0){//check we have 2 spectra
-    		TS_ASSERT_EQUALS(workspaces[j]->getNumberHistograms(), workspaces[0]->getNumberHistograms());
-	}
-	if(j!=2){//check results match
-	    TS_ASSERT_EQUALS(workspaces[j]->x(j).rawData(),workspaces[2]->x(j).rawData());
-	    TS_ASSERT_EQUALS(workspaces[j]->y(j).rawData(),workspaces[2]->y(j).rawData());
-	    TS_ASSERT_EQUALS(workspaces[j]->e(j).rawData(),workspaces[2]->e(j).rawData());
-	}
-
-
+    for (int j = 0; j < 3; j++) {
+      if (j != 0) { // check we have 2 spectra
+        TS_ASSERT_EQUALS(workspaces[j]->getNumberHistograms(),
+                         workspaces[0]->getNumberHistograms());
+      }
+      if (j != 2) { // check results match
+        TS_ASSERT_EQUALS(workspaces[j]->x(j).rawData(),
+                         workspaces[2]->x(j).rawData());
+        TS_ASSERT_EQUALS(workspaces[j]->y(j).rawData(),
+                         workspaces[2]->y(j).rawData());
+        TS_ASSERT_EQUALS(workspaces[j]->e(j).rawData(),
+                         workspaces[2]->e(j).rawData());
+      }
     }
   }
   void test_yUnitLabel() {
@@ -162,18 +165,18 @@ public:
     TS_ASSERT(result);
     TS_ASSERT_EQUALS(result->YUnitLabel(), "Asymmetry");
   }
- void test_NoRange() {
+  void test_NoRange() {
     auto ws = createWorkspace(1, 50);
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.1);
     alg->setProperty("EndX", 0.1);
     alg->setProperty("OutputWorkspace", outputName);
-    TS_ASSERT_THROWS(alg->execute(),std::runtime_error);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
   void test_BackwardsRange() {
     auto ws = createWorkspace(1, 50);
-    IAlgorithm_sptr alg =setUpAlg();
+    IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
     alg->setProperty("StartX", 0.9);
     alg->setProperty("EndX", 0.1);
@@ -181,44 +184,41 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
   void test_NumberOfDataPoints() {
-	
-    double dx=(1.0/300.0);
-    auto fineWS   = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-                      yData(), 1, 0.0, 1.0,dx,true,eData());
+
+    double dx = (1.0 / 300.0);
+    auto fineWS = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        yData(), 1, 0.0, 1.0, dx, true, eData());
     fineWS->mutableRun().addProperty("goodfrm", 10);
     auto coarseWS = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-                      yData(), 1, dx, 1.0+dx,3.0*dx,true,eData());
- 
+        yData(), 1, dx, 1.0 + dx, 3.0 * dx, true, eData());
+
     coarseWS->mutableRun().addProperty("goodfrm", 10);
 
-    IAlgorithm_sptr fineAlg =
-	setUpAlg();     
+    IAlgorithm_sptr fineAlg = setUpAlg();
     fineAlg->setProperty("InputWorkspace", fineWS);
-    fineAlg->setPropertyValue("OutputWorkspace","fineOutWS"); 
+    fineAlg->setPropertyValue("OutputWorkspace", "fineOutWS");
     TS_ASSERT_THROWS_NOTHING(fineAlg->execute());
     TS_ASSERT(fineAlg->isExecuted());
     MatrixWorkspace_sptr fineOutWS = fineAlg->getProperty("OutputWorkspace");
- 
-    IAlgorithm_sptr coarseAlg =
-	setUpAlg();     
+
+    IAlgorithm_sptr coarseAlg = setUpAlg();
     coarseAlg->setProperty("InputWorkspace", coarseWS);
-    coarseAlg->setPropertyValue("OutputWorkspace","coarseOutWS"); 
+    coarseAlg->setPropertyValue("OutputWorkspace", "coarseOutWS");
     TS_ASSERT_THROWS_NOTHING(coarseAlg->execute());
     TS_ASSERT(coarseAlg->isExecuted());
-    MatrixWorkspace_sptr coarseOutWS = coarseAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr coarseOutWS =
+        coarseAlg->getProperty("OutputWorkspace");
 
-    double Delta = 0.05;//only expect numbers to be similar
-    for(int j=0;j<28;j++){
-        // Test some X values
-    	TS_ASSERT_DELTA(fineOutWS->x(0)[1+j*3],coarseOutWS->x(0)[j] ,Delta);
-    	// Test some Y values
-    	TS_ASSERT_DELTA(fineOutWS->y(0)[1+j*3],coarseOutWS->y(0)[j] ,Delta);
-    	// Test some E values
-    	TS_ASSERT_DELTA(fineOutWS->e(0)[1+j*3],coarseOutWS->e(0)[j] ,Delta);
+    double Delta = 0.05; // only expect numbers to be similar
+    for (int j = 0; j < 28; j++) {
+      // Test some X values
+      TS_ASSERT_DELTA(fineOutWS->x(0)[1 + j * 3], coarseOutWS->x(0)[j], Delta);
+      // Test some Y values
+      TS_ASSERT_DELTA(fineOutWS->y(0)[1 + j * 3], coarseOutWS->y(0)[j], Delta);
+      // Test some E values
+      TS_ASSERT_DELTA(fineOutWS->e(0)[1 + j * 3], coarseOutWS->e(0)[j], Delta);
     }
-
   }
-
 };
 
 class EstimateAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {

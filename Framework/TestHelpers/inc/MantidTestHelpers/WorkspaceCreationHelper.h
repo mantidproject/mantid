@@ -163,7 +163,9 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceBinned(int nhist, const int numBoundaries,
                         const double xBoundaries[]);
 
-struct returnOne{double operator()(const double, size_t){ return 1;}};
+struct returnOne {
+  double operator()(const double, size_t) { return 1; }
+};
 
 /**
  * Creates a 2D workspace from taking the function values from the input
@@ -176,10 +178,11 @@ struct returnOne{double operator()(const double, size_t){ return 1;}};
  * @param isHist :: True if it should be a histogram
  * @return The new workspace. The errors are set to 1.0
  */
-template <typename fT,typename gT=returnOne>
+template <typename fT, typename gT = returnOne>
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
-                              double dx, bool isHist = false,gT eFunc=returnOne() ) {
+                              double dx, bool isHist = false,
+                              gT eFunc = returnOne()) {
   int nX = int((x1 - x0) / dx) + 1;
   int nY = nX - (isHist ? 1 : 0);
   if (nY <= 0)
@@ -198,7 +201,7 @@ create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
       double x = x0 + dx * i;
       X[i] = x;
       Y[i] = yFunc(x, iSpec);
-      E[i] = eFunc(x,iSpec);
+      E[i] = eFunc(x, iSpec);
     }
     if (isHist)
       X.back() = X[nY - 1] + dx;
