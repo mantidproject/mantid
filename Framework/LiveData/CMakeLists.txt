@@ -58,23 +58,23 @@ find_package ( LibRDKafka )
 if ( LIBRDKAFKA_FOUND )
   set ( SRC_FILES
     ${SRC_FILES}
-	src/Kafka/KafkaEventListener.cpp
-	src/Kafka/KafkaEventStreamDecoder.cpp
+    src/Kafka/KafkaEventListener.cpp
+    src/Kafka/KafkaEventStreamDecoder.cpp
     src/Kafka/KafkaBroker.cpp
-	src/Kafka/KafkaTopicSubscriber.cpp
+    src/Kafka/KafkaTopicSubscriber.cpp
   )
   set ( INC_FILES
     ${INC_FILES}
-	inc/MantidLiveData/Kafka/KafkaEventListener.h
-	inc/MantidLiveData/Kafka/KafkaEventStreamDecoder.h
+    inc/MantidLiveData/Kafka/KafkaEventListener.h
+    inc/MantidLiveData/Kafka/KafkaEventStreamDecoder.h
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
-	inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
-	src/Kafka/private/Schema/flatbuffers/flatbuffers.h
-	src/Kafka/private/Schema/det_spec_mapping_schema_generated.h
-	src/Kafka/private/Schema/event_schema_generated.h
-	src/Kafka/private/Schema/run_info_schema_generated.h
+    inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+    src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+    src/Kafka/private/Schema/det_spec_mapping_schema_generated.h
+    src/Kafka/private/Schema/event_schema_generated.h
+    src/Kafka/private/Schema/run_info_schema_generated.h
   )
   set ( TEST_FILES
     ${TEST_FILES}
