@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IMDHistoWorkspaceProperty, PropertyMode, WorkspaceProperty, Progress
-from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion
+from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, Property
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
@@ -32,6 +32,12 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertySettings("BoxWidth", condition)
         self.declareProperty("SpaceGroup", "", doc="Space groups, for reflection removal")
         self.setPropertySettings("SpaceGroup", condition)
+        self.declareProperty("CutSphere", False, "Limit min/max q values. Can help with edge effects.")
+        condition = EnabledWhenProperty("CutSphere", PropertyCriterion.IsNotDefault)
+        self.declareProperty("SphereMin", Property.EMPTY_DBL, "Min Sphere")
+        self.setPropertySettings("SphereMin", condition)
+        self.declareProperty("SphereMax", Property.EMPTY_DBL, "Min Sphere")
+        self.setPropertySettings("SphereMax", condition)
         self.declareProperty("Convolution", True, "Apply convolution to fill in removed reflections")
         condition = EnabledWhenProperty("Convolution", PropertyCriterion.IsDefault)
         self.declareProperty("ConvolutionWidth", 2.0, "Width of gaussian convolution in pixels")
@@ -53,19 +59,20 @@ class DeltaPDF3D(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        progress = Progress(self, 0.0, 1.0, 4)
+        progress = Progress(self, 0.0, 1.0, 5)
         inWS = self.getProperty("InputWorkspace").value
         signal = inWS.getSignalArray().copy()
+
+        dimX=inWS.getXDimension()
+        dimY=inWS.getYDimension()
+        dimZ=inWS.getZDimension()
+        X=np.linspace(dimX.getMinimum(),dimX.getMaximum(),dimX.getNBins()+1)
+        Y=np.linspace(dimY.getMinimum(),dimY.getMaximum(),dimY.getNBins()+1)
+        Z=np.linspace(dimZ.getMinimum(),dimZ.getMaximum(),dimZ.getNBins()+1)
 
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
             box_width = self.getProperty("BoxWidth").value
-            dimX=inWS.getXDimension()
-            dimY=inWS.getYDimension()
-            dimZ=inWS.getZDimension()
-            X=np.linspace(dimX.getMinimum(),dimX.getMaximum(),dimX.getNBins()+1)
-            Y=np.linspace(dimY.getMinimum(),dimY.getMaximum(),dimY.getNBins()+1)
-            Z=np.linspace(dimZ.getMinimum(),dimZ.getMaximum(),dimZ.getNBins()+1)
             space_group = self.getProperty("SpaceGroup").value
             if space_group is '':
                 check_space_group = False
@@ -83,6 +90,20 @@ class DeltaPDF3D(PythonAlgorithm):
                             z_min=np.searchsorted(Z,l-box_width)
                             z_max=np.searchsorted(Z,l+box_width)
                             signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
+
+        if self.getProperty("CutSphere").value:
+            progress.report("Cutting to sphere")
+            sphereMin = self.getProperty("SphereMin").value
+            sphereMax = self.getProperty("SphereMax").value
+            shape=signal.shape
+            Xs=((X[1:] + X[:-1])/2).reshape((shape[0], 1, 1))*np.ones(shape)
+            Ys=((Y[1:] + Y[:-1])/2).reshape((1, shape[1], 1))*np.ones(shape)
+            Zs=((Z[1:] + Z[:-1])/2).reshape((1, 1, shape[2]))*np.ones(shape)
+            q=Xs**2 + Ys**2 + Zs**2
+            if sphereMax != Property.EMPTY_DBL:
+                signal[q > sphereMax**2]=np.nan
+            if sphereMin != Property.EMPTY_DBL:
+                signal[q < sphereMin**2]=np.nan
 
         if self.getProperty("Convolution").value:
             progress.report("Convoluting signal")
@@ -102,8 +123,7 @@ class DeltaPDF3D(PythonAlgorithm):
             signal[np.isnan(signal)]=0
             signal[np.isinf(signal)]=0
 
-            fft=np.fft.fftshift(np.fft.fftn(np.fft.fftshift(signal)))
-            signal=(fft*np.conj(fft)).real
+            signal=np.fft.fftshift(np.fft.fftn(np.fft.fftshift(signal))).real
 
             # Calculate new extents for fft space
             extents=''
