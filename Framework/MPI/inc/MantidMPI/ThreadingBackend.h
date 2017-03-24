@@ -72,14 +72,15 @@ public:
 
 private:
   int m_size{1};
-  std::map<std::tuple<int, int, int>, std::vector<std::stringbuf>> m_buffer;
+  std::map<std::tuple<int, int, int>,
+           std::vector<std::unique_ptr<std::stringbuf>>> m_buffer;
   std::mutex m_mutex;
 };
 
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
-  std::stringbuf buf;
-  std::ostream os(&buf);
+  auto buf = Kernel::make_unique<std::stringbuf>();
+  std::ostream os(buf.get());
   boost::archive::binary_oarchive oa(os);
   oa.operator<<(std::forward<T>(args)...);
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -97,9 +98,13 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
     auto &queue = it->second;
     if (queue.empty())
       continue;
-    std::istream is(&queue.front());
-    boost::archive::binary_iarchive ia(is);
-    ia.operator>>(std::forward<T>(args)...);
+    std::istream is(queue.front().get());
+    {
+      // binary_iarchive scoped to ensure that it goes out of scope before
+      // erasing the buffer, otherwise this segfaults.
+      boost::archive::binary_iarchive ia(is);
+      ia.operator>>(std::forward<T>(args)...);
+    }
     queue.erase(queue.begin());
     return;
   }
