@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
 
@@ -19,7 +20,7 @@ public:
   void test_size_mismatch_fail() {
     IndexInfo source({1, 2, 3}, {{10}, {20}, {30}});
     std::vector<std::vector<size_t>> grouping{{0}, {1}, {2}};
-    std::vector<specnum_t> specNums{4, 5};
+    std::vector<SpectrumNumber> specNums{4, 5};
     TS_ASSERT_THROWS(group(source, std::move(specNums), grouping),
                      std::runtime_error);
     TS_ASSERT_EQUALS(specNums.size(), 2);
@@ -33,9 +34,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 4);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 5);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>{10});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<detid_t>{20});
-    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<detid_t>{30});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{10});
+    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{20});
+    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<DetectorID>{30});
   }
 
   void test_swap_ids() {
@@ -46,9 +47,9 @@ public:
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(2), 3);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>{20});
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<detid_t>{10});
-    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<detid_t>{30});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{20});
+    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{10});
+    TS_ASSERT_EQUALS(result.detectorIDs(2), std::vector<DetectorID>{30});
   }
 
   void test_extract() {
@@ -57,7 +58,7 @@ public:
     auto result = group(source, {1}, grouping);
     TS_ASSERT_EQUALS(result.size(), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>{20});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>{20});
   }
 
   void test_group() {
@@ -67,8 +68,8 @@ public:
     TS_ASSERT_EQUALS(result.size(), 2);
     TS_ASSERT_EQUALS(result.spectrumNumber(0), 1);
     TS_ASSERT_EQUALS(result.spectrumNumber(1), 2);
-    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<detid_t>({10, 30}));
-    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<detid_t>{20});
+    TS_ASSERT_EQUALS(result.detectorIDs(0), std::vector<DetectorID>({10, 30}));
+    TS_ASSERT_EQUALS(result.detectorIDs(1), std::vector<DetectorID>{20});
   }
 };
 

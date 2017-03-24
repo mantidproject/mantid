@@ -302,7 +302,7 @@ void EditInstrumentGeometry::exec() {
 
   // Add/copy detector information
   auto indexInfo = workspace->indexInfo();
-  std::vector<detid_t> detIDs;
+  std::vector<Indexing::DetectorID> detIDs;
   for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
     // Create a new detector.
     //    (Instrument will take ownership of pointer so no need to delete.)
@@ -325,9 +325,9 @@ void EditInstrumentGeometry::exec() {
 
     // Add new detector to spectrum and instrument
     // Good and do some debug output
-    g_log.debug() << "Orignal spectrum " << indexInfo.spectrumNumber(i)
-                  << "has " << indexInfo.detectorIDs(i).size()
-                  << " detectors. \n";
+    g_log.debug() << "Orignal spectrum "
+                  << static_cast<int32_t>(indexInfo.spectrumNumber(i)) << "has "
+                  << indexInfo.detectorIDs(i).size() << " detectors. \n";
 
     detIDs.push_back(newdetid);
     instrument->add(detector);

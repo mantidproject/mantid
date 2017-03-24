@@ -104,6 +104,9 @@ public:
   bool operator==(const cow_ptr<DataType> &A) const noexcept {
     return Data == A.Data;
   } ///< Based on ptr equality
+  bool operator!=(const cow_ptr<DataType> &A) const noexcept {
+    return Data != A.Data;
+  } ///< Based on ptr inequality
   DataType &access();
 };
 

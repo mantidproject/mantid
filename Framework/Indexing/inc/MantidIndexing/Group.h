@@ -2,11 +2,11 @@
 #define MANTID_INDEXING_GROUP_H_
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidIndexing/SpectrumNumber.h"
 
 #include <vector>
 
 namespace Mantid {
-using specnum_t = int32_t;
 namespace Indexing {
 class IndexInfo;
 
@@ -38,7 +38,7 @@ class IndexInfo;
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 MANTID_INDEXING_DLL IndexInfo
-group(const IndexInfo &source, std::vector<specnum_t> &&specNums,
+group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
       const std::vector<std::vector<size_t>> &grouping);
 
 } // namespace Indexing
