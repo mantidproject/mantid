@@ -11,7 +11,7 @@
 
 namespace Mantid {
 namespace LiveData {
-class ISISKafkaEventStreamDecoder;
+class KafkaEventStreamDecoder;
 
 /**
   Implementation of a live listener to consume messages from the Kafka system
@@ -36,18 +36,18 @@ class ISISKafkaEventStreamDecoder;
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class DLLExport ISISKafkaEventListener : public API::LiveListener {
+class DLLExport KafkaEventListener : public API::LiveListener {
 public:
-  ISISKafkaEventListener();
+  KafkaEventListener();
   /// Destructor. Should handle termination of any socket connections.
-  ~ISISKafkaEventListener() override = default;
+  ~KafkaEventListener() override = default;
 
   //----------------------------------------------------------------------
   // Static properties
   //----------------------------------------------------------------------
 
   /// The name of this listener
-  std::string name() const override { return "ISISKafkaEventListener"; }
+  std::string name() const override { return "KafkaEventListener"; }
   /// Does this listener support requests for (recent) past data
   bool supportsHistory() const override { return true; }
   /// Does this listener buffer events (true) or histogram data (false)
@@ -69,7 +69,7 @@ public:
   int runNumber() const override;
 
 private:
-  std::unique_ptr<ISISKafkaEventStreamDecoder> m_decoder = nullptr;
+  std::unique_ptr<KafkaEventStreamDecoder> m_decoder = nullptr;
 };
 
 } // namespace LiveData

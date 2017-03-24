@@ -1,4 +1,4 @@
-#include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
@@ -13,8 +13,8 @@
 #include "MantidLiveData/Exception.h"
 
 GCC_DIAG_OFF(conversion)
-#include "private/Kafka/Schema/det_spec_mapping_schema_generated.h"
-#include "private/Kafka/Schema/event_schema_generated.h"
+#include "private/Schema/det_spec_mapping_schema_generated.h"
+#include "private/Schema/event_schema_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <boost/make_shared.hpp>
@@ -26,7 +26,7 @@ GCC_DIAG_ON(conversion)
 
 namespace {
 /// Logger
-Mantid::Kernel::Logger g_log("ISISKafkaEventStreamDecoder");
+Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
 
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
@@ -117,7 +117,7 @@ using Kernel::DateAndTime;
  * run
  * mapping
  */
-ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
+KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
     const std::string &runInfoTopic, const std::string &spDetTopic)
     : m_broker(broker), m_eventTopic(eventTopic), m_runInfoTopic(runInfoTopic),
@@ -129,13 +129,13 @@ ISISKafkaEventStreamDecoder::ISISKafkaEventStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-ISISKafkaEventStreamDecoder::~ISISKafkaEventStreamDecoder() { stopCapture(); }
+KafkaEventStreamDecoder::~KafkaEventStreamDecoder() { stopCapture(); }
 
 /**
  * Start capturing from the stream on a separate thread. This is a non-blocking
  * call and will return after the thread has started
  */
-void ISISKafkaEventStreamDecoder::startCapture(bool startNow) {
+void KafkaEventStreamDecoder::startCapture(bool startNow) {
 
   // If we are not starting now, then we want to start at offsets corresponding
   // to the start of the run
@@ -145,7 +145,7 @@ void ISISKafkaEventStreamDecoder::startCapture(bool startNow) {
     runStream->consumeMessage(&rawMsgBuffer);
     if (rawMsgBuffer.empty()) {
       throw std::runtime_error(
-          "ISISKafkaEventStreamDecoder::initLocalCaches() - "
+          "KafkaEventStreamDecoder::initLocalCaches() - "
           "Empty message received from run info "
           "topic. Unable to continue");
     }
@@ -168,7 +168,7 @@ void ISISKafkaEventStreamDecoder::startCapture(bool startNow) {
  * Stop capturing from the stream. This is a blocking call until the capturing
  * function has completed
  */
-void ISISKafkaEventStreamDecoder::stopCapture() noexcept {
+void KafkaEventStreamDecoder::stopCapture() noexcept {
   // This will interrupt the "event" loop
   m_interrupt = true;
   // Wait until the function has completed. The background thread
@@ -183,7 +183,7 @@ void ISISKafkaEventStreamDecoder::stopCapture() noexcept {
  * @return True if data has been accumulated so that extractData()
  * can be called, false otherwise
  */
-bool ISISKafkaEventStreamDecoder::hasData() const noexcept {
+bool KafkaEventStreamDecoder::hasData() const noexcept {
   std::lock_guard<std::mutex> lock(m_mutex);
   return !m_localEvents.empty();
 }
@@ -192,7 +192,7 @@ bool ISISKafkaEventStreamDecoder::hasData() const noexcept {
  * Check if a message has indicated that end of run has been reached
  * @return  True if end of run has been reached
  */
-bool ISISKafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
+bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
   // Notify the decoder that MonitorLiveData knows it has reached end of run
   // and after giving it opportunity to interrupt, decoder can continue with
   // messages of the next run
@@ -213,7 +213,7 @@ bool ISISKafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
  * @return A pointer to the data collected since the last call to this
  * method
  */
-API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
+API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
   if (m_exception) {
     throw * m_exception;
   }
@@ -233,7 +233,7 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractData() {
 // Private members
 // -----------------------------------------------------------------------------
 
-API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
+API::Workspace_sptr KafkaEventStreamDecoder::extractDataImpl() {
   std::lock_guard<std::mutex> lock(m_mutex);
   if (m_localEvents.size() == 1) {
     auto temp = createBufferWorkspace(m_localEvents.front());
@@ -258,7 +258,7 @@ API::Workspace_sptr ISISKafkaEventStreamDecoder::extractDataImpl() {
  * Implementation designed to be entry point for new thread of execution.
  * It catches all thrown exceptions.
  */
-void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
+void KafkaEventStreamDecoder::captureImpl() noexcept {
   m_capturing = true;
   try {
     captureImplExcept();
@@ -266,7 +266,7 @@ void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
     m_exception = boost::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
     m_exception = boost::make_shared<std::runtime_error>(
-        "ISISKafkaEventStreamDecoder: Unknown exception type caught.");
+        "KafkaEventStreamDecoder: Unknown exception type caught.");
   }
   m_capturing = false;
 }
@@ -274,7 +274,7 @@ void ISISKafkaEventStreamDecoder::captureImpl() noexcept {
 /**
  * Exception-throwing variant of captureImpl(). Do not call this directly
  */
-void ISISKafkaEventStreamDecoder::captureImplExcept() {
+void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture starting");
   initLocalCaches();
 
@@ -306,7 +306,7 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
       std::lock_guard<std::mutex> lock(m_mutex);
       if (frameData->period() < 0)
         throw std::runtime_error(
-            "ISISKafkaEventStreamDecoder::captureImplExcept() - "
+            "KafkaEventStreamDecoder::captureImplExcept() - "
             "Negative period number in event message. Producer error, unable "
             "to continue");
       auto &periodBuffer =
@@ -365,13 +365,13 @@ void ISISKafkaEventStreamDecoder::captureImplExcept() {
  * By the end of this method the local event buffer is ready to accept
  * events
  */
-void ISISKafkaEventStreamDecoder::initLocalCaches() {
+void KafkaEventStreamDecoder::initLocalCaches() {
   std::string rawMsgBuffer;
 
   // Load spectra-detector mapping from stream
   m_spDetStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("ISISKafkaEventStreamDecoder::initLocalCaches() - "
+    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
                              "Empty message received from spectrum-detector "
                              "topic. Unable to continue");
   }
@@ -381,7 +381,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   auto nudet = spDetMsg->det()->size();
   if (nudet != nspec) {
     std::ostringstream os;
-    os << "ISISKafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
+    os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
           "found nspec=" << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
@@ -394,7 +394,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   // Load run metadata
   m_runStream->consumeMessage(&rawMsgBuffer);
   if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("ISISKafkaEventStreamDecoder::initLocalCaches() - "
+    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
                              "Empty message received from run info "
                              "topic. Unable to continue");
   }
@@ -430,7 +430,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
   const size_t nperiods(static_cast<size_t>(runMsg->n_periods()));
   if (nperiods == 0) {
     throw std::runtime_error(
-        "ISISKafkaEventStreamDecoder - Message has n_periods==0. This is "
+        "KafkaEventStreamDecoder - Message has n_periods==0. This is "
         "an error by the data producer");
   }
   std::lock_guard<std::mutex> lock(m_mutex);
@@ -453,7 +453,7 @@ void ISISKafkaEventStreamDecoder::initLocalCaches() {
  * @return A new workspace of the appropriate size
  */
 DataObjects::EventWorkspace_sptr
-ISISKafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
+KafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
                                                    const int32_t *spec,
                                                    const int32_t *udet,
                                                    const uint32_t length) {
@@ -495,7 +495,7 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
  * @param parent A pointer to an existing workspace
  */
 DataObjects::EventWorkspace_sptr
-ISISKafkaEventStreamDecoder::createBufferWorkspace(
+KafkaEventStreamDecoder::createBufferWorkspace(
     const DataObjects::EventWorkspace_sptr &parent) {
   auto buffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       API::WorkspaceFactory::Instance().create(
@@ -514,7 +514,7 @@ ISISKafkaEventStreamDecoder::createBufferWorkspace(
  * @param name Name of an instrument to load
  * @param workspace A pointer to the workspace receiving the instrument
  */
-void ISISKafkaEventStreamDecoder::loadInstrument(
+void KafkaEventStreamDecoder::loadInstrument(
     const std::string &name, DataObjects::EventWorkspace_sptr workspace) {
   if (name.empty()) {
     g_log.warning("Empty instrument name found");

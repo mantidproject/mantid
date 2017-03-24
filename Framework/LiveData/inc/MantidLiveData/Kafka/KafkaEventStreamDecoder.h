@@ -41,16 +41,16 @@ namespace LiveData {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ISISKafkaEventStreamDecoder {
+class DLLExport KafkaEventStreamDecoder {
 public:
-  ISISKafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
+  KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                               const std::string &eventTopic,
                               const std::string &runInfoTopic,
                               const std::string &spDetTopic);
-  ~ISISKafkaEventStreamDecoder();
-  ISISKafkaEventStreamDecoder(const ISISKafkaEventStreamDecoder &) = delete;
-  ISISKafkaEventStreamDecoder &
-  operator=(const ISISKafkaEventStreamDecoder &) = delete;
+  ~KafkaEventStreamDecoder();
+  KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
+  KafkaEventStreamDecoder &
+  operator=(const KafkaEventStreamDecoder &) = delete;
 
 public:
   ///@name Start/stop

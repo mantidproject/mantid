@@ -38,7 +38,7 @@
   <instrument name="HRPDTEST">
     <technique>Test Listener</technique>
     <livedata>
-      <connection name="default" listener="ISISKafkaEventListener" address="127.0.0.1:0" />
+      <connection name="default" listener="KafkaEventListener" address="127.0.0.1:0" />
     </livedata>
   </instrument>
 

@@ -3,26 +3,26 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "ISISKafkaTesting.h"
+#include "KafkaTesting.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "MantidLiveData/ISIS/KafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
 #include <thread>
 
-class ISISKafkaEventStreamDecoderTest : public CxxTest::TestSuite {
+class KafkaEventStreamDecoderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ISISKafkaEventStreamDecoderTest *createSuite() {
-    return new ISISKafkaEventStreamDecoderTest();
+  static KafkaEventStreamDecoderTest *createSuite() {
+    return new KafkaEventStreamDecoderTest();
   }
-  static void destroySuite(ISISKafkaEventStreamDecoderTest *suite) {
+  static void destroySuite(KafkaEventStreamDecoderTest *suite) {
     delete suite;
   }
 
@@ -207,10 +207,10 @@ public:
   }
 
 private:
-  std::unique_ptr<Mantid::LiveData::ISISKafkaEventStreamDecoder>
+  std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return Mantid::Kernel::make_unique<ISISKafkaEventStreamDecoder>(broker, "",
+    return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "",
                                                                     "", "");
   }
 
