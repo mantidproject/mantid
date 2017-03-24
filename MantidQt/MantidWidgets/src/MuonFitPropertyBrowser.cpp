@@ -389,14 +389,14 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		asymmAlg->setProperty("StartX", startX());
 		asymmAlg->setProperty("EndX", endX());
 		asymmAlg->setPropertyValue("OutputWorkspace", wsName);
-		asymmAlg->setPropertyValue("Minimizer", minimizer(true));
-		asymmAlg->setProperty("MaxIterations", maxIterations);
+		//asymmAlg->setPropertyValue("Minimizer", minimizer(true));
+		//asymmAlg->setProperty("MaxIterations", maxIterations);
 		asymmAlg->execute();
 		if (!asymmAlg->isExecuted()) {
 			throw std::runtime_error("Asymmetry Calculation has failed.");
 		}
 		// calculate the fit explicitly -> above does not get the function exactly right
-		try{
+		/*try{
 		Mantid::API::IAlgorithm_sptr alg =
 			Mantid::API::AlgorithmManager::Instance().create("Fit");
 		alg->initialize();
@@ -429,7 +429,7 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 	catch (const std::exception &e) {
 		QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
 		QMessageBox::critical(this, "Mantid - Error", msg);
-	}
+	}*/
 }
 
 /**

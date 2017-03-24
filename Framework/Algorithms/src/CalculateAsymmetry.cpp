@@ -59,7 +59,7 @@ void CalculateAsymmetry::init() {
 		"FittingFunction",
 		"name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
 		"The additional fitting functions to be used.");
-	declareProperty(
+	/*declareProperty(
 		"InputDataType",
 		"counts",
 		boost::make_shared<Mantid::Kernel::StringListValidator>(std::vector<std::string>
@@ -76,7 +76,7 @@ void CalculateAsymmetry::init() {
 	mustBePositive->setLower(0);
 	declareProperty(
 		"MaxIterations", 500, mustBePositive->clone(),
-		"Stop after this number of iterations if a good fit is not found");
+		"Stop after this number of iterations if a good fit is not found");*/
 }
 /** Executes the algorithm
  *
@@ -160,7 +160,7 @@ void CalculateAsymmetry::exec() {
       g_log.warning() << "Data at late times may dominate the normalisation."
                       << '\n';
     }
-	const std::string Minimizer = getProperty("Minimizer");
+	//const std::string Minimizer = getProperty("Minimizer");
     const Mantid::API::Run &run = inputWS->run();
     const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
     // inital estimate of N0
@@ -230,8 +230,8 @@ double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
   fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
-  fit->setPropertyValue("Minimizer", Minimizer);
-  fit->setProperty("MaxIterations",MaxIterations);
+//  fit->setPropertyValue("Minimizer", Minimizer);
+ // fit->setProperty("MaxIterations",MaxIterations);
   fit->execute();
 
 
