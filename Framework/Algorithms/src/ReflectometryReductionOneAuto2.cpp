@@ -112,6 +112,14 @@ void ReflectometryReductionOneAuto2::init() {
           "InputWorkspace", "", Direction::Input, PropertyMode::Mandatory),
       "Input run in TOF or wavelength");
 
+  // Reduction type
+  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
+                                             "NonFlatSample"};
+  std::string defaultCorrection = "None";
+  declareProperty("ReductionType", "Normal",
+                  boost::make_shared<StringListValidator>(reductionTypes),
+                  "The type of reduction to perform.");
+
   // Analysis mode
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
                                               "MultiDetectorAnalysis"};
@@ -229,7 +237,7 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->initialize();
 
   // Mandatory properties
-
+  alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -278,9 +286,9 @@ void ReflectometryReductionOneAuto2::exec() {
   try {
     MatrixWorkspace_sptr IvsQB = rebinAndScale(IvsQ, theta, params);
     setProperty("OutputWorkspaceBinned", IvsQB);
-  }
-  catch (std::exception &ex) {
-    g_log.error() << "Failed to rebin and scale result: " << ex.what() << ". OutputWorkspaceBinned will not be set.";
+  } catch (std::exception &ex) {
+    g_log.error() << "Failed to rebin and scale result: " << ex.what()
+                  << ". OutputWorkspaceBinned will not be set.";
   }
 
   // Set other properties so they can be updated in the Reflectometry interface
