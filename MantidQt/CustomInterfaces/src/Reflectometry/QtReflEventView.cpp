@@ -17,6 +17,7 @@ QtReflEventView::QtReflEventView(QWidget *parent) {
   m_buttonList.push_back(m_ui.uniformEvenButton);
   m_buttonList.push_back(m_ui.uniformButton);
   m_buttonList.push_back(m_ui.customButton);
+  m_buttonList.push_back(m_ui.logValueButton);
 
   // Whenever one of the slicing option buttons is selected, their corresponding
   // entry is enabled, otherwise they remain disabled.
@@ -60,6 +61,10 @@ std::string QtReflEventView::getTimeSlicingValues() const {
     values = m_ui.uniformEdit->text().toStdString();
   else if (m_sliceType == "Custom")
     values = m_ui.customEdit->text().toStdString();
+  else if (m_sliceType == "LogValue")
+    values =
+        "Slicing=\"" + m_ui.customEdit->text().toStdString() +
+        "\",LogFilter=" + m_ui.logValueComboBox->currentText().toStdString();
 
   return values;
 }
@@ -76,7 +81,7 @@ void QtReflEventView::toggleSlicingOptions() const {
   const auto checkedButton = m_ui.slicingOptionsButtonGroup->checkedButton();
 
   const std::vector<std::string> slicingTypes = {"UniformEven", "Uniform",
-                                                 "Custom"};
+                                                 "Custom", "LogValue"};
 
   std::vector<bool> entriesEnabled(m_buttonList.size(), false);
   for (size_t i = 0; i < m_buttonList.size(); i++) {
@@ -87,9 +92,18 @@ void QtReflEventView::toggleSlicingOptions() const {
     }
   }
 
+  // UniformEven
   m_ui.uniformEvenEdit->setEnabled(entriesEnabled[0]);
+  m_ui.uniformEvenLabel->setEnabled(entriesEnabled[0]);
+  // Uniform
   m_ui.uniformEdit->setEnabled(entriesEnabled[1]);
+  m_ui.uniformLabel->setEnabled(entriesEnabled[1]);
+  // Custom
   m_ui.customEdit->setEnabled(entriesEnabled[2]);
+  m_ui.customLabel->setEnabled(entriesEnabled[2]);
+  // LogValue
+  m_ui.logValueEdit->setEnabled(entriesEnabled[3]);
+  m_ui.logValueComboBox->setEnabled(entriesEnabled[3]);
 }
 
 } // namespace CustomInterfaces
