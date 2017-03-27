@@ -9,7 +9,15 @@ from mantid.simpleapi import *  # noqa
 
 
 def _insert_energy_value(ws_name, energy):
-    return ws_name.replace('_red', '_' + str(energy) + '_red')
+    '''
+    Inserts the doppler's energy value in the workspace name
+    in between the user input and automatic suffix
+    @param ws_name : workspace name
+    @param energy : energy value
+    @return : new name with energy value inside
+    '''
+    suffix_pos = ws_name.rfind('_')
+    return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
 
 
 class IndirectILLReductionFWS(PythonAlgorithm):
@@ -234,11 +242,11 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
 
-            DeleteWorkspace(left)
-            DeleteWorkspace(right)
-
             if left_monitor != 0. and right_monitor != 0.:
                 Scale(InputWorkspace=sum, OutputWorkspace=sum, Factor=0.5)
+
+            DeleteWorkspace(left)
+            DeleteWorkspace(right)
 
             RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
 
