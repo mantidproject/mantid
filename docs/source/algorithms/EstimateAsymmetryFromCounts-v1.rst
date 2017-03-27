@@ -34,7 +34,7 @@ input = CreateWorkspace(x,y)
 run = input.getRun()
 run.addProperty("goodfrm","10","None",True)
 
-output=EstimateAsymmetryFromCounts(InputWorkspace=input,spectra=0,XStart=1,XEnd=5)
+output=EstimateAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
 print "Asymmetry estimate: ", output.readY(0)
 
 Output:
