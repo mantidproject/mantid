@@ -150,7 +150,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
-    if not alg.has_key("InputWorkspace") or not alg.has_key("OutputWorkspace"):  #  noqa
+    if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:  #  noqa
         raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and"
                            " an OutputWorkspace property.".format(alg.name()))
 
