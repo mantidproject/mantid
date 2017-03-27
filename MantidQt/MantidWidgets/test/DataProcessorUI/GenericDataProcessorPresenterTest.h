@@ -1031,6 +1031,10 @@ public:
     createTOFWorkspace("TOF_12345", "12345");
     createTOFWorkspace("TOF_12346", "12346");
 
+    std::map<std::string, std::string> preProcessingOptions;
+    preProcessingOptions["Run(s)"];
+    preProcessingOptions["Transmission Run(s)"];
+
     // We should not receive any errors
     EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
 
@@ -1043,7 +1047,7 @@ public:
         .WillRepeatedly(Return(grouplist));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(preProcessingOptions));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));
