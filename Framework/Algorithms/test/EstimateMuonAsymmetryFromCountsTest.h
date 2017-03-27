@@ -226,9 +226,6 @@ class EstimateMuonAsymmetryFromCountsTestPerformance
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
-    return new EstimateMuonAsymmetryFromCountsTestPerformance();
-  }
   static void
   destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
