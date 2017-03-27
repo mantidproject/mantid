@@ -367,7 +367,7 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   if (min < 0 || max < 0)
     std::cerr << "Only positive numbers allowed\n";
   if (min == 0)
-    min = FLT_EPSILON;
+    min = 1e-3; // This is Qmin default! Might have to change this
   std::vector<double> outBins(num);
   min = log10(min);
   max = log10(max);
