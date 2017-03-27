@@ -12,6 +12,7 @@ Algorithms
   an invalid detector or sample name would cause a segmentation fault.
 - The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``DetectorCorrectionType``, 
   which specifies whether detector positions should be corrected by a vertical  shift (default) or by a rotation around the sample position.
+- :ref:`algm-ReflectometryReductionOneAuto` - fixed a bug where processing instructions were not applied correctly to the specified transmission run.
 
 ConvertToReflectometryQ
 -----------------------
