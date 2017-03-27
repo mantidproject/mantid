@@ -1,4 +1,6 @@
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/RoundRobinPartitioner.h"
+#include "MantidIndexing/SpectrumNumberTranslator.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -12,9 +14,10 @@ namespace Indexing {
 /// Construct a default IndexInfo, with contiguous spectrum numbers starting at
 /// 1 and no detector IDs.
 IndexInfo::IndexInfo(const size_t globalSize)
-    : m_spectrumNumbers(Kernel::make_cow<std::vector<specnum_t>>(globalSize)),
+    : m_spectrumNumbers(
+          Kernel::make_cow<std::vector<SpectrumNumber>>(globalSize)),
       m_detectorIDs(
-          Kernel::make_cow<std::vector<std::vector<detid_t>>>(globalSize)) {
+          Kernel::make_cow<std::vector<std::vector<DetectorID>>>(globalSize)) {
   // Default to spectrum numbers 1...globalSize
   auto &specNums = m_spectrumNumbers.access();
   std::iota(specNums.begin(), specNums.end(), 1);
@@ -22,8 +25,8 @@ IndexInfo::IndexInfo(const size_t globalSize)
 
 /// Construct with given spectrum number and vector of detector IDs for each
 /// index.
-IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
-                     std::vector<std::vector<detid_t>> &&detectorIDs) {
+IndexInfo::IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
+                     std::vector<std::vector<DetectorID>> &&detectorIDs) {
   if (spectrumNumbers.size() != detectorIDs.size())
     throw std::runtime_error("IndexInfo: Size mismatch between spectrum number "
                              "and detector ID vectors");
@@ -31,70 +34,51 @@ IndexInfo::IndexInfo(std::vector<specnum_t> &&spectrumNumbers,
   m_detectorIDs.access() = std::move(detectorIDs);
 }
 
-/// Constructor for internal use by MatrixWorkspace (legacy mode).
-IndexInfo::IndexInfo(
-    std::function<size_t()> getSize,
-    std::function<specnum_t(const size_t)> getSpectrumNumber,
-    std::function<const std::set<specnum_t> &(const size_t)> getDetectorIDs)
-    : m_isLegacy{true}, m_getSize(getSize),
-      m_getSpectrumNumber(getSpectrumNumber), m_getDetectorIDs(getDetectorIDs) {
-}
-
-/// Copy constructor.
-IndexInfo::IndexInfo(const IndexInfo &other) {
-  if (other.m_isLegacy) {
-    // Workaround while IndexInfo is not holding index data stored in
-    // MatrixWorkspace: build IndexInfo based on data in ISpectrum.
-    auto size = other.m_getSize();
-    auto &specNums = m_spectrumNumbers.access();
-    auto &detIDs = m_detectorIDs.access();
-    for (size_t i = 0; i < size; ++i) {
-      specNums.push_back(other.m_getSpectrumNumber(i));
-      const auto &set = other.m_getDetectorIDs(i);
-      detIDs.emplace_back(set.begin(), set.end());
-    }
-  } else {
-    m_spectrumNumbers = other.m_spectrumNumbers;
-    m_detectorIDs = other.m_detectorIDs;
-  }
-}
-
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
-  if (m_isLegacy)
-    return m_getSize();
+  if (!m_spectrumNumbers)
+    return 0;
   return m_spectrumNumbers->size();
 }
 
 /// Returns the spectrum number for given index.
-specnum_t IndexInfo::spectrumNumber(const size_t index) const {
-  if (m_isLegacy)
-    return m_getSpectrumNumber(index);
+SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
   return (*m_spectrumNumbers)[index];
 }
 
 /// Return a vector of the detector IDs for given index.
-std::vector<detid_t> IndexInfo::detectorIDs(const size_t index) const {
-  if (m_isLegacy) {
-    const auto &ids = m_getDetectorIDs(index);
-    return std::vector<detid_t>(ids.begin(), ids.end());
-  }
+const std::vector<DetectorID> &
+IndexInfo::detectorIDs(const size_t index) const {
   return (*m_detectorIDs)[index];
 }
 
 /// Set a spectrum number for each index.
-void IndexInfo::setSpectrumNumbers(std::vector<specnum_t> &&spectrumNumbers) & {
-  // No test of m_isLegacy, we cannot have non-const access in that case.
-  if (m_spectrumNumbers->size() != spectrumNumbers.size())
+void IndexInfo::setSpectrumNumbers(
+    std::vector<SpectrumNumber> &&spectrumNumbers) {
+  if (size() != spectrumNumbers.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum numbers");
   m_spectrumNumbers.access() = std::move(spectrumNumbers);
+  m_spectrumNumberTranslator =
+      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
+}
+
+/// Set a contiguous range of spectrum numbers.
+void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
+                                   const SpectrumNumber max) {
+  if (static_cast<int64_t>(size()) !=
+      static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1)
+    throw std::runtime_error(
+        "IndexInfo: Size mismatch when setting new spectrum numbers");
+  auto &data = m_spectrumNumbers.access();
+  std::iota(data.begin(), data.end(), static_cast<int32_t>(min));
+  m_spectrumNumberTranslator =
+      Kernel::cow_ptr<SpectrumNumberTranslator>{nullptr};
 }
 
 /// Set a single detector ID for each index.
-void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
-  // No test of m_isLegacy, we cannot have non-const access in that case.
-  if (m_detectorIDs->size() != detectorIDs.size())
+void IndexInfo::setDetectorIDs(const std::vector<DetectorID> &detectorIDs) {
+  if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
 
@@ -108,9 +92,8 @@ void IndexInfo::setDetectorIDs(const std::vector<detid_t> &detectorIDs) & {
 
 /// Set a vector of detector IDs for each index.
 void IndexInfo::setDetectorIDs(
-    // No test of m_isLegacy, we cannot have non-const access in that case.
-    std::vector<std::vector<detid_t>> &&detectorIDs) & {
-  if (m_detectorIDs->size() != detectorIDs.size())
+    std::vector<std::vector<DetectorID>> &&detectorIDs) {
+  if (size() != detectorIDs.size())
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new detector IDs");
 
@@ -125,6 +108,13 @@ void IndexInfo::setDetectorIDs(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>>(nullptr);
 }
 
+/** Set the spectrum definitions.
+ *
+ * Note that in principle the spectrum definitions contain the same information
+ * as the groups of detector IDs. However, Mantid currently supports invalid
+ * detector IDs in groups, whereas spectrum definitions contain only valid
+ * indices. Validation requires access to the instrument and thus cannot be done
+ * internally in IndexInfo, i.e., spectrum definitions must be set by hand. */
 void IndexInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
   if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
@@ -133,9 +123,80 @@ void IndexInfo::setSpectrumDefinitions(
   m_spectrumDefinitions = spectrumDefinitions;
 }
 
+/// Returns the spectrum definitions.
 const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
 IndexInfo::spectrumDefinitions() const {
   return m_spectrumDefinitions;
+}
+
+/** Creates an index set containing all indices.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
+SpectrumIndexSet IndexInfo::makeIndexSet() const {
+  makeSpectrumNumberTranslator();
+  return m_spectrumNumberTranslator->makeIndexSet();
+}
+
+/** Creates an index set containing all indices with spectrum number between
+ * `min` and `max`.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
+SpectrumIndexSet IndexInfo::makeIndexSet(SpectrumNumber min,
+                                         SpectrumNumber max) const {
+  makeSpectrumNumberTranslator();
+  return m_spectrumNumberTranslator->makeIndexSet(min, max);
+}
+
+/** Creates an index set containing all indices with global index between `min`
+ * and `max`.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
+SpectrumIndexSet IndexInfo::makeIndexSet(GlobalSpectrumIndex min,
+                                         GlobalSpectrumIndex max) const {
+  makeSpectrumNumberTranslator();
+  return m_spectrumNumberTranslator->makeIndexSet(min, max);
+}
+
+/** Creates an index set containing all indices corresponding to the spectrum
+ * numbers in the provided vector.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
+SpectrumIndexSet IndexInfo::makeIndexSet(
+    const std::vector<SpectrumNumber> &spectrumNumbers) const {
+  makeSpectrumNumberTranslator();
+  return m_spectrumNumberTranslator->makeIndexSet(spectrumNumbers);
+}
+
+/** Creates an index set containing all indices corresponding to the global
+ * indices in the provided vector.
+ *
+ * If there are multiple partitions (MPI ranks), the returned set contains the
+ * subset of indices on this partition. */
+SpectrumIndexSet IndexInfo::makeIndexSet(
+    const std::vector<GlobalSpectrumIndex> &globalIndices) const {
+  makeSpectrumNumberTranslator();
+  return m_spectrumNumberTranslator->makeIndexSet(globalIndices);
+}
+
+void IndexInfo::makeSpectrumNumberTranslator() const {
+  // To support legacy code that creates workspaces with duplicate spectrum
+  // numbers we are currently creating the SpectrumNumberTranslator only when
+  // needed.
+  // Note that the lazy initialization implies that no sharing of
+  // SpectrumNumberTranslator will be set up for workspaces created before the
+  // first access.
+  // TODO We are not setting monitors currently. This is ok as long as we have
+  // exactly one partition.
+  PartitionIndex partition = 0;
+  RoundRobinPartitioner partitioner(
+      1, partition, Partitioner::MonitorStrategy::CloneOnEachPartition,
+      std::vector<GlobalSpectrumIndex>{});
+  m_spectrumNumberTranslator = Kernel::make_cow<SpectrumNumberTranslator>(
+      *m_spectrumNumbers, partitioner, partition);
 }
 
 } // namespace Indexing

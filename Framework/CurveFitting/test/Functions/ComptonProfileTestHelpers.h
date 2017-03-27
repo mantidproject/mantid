@@ -88,7 +88,8 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
 
   // Link workspace with detector
   Mantid::Indexing::IndexInfo indexInfo(nhist);
-  indexInfo.setDetectorIDs(std::vector<Mantid::detid_t>(nhist, id));
+  indexInfo.setDetectorIDs(
+      std::vector<Mantid::Indexing::DetectorID>(nhist, id));
   ws2d->setIndexInfo(indexInfo);
 
   return ws2d;

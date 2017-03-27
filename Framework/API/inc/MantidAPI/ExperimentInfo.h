@@ -224,8 +224,7 @@ private:
   mutable std::recursive_mutex m_mutex;
 
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
-  mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
-  mutable std::mutex m_detectorInfoMutex;
+  std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
 
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
   std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;

@@ -71,6 +71,8 @@ ExperimentInfo::ExperimentInfo()
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, getInstrument(), m_parmap.get());
 }
 
 /**
@@ -265,7 +267,6 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     // We take a *copy* of the ParameterMap since we are modifying it by setting
@@ -280,6 +281,8 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       sptr_instrument, m_parmap);
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, getInstrument(), m_parmap.get());
 
   std::vector<Geometry::ComponentID> componentIds;
   m_componentInfo =
@@ -1148,17 +1151,11 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
 
 /** Return a const reference to the DetectorInfo object.
  *
- * Any modifications of the instrument or instrument parameters will invalidate
+ * Setting a new instrument via ExperimentInfo::setInstrument will invalidate
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
-  if (!m_detectorInfoWrapper) {
-    std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfoWrapper)
-      m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-          *m_detectorInfo, getInstrument(), m_parmap.get());
-  }
   return *m_detectorInfoWrapper;
 }
 

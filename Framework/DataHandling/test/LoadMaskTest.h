@@ -197,7 +197,7 @@ public:
     std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
     auto it = --detIDs.end();
-    for (; it > detIDs.begin(); --it) {
+    for (; it >= detIDs.begin(); --it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
       Mantid::specnum_t specNo =
