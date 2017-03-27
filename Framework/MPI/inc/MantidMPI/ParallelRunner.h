@@ -47,27 +47,25 @@ public:
   void run(Function &&f, Args &&... args);
 
 private:
-#ifndef MPI_EXPERIMENTAL
   boost::shared_ptr<detail::ThreadingBackend> m_backend;
-#endif
 };
 
 template <class Function, class... Args>
 void ParallelRunner::run(Function &&f, Args &&... args) {
-#ifdef MPI_EXPERIMENTAL
-  Communicator comm;
-  f(comm, std::forward<Args>(args)...);
-#else
-  std::vector<std::thread> threads;
-  for (int t = 0; t < m_backend->size(); ++t) {
-    Communicator comm(m_backend, t);
-    threads.emplace_back(std::forward<Function>(f), comm,
-                         std::forward<Args>(args)...);
+  if (!m_backend) {
+    Communicator comm;
+    f(comm, std::forward<Args>(args)...);
+  } else {
+    std::vector<std::thread> threads;
+    for (int t = 0; t < m_backend->size(); ++t) {
+      Communicator comm(m_backend, t);
+      threads.emplace_back(std::forward<Function>(f), comm,
+                           std::forward<Args>(args)...);
+    }
+    for (auto &t : threads) {
+      t.join();
+    }
   }
-  for (auto &t : threads) {
-    t.join();
-  }
-#endif
 }
 
 template <class... Args> void runParallel(Args &&... args) {

@@ -7,33 +7,33 @@ namespace Mantid {
 namespace MPI {
 
 ParallelRunner::ParallelRunner() {
-#ifndef MPI_EXPERIMENTAL
-  // 3 is an arbitrary choice. We need more than 1 since that would be a trivial
-  // case, 2 seems like a special case that might make some bugs invisible.
-  int threads =
-      std::max(3, static_cast<int>(std::thread::hardware_concurrency()));
-  m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
-#endif
+  Communicator comm;
+  // Fake parallelism via threads if there is only 1 MPI rank
+  if (comm.size() == 1) {
+    // 3 is an arbitrary choice. We need more than 1 since that would be a
+    // trivial case, 2 seems like a special case that might make some bugs
+    // invisible.
+    int threads =
+        std::max(3, static_cast<int>(std::thread::hardware_concurrency()));
+    m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
+  }
 }
 
 ParallelRunner::ParallelRunner(const int threads) {
-#ifdef MPI_EXPERIMENTAL
   Communicator comm;
-  if (comm.size() != threads)
+  // Fake parallelism via threads if there is only 1 MPI rank, but fail if there
+  // are MPI ranks that do not match the number of requested threads.
+  if (comm.size() != 1 && comm.size() != threads)
     throw("ParallelRunner: number of requested threads does not match number "
           "of MPI ranks");
-#else
   m_backend = boost::make_shared<detail::ThreadingBackend>(threads);
-#endif
 }
 
 int ParallelRunner::size() const {
-#ifdef MPI_EXPERIMENTAL
+  if (m_backend)
+    return m_backend->size();
   Communicator comm;
   return comm.size();
-#else
-  return m_backend->size();
-#endif
 }
 
 } // namespace MPI

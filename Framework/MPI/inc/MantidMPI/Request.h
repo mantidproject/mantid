@@ -3,14 +3,14 @@
 
 #include "MantidMPI/DllConfig.h"
 
-#ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/request.hpp>
-#else
 #include <thread>
-#endif
 
 namespace Mantid {
 namespace MPI {
+namespace detail {
+class ThreadingBackend;
+}
 
 /** Wrapper for boost::mpi::request. For non-MPI builds an equivalent
   implementation is provided.
@@ -42,27 +42,22 @@ namespace MPI {
 class MANTID_MPI_DLL Request {
 public:
   Request() = default;
-#ifdef MPI_EXPERIMENTAL
   Request(const boost::mpi::request &request);
-#else
-  template <class Function> explicit Request(Function &&f);
-#endif
 
   void wait();
 
 private:
-#ifdef MPI_EXPERIMENTAL
+  template <class Function> explicit Request(Function &&f);
   boost::mpi::request m_request;
-#else
   std::thread m_thread;
-#endif
+  const bool m_threadingBackend{false};
+  // For accessing constructor based on callable.
+  friend class detail::ThreadingBackend;
 };
 
-#ifndef MPI_EXPERIMENTAL
 template <class Function>
 Request::Request(Function &&f)
-    : m_thread(std::forward<Function>(f)) {}
-#endif
+    : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
 
 } // namespace MPI
 } // namespace Mantid

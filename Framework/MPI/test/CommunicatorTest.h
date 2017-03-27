@@ -16,7 +16,7 @@ void send_recv(const Communicator &comm) {
   double data = 3.14;
 
   if (comm.rank() == 0)
-    TS_ASSERT_THROWS_NOTHING(comm.send(1, 123, data));
+    (comm.send(1, 123, data));
   if (comm.rank() == 1) {
     double result;
     TS_ASSERT_THROWS_NOTHING(comm.recv(0, 123, result));
@@ -79,14 +79,9 @@ public:
 
   void test_defaults() {
     Communicator comm;
-#ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;
     TS_ASSERT_EQUALS(comm.size(), world.size());
     TS_ASSERT_EQUALS(comm.rank(), world.rank());
-#else
-    TS_ASSERT_EQUALS(comm.size(), 1);
-    TS_ASSERT_EQUALS(comm.rank(), 0);
-#endif
   }
 
   void test_send_recv() { runParallel(send_recv); }

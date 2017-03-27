@@ -31,6 +31,7 @@ public:
 
   void test_size() {
     ParallelRunner parallel;
+    TS_ASSERT(parallel.size() > 1);
     parallel.run(check_size, parallel.size());
   }
 
@@ -39,14 +40,13 @@ public:
     std::set<int> ranks;
     ParallelRunner parallel;
     parallel.run(get_ranks, std::ref(mutex), std::ref(ranks));
-#ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;
-    TS_ASSERT_EQUALS(ranks.size(), 1);
-    TS_ASSERT_EQUALS(ranks.count(world.rank()), 1);
-#else
-    for (int rank = 0; rank < parallel.size(); ++rank)
-      TS_ASSERT_EQUALS(ranks.count(rank), 1);
-#endif
+    if (world.size() == 1) {
+      for (int rank = 0; rank < parallel.size(); ++rank)
+        TS_ASSERT_EQUALS(ranks.count(rank), 1);
+    } else {
+      TS_ASSERT_EQUALS(ranks.count(world.rank()), 1);
+    }
   }
 };
 

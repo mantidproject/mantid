@@ -3,16 +3,14 @@
 
 #include "MantidMPI/DllConfig.h"
 #include "MantidMPI/Request.h"
+#include "MantidMPI/ThreadingBackend.h"
 
 #include <boost/make_shared.hpp>
-#ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/communicator.hpp>
-#else
-#include "MantidMPI/ThreadingBackend.h"
-#endif
 
 namespace Mantid {
 namespace MPI {
+class ParallelRunner;
 
 /** Wrapper for boost::mpi::communicator. For non-MPI builds an equivalent
   implementation is provided.
@@ -44,12 +42,7 @@ namespace MPI {
 class MANTID_MPI_DLL Communicator {
 public:
   Communicator() = default;
-#ifdef MPI_EXPERIMENTAL
   explicit Communicator(const boost::mpi::communicator &comm);
-#else
-  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
-               const int rank);
-#endif
 
   int rank() const;
   int size() const;
@@ -59,47 +52,41 @@ public:
   template <typename... T> Request irecv(T &&... args) const;
 
 private:
-#ifdef MPI_EXPERIMENTAL
+  Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
+               const int rank);
+
   boost::mpi::communicator m_communicator;
-#else
-  boost::shared_ptr<detail::ThreadingBackend> m_backend{
-      boost::make_shared<detail::ThreadingBackend>()};
+  boost::shared_ptr<detail::ThreadingBackend> m_backend;
   const int m_rank{0};
-#endif
+
+  // For accessing constructor with threading backend.
+  friend class ParallelRunner;
 };
 
 template <typename... T> void Communicator::send(T &&... args) const {
-#ifdef MPI_EXPERIMENTAL
+  if (m_backend)
+    return m_backend->send(m_rank, std::forward<T>(args)...);
   m_communicator.send(std::forward<T>(args)...);
-#else
-  m_backend->send(m_rank, std::forward<T>(args)...);
-#endif
 }
 
 template <typename... T> void Communicator::recv(T &&... args) const {
-#ifdef MPI_EXPERIMENTAL
   // Not returning a status since it would usually not get initialized. See
   // http://mpi-forum.org/docs/mpi-1.1/mpi-11-html/node35.html#Node35.
+  if (m_backend)
+    return m_backend->recv(m_rank, std::forward<T>(args)...);
   static_cast<void>(m_communicator.recv(std::forward<T>(args)...));
-#else
-  return m_backend->recv(m_rank, std::forward<T>(args)...);
-#endif
 }
 
 template <typename... T> Request Communicator::isend(T &&... args) const {
-#ifdef MPI_EXPERIMENTAL
+  if (m_backend)
+    return m_backend->isend(m_rank, std::forward<T>(args)...);
   return m_communicator.isend(std::forward<T>(args)...);
-#else
-  return m_backend->isend(m_rank, std::forward<T>(args)...);
-#endif
 }
 
 template <typename... T> Request Communicator::irecv(T &&... args) const {
-#ifdef MPI_EXPERIMENTAL
+  if (m_backend)
+    return m_backend->irecv(m_rank, std::forward<T>(args)...);
   return m_communicator.irecv(std::forward<T>(args)...);
-#else
-  return m_backend->irecv(m_rank, std::forward<T>(args)...);
-#endif
 }
 
 } // namespace MPI
