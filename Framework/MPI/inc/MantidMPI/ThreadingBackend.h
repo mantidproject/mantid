@@ -81,8 +81,13 @@ template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
   auto buf = Kernel::make_unique<std::stringbuf>();
   std::ostream os(buf.get());
-  boost::archive::binary_oarchive oa(os);
-  oa.operator<<(std::forward<T>(args)...);
+  {
+    // binary_oarchive must be scoped, otherwise the destructor segaults. Since
+    // the buffer is in a unique_ptr that is being moved, maybe this is due to
+    // access from another thread once the lock goes out if scope?
+    boost::archive::binary_oarchive oa(os);
+    oa.operator<<(std::forward<T>(args)...);
+  }
   std::lock_guard<std::mutex> lock(m_mutex);
   m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
 }

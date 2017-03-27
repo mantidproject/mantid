@@ -3,11 +3,12 @@
 
 #include "MantidMPI/DllConfig.h"
 #include "MantidMPI/Request.h"
-#include "MantidMPI/ThreadingBackend.h"
 
 #include <boost/make_shared.hpp>
 #ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/communicator.hpp>
+#else
+#include "MantidMPI/ThreadingBackend.h"
 #endif
 
 namespace Mantid {
