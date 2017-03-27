@@ -117,6 +117,7 @@
   </instrument>
 
   <instrument name="LOQ">
+    <zeropadding size="8" startRunNumber="99738" prefix="LOQ"/>
     <technique>Small Angle Scattering</technique>
     <livedata>
       <connection name="histo" address="NDXLOQ:6789" listener="ISISHistoDataListener" />
