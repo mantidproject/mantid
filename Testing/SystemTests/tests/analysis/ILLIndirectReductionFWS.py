@@ -46,6 +46,8 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         self._run_sum_interpolate()
 
+        self._run_efws_mirror_sense()
+
         self.tearDown()
 
     def _run_ifws(self):
@@ -108,7 +110,7 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         # this tests the EFWS in mirror mode: data in 140680 is indeed split to two wings,
         # while the others have right wing empty (though mirror sense is ON!)
         IndirectILLReductionFWS(Run="140678:140682", OutputWorkspace="efws_mirror")
-        yData = mtd["efws_mirror"].readY(17)
+        yData = mtd["efws_mirror"].getItem(0).readY(17)
         avg = numpy.average(yData)
-        for y in yData:
+        for y in numpy.nditer(yData):
             self.assertDelta(y, avg, 0.001)
