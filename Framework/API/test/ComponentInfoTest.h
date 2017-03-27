@@ -90,9 +90,9 @@ public:
                        std::vector<Mantid::Geometry::ComponentID>{
                            &fakeComposite1, &fakeComposite2, &fakeDetector1,
                            &fakeDetector2, &fakeDetector3});
-    TS_ASSERT_EQUALS(info.detectorIndices(0 /*component index*/),
+    TS_ASSERT_EQUALS(info.detectorIndices(3 /*component index*/),
                      std::vector<size_t>({0, 2, 1}));
-    TS_ASSERT_EQUALS(info.detectorIndices(1 /*component index*/),
+    TS_ASSERT_EQUALS(info.detectorIndices(4 /*component index*/),
                      std::vector<size_t>({1}));
   }
 };

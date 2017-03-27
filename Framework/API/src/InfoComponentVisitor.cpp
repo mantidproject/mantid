@@ -6,7 +6,6 @@
 
 #include <numeric>
 #include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace API {
