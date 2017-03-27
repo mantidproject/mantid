@@ -32,8 +32,7 @@ double getSingleWorkspaceLogValue(
     return wsIndex;
   } else {
     // MatrixWorkspace is an ExperimentInfo
-    if (auto ei = boost::dynamic_pointer_cast<const ExperimentInfo>(matrixWS)) {
-      auto log = ei->run().getLogData(logName.toStdString());
+      auto log = matrixWS->run().getLogData(logName.toStdString());
       if (log) {
         if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
@@ -45,9 +44,6 @@ double getSingleWorkspaceLogValue(
       } else {
         throw std::invalid_argument("Log not present in workspace");
       }
-    } else {
-      throw std::invalid_argument("Bad input workspace type");
-    }
   }
 }
 
