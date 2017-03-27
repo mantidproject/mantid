@@ -67,7 +67,8 @@ private:
                     const QString &logName) const;
 
   /// Returns a single log value from supplied custom log
-  double getSingleLogValue(size_t wsIndex, const std::set<double> &values) const;
+  double getSingleLogValue(size_t wsIndex,
+                           const std::set<double> &values) const;
 
   /// Get X axis title
   QString getXAxisTitle(

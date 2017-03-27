@@ -32,18 +32,18 @@ double getSingleWorkspaceLogValue(
     return wsIndex;
   } else {
     // MatrixWorkspace is an ExperimentInfo
-      auto log = matrixWS->run().getLogData(logName.toStdString());
-      if (log) {
-        if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
-            dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          return std::stod(log->value());
-        } else {
-          throw std::invalid_argument(
-              "Log is of wrong type (expected single numeric value");
-        }
+    auto log = matrixWS->run().getLogData(logName.toStdString());
+    if (log) {
+      if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
+          dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
+        return std::stod(log->value());
       } else {
-        throw std::invalid_argument("Log not present in workspace");
+        throw std::invalid_argument(
+            "Log is of wrong type (expected single numeric value");
       }
+    } else {
+      throw std::invalid_argument("Log not present in workspace");
+    }
   }
 }
 

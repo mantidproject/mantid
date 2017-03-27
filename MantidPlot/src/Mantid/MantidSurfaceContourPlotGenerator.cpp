@@ -21,7 +21,8 @@ using Mantid::HistogramData::Histogram;
  * Constructor
  * @param mantidUI :: [input] Pointer to the Mantid UI
  */
-MantidSurfaceContourPlotGenerator::MantidSurfaceContourPlotGenerator(MantidDisplayBase *mantidUI)
+MantidSurfaceContourPlotGenerator::MantidSurfaceContourPlotGenerator(
+    MantidDisplayBase *mantidUI)
     : m_mantidUI(mantidUI) {}
 
 /**
@@ -142,7 +143,7 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     int plotIndex, const QString &logName,
     const std::set<double> &customLogValues) const {
-    const auto index =
+  const auto index =
       static_cast<size_t>(plotIndex); // which spectrum to plot from each WS
 
   validateWorkspaceChoices(workspaces, index);
@@ -218,13 +219,13 @@ double MantidSurfaceContourPlotGenerator::getSingleLogValue(
  * @param logName :: [input] Name of log
  * @returns log value as a double, or workspace index
  * @throws invalid_argument if log is wrong type or not present
- */ 
+ */
 double MantidSurfaceContourPlotGenerator::getSingleLogValue(
     size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
 
   return getSingleWorkspaceLogValue(wsIndex, matrixWS, logName);
-} 
+}
 
 /**
  * Performs validation of user's selected options.

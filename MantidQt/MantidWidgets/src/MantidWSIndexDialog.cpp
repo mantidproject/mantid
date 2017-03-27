@@ -505,12 +505,12 @@ void MantidWSIndexWidget::populateLogComboBox() {
   // Create a table of all single-value numeric log names versus
   // how many workspaces they appear in
   std::map<std::string, int> logCounts;
-  for (auto& wsName : m_wsNames) {
+  for (auto &wsName : m_wsNames) {
     auto ws = getWorkspace(wsName);
     if (ws) {
       const std::vector<Mantid::Kernel::Property *> &logData =
           ws->run().getLogData();
-      for (auto& log : logData) {
+      for (auto &log : logData) {
         // If this is a single-value numeric log, add it to the list of counts
         if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
@@ -527,7 +527,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
 
   // Add the log names to the combo box if they appear in all workspaces
   const int nWorkspaces = m_wsNames.size();
-  for (auto& logCount : logCounts) {
+  for (auto &logCount : logCounts) {
     if (logCount.second == nWorkspaces) {
       m_logSelector->addItem(logCount.first.c_str());
     }
