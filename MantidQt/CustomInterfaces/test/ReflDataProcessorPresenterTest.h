@@ -143,6 +143,10 @@ public:
     // We should not receive any errors
     EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
 
+    std::map<std::string, std::string> preProcessingOptions;
+    preProcessingOptions["Run(s)"];
+    preProcessingOptions["Transmission Run(s)"];
+
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
         .Times(1)
@@ -155,7 +159,7 @@ public:
         .WillOnce(Return("0,10,20,30"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(6)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(preProcessingOptions));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(6)
         .WillRepeatedly(Return(""));
@@ -230,6 +234,9 @@ public:
     std::set<int> groupList;
     groupList.insert(0);
 
+    std::map<std::string, std::string> preProcessingOptions;
+    preProcessingOptions["Run(s)"];
+
     // We should be warned
     EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
 
@@ -245,7 +252,7 @@ public:
         .WillOnce(Return("0,10"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(preProcessingOptions));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(1)
         .WillRepeatedly(Return(""));
@@ -285,6 +292,10 @@ public:
     std::set<int> groupList;
     groupList.insert(0);
 
+    std::map<std::string, std::string> preProcessingOptions;
+    preProcessingOptions["Run(s)"];
+    preProcessingOptions["Transmission Run(s)"];
+
     // We should be warned
     EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
 
@@ -300,7 +311,7 @@ public:
         .WillOnce(Return("0,10,20,30"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
-        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+        .WillRepeatedly(Return(preProcessingOptions));
     EXPECT_CALL(mockMainPresenter, getProcessingOptions())
         .Times(2)
         .WillRepeatedly(Return(""));

@@ -605,9 +605,6 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
 
       const std::string runStr = data.at(i);
 
-      std::cout << "runStr = " << runStr << "\n";
-      std::cout << "procName = " << m_processor.name() << "\n";
-
       if (!runStr.empty()) {
 
         auto preprocessor = m_preprocessMap.at(columnName);
@@ -615,12 +612,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
         // Global pre-processing options for this algorithm as a string
         const std::string options = globalOptions.at(columnName);
 
-        std::cout << "options = " << options << "\n";
-
         auto optionsMap = parseKeyValueString(options);
         auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-
-        std::cout << "runWSName = " << runWS->getName() << "\n";
 
         alg->setProperty(propertyName, runWS->getName());
       }
