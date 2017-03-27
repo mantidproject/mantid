@@ -62,12 +62,12 @@ private:
 
   /// Returns a single log value from the given workspace
   double
-  getSingleLogValue(int wsIndex,
+  getSingleLogValue(size_t wsIndex,
                     const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
                     const QString &logName) const;
 
   /// Returns a single log value from supplied custom log
-  double getSingleLogValue(int wsIndex, const std::set<double> &values) const;
+  double getSingleLogValue(size_t wsIndex, const std::set<double> &values) const;
 
   /// Get X axis title
   QString getXAxisTitle(

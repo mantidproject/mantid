@@ -144,9 +144,8 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     int plotIndex, const QString &logName,
     const std::set<double> &customLogValues) const {
-  const auto index =
+    const auto index =
       static_cast<size_t>(plotIndex); // which spectrum to plot from each WS
-  // const auto &logName = logName; // Log to read for axis of XYZ plot
 
   validateWorkspaceChoices(workspaces, index);
 
@@ -209,14 +208,8 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
  * @returns Numeric log value
  */
 double MantidSurfaceContourPlotGenerator::getSingleLogValue(
-    int wsIndex, const std::set<double> &logValues) const {
-  double value = 0;
-  if (wsIndex < static_cast<int>(logValues.size())) {
-    auto it = logValues.begin();
-    std::advance(it, wsIndex);
-    value = *it;
-  }
-  return value;
+    size_t wsIndex, const std::set<double> &logValues) const {
+  return getSingleWorkspaceLogValue(wsIndex, logValues);
 }
 
 /**
@@ -227,13 +220,13 @@ double MantidSurfaceContourPlotGenerator::getSingleLogValue(
  * @param logName :: [input] Name of log
  * @returns log value as a double, or workspace index
  * @throws invalid_argument if log is wrong type or not present
- */
+ */ 
 double MantidSurfaceContourPlotGenerator::getSingleLogValue(
-    int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
+    size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
 
   return getSingleWorkspaceLogValue(wsIndex, matrixWS, logName);
-}
+} 
 
 /**
  * Performs validation of user's selected options.
@@ -273,7 +266,7 @@ std::string MantidSurfaceContourPlotGenerator::validatePlotOptions(
 QString MantidSurfaceContourPlotGenerator::getXAxisTitle(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
     const {
-  if (workspaces.size() <= 0) {
+  if (workspaces.empty()) {
     return QString();
   }
   const auto firstWS =

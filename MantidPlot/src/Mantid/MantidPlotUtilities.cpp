@@ -62,7 +62,7 @@ double getSingleWorkspaceLogValue(
 double getSingleWorkspaceLogValue(size_t wsIndex,
                                   const std::set<double> &logValues) {
   double value = 0;
-  if (wsIndex < static_cast<int>(logValues.size())) {
+  if (wsIndex < logValues.size()) {
     auto it = logValues.begin();
     std::advance(it, wsIndex);
     value = *it;
