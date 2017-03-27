@@ -261,13 +261,13 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
       auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
       if (sampleOuterRadius <= sampleInnerRadius) {
         uiv.addErrorMessage(
-          "Sample outer radius must be bigger than sample inner radius");
+            "Sample outer radius must be bigger than sample inner radius");
       }
       if (m_uiForm.ckUseCan->isChecked()) {
         auto containerRadius = m_uiForm.spAnnCanOuterRadius->value();
         if (containerRadius <= sampleOuterRadius) {
           uiv.addErrorMessage(
-            "Container outer radius must be bigger than sample outer radius");
+              "Container outer radius must be bigger than sample outer radius");
         }
       }
     }
