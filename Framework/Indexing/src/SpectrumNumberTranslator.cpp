@@ -26,11 +26,15 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
 
 /// Returns the global number of spectra.
 size_t SpectrumNumberTranslator::globalSize() const {
-  return m_partitions.size();
+  return m_globalSpectrumNumbers.size();
 }
 
 /// Returns the local number of spectra.
-size_t SpectrumNumberTranslator::localSize() const { return m_indices.size(); }
+size_t SpectrumNumberTranslator::localSize() const {
+  if (isPartitioned())
+    return m_spectrumNumbers.size();
+  return globalSize();
+}
 
 /// Returns the spectrum number for given index.
 SpectrumNumber
@@ -42,7 +46,7 @@ SpectrumNumberTranslator::spectrumNumber(const size_t index) const {
 
 // Full set
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet() const {
-  return SpectrumIndexSet(m_indices.size());
+  return SpectrumIndexSet(localSize());
 }
 
 SpectrumIndexSet
@@ -103,6 +107,13 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
       indices.push_back(std::distance(m_globalToLocal.begin(), it));
   }
   return SpectrumIndexSet(indices, m_globalToLocal.size());
+}
+
+bool SpectrumNumberTranslator::isPartitioned() const {
+  // Careful: Do NOT use maps of spectrum numbers for size check, since those
+  // can (currently) be smaller than the actual size due to duplicate spectrum
+  // numbers.
+  return m_globalToLocal.size() != m_globalSpectrumNumbers.size();
 }
 
 void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {

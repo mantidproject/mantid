@@ -88,6 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(translator.spectrumNumber(0));
     // Accessing full set works, does not require spectrum numbers.
     TS_ASSERT_THROWS_NOTHING(translator.makeIndexSet());
+    TS_ASSERT_EQUALS(translator.makeIndexSet().size(), 4);
     // Access via spectrum numbers fails.
     TS_ASSERT_THROWS(
         translator.makeIndexSet(SpectrumNumber(2), SpectrumNumber(3)),

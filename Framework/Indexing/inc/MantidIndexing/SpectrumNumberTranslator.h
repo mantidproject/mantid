@@ -65,6 +65,7 @@ public:
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
 private:
+  bool isPartitioned() const;
   void checkUniqueSpectrumNumbers() const;
 
   struct SpectrumNumberHash {
