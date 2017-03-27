@@ -22,7 +22,6 @@ using namespace Mantid::CurveFitting::Constraints;
 
 class BoundaryConstraintTest : public CxxTest::TestSuite {
 public:
-
   void testInitialize1() {
     Gaussian gaus;
     gaus.initialize();

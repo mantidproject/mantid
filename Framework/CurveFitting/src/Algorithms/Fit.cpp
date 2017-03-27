@@ -26,7 +26,6 @@ DECLARE_ALGORITHM(Fit)
 /// Default constructor
 Fit::Fit() : IFittingAlgorithm(), m_maxIterations() {}
 
-
 /** Initialisation method
 */
 void Fit::initConcrete() {
@@ -148,14 +147,14 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
 /// Run the minimizer's iteration loop.
 /// @returns :: Number of actual iterations.
 size_t Fit::runMinimizer() {
-  const int64_t nsteps = m_maxIterations * m_function->estimateNoProgressCalls();
+  const int64_t nsteps =
+      m_maxIterations * m_function->estimateNoProgressCalls();
   API::Progress prog(this, 0.0, 1.0, nsteps);
   m_function->setProgressReporter(&prog);
 
   // do the fitting until success or iteration limit is reached
   size_t iter = 0;
   bool isFinished = false;
-  //std::string errorString;
   g_log.debug("Starting minimizer iteration\n");
   while (iter < m_maxIterations) {
     g_log.debug() << "Starting iteration " << iter << "\n";
@@ -195,8 +194,8 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   m_minimizer->finalize();
 
   auto errorString = m_minimizer->getError();
-  g_log.debug() << "Iteration stopped. Minimizer status string="
-                << errorString << "\n";
+  g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString
+                << "\n";
 
   bool success = errorString.empty() || errorString == "success";
   if (success) {
@@ -207,8 +206,8 @@ void Fit::finalizeMinimizer(size_t nIterations) {
     if (!errorString.empty()) {
       errorString += '\n';
     }
-    errorString += "Failed to converge after " + std::to_string(m_maxIterations) +
-                   " iterations.";
+    errorString += "Failed to converge after " +
+                   std::to_string(m_maxIterations) + " iterations.";
   }
 
   // return the status flag

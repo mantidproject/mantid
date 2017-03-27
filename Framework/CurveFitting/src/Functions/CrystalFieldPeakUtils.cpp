@@ -127,7 +127,8 @@ void setPeakWidth(API::IPeakFunction &peak, double centre,
 }
 
 /// Create a single peak.
-/// @param peakShape :: A shape of the of created peak as a name of an IPeakFunction.
+/// @param peakShape :: A shape of the of created peak as a name of an
+/// IPeakFunction.
 /// @param centre :: Peak centre.
 /// @param intensity :: Integrated intensity of the peak.
 /// @param xVec :: x-values of a tabulated width function.
@@ -200,7 +201,8 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
   for (size_t i = 0; i < maxNPeaks; ++i) {
     const bool isGood = i < nPeaks;
     const auto centre = isGood ? centresAndIntensities.getCalculated(i) : 0.0;
-    const auto intensity = isGood ? centresAndIntensities.getCalculated(i + nPeaks) : 0.0;
+    const auto intensity =
+        isGood ? centresAndIntensities.getCalculated(i + nPeaks) : 0.0;
     auto peak = createPeak(peakShape, centre, intensity, xVec, yVec,
                            fwhmVariation, defaultFWHM, isGood, fixAllPeaks);
     spectrum.addFunction(peak);
@@ -239,12 +241,10 @@ void updatePeakWidth(API::IPeakFunction &peak, double centre,
 /// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @param isGood :: If the peak good and may have free fitting parameters.
 /// @param fixAll :: If true all parameters should be fixed.
-void updatePeak(API::IPeakFunction &peak, double centre,
-                                   double intensity,
-                                   const std::vector<double> &xVec,
-                                   const std::vector<double> &yVec,
-                                   double fwhmVariation,
-                                   bool isGood, bool fixAll) {
+void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
+                const std::vector<double> &xVec,
+                const std::vector<double> &yVec, double fwhmVariation,
+                bool isGood, bool fixAll) {
   const bool fixByDefault = true;
   if (isGood) {
     peak.setCentre(centre);
@@ -294,13 +294,15 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
   for (size_t i = 0; i < maxNPeaks; ++i) {
     const bool isGood = i < nGoodPeaks;
     auto centre = isGood ? centresAndIntensities.getCalculated(i) : 0.0;
-    auto intensity = isGood ? centresAndIntensities.getCalculated(i + nGoodPeaks) : 0.0;
+    auto intensity =
+        isGood ? centresAndIntensities.getCalculated(i + nGoodPeaks) : 0.0;
 
     if (i < nFunctions) {
       auto fun = spectrum.getFunction(i + iFirst);
       auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
       const bool fixAll = fixAllPeaks || i > nOriginalPeaks;
-      updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood, fixAll);
+      updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood,
+                 fixAll);
     } else {
       auto peakPtr =
           createPeak(peakShape, centre, intensity, xVec, yVec, fwhmVariation,
