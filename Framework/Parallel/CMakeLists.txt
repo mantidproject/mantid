@@ -40,11 +40,6 @@ if (COVERALLS)
   endforeach(loop_var)
 endif()
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Parallel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 # Add the target for this directory
 add_library ( Parallel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
