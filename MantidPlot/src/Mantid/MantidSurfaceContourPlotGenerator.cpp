@@ -1,4 +1,4 @@
-#include "MantidGroupPlotGenerator.h"
+#include "MantidSurfaceContourPlotGenerator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -21,7 +21,7 @@ using Mantid::HistogramData::Histogram;
  * Constructor
  * @param mantidUI :: [input] Pointer to the Mantid UI
  */
-MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
+MantidSurfaceContourPlotGenerator::MantidSurfaceContourPlotGenerator(MantidDisplayBase *mantidUI)
     : m_mantidUI(mantidUI) {}
 
 /**
@@ -34,7 +34,7 @@ MantidGroupPlotGenerator::MantidGroupPlotGenerator(MantidDisplayBase *mantidUI)
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
-void MantidGroupPlotGenerator::plotSurface(
+void MantidSurfaceContourPlotGenerator::plotSurface(
     bool accepted, int plotIndex, const QString &axisName,
     const QString &logName, const std::set<double> &customLogValues,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
@@ -53,7 +53,7 @@ void MantidGroupPlotGenerator::plotSurface(
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
-void MantidGroupPlotGenerator::plotContour(
+void MantidSurfaceContourPlotGenerator::plotContour(
     bool accepted, int plotIndex, const QString &axisName,
     const QString &logName, const std::set<double> &customLogValues,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
@@ -73,7 +73,7 @@ void MantidGroupPlotGenerator::plotContour(
  * @param workspaces :: [input] set of workspaces forming the group to be
  * plotted
  */
-void MantidGroupPlotGenerator::plot(
+void MantidSurfaceContourPlotGenerator::plot(
     Type graphType, bool accepted, int plotIndex, const QString &axisName,
     const QString &logName, const std::set<double> &customLogValues,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
@@ -139,7 +139,7 @@ void MantidGroupPlotGenerator::plot(
  * @returns Pointer to the created workspace
  */
 const MatrixWorkspace_sptr
-MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
+MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
     Type graphType,
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     int plotIndex, const QString &logName,
@@ -208,7 +208,7 @@ MantidGroupPlotGenerator::createWorkspaceForGroupPlot(
  * @param logValues :: [input] User-provided set of log values
  * @returns Numeric log value
  */
-double MantidGroupPlotGenerator::getSingleLogValue(
+double MantidSurfaceContourPlotGenerator::getSingleLogValue(
     int wsIndex, const std::set<double> &logValues) const {
   double value = 0;
   if (wsIndex < static_cast<int>(logValues.size())) {
@@ -228,7 +228,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @returns log value as a double, or workspace index
  * @throws invalid_argument if log is wrong type or not present
  */
-double MantidGroupPlotGenerator::getSingleLogValue(
+double MantidSurfaceContourPlotGenerator::getSingleLogValue(
     int wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) const {
 
@@ -245,7 +245,7 @@ double MantidGroupPlotGenerator::getSingleLogValue(
  * @param nWorkspaces :: [input] Number of workspaces in selected group
  * @returns Error string, or empty string if no error
  */
-std::string MantidGroupPlotGenerator::validatePlotOptions(
+std::string MantidSurfaceContourPlotGenerator::validatePlotOptions(
     MantidQt::MantidWidgets::MantidWSIndexWidget::UserInputAdvanced &options,
     int nWorkspaces) {
   std::stringstream err;
@@ -270,7 +270,7 @@ std::string MantidGroupPlotGenerator::validatePlotOptions(
  * The title is generated from the first of these workspaces.
  * @returns :: Title for X axis of graph
  */
-QString MantidGroupPlotGenerator::getXAxisTitle(
+QString MantidSurfaceContourPlotGenerator::getXAxisTitle(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces)
     const {
   if (workspaces.size() <= 0) {
@@ -301,7 +301,7 @@ QString MantidGroupPlotGenerator::getXAxisTitle(
  * @throw std::logic_error if spectrum index not contained in workspace, or if
  * wsGroup contains workspaces other than MatrixWorkspaces
  */
-bool MantidGroupPlotGenerator::groupContentsHaveSameX(
+bool MantidSurfaceContourPlotGenerator::groupContentsHaveSameX(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     const size_t index) {
   if (workspaces.size() == 0) {
@@ -354,7 +354,7 @@ bool MantidGroupPlotGenerator::groupContentsHaveSameX(
  * @param spectrum :: [input] Spectrum index to test
  * @throws std::invalid_argument if validation fails.
  */
-void MantidGroupPlotGenerator::validateWorkspaceChoices(
+void MantidSurfaceContourPlotGenerator::validateWorkspaceChoices(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     const size_t spectrum) const {
   if (workspaces.empty()) {

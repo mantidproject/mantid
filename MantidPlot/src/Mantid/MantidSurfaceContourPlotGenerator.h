@@ -1,5 +1,5 @@
-#ifndef MANTIDGROUPPLOTGENERATOR_H_
-#define MANTIDGROUPPLOTGENERATOR_H_
+#ifndef MANTIDSURFACECONTOURPLOTGENERATOR_H_
+#define MANTIDSURFACECONTOURPLOTGENERATOR_H_
 
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
@@ -12,10 +12,10 @@
 * This utility class generates a surface or contour plot from a group of
 * workspaces.
 */
-class MantidGroupPlotGenerator {
+class MantidSurfaceContourPlotGenerator {
 public:
   /// Constructor
-  explicit MantidGroupPlotGenerator(
+  explicit MantidSurfaceContourPlotGenerator(
       MantidQt::MantidWidgets::MantidDisplayBase *mantidUI);
 
   /// Plots a surface from the given workspace group
