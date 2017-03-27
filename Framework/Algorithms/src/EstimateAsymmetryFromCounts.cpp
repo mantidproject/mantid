@@ -13,7 +13,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-
 #include <cmath>
 #include <numeric>
 #include <vector>
@@ -55,21 +54,20 @@ void EstimateAsymmetryFromCounts::init() {
 * @returns map with keys corresponding to properties with errors and values
 * containing the error messages.
 */
-std::map<std::string, std::string> EstimateAsymmetryFromCounts::validateInputs() {
-	// create the map
-	std::map<std::string, std::string> validationOutput;
-	// check start and end times
-	double startX = getProperty("StartX");
-	double endX = getProperty("EndX");
-	if (startX > endX) {
-		validationOutput["Start"] =
-			"Start time is after the end time.";
-	}
-	else if (startX == endX) {
-		validationOutput["StartX"] = "Start and end times are equal, there is no "
-			"data to apply the algorithm to.";
-	}
-	return validationOutput;
+std::map<std::string, std::string>
+EstimateAsymmetryFromCounts::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+  // check start and end times
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  if (startX > endX) {
+    validationOutput["StartX"] = "Start time is after the end time.";
+  } else if (startX == endX) {
+    validationOutput["StartX"] = "Start and end times are equal, there is no "
+                                 "data to apply the algorithm to.";
+  }
+  return validationOutput;
 }
 
 /** Executes the algorithm
@@ -98,7 +96,7 @@ void EstimateAsymmetryFromCounts::exec() {
 
   // No spectra specified = process all spectra
   if (spectra.empty()) {
-    spectra=std::vector<int>(numSpectra);
+    spectra = std::vector<int>(numSpectra);
     std::iota(spectra.begin(), spectra.end(), 0);
   }
 
@@ -125,16 +123,18 @@ void EstimateAsymmetryFromCounts::exec() {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
-      g_log.error("Spectra size greater than the number of spectra!");
-      throw std::invalid_argument(
-          "Spectra size greater than the number of spectra!");
+      g_log.error("The spectral index " + std::to_string(spectra[i]) +
+                  " is greater than the number of spectra!");
+      throw std::invalid_argument("The spectral index " +
+                                  std::to_string(spectra[i]) +
+                                  " is greater than the number of spectra!");
     }
     // Calculate the normalised counts
     const double normConst = estimateNormalisationConst(
-		inputWS->histogram(specNum), numGoodFrames, startX, endX);
+        inputWS->histogram(specNum), numGoodFrames, startX, endX);
     // Calculate the asymmetry
     outputWS->setHistogram(
-		specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+        specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;

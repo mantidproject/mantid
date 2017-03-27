@@ -83,14 +83,14 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
                                   const double numGoodFrames,
                                   const double startX, const double endX) {
 
-  auto &xData = histogram.binEdges();
-  auto &yData = histogram.y();
+  auto &&xData = histogram.binEdges();
+  auto &&yData = histogram.y();
 
   size_t i0 = startIndexFromTime(xData, startX);
-  size_t iN = endIndexFromTime(xData, endX);  
+  size_t iN = endIndexFromTime(xData, endX);
   // remove an extra index as XData is bin boundaries and not point data
   auto it0 = std::next(yData.rawData().begin(), i0);
-  auto itN= std::next(yData.rawData().begin(), iN);
+  auto itN = std::next(yData.rawData().begin(), iN);
   double summation = std::accumulate(it0, itN, 0);
   double Delta = xData[1] - xData[0];
   double denominator = MUON_LIFETIME_MICROSECONDS * numGoodFrames *
@@ -104,19 +104,18 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
 * @param xData :: [input] Input HistogramData as bin edges
 * @param startX :: [input] the start time
 * @returns :: The index to start calculations from
-* @throw :: runtime error if the range is zero. 
+* @throw :: runtime error if the range is zero.
 */
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
-	const double startX) {
-	auto upper = std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-	if (upper == xData.rawData().end())
-	{
-		throw std::runtime_error("The start point is equal to or greater than the "
-			"last data point. There is zero range.");
-	}
-	else {
-		return std::distance(xData.rawData().begin(), upper);
-	}
+                          const double startX) {
+  auto upper =
+      std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
+  if (upper == xData.rawData().end()) {
+    throw std::runtime_error("The start point is equal to or greater than the "
+                             "last data point. There is zero range.");
+  } else {
+    return std::distance(xData.rawData().begin(), upper);
+  }
 }
 /**
 * find the first index in bin edges that is after
@@ -127,16 +126,15 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 * @throw :: runtime error if the range is zero.
 */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
-	const double endX) {
-	auto lower = std::lower_bound(xData.rawData().begin(), xData.rawData().end(), endX);
+                        const double endX) {
+  auto lower =
+      std::lower_bound(xData.rawData().begin(), xData.rawData().end(), endX);
 
-	if (lower == xData.rawData().end())
-	{
-		throw std::runtime_error("The end point is less than or equal to the first "
-			"data point. There is zero range");
-	}
-	else {
-		return std::distance(xData.rawData().begin(), lower);
-	}
+  if (lower == xData.rawData().end()) {
+    throw std::runtime_error("The end point is less than or equal to the first "
+                             "data point. There is zero range");
+  } else {
+    return std::distance(xData.rawData().begin(), lower);
+  }
 }
 } // namespace Mantid
