@@ -35,6 +35,21 @@ struct eData {
   double operator()(const double, size_t) { return 0.005; }
 };
 
+
+struct yAsymmData {
+  double operator()(const double x, size_t) {
+
+    // Create a fake muon dataset
+    double a = 1.05; // Amplitude of the oscillations
+    double w = 5.0;  // Frequency of the oscillations
+    double phi = 0.1;
+    return (a * cos(w * x + phi))+0.5;
+  }
+};
+struct eAsymmData {
+  double operator()(const double, size_t) { return 0.0005; }
+};
+
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
   MatrixWorkspace_sptr ws =
       WorkspaceCreationHelper::create2DWorkspaceFromFunction(
@@ -204,6 +219,7 @@ public:
     TS_ASSERT_DELTA(outWS->e(0)[19], 0.0014, Delta);
     TS_ASSERT_DELTA(outWS->e(0)[49], 0.0216, Delta);
   }
+ 
   void test_NumberOfDataPoints() {
 
     double dx = 10.0 * (1.0 / static_cast<double>(300.0));
@@ -239,6 +255,39 @@ public:
       // Test some E values
       TS_ASSERT_DELTA(fineOutWS->e(0)[1 + j * 3], coarseOutWS->e(0)[j], Delta);
     }
+  }
+
+  void test_FitToEstimateAsymmetry() {
+
+    double dx = 10.0 * (1.0 / static_cast<double>(100.0));
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+        yAsymmData(), 1, 0.0, 10.0, dx, true, eAsymmData());
+    ws->mutableRun().addProperty("goodfrm", 10);
+
+    IAlgorithm_sptr alg = setUpAlg();
+    alg->setProperty("InputWorkspace", ws);
+    alg->setPropertyValue("OutputWorkspace", "asymm");
+    alg->setPropertyValue("InputDataType", "asymmetry");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    
+     double Delta = 0.0001;
+    // First spectrum
+    // Test some X values
+    TS_ASSERT_DELTA(outWS->x(0)[10], 1.000, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 1.900, Delta);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 4.900, Delta);
+    // Test some Y values
+    TS_ASSERT_DELTA(outWS->y(0)[10], 0.2742, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.6869, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49], 0.6152, Delta);
+    // Test some E values
+    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0003, Delta);
+    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0003, Delta);
+    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0003, Delta);
+
+
   }
 };
 
