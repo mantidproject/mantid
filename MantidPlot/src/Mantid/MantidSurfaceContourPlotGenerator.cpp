@@ -131,9 +131,7 @@ void MantidSurfaceContourPlotGenerator::plot(
  * @param graphType :: [input] Type of graph to plot
  * @param workspaces :: [input] set of workspaces forming the group to be
  *plotted
- * @param accepted :: [input] true if plot has been accepted
  * @param plotIndex :: [input] plot index
- * @param axisName :: [input] axis name
  * @param logName :: [input] log name
  * @param customLogValues :: [input] custom log
  * @returns Pointer to the created workspace
