@@ -35,7 +35,6 @@ struct eData {
   double operator()(const double, size_t) { return 0.005; }
 };
 
-
 struct yAsymmData {
   double operator()(const double x, size_t) {
 
@@ -43,7 +42,7 @@ struct yAsymmData {
     double a = 1.05; // Amplitude of the oscillations
     double w = 5.0;  // Frequency of the oscillations
     double phi = 0.1;
-    return (a * cos(w * x + phi))+0.5;
+    return (a * cos(w * x + phi)) + 0.5;
   }
 };
 struct eAsymmData {
@@ -219,7 +218,7 @@ public:
     TS_ASSERT_DELTA(outWS->e(0)[19], 0.0014, Delta);
     TS_ASSERT_DELTA(outWS->e(0)[49], 0.0216, Delta);
   }
- 
+
   void test_NumberOfDataPoints() {
 
     double dx = 10.0 * (1.0 / static_cast<double>(300.0));
@@ -271,8 +270,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    
-     double Delta = 0.0001;
+
+    double Delta = 0.0001;
     // First spectrum
     // Test some X values
     TS_ASSERT_DELTA(outWS->x(0)[10], 1.000, Delta);
@@ -286,8 +285,6 @@ public:
     TS_ASSERT_DELTA(outWS->e(0)[10], 0.0003, Delta);
     TS_ASSERT_DELTA(outWS->e(0)[19], 0.0003, Delta);
     TS_ASSERT_DELTA(outWS->e(0)[49], 0.0003, Delta);
-
-
   }
 };
 

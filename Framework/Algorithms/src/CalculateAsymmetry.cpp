@@ -17,7 +17,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/StartsWithValidator.h"
 
-
 #include <cmath>
 #include <numeric>
 #include <vector>
@@ -56,22 +55,21 @@ void CalculateAsymmetry::init() {
       "FittingFunction",
       "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
       "The additional fitting functions to be used.");
-  declareProperty(
-	  "InputDataType",
-	  "counts",
-	  boost::make_shared<Mantid::Kernel::StringListValidator>(std::vector<std::string>
-  {"counts", "asymmetry"}), "If the data is raw counts or asymmetry");
+  declareProperty("InputDataType", "counts",
+                  boost::make_shared<Mantid::Kernel::StringListValidator>(
+                      std::vector<std::string>{"counts", "asymmetry"}),
+                  "If the data is raw counts or asymmetry");
   std::vector<std::string> minimizerOptions =
-	  API::FuncMinimizerFactory::Instance().getKeys();
+      API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator =
-	  boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
   declareProperty("Minimizer", "Levenberg-MarquardtMD", minimizerValidator,
-	  "Minimizer to use for fitting.");
+                  "Minimizer to use for fitting.");
   auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
-	  "MaxIterations", 500, mustBePositive->clone(),
-	  "Stop after this number of iterations if a good fit is not found");
+      "MaxIterations", 500, mustBePositive->clone(),
+      "Stop after this number of iterations if a good fit is not found");
 }
 /*
 * Validate the input parameters
@@ -155,21 +153,19 @@ void CalculateAsymmetry::exec() {
                                   std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
     }
-	double estNormConst;
-	if (dataType == "counts") {
-		// inital estimate of N0
-		estNormConst = estimateNormalisationConst(
-			inputWS->histogram(specNum), numGoodFrames, startX, endX);
-		// Calculate the normalised counts
-		outputWS->setHistogram(
-			specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
-	}
-	else {
-		estNormConst = 1.0;
-		outputWS->setHistogram(
-			specNum,inputWS->histogram(specNum));
-		outputWS->mutableY(specNum) += 1.0;//add offset back in
-	}
+    double estNormConst;
+    if (dataType == "counts") {
+      // inital estimate of N0
+      estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),
+                                                numGoodFrames, startX, endX);
+      // Calculate the normalised counts
+      outputWS->setHistogram(
+          specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+    } else {
+      estNormConst = 1.0;
+      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
+      outputWS->mutableY(specNum) += 1.0; // add offset back in
+    }
     // get the normalisation constant
     const double normConst =
         getNormConstant(outputWS, spectra[i], estNormConst, startX, endX);
