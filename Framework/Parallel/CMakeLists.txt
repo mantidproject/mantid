@@ -21,16 +21,22 @@ endif ()
 set ( SRC_FILES
   ${MPI_SRC_FILES}
   src/Communicator.cpp
+  src/ExecutionMode.cpp
+  src/StorageMode.cpp
 )
 
 set ( INC_FILES
   ${MPI_INC_FILES}
   inc/MantidParallel/Communicator.h
+  inc/MantidParallel/ExecutionMode.h
+  inc/MantidParallel/StorageMode.h
 )
 
 set ( TEST_FILES
   ${MPI_TEST_FILES}
   CommunicatorTest.h
+  ExecutionModeTest.h
+  StorageModeTest.h
 )
 
 if (COVERALLS)

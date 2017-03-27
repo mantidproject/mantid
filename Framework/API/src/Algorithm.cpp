@@ -1,9 +1,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -534,6 +535,8 @@ bool Algorithm::execute() {
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
 
+  Parallel::ExecutionMode executionMode = getExecutionMode();
+
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
@@ -545,7 +548,7 @@ bool Algorithm::execute() {
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
-      this->exec();
+      this->exec(executionMode);
       registerFeatureUsage();
       // Check for a cancellation request in case the concrete algorithm doesn't
       interruption_point();
@@ -559,6 +562,8 @@ bool Algorithm::execute() {
         fillHistory();
         linkHistoryWithLastChild();
       }
+
+      propagateWorkspaceStorageMode();
 
       // Put any output workspaces into the AnalysisDataService - if this is not
       // a child algorithm
@@ -1616,6 +1621,154 @@ void Algorithm::setAlgStartupLogging(const bool enabled) {
 bool Algorithm::getAlgStartupLogging() const {
   return m_isAlgStartupLoggingEnabled;
 }
+
+void Algorithm::exec(Parallel::ExecutionMode executionMode) {
+  switch (executionMode) {
+  case Parallel::ExecutionMode::Serial:
+  case Parallel::ExecutionMode::Identical:
+    return exec();
+  case Parallel::ExecutionMode::Distributed:
+    return execDistributed();
+  case Parallel::ExecutionMode::MasterOnly:
+    return execMasterOnly();
+  default:
+    throw(std::runtime_error("Algorithm " + name() +
+                             " does not support execution mode " +
+                             Parallel::toString(executionMode)));
+  }
+}
+
+void Algorithm::execDistributed() { exec(); }
+
+void Algorithm::execMasterOnly() {
+#ifndef MPI_EXPERIMENTAL
+  return exec();
+#else
+  if (FrameworkManager::Instance().mpiCommunicator().rank() == 0)
+    return exec();
+  else
+    return execNonMaster();
+#endif
+}
+
+void Algorithm::execNonMaster() {}
+
+/** Get a (valid) execution mode for this algorithm.
+ *
+ * "Valid" implies that this function does check whether or not the Algorithm
+ * actually supports the mode. If it cannot return a valid mode it throws an
+ * error. As a consequence, the return value of this function can be used
+ * without further sanitization of the return value. */
+Parallel::ExecutionMode Algorithm::getExecutionMode() const {
+#ifndef MPI_EXPERIMENTAL
+  return Parallel::ExecutionMode::Serial;
+#else
+  if (FrameworkManager::Instance().mpiCommunicator().size() == 1)
+    return Parallel::ExecutionMode::Serial;
+  const auto storageModes = getInputWorkspaceStorageModes();
+  const auto executionMode = getParallelExecutionMode(storageModes);
+  if (executionMode == Parallel::ExecutionMode::Invalid) {
+    std::string error("Algorithm does not support execution with input "
+                      "workspaces of the following storage types: " +
+                      Parallel::toString(storageModes) + ".");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  return executionMode;
+#endif
+}
+
+/** Get map of storage modes of all input workspaces.
+ *
+ * The key to the name is the property name of the respective workspace. */
+std::map<std::string, Parallel::StorageMode>
+Algorithm::getInputWorkspaceStorageModes() const {
+  std::map<std::string, Parallel::StorageMode> map;
+  for (const auto &wsProp : m_inputWorkspaceProps) {
+    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+    // so it should never fail.
+    const Property &prop = dynamic_cast<Property &>(*wsProp);
+    // Check if we actually have that input workspace
+    if (wsProp->getWorkspace())
+      map.emplace(prop.name(), wsProp->getWorkspace()->getStorageMode());
+  }
+  return map;
+}
+
+/// Helper function to translate from StorageMode to ExecutionMode.
+void Algorithm::propagateWorkspaceStorageMode() const {
+#ifndef MPI_EXPERIMENTAL
+  for (const auto &wsProp : m_outputWorkspaceProps)
+    if (wsProp->getWorkspace())
+      wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
+#else
+  if (FrameworkManager::Instance().mpiCommunicator().size() == 1) {
+    for (const auto &wsProp : m_outputWorkspaceProps)
+      if (wsProp->getWorkspace())
+        wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
+    return;
+  }
+  for (const auto &wsProp : m_outputWorkspaceProps) {
+    if (!wsProp->getWorkspace())
+      continue;
+    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+    // so it should never fail.
+    const Property &prop = dynamic_cast<Property &>(*wsProp);
+    Parallel::StorageMode mode = getStorageModeForOutputWorkspace(prop.name());
+    wsProp->getWorkspace()->setStorageMode(mode);
+    getLogger().notice() << "Set storage mode of output \"" + prop.name() +
+                                "\" to " + Parallel::toString(mode) +
+                                ". Workspace name is " +
+                                wsProp->getWorkspace()->getName() + "\n";
+  }
+#endif
+}
+
+/** Get correct execution mode based on input storage modes for an MPI run.
+ *
+ * The default implementation returns ExecutionMode::Invalid. Classes inheriting
+ * from Algorithm can re-implement this if they support execution with multiple
+ * MPI ranks. May not return ExecutionMode::Serial, because that is not a
+ * "parallel" execution mode. */
+Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  UNUSED_ARG(storageModes)
+  // By default no parallel execution is possible.
+  return Parallel::ExecutionMode::Invalid;
+}
+
+/** Get storage mode for an output workspace.
+ *
+ * The default implementation returns the storage mode of the input workspace.
+ * If there is more than one input workspace it throws an exception. Classes
+ * inheriting from Algorithm can re-implement this when needed. The workspace is
+ * identified by the name if its property in the Algorithm (*not* the name of
+ * the Workspace). */
+Parallel::StorageMode Algorithm::getStorageModeForOutputWorkspace(
+    const std::string &propertyName) const {
+  if (m_inputWorkspaceProps.size() == 1)
+    if (m_inputWorkspaceProps.front()->getWorkspace())
+      return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
+  std::string error("Could not determine StorageMode for output workspace " +
+                    propertyName + ".");
+  getLogger().error() << error << "\n";
+  throw std::runtime_error(error);
+}
+
+Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
+    Parallel::StorageMode storageMode) const {
+  switch (storageMode) {
+  case Parallel::StorageMode::Cloned:
+    return Parallel::ExecutionMode::Identical;
+  case Parallel::StorageMode::Distributed:
+    return Parallel::ExecutionMode::Distributed;
+  case Parallel::StorageMode::MasterOnly:
+    return Parallel::ExecutionMode::MasterOnly;
+  default:
+    return Parallel::ExecutionMode::Invalid;
+  }
+}
+
 } // namespace API
 
 //---------------------------------------------------------------------------

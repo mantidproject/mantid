@@ -12,14 +12,8 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/FakeObjects.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             API
-            Geometry
-            HistogramData
-            Indexing
-            Beamline
-            Kernel
-            Nexus
             ${JSONCPP_LIBRARIES}
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}

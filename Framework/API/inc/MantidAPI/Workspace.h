@@ -5,6 +5,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/Exception.h"
+#include "MantidParallel/StorageMode.h"
 
 namespace Mantid {
 
@@ -93,6 +94,9 @@ public:
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory &getHistory() const { return *m_history; }
 
+  void setStorageMode(Parallel::StorageMode mode);
+  Parallel::StorageMode getStorageMode() const;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace(const Workspace &);
@@ -108,6 +112,8 @@ private:
   std::string m_name;
   /// The history of the workspace, algorithm and environment
   std::unique_ptr<WorkspaceHistory> m_history;
+  /// Storage mode of the Workspace (used for MPI runs)
+  Parallel::StorageMode m_storageMode{Parallel::StorageMode::Cloned};
 
   /// Virtual clone method. Not implemented to force implementation in childs.
   virtual Workspace *doClone() const = 0;

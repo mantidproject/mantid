@@ -15,6 +15,9 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include "MantidParallel/ExecutionMode.h"
+#include "MantidParallel/StorageMode.h"
+
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
@@ -310,6 +313,21 @@ protected:
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
 
+  void exec(Parallel::ExecutionMode executionMode);
+  virtual void execDistributed();
+  virtual void execMasterOnly();
+  virtual void execNonMaster();
+
+  virtual Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes) const;
+
+  virtual Parallel::StorageMode
+  getStorageModeForOutputWorkspace(const std::string &propertyName) const;
+
+  Parallel::ExecutionMode
+  getCorrespondingExecutionMode(Parallel::StorageMode storageMode) const;
+  void propagateWorkspaceStorageMode() const;
+
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
   virtual const std::string workspaceMethodOnTypes() const { return ""; }
@@ -405,6 +423,10 @@ private:
                        const bool groupProcessing = false);
 
   void registerFeatureUsage() const;
+
+  Parallel::ExecutionMode getExecutionMode() const;
+  std::map<std::string, Parallel::StorageMode>
+  getInputWorkspaceStorageModes() const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

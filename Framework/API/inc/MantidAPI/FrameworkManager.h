@@ -10,6 +10,11 @@
 #include <boost/mpi/environment.hpp>
 #endif
 
+#ifdef MPI_EXPERIMENTAL
+#include "MantidParallel/Communicator.h"
+#include <boost/mpi/environment.hpp>
+#endif
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -103,6 +108,10 @@ public:
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
 
+#ifdef MPI_EXPERIMENTAL
+  const Mantid::Parallel::Communicator &mpiCommunicator() const;
+#endif
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 
@@ -134,6 +143,10 @@ private:
   boost::mpi::environment m_mpi_environment;
   int argc = 0;
   char **argv;
+#endif
+#ifdef MPI_EXPERIMENTAL
+  boost::mpi::environment m_mpi_environment;
+  Mantid::Parallel::Communicator m_mpi_communicator;
 #endif
 };
 
