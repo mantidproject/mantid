@@ -16,8 +16,6 @@ class NormaliseByAirRegionTest(unittest.TestCase):
         crop = False
         images, control = th.gen_img_shared_array_and_copy()
 
-        err_msg = "TEST NOT EXECUTED :: Running normalise_by_air_region with size {0}, mode {1} and order {2} changed the data!"
-
         # empty params
         air = None
         roi = None

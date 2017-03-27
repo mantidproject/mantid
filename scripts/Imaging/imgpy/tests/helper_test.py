@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy.testing as npt
-from tests import test_helper as th
 
 
 class HelperTest(unittest.TestCase):

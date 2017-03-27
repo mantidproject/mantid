@@ -21,7 +21,3 @@ from __future__ import (absolute_import, division, print_function)
 #
 # File change history is stored at: <https://github.com/mantidproject/mantid>.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
-
-from tools import importer
-from tools import astra_tool
-from tools import tomopy_tool

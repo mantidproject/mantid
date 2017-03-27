@@ -109,7 +109,7 @@ def create_partial(func, fwd_function=inplace_fwd_func, **kwargs):
     """
     Create a partial using functools.partial, to forward the kwargs to the parallel execution of imap.
     If you seem to be getting nans, check if the correct fwd_function is set!
-    
+
     :param func: Function that will be executed
     :param fwd_function: The function will be forwarded through function. It must be one of:
             - two_shared_mem.inplace_fwd_func: if the function replaces

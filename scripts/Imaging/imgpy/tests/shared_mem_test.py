@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import numpy.testing as npt
 from tests import test_helper as th
 
 
@@ -99,6 +98,7 @@ class SharedMemTest(unittest.TestCase):
         # compare results
         th.assert_not_equals(res, expected)
         th.assert_equals(img, orig)
+
 
 if __name__ == '__main__':
     unittest.main()

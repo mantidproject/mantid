@@ -28,15 +28,18 @@ def create_shared_array(shape, dtype=np.float32):
 
 def multiprocessing_available():
     try:
-        import multiprocessing
+        # ignore error about unused import
+        import multiprocessing  # noqa: F401
         return True
     except ImportError:
         return False
+
 
 def get_cores():
     import multiprocessing
     # get max cores on the system as default
     return multiprocessing.cpu_count()
+
 
 def generate_indices(num_images):
     """
@@ -48,5 +51,6 @@ def generate_indices(num_images):
 
 
 def calculate_chunksize(cores):
-    # TODO possible proper calculation of chunksize, although best performance has been with 1
+    # TODO possible proper calculation of chunksize, although best performance
+    # has been with 1
     return 1

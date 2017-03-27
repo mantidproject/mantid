@@ -63,7 +63,7 @@ def create_partial(func, fwd_func=return_fwd_func, **kwargs):
     """
     Create a partial using functools.partial, to forward the kwargs to the parallel execution.
     If you seem to be getting NANs, check if the correct fwd_function is set!
-    
+
     :param func: Function that will be executed
     :param fwd_func: The function will be forwarded through function. It must be one of:
             - shared_mem.fwd_func: if the function returns a value

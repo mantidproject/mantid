@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import numpy.testing as npt
 from tests import test_helper as th
 
 
@@ -15,7 +14,6 @@ class ExclusiveMemTest(unittest.TestCase):
     def test_exec(self):
         # create data as shared array
         img = th.gen_img_numpy_rand()
-        orig = th.deepcopy(img)
         add_arg = 5
 
         expected = img + add_arg

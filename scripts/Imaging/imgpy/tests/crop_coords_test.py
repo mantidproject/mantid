@@ -12,32 +12,30 @@ class CropCoordsTest(unittest.TestCase):
         self.alg = crop_coords
 
     def test_not_executed_volume(self):
-        #Check that the filter is not executed when:
+        # Check that the filter is not executed when:
         #    - no Region of Interest is provided
         #    - Region of Interest is out of bounds anywhere
         # images that will be put through testing
         images, control = th.gen_img_shared_array_and_copy()
 
-        err_msg = "TEST NOT EXECUTED :: Running crop coords with Region of Interest {0} changed the data!"
-
         # left > right or top > bottom should not change the data
         roi = [61, 2, 5, 1]
         result = self.alg.execute_volume(images, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
         roi = [5, 15, 5, 5]
         result = self.alg.execute_volume(images, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
         roi = '[5, 5, 15, 5]'
         npt.assert_raises(ValueError, self.alg.execute_volume, images, roi)
 
         roi = None
         result = self.alg.execute_volume(images, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
     def test_executed_volume(self):
-        #Check that the filter is  executed when:
+        # Check that the filter is  executed when:
         #    - valid Region of Interest is provided
 
         # images that will be put through testing
@@ -71,30 +69,28 @@ class CropCoordsTest(unittest.TestCase):
         images, control = th.gen_img_shared_array_and_copy()
         image = images[0]
         control = control[0]
-        err_msg = "TEST NOT EXECUTED :: Running crop coords with Region of Interest {0} changed the data!"
 
         # left > right or top > bottom should not change the data
         roi = [61, 2, 5, 1]
         result = self.alg.execute_image(image, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
         roi = [5, 15, 5, 5]
         result = self.alg.execute_image(image, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
         roi = '[5, 5, 15, 5]'
         npt.assert_raises(ValueError, self.alg.execute_image, image, roi)
 
         roi = None
         result = self.alg.execute_image(image, roi)
-        npt.assert_equal(result, control, err_msg=err_msg.format(roi))
+        npt.assert_equal(result, control)
 
     def test_executed_image_no_helper(self):
         # image that will be put through testing
         images, control = th.gen_img_shared_array_and_copy()
         image = images[0]
         control = control[0]
-        err_msg = "TEST EXECUTED :: Running crop coords with Region of Interest {0} didn't change the data!"
 
         roi = [5, 5, 5, 15]
         result = self.alg.execute_image(image, roi)

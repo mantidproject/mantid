@@ -15,7 +15,6 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
         images, control = th.gen_img_shared_array_and_copy()
         flat = th.gen_img_shared_array()[0]
         dark = th.gen_img_shared_array()[0]
-        err_msg = "TEST NOT EXECUTED :: Running normalise_by_flat_dark with size {0}, mode {1} and order {2} changed the data!"
 
         # empty params
         result = self.alg.execute(images)

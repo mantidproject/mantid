@@ -1,11 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
-import numpy.testing as npt
 from tests import test_helper as th
 
 
 def add_inplace(first_shared, second_shared, add_arg):
-    # it's not the same as 
+    # it's not the same as
     # first_shared[:] += second_shared + add_arg
     # as then the check fails versus the expected one
     first_shared[:] = first_shared + second_shared + add_arg
@@ -195,10 +194,11 @@ class TwoSharedMemTest(unittest.TestCase):
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_first,
             add_arg=5)
+
         # execute parallel
-        orig_2nd = th.deepcopy(img2nd)
         res1, res2 = ptsm.execute(
             img, img2nd, f, name="Fail Return to first test")
+
         # compare results
         th.assert_equals(res1, img)
         th.assert_equals(res2, img2nd)
@@ -207,7 +207,7 @@ class TwoSharedMemTest(unittest.TestCase):
     def test_fail_with_normal_array_return_to_second(self):
         """
         This test does not use shared arrays and will not change the data.
-        This behaviour is intended and is 
+        This behaviour is intended and is
         """
         # create data as normal nd array
         img = th.gen_img_numpy_rand()
@@ -228,14 +228,16 @@ class TwoSharedMemTest(unittest.TestCase):
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_second,
             add_arg=5)
+
         # execute parallel
-        orig_1st = th.deepcopy(img)
         res1, res2 = ptsm.execute(
             img, img2nd, f, name="Fail Return to second test")
+
         # compare results
         th.assert_equals(res1, img)
         th.assert_equals(res2, img2nd)
         th.assert_not_equals(res2, expected)
+
 
 if __name__ == '__main__':
     unittest.main()

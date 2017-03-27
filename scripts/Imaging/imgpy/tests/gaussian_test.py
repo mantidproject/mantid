@@ -32,7 +32,7 @@ class GaussianTest(unittest.TestCase):
         mode = 'reflect'
         order = 1
         result = self.alg.execute(images, size, mode, order)
-        th.assert_not_equals(images, control)
+        th.assert_not_equals(result, control)
 
     def test_executed_no_helper_parallel(self):
         images, control = th.gen_img_shared_array_and_copy()
@@ -41,7 +41,7 @@ class GaussianTest(unittest.TestCase):
         mode = 'reflect'
         order = 1
         result = self.alg.execute(images, size, mode, order)
-        th.assert_not_equals(images, control)
+        th.assert_not_equals(result, control)
 
     def test_executed_no_helper_seq(self):
         images, control = th.gen_img_shared_array_and_copy()
@@ -54,7 +54,7 @@ class GaussianTest(unittest.TestCase):
         result = self.alg.execute(images, size, mode, order)
         th.switch_mp_on()
 
-        th.assert_not_equals(images, control)
+        th.assert_not_equals(result, control)
 
 
 if __name__ == '__main__':

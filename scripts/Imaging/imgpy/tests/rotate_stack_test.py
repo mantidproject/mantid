@@ -14,8 +14,6 @@ class RotateStackTest(unittest.TestCase):
     def test_not_executed(self):
         # only works on square images
         images, control = th.gen_img_shared_array_and_copy((10, 10, 10))
-        flat = th.gen_img_shared_array()[0]
-        dark = th.gen_img_shared_array()[0]
 
         # empty params
         result = self.alg.execute(images, None)[0]
@@ -32,14 +30,10 @@ class RotateStackTest(unittest.TestCase):
     def do_execute(self):
         # only works on square images
         images, control = th.gen_img_shared_array_and_copy((10, 10, 10))
-        flat = th.gen_img_shared_array()[0]
-        dark = th.gen_img_shared_array()[0]
 
         rotation = 1  # once clockwise
         images[:, 0, 0] = 42  # set all images at 0,0 to 42
         result = self.alg.execute(images, rotation)[0]
-        h = result.shape[1]
-        w = result.shape[2]
         npt.assert_equal(result[:, 0, w - 1], 42.0)
 
 

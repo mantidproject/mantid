@@ -27,7 +27,8 @@ class StripeRemovalTest(unittest.TestCase):
         ti = None
         sf = None
         result = self.alg.execute(images, wf, ti, sf)
-        th.assert_not_equals(images, control)
+        th.assert_not_equals(result, control)
+
     def test_executed_ti(self):
         images, control = th.gen_img_shared_array_and_copy()
 
@@ -35,8 +36,8 @@ class StripeRemovalTest(unittest.TestCase):
         ti = ['nblock=2']
         sf = None
         result = self.alg.execute(images, wf, ti, sf)
-        th.assert_not_equals(images, control)
-    
+        th.assert_not_equals(result, control)
+
     def test_executed_sf(self):
         images, control = th.gen_img_shared_array_and_copy()
 
@@ -44,7 +45,8 @@ class StripeRemovalTest(unittest.TestCase):
         ti = None
         sf = ['size=5']
         result = self.alg.execute(images, wf, ti, sf)
-        th.assert_not_equals(images, control)
+        th.assert_not_equals(result, control)
+
 
 if __name__ == '__main__':
     unittest.main()
