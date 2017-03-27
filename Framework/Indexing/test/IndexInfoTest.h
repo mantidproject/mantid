@@ -38,12 +38,42 @@ public:
     TS_ASSERT_EQUALS(info.spectrumNumber(0), 3);
     TS_ASSERT_EQUALS(info.spectrumNumber(1), 2);
     TS_ASSERT_EQUALS(info.spectrumNumber(2), 1);
-    TS_ASSERT_EQUALS(info.detectorIDs(0), (std::vector<detid_t>{}));
-    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<detid_t>{10}));
-    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<detid_t>{20, 30}));
+    TS_ASSERT_EQUALS(info.detectorIDs(0), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(info.detectorIDs(1), (std::vector<DetectorID>{10}));
+    TS_ASSERT_EQUALS(info.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+  }
+
+  void test_vector_constructor_size_mismatch() {
+    TS_ASSERT_THROWS(IndexInfo({3, 2, 1}, {{}, {10}}), std::runtime_error);
   }
 
   void test_size() { TS_ASSERT_EQUALS(IndexInfo(3).size(), 3); }
+
+  void test_copy() {
+    const IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    auto copy(info);
+    TS_ASSERT_EQUALS(info.size(), 3);
+    TS_ASSERT_EQUALS(copy.size(), 3);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(0), 3);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(copy.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<DetectorID>{10}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+  }
+
+  void test_move() {
+    IndexInfo info({3, 2, 1}, {{}, {10}, {20, 30}});
+    auto moved(std::move(info));
+    TS_ASSERT_EQUALS(info.size(), 0);
+    TS_ASSERT_EQUALS(moved.size(), 3);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(0), 3);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(moved.spectrumNumber(2), 1);
+    TS_ASSERT_EQUALS(moved.detectorIDs(0), (std::vector<DetectorID>{}));
+    TS_ASSERT_EQUALS(moved.detectorIDs(1), (std::vector<DetectorID>{10}));
+    TS_ASSERT_EQUALS(moved.detectorIDs(2), (std::vector<DetectorID>{20, 30}));
+  }
 
   void test_setSpectrumNumbers_size_mismatch() {
     IndexInfo t(3);
@@ -66,9 +96,9 @@ public:
   void test_setDetectorIDs() {
     IndexInfo t(3);
     TS_ASSERT_THROWS_NOTHING(t.setDetectorIDs({6, 7, 8}));
-    TS_ASSERT_EQUALS(t.detectorIDs(0), std::vector<detid_t>{6});
-    TS_ASSERT_EQUALS(t.detectorIDs(1), std::vector<detid_t>{7});
-    TS_ASSERT_EQUALS(t.detectorIDs(2), std::vector<detid_t>{8});
+    TS_ASSERT_EQUALS(t.detectorIDs(0), std::vector<DetectorID>{6});
+    TS_ASSERT_EQUALS(t.detectorIDs(1), std::vector<DetectorID>{7});
+    TS_ASSERT_EQUALS(t.detectorIDs(2), std::vector<DetectorID>{8});
   }
 
   void test_setSpectrumDefinitions_setting_nullptr_fails() {
