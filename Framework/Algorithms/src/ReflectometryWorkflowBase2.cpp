@@ -323,7 +323,8 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
 * @return :: the detector workspace in wavelength
 */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
+ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
+                                           const bool convert) {
 
   const std::string processingCommands =
       getPropertyValue("ProcessingInstructions");
@@ -334,7 +335,9 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
 
-  detectorWS = convertToWavelength(detectorWS);
+  if (convert) {
+    detectorWS = convertToWavelength(detectorWS);
+  }
 
   return detectorWS;
 }

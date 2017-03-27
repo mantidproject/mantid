@@ -83,7 +83,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Create the output workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr makeIvsLam();
+  Mantid::API::MatrixWorkspace_sptr
+  makeIvsLam(const bool convert, const bool normalise, const bool sum);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);

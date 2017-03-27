@@ -180,22 +180,20 @@ void ReflectometryReductionOne2::exec() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
-  // Output workspace in wavelength
-  MatrixWorkspace_sptr IvsLam;
+  bool convert = true;   // whether to convert to lambda
+  bool normalise = true; // whether to normalise
+  bool sum = true;       // whether to do summation
   if (xUnitID == "Wavelength") {
-    IvsLam = m_runWS;
-  } else {
-    // xUnitID == "TOF"
-    IvsLam = makeIvsLam();
+    // Assume already reduced (normalised and summed)
+    convert = false;
+    normalise = false;
+    // sum = false;  // temp for testing - still do summation
   }
 
   findDetectorsOfInterest();
-  // Transmission correction of the resulting linear array. Note that if
-  // we're summing in Q then transmission correction will already have been
-  // done on the 2D array.
-  if (!sumInQ()) {
-    IvsLam = transOrAlgCorrection(IvsLam);
-  }
+
+  // Output workspace in wavelength
+  MatrixWorkspace_sptr IvsLam = makeIvsLam(convert, normalise, sum);
 
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
@@ -213,89 +211,107 @@ void ReflectometryReductionOne2::exec() {
 * @param inputWS :: the input workspace in TOF
 * @return :: the output workspace in wavelength
 */
-MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
-  MatrixWorkspace_sptr IvsLam;
+MatrixWorkspace_sptr
+ReflectometryReductionOne2::makeIvsLam(const bool convert, const bool normalise,
+                                       const bool sum) {
+  MatrixWorkspace_sptr IvsLam = m_runWS;
 
   if (sumInQ()) {
     findConstantsForSumInQ();
 
-    // Convert the 2D workspace to wavelength
-    MatrixWorkspace_sptr detectorWS = convertToWavelength(m_runWS);
+    // Get the normalised detector workspace
+    MatrixWorkspace_sptr detectorWS = m_runWS;
+    if (convert) {
+      // Convert the 2D workspace to wavelength
+      detectorWS = convertToWavelength(detectorWS);
+    }
+    if (normalise) {
+      detectorWS = monitorCorrection(detectorWS);
+      detectorWS = transOrAlgCorrection(detectorWS);
+    }
 
-    // Normalize
-    detectorWS = monitorCorrection(detectorWS);
-    detectorWS = transOrAlgCorrection(detectorWS);
+    // Do the summation in Q
+    if (sum) {
+      // Construct the output array in virtual lambda
+      IvsLam = constructIvsLamWS(detectorWS);
 
-    // Construct the output array in virtual lambda
-    IvsLam = constructIvsLamWS(detectorWS);
+      // Loop through each spectrum in the region of interest
+      const auto &spectrumInfo = detectorWS->spectrumInfo();
+      for (size_t spIdx : m_detectors) {
+        // Get the angle of this detector and its size in twoTheta
+        double theta = 0.0;
+        double bTwoTheta = 0.0;
+        getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
 
-    // Loop through each spectrum in the region of interest
-    const auto &spectrumInfo = detectorWS->spectrumInfo();
-    for (size_t spIdx : m_detectors) {
-      // Get the angle of this detector and its size in twoTheta
-      double theta = 0.0;
-      double bTwoTheta = 0.0;
-      getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
-
-      // Loop through each value in this spectrum
-      const auto &inputX = detectorWS->x(spIdx);
-      const auto &inputY = detectorWS->y(spIdx);
-      if (inputX.size() != inputY.size() + 1) {
-        throw std::runtime_error("Expected input data to be binned");
-      }
-
-      // Convenience points to the output array X and Y values
-      const auto &outputX = IvsLam->x(0);
-      auto &outputY = IvsLam->dataY(0);
-      if (outputX.size() != outputY.size() + 1) {
-        throw std::runtime_error("Expected output data to be binned");
-      }
-
-      for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-        // Get the bin width and the bin centre
-        const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
-        const double lambda = inputX[inputIdx] + bLambda / 2.0;
-
-        // Skip if outside area of interest
-        if (lambda < lambdaMin() || lambda > lambdaMax()) {
-          continue;
+        // Loop through each value in this spectrum
+        const auto &inputX = detectorWS->x(spIdx);
+        const auto &inputY = detectorWS->y(spIdx);
+        if (inputX.size() != inputY.size() + 1) {
+          throw std::runtime_error("Expected input data to be binned");
         }
 
-        // Project these coordinates onto the virtual-lambda output (at thetaR)
-        double lambdaMin = 0.0;
-        double lambdaMax = 0.0;
-        getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
-                                lambdaMax);
+        // Convenience points to the output array X and Y values
+        const auto &outputX = IvsLam->x(0);
+        auto &outputY = IvsLam->dataY(0);
+        if (outputX.size() != outputY.size() + 1) {
+          throw std::runtime_error("Expected output data to be binned");
+        }
 
-        // Share the counts from the detector into the output bins that overlap
-        // this range
-        const double inputCounts = inputY[inputIdx];
-        const double totalWidth = lambdaMax - lambdaMin;
+        for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
+          // Get the bin width and the bin centre
+          const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
+          const double lambda = inputX[inputIdx] + bLambda / 2.0;
 
-        // Loop through all output bins that overlap the projected range
-        for (int outputIdx = 0; outputIdx < outputY.size(); ++outputIdx) {
-          const double binStart = outputX[outputIdx];
-          const double binEnd = outputX[outputIdx + 1];
-          if (binEnd < lambdaMin) {
-            continue; // doesn't overlap
-          } else if (binStart > lambdaMax) {
-            break; // finished
+          // Skip if outside area of interest
+          if (lambda < lambdaMin() || lambda > lambdaMax()) {
+            continue;
           }
-          // Add a share of the input counts to this bin based on the proportion
-          // of overlap.
-          const double overlapWidth =
-              std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
-          outputY[outputIdx] += (inputCounts * overlapWidth) / (totalWidth);
+
+          // Project these coordinates onto the virtual-lambda output (at
+          // thetaR)
+          double lambdaMin = 0.0;
+          double lambdaMax = 0.0;
+          getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
+                                  lambdaMax);
+
+          // Share the counts from the detector into the output bins that
+          // overlap
+          // this range
+          const double inputCounts = inputY[inputIdx];
+          const double totalWidth = lambdaMax - lambdaMin;
+
+          // Loop through all output bins that overlap the projected range
+          for (int outputIdx = 0; outputIdx < outputY.size(); ++outputIdx) {
+            const double binStart = outputX[outputIdx];
+            const double binEnd = outputX[outputIdx + 1];
+            if (binEnd < lambdaMin) {
+              continue; // doesn't overlap
+            } else if (binStart > lambdaMax) {
+              break; // finished
+            }
+            // Add a share of the input counts to this bin based on the
+            // proportion
+            // of overlap.
+            const double overlapWidth =
+                std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
+            outputY[outputIdx] += (inputCounts * overlapWidth) / (totalWidth);
+          }
         }
       }
     }
   } else {
-    // Get 1D workspace of detectors, summed in lambda
-    auto detectorWS = makeDetectorWS(m_runWS);
+    // Simple summation in lambda
+    if (sum) {
+      // Get 1D workspace of detectors, summed, and converted to lambda if
+      // applicable
+      IvsLam = makeDetectorWS(IvsLam, convert);
+    }
 
-    // Normalize
-    detectorWS = directBeamCorrection(detectorWS);
-    IvsLam = monitorCorrection(detectorWS);
+    if (normalise) {
+      IvsLam = directBeamCorrection(IvsLam);
+      IvsLam = monitorCorrection(IvsLam);
+      IvsLam = transOrAlgCorrection(IvsLam);
+    }
   }
 
   // Crop to wavelength limits
@@ -415,45 +431,59 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 
   const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
 
-  MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
-  Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
+  MatrixWorkspace_sptr transmissionWS;
 
-  if (xUnit->unitID() == "TOF") {
+  if (sumInQ()) {
+    MatrixWorkspace_sptr firstTransmissionWS =
+        getProperty("FirstTransmissionRun");
+    transmissionWS = convertToWavelength(firstTransmissionWS);
+    /// todo: stitch with second transmission run
+  } else {
+    // Reduce the transmission workspace first
+    transmissionWS = getProperty("FirstTransmissionRun");
+    Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
 
-    // Processing instructions for transmission workspace
-    std::string transmissionCommands = getProperty("ProcessingInstructions");
-    if (strictSpectrumChecking) {
-      // If we have strict spectrum checking, the processing commands need to be
-      // made from the
-      // numerator workspace AND the transmission workspace based on matching
-      // spectrum numbers.
-      transmissionCommands =
-          createProcessingCommandsFromDetectorWS(detectorWS, transmissionWS);
+    if (xUnit->unitID() == "TOF") {
+
+      // Processing instructions for transmission workspace
+      std::string transmissionCommands = getProperty("ProcessingInstructions");
+      if (strictSpectrumChecking) {
+        // If we have strict spectrum checking, the processing commands need to
+        // be
+        // made from the
+        // numerator workspace AND the transmission workspace based on matching
+        // spectrum numbers.
+        transmissionCommands = createProcessingCommandsFromDetectorWS(
+            detectorWS, transmissionWS, m_detectors);
+      }
+
+      MatrixWorkspace_sptr secondTransmissionWS =
+          getProperty("SecondTransmissionRun");
+      auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+      alg->initialize();
+      alg->setProperty("FirstTransmissionRun", transmissionWS);
+      alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("I0MonitorIndex",
+                            getPropertyValue("I0MonitorIndex"));
+      alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
+      alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
+      alg->setPropertyValue("MonitorBackgroundWavelengthMin",
+                            getPropertyValue("MonitorBackgroundWavelengthMin"));
+      alg->setPropertyValue("MonitorBackgroundWavelengthMax",
+                            getPropertyValue("MonitorBackgroundWavelengthMax"));
+      alg->setPropertyValue(
+          "MonitorIntegrationWavelengthMin",
+          getPropertyValue("MonitorIntegrationWavelengthMin"));
+      alg->setPropertyValue(
+          "MonitorIntegrationWavelengthMax",
+          getPropertyValue("MonitorIntegrationWavelengthMax"));
+      alg->setProperty("ProcessingInstructions", transmissionCommands);
+      alg->execute();
+      transmissionWS = alg->getProperty("OutputWorkspace");
     }
-
-    MatrixWorkspace_sptr secondTransmissionWS =
-        getProperty("SecondTransmissionRun");
-    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
-    alg->initialize();
-    alg->setProperty("FirstTransmissionRun", transmissionWS);
-    alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
-    alg->setPropertyValue("Params", getPropertyValue("Params"));
-    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
-    alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
-    alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                          getPropertyValue("MonitorBackgroundWavelengthMin"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                          getPropertyValue("MonitorBackgroundWavelengthMax"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMin",
-                          getPropertyValue("MonitorIntegrationWavelengthMin"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMax",
-                          getPropertyValue("MonitorIntegrationWavelengthMax"));
-    alg->setProperty("ProcessingInstructions", transmissionCommands);
-    alg->execute();
-    transmissionWS = alg->getProperty("OutputWorkspace");
   }
 
   // Rebin the transmission run to be the same as the input.
