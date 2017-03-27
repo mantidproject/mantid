@@ -1,14 +1,14 @@
-#ifndef MANTID_MPI_PARALLELRUNNERTEST_H_
-#define MANTID_MPI_PARALLELRUNNERTEST_H_
+#ifndef MANTID_PARALLEL_PARALLELRUNNERTEST_H_
+#define MANTID_PARALLEL_PARALLELRUNNERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMPI/ParallelRunner.h"
+#include "MantidParallel/ParallelRunner.h"
 
 #include <mutex>
 #include <vector>
 
-using namespace Mantid::MPI;
+using namespace Mantid::Parallel;
 
 namespace {
 void check_size(const Communicator &comm, const int expected) {
@@ -50,4 +50,4 @@ public:
   }
 };
 
-#endif /* MANTID_MPI_PARALLELRUNNERTEST_H_ */
+#endif /* MANTID_PARALLEL_PARALLELRUNNERTEST_H_ */

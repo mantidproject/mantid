@@ -1,15 +1,15 @@
-#ifndef MANTID_MPI_COMMUNICATOR_H_
-#define MANTID_MPI_COMMUNICATOR_H_
+#ifndef MANTID_PARALLEL_COMMUNICATOR_H_
+#define MANTID_PARALLEL_COMMUNICATOR_H_
 
-#include "MantidMPI/DllConfig.h"
-#include "MantidMPI/Request.h"
-#include "MantidMPI/ThreadingBackend.h"
+#include "MantidParallel/DllConfig.h"
+#include "MantidParallel/Request.h"
+#include "MantidParallel/ThreadingBackend.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/mpi/communicator.hpp>
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 class ParallelRunner;
 
 /** Wrapper for boost::mpi::communicator. For non-MPI builds an equivalent
@@ -39,7 +39,7 @@ class ParallelRunner;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MPI_DLL Communicator {
+class MANTID_PARALLEL_DLL Communicator {
 public:
   Communicator() = default;
   explicit Communicator(const boost::mpi::communicator &comm);
@@ -89,7 +89,7 @@ template <typename... T> Request Communicator::irecv(T &&... args) const {
   return m_communicator.irecv(std::forward<T>(args)...);
 }
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_MPI_COMMUNICATOR_H_ */
+#endif /* MANTID_PARALLEL_COMMUNICATOR_H_ */

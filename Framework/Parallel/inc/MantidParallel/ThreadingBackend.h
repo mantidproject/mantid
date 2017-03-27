@@ -1,8 +1,8 @@
-#ifndef MANTID_MPI_THREADINGBACKEND_H_
-#define MANTID_MPI_THREADINGBACKEND_H_
+#ifndef MANTID_PARALLEL_THREADINGBACKEND_H_
+#define MANTID_PARALLEL_THREADINGBACKEND_H_
 
-#include "MantidMPI/DllConfig.h"
-#include "MantidMPI/Request.h"
+#include "MantidParallel/DllConfig.h"
+#include "MantidParallel/Request.h"
 #include "MantidKernel/make_unique.h"
 
 #include <boost/archive/binary_oarchive.hpp>
@@ -17,7 +17,7 @@
 #include <tuple>
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 namespace detail {
 
 /** ThreadingBackend provides a backend for data exchange between
@@ -48,7 +48,7 @@ namespace detail {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MPI_DLL ThreadingBackend {
+class MANTID_PARALLEL_DLL ThreadingBackend {
 public:
   ThreadingBackend() = default;
   explicit ThreadingBackend(const int size);
@@ -128,7 +128,7 @@ Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
 }
 
 } // namespace detail
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_MPI_THREADINGBACKEND_H_ */
+#endif /* MANTID_PARALLEL_THREADINGBACKEND_H_ */

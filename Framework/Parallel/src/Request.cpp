@@ -1,11 +1,11 @@
-#include "MantidMPI/Request.h"
+#include "MantidParallel/Request.h"
 
 #ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/status.hpp>
 #endif
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 
 Request::Request(const boost::mpi::request &request) : m_request(request) {}
 
@@ -18,5 +18,5 @@ void Request::wait() {
   static_cast<void>(m_request.wait());
 }
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid

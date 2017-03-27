@@ -1,7 +1,7 @@
-#include "MantidMPI/Communicator.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 
 Communicator::Communicator(const boost::mpi::communicator &comm)
     : m_communicator(comm) {}
@@ -22,5 +22,5 @@ int Communicator::size() const {
   return m_communicator.size();
 }
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid

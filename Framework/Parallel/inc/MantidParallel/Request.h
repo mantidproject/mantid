@@ -1,13 +1,13 @@
-#ifndef MANTID_MPI_REQUEST_H_
-#define MANTID_MPI_REQUEST_H_
+#ifndef MANTID_PARALLEL_REQUEST_H_
+#define MANTID_PARALLEL_REQUEST_H_
 
-#include "MantidMPI/DllConfig.h"
+#include "MantidParallel/DllConfig.h"
 
 #include <boost/mpi/request.hpp>
 #include <thread>
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 namespace detail {
 class ThreadingBackend;
 }
@@ -39,7 +39,7 @@ class ThreadingBackend;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MPI_DLL Request {
+class MANTID_PARALLEL_DLL Request {
 public:
   Request() = default;
   Request(const boost::mpi::request &request);
@@ -59,7 +59,7 @@ template <class Function>
 Request::Request(Function &&f)
     : m_thread(std::forward<Function>(f)), m_threadingBackend{true} {}
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_MPI_REQUEST_H_ */
+#endif /* MANTID_PARALLEL_REQUEST_H_ */

@@ -7,10 +7,10 @@ if ( MPI_EXPERIMENTAL )
     )
 
   set ( MPI_INC_FILES
-    inc/MantidMPI/Communicator.h
-    inc/MantidMPI/ParallelRunner.h
-    inc/MantidMPI/Request.h
-    inc/MantidMPI/ThreadingBackend.h
+    inc/MantidParallel/Communicator.h
+    inc/MantidParallel/ParallelRunner.h
+    inc/MantidParallel/Request.h
+    inc/MantidParallel/ThreadingBackend.h
     )
 
   set ( MPI_TEST_FILES
@@ -42,23 +42,23 @@ endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(MPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(Parallel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Add the target for this directory
-add_library ( MPI ${SRC_FILES} ${INC_FILES} )
+add_library ( Parallel ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( MPI PROPERTIES OUTPUT_NAME MantidMPI
-  COMPILE_DEFINITIONS IN_MANTID_MPI )
+set_target_properties ( Parallel PROPERTIES OUTPUT_NAME MantidParallel
+  COMPILE_DEFINITIONS IN_MANTID_PARALLEL )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+  set_target_properties ( Parallel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
 # Add to the 'Framework' group in VS
-set_property ( TARGET MPI PROPERTY FOLDER "MantidFramework" )
+set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( MPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
                         ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory
@@ -68,4 +68,4 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS Parallel ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

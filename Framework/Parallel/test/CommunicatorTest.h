@@ -1,12 +1,12 @@
-#ifndef MANTID_MPI_COMMUNICATORTEST_H_
-#define MANTID_MPI_COMMUNICATORTEST_H_
+#ifndef MANTID_PARALLEL_COMMUNICATORTEST_H_
+#define MANTID_PARALLEL_COMMUNICATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMPI/Communicator.h"
-#include "MantidMPI/ParallelRunner.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidParallel/ParallelRunner.h"
 
-using namespace Mantid::MPI;
+using namespace Mantid::Parallel;
 
 namespace {
 void send_recv(const Communicator &comm) {
@@ -93,4 +93,4 @@ public:
   void test_isend_irecv() { runParallel(isend_irecv); }
 };
 
-#endif /* MANTID_MPI_COMMUNICATORTEST_H_ */
+#endif /* MANTID_PARALLEL_COMMUNICATORTEST_H_ */

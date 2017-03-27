@@ -1,9 +1,9 @@
-#ifndef MANTID_MPI_DLLCONFIG_H_
-#define MANTID_MPI_DLLCONFIG_H_
+#ifndef MANTID_PARALLEL_DLLCONFIG_H_
+#define MANTID_PARALLEL_DLLCONFIG_H_
 
 /*
   This file contains the DLLExport/DLLImport linkage configuration for the
-  MPI library
+  Parallel library
 
   Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -28,10 +28,10 @@
 */
 #include "MantidKernel/System.h"
 
-#ifdef IN_MANTID_MPI
-#define MANTID_MPI_DLL DLLExport
+#ifdef IN_MANTID_PARALLEL
+#define MANTID_PARALLEL_DLL DLLExport
 #else
-#define MANTID_MPI_DLL DLLImport
-#endif // IN_MANTID_MPI
+#define MANTID_PARALLEL_DLL DLLImport
+#endif // IN_MANTID_PARALLEL
 
-#endif // MANTID_MPI_DLLCONFIG_H_
+#endif // MANTID_PARALLEL_DLLCONFIG_H_

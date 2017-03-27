@@ -5,14 +5,14 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS EnvironmentSetup.cpp )
 
-  cxxtest_add_test ( MPITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( MPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
-    MPI
+  cxxtest_add_test ( ParallelTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries( ParallelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
+    Parallel
     ${Boost_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES} )
 
-  add_dependencies ( FrameworkTests MPITest )
+  add_dependencies ( FrameworkTests ParallelTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MPITest PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET ParallelTest PROPERTY FOLDER "UnitTests" )
 endif ()

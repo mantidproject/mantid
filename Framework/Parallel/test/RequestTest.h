@@ -1,11 +1,11 @@
-#ifndef MANTID_MPI_REQUESTTEST_H_
-#define MANTID_MPI_REQUESTTEST_H_
+#ifndef MANTID_PARALLEL_REQUESTTEST_H_
+#define MANTID_PARALLEL_REQUESTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMPI/Request.h"
+#include "MantidParallel/Request.h"
 
-using Mantid::MPI::Request;
+using Mantid::Parallel::Request;
 
 class RequestTest : public CxxTest::TestSuite {
 public:
@@ -23,4 +23,4 @@ public:
   }
 };
 
-#endif /* MANTID_MPI_REQUESTTEST_H_ */
+#endif /* MANTID_PARALLEL_REQUESTTEST_H_ */

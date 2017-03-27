@@ -1,14 +1,14 @@
-#ifndef MANTID_MPI_PARALLELRUNNER_H_
-#define MANTID_MPI_PARALLELRUNNER_H_
+#ifndef MANTID_PARALLEL_PARALLELRUNNER_H_
+#define MANTID_PARALLEL_PARALLELRUNNER_H_
 
-#include "MantidMPI/Communicator.h"
-#include "MantidMPI/DllConfig.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidParallel/DllConfig.h"
 
 #include <functional>
 #include <thread>
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 
 /** Runs a callable in parallel. This is mainly a helper for testing code with
   MPI calls. ParallelRunner passes a Communicator as first argument to the
@@ -36,7 +36,7 @@ namespace MPI {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MPI_DLL ParallelRunner {
+class MANTID_PARALLEL_DLL ParallelRunner {
 public:
   ParallelRunner();
   ParallelRunner(const int threads);
@@ -73,7 +73,7 @@ template <class... Args> void runParallel(Args &&... args) {
   runner.run(std::forward<Args>(args)...);
 }
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_MPI_PARALLELRUNNER_H_ */
+#endif /* MANTID_PARALLEL_PARALLELRUNNER_H_ */

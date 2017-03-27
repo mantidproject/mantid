@@ -1,10 +1,10 @@
-#include "MantidMPI/ParallelRunner.h"
-#include "MantidMPI/ThreadingBackend.h"
+#include "MantidParallel/ParallelRunner.h"
+#include "MantidParallel/ThreadingBackend.h"
 
 #include <algorithm>
 
 namespace Mantid {
-namespace MPI {
+namespace Parallel {
 
 ParallelRunner::ParallelRunner() {
   Communicator comm;
@@ -36,5 +36,5 @@ int ParallelRunner::size() const {
   return comm.size();
 }
 
-} // namespace MPI
+} // namespace Parallel
 } // namespace Mantid

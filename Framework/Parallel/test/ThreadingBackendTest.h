@@ -1,11 +1,11 @@
-#ifndef MANTID_MPI_THREADINGBACKENDTEST_H_
-#define MANTID_MPI_THREADINGBACKENDTEST_H_
+#ifndef MANTID_PARALLEL_THREADINGBACKENDTEST_H_
+#define MANTID_PARALLEL_THREADINGBACKENDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMPI/ThreadingBackend.h"
+#include "MantidParallel/ThreadingBackend.h"
 
-using Mantid::MPI::detail::ThreadingBackend;
+using Mantid::Parallel::detail::ThreadingBackend;
 
 class ThreadingBackendTest : public CxxTest::TestSuite {
 public:
@@ -27,4 +27,4 @@ public:
   }
 };
 
-#endif /* MANTID_MPI_THREADINGBACKENDTEST_H_ */
+#endif /* MANTID_PARALLEL_THREADINGBACKENDTEST_H_ */
