@@ -268,13 +268,14 @@ void FunctionGenerator::checkTargetFunction() const {
 /// Get the tie for i-th parameter
 ParameterTie *FunctionGenerator::getTie(size_t i) const {
   auto tie = IFunction::getTie(i);
-  if (tie == nullptr) {
-    if (i < m_nOwnParams) {
-      tie = m_source->getTie(i);
-    } else {
-      checkTargetFunction();
-      tie = m_target->getTie(i - m_nOwnParams);
-    }
+  if (!tie) {
+    return nullptr;
+  }
+  if (i < m_nOwnParams) {
+    tie = m_source->getTie(i);
+  } else {
+    checkTargetFunction();
+    tie = m_target->getTie(i - m_nOwnParams);
   }
   return tie;
 }

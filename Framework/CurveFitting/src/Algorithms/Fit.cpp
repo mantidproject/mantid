@@ -23,6 +23,10 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Fit)
 
+/// Default constructor
+Fit::Fit() : IFittingAlgorithm(), m_maxIterations() {}
+
+
 /** Initialisation method
 */
 void Fit::initConcrete() {
@@ -99,6 +103,22 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
 }
 
+/// Read in the properties specific to Fit.
+void Fit::readProperties() {
+  std::string ties = getPropertyValue("Ties");
+  if (!ties.empty()) {
+    m_function->addTies(ties);
+  }
+  std::string contstraints = getPropertyValue("Constraints");
+  if (!contstraints.empty()) {
+    m_function->addConstraints(contstraints);
+  }
+
+  // Try to retrieve optional properties
+  int intMaxIterations = getProperty("MaxIterations");
+  m_maxIterations = static_cast<size_t>(intMaxIterations);
+}
+
 /// Initialize the minimizer for this fit.
 /// @param maxIterations :: Maximum number of iterations.
 void Fit::initializeMinimizer(size_t maxIterations) {
@@ -123,6 +143,76 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
       declareProperty(std::move(clonedProperty));
     }
   }
+}
+
+/// Run the minimizer's iteration loop.
+/// @returns :: Number of actual iterations.
+size_t Fit::runMinimizer() {
+  const int64_t nsteps = m_maxIterations * m_function->estimateNoProgressCalls();
+  API::Progress prog(this, 0.0, 1.0, nsteps);
+  m_function->setProgressReporter(&prog);
+
+  // do the fitting until success or iteration limit is reached
+  size_t iter = 0;
+  bool isFinished = false;
+  //std::string errorString;
+  g_log.debug("Starting minimizer iteration\n");
+  while (iter < m_maxIterations) {
+    g_log.debug() << "Starting iteration " << iter << "\n";
+    try {
+      // Perform a single iteration. isFinished is set when minimizer wants to
+      // quit.
+      m_function->iterationStarting();
+      isFinished = !m_minimizer->iterate(iter);
+      m_function->iterationFinished();
+    } catch (Kernel::Exception::FitSizeWarning &) {
+      // This is an attempt to recover after the function changes its number of
+      // parameters or ties during the iteration.
+      if (auto cf = dynamic_cast<API::CompositeFunction *>(m_function.get())) {
+        // Make sure the composite function is valid.
+        cf->checkFunction();
+      }
+      // Re-create the cost function and minimizer.
+      initializeMinimizer(m_maxIterations - iter);
+    }
+
+    prog.report();
+
+    if (isFinished) {
+      // It was the last iteration. Break out of the loop and return the number
+      // of finished iterations.
+      break;
+    }
+    ++iter;
+  }
+  g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
+  return iter;
+}
+
+/// Finalize the minimizer.
+/// @param nIterations :: The actual number of iterations done by the minimizer.
+void Fit::finalizeMinimizer(size_t nIterations) {
+  m_minimizer->finalize();
+
+  auto errorString = m_minimizer->getError();
+  g_log.debug() << "Iteration stopped. Minimizer status string="
+                << errorString << "\n";
+
+  bool success = errorString.empty() || errorString == "success";
+  if (success) {
+    errorString = "success";
+  }
+
+  if (nIterations >= m_maxIterations) {
+    if (!errorString.empty()) {
+      errorString += '\n';
+    }
+    errorString += "Failed to converge after " + std::to_string(m_maxIterations) +
+                   " iterations.";
+  }
+
+  // return the status flag
+  setPropertyValue("OutputStatus", errorString);
 }
 
 /// Create algorithm output worksapces.
@@ -279,83 +369,17 @@ void Fit::createOutput() {
 */
 void Fit::execConcrete() {
 
-  std::string ties = getPropertyValue("Ties");
-  if (!ties.empty()) {
-    m_function->addTies(ties);
-  }
-  std::string contstraints = getPropertyValue("Constraints");
-  if (!contstraints.empty()) {
-    m_function->addConstraints(contstraints);
-  }
-
-  // Try to retrieve optional properties
-  int intMaxIterations = getProperty("MaxIterations");
-  const size_t maxIterations = static_cast<size_t>(intMaxIterations);
+  // Read Fit's own properties
+  readProperties();
 
   // Get the minimizer
-  initializeMinimizer(maxIterations);
+  initializeMinimizer(m_maxIterations);
 
-  const int64_t nsteps = maxIterations * m_function->estimateNoProgressCalls();
-  API::Progress prog(this, 0.0, 1.0, nsteps);
-  m_function->setProgressReporter(&prog);
+  // Run the minimizer
+  auto nIterations = runMinimizer();
 
-  // do the fitting until success or iteration limit is reached
-  size_t iter = 0;
-  bool success = false;
-  bool isFinished = false;
-  std::string errorString;
-  g_log.debug("Starting minimizer iteration\n");
-  while (iter < maxIterations) {
-    g_log.debug() << "Starting iteration " << iter << "\n";
-    try {
-      // Perform a single iteration. isFinished is set when minimizer wants to
-      // quit.
-      m_function->iterationStarting();
-      isFinished = !m_minimizer->iterate(iter);
-      m_function->iterationFinished();
-    } catch (Kernel::Exception::FitSizeWarning &) {
-      // This is an attempt to recover after the function changes its number of
-      // parameters
-      // or ties during the iteration.
-      if (auto cf = dynamic_cast<API::CompositeFunction *>(m_function.get())) {
-        // Make sure the composite function is valid.
-        cf->checkFunction();
-      }
-      // Re-create the cost function and minimizer.
-      initializeMinimizer(maxIterations - iter);
-    }
-
-    prog.report();
-
-    if (isFinished) {
-      // It was the last iteration. Set the error string and break out of the
-      // loop.
-      errorString = m_minimizer->getError();
-      g_log.debug() << "Iteration stopped. Minimizer status string="
-                    << errorString << "\n";
-
-      success = errorString.empty() || errorString == "success";
-      if (success) {
-        errorString = "success";
-      }
-      break;
-    }
-    ++iter;
-  }
-  g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
-
-  m_minimizer->finalize();
-
-  if (iter >= maxIterations) {
-    if (!errorString.empty()) {
-      errorString += '\n';
-    }
-    errorString += "Failed to converge after " + std::to_string(maxIterations) +
-                   " iterations.";
-  }
-
-  // return the status flag
-  setPropertyValue("OutputStatus", errorString);
+  // Finilize the minimizer.
+  finalizeMinimizer(nIterations);
 
   // fit ended, creating output
   createOutput();

@@ -302,9 +302,6 @@ bool IFunction::removeTie(size_t i) {
  * @return A pointer to the tie
  */
 ParameterTie *IFunction::getTie(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("Function parameter index out of range.");
-  }
   auto it =
       std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
   if (it != m_ties.cend()) {
@@ -345,9 +342,6 @@ void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
  * @return A pointer to the constraint or NULL
  */
 IConstraint *IFunction::getConstraint(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("ParamFunction parameter index out of range.");
-  }
   auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
                          ReferenceEqual(*this, i));
   if (it != m_constraints.cend()) {

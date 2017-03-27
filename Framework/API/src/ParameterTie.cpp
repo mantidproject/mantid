@@ -116,7 +116,7 @@ double ParameterTie::eval() {
     }
     res = m_parser->Eval();
   } catch (mu::ParserError &e) {
-    throw std::runtime_error("Error in expresseion: " + e.GetMsg());
+    throw std::runtime_error("Error in expression: " + e.GetMsg());
   }
 
   setParameter(res);

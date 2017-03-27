@@ -165,12 +165,10 @@ void BoundaryConstraint::setParamToSatisfyConstraint() {
 
   double paramValue = getParameter();
 
-  if (m_hasLowerBound)
-    if (paramValue < m_lowerBound)
-      setParameter(m_lowerBound, false);
-  if (m_hasUpperBound)
-    if (paramValue > m_upperBound)
-      setParameter(m_upperBound, false);
+  if (m_hasLowerBound && paramValue < m_lowerBound)
+    setParameter(m_lowerBound, false);
+  if (m_hasUpperBound && paramValue > m_upperBound)
+    setParameter(m_upperBound, false);
 }
 
 double BoundaryConstraint::check() {

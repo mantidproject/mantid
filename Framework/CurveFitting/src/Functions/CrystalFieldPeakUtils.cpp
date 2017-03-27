@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -100,6 +101,42 @@ inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
   peak.setFwhm(fwhm);
 }
 
+/// Set the width of a peak.
+/// @param centre :: Peak centre.
+/// @param xVec :: x-values of a tabulated width function.
+/// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
+/// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
+///        are empty.
+/// @param useDefaultFWHM :: If true always use defaultFWHM for the width.
+void setPeakWidth(API::IPeakFunction &peak, double centre,
+                  const std::vector<double> &xVec,
+                  const std::vector<double> &yVec, double fwhmVariation,
+                  double defaultFWHM, bool useDefaultFWHM) {
+  if (useDefaultFWHM) {
+    peak.setFwhm(defaultFWHM);
+  } else {
+    auto fwhm = calculateWidth(centre, xVec, yVec);
+    if (fwhm > 0.0) {
+      peak.setFwhm(fwhm);
+      setWidthConstraint(peak, fwhm, fwhmVariation);
+    } else {
+      ignorePeak(peak, defaultFWHM);
+    }
+  }
+}
+
+/// Create a single peak.
+/// @param peakShape :: A shape of the of created peak as a name of an IPeakFunction.
+/// @param centre :: Peak centre.
+/// @param intensity :: Integrated intensity of the peak.
+/// @param xVec :: x-values of a tabulated width function.
+/// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
+/// @param defaultFWHM :: A default value for the FWHM to use if xVec and yVec
+///        are empty.
+/// @param isGood :: If the peak good and may have free fitting parameters.
+/// @param fixAllPeaks :: If true all parameters should be fixed.
 API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
                                    double intensity,
                                    const std::vector<double> &xVec,
@@ -116,17 +153,8 @@ API::IPeakFunction_sptr createPeak(const std::string &peakShape, double centre,
   if (isGood) {
     peak->setCentre(centre);
     peak->setIntensity(intensity);
-    if (useDefaultFWHM) {
-      peak->setFwhm(defaultFWHM);
-    } else {
-      auto fwhm = calculateWidth(centre, xVec, yVec);
-      if (fwhm > 0.0) {
-        peak->setFwhm(fwhm);
-        setWidthConstraint(*peak, fwhm, fwhmVariation);
-      } else {
-        ignorePeak(*peak, defaultFWHM);
-      }
-    }
+    setPeakWidth(*peak, centre, xVec, yVec, fwhmVariation, defaultFWHM,
+                 useDefaultFWHM);
     peak->fixCentre(fixByDefault);
     peak->fixIntensity(fixByDefault);
   } else {
@@ -169,39 +197,67 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
   if (nRequiredPeaks > maxNPeaks) {
     maxNPeaks = nRequiredPeaks;
   }
-  const bool fixByDefault = true;
   for (size_t i = 0; i < maxNPeaks; ++i) {
-    auto fun = API::FunctionFactory::Instance().createFunction(peakShape);
-    auto peak = boost::dynamic_pointer_cast<API::IPeakFunction>(fun);
-    if (!peak) {
-      throw std::runtime_error("A peak function is expected.");
-    }
-    if (i < nPeaks) {
-      auto centre = centresAndIntensities.getCalculated(i);
-      peak->setCentre(centre);
-      peak->setIntensity(centresAndIntensities.getCalculated(i + nPeaks));
-      if (useDefaultFWHM) {
-        peak->setFwhm(defaultFWHM);
-      } else {
-        auto fwhm = calculateWidth(centre, xVec, yVec);
-        if (fwhm > 0.0) {
-          peak->setFwhm(fwhm);
-          setWidthConstraint(*peak, fwhm, fwhmVariation);
-        } else {
-          ignorePeak(*peak, defaultFWHM);
-        }
-      }
-      peak->fixCentre(fixByDefault);
-      peak->fixIntensity(fixByDefault);
-    } else {
-      ignorePeak(*peak, defaultFWHM);
-    }
-    if (fixAllPeaks) {
-      peak->fixAll(fixByDefault);
-    }
+    const bool isGood = i < nPeaks;
+    const auto centre = isGood ? centresAndIntensities.getCalculated(i) : 0.0;
+    const auto intensity = isGood ? centresAndIntensities.getCalculated(i + nPeaks) : 0.0;
+    auto peak = createPeak(peakShape, centre, intensity, xVec, yVec,
+                           fwhmVariation, defaultFWHM, isGood, fixAllPeaks);
     spectrum.addFunction(peak);
   }
   return nPeaks;
+}
+
+/// Update width of a peak.
+/// @param peak :: A peak to update.
+/// @param centre :: Peak centre.
+/// @param xVec :: x-values of a tabulated width function.
+/// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
+void updatePeakWidth(API::IPeakFunction &peak, double centre,
+                     const std::vector<double> &xVec,
+                     const std::vector<double> &yVec, double fwhmVariation) {
+  bool mustUpdateWidth = !xVec.empty();
+  if (mustUpdateWidth) {
+    auto fwhm = peak.fwhm();
+    auto expectedFwhm = calculateWidth(centre, xVec, yVec);
+    if (expectedFwhm <= 0.0) {
+      ignorePeak(peak, fwhm);
+    } else if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
+      peak.setFwhm(expectedFwhm);
+      setWidthConstraint(peak, expectedFwhm, fwhmVariation);
+    }
+  }
+}
+
+/// Update a single peak.
+/// @param peak :: A peak to update.
+/// @param centre :: New peak centre.
+/// @param intensity :: New integrated intensity.
+/// @param xVec :: x-values of a tabulated width function.
+/// @param yVec :: y-values of a tabulated width function.
+/// @param fwhmVariation :: A variation in the peak width allowed in a fit.
+/// @param isGood :: If the peak good and may have free fitting parameters.
+/// @param fixAll :: If true all parameters should be fixed.
+void updatePeak(API::IPeakFunction &peak, double centre,
+                                   double intensity,
+                                   const std::vector<double> &xVec,
+                                   const std::vector<double> &yVec,
+                                   double fwhmVariation,
+                                   bool isGood, bool fixAll) {
+  const bool fixByDefault = true;
+  if (isGood) {
+    peak.setCentre(centre);
+    peak.setIntensity(intensity);
+    updatePeakWidth(peak, centre, xVec, yVec, fwhmVariation);
+    peak.unfixIntensity();
+    peak.fixIntensity(fixByDefault);
+  } else {
+    peak.setHeight(0.0);
+    if (fixAll) {
+      peak.fixAll(fixByDefault);
+    }
+  }
 }
 
 /// Update the peaks parameters after recalculationof the crystal field.
@@ -234,46 +290,22 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
   size_t nGoodPeaks = calculateNPeaks(centresAndIntensities);
   size_t maxNPeaks = calculateMaxNPeaks(nGoodPeaks);
   size_t nFunctions = spectrum.nFunctions();
-  bool mustUpdateWidth = !xVec.empty();
-  const bool fixByDefault = true;
 
   for (size_t i = 0; i < maxNPeaks; ++i) {
+    const bool isGood = i < nGoodPeaks;
+    auto centre = isGood ? centresAndIntensities.getCalculated(i) : 0.0;
+    auto intensity = isGood ? centresAndIntensities.getCalculated(i + nGoodPeaks) : 0.0;
+
     if (i < nFunctions) {
       auto fun = spectrum.getFunction(i + iFirst);
       auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
-      if (i < nGoodPeaks) {
-        auto centre = centresAndIntensities.getCalculated(i);
-        peak.setCentre(centre);
-        peak.setIntensity(centresAndIntensities.getCalculated(i + nGoodPeaks));
-        if (mustUpdateWidth) {
-          auto fwhm = peak.fwhm();
-          auto expectedFwhm = calculateWidth(centre, xVec, yVec);
-          if (expectedFwhm <= 0.0) {
-            ignorePeak(peak, fwhm);
-          } else if (fabs(fwhm - expectedFwhm) > fwhmVariation) {
-            peak.setFwhm(expectedFwhm);
-            setWidthConstraint(peak, expectedFwhm, fwhmVariation);
-          }
-        }
-        peak.unfixIntensity();
-        peak.fixIntensity(fixByDefault);
-      } else {
-        peak.setHeight(0.0);
-        if (i > nOriginalPeaks) {
-          peak.fixAll(fixByDefault);
-        }
-      }
+      const bool fixAll = fixAllPeaks || i > nOriginalPeaks;
+      updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood, fixAll);
     } else {
-      bool isGood = i < nGoodPeaks;
-      double centre = 0.0;
-      double intensity = 0.0;
-      if (isGood) {
-        centre = centresAndIntensities.getCalculated(i);
-        intensity = centresAndIntensities.getCalculated(i + nGoodPeaks);
-      }
       auto peakPtr =
           createPeak(peakShape, centre, intensity, xVec, yVec, fwhmVariation,
                      defaultFWHM, isGood, fixAllPeaks);
+      spectrum.addFunction(peakPtr);
     }
   }
   return nGoodPeaks;
