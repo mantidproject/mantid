@@ -34,6 +34,7 @@ class RotateStackTest(unittest.TestCase):
         rotation = 1  # once clockwise
         images[:, 0, 0] = 42  # set all images at 0,0 to 42
         result = self.alg.execute(images, rotation)[0]
+        w = result.shape[2]
         npt.assert_equal(result[:, 0, w - 1], 42.0)
 
 
