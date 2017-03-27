@@ -192,7 +192,6 @@ size_t buildSpectrumFunction(API::CompositeFunction &spectrum,
     throw std::runtime_error("WidthX and WidthY must have the same size.");
   }
 
-  bool useDefaultFWHM = xVec.empty();
   auto nPeaks = calculateNPeaks(centresAndIntensities);
   auto maxNPeaks = calculateMaxNPeaks(nPeaks);
   if (nRequiredPeaks > maxNPeaks) {
