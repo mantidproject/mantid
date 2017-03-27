@@ -26,13 +26,13 @@ class VesuvioPeakPrediction(VesuvioBase):
                              validator=StringListValidator(['Debye', 'Einstein']),
                              doc='Model used to make predictions')
 
-        arrvalid=FloatArrayBoundedValidator()
+        arrvalid = FloatArrayBoundedValidator()
         arrvalid.setLower(0.0)
 
         self.declareProperty(FloatArrayProperty(name='Temperature', validator=arrvalid),
                              doc='Temperature (K)')
 
-        floatvalid=FloatBoundedValidator(0.0)
+        floatvalid = FloatBoundedValidator(0.0)
         floatvalid.setLowerExclusive(True)
 
         self.declareProperty(name='AtomicMass', defaultValue=1.0,
@@ -59,7 +59,7 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         self.setup()
 
-        vesuvio_params = CreateEmptyTableWorkspace(OutputWorkspace='vesuvio_'+self._model.lower()+'_params')
+        vesuvio_params = CreateEmptyTableWorkspace(OutputWorkspace='vesuvio_' + self._model.lower() + '_params')
         vesuvio_params.setTitle('Vesuvio Peak Parameters')
         vesuvio_params.addColumn('float', 'Temperature(K)')
         vesuvio_params.addColumn('float', 'Atomic Mass(AMU)')
@@ -123,7 +123,6 @@ class VesuvioPeakPrediction(VesuvioBase):
         w_bar = self.r_integral(y, dx, n)
 
         k = 3.0 * w_bar / 4.0  # mean kinetic energy in 3D in mEV
-        eff_temp = 2.0 * k * 11.604 / 3.0  # effective temperature
         y_bar = math.sqrt(atomic_mass * w_bar / (2 * 4.18036))  # RMS momentum along Q
 
         return k, y_bar
@@ -158,8 +157,6 @@ class VesuvioPeakPrediction(VesuvioBase):
         rint = dx * (y[1] + y[n] + 4 * s_even + 2 * s_odd) / 3.0
 
         return rint
-
-
 
 
 AlgorithmFactory.subscribe(VesuvioPeakPrediction)
