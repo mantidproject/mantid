@@ -225,7 +225,6 @@ double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
 
   std::string fitStatus = fit->getProperty("OutputStatus");
   API::IFunction_sptr result = fit->getProperty("Function");
-  std::vector<std::string> paramnames = result->getParameterNames();
   const double A0 = result->getParameter(0);
   if (fitStatus == "success") { // to be explicit
 
