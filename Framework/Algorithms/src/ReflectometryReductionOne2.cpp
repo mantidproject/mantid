@@ -20,48 +20,6 @@ namespace Algorithms {
 namespace {
 
 /**
-* Translate all the workspace indexes in an origin workspace into workspace
-* indexes of a host end-point workspace. This is done using spectrum numbers as
-* the intermediate.
-*
-* @param originWS : Origin workspace, which provides the original workspace
-* index to spectrum number mapping.
-* @param hostWS : Workspace onto which the resulting workspace indexes will be
-* hosted
-* @throws :: If the specId are not found to exist on the host end-point
-*workspace.
-* @return :: Remapped workspace indexes applicable for the host workspace.
-*results
-*as comma separated string.
-*/
-std::string
-createProcessingCommandsFromDetectorWS(MatrixWorkspace_const_sptr originWS,
-                                       MatrixWorkspace_const_sptr hostWS,
-                                       std::vector<size_t> detectors) {
-  auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-  std::stringstream result;
-
-  bool first = true;
-  for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it) {
-    // Skip this spectrum if it is not in the detectors of interest
-    if (std::find(detectors.begin(), detectors.end(), it->second) ==
-        detectors.end()) {
-      continue;
-    }
-
-    specnum_t specId = (*it).first;
-    if (!first) {
-      result << ",";
-    }
-
-    result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
-    first = false;
-  }
-
-  return result.str();
-}
-
-/**
 @param ws1 : First workspace to compare
 @param ws2 : Second workspace to compare against
 @param severe: True to indicate that failure to verify should result in an
@@ -445,18 +403,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 
     if (xUnit->unitID() == "TOF") {
 
-      // Processing instructions for transmission workspace
-      std::string transmissionCommands = getProperty("ProcessingInstructions");
-      if (strictSpectrumChecking) {
-        // If we have strict spectrum checking, the processing commands need to
-        // be
-        // made from the
-        // numerator workspace AND the transmission workspace based on matching
-        // spectrum numbers.
-        transmissionCommands = createProcessingCommandsFromDetectorWS(
-            detectorWS, transmissionWS, m_detectors);
-      }
-
       MatrixWorkspace_sptr secondTransmissionWS =
           getProperty("SecondTransmissionRun");
       auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
@@ -480,12 +426,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
       alg->setPropertyValue(
           "MonitorIntegrationWavelengthMax",
           getPropertyValue("MonitorIntegrationWavelengthMax"));
-      alg->setProperty("ProcessingInstructions", transmissionCommands);
+      alg->setPropertyValue("ProcessingInstructions",
+                            getPropertyValue("ProcessingInstructions"));
       alg->execute();
       transmissionWS = alg->getProperty("OutputWorkspace");
     }
   }
-
+  
   // Rebin the transmission run to be the same as the input.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
   rebinToWorkspaceAlg->initialize();
