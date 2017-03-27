@@ -28,23 +28,23 @@ def execute(imgs_angles, config):
     raise NotImplementedError(
         "Line projection is not implemented in this version.")
 
-    h.check_data_stack(imgs_angles)
+    # h.check_data_stack(imgs_angles)
 
-    if config.pre.line_projection:
-        h.pstart("Starting to apply line projection on {0} images...".format(
-            imgs_angles.shape[0]))
+    # if config.pre.line_projection:
+    #     h.pstart("Starting to apply line projection on {0} images...".format(
+    #         imgs_angles.shape[0]))
 
-        imgs_angles = imgs_angles.astype('float32')
-        for idx in range(0, imgs_angles.shape[0]):
-            max_img = np.amax(imgs_angles[idx, :, :])
-            to_log = np.true_divide(imgs_angles[idx, :, :], max_img)
-            if False:
-                print(
-                    "   Initial image max: {0}. Transformed to log scale, min: {1}, max: {2}.".
-                    format(max_img, np.amin(to_log), np.amax(to_log)))
-            imgs_angles[idx, :, :] = -np.log(to_log + 1e-6)
+    #     imgs_angles = imgs_angles.astype('float32')
+    #     for idx in range(0, imgs_angles.shape[0]):
+    #         max_img = np.amax(imgs_angles[idx, :, :])
+    #         to_log = np.true_divide(imgs_angles[idx, :, :], max_img)
+    #         if False:
+    #             print(
+    #                 "   Initial image max: {0}. Transformed to log scale, min: {1}, max: {2}.".
+    #                 format(max_img, np.amin(to_log), np.amax(to_log)))
+    #         imgs_angles[idx, :, :] = -np.log(to_log + 1e-6)
 
-        h.pstop("Finished applying line projection on {0} images. ".format(
-            imgs_angles.shape[0]))
+    #     h.pstop("Finished applying line projection on {0} images. ".format(
+    #         imgs_angles.shape[0]))
 
-    return imgs_angles
+    # return imgs_angles

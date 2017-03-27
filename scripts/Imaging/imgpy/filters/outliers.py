@@ -52,7 +52,6 @@ def execute(data, outliers_threshold, outliers_radius, cores=None):
     """
 
     if outliers_threshold and outliers_radius and outliers_threshold > 0 and outliers_radius > 0:
-        import numpy as np
         h.pstart("Applying outliers with threshold: {0} and radius {1}".format(
             outliers_threshold, outliers_radius))
 

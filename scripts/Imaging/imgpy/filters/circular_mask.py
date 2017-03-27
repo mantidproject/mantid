@@ -45,7 +45,7 @@ def execute(data, circular_mask_ratio, circular_mask_value=0., cores=None):
         from tools import importer
         tomopy = importer.do_importing('tomopy')
         h.pstart("Starting circular mask...")
-        # for some reason this doesn't like the ncore param, 
+        # for some reason this doesn't like the ncore param,
         # even though it's in the official tomopy docs
         tomopy.circ_mask(
             arr=data,

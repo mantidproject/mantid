@@ -84,11 +84,8 @@ def execute(data,
     if run_ring_removal:
         h.check_data_stack(data)
 
-        from tools import importer
-        # tomopy = importer.do_importing('tomopy')
         h.pstart("Starting ring removal...")
         import tomopy.misc.corr
-        # FIXME out= is not available in this tomopy, it is available in source though @github
         data = tomopy.misc.corr.remove_ring(
             data,
             center_x=center_x,

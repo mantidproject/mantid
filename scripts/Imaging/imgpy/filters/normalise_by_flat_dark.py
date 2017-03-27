@@ -4,8 +4,8 @@ import helper as h
 
 
 def cli_register(parser):
-    # this doesn't have anything to add, 
-    # the options are added in the funcitonal config, 
+    # this doesn't have anything to add,
+    # the options are added in the funcitonal config,
     # which should be moved to here TODO
     return parser
 
@@ -54,8 +54,8 @@ def execute(data,
                          clip_max, roi)
 
     else:
-        # I think this might be the only "filter not applied" message that 
-        #  is useful, so I've left it here for now
+        # I think this might be the only "filter not applied" message that
+        # is useful, so I've left it here for now
         h.tomo_print_note(
             "Not applying normalization by flat/dark images because no valid flat and dark images have been "
             "provided with -F/--input-path-flat and -D/--input-path-dark.")
