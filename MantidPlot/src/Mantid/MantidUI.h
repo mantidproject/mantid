@@ -19,7 +19,6 @@
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/MantidAlgorithmMetatype.h"
