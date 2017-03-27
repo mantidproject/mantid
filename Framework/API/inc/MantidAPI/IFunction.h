@@ -413,9 +413,11 @@ public:
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
 
-  /// Check if a declared parameter i is fixed
+  /// Check if a parameter i is fixed
   bool isFixed(size_t i) const;
-  /// Removes a declared parameter i from the list of active
+  /// Check if a parameter i is fixed by default (not by user).
+  bool isFixedByDefault(size_t i) const;
+  /// Removes a parameter i from the list of active
   void fix(size_t i, bool isDefault = false);
   /// Restores a declared parameter i to the active status
   void unfix(size_t i);
@@ -427,6 +429,10 @@ public:
   void fixAll(bool isDefault = false);
   /// Free all parameters
   void unfixAll();
+  /// Free all parameters fixed by default
+  void unfixAllDefault();
+  /// Fix all active parameters
+  void fixAllActive(bool isDefault = false);
 
   /// Return parameter index from a parameter reference. Usefull for constraints
   /// and ties in composite functions

@@ -240,23 +240,25 @@ void updatePeakWidth(API::IPeakFunction &peak, double centre,
 /// @param yVec :: y-values of a tabulated width function.
 /// @param fwhmVariation :: A variation in the peak width allowed in a fit.
 /// @param isGood :: If the peak good and may have free fitting parameters.
-/// @param fixAll :: If true all parameters should be fixed.
+/// @param fixAllPeaks :: If true all parameters should be fixed.
 void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
                 const std::vector<double> &xVec,
                 const std::vector<double> &yVec, double fwhmVariation,
-                bool isGood, bool fixAll) {
+                bool isGood, bool fixAllPeaks) {
   const bool fixByDefault = true;
   if (isGood) {
+    peak.unfixAllDefault();
     peak.setCentre(centre);
     peak.setIntensity(intensity);
     updatePeakWidth(peak, centre, xVec, yVec, fwhmVariation);
     peak.unfixIntensity();
     peak.fixIntensity(fixByDefault);
-  } else {
-    peak.setHeight(0.0);
-    if (fixAll) {
+    if (fixAllPeaks) {
       peak.fixAll(fixByDefault);
     }
+  } else {
+    peak.setHeight(0.0);
+    peak.fixAllActive(fixByDefault);
   }
 }
 
@@ -300,15 +302,22 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
     if (i < nFunctions) {
       auto fun = spectrum.getFunction(i + iFirst);
       auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
-      const bool fixAll = fixAllPeaks || i > nOriginalPeaks;
       updatePeak(peak, centre, intensity, xVec, yVec, fwhmVariation, isGood,
-                 fixAll);
+                 fixAllPeaks);
     } else {
       auto peakPtr =
           createPeak(peakShape, centre, intensity, xVec, yVec, fwhmVariation,
                      defaultFWHM, isGood, fixAllPeaks);
       spectrum.addFunction(peakPtr);
     }
+  }
+  // If there are any peaks above the maxNPeaks, ignore them
+  // but don't remove
+  for(size_t i = maxNPeaks; i < nFunctions; ++i) {
+    auto fun = spectrum.getFunction(i + iFirst);
+    auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
+    const auto fwhm = peak.fwhm();
+    ignorePeak(peak, fwhm);
   }
   return nGoodPeaks;
 }

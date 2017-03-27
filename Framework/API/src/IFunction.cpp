@@ -113,15 +113,18 @@ bool IFunction::isActive(size_t i) const {
 /**
  * Query if the parameter is fixed
  * @param i :: The index of a declared parameter
- * @return true if parameter i is active
+ * @return true if parameter i is fixed
  */
 bool IFunction::isFixed(size_t i) const {
-  if (i >= nParams()) {
-    throw std::out_of_range("Parameter index " + std::to_string(i) +
-                            " out of range " + std::to_string(nParams()));
-  }
   auto status = getParameterStatus(i);
   return status == Fixed || status == FixedByDefault;
+}
+
+/// Check if a parameter i is fixed by default (not by user).
+/// @param i :: The index of a parameter
+/// @return true if parameter i is fixed by default
+bool IFunction::isFixedByDefault(size_t i) const {
+  return getParameterStatus(i) == FixedByDefault;
 }
 
 /// This method doesn't create a tie
@@ -1379,6 +1382,28 @@ void IFunction::fixAll(bool isDefault) {
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
     unfix(i);
+  }
+}
+
+/// Free all parameters fixed by default
+void IFunction::unfixAllDefault() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == FixedByDefault) {
+      unfix(i);
+    }
+  }
+}
+
+/// Fix all active parameters. This method doesn't change
+/// status of a fixed parameter, eg if one was fixed by default
+/// prior to calling this method it will remain default regardless
+/// the value of isDefault argument.
+/// @param isDefault :: If true fix them by default.
+void IFunction::fixAllActive(bool isDefault) {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == Active) {
+      fix(i, isDefault);
+    }
   }
 }
 
