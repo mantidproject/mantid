@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -51,8 +52,11 @@ class IndirectDiffScan(DataProcessorAlgorithm):
                              validator=StringListValidator(['IRIS', 'OSIRIS']),
                              doc='Instrument used during run.')
 
+        int_arr_valid = IntArrayBoundedValidator()
+        int_arr_valid.setLower(0)
+
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
-                                              validator=IntArrayMandatoryValidator()),
+                                              validator=int_arr_valid),
                              doc='Comma separated range of spectra number to use.')
 
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
@@ -88,6 +92,8 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         scan_alg.setProperty('OutputWorkspace', self._output_ws)
         scan_alg.execute()
         logger.information('OutputWorkspace : %s' % self._output_ws)
+
+        self.setProperty('OutputWorkspace', scan_alg.getPropertyValue('OutputWorkspace'))
 
         workspace_names = mtd[self._output_ws].getNames()
         scan_workspace = self._output_ws + '_scan'
@@ -125,7 +131,7 @@ class IndirectDiffScan(DataProcessorAlgorithm):
             unit = ('Temperature', 'K')
         else:
             logger.notice('Vertical axis is in run number')
-            unit = ('Run No', 'last 3 digits')
+            unit = ('Run No', '_last 3 digits')
 
         # Create a new vertical axis for the workspaces
         y_ws_axis = NumericAxis.create(len(run_numbers))

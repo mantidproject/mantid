@@ -20,7 +20,7 @@ Algorithms
 QuickRuns
 ~~~~~~~~~
 
-- :ref:`IndirectDiffScan <algm-IndirectDiffScan>` to to improve diffraction reduction workflow
+- :ref:`IndirectDiffScan <algm-IndirectDiffScan>` to improve diffraction reduction workflow. Runs a diffraction reduction in diffspec mode with several parameters at fixed values.
 
 Data Reduction
 ##############
