@@ -683,7 +683,8 @@ public:
   }
 
   void test_new_peaks() {
-    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,FWHM=1.1";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT_EQUALS(fun->nParams(), 40);
     TS_ASSERT_DELTA(fun->getParameter(34), 310.38, 1e-2);
@@ -751,7 +752,8 @@ public:
   }
 
   void test_new_peaks_fixed_peak_width() {
-    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,FWHM=1.1";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT_EQUALS(fun->nParams(), 40);
     TS_ASSERT(fun->isActive(36));
@@ -794,9 +796,9 @@ public:
     TS_ASSERT(!fun->isActive(48));
   }
 
-
   void test_new_peaks_tied_peak_width() {
-    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,Temperature=44.0,FWHM=1.1";
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
     auto fun = FunctionFactory::Instance().createInitialized(funDef);
     TS_ASSERT_EQUALS(fun->nParams(), 40);
     TS_ASSERT(fun->isActive(36));
@@ -838,6 +840,7 @@ public:
     TS_ASSERT(!fun->isActive(45));
     TS_ASSERT(!fun->isActive(48));
   }
+
 private:
   std::pair<double, double> getBounds(API::IFunction &fun,
                                       const std::string &parName) {
