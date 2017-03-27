@@ -90,7 +90,7 @@ private:
   // Whether summation should be done in Q or the default lambda
   bool sumInQ();
   // Get angle details for a specific detector
-  void getDetectorDetails(const int spIdx,
+  void getDetectorDetails(const size_t spIdx,
                           const API::SpectrumInfo &spectrumInfo, double &theta,
                           double &bTwoTheta);
   // Get projected coordinates onto thetaR
@@ -111,8 +111,6 @@ private:
   double thetaMax() { return m_thetaMax; }
   double theta0() { return m_theta0; }
   double thetaR() { return m_thetaR; }
-  int minDetectorIdx() { return m_minDetectorIdx; }
-  int maxDetectorIdx() { return m_maxDetectorIdx; }
   int centreDetectorIdx() { return m_centreDetectorIdx; };
 
   API::MatrixWorkspace_sptr m_runWS;
@@ -123,8 +121,7 @@ private:
   double m_thetaR;
   double m_lambdaMin;
   double m_lambdaMax;
-  int m_minDetectorIdx;
-  int m_maxDetectorIdx;
+  std::vector<size_t> m_detectors;
   int m_centreDetectorIdx;
 };
 

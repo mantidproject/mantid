@@ -36,18 +36,28 @@ namespace {
 */
 std::string
 createProcessingCommandsFromDetectorWS(MatrixWorkspace_const_sptr originWS,
-                                       MatrixWorkspace_const_sptr hostWS) {
+                                       MatrixWorkspace_const_sptr hostWS,
+                                       std::vector<size_t> detectors) {
   auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-  auto it = spectrumMap.begin();
   std::stringstream result;
-  specnum_t specId = (*it).first;
-  result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
-  ++it;
-  for (; it != spectrumMap.end(); ++it) {
-    specId = (*it).first;
-    result << ","
-           << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
+
+  bool first = true;
+  for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it) {
+    // Skip this spectrum if it is not in the detectors of interest
+    if (std::find(detectors.begin(), detectors.end(), it->second) ==
+        detectors.end()) {
+      continue;
+    }
+
+    specnum_t specId = (*it).first;
+    if (!first) {
+      result << ",";
+    }
+
+    result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
+    first = false;
   }
+
   return result.str();
 }
 
@@ -179,6 +189,7 @@ void ReflectometryReductionOne2::exec() {
     IvsLam = makeIvsLam();
   }
 
+  findDetectorsOfInterest();
   // Transmission correction of the resulting linear array. Note that if
   // we're summing in Q then transmission correction will already have been
   // done on the 2D array.
@@ -220,7 +231,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
 
     // Loop through each spectrum in the region of interest
     const auto &spectrumInfo = detectorWS->spectrumInfo();
-    for (int spIdx = m_minDetectorIdx; spIdx < m_maxDetectorIdx; ++spIdx) {
+    for (size_t spIdx : m_detectors) {
       // Get the angle of this detector and its size in twoTheta
       double theta = 0.0;
       double bTwoTheta = 0.0;
@@ -539,7 +550,6 @@ bool ReflectometryReductionOne2::sumInQ() {
 */
 void ReflectometryReductionOne2::findConstantsForSumInQ() {
   findLambdaMinMax();
-  findDetectorsOfInterest();
   findThetaMinMax();
   findTheta0();
   findThetaR();
@@ -559,8 +569,8 @@ void ReflectometryReductionOne2::findLambdaMinMax() {
 void ReflectometryReductionOne2::findDetectorsOfInterest() {
   // Get the min and max spectrum indicies from the processing instructions, if
   // given, or default to the overall min and max
-  m_minDetectorIdx = 0;
-  m_maxDetectorIdx = static_cast<int>(m_spectrumInfo->size()) - 1;
+  size_t minDetectorIdx = 0;
+  size_t maxDetectorIdx = static_cast<int>(m_spectrumInfo->size()) - 1;
 
   std::string instructions = getPropertyValue("ProcessingInstructions");
   if (!instructions.empty() &&
@@ -581,8 +591,8 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
     try {
       boost::trim(matches[0]);
       boost::trim(matches[1]);
-      m_minDetectorIdx = boost::lexical_cast<int>(matches[0]);
-      m_maxDetectorIdx = boost::lexical_cast<int>(matches[1]);
+      minDetectorIdx = boost::lexical_cast<int>(matches[0]);
+      maxDetectorIdx = boost::lexical_cast<int>(matches[1]);
     } catch (boost::bad_lexical_cast &ex) {
       std::ostringstream errMsg;
       errMsg << "Error reading processing instructions '" << instructions
@@ -591,12 +601,16 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
     }
   }
 
+  // Add each detector index in the range to the list
+  for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
+    m_detectors.push_back(i);
+  }
+
   // Also set the centre detector index, which is the detector where thetaR is
   // defined. Use the centre of the region of interest.
   /// todo: check this - should it be the centre pixel of the detector
   /// (regardless of region of interest?)
-  m_centreDetectorIdx =
-      m_minDetectorIdx + (maxDetectorIdx() - minDetectorIdx()) / 2;
+  m_centreDetectorIdx = minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
 }
 
 /**
@@ -604,11 +618,11 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 */
 void ReflectometryReductionOne2::findThetaMinMax() {
 
-  m_thetaMin = std::min(m_spectrumInfo->twoTheta(m_minDetectorIdx),
-                        m_spectrumInfo->twoTheta(m_maxDetectorIdx));
+  m_thetaMin = std::min(m_spectrumInfo->twoTheta(m_detectors.front()),
+                        m_spectrumInfo->twoTheta(m_detectors.back()));
 
-  m_thetaMax = std::max(m_spectrumInfo->twoTheta(m_minDetectorIdx),
-                        m_spectrumInfo->twoTheta(m_maxDetectorIdx));
+  m_thetaMax = std::max(m_spectrumInfo->twoTheta(m_detectors.front()),
+                        m_spectrumInfo->twoTheta(m_detectors.back()));
 }
 
 /**
@@ -701,7 +715,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 * @param bTwoTheta [out] : the range twoTheta covered by this detector
 */
 void ReflectometryReductionOne2::getDetectorDetails(
-    const int spIdx, const SpectrumInfo &spectrumInfo, double &theta,
+    const size_t spIdx, const SpectrumInfo &spectrumInfo, double &theta,
     double &bTwoTheta) {
 
   const double twoTheta = spectrumInfo.twoTheta(spIdx);
