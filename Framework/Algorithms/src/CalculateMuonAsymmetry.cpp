@@ -197,10 +197,10 @@ void CalculateMuonAsymmetry::exec() {
 */
 
 double CalculateMuonAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
-                                           int wsIndex,
-                                           const double estNormConstant,
-                                           const double startX,
-                                           const double endX) {
+                                               int wsIndex,
+                                               const double estNormConstant,
+                                               const double startX,
+                                               const double endX) {
   double retVal = 1.0;
   int maxIterations = getProperty("MaxIterations");
   auto minimizer = getProperty("Minimizer");

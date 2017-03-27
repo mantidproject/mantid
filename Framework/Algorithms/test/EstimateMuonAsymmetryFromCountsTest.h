@@ -221,19 +221,23 @@ public:
   }
 };
 
-class EstimateMuonAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
+class EstimateMuonAsymmetryFromCountsTestPerformance
+    : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
     return new EstimateMuonAsymmetryFromCountsTestPerformance();
   }
-  static void destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
+  static void
+  destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }
 
-  EstimateMuonAsymmetryFromCountsTestPerformance() { FrameworkManager::Instance(); }
+  EstimateMuonAsymmetryFromCountsTestPerformance() {
+    FrameworkManager::Instance();
+  }
 
   void setUp() override { input = createWorkspace(1000, 100); }
 
