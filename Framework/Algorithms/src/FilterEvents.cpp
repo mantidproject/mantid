@@ -570,6 +570,88 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
 }
 
 //----------------------------------------------------------------------------------------------
+/**
+ * @brief FilterEvents::processMatrixSplitterWorkspace
+ * Purpose:
+ *   Convert the splitters in MatrixWorkspace to m_vecSplitterTime and
+ * m_vecSplitterGroup
+ * Requirements:
+ *   m_matrixSplitterWS has valid value
+ *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
+ * Guarantees
+ *  - Splitters stored in m_matrixSpliterWS are transformed to
+ *    "m_vecSplitterTime" and "m_vecSplitterGroup", whose sizes differ by 1.
+ *  - Y values are mapped to integer group index stored in "m_vecSplitterGroup".
+ *    The mapping is recorded in "m_yIndexMap" and "m_wsGroupdYMap"
+ *    "m_maxTargetIndex" is used to register the maximum group index
+ *    Negative Y is defined as "undefined"
+ * Note: there is NO undefined split region here, while any NEGATIVE Y value is
+ * defined as "undefined splitter"
+ */
+void FilterEvents::processMatrixSplitterWorkspace() {
+  // Check input workspace validity
+  assert(m_matrixSplitterWS);
+
+  auto X = m_matrixSplitterWS->binEdges(0);
+  auto &Y = m_matrixSplitterWS->y(0);
+  size_t sizex = X.size();
+  size_t sizey = Y.size();
+
+  // Assign vectors for time comparison
+  m_vecSplitterTime.assign(X.size(), 0);
+  m_vecSplitterGroup.assign(Y.size(), -1);
+
+  // Transform vector
+  for (size_t i = 0; i < sizex; ++i) {
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
+  }
+  // shift the splitters' time if applied
+  if (m_isSplittersRelativeTime) {
+    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
+    for (size_t i = 0; i < sizex; ++i)
+      m_vecSplitterTime[i] += time_shift_ns;
+  }
+
+  // process the group
+  uint32_t max_target_index = 1;
+
+  for (size_t i = 0; i < sizey; ++i) {
+
+    int y_index = static_cast<int>(Y[i]);
+
+    // try to find Y[i] in m_yIndexMap
+    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
+    if (mapiter == m_yIndexMap.end()) {
+      // new
+      // default to 0 as undefined slot.
+      uint32_t int_target = UNDEFINED_SPLITTING_TARGET;
+      //  if well-defined, then use the current
+      if (y_index >= 0) {
+        int_target = max_target_index;
+        ++max_target_index;
+      }
+
+      // un-defined or un-filtered
+      m_vecSplitterGroup[i] = int_target;
+
+      // add to maps and etc.
+      m_yIndexMap.emplace(y_index, int_target);
+      m_wsGroupdYMap.emplace(int_target, y_index);
+      m_targetWorkspaceIndexSet.insert(int_target);
+    } else {
+      // this target Y-index has been registered previously
+      uint32_t target_index = mapiter->second;
+      m_vecSplitterGroup[i] = target_index;
+    }
+  }
+
+  // register the max target integer
+  m_maxTargetIndex = max_target_index - 1;
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
 /** process the input splitters given by a TableWorkspace
  * The method will transfer the start/stop time to "m_vecSplitterTime"
  * and map the splitting target (in string) to "m_vecSplitterGroup".
@@ -670,88 +752,6 @@ void FilterEvents::processTableSplittersWorkspace() {
     m_wsGroupIndexTargetMap.emplace(0, "undefined");
     m_targetWorkspaceIndexSet.insert(0);
   }
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/**
- * @brief FilterEvents::processMatrixSplitterWorkspace
- * Purpose:
- *   Convert the splitters in MatrixWorkspace to m_vecSplitterTime and
- * m_vecSplitterGroup
- * Requirements:
- *   m_matrixSplitterWS has valid value
- *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
- * Guarantees
- *  - Splitters stored in m_matrixSpliterWS are transformed to
- *    "m_vecSplitterTime" and "m_vecSplitterGroup", whose sizes differ by 1.
- *  - Y values are mapped to integer group index stored in "m_vecSplitterGroup".
- *    The mapping is recorded in "m_yIndexMap" and "m_wsGroupdYMap"
- *    "m_maxTargetIndex" is used to register the maximum group index
- *    Negative Y is defined as "undefined"
- * Note: there is NO undefined split region here, while any NEGATIVE Y value is
- * defined as "undefined splitter"
- */
-void FilterEvents::processMatrixSplitterWorkspace() {
-  // Check input workspace validity
-  assert(m_matrixSplitterWS);
-
-  auto X = m_matrixSplitterWS->binEdges(0);
-  auto &Y = m_matrixSplitterWS->y(0);
-  size_t sizex = X.size();
-  size_t sizey = Y.size();
-
-  // Assign vectors for time comparison
-  m_vecSplitterTime.assign(X.size(), 0);
-  m_vecSplitterGroup.assign(Y.size(), -1);
-
-  // Transform vector
-  for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
-  }
-  // shift the splitters' time if applied
-  if (m_isSplittersRelativeTime) {
-    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
-    for (size_t i = 0; i < sizex; ++i)
-      m_vecSplitterTime[i] += time_shift_ns;
-  }
-
-  // process the group
-  uint32_t max_target_index = 1;
-
-  for (size_t i = 0; i < sizey; ++i) {
-
-    int y_index = static_cast<int>(Y[i]);
-
-    // try to find Y[i] in m_yIndexMap
-    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
-    if (mapiter == m_yIndexMap.end()) {
-      // new
-      // default to 0 as undefined slot.
-      uint32_t int_target = UNDEFINED_SPLITTING_TARGET;
-      //  if well-defined, then use the current
-      if (y_index >= 0) {
-        int_target = max_target_index;
-        ++max_target_index;
-      }
-
-      // un-defined or un-filtered
-      m_vecSplitterGroup[i] = int_target;
-
-      // add to maps and etc.
-      m_yIndexMap.emplace(y_index, int_target);
-      m_wsGroupdYMap.emplace(int_target, y_index);
-      m_targetWorkspaceIndexSet.insert(int_target);
-    } else {
-      // this target Y-index has been registered previously
-      uint32_t target_index = mapiter->second;
-      m_vecSplitterGroup[i] = target_index;
-    }
-  }
-
-  // register the max target integer
-  m_maxTargetIndex = max_target_index - 1;
 
   return;
 }

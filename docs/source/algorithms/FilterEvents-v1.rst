@@ -20,19 +20,48 @@ Inputs
 FilterEvents takes 2 mandatory input Workspaces and 1 optional
 Workspace.  One of mandatory workspace is the :ref:`EventWorkspace`
 where the events are filtered from.  The other mandatory workspace is
-workspace containing splitters.  It can be either a MatrixWorkspace or
+workspace containing splitters.  It can be a MatrixWorkspace, a TableWorkspace or
 a :ref:`SplittersWorkspace <SplittersWorkspace>`.
 
 The optional workspace is a :ref:`TableWorkspace <Table Workspaces>`
 for information of splitters.
+
+Workspace containing splitters
+==============================
+
+*FilterEvents* accepts three types of workspace that contains event splitters.
+ - TableWorkspace: a general TableWorkspace with at three columns
+ - MatrixWorkspace: a 1-spectrum MatrixWorkspace
+ - SplittersWorkspace: an extended TableWorkspace with restrict definition on start and stop time.
+
+Event splitter
+++++++++++++++
+
+An event splitter contains three items, start time, stop time and splitting target (index).
+All the events belonged to the same splitting target will be saved to a same output EventWorkspace.
+
+Unit of input splitters
++++++++++++++++++++++++
+
+ - MatrixWorkspace:  the unit must be second.
+ 
+ - TableWorkspace: the unit must be second.
+
+ - SplittersWorkspace: by the definition of SplittersWorkspace, the unit has to be nanosecond.
+
+
+How to generate input workspace containing splitters
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+There are two ways to generate 
 
 Algorithm :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`
 creates both the :ref:`SplittersWorkspace <SplittersWorkspace>` and
 splitter information workspace.
 
 
-Splitters in relative time
-==========================
+Splitters in relative time or absolute time
++++++++++++++++++++++++++++++++++++++++++++
 
 As the SplittersWorkspace is in format of :ref:`MatrixWorkspace
 <MatrixWorkspace>`, its time, i.e., the value in X vector, can be
