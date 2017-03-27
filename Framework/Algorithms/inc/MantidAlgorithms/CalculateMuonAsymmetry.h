@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_CALCULATEASYMMETRY_H_
-#define MANTID_ALGORITHM_CALCULATEASYMMETRY_H_
+#ifndef MANTID_ALGORITHM_CALCULATEMUONASYMMETRY_H_
+#define MANTID_ALGORITHM_CALCULATEMUONASYMMETRY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,8 +27,11 @@ Required Properties:
 <LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
 <LI> StartX - The minimum time to include the analysis </LI>
 <LI> EndX - The maximum time to include in the analysis </LI>
-<LI> myFucntion - The composite function to be used in the fitting (sum_j
+<LI> FittingFucntion - The composite function to be used in the fitting (sum_j
 f(t,{lambda}_j) ) </LI>
+<LI> InputDataType - If the input data is counts or asymmetry </LI>
+<LI> Minimizer - The minimizer method to use for the calculation </LI>
+<LI> MaxIterations - The maximum number of iterations in the calculation </LI>
 </UL>
 
 
@@ -56,10 +59,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateAsymmetry : public API::Algorithm {
+class DLLExport CalculateMuonAsymmetry : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "CalculateAsymmetry"; }
+  const std::string name() const override { return "CalculateMuonAsymmetry"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "This algorithm calculates the asymmetry for a transverse field.";
@@ -84,4 +87,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_CALCULATEASYMMETRY_H_*/
+#endif /*MANTID_ALGORITHM_CALCULATEMUONASYMMETRY_H_*/

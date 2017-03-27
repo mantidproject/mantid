@@ -14,8 +14,8 @@ Muon Analysis
 Algorithms
 ----------
 
--  :ref:`EstimateAsymmetryFromCounts <algm-EstimateAsymmetryFromCounts>`: new algorithm to estimate the asymmetry. 
--  :ref:`CalculateAsymmetry <algm-CalculateAsymmetry>`: new algorithm to calculate the asymmetry by using a fitting function. 
+-  :ref:`EstimateMuonAsymmetryFromCounts <algm-EstimateMuonAsymmetryFromCounts>`: new algorithm to estimate the asymmetry. 
+-  :ref:`CalculateMuonAsymmetry <algm-CalculateMuonAsymmetry>`: new algorithm to calculate the asymmetry by using a fitting function. 
 Fit Functions
 -------------
 

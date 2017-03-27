@@ -1,8 +1,8 @@
-#ifndef MUONESTIMATEASYMMETRYFROMCOUNTSTEST_H_
-#define MUONESTIMATEASYMMETRYFROMCOUNTSTEST_H_
+#ifndef ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_
+#define ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/EstimateAsymmetryFromCounts.h"
+#include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -11,9 +11,9 @@
 
 using namespace Mantid::API;
 using Mantid::MantidVec;
-using Mantid::Algorithms::EstimateAsymmetryFromCounts;
+using Mantid::Algorithms::EstimateMuonAsymmetryFromCounts;
 
-const std::string outputName = "EstimateAsymmetryFromCounts_Output";
+const std::string outputName = "EstimateMuonAsymmetryFromCounts_Output";
 
 namespace {
 struct yData {
@@ -45,7 +45,7 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
 
 IAlgorithm_sptr setUpAlg() {
   IAlgorithm_sptr asymmAlg =
-      AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
+      AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
   asymmAlg->initialize();
   asymmAlg->setChild(true);
   asymmAlg->setProperty("StartX", 0.1);
@@ -54,18 +54,18 @@ IAlgorithm_sptr setUpAlg() {
 }
 }
 
-class EstimateAsymmetryFromCountsTest : public CxxTest::TestSuite {
+class EstimateMuonAsymmetryFromCountsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateAsymmetryFromCountsTest *createSuite() {
-    return new EstimateAsymmetryFromCountsTest();
+  static EstimateMuonAsymmetryFromCountsTest *createSuite() {
+    return new EstimateMuonAsymmetryFromCountsTest();
   }
-  static void destroySuite(EstimateAsymmetryFromCountsTest *suite) {
+  static void destroySuite(EstimateMuonAsymmetryFromCountsTest *suite) {
     delete suite;
   }
 
-  EstimateAsymmetryFromCountsTest() { FrameworkManager::Instance(); }
+  EstimateMuonAsymmetryFromCountsTest() { FrameworkManager::Instance(); }
 
   void testInit() {
     IAlgorithm_sptr alg = setUpAlg();
@@ -221,24 +221,24 @@ public:
   }
 };
 
-class EstimateAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
+class EstimateMuonAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static EstimateAsymmetryFromCountsTestPerformance *createSuite() {
-    return new EstimateAsymmetryFromCountsTestPerformance();
+  static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
+    return new EstimateMuonAsymmetryFromCountsTestPerformance();
   }
-  static void destroySuite(EstimateAsymmetryFromCountsTestPerformance *suite) {
+  static void destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }
 
-  EstimateAsymmetryFromCountsTestPerformance() { FrameworkManager::Instance(); }
+  EstimateMuonAsymmetryFromCountsTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override { input = createWorkspace(1000, 100); }
 
   void testExec2D() {
-    EstimateAsymmetryFromCounts alg;
+    EstimateMuonAsymmetryFromCounts alg;
     alg.initialize();
     alg.setProperty("InputWorkspace", input);
     alg.setPropertyValue("OutputWorkspace", "output");
@@ -251,4 +251,4 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-#endif /*ESTIMATEASYMMETRYFROMCOUNTSTEST_H_*/
+#endif /*ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_*/

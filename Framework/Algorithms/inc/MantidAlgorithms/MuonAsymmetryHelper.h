@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_ASYMMETRYHELPER_H_
-#define MANTID_ALGORITHM_ASYMMETRYHELPER_H_
+#ifndef MANTID_ALGORITHM_MUONASYMMETRYHELPER_H_
+#define MANTID_ALGORITHM_MUONASYMMETRYHELPER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -53,4 +53,4 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
 
 } // namespace Mantid
 
-#endif /*MANTID_ASYMMETRYHELPER_H_*/
+#endif /*MANTID_MUONASYMMETRYHELPER_H_*/

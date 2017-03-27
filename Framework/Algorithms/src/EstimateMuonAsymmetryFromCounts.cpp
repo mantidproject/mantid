@@ -1,10 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/AsymmetryHelper.h"
-#include "MantidAlgorithms/CalculateAsymmetry.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
+#include "MantidAlgorithms/MuonAsymmetryHelper.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -12,10 +11,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/StartsWithValidator.h"
 
 #include <cmath>
 #include <numeric>
@@ -29,12 +25,12 @@ using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(CalculateAsymmetry)
+DECLARE_ALGORITHM(EstimateMuonAsymmetryFromCounts)
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
-void CalculateAsymmetry::init() {
+void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
@@ -51,32 +47,15 @@ void CalculateAsymmetry::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(
-      "FittingFunction",
-      "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",
-      "The additional fitting functions to be used.");
-  declareProperty("InputDataType", "counts",
-                  boost::make_shared<Mantid::Kernel::StringListValidator>(
-                      std::vector<std::string>{"counts", "asymmetry"}),
-                  "If the data is raw counts or asymmetry");
-  std::vector<std::string> minimizerOptions =
-      API::FuncMinimizerFactory::Instance().getKeys();
-  Kernel::IValidator_sptr minimizerValidator =
-      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
-  declareProperty("Minimizer", "Levenberg-MarquardtMD", minimizerValidator,
-                  "Minimizer to use for fitting.");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
-  mustBePositive->setLower(0);
-  declareProperty(
-      "MaxIterations", 500, mustBePositive->clone(),
-      "Stop after this number of iterations if a good fit is not found");
 }
+
 /*
 * Validate the input parameters
 * @returns map with keys corresponding to properties with errors and values
 * containing the error messages.
 */
-std::map<std::string, std::string> CalculateAsymmetry::validateInputs() {
+std::map<std::string, std::string>
+EstimateMuonAsymmetryFromCounts::validateInputs() {
   // create the map
   std::map<std::string, std::string> validationOutput;
   // check start and end times
@@ -90,11 +69,11 @@ std::map<std::string, std::string> CalculateAsymmetry::validateInputs() {
   }
   return validationOutput;
 }
+
 /** Executes the algorithm
  *
  */
-
-void CalculateAsymmetry::exec() {
+void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<int> spectra = getProperty("Spectra");
 
   // Get original workspace
@@ -105,11 +84,8 @@ void CalculateAsymmetry::exec() {
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
-
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
-  auto dataType = getPropertyValue("InputDataType");
-
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
 
@@ -153,23 +129,12 @@ void CalculateAsymmetry::exec() {
                                   std::to_string(spectra[i]) +
                                   " is greater than the number of spectra!");
     }
-    double estNormConst;
-    if (dataType == "counts") {
-      // inital estimate of N0
-      estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),
-                                                numGoodFrames, startX, endX);
-      // Calculate the normalised counts
-      outputWS->setHistogram(
-          specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
-    } else {
-      estNormConst = 1.0;
-      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
-      outputWS->mutableY(specNum) += 1.0; // add offset back in
-    }
-    // get the normalisation constant
-    const double normConst =
-        getNormConstant(outputWS, spectra[i], estNormConst, startX, endX);
-    // calculate the asymmetry
+    // Calculate the normalised counts
+    const double normConst = estimateNormalisationConst(
+        inputWS->histogram(specNum), numGoodFrames, startX, endX);
+    // Calculate the asymmetry
+    outputWS->setHistogram(
+        specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
@@ -184,68 +149,5 @@ void CalculateAsymmetry::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-
-/**
- * Calculate normalisation constant after the exponential decay has been removed
- * to a linear fitting function
- * @param ws ::  workspace
- * @param wsIndex :: workspace index
- * @param estNormConstant :: estimate of normalisation constant
- * @param startX :: the smallest x value for the fit
- * @param endX :: the largest x value for the fit
- * @return normalisation constant
-*/
-
-double CalculateAsymmetry::getNormConstant(API::MatrixWorkspace_sptr ws,
-                                           int wsIndex,
-                                           const double estNormConstant,
-                                           const double startX,
-                                           const double endX) {
-  double retVal = 1.0;
-  int maxIterations = getProperty("MaxIterations");
-  auto minimizer = getProperty("Minimizer");
-  API::IAlgorithm_sptr fit;
-  fit = createChildAlgorithm("Fit", -1, -1, true);
-  std::string tmpString = getProperty("FittingFunction");
-
-  std::string function;
-  function = "composite=ProductFunction;name=FlatBackground,A0=" +
-             std::to_string(estNormConstant);
-  function += ";(name=FlatBackground,A0=1.0,ties=(A0=1.0);";
-  function += tmpString + ")";
-
-  fit->setProperty("MaxIterations", maxIterations);
-  fit->setPropertyValue("Function", function);
-  fit->setProperty("InputWorkspace", ws);
-  fit->setProperty("WorkspaceIndex", wsIndex);
-  fit->setPropertyValue("Minimizer", minimizer);
-  fit->setProperty("StartX", startX);
-  fit->setProperty("EndX", endX);
-  fit->execute();
-
-  std::string fitStatus = fit->getProperty("OutputStatus");
-  API::IFunction_sptr result = fit->getProperty("Function");
-  const double A0 = result->getParameter(0);
-  if (fitStatus == "success") { // to be explicit
-
-    if (A0 < 0) {
-      g_log.warning() << "When trying to fit Asymmetry normalisation constant "
-                         "this constant comes out negative. For workspace "
-                      << wsIndex << "."
-                      << "To proceed Asym norm constant set to 1.0\n";
-      retVal = 1.0;
-    } else {
-      retVal = A0;
-    }
-  } else {
-    g_log.warning() << "Fit falled. Status = " << fitStatus
-                    << "\nFor workspace index " << wsIndex
-                    << "\nAsym norm constant set to 1.0\n";
-    retVal = 1.0;
-  }
-
-  return retVal;
-}
-
 } // namespace Algorithm
 } // namespace Mantid
