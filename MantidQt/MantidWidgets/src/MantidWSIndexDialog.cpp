@@ -47,7 +47,7 @@ MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
                                          const bool isAdvanced)
     : QWidget(parent, flags), m_spectra(false),
       m_waterfall(showWaterfallOption), m_tiled(showTiledOption),
-      m_advanced(isAdvanced), m_plotOptions(),  m_wsNames(wsNames),
+      m_advanced(isAdvanced), m_plotOptions(), m_wsNames(wsNames),
       m_wsIndexIntervals(), m_spectraNumIntervals(), m_wsIndexChoice(),
       m_spectraIdChoice() {
   checkForSpectraAxes();

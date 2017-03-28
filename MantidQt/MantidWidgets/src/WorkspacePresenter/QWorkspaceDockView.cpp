@@ -39,7 +39,6 @@ namespace {
 Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
-
 }
 
 namespace MantidQt {
@@ -1002,8 +1001,7 @@ void QWorkspaceDockView::addPeaksWorkspaceMenuItems(
 * @param menu :: The menu to store the items
 * @param groupWS :: [input] Workspace group related to the menu
 */
-void QWorkspaceDockView::addWorkspaceGroupMenuItems(
-    QMenu *menu) const {
+void QWorkspaceDockView::addWorkspaceGroupMenuItems(QMenu *menu) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
