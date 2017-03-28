@@ -110,7 +110,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-    return std::distance(xData.rawData().begin(), upper);
+  return std::distance(xData.rawData().begin(), upper);
 }
 /**
 * find the first index in bin edges that is after
@@ -125,6 +125,6 @@ size_t endIndexFromTime(const HistogramData::BinEdges &xData,
   auto lower =
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
 
-    return std::distance(xData.rawData().begin(), lower-1);
+  return std::distance(xData.rawData().begin(), lower - 1);
 }
 } // namespace Mantid
