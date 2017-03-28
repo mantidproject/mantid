@@ -220,17 +220,23 @@ public:
     }
   }
 };
-
-class EstimateMuonAsymmetryFromCountsTestPerformance
-    : public CxxTest::TestSuite {
+// turn clang off, otherwise this does not compile
+// clang-format off
+class EstimateMuonAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
+// clang-format on
 public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static void
-  destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
+  // This pair of boilerplate methods prevent the suite being created statically 
+ // This means the constructor isn't called when running other tests
+  static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
+    return new EstimateMuonAsymmetryFromCountsTestPerformance();
+  }
+// clang-format off
+  static void  destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
+// clang-format on
     AnalysisDataService::Instance().clear();
     delete suite;
   }
+
 
   EstimateMuonAsymmetryFromCountsTestPerformance() {
     FrameworkManager::Instance();
