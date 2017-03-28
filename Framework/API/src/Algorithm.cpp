@@ -16,9 +16,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UsageService.h"
 
-#ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/Communicator.h"
-#endif
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -94,11 +92,8 @@ Algorithm::Algorithm()
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false) {
-#ifdef MPI_EXPERIMENTAL
-  setCommunicator(Parallel::Communicator{});
-#endif
-}
+      m_groupsHaveSimilarNames(false),
+      m_communicator(Kernel::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {
@@ -1661,11 +1656,10 @@ void Algorithm::execDistributed() { exec(); }
  * re-implement this if they support execution with multiple MPI ranks and
  * require a special implementation for master-only execution. */
 void Algorithm::execMasterOnly() {
-#ifdef MPI_EXPERIMENTAL
-  if (communicator().rank() > 0)
-    return execNonMaster();
-#endif
-  return exec();
+  if (communicator().rank() == 0)
+    exec();
+  else
+    execNonMaster();
 }
 
 /** By default execMasterOnly() runs this in `master-only` execution mode on all
@@ -1683,11 +1677,9 @@ void Algorithm::execNonMaster() {}
  * error. As a consequence, the return value of this function can be used
  * without further sanitization of the return value. */
 Parallel::ExecutionMode Algorithm::getExecutionMode() const {
-#ifndef MPI_EXPERIMENTAL
-  return Parallel::ExecutionMode::Serial;
-#else
   if (communicator().size() == 1)
     return Parallel::ExecutionMode::Serial;
+
   const auto storageModes = getInputWorkspaceStorageModes();
   const auto executionMode = getParallelExecutionMode(storageModes);
   if (executionMode == Parallel::ExecutionMode::Invalid) {
@@ -1704,7 +1696,6 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     throw(std::runtime_error(error));
   }
   return executionMode;
-#endif
 }
 
 /** Get map of storage modes of all input workspaces.
@@ -1726,8 +1717,11 @@ Algorithm::getInputWorkspaceStorageModes() const {
 
 /// Propages storage modes to all output workspaces.
 void Algorithm::propagateWorkspaceStorageMode() const {
-#ifdef MPI_EXPERIMENTAL
-  if (communicator().size() > 1) {
+  if (communicator().size() == 1) {
+    for (const auto &wsProp : m_outputWorkspaceProps)
+      if (wsProp->getWorkspace())
+        wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
+  } else {
     for (const auto &wsProp : m_outputWorkspaceProps) {
       if (!wsProp->getWorkspace())
         continue;
@@ -1742,12 +1736,7 @@ void Algorithm::propagateWorkspaceStorageMode() const {
                                   ". Workspace name is " +
                                   wsProp->getWorkspace()->getName() + "\n";
     }
-    return;
   }
-#endif
-  for (const auto &wsProp : m_outputWorkspaceProps)
-    if (wsProp->getWorkspace())
-      wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
 }
 
 /** Get correct execution mode based on input storage modes for an MPI run.
@@ -1796,7 +1785,6 @@ Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
   }
 }
 
-#ifdef MPI_EXPERIMENTAL
 /// Returns a const reference to the (MPI) communicator of the algorithm.
 const Parallel::Communicator &Algorithm::communicator() const {
   return *m_communicator;
@@ -1806,7 +1794,6 @@ const Parallel::Communicator &Algorithm::communicator() const {
 void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
   m_communicator = Kernel::make_unique<Parallel::Communicator>(communicator);
 }
-#endif
 
 } // namespace API
 
