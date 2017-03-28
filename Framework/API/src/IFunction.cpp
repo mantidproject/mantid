@@ -66,7 +66,8 @@ boost::shared_ptr<IFunction> IFunction::clone() const {
  * @param reporter :: A pointer to a progress reporter that can be called during
  * function evaluation
  */
-void IFunction::setProgressReporter(boost::shared_ptr<Kernel::ProgressBase> reporter) {
+void IFunction::setProgressReporter(
+    boost::shared_ptr<Kernel::ProgressBase> reporter) {
   m_progReporter = reporter;
   m_progReporter->setNotifyStep(0.01);
 }

@@ -107,8 +107,8 @@ public:
     alg->setProperty("OutputWorkspace", "out");
     alg->execute();
 
-    auto out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        "out");
+    auto out =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 3);
     TS_ASSERT_DELTA(out->readY(1)[0], 1.094 * c_mbsr, 0.001 * c_mbsr);

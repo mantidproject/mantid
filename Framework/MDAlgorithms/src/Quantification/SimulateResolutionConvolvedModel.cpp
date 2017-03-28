@@ -92,8 +92,8 @@ void SimulateResolutionConvolvedModel::init() {
 void SimulateResolutionConvolvedModel::exec() {
   m_inputWS = getProperty("InputWorkspace");
   // First estimate of progress calls
-  auto progress = boost::make_shared<API::Progress>(this, 0.0, 1.0,
-                         static_cast<size_t>(m_inputWS->getNPoints()));
+  auto progress = boost::make_shared<API::Progress>(
+      this, 0.0, 1.0, static_cast<size_t>(m_inputWS->getNPoints()));
   progress->report("Caching simulation input");
   auto resolution = createFunction();
   createDomains();
