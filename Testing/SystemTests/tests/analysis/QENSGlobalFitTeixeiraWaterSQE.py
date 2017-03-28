@@ -8,6 +8,7 @@ import mantid.simpleapi as sm
 import re
 import numpy as np
 
+
 class GlobalFitTest(MantidStressTest):
     """Global fit of QENS data to the jump-diffusion model by Teixeira
        Fitting model. In this case:
