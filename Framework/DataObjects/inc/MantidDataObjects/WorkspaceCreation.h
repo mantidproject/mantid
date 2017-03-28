@@ -175,7 +175,8 @@ template <class T, class P, class IndexArg,
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
                           const HistogramData::Histogram &histogram) {
   std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
-  ws->initialize(indexArg, HistogramData::Histogram(detail::stripData(histogram)));
+  ws->initialize(indexArg,
+                 HistogramData::Histogram(detail::stripData(histogram)));
   detail::initializeFromParent(parent, *ws);
 
   return ws;
@@ -195,7 +196,8 @@ template <class T, class IndexArg,
           typename std::enable_if<
               !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
               nullptr>
-std::unique_ptr<T> create(const IndexArg &indexArg, const HistogramData::Histogram &histogram) {
+std::unique_ptr<T> create(const IndexArg &indexArg,
+                          const HistogramData::Histogram &histogram) {
   auto ws = Kernel::make_unique<T>();
   HistogramData::Histogram histogramTemplate(histogram);
   if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
