@@ -223,20 +223,19 @@ public:
 // turn clang off, otherwise this does not compile
 // clang-format off
 class EstimateMuonAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
-// clang-format on
+  // clang-format on
 public:
-  // This pair of boilerplate methods prevent the suite being created statically 
- // This means the constructor isn't called when running other tests
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
   static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
     return new EstimateMuonAsymmetryFromCountsTestPerformance();
   }
-// clang-format off
+  // clang-format off
   static void  destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
-// clang-format on
+    // clang-format on
     AnalysisDataService::Instance().clear();
     delete suite;
   }
-
 
   EstimateMuonAsymmetryFromCountsTestPerformance() {
     FrameworkManager::Instance();
