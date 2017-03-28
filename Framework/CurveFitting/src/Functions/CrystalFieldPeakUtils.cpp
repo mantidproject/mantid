@@ -102,6 +102,7 @@ inline void ignorePeak(API::IPeakFunction &peak, double fwhm) {
 }
 
 /// Set the width of a peak.
+/// @param peak :: A peak function to set width to.
 /// @param centre :: Peak centre.
 /// @param xVec :: x-values of a tabulated width function.
 /// @param yVec :: y-values of a tabulated width function.
@@ -269,8 +270,6 @@ void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
 /// @param centresAndIntensities :: A FunctionValues object containing centres
 ///        and intensities for the peaks. First nPeaks calculated values are the
 ///        centres and the following nPeaks values are the intensities.
-/// @param nOriginalPeaks :: Number of actual peaks the spectrum had before the
-///        update.This update can change the number of actual peaks.
 /// @param iFirst :: The first index in the composite function (spectrum) at
 ///        which the peaks begin.
 /// @param xVec :: x-values of a tabulated width function.
@@ -283,8 +282,7 @@ void updatePeak(API::IPeakFunction &peak, double centre, double intensity,
 size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
                               const std::string &peakShape,
                               const FunctionValues &centresAndIntensities,
-                              size_t nOriginalPeaks, size_t iFirst,
-                              const std::vector<double> &xVec,
+                              size_t iFirst, const std::vector<double> &xVec,
                               const std::vector<double> &yVec,
                               double fwhmVariation, double defaultFWHM,
                               bool fixAllPeaks) {
