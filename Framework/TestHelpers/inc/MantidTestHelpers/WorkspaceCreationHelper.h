@@ -170,12 +170,13 @@ struct returnOne {
 /**
  * Creates a 2D workspace from taking the function values from the input
  * function. The type must define operator()()
- * @param f :: A function to use for the signal values
+ * @param yFunc :: A function to use for the y values
  * @param nSpec :: The number of spectra
  * @param x0 :: The start of the x range
  * @param x1 :: The end of the x range
  * @param dx :: The steps in x
  * @param isHist :: True if it should be a histogram
+ * @param eFunc :: A function to use for the y error values
  * @return The new workspace. The errors are set to 1.0
  */
 template <typename fT, typename gT = returnOne>

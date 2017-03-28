@@ -32,7 +32,7 @@ using namespace Kernel;
 using API::Progress;
 using std::size_t;
 
-/**
+/** a
  * Corrects the data and errors for one spectrum.
  * The muon lifetime is in microseconds, not seconds, because the data is in
  * microseconds.
@@ -91,7 +91,7 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
   // remove an extra index as XData is bin boundaries and not point data
   auto it0 = std::next(yData.rawData().begin(), i0);
   auto itN = std::next(yData.rawData().begin(), iN);
-  double summation = std::accumulate(it0, itN, 0);
+  double summation = std::accumulate(it0, itN, 0.0);
   double Delta = xData[1] - xData[0];
   double denominator = MUON_LIFETIME_MICROSECONDS * numGoodFrames *
                        (exp(-startX / MUON_LIFETIME_MICROSECONDS) -
