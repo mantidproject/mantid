@@ -346,10 +346,11 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
  * @param runFound : Whether or not the run was actually found
  * @returns string name of the run
  */
-std::string ReflDataProcessorPresenter::loadRun(
-    const std::string &run, const std::string &instrument,
-    const std::string &prefix, const std::string &loader,
-    bool &runFound) {
+std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
+                                                const std::string &instrument,
+                                                const std::string &prefix,
+                                                const std::string &loader,
+                                                bool &runFound) {
 
   runFound = true;
   const std::string fileName = instrument + run;
