@@ -132,6 +132,20 @@ template <class T, class P, class = typename std::enable_if<std::is_base_of<
                                 API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> createUninitialized(const P &parent) {
   std::unique_ptr<T> ws;
+  return ws;
+}
+
+MANTID_DATAOBJECTS_DLL void
+initializeFromParent(const API::MatrixWorkspace &parent,
+                     API::MatrixWorkspace &ws);
+}
+
+template <class T, class P, class IndexArg, class HistArg,
+          class = typename std::enable_if<
+              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
+                          const HistArg &histArg) {
+  std::unique_ptr<T> ws;
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
@@ -149,23 +163,8 @@ std::unique_ptr<T> createUninitialized(const P &parent) {
       ws = detail::createConcreteHelper<T>();
     }
   }
-  return ws;
-}
-
-MANTID_DATAOBJECTS_DLL void
-initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws);
-}
-
-template <class T, class P, class IndexArg, class HistArg,
-          class = typename std::enable_if<
-              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistArg &histArg) {
-  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
-
   return ws;
 }
 
@@ -184,19 +183,10 @@ template <class T, class P,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
-  if (parent.isCommonBins()) {
-    return create<T>(parent, numHistograms,
-                     detail::stripData(parent.histogram(0)));
-  }
-  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
-  const auto YLength = parent.blocksize();
-  const auto XLength = parent.isHistogramData() ? YLength + 1 : YLength;
-  ws->initialize(numHistograms, XLength, YLength);
+  auto ws = create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
-    ws->mutableX(i) = parent.x(i);
+    ws->setSharedX(i, parent.sharedX(i));
   }
-  detail::initializeFromParent(parent, *ws);
-
   return ws;
 }
 
