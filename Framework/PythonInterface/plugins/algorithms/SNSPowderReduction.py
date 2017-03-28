@@ -1394,7 +1394,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if isinstance(split_ws, SplittersWorkspace):
             is_relative_time = False
         else:
-            if isinstance(split_ws, MatrixWorkskpace):
+            if isinstance(split_ws, MatrixWorkspace):
                 # matrix workspace case
                 time0 = split_ws.readX(0)[0]
             else:
