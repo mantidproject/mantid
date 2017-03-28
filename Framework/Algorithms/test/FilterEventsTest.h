@@ -826,6 +826,7 @@ public:
     filter.setProperty("SplitterWorkspace", "TableSplitter1");
     filter.setProperty("RelativeTime", true);
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
+    filter.setProperty("RelativeTime", true);
 
     // Execute
     TS_ASSERT_THROWS_NOTHING(filter.execute());
@@ -1255,14 +1256,14 @@ public:
                                                 size_y));
 
     for (size_t ix = 0; ix < size_x; ++ix)
-      splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]);
+      splitterws->mutableX(0)[ix] = static_cast<double>(time_vec[ix]) * 1.E-9;
     for (size_t iy = 0; iy < size_y; ++iy)
       splitterws->mutableY(0)[iy] = static_cast<double>(index_vec[iy]);
 
     // print out splitters
     for (size_t ix = 0; ix < size_y; ++ix)
-      std::cout << ix << ": " << splitterws->mutableX(0)[ix] * 1.0E-9 << "  -  "
-                << splitterws->mutableX(0)[ix + 1] * 1.0E-9 << ": "
+      std::cout << ix << ": " << splitterws->mutableX(0)[ix] << "  -  "
+                << splitterws->mutableX(0)[ix + 1]  << ": "
                 << splitterws->mutableY(0)[ix] << "\n";
 
     return splitterws;

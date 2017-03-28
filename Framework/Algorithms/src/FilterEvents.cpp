@@ -603,9 +603,9 @@ void FilterEvents::processMatrixSplitterWorkspace() {
 
   // Transform vector
   for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i] * 1.E9);
   }
-  // shift the splitters' time if applied
+  // shift the splitters' time if user specifis that the input times are relative
   if (m_isSplittersRelativeTime) {
     int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
     for (size_t i = 0; i < sizex; ++i)
@@ -676,14 +676,16 @@ void FilterEvents::processTableSplittersWorkspace() {
   bool found_undefined_splitter = false;
 
   // get the run start time
-  int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
+  int64_t filter_shift_time(0);
+  if (m_isSplittersRelativeTime)
+    filter_shift_time = m_runStartTime.totalNanoseconds();
 
   int max_target_index = 1;
 
   // convert TableWorkspace's values to vectors
   size_t num_rows = m_splitterTableWorkspace->rowCount();
   for (size_t irow = 0; irow < num_rows; ++irow) {
-    // get start and stop time
+    // get start and stop time in second
     double start_time = m_splitterTableWorkspace->cell_cast<double>(irow, 0);
     double stop_time = m_splitterTableWorkspace->cell_cast<double>(irow, 1);
     std::string target = m_splitterTableWorkspace->cell<std::string>(irow, 2);

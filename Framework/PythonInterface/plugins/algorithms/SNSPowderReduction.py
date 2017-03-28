@@ -6,10 +6,11 @@ import os
 import mantid.simpleapi as api
 from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, \
     FileAction, FileProperty, ITableWorkspaceProperty, MultipleFileProperty, PropertyMode, \
-    WorkspaceProperty
+    WorkspaceProperty, MatrixWorkspace
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     Property, PropertyManagerDataService, StringArrayProperty, StringListValidator
+from mantid.dataobjects import SplittersWorkspace
 # Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
@@ -1387,15 +1388,33 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             split_ws_name, str(self._splitinfotablews)))
 
         base_name = raw_ws_name
+
+        # find out whether the splitters are relative time or epoch time
+        split_ws = AnalysisDataService.retrieve(split_ws_name)
+        if isinstance(split_ws, SplittersWorkspace):
+            is_relative_time = False
+        else:
+            if isinstance(split_ws, MatrixWorkskpace):
+                # matrix workspace case
+                time0 = split_ws.readX(0)[0]
+            else:
+                #  table workspace case
+                time0 = split_ws.cell(0, 0)
+
+            if time0 > 3600. * 24 * 356:  # larger than 1 Y
+                is_relative_time = True
+            else:
+                is_relative_time = False
+
         if self._splitinfotablews is None:
             # split without information table
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
-                             SplitterWorkspace=split_ws_name, GroupWorkspaces=True)
+                             SplitterWorkspace=split_ws_name, GroupWorkspaces=True, RelativeTime=is_relative_time)
         else:
             # split with information table
             api.FilterEvents(InputWorkspace=raw_ws_name, OutputWorkspaceBaseName=base_name,
                              SplitterWorkspace=split_ws_name, InformationWorkspace = str(self._splitinfotablews),
-                             GroupWorkspaces=True)
+                             GroupWorkspaces=True, RelativeTime=is_relative_time)
         # ENDIF
 
         # Get workspace group for names of split workspace
