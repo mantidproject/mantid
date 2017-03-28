@@ -606,8 +606,6 @@ std::string GenericDataProcessorPresenter::loadRun(
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", fileName);
   algLoadRun->setProperty("OutputWorkspace", outputName);
-  if (loader == "LoadEventNexus")
-    algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
   if (!algLoadRun->isExecuted()) {
     // Run not loaded from disk
