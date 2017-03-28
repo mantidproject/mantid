@@ -17,7 +17,8 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
 
 IPropertySettings *VisibleWhenProperty::clone() {
   VisibleWhenProperty *out = new VisibleWhenProperty(
-      this->m_otherPropName, this->m_when, this->m_value);
+      m_propertyDetails->otherPropName, m_propertyDetails->criterion,
+      m_propertyDetails->value);
   return out;
 }
 

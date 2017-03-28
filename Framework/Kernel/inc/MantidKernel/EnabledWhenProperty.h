@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -16,6 +17,9 @@ enum ePropertyCriterion {
   IS_NOT_EQUAL_TO,
   IS_MORE_OR_EQ
 };
+
+/** Enum for use when combining two EnabledWhenPropertyItems */
+enum eComparisonCriterion { AND, OR, XOR };
 
 /** IPropertySettings for a property that sets it to enabled (in the GUI)
    when the value of another property is:
@@ -81,6 +85,30 @@ public:
   EnabledWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
+  /** Multiple conditions constructor - takes two EnabledWhenProperty
+    * objects and returns the product of them with the specified logic
+        * operator.
+        *
+        * @param conditionOne :: First EnabledWhenProperty object to use
+        * @param conditionTwo :: Second EnabledWhenProperty object to use
+        * @param localOperator :: The logic operator to apply across both
+    *conditions
+        */
+  EnabledWhenProperty(EnabledWhenProperty &conditionOne,
+                      EnabledWhenProperty &conditionTwo,
+                      eComparisonCriterion logicalOperator);
+  /** Multiple conditions move constructor - moves two EnabledWhenProperty
+  * objects and returns the product of them with the specified logic
+  * operator.
+  *
+  * @param conditionOne :: First EnabledWhenProperty object to use
+  * @param conditionTwo :: Second EnabledWhenProperty object to use
+  * @param localOperator :: The logic operator to apply across both conditions
+  */
+  EnabledWhenProperty(EnabledWhenProperty &&conditionOne,
+                      EnabledWhenProperty &&conditionTwo,
+                      eComparisonCriterion logicalOperator);
+
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
    * other property values?
@@ -104,13 +132,35 @@ public:
   IPropertySettings *clone() override;
 
 protected:
-  /// Name of the OTHER property that we will check.
-  std::string m_otherPropName;
-  /// Criterion to evaluate
-  ePropertyCriterion m_when;
-  /// For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string) to
-  /// check for
-  std::string m_value;
+  struct PropertyDetails {
+    PropertyDetails(std::string otherPropName, ePropertyCriterion criterion,
+                    std::string value)
+        : otherPropName(otherPropName), criterion(criterion), value(value) {}
+    /// Name of the OTHER property that we will check.
+    std::string otherPropName;
+    /// Criterion to evaluate
+    ePropertyCriterion criterion;
+    /// For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string)
+    /// to
+    /// check for
+    std::string value;
+  };
+
+  struct ComparisonDetails {
+    ComparisonDetails(EnabledWhenProperty &conditionOne,
+                      EnabledWhenProperty &conditionTwo,
+                      eComparisonCriterion logicOperator)
+        : conditionOne(conditionOne), conditionTwo(conditionTwo),
+          logicOperator(logicOperator) {}
+
+    EnabledWhenProperty &conditionOne;
+    EnabledWhenProperty &conditionTwo;
+    eComparisonCriterion logicOperator;
+  };
+
+  // Holds the various details used within the comparison
+  std::unique_ptr<PropertyDetails> m_propertyDetails = nullptr;
+  std::unique_ptr<ComparisonDetails> m_comparisonDetails = nullptr;
 };
 
 } // namespace Kernel
