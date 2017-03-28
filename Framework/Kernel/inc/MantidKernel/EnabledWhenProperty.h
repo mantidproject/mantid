@@ -82,32 +82,23 @@ public:
    * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
    * (as string) to check for
    */
-  EnabledWhenProperty(std::string otherPropName, ePropertyCriterion when,
-                      std::string value = "");
+  EnabledWhenProperty(const std::string &otherPropName,
+                      const ePropertyCriterion when,
+                      const std::string &value = "");
 
   /** Multiple conditions constructor - takes two EnabledWhenProperty
     * objects and returns the product of them with the specified logic
-        * operator.
-        *
-        * @param conditionOne :: First EnabledWhenProperty object to use
-        * @param conditionTwo :: Second EnabledWhenProperty object to use
-        * @param localOperator :: The logic operator to apply across both
+    * operator.
+    *
+    * @param conditionOne :: First EnabledWhenProperty object to use
+    * @param conditionTwo :: Second EnabledWhenProperty object to use
+    * @param localOperator :: The logic operator to apply across both
     *conditions
+    *
         */
-  EnabledWhenProperty(EnabledWhenProperty &conditionOne,
-                      EnabledWhenProperty &conditionTwo,
-                      eComparisonCriterion logicalOperator);
-  /** Multiple conditions move constructor - moves two EnabledWhenProperty
-  * objects and returns the product of them with the specified logic
-  * operator.
-  *
-  * @param conditionOne :: First EnabledWhenProperty object to use
-  * @param conditionTwo :: Second EnabledWhenProperty object to use
-  * @param localOperator :: The logic operator to apply across both conditions
-  */
-  EnabledWhenProperty(EnabledWhenProperty &&conditionOne,
-                      EnabledWhenProperty &&conditionTwo,
-                      eComparisonCriterion logicalOperator);
+  EnabledWhenProperty(const EnabledWhenProperty conditionOne,
+                      const EnabledWhenProperty conditionTwo,
+                      const eComparisonCriterion logicalOperator);
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
@@ -133,29 +124,30 @@ public:
 
 protected:
   struct PropertyDetails {
-    PropertyDetails(std::string otherPropName, ePropertyCriterion criterion,
-                    std::string value)
+    PropertyDetails(const std::string &otherPropName,
+                    const ePropertyCriterion criterion,
+                    const std::string &value)
         : otherPropName(otherPropName), criterion(criterion), value(value) {}
     /// Name of the OTHER property that we will check.
-    std::string otherPropName;
+    const std::string otherPropName;
     /// Criterion to evaluate
-    ePropertyCriterion criterion;
+    const ePropertyCriterion criterion;
     /// For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value (as string)
     /// to
     /// check for
-    std::string value;
+    const std::string value;
   };
 
   struct ComparisonDetails {
-    ComparisonDetails(EnabledWhenProperty &conditionOne,
-                      EnabledWhenProperty &conditionTwo,
-                      eComparisonCriterion logicOperator)
+    ComparisonDetails(const EnabledWhenProperty &conditionOne,
+                      const EnabledWhenProperty &conditionTwo,
+                      const eComparisonCriterion logicOperator)
         : conditionOne(conditionOne), conditionTwo(conditionTwo),
           logicOperator(logicOperator) {}
 
-    EnabledWhenProperty &conditionOne;
-    EnabledWhenProperty &conditionTwo;
-    eComparisonCriterion logicOperator;
+    const EnabledWhenProperty &conditionOne;
+    const EnabledWhenProperty &conditionTwo;
+    const eComparisonCriterion logicOperator;
   };
 
   // Holds the various details used within the comparison

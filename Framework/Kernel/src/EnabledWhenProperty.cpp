@@ -7,28 +7,21 @@ using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace Kernel {
-EnabledWhenProperty::EnabledWhenProperty(std::string otherPropName,
-                                         ePropertyCriterion when,
-                                         std::string value)
+EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
+                                         const ePropertyCriterion when,
+                                         const std::string &value)
     : IPropertySettings() {
   m_propertyDetails =
       std::make_unique<PropertyDetails>(otherPropName, when, value);
 }
 
-EnabledWhenProperty::EnabledWhenProperty(EnabledWhenProperty &conditionOne,
-                                         EnabledWhenProperty &conditionTwo,
-                                         eComparisonCriterion logicalOperator)
+EnabledWhenProperty::EnabledWhenProperty(
+    const EnabledWhenProperty conditionOne,
+    const EnabledWhenProperty conditionTwo,
+    const eComparisonCriterion logicalOperator)
     : IPropertySettings() {
   m_comparisonDetails = std::make_unique<ComparisonDetails>(
       conditionOne, conditionTwo, logicalOperator);
-}
-
-EnabledWhenProperty::EnabledWhenProperty(EnabledWhenProperty &&conditionOne,
-                                         EnabledWhenProperty &&conditionTwo,
-                                         eComparisonCriterion logicalOperator)
-    : IPropertySettings() {
-  m_comparisonDetails = std::make_unique<ComparisonDetails>(
-      std::move(conditionOne), std::move(conditionTwo), logicalOperator);
 }
 
 bool EnabledWhenProperty::fulfillsCriterion(
