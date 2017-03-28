@@ -2,18 +2,24 @@
 #define MANTID_PARALLEL_COMMUNICATOR_H_
 
 #include "MantidParallel/DllConfig.h"
+#ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/Request.h"
 #include "MantidParallel/ThreadingBackend.h"
+#endif
 
+#ifdef MPI_EXPERIMENTAL
 #include <boost/make_shared.hpp>
 #include <boost/mpi/communicator.hpp>
+#endif
 
 namespace Mantid {
 namespace Parallel {
+#ifdef MPI_EXPERIMENTAL
 class ParallelRunner;
+#endif
 
 /** Wrapper for boost::mpi::communicator. For non-MPI builds an equivalent
-  implementation is provided.
+  implementation with reduced functionality is provided.
 
   @author Simon Heybrock
   @date 2017
@@ -42,10 +48,13 @@ class ParallelRunner;
 class MANTID_PARALLEL_DLL Communicator {
 public:
   Communicator() = default;
+#ifdef MPI_EXPERIMENTAL
   explicit Communicator(const boost::mpi::communicator &comm);
+#endif
 
   int rank() const;
   int size() const;
+#ifdef MPI_EXPERIMENTAL
   template <typename... T> void send(T &&... args) const;
   template <typename... T> void recv(T &&... args) const;
   template <typename... T> Request isend(T &&... args) const;
@@ -61,8 +70,10 @@ private:
 
   // For accessing constructor with threading backend.
   friend class ParallelRunner;
+#endif
 };
 
+#ifdef MPI_EXPERIMENTAL
 template <typename... T> void Communicator::send(T &&... args) const {
   if (m_backend)
     return m_backend->send(m_rank, std::forward<T>(args)...);
@@ -88,6 +99,7 @@ template <typename... T> Request Communicator::irecv(T &&... args) const {
     return m_backend->irecv(m_rank, std::forward<T>(args)...);
   return m_communicator.irecv(std::forward<T>(args)...);
 }
+#endif
 
 } // namespace Parallel
 } // namespace Mantid

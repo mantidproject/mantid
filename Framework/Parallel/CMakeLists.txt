@@ -1,20 +1,17 @@
 if ( MPI_EXPERIMENTAL )
   set ( MPI_SRC_FILES
-    src/Communicator.cpp
     src/ParallelRunner.cpp
     src/Request.cpp
     src/ThreadingBackend.cpp
     )
 
   set ( MPI_INC_FILES
-    inc/MantidParallel/Communicator.h
     inc/MantidParallel/ParallelRunner.h
     inc/MantidParallel/Request.h
     inc/MantidParallel/ThreadingBackend.h
     )
 
   set ( MPI_TEST_FILES
-    CommunicatorTest.h
     ParallelRunnerTest.h
     RequestTest.h
     ThreadingBackendTest.h
@@ -22,16 +19,18 @@ if ( MPI_EXPERIMENTAL )
 endif ()
 
 set ( SRC_FILES
-	${MPI_SRC_FILES}
-	src/dummy.cpp
+  ${MPI_SRC_FILES}
+  src/Communicator.cpp
 )
 
 set ( INC_FILES
-	${MPI_INC_FILES}
+  ${MPI_INC_FILES}
+  inc/MantidParallel/Communicator.h
 )
 
 set ( TEST_FILES
-	${MPI_TEST_FILES}
+  ${MPI_TEST_FILES}
+  CommunicatorTest.h
 )
 
 if (COVERALLS)

@@ -4,10 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidParallel/Communicator.h"
+#ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/ParallelRunner.h"
+#endif
 
 using namespace Mantid::Parallel;
 
+#ifdef MPI_EXPERIMENTAL
 namespace {
 void send_recv(const Communicator &comm) {
   if (comm.size() < 2)
@@ -67,6 +70,7 @@ void isend_irecv(const Communicator &comm) {
   TS_ASSERT_EQUALS(result, expected);
 }
 }
+#endif
 
 class CommunicatorTest : public CxxTest::TestSuite {
 public:
@@ -79,18 +83,39 @@ public:
 
   void test_defaults() {
     Communicator comm;
+#ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;
     TS_ASSERT_EQUALS(comm.size(), world.size());
     TS_ASSERT_EQUALS(comm.rank(), world.rank());
+#else
+    TS_ASSERT_EQUALS(comm.size(), 1);
+    TS_ASSERT_EQUALS(comm.rank(), 0);
+#endif
   }
 
-  void test_send_recv() { runParallel(send_recv); }
+  void test_send_recv() {
+#ifdef MPI_EXPERIMENTAL
+    runParallel(send_recv);
+#endif
+  }
 
-  void test_isend_recv() { runParallel(isend_recv); }
+  void test_isend_recv() {
+#ifdef MPI_EXPERIMENTAL
+    runParallel(isend_recv);
+#endif
+  }
 
-  void test_send_irecv() { runParallel(send_irecv); }
+  void test_send_irecv() {
+#ifdef MPI_EXPERIMENTAL
+    runParallel(send_irecv);
+#endif
+  }
 
-  void test_isend_irecv() { runParallel(isend_irecv); }
+  void test_isend_irecv() {
+#ifdef MPI_EXPERIMENTAL
+    runParallel(isend_irecv);
+#endif
+  }
 };
 
 #endif /* MANTID_PARALLEL_COMMUNICATORTEST_H_ */
