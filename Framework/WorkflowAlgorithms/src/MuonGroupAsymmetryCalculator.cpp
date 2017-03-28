@@ -43,13 +43,11 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
 
     // Remove decay (summed periods ws)
     MatrixWorkspace_sptr asymSummedPeriods =
-	//	removeExpDecay(summedWS, m_groupIndex);
 	EstimateAsymmetry(summedWS, m_groupIndex);
 
     if (!m_subtractedPeriods.empty()) {
       // Remove decay (subtracted periods ws)
       MatrixWorkspace_sptr asymSubtractedPeriods =
-     //     removeExpDecay(subtractedWS, m_groupIndex);
 			EstimateAsymmetry(subtractedWS, m_groupIndex);
 
       // Now subtract
@@ -59,7 +57,6 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
     }
   } else {
     // Only one period was supplied
-	//  tempWS = removeExpDecay(m_inputWS->getItem(0), -1);
 	  tempWS = EstimateAsymmetry(m_inputWS->getItem(0), -1);
 
   }
@@ -115,7 +112,7 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 	// Remove decay
 	if (inputWS) {
 		IAlgorithm_sptr asym =
-			AlgorithmManager::Instance().create("EstimateAsymmetryFromCounts");
+			AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
 		asym->setChild(true);
 		asym->setProperty("InputWorkspace", inputWS);
 		if (index > 0) {

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_ESTIMATEASYMMETRYFROMCOUNTS_H_
-#define MANTID_ALGORITHM_ESTIMATEASYMMETRYFROMCOUNTS_H_
+#ifndef MANTID_ALGORITHM_ESTIMATEMUONASYMMETRYFROMCOUNTS_H_
+#define MANTID_ALGORITHM_ESTIMATEMUONASYMMETRYFROMCOUNTS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -48,11 +48,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EstimateAsymmetryFromCounts : public API::Algorithm {
+class DLLExport EstimateMuonAsymmetryFromCounts : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {
-    return "EstimateAsymmetryFromCounts";
+    return "EstimateMuonAsymmetryFromCounts";
   }
   /// Summary of algorithms purpose
   const std::string summary() const override {
@@ -69,9 +69,10 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ESTIMATEASYMMETRYFROMCOUNTS_H_*/
+#endif /*MANTID_ESTIMATEMUONASYMMETRYFROMCOUNTS_H_*/

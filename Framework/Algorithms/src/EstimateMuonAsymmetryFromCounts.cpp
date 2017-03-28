@@ -1,16 +1,17 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/AsymmetryHelper.h"
-#include "MantidAlgorithms/EstimateAsymmetryFromCounts.h"
+#include "MantidAlgorithms/EstimateMuonAsymmetryFromCounts.h"
+#include "MantidAlgorithms/MuonAsymmetryHelper.h"
+
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
+
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 #include <numeric>
@@ -24,12 +25,12 @@ using API::Progress;
 using std::size_t;
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(EstimateAsymmetryFromCounts)
+DECLARE_ALGORITHM(EstimateMuonAsymmetryFromCounts)
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
-void EstimateAsymmetryFromCounts::init() {
+void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "The name of the input 2D workspace.");
@@ -48,20 +49,46 @@ void EstimateAsymmetryFromCounts::init() {
       "The upper limit for calculating the asymmetry  (an X value).");
 }
 
+/*
+* Validate the input parameters
+* @returns map with keys corresponding to properties with errors and values
+* containing the error messages.
+*/
+std::map<std::string, std::string>
+EstimateMuonAsymmetryFromCounts::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+  // check start and end times
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  if (startX > endX) {
+    validationOutput["StartX"] = "Start time is after the end time.";
+  } else if (startX == endX) {
+    validationOutput["StartX"] = "Start and end times are equal, there is no "
+                                 "data to apply the algorithm to.";
+  }
+  return validationOutput;
+}
+
 /** Executes the algorithm
  *
  */
-void EstimateAsymmetryFromCounts::exec() {
+void EstimateMuonAsymmetryFromCounts::exec() {
   std::vector<int> spectra = getProperty("Spectra");
 
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
+  auto numSpectra = inputWS->getNumberHistograms();
   // Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  const Mantid::API::Run &run = inputWS->run();
+  const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
+
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
     outputWS->setSharedX(i, inputWS->sharedX(i));
@@ -69,9 +96,8 @@ void EstimateAsymmetryFromCounts::exec() {
 
   // No spectra specified = process all spectra
   if (spectra.empty()) {
-    std::vector<int> allSpectra(numSpectra);
-    std::iota(allSpectra.begin(), allSpectra.end(), 0);
-    spectra.swap(allSpectra);
+    spectra = std::vector<int>(numSpectra);
+    std::iota(spectra.begin(), spectra.end(), 0);
   }
 
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
@@ -96,47 +122,15 @@ void EstimateAsymmetryFromCounts::exec() {
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
-    if (spectra[i] > numSpectra) {
-      g_log.error("Spectra size greater than the number of spectra!");
-      throw std::invalid_argument(
-          "Spectra size greater than the number of spectra!");
-    }
 
-    // check start and end times
-    double startX = getProperty("StartX");
-    double endX = getProperty("EndX");
-
-    if (startX > endX) {
-      g_log.warning()
-          << "Start time is after the end time. Swapping the start and end."
-          << '\n';
-      double tmp = endX;
-      endX = startX;
-      startX = tmp;
-    } else if (startX == endX) {
-      throw std::runtime_error("Start and end times are equal, there is no "
-                               "data to apply the algorithm to.");
-    }
-
-    auto xData = inputWS->histogram(specNum).binEdges();
-	auto moo = xData[0];
-	auto baa = xData[xData.size() - 1];
-
-    if (startX < xData[0]) {
-      g_log.warning() << "Start time is before the first data point. Using "
-                         "first data point." << '\n';
-    }
-    if (endX > xData[xData.size() - 1]) {
-      g_log.warning()
-          << "End time is after the last data point. Using last data point."
-          << '\n';
-      g_log.warning() << "Data at late times may dominate the normalisation."
-                      << '\n';
-    }
+    if (spectra[i] > static_cast<int>(numSpectra)) {
+      g_log.error("The spectral index " + std::to_string(spectra[i]) +
+                  " is greater than the number of spectra!");
+      throw std::invalid_argument("The spectral index " +
+                                  std::to_string(spectra[i]) +
+                                  " is greater than the number of spectra!");
+	}
     // Calculate the normalised counts
-    const Mantid::API::Run &run = inputWS->run();
-    const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-
     const double normConst = estimateNormalisationConst(
         inputWS->histogram(specNum), numGoodFrames, startX, endX);
     // Calculate the asymmetry

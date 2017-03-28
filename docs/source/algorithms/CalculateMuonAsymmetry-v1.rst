@@ -13,7 +13,7 @@ This algorithm calculates the asymmetry from the specified muon
 spectra. By default, all of the spectra
 in a workspace will be corrected.
 
-The formula for calculating the asymmetry is given by:
+The formula for calculating the asymmetry (from counts) is given by:
 
 .. math:: \textrm{NewData} = (\textrm{OldData}\times{e^\frac{t}{\tau}})/F N_0 - 1.0,
 
@@ -23,6 +23,8 @@ fitted normalisation constant. The normalisation is calculated by fitting to the
 and the fitting function is given by
 ..math::N_0[1+f(t)] 
 where :math:'f(t)' is a user defined function. 
+
+It is also possible to calculate the asymmetry from an estimated asymmetry. 
 
 Usage
 -----
@@ -42,7 +44,7 @@ input = CreateWorkspace(xData,yData)
 run = input.getRun()
 run.addProperty("goodfrm","10","None",True)
 
-output=CalculateAsymmetry(InputWorkspace=input,spectra=0,XStart=1,XEnd=5,myFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0")
+output=CalculateMuonAsymmetry(InputWorkspace=input,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="counts",Minimizer="Levenberg-MarquardtMD",MaxIterations=500 )
 print "Asymmetry: ", output.readY(0)
 
 Output:

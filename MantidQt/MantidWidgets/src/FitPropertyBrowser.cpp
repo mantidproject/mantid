@@ -295,20 +295,17 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 	m_fitActionSeqFit = new QAction("Sequential Fit", this);
 	m_fitActionUndoFit = new QAction("Undo Fit", this);
 	m_fitActionEvaluate = new QAction("Evaluate function", this);
-	//m_fitActiontest = new QAction("WAAAAA", this);
-
+	
 	m_fitMapper = new QSignalMapper(this);
 	m_fitMapper->setMapping(m_fitActionFit, "Fit");
 	m_fitMapper->setMapping(m_fitActionSeqFit, "SeqFit");
 	m_fitMapper->setMapping(m_fitActionUndoFit, "UndoFit");
 	m_fitMapper->setMapping(m_fitActionEvaluate, "Evaluate");
-	//m_fitMapper->setMapping(m_fitActiontest, "Fit");
 
 	connect(m_fitActionFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 	connect(m_fitActionSeqFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 	connect(m_fitActionUndoFit, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 	connect(m_fitActionEvaluate, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
-	//connect(m_fitActiontest, SIGNAL(triggered()), m_fitMapper, SLOT(map()));
 
 	connect(m_fitMapper, SIGNAL(mapped(const QString &)), this,
 		SLOT(executeFitMenu(const QString &)));
@@ -318,7 +315,6 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 	m_fitMenu->addSeparator();
 	m_fitMenu->addAction(m_fitActionUndoFit);
 	m_fitMenu->addSeparator();
-	//m_fitMenu->addAction(m_fitActiontest);
 	btnFit->setMenu(m_fitMenu);
 	return btnFit;
 }

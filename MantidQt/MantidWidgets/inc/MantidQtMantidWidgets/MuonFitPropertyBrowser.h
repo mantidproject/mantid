@@ -93,6 +93,9 @@ public:
   void doPlotGuess() override { emit plotGuess(); }
   /// Whether a guess is plotted or not
   bool hasGuess() const override;
+  
+  /// Enable/disable the Fit button;
+  virtual void setFitEnabled(bool yes) override;
 
   void TFAsymmFit(int maxIterations);
 
