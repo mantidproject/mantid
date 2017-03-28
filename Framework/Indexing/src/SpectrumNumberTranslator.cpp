@@ -13,9 +13,9 @@ SpectrumNumberTranslator::SpectrumNumberTranslator(
   for (size_t i = 0; i < m_globalSpectrumNumbers.size(); ++i) {
     auto partition = partitioner->indexOf(GlobalSpectrumIndex(i));
     auto number = m_globalSpectrumNumbers[i];
-    m_partitions.emplace(number, partition);
+    m_spectrumNumberToPartition.emplace(number, partition);
     if (partition == m_partition) {
-      m_indices.emplace(number, currentIndex);
+      m_spectrumNumberToIndex.emplace(number, currentIndex);
       m_globalToLocal.emplace(GlobalSpectrumIndex(i), currentIndex);
       if (partitioner->numberOfPartitions() > 1)
         m_spectrumNumbers.emplace_back(number);
@@ -54,16 +54,16 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
                                        SpectrumNumber max) const {
   checkUniqueSpectrumNumbers();
   // Range check
-  static_cast<void>(m_partitions.at(min));
-  static_cast<void>(m_partitions.at(max));
+  static_cast<void>(m_spectrumNumberToPartition.at(min));
+  static_cast<void>(m_spectrumNumberToPartition.at(max));
 
   // The order of spectrum numbers can be arbitrary so we need to iterate.
   std::vector<size_t> indices;
-  for (const auto &index : m_indices) {
+  for (const auto &index : m_spectrumNumberToIndex) {
     if (index.first >= min && index.first <= max)
       indices.push_back(index.second);
   }
-  return SpectrumIndexSet(indices, m_indices.size());
+  return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
 SpectrumIndexSet
@@ -72,7 +72,7 @@ SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
   if (min > max)
     throw std::logic_error(
         "SpectrumIndexTranslator: specified min is larger than max.");
-  if (max >= m_partitions.size())
+  if (max >= m_spectrumNumberToPartition.size())
     throw std::out_of_range(
         "SpectrumIndexTranslator: specified max value is out of range.");
 
@@ -90,16 +90,16 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   checkUniqueSpectrumNumbers();
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
-    if (m_partitions.at(spectrumNumber) == m_partition)
-      indices.push_back(m_indices.at(spectrumNumber));
-  return SpectrumIndexSet(indices, m_indices.size());
+    if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
+      indices.push_back(m_spectrumNumberToIndex.at(spectrumNumber));
+  return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
     const std::vector<GlobalSpectrumIndex> &globalIndices) const {
   std::vector<size_t> indices;
   for (const auto &globalIndex : globalIndices) {
-    if (globalIndex >= m_partitions.size())
+    if (globalIndex >= m_spectrumNumberToPartition.size())
       throw std::out_of_range(
           "SpectrumIndexTranslator: specified index is out of range.");
     const auto it = m_globalToLocal.find(globalIndex);
@@ -120,7 +120,7 @@ void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
   // To support legacy code that creates workspaces with duplicate spectrum
   // numbers we check for bad spectrum numbers only when needed, i.e., when
   // accessing index maps.
-  if (m_globalSpectrumNumbers.size() != m_partitions.size())
+  if (m_globalSpectrumNumbers.size() != m_spectrumNumberToPartition.size())
     throw std::logic_error("SpectrumNumberTranslator: The vector of spectrum "
                            "numbers contained duplicate entries.");
 }
