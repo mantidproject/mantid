@@ -4,7 +4,6 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -16,6 +15,10 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UsageService.h"
+
+#ifdef MPI_EXPERIMENTAL
+#include "MantidParallel/Communicator.h"
+#endif
 
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
@@ -91,7 +94,11 @@ Algorithm::Algorithm()
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false) {}
+      m_groupsHaveSimilarNames(false) {
+#ifdef MPI_EXPERIMENTAL
+  setCommunicator(Parallel::Communicator{});
+#endif
+}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {
@@ -1622,6 +1629,7 @@ bool Algorithm::getAlgStartupLogging() const {
   return m_isAlgStartupLoggingEnabled;
 }
 
+/// Runs the algorithm with the specified execution mode.
 void Algorithm::exec(Parallel::ExecutionMode executionMode) {
   switch (executionMode) {
   case Parallel::ExecutionMode::Serial:
@@ -1638,19 +1646,34 @@ void Algorithm::exec(Parallel::ExecutionMode executionMode) {
   }
 }
 
+/** Runs the algorithm in `distributed` execution mode.
+ *
+ * The default implementation runs the normal exec() method on all ranks.
+ * Classes inheriting from Algorithm can re-implement this if they support
+ * execution with multiple MPI ranks and require a special implementation for
+ * distributed execution. */
 void Algorithm::execDistributed() { exec(); }
 
+/** Runs the algorithm in `master-only` execution mode.
+ *
+ * The default implementation runs the normal exec() method on rank 0 and
+ * execNonMaster() on all other ranks. Classes inheriting from Algorithm can
+ * re-implement this if they support execution with multiple MPI ranks and
+ * require a special implementation for master-only execution. */
 void Algorithm::execMasterOnly() {
-#ifndef MPI_EXPERIMENTAL
-  return exec();
-#else
-  if (FrameworkManager::Instance().mpiCommunicator().rank() == 0)
-    return exec();
-  else
+#ifdef MPI_EXPERIMENTAL
+  if (communicator().rank() > 0)
     return execNonMaster();
 #endif
+  return exec();
 }
 
+/** By default execMasterOnly() runs this in `master-only` execution mode on all
+ * but rank 0.
+ *
+ * The default implementation does nothing. Classes inheriting from Algorithm
+ * can re-implement this if they support execution with multiple MPI ranks and
+ * require a special behavior on non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {}
 
 /** Get a (valid) execution mode for this algorithm.
@@ -1663,7 +1686,7 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
 #ifndef MPI_EXPERIMENTAL
   return Parallel::ExecutionMode::Serial;
 #else
-  if (FrameworkManager::Instance().mpiCommunicator().size() == 1)
+  if (communicator().size() == 1)
     return Parallel::ExecutionMode::Serial;
   const auto storageModes = getInputWorkspaceStorageModes();
   const auto executionMode = getParallelExecutionMode(storageModes);
@@ -1671,6 +1694,12 @@ Parallel::ExecutionMode Algorithm::getExecutionMode() const {
     std::string error("Algorithm does not support execution with input "
                       "workspaces of the following storage types: " +
                       Parallel::toString(storageModes) + ".");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  if (executionMode == Parallel::ExecutionMode::Serial) {
+    std::string error(Parallel::toString(executionMode) +
+                      " is not a valid *parallel* execution mode.");
     getLogger().error() << error << "\n";
     throw(std::runtime_error(error));
   }
@@ -1690,38 +1719,35 @@ Algorithm::getInputWorkspaceStorageModes() const {
     const Property &prop = dynamic_cast<Property &>(*wsProp);
     // Check if we actually have that input workspace
     if (wsProp->getWorkspace())
-      map.emplace(prop.name(), wsProp->getWorkspace()->getStorageMode());
+      map.emplace(prop.name(), wsProp->getWorkspace()->storageMode());
   }
   return map;
 }
 
-/// Helper function to translate from StorageMode to ExecutionMode.
+/// Propages storage modes to all output workspaces.
 void Algorithm::propagateWorkspaceStorageMode() const {
-#ifndef MPI_EXPERIMENTAL
+#ifdef MPI_EXPERIMENTAL
+  if (communicator().size() > 1) {
+    for (const auto &wsProp : m_outputWorkspaceProps) {
+      if (!wsProp->getWorkspace())
+        continue;
+      // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+      // so it should never fail.
+      const Property &prop = dynamic_cast<Property &>(*wsProp);
+      Parallel::StorageMode mode =
+          getStorageModeForOutputWorkspace(prop.name());
+      wsProp->getWorkspace()->setStorageMode(mode);
+      getLogger().notice() << "Set storage mode of output \"" + prop.name() +
+                                  "\" to " + Parallel::toString(mode) +
+                                  ". Workspace name is " +
+                                  wsProp->getWorkspace()->getName() + "\n";
+    }
+    return;
+  }
+#endif
   for (const auto &wsProp : m_outputWorkspaceProps)
     if (wsProp->getWorkspace())
       wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
-#else
-  if (FrameworkManager::Instance().mpiCommunicator().size() == 1) {
-    for (const auto &wsProp : m_outputWorkspaceProps)
-      if (wsProp->getWorkspace())
-        wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
-    return;
-  }
-  for (const auto &wsProp : m_outputWorkspaceProps) {
-    if (!wsProp->getWorkspace())
-      continue;
-    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
-    // so it should never fail.
-    const Property &prop = dynamic_cast<Property &>(*wsProp);
-    Parallel::StorageMode mode = getStorageModeForOutputWorkspace(prop.name());
-    wsProp->getWorkspace()->setStorageMode(mode);
-    getLogger().notice() << "Set storage mode of output \"" + prop.name() +
-                                "\" to " + Parallel::toString(mode) +
-                                ". Workspace name is " +
-                                wsProp->getWorkspace()->getName() + "\n";
-  }
-#endif
 }
 
 /** Get correct execution mode based on input storage modes for an MPI run.
@@ -1748,13 +1774,14 @@ Parallel::StorageMode Algorithm::getStorageModeForOutputWorkspace(
     const std::string &propertyName) const {
   if (m_inputWorkspaceProps.size() == 1)
     if (m_inputWorkspaceProps.front()->getWorkspace())
-      return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
+      return m_inputWorkspaceProps.front()->getWorkspace()->storageMode();
   std::string error("Could not determine StorageMode for output workspace " +
                     propertyName + ".");
   getLogger().error() << error << "\n";
   throw std::runtime_error(error);
 }
 
+/// Helper function to translate from StorageMode to ExecutionMode.
 Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
     Parallel::StorageMode storageMode) const {
   switch (storageMode) {
@@ -1768,6 +1795,18 @@ Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
     return Parallel::ExecutionMode::Invalid;
   }
 }
+
+#ifdef MPI_EXPERIMENTAL
+/// Returns a const reference to the (MPI) communicator of the algorithm.
+const Parallel::Communicator &Algorithm::communicator() const {
+  return *m_communicator;
+}
+
+/// Sets the (MPI) communicator of the algorithm.
+void Algorithm::setCommunicator(const Parallel::Communicator &communicator) {
+  m_communicator = Kernel::make_unique<Parallel::Communicator>(communicator);
+}
+#endif
 
 } // namespace API
 

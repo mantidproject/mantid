@@ -473,12 +473,5 @@ void FrameworkManagerImpl::setupUsageReporting() {
   Kernel::UsageService::Instance().registerStartup();
 }
 
-#ifdef MPI_EXPERIMENTAL
-const Mantid::Parallel::Communicator &
-FrameworkManagerImpl::mpiCommunicator() const {
-  return m_mpi_communicator;
-}
-#endif
-
 } // namespace API
 } // Namespace Mantid

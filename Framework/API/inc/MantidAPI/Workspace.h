@@ -95,7 +95,7 @@ public:
   const WorkspaceHistory &getHistory() const { return *m_history; }
 
   void setStorageMode(Parallel::StorageMode mode);
-  Parallel::StorageMode getStorageMode() const;
+  Parallel::StorageMode storageMode() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

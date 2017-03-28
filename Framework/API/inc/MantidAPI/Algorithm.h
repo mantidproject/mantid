@@ -18,9 +18,6 @@
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
 
-//----------------------------------------------------------------------
-// Forward Declaration
-//----------------------------------------------------------------------
 namespace boost {
 template <class T> class weak_ptr;
 }
@@ -38,6 +35,11 @@ class Value;
 }
 
 namespace Mantid {
+#ifdef MPI_EXPERIMENTAL
+namespace Parallel {
+class Communicator;
+}
+#endif
 namespace API {
 //----------------------------------------------------------------------
 // Forward Declaration
@@ -307,6 +309,11 @@ public:
 
   void copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum);
 
+#ifdef MPI_EXPERIMENTAL
+  const Parallel::Communicator &communicator() const;
+  void setCommunicator(const Parallel::Communicator &communicator);
+#endif
+
 protected:
   /// Virtual method - must be overridden by concrete algorithm
   virtual void init() = 0;
@@ -479,6 +486,10 @@ private:
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
   bool m_groupsHaveSimilarNames;
+
+#ifdef MPI_EXPERIMENTAL
+  std::unique_ptr<Parallel::Communicator> m_communicator;
+#endif
 };
 
 /// Typedef for a shared pointer to an Algorithm

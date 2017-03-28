@@ -1,9 +1,6 @@
 #ifndef MANTID_API_FRAMEWORKMANAGER_H_
 #define MANTID_API_FRAMEWORKMANAGER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #ifdef MPI_BUILD
@@ -11,7 +8,6 @@
 #endif
 
 #ifdef MPI_EXPERIMENTAL
-#include "MantidParallel/Communicator.h"
 #include <boost/mpi/environment.hpp>
 #endif
 
@@ -23,9 +19,6 @@
 namespace Mantid {
 
 namespace API {
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
 
@@ -108,10 +101,6 @@ public:
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
 
-#ifdef MPI_EXPERIMENTAL
-  const Mantid::Parallel::Communicator &mpiCommunicator() const;
-#endif
-
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 
@@ -146,7 +135,6 @@ private:
 #endif
 #ifdef MPI_EXPERIMENTAL
   boost::mpi::environment m_mpi_environment;
-  Mantid::Parallel::Communicator m_mpi_communicator;
 #endif
 };
 
