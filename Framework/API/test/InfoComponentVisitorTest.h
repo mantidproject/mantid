@@ -48,7 +48,7 @@ public:
                                            V3D(11, 0, 0) /*detector position*/);
 
     // Create the visitor.
-    const size_t detectorIndex = 1;
+    const size_t detectorIndex = 0;
     InfoComponentVisitor visitor(
         1, [&](const Mantid::detid_t) { return detectorIndex; });
 
