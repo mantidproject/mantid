@@ -18,68 +18,70 @@ public:
   void test_when_IS_NOT_DEFAULT() {
     PropertyManagerOwner alg;
     // Start with a regular property
-    alg.declareProperty("DependantProp", 123);
+    alg.declareProperty(m_propertyOneName, 123);
 
     // Make a property with its validator. Will be enabled when that other one
     // is NOT the default
-    auto val = [] {
-      return make_unique<EnabledWhenProperty>("DependantProp", IS_NOT_DEFAULT);
+    auto enabledWhenNotDefault = [this] {
+      return make_unique<EnabledWhenProperty>(m_propertyOneName.c_str(),
+                                              IS_NOT_DEFAULT);
     };
-    alg.declareProperty("EnabledProp", 456);
-    alg.setPropertySettings("EnabledProp", val());
+    alg.declareProperty(m_resultPropName, 456);
+    alg.setPropertySettings(m_resultPropName, enabledWhenNotDefault());
 
-    Property *prop = alg.getPointerToProperty("EnabledProp");
+    Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
-    if (!prop)
-      return;
+
     TSM_ASSERT("Property always returns visible.",
                prop->getSettings()->isVisible(&alg))
     TSM_ASSERT("Property always returns valid.", prop->isValid().empty())
 
     TSM_ASSERT("Starts off NOT enabled", !prop->getSettings()->isEnabled(&alg));
-    alg.setProperty("DependantProp", 234);
+    // Change the property so it is no longer default
+    alg.setProperty(m_propertyOneName, 234);
     TSM_ASSERT("Becomes enabled when another property has been changed",
                prop->getSettings()->isEnabled(&alg));
 
-    alg.declareProperty("MySecondValidatorProp", 456);
-    alg.setPropertySettings("MySecondValidatorProp", val());
-    prop = alg.getPointerToProperty("MySecondValidatorProp");
+    alg.declareProperty(m_propertyTwoName, 456);
+    alg.setPropertySettings(m_propertyTwoName, enabledWhenNotDefault());
+    prop = alg.getPointerToProperty(m_propertyTwoName);
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
-    alg.setProperty("DependantProp", 123);
+    alg.setProperty(m_propertyOneName, 123);
     TSM_ASSERT("Goes back to disabled", !prop->getSettings()->isEnabled(&alg));
   }
 
   void test_when_IS_DEFAULT() {
     PropertyManagerOwner alg;
-    alg.declareProperty("DependantProp", 123);
+    alg.declareProperty(m_propertyOneName, 123);
     // Make a property with its validator. Will be enabled when that other one
     // is the default
-    alg.declareProperty("EnabledProp", 456);
-    alg.setPropertySettings("EnabledProp", make_unique<EnabledWhenProperty>(
-                                               "DependantProp", IS_DEFAULT));
-    Property *prop = alg.getPointerToProperty("EnabledProp");
+    alg.declareProperty(m_resultPropName, 456);
+    alg.setPropertySettings(m_resultPropName,
+                            make_unique<EnabledWhenProperty>(
+                                m_propertyOneName.c_str(), IS_DEFAULT));
+    Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
-    alg.setProperty("DependantProp", -1);
+    alg.setProperty(m_propertyOneName, -1);
     TSM_ASSERT("Becomes disabled when another property has been changed",
                !prop->getSettings()->isEnabled(&alg));
   }
 
   void test_when_IS_EQUAL_TO() {
     PropertyManagerOwner alg;
-    alg.declareProperty("DependantProp", 123);
-    alg.declareProperty("EnabledProp", 456);
-    alg.setPropertySettings(
-        "EnabledProp",
-        make_unique<EnabledWhenProperty>("DependantProp", IS_EQUAL_TO, "234"));
-    Property *prop = alg.getPointerToProperty("EnabledProp");
+    alg.declareProperty(m_propertyOneName, 123);
+    alg.declareProperty(m_resultPropName, 456);
+    alg.setPropertySettings(m_resultPropName,
+                            make_unique<EnabledWhenProperty>(
+                                m_propertyOneName.c_str(), IS_EQUAL_TO, "234"));
+    Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off disabled", !prop->getSettings()->isEnabled(&alg));
-    alg.setProperty("DependantProp", 234);
+    alg.setProperty(m_propertyOneName, 234);
     TSM_ASSERT(
         "Becomes enabled when the other property is equal to the given string",
         prop->getSettings()->isEnabled(&alg));
@@ -87,17 +89,17 @@ public:
 
   void test_when_IS_NOT_EQUAL_TO() {
     PropertyManagerOwner alg;
-    alg.declareProperty("DependantProp", 123);
-    alg.declareProperty("EnabledProp", 456);
-    alg.setPropertySettings("EnabledProp",
-                            make_unique<EnabledWhenProperty>(
-                                "DependantProp", IS_NOT_EQUAL_TO, "234"));
-    Property *prop = alg.getPointerToProperty("EnabledProp");
+    alg.declareProperty(m_propertyOneName, 123);
+    alg.declareProperty(m_resultPropName, 456);
+    alg.setPropertySettings(m_resultPropName, make_unique<EnabledWhenProperty>(
+                                                  m_propertyOneName.c_str(),
+                                                  IS_NOT_EQUAL_TO, "234"));
+    Property *prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
     if (!prop)
       return;
     TSM_ASSERT("Starts off enabled", prop->getSettings()->isEnabled(&alg));
-    alg.setProperty("DependantProp", 234);
+    alg.setProperty(m_propertyOneName, 234);
     TSM_ASSERT(
         "Becomes disabled when the other property is equal to the given string",
         !prop->getSettings()->isEnabled(&alg));
