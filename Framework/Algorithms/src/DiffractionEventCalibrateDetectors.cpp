@@ -292,8 +292,7 @@ void DiffractionEventCalibrateDetectors::exec() {
   // Get some stuff from the input workspace
   // We make a copy of the instrument since we will be moving detectors in
   // `inputW` but want to access original positions (etc.) via `detList` below.
-  const auto &dummyW = create<EventWorkspace>(*inputW, 1);
-  Instrument_const_sptr inst = dummyW->getInstrument();
+  Instrument_const_sptr inst(inputW->getInstrument()->baseInstrument()->clone());
 
   // Build a list of Rectangular Detectors
   std::vector<boost::shared_ptr<RectangularDetector>> detList;

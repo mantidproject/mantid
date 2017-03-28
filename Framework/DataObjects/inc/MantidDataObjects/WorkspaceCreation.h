@@ -58,8 +58,6 @@ class Workspace2D;
   create<T>(IndexInfo,  Histogram)
   create<T>(ParentWS)
   create<T>(ParentWS, Histogram)
-  create<T>(ParentWS, NumSpectra)
-  create<T>(ParentWS, IndexInfo)
   create<T>(ParentWS, NumSpectra, Histogram)
   create<T>(ParentWS, IndexInfo, Histogram)
   ~~~
@@ -68,7 +66,7 @@ class Workspace2D;
     identical to the size of the parent, the created workspace has the same
     number of spectra as the parent workspace and spectrum number as well as
     detector ID information is copied from the parent.
-  - If Histogram is not given, the created workspace has X identical to the
+  - If only ParentWS is given, the created workspace has X identical to the
     parent workspace and Y and E are initialized to 0.
   - If a Histogram with 'NULL' Y and E is given, Y and E are initialized to 0.
 
@@ -134,7 +132,10 @@ template <class T, class P, class = typename std::enable_if<std::is_base_of<
                                 API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> createUninitialized(const P &parent) {
   std::unique_ptr<T> ws;
-
+  // Figure out (dynamic) target type:
+  // - Type is same as parent if T is base of parent
+  // - If T is not base of parent, conversion may occur. Currently only
+  //   supported for EventWorkspace
   if (std::is_base_of<API::HistoWorkspace, T>::value &&
       parent.id() == "EventWorkspace") {
     // Drop events, create Workspace2D or T whichever is more derived.
@@ -161,12 +162,20 @@ template <class T, class P, class IndexArg, class HistArg,
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
                           const HistArg &histArg) {
-  // Figure out (dynamic) target type:
-  // - Type is same as parent if T is base of parent
-  // - If T is not base of parent, conversion may occur. Currently only
-  //   supported for EventWorkspace
   std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  detail::initializeFromParent(parent, *ws);
+
+  return ws;
+}
+
+template <class T, class P, class IndexArg,
+          class = typename std::enable_if<
+              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
+std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
+                          const HistogramData::Histogram &histogram) {
+  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
+  ws->initialize(indexArg, HistogramData::Histogram(detail::stripData(histogram)));
   detail::initializeFromParent(parent, *ws);
 
   return ws;
@@ -179,6 +188,20 @@ template <class T, class IndexArg, class HistArg,
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
+  return std::move(ws);
+}
+
+template <class T, class IndexArg,
+          typename std::enable_if<
+              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
+              nullptr>
+std::unique_ptr<T> create(const IndexArg &indexArg, const HistogramData::Histogram &histogram) {
+  auto ws = Kernel::make_unique<T>();
+  HistogramData::Histogram histogramTemplate(histogram);
+  if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
+    histogramTemplate = detail::stripData(histogramTemplate);
+  }
+  ws->initialize(indexArg, histogramTemplate);
   return std::move(ws);
 }
 
@@ -201,13 +224,6 @@ std::unique_ptr<T> create(const P &parent) {
   detail::initializeFromParent(parent, *ws);
 
   return ws;
-}
-
-template <class T, class P, class IndexArg,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg) {
-  return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
 }
 
 // Templating with HistArg clashes with the IndexArg template above. Could be

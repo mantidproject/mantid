@@ -70,6 +70,21 @@ public:
     check_data(*ws);
   }
 
+  void test_create_size_fully_specified_Histogram() {
+    BinEdges edges{1, 2, 4};
+    Counts counts{3.0, 5.0};
+    CountStandardDeviations deviations{2.0, 4.0};
+    Histogram histo{edges, counts, deviations};
+    std::unique_ptr<Workspace2D> ws;
+    TS_ASSERT_THROWS_NOTHING(ws = create<Workspace2D>(2, histo))
+    TS_ASSERT_EQUALS(ws->x(0).rawData(), std::vector<double>({1, 2, 4}));
+    TS_ASSERT_EQUALS(ws->x(1).rawData(), std::vector<double>({1, 2, 4}));
+    TS_ASSERT_EQUALS(ws->y(0).rawData(), std::vector<double>({3, 5}));
+    TS_ASSERT_EQUALS(ws->y(1).rawData(), std::vector<double>({3, 5}));
+    TS_ASSERT_EQUALS(ws->e(0).rawData(), std::vector<double>({2, 4}));
+    TS_ASSERT_EQUALS(ws->e(1).rawData(), std::vector<double>({2, 4}));
+  }
+
   void test_create_IndexInfo_Histogram() {
     const auto ws =
         create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
@@ -113,7 +128,7 @@ public:
   void test_create_parent_same_size() {
     const auto parent =
         create<Workspace2D>(make_indices(), Histogram(BinEdges{1, 2, 4}));
-    const auto ws = create<Workspace2D>(*parent, 2);
+    const auto ws = create<Workspace2D>(*parent, 2, parent->histogram(0));
     // Same size -> Indices copied from parent
     check_indices(*ws);
     check_data(*ws);
@@ -122,14 +137,14 @@ public:
   void test_create_parent_size() {
     const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
     parent->getSpectrum(0).setSpectrumNo(7);
-    const auto ws = create<Workspace2D>(*parent, 2);
+    const auto ws = create<Workspace2D>(*parent, 2, parent->histogram(0));
     check_default_indices(*ws);
     check_data(*ws);
   }
 
   void test_create_parent_IndexInfo_same_size() {
     const auto parent = create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
-    const auto ws = create<Workspace2D>(*parent, make_indices());
+    const auto ws = create<Workspace2D>(*parent, make_indices(), parent->histogram(0));
     // If parent has same size, data in IndexInfo is ignored
     check_default_indices(*ws);
     check_data(*ws);
@@ -137,7 +152,17 @@ public:
 
   void test_create_parent_IndexInfo() {
     const auto parent = create<Workspace2D>(3, Histogram(BinEdges{1, 2, 4}));
-    const auto ws = create<Workspace2D>(*parent, make_indices());
+    const auto ws = create<Workspace2D>(*parent, make_indices(), parent->histogram(0));
+    check_indices(*ws);
+    check_data(*ws);
+  }
+
+  void test_create_event_from_event() {
+    const auto parent =
+        create<EventWorkspace>(make_indices(), Histogram(BinEdges{1, 2, 4}));
+    std::unique_ptr<EventWorkspace> ws;
+    TS_ASSERT_THROWS_NOTHING(ws = create<EventWorkspace>(*parent, 2, parent->histogram(0)))
+    TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
     check_indices(*ws);
     check_data(*ws);
   }
@@ -170,6 +195,13 @@ public:
     const auto parent = create<Workspace2D>(2, Histogram(BinEdges(2)));
     const auto ws = create<EventWorkspace>(*parent);
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
+  }
+
+  void test_create_event_from_edges() {
+    std::unique_ptr<EventWorkspace> ws;
+    TS_ASSERT_THROWS_NOTHING(ws = create<EventWorkspace>(2, BinEdges{1, 2, 4}))
+    TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
+    check_data(*ws);
   }
 };
 

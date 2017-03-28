@@ -407,7 +407,7 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1);
+  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1, inputWorkspace.histogram(0));
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);
