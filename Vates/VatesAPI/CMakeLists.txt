@@ -127,7 +127,6 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
-inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
 set( TEST_FILES

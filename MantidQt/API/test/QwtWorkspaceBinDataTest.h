@@ -6,7 +6,11 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using namespace Mantid::HistogramData;
 
 class QwtWorkspaceBinDataTest : public CxxTest::TestSuite {
   Mantid::API::MatrixWorkspace_sptr ws;
@@ -17,13 +21,11 @@ public:
     auto *ax1 = new Mantid::API::NumericAxis(3);
     ws->replaceAxis(1, ax1);
     for (size_t i = 0; i < 3; i++) {
-      ax1->setValue(i, 10.0 + static_cast<double>(i));
-      for (size_t j = 0; j < 5; j++)
-        ws->dataX(i)[j] = double(i) + double(j);
-      for (size_t j = 0; j < 4; j++) {
-        ws->dataY(i)[j] = double(i) + double(j) * 2;
-        ws->dataE(i)[j] = double(i) + double(j) * 3;
-      }
+      double index = static_cast<double>(i);
+      ax1->setValue(i, 10.0 + index);
+      ws->setHistogram(i, BinEdges(5, LinearGenerator(index, 1)),
+                       Counts(4, LinearGenerator(index, 2)),
+                       CountStandardDeviations(4, LinearGenerator(index, 3)));
     }
   }
 
@@ -58,7 +60,7 @@ public:
 
   /** In log scale, points below a minimum value are clipped to the minimum */
   void test_logScale() {
-    ws->dataY(2)[2] = -10;
+    ws->mutableY(2)[2] = -10;
     QwtWorkspaceBinData data(*ws, 2, true);
     TS_ASSERT_DELTA(data.y(1), 5.0, 1e-6);
     TS_ASSERT_DELTA(data.e(1), 7.0, 1e-6);

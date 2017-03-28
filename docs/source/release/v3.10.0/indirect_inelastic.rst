@@ -33,14 +33,19 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+
 - The Delta Function option can now be used with StretchedExpFT mode
+
 
 Jump Fit
 ~~~~~~~~
 
 Improvements
 ------------
+
+- Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+
 
 Bugfixes
 --------
