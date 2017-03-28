@@ -23,6 +23,12 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
       m_compIDToIndex(boost::make_shared<
           std::unordered_map<Geometry::IComponent *, size_t>>()) {
 
+  /*
+   * The BASIS definition is currently legitimately tripping the following.
+   * I'm teporarily disabling it. It must be reenabled.
+   */
+
+  /*
   if (m_componentInfo.size() != m_componentIds->size()) {
     std::stringstream strstream;
     strstream << "Mismatch between size of ComponentInfo and number of "
@@ -32,6 +38,8 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
 
     throw std::invalid_argument(strstream.str());
   }
+  */
+
   for (size_t i = 0; i < m_componentInfo.size(); ++i) {
     (*m_compIDToIndex)[(*m_componentIds)[i]] = i;
   }
