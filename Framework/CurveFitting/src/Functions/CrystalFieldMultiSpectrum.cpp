@@ -427,8 +427,8 @@ void CrystalFieldMultiSpectrum::updateSpectrum(
     calcExcitations(nre, en, wf, temperature, values, iSpec);
     auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
     m_nPeaks[iSpec] = CrystalFieldUtils::updateSpectrumFunction(
-        composite, peakShape, values, m_nPeaks[iSpec], 1, m_fwhmX[iSpec],
-        m_fwhmY[iSpec], fwhmVariation, fwhm, fixAllPeaks);
+        composite, peakShape, values, 1, m_fwhmX[iSpec], m_fwhmY[iSpec],
+        fwhmVariation, fwhm, fixAllPeaks);
   }
 }
 
