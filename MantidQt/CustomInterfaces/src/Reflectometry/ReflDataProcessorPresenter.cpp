@@ -337,6 +337,39 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
     loadRun(runNo, instrument, prefix, m_loader, runFound);
 }
 
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string ReflDataProcessorPresenter::loadRun(
+    const std::string &run, const std::string &instrument,
+    const std::string &prefix, const std::string &loader,
+    bool &runFound) {
+
+  runFound = true;
+  const std::string fileName = instrument + run;
+  const std::string outputName = prefix + run;
+
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
+  algLoadRun->initialize();
+  algLoadRun->setProperty("Filename", fileName);
+  algLoadRun->setProperty("OutputWorkspace", outputName);
+  algLoadRun->setProperty("LoadMonitors", true);
+  algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
+    return "";
+  }
+
+  return outputName;
+}
+
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
 * @param runNo :: the run number as a string

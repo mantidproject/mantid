@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
@@ -128,10 +129,6 @@ protected:
   // Finds a run in the AnalysisDataService
   std::string findRunInADS(const std::string &run, const std::string &prefix,
                            bool &runFound);
-  // Loads a run from disk
-  std::string loadRun(const std::string &run, const std::string &instrument,
-                      const std::string &prefix, const std::string &loader,
-                      bool &runFound);
 
   // Process selected rows
   virtual void process();
@@ -165,6 +162,10 @@ private:
   Mantid::API::Workspace_sptr getRun(const std::string &run,
                                      const std::string &instrument,
                                      const std::string &prefix);
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,

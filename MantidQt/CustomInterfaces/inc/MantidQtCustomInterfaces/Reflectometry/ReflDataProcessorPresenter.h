@@ -59,6 +59,10 @@ private:
   // Plotting
   void plotRow() override;
   void plotGroup() override;
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // Get the name of a post-processed workspace
   std::string getPostprocessedWorkspaceName(const GroupData &groupData,
                                             const std::string &prefix,
