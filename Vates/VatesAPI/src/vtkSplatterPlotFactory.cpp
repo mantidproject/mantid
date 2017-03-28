@@ -589,7 +589,8 @@ void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) {
  *                       to the interval (0,100].
  */
 void vtkSplatterPlotFactory::SetPercentToUse(double percentToUse) {
-  m_percentToUse = boost::algorithm::clamp(percentToUse, 0.0, 100.0);
+  m_percentToUse = boost::algorithm::clamp(
+      percentToUse, std::numeric_limits<double>::min(), 100.0);
 }
 
 /**
