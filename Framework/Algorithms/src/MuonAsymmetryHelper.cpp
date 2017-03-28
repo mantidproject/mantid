@@ -110,12 +110,7 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
   auto upper =
       std::upper_bound(xData.rawData().begin(), xData.rawData().end(), startX);
-  if (upper == xData.rawData().end()) {
-    throw std::runtime_error("The start point is equal to or greater than the "
-                             "last data point. There is zero range.");
-  } else {
     return std::distance(xData.rawData().begin(), upper);
-  }
 }
 /**
 * find the first index in bin edges that is after
@@ -128,13 +123,8 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX) {
   auto lower =
-      std::lower_bound(xData.rawData().begin(), xData.rawData().end(), endX);
+      std::upper_bound(xData.rawData().begin(), xData.rawData().end(), endX);
 
-  if (lower == xData.rawData().end()) {
-    throw std::runtime_error("The end point is less than or equal to the first "
-                             "data point. There is zero range");
-  } else {
-    return std::distance(xData.rawData().begin(), lower);
-  }
+    return std::distance(xData.rawData().begin(), lower-1);
 }
 } // namespace Mantid
