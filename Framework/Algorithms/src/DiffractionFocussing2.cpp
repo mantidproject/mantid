@@ -338,7 +338,7 @@ void DiffractionFocussing2::exec() {
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
   auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(),
-                                    m_matrixInputW->histogram(0));
+                                    m_matrixInputW->binEdges(0));
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);

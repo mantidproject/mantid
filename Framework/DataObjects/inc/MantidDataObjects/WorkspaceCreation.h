@@ -163,11 +163,7 @@ template <class T, class P, class IndexArg, class HistArg,
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
                           const HistArg &histArg) {
   std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
-  HistogramData::Histogram templateHisto(histArg);
-  if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
-    templateHisto = detail::stripData(templateHisto);
-  }
-  ws->initialize(indexArg, templateHisto);
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
 
   return ws;
@@ -179,11 +175,7 @@ template <class T, class IndexArg, class HistArg,
               nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
-  HistogramData::Histogram templateHist(histArg);
-  if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
-    templateHist = detail::stripData(templateHist);
-  }
-  ws->initialize(indexArg, templateHist);
+  ws->initialize(indexArg, HistogramData::Histogram(histArg));
   return ws;
 }
 

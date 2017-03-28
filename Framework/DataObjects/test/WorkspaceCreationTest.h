@@ -180,7 +180,7 @@ public:
         create<EventWorkspace>(make_indices(), Histogram(BinEdges{1, 2, 4}));
     std::unique_ptr<EventWorkspace> ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = create<EventWorkspace>(*parent, 2, parent->histogram(0)))
+        ws = create<EventWorkspace>(*parent, 2, parent->binEdges(0)))
     TS_ASSERT_EQUALS(ws->id(), "EventWorkspace");
     check_indices(*ws);
     check_zeroed_data(*ws);

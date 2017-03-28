@@ -8,9 +8,7 @@ namespace Mantid {
 namespace DataObjects {
 namespace detail {
 HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
-  if (histogram.ptrY()) {
-    histogram.setSharedY(nullptr);
-  }
+  histogram.setSharedY(nullptr);
   histogram.setSharedE(nullptr);
   return histogram;
 }
