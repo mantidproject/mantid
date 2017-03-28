@@ -55,8 +55,10 @@ SpectrumNumber IndexInfo::spectrumNumber(const size_t index) const {
 void IndexInfo::setSpectrumNumbers(
     std::vector<SpectrumNumber> &&spectrumNumbers) {
   if (m_spectrumNumberTranslator->globalSize() != spectrumNumbers.size())
-    throw std::runtime_error(
-        "IndexInfo: Size mismatch when setting new spectrum numbers");
+    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. "
+                             "The vector must contain a spectrum number for "
+                             "each spectrum (not just for the local "
+                             "partition).");
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
@@ -65,8 +67,10 @@ void IndexInfo::setSpectrumNumbers(const SpectrumNumber min,
                                    const SpectrumNumber max) {
   auto newSize = static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1;
   if (static_cast<int64_t>(m_spectrumNumberTranslator->globalSize()) != newSize)
-    throw std::runtime_error(
-        "IndexInfo: Size mismatch when setting new spectrum numbers");
+    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. "
+                             "The range of spectrum numbers must provide a "
+                             "spectrum number for each spectrum (not just for "
+                             "the local partition).");
   std::vector<SpectrumNumber> specNums(newSize);
   std::iota(specNums.begin(), specNums.end(), static_cast<int32_t>(min));
   makeSpectrumNumberTranslator(std::move(specNums));
