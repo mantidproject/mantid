@@ -340,7 +340,7 @@ void GenerateEventsFilter::processInputTime() {
 
   // Check start/stop time
   //  if (m_startTime.totalNanoseconds() >= m_stopTime.totalNanoseconds()) {
-  if (m_startTime >= m_stopTime ){
+  if (m_startTime >= m_stopTime) {
     stringstream errss;
     errss << "Input StartTime " << m_startTime.toISO8601String()
           << " is equal or later than "
@@ -1743,8 +1743,9 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   auto &dataX = m_filterWS->mutableX(0);
   for (size_t i = 0; i < sizex; ++i) {
-      // x is in the unit as second
-    dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds()) * 1.E-9;
+    // x is in the unit as second
+    dataX[i] =
+        static_cast<double>(m_vecSplitterTime[i].totalNanoseconds()) * 1.E-9;
   }
 
   auto &dataY = m_filterWS->mutableY(0);
@@ -1781,16 +1782,18 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
   size_t index = 0;
   for (size_t i = 0; i < numThreads; ++i) {
     for (size_t j = 0; j < m_vecGroupIndexSet[i].size(); ++j) {
-        // x is in the unit as second
+      // x is in the unit as second
       dataX[index] =
-          static_cast<double>(m_vecSplitterTimeSet[i][j].totalNanoseconds()) * 1.E-9;
+          static_cast<double>(m_vecSplitterTimeSet[i][j].totalNanoseconds()) *
+          1.E-9;
       dataY[index] = static_cast<double>(m_vecGroupIndexSet[i][j]);
       ++index;
     }
   }
   // x is in the unit as second
   dataX[index] = static_cast<double>(
-      m_vecSplitterTimeSet.back().back().totalNanoseconds()) * 1.E-9;
+                     m_vecSplitterTimeSet.back().back().totalNanoseconds()) *
+                 1.E-9;
 }
 
 //----------------------------------------------------------------------------------------------

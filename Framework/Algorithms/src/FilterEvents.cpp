@@ -605,7 +605,8 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   for (size_t i = 0; i < sizex; ++i) {
     m_vecSplitterTime[i] = static_cast<int64_t>(X[i] * 1.E9);
   }
-  // shift the splitters' time if user specifis that the input times are relative
+  // shift the splitters' time if user specifis that the input times are
+  // relative
   if (m_isSplittersRelativeTime) {
     int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
     for (size_t i = 0; i < sizex; ++i)

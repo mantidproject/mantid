@@ -600,9 +600,9 @@ public:
     TS_ASSERT_EQUALS(splittersws->x(0).size(), 2);
     TS_ASSERT_EQUALS(splittersws->y(0).size(), 1);
     Kernel::DateAndTime runstart(3000000000);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]*1.E9),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
                      runstart.totalNanoseconds() + 100);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]*1.E9),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1] * 1.E9),
                      runstart.totalNanoseconds() + 1000000);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
