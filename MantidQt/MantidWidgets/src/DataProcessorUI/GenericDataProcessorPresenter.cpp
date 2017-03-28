@@ -539,10 +539,7 @@ GenericDataProcessorPresenter::getRun(const std::string &run,
   std::string fileName = instrument + run;
 
   outName = findRunInADS(run, prefix, runFound);
-  if (!runFound ||
-      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) !=
-          NULL) {
-    // Workspace must not be an event workspace
+  if (!runFound) {
     outName = loadRun(run, instrument, prefix, m_loader, runFound);
     if (!runFound)
       throw std::runtime_error("Could not open " + fileName);

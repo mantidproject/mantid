@@ -3,6 +3,7 @@
 
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -81,6 +82,9 @@ private:
   // Take a slice from event workspace
   std::string takeSlice(const std::string &runNo, double startTime,
                         double stopTime);
+  // Asks user if they wish to proceed if a type of workspace exists in the ADS
+  bool proceedIfWSTypeInADS(const MantidQt::MantidWidgets::TreeData &data,
+                            const bool findEventWS);
 };
 }
 }

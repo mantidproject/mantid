@@ -47,20 +47,26 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 */
 void ReflDataProcessorPresenter::process() {
 
+  // Get selected runs
+  const auto items = m_manager->selectedData(true);
+
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
   if (timeSlicing.empty()) {
-    GenericDataProcessorPresenter::process();
+    // Check if any input event workspaces still exist in ADS
+    if (proceedIfWSTypeInADS(items, true))
+      GenericDataProcessorPresenter::process();
     return;
   }
+
+  // Check if any input non-event workspaces exist in ADS
+  if (!proceedIfWSTypeInADS(items, false))
+    return;
 
   // Parse time slices
   std::vector<double> startTimes, stopTimes;
   parseTimeSlicing(timeSlicing, startTimes, stopTimes);
-
-  // Get selected runs
-  const auto items = m_manager->selectedData(true);
 
   // Progress report
   int progress = 0;
@@ -517,6 +523,58 @@ void ReflDataProcessorPresenter::plotGroup() {
         "Error plotting groups.");
 
   plotWorkspaces(workspaces);
+}
+
+/** Asks user if they wish to proceed if the AnalysisDataService contains input
+ * workspaces of a specific type
+ *
+ * @param data :: The data selected in the table
+ * @param findEventWS :: Whether or not we are searching for event workspaces
+ * @return :: Boolean - true if user wishes to proceed, false if not
+ */
+bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
+                                                      const bool findEventWS) {
+
+  std::vector<std::string> foundInputWorkspaces;
+
+  for (const auto &item : data) {
+    const auto group = item.second;
+
+    for (const auto &row : group) {
+      bool runFound = false;
+      std::string runNo = row.second.at(0);
+      std::string outName = findRunInADS(runNo, "TOF_", runFound);
+
+      if (runFound) {
+        bool isEventWS =
+            AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                outName) != NULL;
+        if (findEventWS == isEventWS)
+          foundInputWorkspaces.push_back(outName);
+      }
+    }
+  }
+
+  if (foundInputWorkspaces.size() > 0) {
+    // Input workspaces of type found, ask user if they wish to process
+    std::string foundStr = boost::algorithm::join(foundInputWorkspaces, "\n");
+    bool process = m_mainPresenter->askUserYesNo(
+        "Processing selected rows will replace the following workspaces:\n\n" +
+            foundStr + "\n\nDo you wish to continue?",
+        "Process selected rows?");
+
+    if (process) {
+      // Remove all found workspaces
+      for (auto &wsName : foundInputWorkspaces) {
+        AnalysisDataService::Instance().remove(wsName);
+      }
+    }
+
+    return process;
+  }
+
+  // No input workspaces of type found, proceed with reduction automatically
+  return true;
 }
 }
 }
