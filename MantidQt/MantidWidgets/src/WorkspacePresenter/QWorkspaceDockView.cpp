@@ -999,7 +999,6 @@ void QWorkspaceDockView::addPeaksWorkspaceMenuItems(
 /**
 * Add the actions that are appropriate for a WorkspaceGroup
 * @param menu :: The menu to store the items
-* @param groupWS :: [input] Workspace group related to the menu
 */
 void QWorkspaceDockView::addWorkspaceGroupMenuItems(QMenu *menu) const {
   m_plotSpec->setEnabled(true);
