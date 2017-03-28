@@ -11,9 +11,7 @@ HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
   if (histogram.ptrY()) {
     histogram.setSharedY(nullptr);
   }
-  if (histogram.ptrE()) {
-    histogram.setSharedE(nullptr);
-  }
+  histogram.setSharedE(nullptr);
   return histogram;
 }
 
