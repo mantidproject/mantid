@@ -106,19 +106,72 @@ public:
   void test_combination_AND() {
     // Setup with same value first
     auto alg = setupCombinationTest(AND, true);
-    auto prop = alg.getPointerToProperty(m_resultPropName);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
     TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
     // AND should return true first
-    TS_ASSERT(prop->getSettings()->isEnabled(&alg));
+    TS_ASSERT(propSettings->isEnabled(&alg));
 
     // Now set a different value - should be disabled
-    alg.setPropertyValue(m_propertyTwoName, m_differentValue);
-    TS_ASSERT(!prop->getSettings()->isEnabled(&alg));
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isEnabled(&alg));
+  }
+
+  void test_combination_OR() {
+    // First check with both set to the true value
+    auto alg = setupCombinationTest(OR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
+    // OR should return true for both values on
+    TS_ASSERT(propSettings->isEnabled(&alg));
+
+    // Set property one to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isEnabled(&alg));
+
+    // Set property two to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isEnabled(&alg));
+
+    // Check the with both set to false the OR returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isEnabled(&alg));
+  }
+
+  void test_combination_XOR() {
+    auto alg = setupCombinationTest(XOR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
+
+    // With both set to the same value this should return false
+    TS_ASSERT(!propSettings->isEnabled(&alg));
+
+    // Set property one to false and two to true so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isEnabled(&alg));
+
+    // Set property one to true and one to false so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isEnabled(&alg));
+
+    // Check with both set false it returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isEnabled(&alg));
   }
 
 private:
-  const std::string m_propertyOneValue = "testTrue";
-  const std::string m_differentValue = "testFalse";
+  const std::string m_propertyTrueValue = "testTrue";
+  const std::string m_propertyFalseValue = "testFalse";
   const std::string m_resultValue = "Result";
 
   const std::string m_propertyOneName = "PropOne";
@@ -126,20 +179,20 @@ private:
   const std::string m_resultPropName = "ResultProp";
 
   PropertyManagerOwner setupCombinationTest(eLogicOperator logicOperation,
-                                            bool isSameValue) {
+                                            bool secondPropertyIsTrue) {
     auto propOne =
-        getEnabledWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyOneValue);
+        getEnabledWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyTrueValue);
     auto propTwo =
-        getEnabledWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyOneValue);
+        getEnabledWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyTrueValue);
     auto combination = getCombinationProperty(
         std::move(propOne), std::move(propTwo), logicOperation);
     // Set both to the same value to check
     PropertyManagerOwner alg;
-    alg.declareProperty(m_propertyOneName, m_propertyOneValue);
-    if (isSameValue) {
-      alg.declareProperty(m_propertyTwoName, m_propertyOneValue);
+    alg.declareProperty(m_propertyOneName, m_propertyTrueValue);
+    if (secondPropertyIsTrue) {
+      alg.declareProperty(m_propertyTwoName, m_propertyTrueValue);
     } else {
-      alg.declareProperty(m_propertyTwoName, m_differentValue);
+      alg.declareProperty(m_propertyTwoName, m_propertyFalseValue);
     }
     alg.declareProperty(m_resultPropName, m_resultValue);
     alg.setPropertySettings(m_resultPropName, std::move(combination));
