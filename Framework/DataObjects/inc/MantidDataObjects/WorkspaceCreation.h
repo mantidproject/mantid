@@ -163,20 +163,11 @@ template <class T, class P, class IndexArg, class HistArg,
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
                           const HistArg &histArg) {
   std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
-  ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent(parent, *ws);
-
-  return ws;
-}
-
-template <class T, class P, class IndexArg,
-          class = typename std::enable_if<
-              std::is_base_of<API::MatrixWorkspace, P>::value>::type>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistogramData::Histogram &histogram) {
-  std::unique_ptr<T> ws = detail::createUninitialized<T, P>(parent);
-  ws->initialize(indexArg,
-                 HistogramData::Histogram(detail::stripData(histogram)));
+  HistogramData::Histogram templateHisto(histArg);
+  if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
+    templateHisto = detail::stripData(templateHisto);
+  }
+  ws->initialize(indexArg, templateHisto);
   detail::initializeFromParent(parent, *ws);
 
   return ws;
@@ -188,23 +179,12 @@ template <class T, class IndexArg, class HistArg,
               nullptr>
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
-  ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  return std::move(ws);
-}
-
-template <class T, class IndexArg,
-          typename std::enable_if<
-              !std::is_base_of<API::MatrixWorkspace, IndexArg>::value>::type * =
-              nullptr>
-std::unique_ptr<T> create(const IndexArg &indexArg,
-                          const HistogramData::Histogram &histogram) {
-  auto ws = Kernel::make_unique<T>();
-  HistogramData::Histogram histogramTemplate(histogram);
+  HistogramData::Histogram templateHist(histArg);
   if (std::is_base_of<DataObjects::EventWorkspace, T>::value) {
-    histogramTemplate = detail::stripData(histogramTemplate);
+    templateHist = detail::stripData(templateHist);
   }
-  ws->initialize(indexArg, histogramTemplate);
-  return std::move(ws);
+  ws->initialize(indexArg, templateHist);
+  return ws;
 }
 
 template <class T, class P,
