@@ -117,8 +117,7 @@ public:
   }
 
   void test_create_parent_varying_bins() {
-    auto parent =
-        create<Workspace2D>(make_indices(), make_data());
+    auto parent = create<Workspace2D>(make_indices(), make_data());
     const double binShift = -0.54;
     parent->mutableX(1) += binShift;
     const auto ws = create<Workspace2D>(*parent);
@@ -134,8 +133,7 @@ public:
   }
 
   void test_create_parent_varying_bins_from_event() {
-    auto parent =
-        create<EventWorkspace>(make_indices(), BinEdges{1, 2, 4});
+    auto parent = create<EventWorkspace>(make_indices(), BinEdges{1, 2, 4});
     const double binShift = -0.54;
     parent->mutableX(1) += binShift;
     const auto ws = create<EventWorkspace>(*parent);

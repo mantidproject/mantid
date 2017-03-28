@@ -128,13 +128,6 @@ template <>
 MANTID_DATAOBJECTS_DLL std::unique_ptr<API::HistoWorkspace>
 createConcreteHelper();
 
-template <class T, class P, class = typename std::enable_if<std::is_base_of<
-                                API::MatrixWorkspace, P>::value>::type>
-std::unique_ptr<T> createUninitialized(const P &parent) {
-  std::unique_ptr<T> ws;
-  return ws;
-}
-
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws);
@@ -145,11 +138,11 @@ template <class T, class P, class IndexArg, class HistArg,
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
                           const HistArg &histArg) {
-  std::unique_ptr<T> ws;
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
   //   supported for EventWorkspace
+  std::unique_ptr<T> ws;
   if (std::is_base_of<API::HistoWorkspace, T>::value &&
       parent.id() == "EventWorkspace") {
     // Drop events, create Workspace2D or T whichever is more derived.
@@ -183,7 +176,8 @@ template <class T, class P,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
-  auto ws = create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  auto ws =
+      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
