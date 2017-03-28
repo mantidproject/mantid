@@ -64,9 +64,6 @@ private:
   /// Only Assemblies and other NON-detectors yield ranges
   std::vector<std::pair<size_t, size_t>> m_ranges;
 
-  /// Internal counter for detectors
-  size_t m_detectorCounter;
-
 public:
   InfoComponentVisitor(const size_t nDetectors,
                        std::function<size_t(Mantid::detid_t)> mapperFunc);

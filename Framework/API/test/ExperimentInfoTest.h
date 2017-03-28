@@ -10,6 +10,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
@@ -837,6 +838,17 @@ public:
         compInfo.detectorIndices(compInfo.indexOf(detCompId)).size(), 1);
     TS_ASSERT_EQUALS(compInfo.detectorIndices(compInfo.indexOf(detCompId))[0],
                      targetDetectorIndex);
+
+    size_t detectorIndex =
+        0; // interchangeable as either component or detector index
+    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+                      compInfo.detectorIndices(detectorIndex),
+                      std::vector<size_t>{detectorIndex});
+
+    detectorIndex = 99; // interchangeable as either component or detector index
+    TSM_ASSERT_EQUALS("Gurantee violated of detectorindex == componentIndex",
+                      compInfo.detectorIndices(detectorIndex),
+                      std::vector<size_t>{detectorIndex});
   }
 
   void test_component_info_detector_indices_for_generic_component_types() {
@@ -859,6 +871,44 @@ public:
     TSM_ASSERT_EQUALS(
         "Source should not report any nested detector indexes",
         compInfo.detectorIndices(compInfo.indexOf(sourceId)).size(), 0);
+  }
+
+  void test_component_info_stripped_of_invalid_detectors() {
+    using namespace Mantid::Geometry;
+
+    auto instrument = boost::make_shared<Mantid::Geometry::Instrument>();
+    int id = 1;
+    Detector *det1 =
+        new Detector("pixel1", id /*detector id*/, instrument.get());
+    Detector *det2 =
+        new Detector("pixel2", id /*same detector id*/, instrument.get());
+    // Add detector to the instrument
+    instrument->add(det1);
+    // Add other detector to the instrument
+    instrument->add(det2);
+    instrument->markAsDetector(det1);
+    // The following should fail. Same id is reused!
+    instrument->markAsDetector(det2);
+
+    // A source
+    ObjComponent *source = new ObjComponent("source");
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+    // A sample
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(instrument);
+    const Mantid::API::ComponentInfo &compInfo = expInfo.componentInfo();
+
+    TSM_ASSERT_EQUALS("Should be a valid component index", 0,
+                      compInfo.indexOf(det1->getComponentID()));
+    TSM_ASSERT_THROWS("Should throw. Duplicate should have been rejected",
+                      compInfo.indexOf(det2->getComponentID()),
+                      std::out_of_range &);
   }
 
 private:

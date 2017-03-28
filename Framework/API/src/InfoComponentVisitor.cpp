@@ -15,8 +15,8 @@ using namespace Mantid::Geometry;
 InfoComponentVisitor::InfoComponentVisitor(
     const size_t nDetectors,
     std::function<size_t(const Mantid::detid_t)> mapperFunc)
-    : m_componentIds(nDetectors), m_detectorIdToIndexMapperFunction(mapperFunc),
-      m_detectorCounter(0) {
+    : m_componentIds(nDetectors, nullptr),
+      m_detectorIdToIndexMapperFunction(mapperFunc) {
   m_detectorIndices.reserve(nDetectors);
 }
 
@@ -66,12 +66,25 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   const auto detectorIndex =
       m_detectorIdToIndexMapperFunction(detector.getID());
 
-  /* Already allocated we just need to index into the inital front-detector
-   * part of the collection
-  */
-  m_componentIds[m_detectorCounter++] = detector.getComponentID();
-  // register the detector index
-  m_detectorIndices.push_back(detectorIndex);
+  /* Unfortunately Mantid supports having detectors attached to an
+   * instrument that have an an invalid or duplicate detector id.
+   * We do not register detectors with the same id twice.
+   */
+  if (m_componentIds[detectorIndex] == nullptr) {
+
+    /* Already allocated we just need to index into the inital front-detector
+    * part of the collection.
+    * 1. Guarantee on grouping detectors by type such that the first n
+    * components
+    * are detectors.
+    * 2. Guarantee on ordering such that the
+    * detectorIndex == componentIndex for all detectors.
+    */
+    m_componentIds[detectorIndex] = detector.getComponentID();
+
+    // register the detector index
+    m_detectorIndices.push_back(detectorIndex);
+  }
 }
 
 /**

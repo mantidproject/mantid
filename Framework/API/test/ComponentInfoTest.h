@@ -49,21 +49,6 @@ public:
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
 
-  void test_throws_if_componentids_and_internalinfo_size_mismatch() {
-
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
-    ranges.push_back(
-        std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
-    TSM_ASSERT_THROWS(
-        "Should throw too few ComponentIDs",
-        ComponentInfo(internalInfo,
-                      std::vector<Mantid::Geometry::ComponentID>{}),
-        std::invalid_argument &);
-  }
-
   void test_detector_indices() {
 
     /*
