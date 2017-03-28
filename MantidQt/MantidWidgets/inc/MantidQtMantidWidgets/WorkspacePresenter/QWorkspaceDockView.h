@@ -169,8 +169,7 @@ private:
       QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const;
   void addPeaksWorkspaceMenuItems(
       QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const;
-  void addWorkspaceGroupMenuItems(
-      QMenu *menu, const Mantid::API::WorkspaceGroup_const_sptr &groupWS) const;
+  void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu *menu) const;
   void addClearMenuItems(QMenu *menu, const QString &wsName);
 

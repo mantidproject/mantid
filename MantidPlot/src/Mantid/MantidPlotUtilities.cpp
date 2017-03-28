@@ -29,7 +29,7 @@ double getSingleWorkspaceLogValue(
     size_t wsIndex, const Mantid::API::MatrixWorkspace_const_sptr &matrixWS,
     const QString &logName) {
   if (logName == MantidWSIndexWidget::WORKSPACE_INDEX || logName == "") {
-    return wsIndex;
+    return (double) wsIndex; // cast for plotting
   } else {
     // MatrixWorkspace is an ExperimentInfo
     auto log = matrixWS->run().getLogData(logName.toStdString());

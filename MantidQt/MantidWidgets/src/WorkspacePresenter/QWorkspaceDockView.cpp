@@ -40,24 +40,6 @@ Mantid::Kernel::Logger docklog("MantidDockWidget");
 
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 
-bool isAllMatrixWorkspaces(const WorkspaceGroup_const_sptr &wsGroup) {
-  bool allMatrixWSes = false;
-
-  if (wsGroup) {
-    if (!wsGroup->isEmpty()) {
-      allMatrixWSes = true;
-      for (int index = 0; index < wsGroup->getNumberOfEntries(); index++) {
-        if (nullptr == boost::dynamic_pointer_cast<MatrixWorkspace>(
-                           wsGroup->getItem(index))) {
-          allMatrixWSes = false;
-          break;
-        }
-      }
-    }
-  }
-
-  return allMatrixWSes;
-}
 }
 
 namespace MantidQt {
@@ -1021,7 +1003,7 @@ void QWorkspaceDockView::addPeaksWorkspaceMenuItems(
 * @param groupWS :: [input] Workspace group related to the menu
 */
 void QWorkspaceDockView::addWorkspaceGroupMenuItems(
-    QMenu *menu, const WorkspaceGroup_const_sptr &groupWS) const {
+    QMenu *menu) const {
   m_plotSpec->setEnabled(true);
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
@@ -1251,7 +1233,7 @@ void QWorkspaceDockView::popupContextMenu() {
       addPeaksWorkspaceMenuItems(menu, peaksWS);
     } else if (auto groupWS =
                    boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
-      addWorkspaceGroupMenuItems(menu, groupWS);
+      addWorkspaceGroupMenuItems(menu);
     } else if (boost::dynamic_pointer_cast<const Mantid::API::ITableWorkspace>(
                    ws)) {
       addTableWorkspaceMenuItems(menu);
