@@ -56,7 +56,8 @@ public:
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
 #elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
-  // The noexcept default deceleration was fixed in GCC 4.9.0
+  // The noexcept default declaration was fixed in GCC 4.9.0
+  // so for versions 4.8.x and below use default only
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
   Peak(Peak &&) = default;
   Peak &operator=(Peak &&) = default;
