@@ -8,18 +8,6 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, File
 from mantid.simpleapi import *  # noqa
 
 
-def _insert_energy_value(ws_name, energy):
-    '''
-    Inserts the doppler's energy value in the workspace name
-    in between the user input and automatic suffix
-    @param ws_name : workspace name
-    @param energy : energy value
-    @return : new name with energy value inside
-    '''
-    suffix_pos = ws_name.rfind('_')
-    return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
-
-
 class IndirectILLReductionFWS(PythonAlgorithm):
 
     _SAMPLE = 'sample'
@@ -372,7 +360,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ws = _insert_energy_value(self._red_ws, energy) + '_' + label
+                ws = self._insert_energy_value(self._red_ws + '_' + label, energy, label)
                 x_range = mtd[ws].readX(0)[-1] - mtd[ws].readX(0)[0]
                 if mtd[ws].blocksize() > 1:
                     Integration(InputWorkspace=ws, OutputWorkspace=ws)
@@ -387,7 +375,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[label]:
-                ref = _insert_energy_value(self._red_ws, energy)
+                ref = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 ws = ref + '_' + label
                 if mtd[ws].blocksize() > 1:
                     SplineInterpolation(WorkspaceToInterpolate=ws,
@@ -402,7 +390,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._BACKGROUND]:
-                sample_ws = _insert_energy_value(self._red_ws, energy)
+                sample_ws = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 back_ws = sample_ws + '_' + self._BACKGROUND
                 Minus(LHSWorkspace=sample_ws, RHSWorkspace=back_ws, OutputWorkspace=sample_ws)
             else:
@@ -416,7 +404,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         for energy in self._all_runs[self._SAMPLE]:
             if energy in self._all_runs[self._CALIBRATION]:
-                sample_ws = _insert_energy_value(self._red_ws, energy)
+                sample_ws = self._insert_energy_value(self._red_ws, energy, self._SAMPLE)
                 calib_ws = sample_ws + '_' + self._CALIBRATION
                 Divide(LHSWorkspace=sample_ws, RHSWorkspace=calib_ws, OutputWorkspace=sample_ws)
                 self._scale_calibration(sample_ws,calib_ws)
@@ -501,7 +489,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             ws_list = self._all_runs[label][energy]
             size = len(self._all_runs[label][energy])
 
-            wsname = _insert_energy_value(groupname, energy)
+            wsname = self._insert_energy_value(groupname, energy, label)
 
             togroup.append(wsname)
             nspectra = mtd[ws_list[0]].getNumberHistograms()
@@ -567,6 +555,26 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             axis.setUnit("Label").setLabel('Time', 'seconds')
         else:
             axis.setUnit("Label").setLabel(self._observable, '')
+
+    def _insert_energy_value(self, ws_name, energy, label):
+        '''
+        Inserts the doppler's energy value in the workspace name
+        in between the user input and automatic suffix
+        @param ws_name : workspace name
+        @param energy : energy value
+        @param label : sample, background, or calibration
+        @return : new name with energy value inside
+        Example:
+        user_input_2theta > user_input_1.5_2theta
+        user_input_red_background > user_input_1.5_red_background
+        '''
+        suffix_pos = ws_name.rfind('_')
+
+        if label != self._SAMPLE:
+            # find second to last underscore
+            suffix_pos = ws_name.rfind('_', 0, suffix_pos)
+
+        return ws_name[:suffix_pos] + '_' + str(energy) + ws_name[suffix_pos:]
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionFWS)
