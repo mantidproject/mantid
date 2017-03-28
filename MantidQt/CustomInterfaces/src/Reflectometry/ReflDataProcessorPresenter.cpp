@@ -5,6 +5,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorTreeManager.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
 #include <boost/algorithm/string.hpp>
@@ -363,6 +364,25 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
       stopTimes[i] = times[i + 1];
     }
   }
+}
+
+/** Parses a string to extract log value filter and time slicing
+ *
+ * @param inputStr :: The string to parse
+ * @param logFilter :: The log filter to use
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
+void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
+                                               std::string &logFilter,
+                                               std::vector<double> &startTimes,
+                                               std::vector<double> &stopTimes) {
+
+  auto strMap = parseKeyValueString(inputStr);
+  std::string timeSlicing = strMap.at("Slicing");
+  logFilter = strMap.at("LogFilter");
+
+  parseCustom(timeSlicing, startTimes, stopTimes);
 }
 
 /** Loads an event workspace and puts it into the ADS

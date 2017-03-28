@@ -80,6 +80,10 @@ private:
   void parseCustom(const std::string &timeSlicing,
                    std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
+  // Parse log value time slicing and filter from input string
+  void parseLogValue(const std::string &inputStr, std::string &logFilter,
+                     std::vector<double> &startTimes,
+                     std::vector<double> &stopTimes);
 
   // Load a run as event workspace
   bool loadEventRun(const std::string &runNo);

@@ -63,7 +63,7 @@ std::string QtReflEventView::getTimeSlicingValues() const {
     values = m_ui.customEdit->text().toStdString();
   else if (m_sliceType == "LogValue")
     values =
-        "Slicing=\"" + m_ui.customEdit->text().toStdString() +
+        "Slicing=\"" + m_ui.logValueEdit->text().toStdString() +
         "\",LogFilter=" + m_ui.logValueComboBox->currentText().toStdString();
 
   return values;
