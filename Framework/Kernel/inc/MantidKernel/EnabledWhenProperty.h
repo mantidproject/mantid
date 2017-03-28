@@ -19,7 +19,7 @@ enum ePropertyCriterion {
 };
 
 /** Enum for use when combining two EnabledWhenPropertyItems */
-enum eComparisonCriterion { AND, OR, XOR };
+enum eLogicOperator { AND, OR, XOR };
 
 /** IPropertySettings for a property that sets it to enabled (in the GUI)
    when the value of another property is:
@@ -86,19 +86,21 @@ public:
                       const ePropertyCriterion when,
                       const std::string &value = "");
 
-  /** Multiple conditions constructor - takes two EnabledWhenProperty
-    * objects and returns the product of them with the specified logic
-    * operator.
+  /** Multiple conditions constructor - takes two unique pointers to
+    * EnabledWhenProperty objects and returns the product of them
+        * with the specified logic operator.
+        * Note: With Unique pointers you will need to use std::move
+        * to transfer ownership of those objects to this one.
     *
     * @param conditionOne :: First EnabledWhenProperty object to use
     * @param conditionTwo :: Second EnabledWhenProperty object to use
     * @param localOperator :: The logic operator to apply across both
     *conditions
     *
-        */
-  EnabledWhenProperty(const EnabledWhenProperty conditionOne,
-                      const EnabledWhenProperty conditionTwo,
-                      const eComparisonCriterion logicalOperator);
+    */
+  EnabledWhenProperty(std::unique_ptr<EnabledWhenProperty> &&conditionOne,
+                      std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
+                      eLogicOperator logicalOperator);
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
@@ -139,15 +141,15 @@ protected:
   };
 
   struct ComparisonDetails {
-    ComparisonDetails(const EnabledWhenProperty &conditionOne,
-                      const EnabledWhenProperty &conditionTwo,
-                      const eComparisonCriterion logicOperator)
-        : conditionOne(conditionOne), conditionTwo(conditionTwo),
-          logicOperator(logicOperator) {}
+    ComparisonDetails(std::unique_ptr<EnabledWhenProperty> conditionOne,
+                      std::unique_ptr<EnabledWhenProperty> conditionTwo,
+                      eLogicOperator logicOperator)
+        : conditionOne(std::move(conditionOne)),
+          conditionTwo(std::move(conditionTwo)), logicOperator(logicOperator) {}
 
-    const EnabledWhenProperty &conditionOne;
-    const EnabledWhenProperty &conditionTwo;
-    const eComparisonCriterion logicOperator;
+    std::unique_ptr<EnabledWhenProperty> conditionOne;
+    std::unique_ptr<EnabledWhenProperty> conditionTwo;
+    const eLogicOperator logicOperator;
   };
 
   // Holds the various details used within the comparison

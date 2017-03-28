@@ -2,11 +2,15 @@
 
 #include <boost/lexical_cast.hpp>
 #include <exception>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace Kernel {
+
+using EnabledPropPtr = std::unique_ptr<EnabledWhenProperty>;
+
 EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const ePropertyCriterion when,
                                          const std::string &value)
@@ -15,13 +19,12 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
       std::make_unique<PropertyDetails>(otherPropName, when, value);
 }
 
-EnabledWhenProperty::EnabledWhenProperty(
-    const EnabledWhenProperty conditionOne,
-    const EnabledWhenProperty conditionTwo,
-    const eComparisonCriterion logicalOperator)
+EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
+                                         EnabledPropPtr &&conditionTwo,
+                                         eLogicOperator logicalOperator)
     : IPropertySettings() {
   m_comparisonDetails = std::make_unique<ComparisonDetails>(
-      conditionOne, conditionTwo, logicalOperator);
+      std::move(conditionOne), std::move(conditionTwo), logicalOperator);
 }
 
 bool EnabledWhenProperty::fulfillsCriterion(
