@@ -90,6 +90,13 @@ Python
       3.0
       3.0
 
+- A `SpectraAxis` object can now be created from Python, in a similar way to the other Axis types:
+
+  .. code-block:: python
+  
+     ws1 = CreateSampleWorkspace()
+     # Create a new axis reference
+     s_axis = SpectraAxis.create(ws1)
 
 
 Python Algorithms

@@ -103,9 +103,12 @@ public:
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 2);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), 4);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0}));
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(1), (std::vector<detid_t>{1}));
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(2), (std::vector<detid_t>{2, 3}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(1),
+                     (std::vector<Indexing::DetectorID>{1}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(2),
+                     (std::vector<Indexing::DetectorID>{2, 3}));
   }
 
   void test_setIndexInfo() {
@@ -139,11 +142,19 @@ public:
     ws.initialize(1, 1, 1);
     const auto &indexInfo = ws.indexInfo();
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), std::vector<detid_t>({0}));
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0}));
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).addDetectorID(7);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 7);
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), std::vector<detid_t>({0, 7}));
+    // No changes -- old and new interface should not be mixed!
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0}));
+    // After getting a new reference we should see the changes.
+    const auto &indexInfo2 = ws.indexInfo();
+    TS_ASSERT_EQUALS(indexInfo2.spectrumNumber(0), 7);
+    TS_ASSERT_EQUALS(indexInfo2.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0, 7}));
   }
 
   void test_IndexInfo_copy() {
@@ -163,16 +174,22 @@ public:
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
     TS_ASSERT_EQUALS(copy.spectrumNumber(1), 4);
     TS_ASSERT_EQUALS(copy.spectrumNumber(2), 6);
-    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
-    TS_ASSERT_EQUALS(copy.detectorIDs(1), (std::vector<detid_t>{1}));
-    TS_ASSERT_EQUALS(copy.detectorIDs(2), (std::vector<detid_t>{2, 3}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(1),
+                     (std::vector<Indexing::DetectorID>{1}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(2),
+                     (std::vector<Indexing::DetectorID>{2, 3}));
     // Changing data in workspace affects indexInfo, but not copy
     ws.getSpectrum(0).setSpectrumNo(7);
     ws.getSpectrum(0).addDetectorID(7);
-    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), 7);
-    TS_ASSERT_EQUALS(indexInfo.detectorIDs(0), (std::vector<detid_t>{0, 7}));
+    const auto &indexInfo2 = ws.indexInfo();
+    TS_ASSERT_EQUALS(indexInfo2.spectrumNumber(0), 7);
+    TS_ASSERT_EQUALS(indexInfo2.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0, 7}));
     TS_ASSERT_EQUALS(copy.spectrumNumber(0), 2);
-    TS_ASSERT_EQUALS(copy.detectorIDs(0), (std::vector<detid_t>{0}));
+    TS_ASSERT_EQUALS(copy.detectorIDs(0),
+                     (std::vector<Indexing::DetectorID>{0}));
   }
 
   void test_setIndexInfo_shares_spectrumDefinition() {
@@ -186,6 +203,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(indices.setSpectrumDefinitions(defs));
     TS_ASSERT_THROWS_NOTHING(ws.setIndexInfo(std::move(indices)));
     TS_ASSERT_EQUALS(ws.indexInfo().spectrumDefinitions().get(), defs.get());
+  }
+
+  void test_clone_shares_data_in_IndexInfo() {
+    WorkspaceTester ws;
+    ws.initialize(3, 1, 1);
+    const auto clone = ws.clone();
+    const auto &info1 = ws.indexInfo();
+    const auto &info2 = clone->indexInfo();
+    // Spectrum numbers should also be shared, but there is no access by
+    // reference, so we cannot check.
+    TS_ASSERT_EQUALS(&info1.detectorIDs(0), &info2.detectorIDs(0));
+    TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
+  }
+
+  void test_WorkspaceFactory_shares_data_in_IndexInfo() {
+    const auto ws =
+        WorkspaceFactory::Instance().create("WorkspaceTester", 3, 1, 1);
+    const auto copy = WorkspaceFactory::Instance().create(ws);
+    const auto &info1 = ws->indexInfo();
+    const auto &info2 = copy->indexInfo();
+    // Spectrum numbers should also be shared, but there is no access by
+    // reference, so we cannot check.
+    TS_ASSERT_EQUALS(&info1.detectorIDs(0), &info2.detectorIDs(0));
+    TS_ASSERT(info1.spectrumDefinitions()); // should not be nullptr
+    TS_ASSERT_EQUALS(info1.spectrumDefinitions(), info2.spectrumDefinitions());
   }
 
   void test_toString_Produces_Expected_Contents() {

@@ -5,8 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
-#include <qwt_plot_curve.h>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
@@ -85,7 +83,7 @@ DatasetPlotData::~DatasetPlotData() {
 
 /// Set the data to the curves.
 /// @param ws :: A Fit's input workspace.
-/// @param wsIndex :: Workspace index of a spectrum to costruct the plot data
+/// @param wsIndex :: Workspace index of a spectrum to construct the plot data
 /// for.
 /// @param outputWS :: The output workspace from Fit containing the calculated
 /// spectrum.
@@ -93,11 +91,11 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
                               int wsIndex,
                               const Mantid::API::MatrixWorkspace *outputWS) {
   bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
-  auto xValues = ws->points(wsIndex);
 
-  m_dataCurve->setData(xValues.rawData().data(),
-                       ws->y(wsIndex).rawData().data(),
-                       static_cast<int>(xValues.size()));
+  const auto &xVals = ws->isHistogramData() ? ws->points(wsIndex).rawData()
+                                            : ws->binEdges(wsIndex).rawData();
+  m_dataCurve->setData(xVals.data(), ws->y(wsIndex).rawData().data(),
+                       static_cast<int>(xVals.size()));
 
   if (m_dataErrorCurve) {
     m_dataErrorCurve->detach();
@@ -107,22 +105,20 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws,
       m_dataCurve, ws->e(wsIndex).rawData());
 
   if (haveFitCurves) {
-    auto xBegin = std::lower_bound(xValues.begin(), xValues.end(),
-                                   outputWS->x(1).front());
-    if (xBegin == xValues.end())
+    auto xBegin =
+        std::lower_bound(xVals.begin(), xVals.end(), outputWS->x(1).front());
+    if (xBegin == xVals.end())
       return;
-    int i0 = static_cast<int>(std::distance(xValues.begin(), xBegin));
+    int i0 = static_cast<int>(std::distance(xVals.begin(), xBegin));
     int n = static_cast<int>(outputWS->y(1).size());
-    if (i0 + n > static_cast<int>(xValues.size()))
+    if (i0 + n > static_cast<int>(xVals.size()))
       return;
     m_calcCurve = new QwtPlotCurve("calc");
-    m_calcCurve->setData(xValues.rawData().data() + i0,
-                         outputWS->y(1).rawData().data(), n);
+    m_calcCurve->setData(xVals.data() + i0, outputWS->y(1).rawData().data(), n);
     QPen penCalc("red");
     m_calcCurve->setPen(penCalc);
     m_diffCurve = new QwtPlotCurve("diff");
-    m_diffCurve->setData(xValues.rawData().data() + i0,
-                         outputWS->y(2).rawData().data(), n);
+    m_diffCurve->setData(xVals.data() + i0, outputWS->y(2).rawData().data(), n);
     QPen penDiff("green");
     m_diffCurve->setPen(penDiff);
   }
