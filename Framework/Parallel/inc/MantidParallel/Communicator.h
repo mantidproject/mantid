@@ -57,7 +57,7 @@ private:
 
   boost::mpi::communicator m_communicator;
   boost::shared_ptr<detail::ThreadingBackend> m_backend;
-  const int m_rank{0};
+  int m_rank{0};
 
   // For accessing constructor with threading backend.
   friend class ParallelRunner;
