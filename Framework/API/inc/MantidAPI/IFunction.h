@@ -313,9 +313,7 @@ public:
   //---------------------------------------------------------//
 
   /// Constructor
-  IFunction()
-      : m_isParallel(false), m_handler(nullptr), m_progReporter(nullptr),
-        m_chiSquared(0.0) {}
+  IFunction() : m_isParallel(false), m_handler(nullptr), m_chiSquared(0.0) {}
   /// Virtual destructor
   virtual ~IFunction();
   /// No copying
@@ -345,7 +343,7 @@ public:
   virtual int64_t estimateNoProgressCalls() const { return 1; }
 
   /// Attach a progress reporter
-  void setProgressReporter(Kernel::ProgressBase *reporter);
+  void setProgressReporter(boost::shared_ptr<Kernel::ProgressBase> reporter);
   /// Reports progress with an optional message
   void reportProgress(const std::string &msg = "") const;
   /// Returns true if a progress reporter is set & evalaution has been requested
@@ -604,7 +602,7 @@ protected:
   FunctionHandler *m_handler;
 
   /// Pointer to the progress handler
-  Kernel::ProgressBase *m_progReporter;
+  boost::shared_ptr<Kernel::ProgressBase> m_progReporter;
 
 private:
   /// The declared attributes

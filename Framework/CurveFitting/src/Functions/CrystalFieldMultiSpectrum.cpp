@@ -15,6 +15,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+#include <iostream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -183,27 +184,27 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   ham += hz;
 
   // Get the temperatures from the attribute
-  const auto temperatures = getAttribute("Temperatures").asVector();
-  if (temperatures.empty()) {
+  m_temperatures = getAttribute("Temperatures").asVector();
+  if (m_temperatures.empty()) {
     throw std::runtime_error("Vector of temperatures cannot be empty.");
   }
   // Get the FWHMs from the attribute and check for consistency.
-  auto fwhms = getAttribute("FWHMs").asVector();
-  if (fwhms.size() != temperatures.size()) {
-    if (fwhms.empty()) {
+  m_FWHMs = getAttribute("FWHMs").asVector();
+  if (m_FWHMs.size() != m_temperatures.size()) {
+    if (m_FWHMs.empty()) {
       throw std::runtime_error("Vector of FWHMs cannot be empty.");
     }
-    if (fwhms.size() == 1) {
-      auto fwhm = fwhms.front();
-      fwhms.resize(temperatures.size(), fwhm);
+    if (m_FWHMs.size() == 1) {
+      auto fwhm = m_FWHMs.front();
+      m_FWHMs.resize(m_temperatures.size(), fwhm);
     } else {
       throw std::runtime_error("Vector of FWHMs must either have same size as "
                                "Temperatures (" +
-                               std::to_string(temperatures.size()) +
+                               std::to_string(m_temperatures.size()) +
                                ") or have size 1.");
     }
   }
-  const auto nSpec = temperatures.size();
+  const auto nSpec = m_temperatures.size();
   // Get a list of "spectra" which corresponds to physical properties
   const auto physprops = getAttribute("PhysicalProperties").asVector();
   if (physprops.empty()) {
@@ -231,7 +232,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   for (size_t i = 0; i < nSpec; ++i) {
     if (m_physprops[i] > 0) {
       // This "spectrum" is actually a physical properties dataset.
-      fun->addFunction(buildPhysprop(nre, en, wf, ham, temperatures[i], i));
+      fun->addFunction(buildPhysprop(nre, en, wf, ham, m_temperatures[i], i));
     } else {
       if (m_fwhmX[i].empty()) {
         auto suffix = std::to_string(i);
@@ -239,7 +240,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
         m_fwhmY[i] = IFunction::getAttribute("FWHMY" + suffix).asVector();
       }
       fun->addFunction(
-          buildSpectrum(nre, en, wf, temperatures[i], fwhms[i], i));
+          buildSpectrum(nre, en, wf, m_temperatures[i], m_FWHMs[i], i));
     }
     fun->setDomainIndex(i, i);
   }
@@ -377,13 +378,11 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
   peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
   ham += hz;
 
-  const auto temperatures = getAttribute("Temperatures").asVector();
-  const auto fwhms = getAttribute("FWHMs").asVector();
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   try {
-    for (size_t i = 0; i < temperatures.size(); ++i) {
-      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, temperatures[i],
-                     fwhms[i], i);
+    for (size_t i = 0; i < m_temperatures.size(); ++i) {
+      updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i],
+                     m_FWHMs[i], i);
     }
   } catch (std::out_of_range &) {
     buildTargetFunction();

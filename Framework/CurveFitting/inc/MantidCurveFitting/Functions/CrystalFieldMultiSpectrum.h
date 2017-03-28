@@ -78,6 +78,10 @@ private:
   /// Caches of the width functions
   mutable std::vector<std::vector<double>> m_fwhmX;
   mutable std::vector<std::vector<double>> m_fwhmY;
+  /// Cache the temperatures
+  mutable std::vector<double> m_temperatures;
+  /// Cache the default peak FWHMs
+  mutable std::vector<double> m_FWHMs;
 };
 
 } // namespace Functions

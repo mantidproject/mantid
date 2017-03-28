@@ -16,6 +16,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
 
+#include <boost/make_shared.hpp>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
@@ -149,8 +151,8 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
 size_t Fit::runMinimizer() {
   const int64_t nsteps =
       m_maxIterations * m_function->estimateNoProgressCalls();
-  API::Progress prog(this, 0.0, 1.0, nsteps);
-  m_function->setProgressReporter(&prog);
+  auto prog = boost::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
+  m_function->setProgressReporter(prog);
 
   // do the fitting until success or iteration limit is reached
   size_t iter = 0;
@@ -175,7 +177,7 @@ size_t Fit::runMinimizer() {
       initializeMinimizer(m_maxIterations - iter);
     }
 
-    prog.report();
+    prog->report();
 
     if (isFinished) {
       // It was the last iteration. Break out of the loop and return the number

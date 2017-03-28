@@ -312,7 +312,7 @@ size_t updateSpectrumFunction(API::CompositeFunction &spectrum,
   }
   // If there are any peaks above the maxNPeaks, ignore them
   // but don't remove
-  for (size_t i = maxNPeaks; i < nFunctions; ++i) {
+  for (size_t i = maxNPeaks; i < nFunctions - iFirst; ++i) {
     auto fun = spectrum.getFunction(i + iFirst);
     auto &peak = dynamic_cast<API::IPeakFunction &>(*fun);
     const auto fwhm = peak.fwhm();
