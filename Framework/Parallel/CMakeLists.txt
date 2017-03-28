@@ -53,7 +53,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${GSL_LIBRARIES} ${MANTIDLIBS} )
 
 # Add the unit tests directory
