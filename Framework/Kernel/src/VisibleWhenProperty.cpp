@@ -12,7 +12,7 @@ bool VisibleWhenProperty::isEnabled(const IPropertyManager *) const {
 }
 
 bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
-  return this->fulfillsCriterion(algo);
+  return this->checkCriterion(algo);
 }
 
 IPropertySettings *VisibleWhenProperty::clone() {

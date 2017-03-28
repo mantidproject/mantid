@@ -108,7 +108,16 @@ public:
    * @return true if fulfilled or if any problem was found (missing property,
    * e.g.).
    */
-  virtual bool fulfillsCriterion(const IPropertyManager *algo) const;
+  virtual bool checkCriterion(const IPropertyManager *algo) const;
+
+  /**
+   * Checks if a the user specified combination of criterion
+   * returns a true or false value
+   *
+   * @return true if user specified combination was true.
+   * @throw If any problems was found
+   */
+  virtual bool checkComparison(const IPropertyManager *algo) const;
 
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
@@ -125,6 +134,8 @@ public:
   IPropertySettings *clone() override;
 
 protected:
+  std::string getPropertyValue(const IPropertyManager *algo) const;
+
   struct PropertyDetails {
     PropertyDetails(const std::string &otherPropName,
                     const ePropertyCriterion criterion,
