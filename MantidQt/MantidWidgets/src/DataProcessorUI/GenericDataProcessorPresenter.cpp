@@ -193,7 +193,7 @@ Process selected data
 */
 void GenericDataProcessorPresenter::process() {
 
-  const auto items = m_manager->selectedData(true);
+  const auto items = m_manager->selectedData();
 
   // Don't bother continuing if there are no items to process
   if (items.size() == 0)
