@@ -69,10 +69,10 @@ private:
   directBeamCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission or algorithm correction
   Mantid::API::MatrixWorkspace_sptr
-  transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
+  transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced);
   // Performs transmission corrections
   Mantid::API::MatrixWorkspace_sptr
-  transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
+  transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced);
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr
   algorithmicCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
@@ -97,6 +97,11 @@ private:
   void getProjectedLambdaRange(const double lambda, const double theta,
                                const double bLambda, const double bTwoTheta,
                                double &lambdaTop, double &lambdaBot);
+  // Check whether two spectrum maps match
+  void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
+                          API::MatrixWorkspace_const_sptr ws2,
+                          const bool severe);
+
   // Find and cache constants
   void initRun();
   void findLambdaMinMax();

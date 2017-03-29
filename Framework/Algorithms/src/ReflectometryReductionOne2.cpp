@@ -16,28 +16,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Algorithms {
 
-/*Anonomous namespace */
-namespace {
-
-/**
-@param ws1 : First workspace to compare
-@param ws2 : Second workspace to compare against
-@param severe: True to indicate that failure to verify should result in an
-exception. Otherwise a warning is generated.
-@return : true if spectrum maps match. False otherwise
-*/
-bool verifySpectrumMaps(MatrixWorkspace_const_sptr ws1,
-                        MatrixWorkspace_const_sptr ws2) {
-  auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
-  auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
-  if (map1 != map2) {
-    return false;
-  } else {
-    return true;
-  }
-}
-}
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne2)
 
@@ -197,7 +175,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     }
     if (m_normalise) {
       detectorWS = monitorCorrection(detectorWS);
-      detectorWS = transOrAlgCorrection(detectorWS);
+      detectorWS = transOrAlgCorrection(detectorWS, false);
     }
 
     // Do the summation in Q
@@ -280,7 +258,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     if (m_normalise) {
       IvsLam = directBeamCorrection(IvsLam);
       IvsLam = monitorCorrection(IvsLam);
-      IvsLam = transOrAlgCorrection(IvsLam);
+      IvsLam = transOrAlgCorrection(IvsLam, true);
     }
   }
 
@@ -376,12 +354,12 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::directBeamCorrection(
 * @return : corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
-    MatrixWorkspace_sptr detectorWS) {
+    MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
   MatrixWorkspace_sptr normalized;
   MatrixWorkspace_sptr transRun = getProperty("FirstTransmissionRun");
   if (transRun) {
-    normalized = transmissionCorrection(detectorWS);
+    normalized = transmissionCorrection(detectorWS, detectorWSReduced);
   } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
     normalized = algorithmicCorrection(detectorWS);
   } else {
@@ -394,17 +372,24 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
 /** Perform transmission correction by running 'CreateTransmissionWorkspace' on
 * the input workspace
 * @param detectorWS :: the input workspace
+* @param detectorWSReduced:: the input detector workspace has been reduced
 * @return :: the input workspace normalized by transmission
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
-    MatrixWorkspace_sptr detectorWS) {
+    MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
   const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
-
-  // Reduce the transmission workspace first
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
-  Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
 
+  // If the detector workspace has not been reduced then the spectrum maps
+  // should match BEFORE reducing the transmission workspace
+  if (!detectorWSReduced) {
+    verifySpectrumMaps(detectorWS, transmissionWS, strictSpectrumChecking);
+  }
+
+  // Reduce the transmission workspace, if not already done (assume that if
+  // the workspace is in wavelength then it has already been reduced)
+  Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
   if (xUnit->unitID() == "TOF") {
 
     MatrixWorkspace_sptr secondTransmissionWS =
@@ -441,15 +426,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   rebinToWorkspaceAlg->execute();
   transmissionWS = rebinToWorkspaceAlg->getProperty("OutputWorkspace");
 
-  const bool match = verifySpectrumMaps(detectorWS, transmissionWS);
-  if (!match) {
-    const std::string message =
-        "Spectrum maps between workspaces do NOT match up.";
-    if (strictSpectrumChecking) {
-      throw std::invalid_argument(message);
-    } else {
-      g_log.warning(message);
-    }
+  // If the detector workspace has been reduced then the spectrum maps
+  // should match AFTER reducing the transmission workspace
+  if (detectorWSReduced) {
+    verifySpectrumMaps(detectorWS, transmissionWS, strictSpectrumChecking);
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
@@ -726,6 +706,31 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     errMsg << "Failed to project (lambda, theta) = (" << lambda << "," << theta
            << ") onto thetaR = " << thetaR() << ": " << ex.what();
     throw std::runtime_error(errMsg.str());
+  }
+}
+
+/**
+Check whether theif spectrum maps for the given workspaces are the same.
+
+@param ws1 : First workspace to compare
+@param ws2 : Second workspace to compare against
+@param severe: True to indicate that failure to verify should result in an
+exception. Otherwise a warning is generated.
+*/
+void ReflectometryReductionOne2::verifySpectrumMaps(MatrixWorkspace_const_sptr ws1,
+                                                    MatrixWorkspace_const_sptr ws2,
+                                                    const bool severe) {
+  auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
+  auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
+  if (map1 != map2) {
+    const std::string message =
+      "Spectrum maps between workspaces do NOT match up.";
+    if (severe) {
+      throw std::invalid_argument(message);
+    }
+    else {
+      g_log.warning(message);
+    }
   }
 }
 
