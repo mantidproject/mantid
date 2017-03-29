@@ -43,7 +43,7 @@ InputDataControl::~InputDataControl() {
 std::vector<double> InputDataControl::selectedDataX() {
   auto first = m_domain.at(m_selectedWorkspaceIndex).first;
   auto second = m_domain.at(m_selectedWorkspaceIndex).second;
-  auto X = m_workspace->dataX(m_selectedWorkspaceIndex);
+  const auto &X = m_workspace->x(m_selectedWorkspaceIndex);
   // crop the zero signal
   std::vector<double> x(X.begin() + first, X.begin() + second);
   return x;
@@ -54,13 +54,12 @@ std::vector<double> InputDataControl::selectedDataX() {
  * for the current selected slice
  */
 std::pair<double, double> InputDataControl::getCurrentRange() {
-  auto domain = m_domain.at(m_selectedWorkspaceIndex);
-  auto X = m_workspace->dataX(m_selectedWorkspaceIndex);
-  auto second = domain.second;
-  if (m_workspace->isHistogramData()) {
+  auto first = m_domain.at(m_selectedWorkspaceIndex).first;
+  auto second = m_domain.at(m_selectedWorkspaceIndex).second;
+  if (m_workspace->isHistogramData())
     second -= 1;
-  }
-  return std::pair<double, double>(X.at(domain.first), X.at(second));
+  const auto &X = m_workspace->x(m_selectedWorkspaceIndex);
+  return std::pair<double, double>(X[first], X[second]);
 }
 
 /**
@@ -69,10 +68,9 @@ std::pair<double, double> InputDataControl::getCurrentRange() {
 std::vector<double> InputDataControl::selectedDataY() {
   auto first = m_domain.at(m_selectedWorkspaceIndex).first;
   auto second = m_domain.at(m_selectedWorkspaceIndex).second;
-  if (m_workspace->isHistogramData()) {
+  if (m_workspace->isHistogramData())
     second -= 1;
-  }
-  auto Y = m_workspace->dataY(m_selectedWorkspaceIndex);
+  const auto &Y = m_workspace->y(m_selectedWorkspaceIndex);
   std::vector<double> y(Y.begin() + first,
                         Y.begin() + second); // crop the zero signal
   return y;
@@ -84,10 +82,9 @@ std::vector<double> InputDataControl::selectedDataY() {
 std::vector<double> InputDataControl::selectedDataE() {
   auto first = m_domain.at(m_selectedWorkspaceIndex).first;
   auto second = m_domain.at(m_selectedWorkspaceIndex).second;
-  if (m_workspace->isHistogramData()) {
+  if (m_workspace->isHistogramData())
     second -= 1;
-  }
-  auto E = m_workspace->dataE(m_selectedWorkspaceIndex);
+  const auto &E = m_workspace->e(m_selectedWorkspaceIndex);
   std::vector<double> e(E.begin() + first,
                         E.begin() + second); // crop the zero signal
   return e;
