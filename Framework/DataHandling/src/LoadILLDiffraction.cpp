@@ -67,7 +67,7 @@ void LoadILLDiffraction::init() {
   declareProperty(
       make_unique<FileProperty>("Filename", "", FileProperty::Load, ".nxs"),
       "File path of the data file to load");
-  declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+  declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
 }
@@ -87,7 +87,7 @@ void LoadILLDiffraction::exec() {
   loadDataScan();
   progress.report("Loaded the detector scan data");
 
-  // loadMetadata();
+  //loadMetadata();
   progress.report("Loaded the metadata");
 
   setProperty("OutputWorkspace", m_outWorkspace);
@@ -251,10 +251,12 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) const {
 
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].axis != 1 &&
-        !boost::starts_with(m_scanVar[i].name, "Monitor")) {
+        !boost::starts_with(m_scanVar[i].property, "Monitor")) {
       std::string key = m_scanVar[i].name;
       std::string value;
-      if (m_scanVar[i].scanned == 1) {
+      if (m_scanVar[i].scanned == 1 ||
+          boost::starts_with(m_scanVar[i].property, "Time") ||
+          boost::starts_with(m_scanVar[i].property, "TotalCount")) {
         // keep the list
         for (size_t j = 0; j < m_numberScanPoints; ++j) {
           value +=
