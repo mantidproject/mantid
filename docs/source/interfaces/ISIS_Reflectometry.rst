@@ -445,6 +445,10 @@ For experiment settings, these are pulled from the **ReflectometryReductionOneAu
 algorithm whereas for instrument settings, they are pulled from the current instrument
 being used in the run.
 
+If either the *Experiment* or the *Instrument* settings sections are unchecked, this will disable
+all the of the entries for each respective section. In addition, the reduction will not make use of
+the values from any of the disabled entries.
+
 Save ASCII tab
 ~~~~~~~~~~~~~~
 

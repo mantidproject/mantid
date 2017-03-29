@@ -27,6 +27,7 @@ ISIS Reflectometry
 - Fixed a bug where the contents of the processing table where not saved to the selected table workspace.
 - Added two new buttons `Expand Groups` and `Collapse Groups` which expand and collapse all groups in the table respectively.
 - Fixed a bug when removing rows from the processing table.
+- Fixed a bug where if either `Instrument` and/or `Experiments` was disabled, their respective entries would still be applied in the reduction.
 - Fixed shortcuts:
 
   - Ctrl+C copies the selected row(s) to the clipboard.
