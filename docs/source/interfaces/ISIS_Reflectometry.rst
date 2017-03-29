@@ -97,12 +97,12 @@ Runs tab
 
 This section describes the different elements in the *Runs* tab.
 
-.. interface:: ISIS Reflectometry (Polref)
+.. interface:: ISIS Reflectometry
 
 Menu bar
 ^^^^^^^^
 
-.. interface:: ISIS Reflectometry (Polref)
+.. interface:: ISIS Reflectometry
   :widget: menuBar
 
 The **Reflectometry** menu provides access to the following functionality:
@@ -145,7 +145,7 @@ These are documented in the `Tool Bar`_ section of this document.
 Processing Table
 ^^^^^^^^^^^^^^^^
 
-.. interface:: ISIS Reflectometry (Polref)
+.. interface:: ISIS Reflectometry
   :widget: groupProcessPane
 
 The processing table is where the bulk of the work takes place. It is used to
@@ -176,7 +176,7 @@ Tool Bar
 
 This table details the behaviour of the actions in the tool bar, from left to right.
 
-.. interface:: ISIS Reflectometry (Polref)
+.. interface:: ISIS Reflectometry
   :widget: rowToolBar
 
 .. WARNING If you're updating this documentation, you probably also want to update the "What's This" tips in DataProcessorWidget.ui
@@ -322,7 +322,7 @@ Columns
 Search Interface
 ^^^^^^^^^^^^^^^^
 
-.. interface:: ISIS Reflectometry (Polref)
+.. interface:: ISIS Reflectometry
   :widget: groupSearchPane
   :align: right
 
