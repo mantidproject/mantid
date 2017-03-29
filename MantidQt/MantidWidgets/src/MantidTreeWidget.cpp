@@ -257,10 +257,13 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
       spectrumToPlot.insert(QString::fromStdString(selectedMatrixWs->getName()),
                             SINGLE_SPECTRUM);
     }
+    // and get simple 1D plot done
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
+    selections.simple = true; 
     selections.waterfall = false;
     selections.tiled = false;
+    selections.surface = false;
     return selections;
   }
 
