@@ -38,12 +38,19 @@ public:
   VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
+  /// Constructs a VisibleWhenProperty object which copies two
+  /// already constructed VisibleWhenProperty objects and returns the result
+  /// of both of them with the specified logic operator
+  VisibleWhenProperty(const VisibleWhenProperty &conditionOne,
+                      const VisibleWhenProperty &conditionTwo,
+                      eLogicOperator logicOperator);
+
   /// Constructs a VisibleWhenProperty object which takes ownership of two
   /// already constructed VisibleWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
   VisibleWhenProperty(std::unique_ptr<VisibleWhenProperty> &&conditionOne,
                       std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
-                      eLogicOperator logicalOperator);
+                      eLogicOperator logicOperator);
 
   /// Default copy constructor
   // Ensure we get default copy constructor as the base class

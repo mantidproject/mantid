@@ -25,6 +25,26 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
       std::make_unique<PropertyDetails>(otherPropName, when, value);
 }
 
+/** Multiple conditions constructor - takes two enable when property
+  * objects and returns the product of of the with the specified
+  * logic operator
+  *
+  * @param conditionOne :: First EnabledWhenProperty object to use
+  * @param conditionTwo :: Second EnabledWhenProperty object to use
+  * @param localOperator :: The logic operator to apply across both
+  * conditions
+  */
+EnabledWhenProperty::EnabledWhenProperty(
+    const EnabledWhenProperty &conditionOne,
+    const EnabledWhenProperty &conditionTwo, eLogicOperator logicalOperator)
+    : // This method allows the Python interface to easily construct these
+      // objects
+      // Copy the object then forward onto our unique pointer constructor
+      EnabledWhenProperty(
+          std::move(std::make_unique<EnabledWhenProperty>(conditionOne)),
+          std::move(std::make_unique<EnabledWhenProperty>(conditionTwo)),
+          logicalOperator) {}
+
 /** Multiple conditions constructor - takes two unique pointers to
 * EnabledWhenProperty objects and returns the product of them
 * with the specified logic operator.
@@ -52,9 +72,14 @@ EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
   * @return :: EnabledWhenProperty object
   */
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original) {
-  m_comparisonDetails =
-      make_unique<ComparisonDetails>(*original.m_comparisonDetails);
-  m_propertyDetails = make_unique<PropertyDetails>(*original.m_propertyDetails);
+  if (m_comparisonDetails) {
+    m_comparisonDetails =
+        make_unique<ComparisonDetails>(*original.m_comparisonDetails);
+  }
+  if (m_propertyDetails) {
+    m_propertyDetails =
+        make_unique<PropertyDetails>(*original.m_propertyDetails);
+  }
 }
 
 /**
@@ -193,7 +218,7 @@ void EnabledWhenProperty::modify_allowed_values(Property *const) {}
 * @return Pointer to cloned EnabledWhenProperty object
 */
 IPropertySettings *EnabledWhenProperty::clone() {
-	return new EnabledWhenProperty(*this);
+  return new EnabledWhenProperty(*this);
 }
 
 } // namespace Mantid

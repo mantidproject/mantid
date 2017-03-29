@@ -15,6 +15,25 @@ VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
                                          std::string value)
     : EnabledWhenProperty(otherPropName, when, value) {}
 
+/** Multiple conditions constructor - takes two  VisibleWhenProperty
+* objects and returns the product of them with the specified logic operator.
+*
+* @param conditionOne :: First VisibleWhenProperty object to use
+* @param conditionTwo :: Second VisibleWhenProperty object to use
+* @param localOperator :: The logic operator to apply across both
+*conditions
+*
+*/
+VisibleWhenProperty::VisibleWhenProperty(
+    const VisibleWhenProperty &conditionOne,
+    const VisibleWhenProperty &conditionTwo, eLogicOperator logicOperator)
+    : // For the python interface to be able to easily copy objects in
+      // Make a deep copy and turn into a unique pointer and forward on
+      VisibleWhenProperty(
+          std::move(std::make_unique<VisibleWhenProperty>(conditionOne)),
+          std::move(std::make_unique<VisibleWhenProperty>(conditionTwo)),
+          logicOperator) {}
+
 /** Multiple conditions constructor - takes two unique pointers to
 * VisibleWhenProperty objects and returns the product of them
 * with the specified logic operator.
@@ -30,9 +49,9 @@ VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
 VisibleWhenProperty::VisibleWhenProperty(
     std::unique_ptr<VisibleWhenProperty> &&conditionOne,
     std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
-    eLogicOperator logicalOperator)
+    eLogicOperator logicOperator)
     : EnabledWhenProperty(std::move(conditionOne), std::move(conditionTwo),
-                          logicalOperator) {}
+                          logicOperator) {}
 
 /**
 * Checks if the user specified combination of visible criterion

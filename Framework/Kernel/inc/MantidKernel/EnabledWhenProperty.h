@@ -81,6 +81,13 @@ public:
                       const ePropertyCriterion when,
                       const std::string &value = "");
 
+  /// Constructs a EnabledWhenProperty object which copies two
+  /// already constructed EnabledWhenProperty objects and returns the result
+  /// of both of them with the specified logic operator
+  EnabledWhenProperty(const EnabledWhenProperty &conditionOne,
+                      const EnabledWhenProperty &conditionTwo,
+                      eLogicOperator logicalOperator);
+
   /// Constructs a EnabledWhenProperty object which takes ownership of two
   /// already constructed EnabledWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
