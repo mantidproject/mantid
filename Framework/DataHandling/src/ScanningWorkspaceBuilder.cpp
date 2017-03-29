@@ -45,15 +45,26 @@ void ScanningWorkspaceBuilder::setTimeRanges(
 }
 
 void ScanningWorkspaceBuilder::setPositions(
-    std::vector<std::vector<Kernel::V3D>>) {
-  throw std::runtime_error("Not implemented yet!");
-}
-void ScanningWorkspaceBuilder::setRotations(
-    std::vector<std::vector<Kernel::Quat>>) {
-  throw std::runtime_error("Not implemented yet!");
+    std::vector<std::vector<Kernel::V3D>> &positions) {
+  for (const auto &vector : positions) {
+    verifyTimeIndexSize(vector.size(), "positions");
+  }
+  verifyDetectorSize(positions.size(), "positions");
+
+  m_positions = positions;
 }
 
-MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
+void ScanningWorkspaceBuilder::setRotations(
+    std::vector<std::vector<Kernel::Quat>> &rotations) {
+  for (const auto &vector : rotations) {
+    verifyTimeIndexSize(vector.size(), "rotations");
+  }
+  verifyDetectorSize(rotations.size(), "rotations");
+
+  m_rotations = rotations;
+}
+
+MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   validateInputs();
 
   auto outputWorkspace = WorkspaceFactory::Instance().create(
@@ -75,19 +86,52 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
     outputDetectorInfo.merge(mergeDetectorInfo);
   }
 
+  if (!m_positions.empty())
+    buildPositions(outputDetectorInfo);
+
+  if (!m_rotations.empty())
+    buildRotations(outputDetectorInfo);
+
   return outputWorkspace;
 }
 
+void ScanningWorkspaceBuilder::buildRotations(
+    DetectorInfo &outputDetectorInfo) const {
+  for (size_t i = 0; i < m_nDetectors; ++i) {
+    for (size_t j = 0; j < m_nTimeIndexes; ++j) {
+      outputDetectorInfo.setRotation({i, j}, m_rotations[i][j]);
+    }
+  }
+}
+
+void ScanningWorkspaceBuilder::buildPositions(
+    DetectorInfo &outputDetectorInfo) const {
+  for (size_t i = 0; i < m_nDetectors; ++i) {
+    for (size_t j = 0; j < m_nTimeIndexes; ++j) {
+      outputDetectorInfo.setPosition({i, j}, m_positions[i][j]);
+    }
+  }
+}
+
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(
-    size_t inputSize, const std::string &description) {
-  if (inputSize != m_nTimeIndexes) {
+    size_t timeIndexSize, const std::string &description) const {
+  if (timeIndexSize != m_nTimeIndexes) {
     throw std::logic_error(
         "Number of " + description +
         " supplied does not match the number of time indexes being requested.");
   }
 }
 
-void ScanningWorkspaceBuilder::validateInputs() {
+void ScanningWorkspaceBuilder::verifyDetectorSize(
+    size_t detectorSize, const std::string &description) const {
+  if (detectorSize != m_nDetectors) {
+    throw std::logic_error(
+        "Number of " + description +
+        " supplied does not match the number of detectors being requested.");
+  }
+}
+
+void ScanningWorkspaceBuilder::validateInputs() const {
   if (!m_instrument)
     throw std::logic_error("Can not build workspace - instrument has not been "
                            "set. Please call setInstrument() before building.");

@@ -107,6 +107,49 @@ public:
                             "the number of time indexes being requested.");
   }
 
+  void test_creating_workspace_with_positions() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    initalisePositions();
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions));
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    const auto &detectorInfo = ws->detectorInfo();
+
+    for (size_t i = 0; i < nDetectors; ++i) {
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        TS_ASSERT_EQUALS(V3D(double(i), double(j), 1.0),
+                         detectorInfo.position({i, j}))
+      }
+    }
+  }
+
+  void test_creating_workspace_with_rotations() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    initaliseRotations();
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations));
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    const auto &detectorInfo = ws->detectorInfo();
+
+    for (size_t i = 0; i < nDetectors; ++i) {
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        auto quat = Quat(double(i), double(j), 1.0, 2.0);
+        quat.normalize();
+        TS_ASSERT_EQUALS(quat, detectorInfo.rotation({i, j}))
+      }
+    }
+  }
+
 private:
   size_t nDetectors = 5;
   size_t nTimeIndexes = 4;
@@ -116,6 +159,29 @@ private:
       {0, 1}, {1, 3}, {3, 6}, {6, 10}};
 
   std::vector<double> timeDurations = {1e-9, 2e-9, 3e-9, 4e-9};
+
+  std::vector<std::vector<V3D>> positions;
+  std::vector<std::vector<Quat>> rotations;
+
+  void initalisePositions() {
+    for (size_t i = 0; i < nDetectors; ++i) {
+      std::vector<V3D> timePositions;
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        timePositions.push_back(V3D(double(i), double(j), 1.0));
+      }
+      positions.push_back(timePositions);
+    }
+  }
+
+  void initaliseRotations() {
+    for (size_t i = 0; i < nDetectors; ++i) {
+      std::vector<Quat> timeRotations;
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        timeRotations.push_back(Quat(double(i), double(j), 1.0, 2.0));
+      }
+      rotations.push_back(timeRotations);
+    }
+  }
 
   Instrument_const_sptr createSimpleInstrument(size_t nDetectors,
                                                size_t nBins) {

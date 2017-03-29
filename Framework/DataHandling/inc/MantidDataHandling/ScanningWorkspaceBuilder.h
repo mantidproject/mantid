@@ -4,6 +4,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/V3D.h"
+#include "MantidKernel/Quat.h"
 
 #include <vector>
 
@@ -44,10 +46,10 @@ public:
       std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> &timeRanges);
   void setTimeRanges(const Kernel::DateAndTime &startTime,
                      const std::vector<double> &durations);
-  void setPositions(std::vector<std::vector<Kernel::V3D>>);
-  void setRotations(std::vector<std::vector<Kernel::Quat>>);
+  void setPositions(std::vector<std::vector<Kernel::V3D>> &positions);
+  void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
 
-  API::MatrixWorkspace_sptr buildWorkspace();
+  API::MatrixWorkspace_sptr buildWorkspace() const;
 
 private:
   size_t m_nDetectors;
@@ -56,11 +58,16 @@ private:
 
   boost::shared_ptr<const Geometry::Instrument> m_instrument;
   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
-  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_positions;
-  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_rotations;
+  std::vector<std::vector<Kernel::V3D>> m_positions;
+  std::vector<std::vector<Kernel::Quat>> m_rotations;
 
-  void verifyTimeIndexSize(size_t inputSize, const std::string &description);
-  void validateInputs();
+  void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
+  void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
+  void verifyTimeIndexSize(size_t timeIndexSize,
+                           const std::string &description) const;
+  void verifyDetectorSize(size_t detectorSize,
+                          const std::string &description) const;
+  void validateInputs() const;
 };
 
 } // namespace DataHandling
