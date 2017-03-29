@@ -72,7 +72,7 @@ private:
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
   void loadBeam(API::MatrixWorkspace_sptr &beamWS, const std::string beam,
-                const std::string angleDirectBeam);
+                std::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
 

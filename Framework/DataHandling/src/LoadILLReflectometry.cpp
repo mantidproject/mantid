@@ -527,9 +527,9 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
   */
 void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
                                     const std::string beam,
-                                    const std::string angleDirectBeam) {
+                                    std::string angleDirectBeam) {
   const std::string theBeam{getPropertyValue(beam)};
-  // init direct beam workspace, we do not need its monitor counts
+  // init beam workspace, we do not need its monitor counts
   beamWS = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
       m_numberOfChannels);
@@ -546,6 +546,21 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
   data.load();
+  // check whether beam workspace is compatible
+  if (beam == "DirectBeam") {
+    if (data.dim0() * data.dim1() * data.dim2() !=
+        int(m_numberOfChannels * m_numberOfHistograms))
+      g_log.error() << beam
+                    << " has incompatible size with beam read from Filename\n";
+    // set Bragg angle of the direct beam for later use
+    if (!angleDirectBeam.empty()) {
+      std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
+      m_BraggAngleDirectBeam =
+          entry.getFloat(std::string("instrument/").append(angleDirectBeam));
+      g_log.debug() << "Bragg angle of the direct beam: "
+                    << m_BraggAngleDirectBeam << " degrees\n"; //?
+    }
+  }
   // write data
   HistogramData::BinEdges binEdges(xVals);
   size_t spec = 0;
@@ -555,13 +570,6 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
                                             data_p + m_numberOfChannels);
     beamWS->setHistogram(spec, binEdges, std::move(histoCounts));
     ++spec;
-  }
-  // set Bragg angle of the direct beam for later use
-  if (!angleDirectBeam.empty() && (beam == "DirectBeam")) {
-    // m_BraggAngleDirectBeam =
-    //    entry.getFloat(std::string("instrument/").append(angleDirectBeam));
-    g_log.debug() << "Bragg angle of the direct beam: "
-                  << m_BraggAngleDirectBeam << " degrees\n"; //?
   }
 }
 
