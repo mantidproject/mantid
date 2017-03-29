@@ -16,6 +16,52 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Algorithms {
 
+/*Anonomous namespace */
+namespace {
+
+/**
+* Translate all the workspace indexes in an origin workspace into workspace
+* indexes of a host end-point workspace. This is done using spectrum numbers as
+* the intermediate.
+*
+* @param originWS : Origin workspace, which provides the original workspace
+* index to spectrum number mapping.
+* @param hostWS : Workspace onto which the resulting workspace indexes will be
+* hosted
+* @throws :: If the specId are not found to exist on the host end-point
+*workspace.
+* @return :: Remapped workspace indexes applicable for the host workspace.
+*results
+*as comma separated string.
+*/
+std::string
+createProcessingCommandsFromDetectorWS(MatrixWorkspace_const_sptr originWS,
+                                       MatrixWorkspace_const_sptr hostWS,
+                                       std::vector<size_t> detectors) {
+  auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
+  std::stringstream result;
+
+  bool first = true;
+  for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it) {
+    // Skip this spectrum if it is not in the detectors of interest
+    if (std::find(detectors.begin(), detectors.end(), it->second) ==
+        detectors.end()) {
+      continue;
+    }
+
+    specnum_t specId = (*it).first;
+    if (!first) {
+      result << ",";
+    }
+
+    result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
+    first = false;
+  }
+
+  return result.str();
+}
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne2)
 
@@ -392,31 +438,45 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
   if (xUnit->unitID() == "TOF") {
 
-    MatrixWorkspace_sptr secondTransmissionWS =
-        getProperty("SecondTransmissionRun");
-    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
-    alg->initialize();
-    alg->setProperty("FirstTransmissionRun", transmissionWS);
-    alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
-    alg->setPropertyValue("Params", getPropertyValue("Params"));
-    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
-    alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
-    alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                          getPropertyValue("MonitorBackgroundWavelengthMin"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                          getPropertyValue("MonitorBackgroundWavelengthMax"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMin",
-                          getPropertyValue("MonitorIntegrationWavelengthMin"));
-    alg->setPropertyValue("MonitorIntegrationWavelengthMax",
-                          getPropertyValue("MonitorIntegrationWavelengthMax"));
-    alg->setPropertyValue("ProcessingInstructions",
-                          getPropertyValue("ProcessingInstructions"));
-    alg->execute();
-    transmissionWS = alg->getProperty("OutputWorkspace");
-  }
+      // Processing instructions for transmission workspace
+      std::string transmissionCommands = getProperty("ProcessingInstructions");
+      if (strictSpectrumChecking) {
+        // If we have strict spectrum checking, the processing commands need to
+        // be
+        // made from the
+        // numerator workspace AND the transmission workspace based on matching
+        // spectrum numbers.
+        transmissionCommands = createProcessingCommandsFromDetectorWS(
+            detectorWS, transmissionWS, m_detectors);
+      }
+
+      MatrixWorkspace_sptr secondTransmissionWS =
+          getProperty("SecondTransmissionRun");
+      auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+      alg->initialize();
+      alg->setProperty("FirstTransmissionRun", transmissionWS);
+      alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("I0MonitorIndex",
+                            getPropertyValue("I0MonitorIndex"));
+      alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
+      alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
+      alg->setPropertyValue("MonitorBackgroundWavelengthMin",
+                            getPropertyValue("MonitorBackgroundWavelengthMin"));
+      alg->setPropertyValue("MonitorBackgroundWavelengthMax",
+                            getPropertyValue("MonitorBackgroundWavelengthMax"));
+      alg->setPropertyValue(
+          "MonitorIntegrationWavelengthMin",
+          getPropertyValue("MonitorIntegrationWavelengthMin"));
+      alg->setPropertyValue(
+          "MonitorIntegrationWavelengthMax",
+          getPropertyValue("MonitorIntegrationWavelengthMax"));
+      alg->setProperty("ProcessingInstructions", transmissionCommands);
+      alg->execute();
+      transmissionWS = alg->getProperty("OutputWorkspace");
+    }
 
   // Rebin the transmission run to be the same as the input.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
