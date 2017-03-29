@@ -1401,9 +1401,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 #  table workspace case
                 time0 = split_ws.cell(0, 0)
 
-            if time0 > 3600. * 24 * 356:  # larger than 1 Y
+            if time0 > 3600. * 24 * 356:
+                # longer than 1 Y. Cannot be relative time.
                 is_relative_time = True
             else:
+                # even just shorter than 1 year, but there was no experiment in 1991.
                 is_relative_time = False
 
         if self._splitinfotablews is None:
