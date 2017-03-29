@@ -259,7 +259,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Executes the data reduction workflow."""
-        progress = Progress(self, 0.0, 1.0, 8)
+        progress = Progress(self, 0.0, 1.0, 9)
         report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
@@ -273,9 +273,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         # Get input workspace.
         progress.report('Loading inputs')
         mainWS = self._inputWS(wsNames, wsCleanup, subalgLogging)
-
-        progress.report('Correcting TOF')
-        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Extract monitors to a separate workspace.
         progress.report('Extracting monitors')
@@ -303,6 +300,14 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                           wsNames, wsCleanup, report,
                                           subalgLogging)
         wsCleanup.cleanupLater(monWS)
+
+        progress.report('Correcting TOF')
+        mainWS = self._correctTOFAxis(mainWS, wsNames, wsCleanup, report, subalgLogging)
+
+        # Find elastic peak positions.
+        progress.report('Recalculating EPPs')
+        detEPPWS = self._createEPPWSDet(mainWS, wsNames, wsCleanup, subalgLogging)
+        wsCleanup.cleanupLater(detEPPWS, monEPPWS)
 
         self._finalize(mainWS, wsCleanup, report)
         progress.report('Done')
@@ -452,6 +457,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             direction=Direction.Output,
             optional=PropertyMode.Optional),
             doc='Output workspace for elastic channel index.')
+        self.setPropertyGroup(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS,
+                              common.PROPGROUP_OPTIONAL_OUTPUT)
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_OUTPUT_DET_EPP_WS,
             defaultValue='',
@@ -495,13 +502,12 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         """Perform and apply incident energy calibration."""
         eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
         if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_ON:
-            eiInWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
-            if not eiInWS:
+            if self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault:
                 monIndex = self._monitorIndex(monWS)
                 eiCalibrationWS = _calibratedIncidentEnergy(mainWS, detEPPWS, monWS, monEPPWS, monIndex, wsNames,
                                                             self.log(), subalgLogging)
             else:
-                eiCalibrationWS = eiInWS
+                eiCalibrationWS = self.getProperty(common.PROP_INCIDENT_ENERGY_WS).value
                 wsCleanup.protect(eiCalibrationWS)
             if eiCalibrationWS:
                 eiCalibratedDetWS = _applyIncidentEnergyCalibration(mainWS, common.WS_CONTENT_DETS, eiCalibrationWS, wsNames,
@@ -560,8 +566,10 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _createEPPWSDet(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Create an EPP table for a detector workspace."""
         eiCalibration = self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).value
+        noEiCalibration = eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_OFF
+        yesInputEi = not self.getProperty(common.PROP_INCIDENT_ENERGY_WS).isDefault
         noOutputEPP = self.getProperty(common.PROP_OUTPUT_DET_EPP_WS).isDefault
-        if eiCalibration == common.INCIDENT_ENERGY_CALIBRATION_OFF and noOutputEPP:
+        if (noEiCalibration or yesInputEi) and noOutputEPP:
             # No epp table needed.
             return None
         detEPPInWS = self.getProperty(common.PROP_EPP_WS).value
