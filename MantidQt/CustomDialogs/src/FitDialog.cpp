@@ -4,12 +4,8 @@
 #include "MantidQtCustomDialogs/FitDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 // Qt
-#include <QCheckBox>
 #include <QComboBox>
 #include <QSpinBox>
-#include <QUrl>
-#include <QDesktopWidget>
-#include <QFileInfo>
 
 // Mantid
 #include "MantidKernel/Property.h"
@@ -217,7 +213,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
       m_workspaceIndex->setRange(0,
                                  static_cast<int>(ws->getNumberHistograms()));
       if (ws->blocksize() > 0) {
-        const Mantid::MantidVec &x = ws->readX(0);
+        const auto &x = ws->x(0);
         m_startX->setText(QString::number(x.front()));
         m_endX->setText(QString::number(x.back()));
       }
