@@ -251,6 +251,7 @@ private slots:
 
   /// Called when "TF Asymmetry" checkbox is turned on/off
   void TFAsymmCheckboxChanged(int state);
+  void MuonAnalysis::setTFAsymm(Muon::TFAsymmState);
   /// Called when "overwrite" is changed
   void updateDataPresenterOverwrite(int state);
 

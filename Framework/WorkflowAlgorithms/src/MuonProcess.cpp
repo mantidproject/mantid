@@ -11,6 +11,7 @@
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"
 
+
 // free functions
 namespace {
 /**
@@ -167,7 +168,6 @@ void MuonProcess::exec() {
 
   // If not analysing, the present WS will be the output
   Workspace_sptr outWS = allPeriodsWS;
-
   if (mode != "CorrectAndGroup") {
     // Correct bin values
     double loadedTimeZero = getProperty("LoadedTimeZero");
