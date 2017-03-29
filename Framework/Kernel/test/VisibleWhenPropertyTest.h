@@ -104,70 +104,70 @@ public:
   }
 
   void test_combination_AND() {
-	  // Setup with same value first
-	  auto alg = setupCombinationTest(AND, true);
-	  const auto prop = alg.getPointerToProperty(m_resultPropName);
-	  TS_ASSERT(prop);
-	  const auto propSettings = prop->getSettings();
+    // Setup with same value first
+    auto alg = setupCombinationTest(AND, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
 
-	  // AND should return true first
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // AND should return true first
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Now set a different value - should be disabled
-	  alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
-	  TS_ASSERT(!propSettings->isVisible(&alg));
+    // Now set a different value - should be disabled
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
   }
 
   void test_combination_OR() {
-	  // First check with both set to the true value
-	  auto alg = setupCombinationTest(OR, true);
-	  const auto prop = alg.getPointerToProperty(m_resultPropName);
-	  TS_ASSERT(prop);
-	  const auto propSettings = prop->getSettings();
+    // First check with both set to the true value
+    auto alg = setupCombinationTest(OR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
 
-	  // OR should return true for both values on
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // OR should return true for both values on
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Set property one to false condition and check OR is still true
-	  alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // Set property one to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Set property two to false condition and check OR is still true
-	  alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // Set property two to false condition and check OR is still true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Check the with both set to false the OR returns false
-	  alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
-	  TS_ASSERT(!propSettings->isVisible(&alg));
+    // Check the with both set to false the OR returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
   }
 
   void test_combination_XOR() {
-	  auto alg = setupCombinationTest(XOR, true);
-	  const auto prop = alg.getPointerToProperty(m_resultPropName);
-	  TS_ASSERT(prop);
-	  const auto propSettings = prop->getSettings();
+    auto alg = setupCombinationTest(XOR, true);
+    const auto prop = alg.getPointerToProperty(m_resultPropName);
+    TS_ASSERT(prop);
+    const auto propSettings = prop->getSettings();
 
-	  // With both set to the same value this should return false
-	  TS_ASSERT(!propSettings->isVisible(&alg));
+    // With both set to the same value this should return false
+    TS_ASSERT(!propSettings->isVisible(&alg));
 
-	  // Set property one to false and two to true so returns true
-	  alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // Set property one to false and two to true so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyTrueValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Set property one to true and one to false so returns true
-	  alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
-	  TS_ASSERT(propSettings->isVisible(&alg));
+    // Set property one to true and one to false so returns true
+    alg.setPropertyValue(m_propertyOneName, m_propertyTrueValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(propSettings->isVisible(&alg));
 
-	  // Check with both set false it returns false
-	  alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
-	  alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
-	  TS_ASSERT(!propSettings->isVisible(&alg));
+    // Check with both set false it returns false
+    alg.setPropertyValue(m_propertyOneName, m_propertyFalseValue);
+    alg.setPropertyValue(m_propertyTwoName, m_propertyFalseValue);
+    TS_ASSERT(!propSettings->isVisible(&alg));
   }
 
 private:

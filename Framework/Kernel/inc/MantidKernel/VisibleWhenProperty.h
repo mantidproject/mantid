@@ -45,6 +45,13 @@ public:
                       std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
                       eLogicOperator logicalOperator);
 
+  /// Default copy constructor
+  // Ensure we get default copy constructor as the base class
+  // handles it for us
+  VisibleWhenProperty(const VisibleWhenProperty &) = default;
+
+  /// Checks two VisisbleWhenProperty objects to determine the
+  /// result of both of them
   virtual bool checkComparison(const IPropertyManager *algo) const;
 
   /// Return true always as we only consider visible

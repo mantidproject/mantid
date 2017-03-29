@@ -11,6 +11,12 @@ namespace Kernel {
 
 using EnabledPropPtr = std::unique_ptr<EnabledWhenProperty>;
 
+/** Constructor
+* @param otherPropName :: Name of the OTHER property that we will check.
+* @param when :: Criterion to evaluate
+* @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
+* (as string) to check for
+*/
 EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const ePropertyCriterion when,
                                          const std::string &value)
@@ -19,6 +25,18 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
       std::make_unique<PropertyDetails>(otherPropName, when, value);
 }
 
+/** Multiple conditions constructor - takes two unique pointers to
+* EnabledWhenProperty objects and returns the product of them
+* with the specified logic operator.
+* Note: With Unique pointers you will need to use std::move
+* to transfer ownership of those objects to this one.
+*
+* @param conditionOne :: First EnabledWhenProperty object to use
+* @param conditionTwo :: Second EnabledWhenProperty object to use
+* @param localOperator :: The logic operator to apply across both
+*conditions
+*
+*/
 EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
                                          EnabledPropPtr &&conditionTwo,
                                          eLogicOperator logicalOperator)
@@ -27,6 +45,53 @@ EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
       std::move(conditionOne), std::move(conditionTwo), logicalOperator);
 }
 
+/**
+  * Copy constructor for EnabledWhenProperty
+  *
+  * @param original :: Object to deep copy
+  * @return :: EnabledWhenProperty object
+  */
+EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original) {
+  m_comparisonDetails =
+      make_unique<ComparisonDetails>(*original.m_comparisonDetails);
+  m_propertyDetails = make_unique<PropertyDetails>(*original.m_propertyDetails);
+}
+
+/**
+* Checks if the user specified combination of enabled criterion
+* returns a true or false value
+*
+* @param :: algo The algorithm containing the property to check
+* @return :: true if user specified combination was true, else false.
+* @throw::  If any problems was found
+*/
+bool EnabledWhenProperty::checkComparison(const IPropertyManager *algo) const {
+  const auto &comparison = m_comparisonDetails;
+  const auto &objectOne = comparison->conditionOne;
+  const auto &objectTwo = comparison->conditionTwo;
+
+  switch (comparison->logicOperator) {
+  case AND:
+    return objectOne->isEnabled(algo) && objectTwo->isEnabled(algo);
+    break;
+  case OR:
+    return objectOne->isEnabled(algo) || objectTwo->isEnabled(algo);
+    break;
+  case XOR:
+    return objectOne->isEnabled(algo) ^ objectTwo->isEnabled(algo);
+    break;
+  default:
+    throw std::runtime_error("Unknown logic operator in EnabledWhenProperty");
+  }
+}
+
+/**
+* Does the validator fulfill the criterion based on the
+* other property values?
+* @param algo :: The pointer to the algorithm to check the property values of
+* @return :: True if the criteria are met else false
+* @throw :: Throws on any problems (e.g. property missing from algorithm)
+*/
 bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
 
   // Value of the other property
@@ -60,37 +125,14 @@ bool EnabledWhenProperty::checkCriterion(const IPropertyManager *algo) const {
   }
 }
 
-bool EnabledWhenProperty::checkComparison(const IPropertyManager *algo) const {
-  const auto &comparison = m_comparisonDetails;
-  const auto &objectOne = comparison->conditionOne;
-  const auto &objectTwo = comparison->conditionTwo;
-
-  switch (comparison->logicOperator) {
-  case AND:
-    return objectOne->isEnabled(algo) && objectTwo->isEnabled(algo);
-    break;
-  case OR:
-    return objectOne->isEnabled(algo) || objectTwo->isEnabled(algo);
-    break;
-  case XOR:
-    return objectOne->isEnabled(algo) ^ objectTwo->isEnabled(algo);
-    break;
-  default:
-    throw std::runtime_error("Unknown logic operator in EnabledWhenProperty");
-  }
-}
-
-bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
-  if (m_propertyDetails) {
-    return checkCriterion(algo);
-  } else if (m_comparisonDetails) {
-    return checkComparison(algo);
-  } else {
-    throw std::runtime_error("Both PropertyDetails and ComparisonDetails were "
-                             "null in EnabledWhenProperty");
-  }
-}
-
+/**
+  * Checks the algorithm given is in a valid state and the property
+  * exists then proceeds to try to get the value associated
+  *
+  * @param algo :: The pointer to the algorithm to process
+  * @return :: The value contained by said property
+  * @throw :: Throws if anything is wrong with the property or algorithm
+  */
 std::string
 EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
   // Find the property
@@ -110,18 +152,48 @@ EnabledWhenProperty::getPropertyValue(const IPropertyManager *algo) const {
   return prop->value();
 }
 
-bool EnabledWhenProperty::isVisible(const IPropertyManager *) const {
+/**
+  * Returns whether the property should be enabled or disabled based
+  * on the property conditions
+  *
+  * @param algo :: The algorithm containing the property
+  * @return :: True if enabled when conditions matched, else false
+  * @throw :: Throws on any error (e.g. missing property)
+  */
+bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
+  if (m_propertyDetails) {
+    return checkCriterion(algo);
+  } else if (m_comparisonDetails) {
+    return checkComparison(algo);
+  } else {
+    throw std::runtime_error("Both PropertyDetails and ComparisonDetails were "
+                             "null in EnabledWhenProperty");
+  }
+}
+
+/**
+  * Always returns true as EnabledWhenProperty always sets the visibility
+  * on while altering whether the property is Enabled or disabled
+  *
+  * @param :: algo Pointer to the algorithm
+  * @return :: True always
+  */
+bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
   return true;
 }
-/// does nothing in this case and put here to satisfy the interface.
+
+/// Does nothing in this case and put here to satisfy the interface.
 void EnabledWhenProperty::modify_allowed_values(Property *const) {}
-//--------------------------------------------------------------------------------------------
-/// Make a copy of the present type of validator
+
+/**
+* Clones the current EnabledWhenProperty object and returns
+* a pointer to the new object. The caller is responsible
+* for deleting this pointer when finished
+*
+* @return Pointer to cloned EnabledWhenProperty object
+*/
 IPropertySettings *EnabledWhenProperty::clone() {
-  const PropertyDetails &propDetails = *m_propertyDetails;
-  EnabledWhenProperty *out = new EnabledWhenProperty(
-      propDetails.otherPropName, propDetails.criterion, propDetails.value);
-  return out;
+	return new EnabledWhenProperty(*this);
 }
 
 } // namespace Mantid

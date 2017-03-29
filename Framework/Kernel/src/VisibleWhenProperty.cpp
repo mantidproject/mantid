@@ -99,10 +99,7 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
   * @return Pointer to cloned VisisbleWhenProperty object
   */
 IPropertySettings *VisibleWhenProperty::clone() {
-  VisibleWhenProperty *out = new VisibleWhenProperty(
-      m_propertyDetails->otherPropName, m_propertyDetails->criterion,
-      m_propertyDetails->value);
-  return out;
+  return new VisibleWhenProperty(*this);
 }
 
 } // namespace Mantid
