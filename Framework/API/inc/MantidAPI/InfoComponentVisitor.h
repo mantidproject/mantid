@@ -55,7 +55,7 @@ private:
   std::vector<Mantid::Geometry::IComponent *> m_componentIds;
 
   /// Detector indexes
-  std::vector<size_t> m_detectorIndices;
+  std::vector<size_t> m_assemblySortedDetectorIndices;
 
   /// Mapping function to allow us to go from detector id to detecor index
   std::function<size_t(const Mantid::detid_t)>
@@ -80,7 +80,7 @@ public:
 
   const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
 
-  const std::vector<size_t> &detectorIndices() const;
+  const std::vector<size_t> &assemblySortedDetectorIndices() const;
 
   size_t size() const;
 };

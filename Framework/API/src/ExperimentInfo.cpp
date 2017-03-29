@@ -202,7 +202,8 @@ makeComponentInfo(const Instrument &oldInstr,
   componentIds = visitor.componentIds();
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.detectorIndices(), visitor.componentDetectorRanges());
+      visitor.assemblySortedDetectorIndices(),
+      visitor.componentDetectorRanges());
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
@@ -304,11 +305,9 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
 Instrument_const_sptr ExperimentInfo::getInstrument() const {
   populateIfNotLoaded();
   checkDetectorInfoSize(*sptr_instrument, *m_detectorInfo);
-  // checkComponentInfoSize(*sptr_instrument, *m_componentInfo);
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
-  // instrument->setComponentInfo(m_componentInfo);
   return instrument;
 }
 

@@ -60,7 +60,7 @@ public:
      * it did the job correctly.
     */
     TSM_ASSERT_EQUALS("Single detector should have index of 0",
-                      visitor.detectorIndices(),
+                      visitor.assemblySortedDetectorIndices(),
                       std::vector<size_t>{detectorIndex});
   }
 

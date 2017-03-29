@@ -17,7 +17,7 @@ InfoComponentVisitor::InfoComponentVisitor(
     std::function<size_t(const Mantid::detid_t)> mapperFunc)
     : m_componentIds(nDetectors, nullptr),
       m_detectorIdToIndexMapperFunction(mapperFunc) {
-  m_detectorIndices.reserve(nDetectors);
+  m_assemblySortedDetectorIndices.reserve(nDetectors);
 }
 
 /**
@@ -30,12 +30,12 @@ void InfoComponentVisitor::registerComponentAssembly(
   std::vector<IComponent_const_sptr> assemblyChildren;
   assembly.getChildren(assemblyChildren, false /*is recursive*/);
 
-  const size_t detectorStart = m_detectorIndices.size();
+  const size_t detectorStart = m_assemblySortedDetectorIndices.size();
   for (const auto &child : assemblyChildren) {
     // register everything under this assembly
     child->registerContents(*this);
   }
-  const size_t detectorStop = m_detectorIndices.size();
+  const size_t detectorStop = m_assemblySortedDetectorIndices.size();
 
   m_ranges.emplace_back(std::make_pair(detectorStart, detectorStop));
 
@@ -83,7 +83,7 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     m_componentIds[detectorIndex] = detector.getComponentID();
 
     // register the detector index
-    m_detectorIndices.push_back(detectorIndex);
+    m_assemblySortedDetectorIndices.push_back(detectorIndex);
   }
 }
 
@@ -100,9 +100,11 @@ InfoComponentVisitor::componentDetectorRanges() const {
 /**
  * @brief InfoComponentVisitor::detectorIndices
  * @return detector indices in the order in which they have been visited
+ * thus grouped by assembly to form a contiguous range for levels of assemblies.
  */
-const std::vector<size_t> &InfoComponentVisitor::detectorIndices() const {
-  return m_detectorIndices;
+const std::vector<size_t> &
+InfoComponentVisitor::assemblySortedDetectorIndices() const {
+  return m_assemblySortedDetectorIndices;
 }
 
 /**
