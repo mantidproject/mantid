@@ -736,9 +736,20 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
+
+/**
+Collapse all groups
+*/
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
+
   switch (flag) {
   case DataProcessorPresenter::SaveAsFlag:
     saveTableAs();
@@ -802,6 +813,12 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
+    break;
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
+    break;
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
