@@ -5,11 +5,61 @@
 
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidParallel/ParallelRunner.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
+#ifdef MPI_EXPERIMENTAL
+#include <boost/mpi/environment.hpp>
+#endif
+
 using namespace Mantid;
 using namespace Indexing;
+
+namespace {
+void run_StorageMode_Cloned(const Parallel::Communicator &comm) {
+  IndexInfo i(3, Parallel::StorageMode::Cloned, comm);
+  TS_ASSERT_EQUALS(i.size(), 3);
+  TS_ASSERT_EQUALS(i.globalSize(), 3);
+  TS_ASSERT_EQUALS(i.spectrumNumber(0), 1);
+  TS_ASSERT_EQUALS(i.spectrumNumber(1), 2);
+  TS_ASSERT_EQUALS(i.spectrumNumber(2), 3);
+}
+
+void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
+  IndexInfo i(47, Parallel::StorageMode::Distributed, comm);
+  TS_ASSERT_EQUALS(i.globalSize(), 47);
+  size_t expectedSize = 0;
+  for (size_t globalIndex = 0; globalIndex < i.globalSize(); ++globalIndex) {
+    // Current default is RoundRobinPartitioner
+    if (static_cast<int>(globalIndex) % comm.size() == comm.rank()) {
+      TS_ASSERT_EQUALS(i.spectrumNumber(expectedSize),
+                       static_cast<int>(globalIndex) + 1);
+      ++expectedSize;
+    }
+  }
+  TS_ASSERT_EQUALS(i.size(), expectedSize);
+}
+
+void run_isOnThisPartition_StorageMode_Cloned(
+    const Parallel::Communicator &comm) {
+  IndexInfo info(47, Parallel::StorageMode::Cloned, comm);
+  for (size_t i = 0; i < info.globalSize(); ++i)
+    TS_ASSERT(info.isOnThisPartition(i));
+}
+
+void run_isOnThisPartition_StorageMode_Distributed(
+    const Parallel::Communicator &comm) {
+  IndexInfo info(47, Parallel::StorageMode::Distributed, comm);
+  // Current default is RoundRobinPartitioner
+  for (size_t i = 0; i < info.globalSize(); ++i) {
+    if (static_cast<int>(i) % comm.size() == comm.rank()) {
+      TS_ASSERT(info.isOnThisPartition(i));
+    }
+  }
+}
+}
 
 class IndexInfoTest : public CxxTest::TestSuite {
 public:
@@ -123,73 +173,51 @@ public:
   }
 
   void test_StorageMode_Cloned() {
-    int nrank = 2;
-    IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{nrank, 0});
-    IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{nrank, 1});
-    TS_ASSERT_EQUALS(rank0.size(), 3);
-    TS_ASSERT_EQUALS(rank0.globalSize(), 3);
-    TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 2);
-    TS_ASSERT_EQUALS(rank0.spectrumNumber(2), 3);
-    TS_ASSERT_EQUALS(rank1.size(), 3);
-    TS_ASSERT_EQUALS(rank1.globalSize(), 3);
-    TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(rank1.spectrumNumber(1), 2);
-    TS_ASSERT_EQUALS(rank1.spectrumNumber(2), 3);
+#ifdef MPI_EXPERIMENTAL
+    runParallel(run_StorageMode_Cloned);
+#else
+    // Trivial: Run with one partition.
+    run_StorageMode_Cloned(Parallel::Communicator{});
+#endif
   }
 
   void test_StorageMode_Distributed() {
-    int nrank = 2;
-    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{nrank, 0});
-    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{nrank, 1});
-    // Current default is RoundRobinPartitioner
-    TS_ASSERT_EQUALS(rank0.size(), 2);
-    TS_ASSERT_EQUALS(rank0.globalSize(), 3);
-    TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
-    TS_ASSERT_EQUALS(rank0.spectrumNumber(1), 3);
-    TS_ASSERT_EQUALS(rank1.size(), 1);
-    TS_ASSERT_EQUALS(rank1.globalSize(), 3);
-    TS_ASSERT_EQUALS(rank1.spectrumNumber(0), 2);
+#ifdef MPI_EXPERIMENTAL
+    runParallel(run_StorageMode_Distributed);
+#else
+    // Trivial: Run with one partition.
+    run_StorageMode_Distributed(Parallel::Communicator{});
+#endif
   }
 
   void test_StorageMode_MasterOnly() {
-    int nrank = 2;
-    TS_ASSERT_THROWS(IndexInfo(3, IndexInfo::StorageMode::MasterOnly,
-                               IndexInfo::Communicator{nrank, 0}),
+    TS_ASSERT_THROWS(IndexInfo(3, Parallel::StorageMode::MasterOnly,
+                               Parallel::Communicator{}),
                      std::runtime_error);
   }
 
   void test_isOnThisPartition_StorageMode_Cloned() {
-    int nrank = 2;
-    IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{nrank, 0});
-    IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{nrank, 1});
-    for (size_t i = 0; i < rank0.globalSize(); ++i)
-      TS_ASSERT(rank0.isOnThisPartition(i));
-    for (size_t i = 0; i < rank1.globalSize(); ++i)
-      TS_ASSERT(rank1.isOnThisPartition(i));
+#ifdef MPI_EXPERIMENTAL
+    runParallel(run_isOnThisPartition_StorageMode_Cloned);
+#else
+    // Trivial: Run with one partition.
+    run_isOnThisPartition_StorageMode_Cloned(Parallel::Communicator{});
+#endif
   }
 
   void test_isOnThisPartition_StorageMode_Distributed() {
-    int nrank = 2;
-    IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{nrank, 0});
-    IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{nrank, 1});
-    // Current default is RoundRobinPartitioner
-    for (size_t i = 0; i < rank0.globalSize(); ++i) {
-      if (i % nrank == 0) {
-        TS_ASSERT(rank0.isOnThisPartition(i));
-      } else {
-        TS_ASSERT(rank1.isOnThisPartition(i));
-      }
-    }
+#ifdef MPI_EXPERIMENTAL
+    runParallel(run_isOnThisPartition_StorageMode_Distributed);
+#else
+    // Trivial: Run with one partition.
+    run_isOnThisPartition_StorageMode_Distributed(Parallel::Communicator{});
+#endif
   }
+
+private:
+#ifdef MPI_EXPERIMENTAL
+  boost::mpi::environment m_environment;
+#endif
 };
 
 #endif /* MANTID_INDEXING_INDEXINFOTEST_H_ */
