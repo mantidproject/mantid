@@ -401,50 +401,38 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
 
   const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
 
-  MatrixWorkspace_sptr transmissionWS;
+  // Reduce the transmission workspace first
+  MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
+  Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
 
-  if (sumInQ()) {
-    MatrixWorkspace_sptr firstTransmissionWS =
-        getProperty("FirstTransmissionRun");
-    transmissionWS = convertToWavelength(firstTransmissionWS);
-    /// todo: stitch with second transmission run
-  } else {
-    // Reduce the transmission workspace first
-    transmissionWS = getProperty("FirstTransmissionRun");
-    Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
+  if (xUnit->unitID() == "TOF") {
 
-    if (xUnit->unitID() == "TOF") {
-
-      MatrixWorkspace_sptr secondTransmissionWS =
-          getProperty("SecondTransmissionRun");
-      auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
-      alg->initialize();
-      alg->setProperty("FirstTransmissionRun", transmissionWS);
-      alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
-      alg->setPropertyValue("Params", getPropertyValue("Params"));
-      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-      alg->setPropertyValue("I0MonitorIndex",
-                            getPropertyValue("I0MonitorIndex"));
-      alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
-      alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-      alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                            getPropertyValue("MonitorBackgroundWavelengthMin"));
-      alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                            getPropertyValue("MonitorBackgroundWavelengthMax"));
-      alg->setPropertyValue(
-          "MonitorIntegrationWavelengthMin",
-          getPropertyValue("MonitorIntegrationWavelengthMin"));
-      alg->setPropertyValue(
-          "MonitorIntegrationWavelengthMax",
-          getPropertyValue("MonitorIntegrationWavelengthMax"));
-      alg->setPropertyValue("ProcessingInstructions",
-                            getPropertyValue("ProcessingInstructions"));
-      alg->execute();
-      transmissionWS = alg->getProperty("OutputWorkspace");
-    }
+    MatrixWorkspace_sptr secondTransmissionWS =
+        getProperty("SecondTransmissionRun");
+    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+    alg->initialize();
+    alg->setProperty("FirstTransmissionRun", transmissionWS);
+    alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
+    alg->setPropertyValue("Params", getPropertyValue("Params"));
+    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
+    alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
+    alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
+    alg->setPropertyValue("MonitorBackgroundWavelengthMin",
+                          getPropertyValue("MonitorBackgroundWavelengthMin"));
+    alg->setPropertyValue("MonitorBackgroundWavelengthMax",
+                          getPropertyValue("MonitorBackgroundWavelengthMax"));
+    alg->setPropertyValue("MonitorIntegrationWavelengthMin",
+                          getPropertyValue("MonitorIntegrationWavelengthMin"));
+    alg->setPropertyValue("MonitorIntegrationWavelengthMax",
+                          getPropertyValue("MonitorIntegrationWavelengthMax"));
+    alg->setPropertyValue("ProcessingInstructions",
+                          getPropertyValue("ProcessingInstructions"));
+    alg->execute();
+    transmissionWS = alg->getProperty("OutputWorkspace");
   }
-  
+
   // Rebin the transmission run to be the same as the input.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
   rebinToWorkspaceAlg->initialize();
