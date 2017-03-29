@@ -59,15 +59,15 @@ void CreateTransmissionWorkspace::init() {
 
   setPropertySettings("Params",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+                          "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+                          "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("EndOverlap",
                       make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionWorkspace", IS_NOT_DEFAULT));
+                          "SecondTransmissionRun", IS_NOT_DEFAULT));
 }
 
 //----------------------------------------------------------------------------------------------

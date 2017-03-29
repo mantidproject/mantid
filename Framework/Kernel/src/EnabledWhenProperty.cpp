@@ -72,11 +72,13 @@ EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
   * @return :: EnabledWhenProperty object
   */
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original) {
-  if (m_comparisonDetails) {
+  // This can be triggered several times during Mantid startup so leave
+  // this check as a debug assertion
+  assert(original.m_comparisonDetails || original.m_propertyDetails);
+  if (original.m_comparisonDetails) {
     m_comparisonDetails =
         make_unique<ComparisonDetails>(*original.m_comparisonDetails);
-  }
-  if (m_propertyDetails) {
+  } else {
     m_propertyDetails =
         make_unique<PropertyDetails>(*original.m_propertyDetails);
   }
