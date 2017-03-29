@@ -42,6 +42,20 @@ void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
   TS_ASSERT_EQUALS(i.size(), expectedSize);
 }
 
+void run_StorageMode_MasterOnly(const Parallel::Communicator &comm) {
+  if(comm.rank() == 0) {
+    IndexInfo i(3, Parallel::StorageMode::MasterOnly, comm);
+    TS_ASSERT_EQUALS(i.size(), 3);
+    TS_ASSERT_EQUALS(i.globalSize(), 3);
+    TS_ASSERT_EQUALS(i.spectrumNumber(0), 1);
+    TS_ASSERT_EQUALS(i.spectrumNumber(1), 2);
+    TS_ASSERT_EQUALS(i.spectrumNumber(2), 3);
+  } else {
+    TS_ASSERT_THROWS(IndexInfo(3, Parallel::StorageMode::MasterOnly, comm),
+                     std::runtime_error);
+  }
+}
+
 void run_isOnThisPartition_StorageMode_Cloned(
     const Parallel::Communicator &comm) {
   IndexInfo info(47, Parallel::StorageMode::Cloned, comm);
@@ -191,9 +205,12 @@ public:
   }
 
   void test_StorageMode_MasterOnly() {
-    TS_ASSERT_THROWS(IndexInfo(3, Parallel::StorageMode::MasterOnly,
-                               Parallel::Communicator{}),
-                     std::runtime_error);
+#ifdef MPI_EXPERIMENTAL
+    runParallel(run_StorageMode_MasterOnly);
+#else
+    // Trivial: Run with one partition.
+    run_StorageMode_MasterOnly(Parallel::Communicator{});
+#endif
   }
 
   void test_isOnThisPartition_StorageMode_Cloned() {

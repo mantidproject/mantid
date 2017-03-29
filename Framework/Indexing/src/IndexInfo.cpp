@@ -203,11 +203,16 @@ void IndexInfo::makeSpectrumNumberTranslator(
   } else if (m_storageMode == Parallel::StorageMode::Cloned) {
     partition = PartitionIndex(0);
     numberOfPartitions = 1;
+  } else if (m_storageMode == Parallel::StorageMode::MasterOnly) {
+    if (m_communicator->rank() != 0)
+      throw std::runtime_error(
+          "IndexInfo: storage mode is " + Parallel::toString(m_storageMode) +
+          " but creation on non-master rank has been attempted");
+    partition = PartitionIndex(0);
+    numberOfPartitions = 1;
   } else {
-    // We still need to figure out the required behavior here, will do this when
-    // implementing basic MPI support for MatrixWorkspace.
-    throw std::runtime_error(
-        "IndexInfo does not yet support StorageMode::MasterOnly");
+    throw std::runtime_error("IndexInfo: unknown storage mode " +
+                             Parallel::toString(m_storageMode));
   }
   auto partitioner = Kernel::make_unique<RoundRobinPartitioner>(
       numberOfPartitions, partition,
