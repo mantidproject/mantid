@@ -12,8 +12,8 @@ namespace Parallel {
 
 /** Runs a callable in parallel. This is mainly a helper for testing code with
   MPI calls. ParallelRunner passes a Communicator as first argument to the
-  callable. In a non-MPI build the callable is executed in threads ot mimic MPI
-  ranks.
+  callable. In runs with only a single MPI rank the callable is executed in
+  threads to mimic MPI ranks.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
