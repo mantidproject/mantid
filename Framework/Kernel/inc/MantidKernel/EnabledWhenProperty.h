@@ -33,6 +33,11 @@ setPropertySettings("PropA",
 make_unique<VisibleWhenProperty>("OtherProperty",
 IS_NOT_DEFAULT);
 
+- To combine them you create objects as detailed above and combine them
+in the constructor
+setPropertySettings("PropA",
+make_unique<VisibleWhenProperty>(conditionOne, conditionTwo, AND));
+
 - This will make the property "PropA" show as visible when "OtherProperty"
 is NOT the default value for it.
 
