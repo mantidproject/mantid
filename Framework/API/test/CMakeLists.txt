@@ -14,10 +14,9 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             API
+            Nexus
             ${JSONCPP_LIBRARIES}
             ${NEXUS_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )

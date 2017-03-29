@@ -10,18 +10,11 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             WorkflowAlgorithms
-            API
             Algorithms
             DataHandling
-            DataObjects
-            Geometry
-            HistogramData
-            Kernel
-			Nexus
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
+            Nexus
             )
   add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
