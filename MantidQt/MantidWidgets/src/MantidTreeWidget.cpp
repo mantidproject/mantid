@@ -260,7 +260,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
     // and get simple 1D plot done
     MantidWSIndexWidget::UserInput selections;
     selections.plots = spectrumToPlot;
-    selections.simple = true; 
+    selections.simple = true;
     selections.waterfall = false;
     selections.tiled = false;
     selections.surface = false;
