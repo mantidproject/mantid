@@ -108,9 +108,9 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
 void MatrixWorkspace::setIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
-    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
-                             "does not match number of histograms in "
-                             "workspace");
+    throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                                "does not match number of histograms in "
+                                "workspace");
 
   for (size_t i = 0; i < getNumberHistograms(); ++i) {
     getSpectrum(i)
@@ -147,9 +147,9 @@ void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
-    throw std::runtime_error("MatrixWorkspace::setIndexInfo: IndexInfo size "
-                             "does not match number of histograms in "
-                             "workspace");
+    throw std::invalid_arument("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                               "does not match number of histograms in "
+                               "workspace");
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
   setSpectrumDefinitions(m_indexInfo->spectrumDefinitions());
