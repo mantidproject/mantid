@@ -419,7 +419,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Failed_test_FilterElasticCorrection() {
+  void test_FilterElasticCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceElastic(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockElasticEventWS", ws);
     TS_ASSERT_EQUALS(ws->getNumberEvents(), 10000);
@@ -477,7 +477,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test filtering with correction of direct geometry
     */
-  void Failed_test_FilterDGCorrection() {
+  void test_FilterDGCorrection() {
     EventWorkspace_sptr ws = createEventWorkspaceDirect(0, 1000000);
     AnalysisDataService::Instance().addOrReplace("MockDirectEventWS", ws);
 
@@ -1435,6 +1435,7 @@ public:
     auto &vec_splitTimes = spws->mutableX(0);
     auto &vec_splitGroup = spws->mutableY(0);
 
+    // set up the splitters in nanosecond
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000;
     vec_splitTimes[2] = 2000000;
@@ -1446,6 +1447,10 @@ public:
     vec_splitTimes[8] = 8000000;
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
+
+    // convert the splitters' time to second
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
+      vec_splitTimes[i] *= 1.E-9;
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;
@@ -1468,6 +1473,7 @@ public:
     auto &vec_splitTimes = spws->mutableX(0);
     auto &vec_splitGroup = spws->mutableY(0);
 
+    // create the splitters in nanosecond
     vec_splitTimes[0] = 1000000;
     vec_splitTimes[1] = 1300000; // Rule in  1,339,000
     vec_splitTimes[2] = 2000000;
@@ -1479,6 +1485,10 @@ public:
     vec_splitTimes[8] = 8000000;
     vec_splitTimes[9] = 9000000;
     vec_splitTimes[10] = 10000000;
+
+    // convert the splitters' time to second
+    for (size_t i = 0; i < vec_splitTimes.size(); ++i)
+      vec_splitTimes[i] *= 1.E-9;
 
     vec_splitGroup[0] = 2;
     vec_splitGroup[1] = 5;
