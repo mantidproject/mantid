@@ -16,52 +16,6 @@ using namespace Mantid::API;
 namespace Mantid {
 namespace Algorithms {
 
-/*Anonomous namespace */
-namespace {
-
-/**
-* Translate all the workspace indexes in an origin workspace into workspace
-* indexes of a host end-point workspace. This is done using spectrum numbers as
-* the intermediate.
-*
-* @param originWS : Origin workspace, which provides the original workspace
-* index to spectrum number mapping.
-* @param hostWS : Workspace onto which the resulting workspace indexes will be
-* hosted
-* @throws :: If the specId are not found to exist on the host end-point
-*workspace.
-* @return :: Remapped workspace indexes applicable for the host workspace.
-*results
-*as comma separated string.
-*/
-std::string
-createProcessingCommandsFromDetectorWS(MatrixWorkspace_const_sptr originWS,
-                                       MatrixWorkspace_const_sptr hostWS,
-                                       std::vector<size_t> detectors) {
-  auto spectrumMap = originWS->getSpectrumToWorkspaceIndexMap();
-  std::stringstream result;
-
-  bool first = true;
-  for (auto it = spectrumMap.begin(); it != spectrumMap.end(); ++it) {
-    // Skip this spectrum if it is not in the detectors of interest
-    if (std::find(detectors.begin(), detectors.end(), it->second) ==
-        detectors.end()) {
-      continue;
-    }
-
-    specnum_t specId = (*it).first;
-    if (!first) {
-      result << ",";
-    }
-
-    result << static_cast<int>(hostWS->getIndexFromSpectrumNumber(specId));
-    first = false;
-  }
-
-  return result.str();
-}
-}
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryReductionOne2)
 
@@ -174,10 +128,11 @@ void ReflectometryReductionOne2::initRun() {
     // sum = false;  // temp for testing - still do summation
   }
 
+  findDetectorsOfInterest();
+
   if (summingInQ()) {
     // These values are only required for summation in Q
     findLambdaMinMax();
-    findDetectorsOfInterest();
     findThetaMinMax();
     findTheta0();
     findThetaR();
@@ -432,45 +387,46 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
   if (xUnit->unitID() == "TOF") {
 
-      // Processing instructions for transmission workspace
-      std::string transmissionCommands = getProperty("ProcessingInstructions");
-      if (strictSpectrumChecking) {
-        // If we have strict spectrum checking, the processing commands need to
-        // be
-        // made from the
-        // numerator workspace AND the transmission workspace based on matching
-        // spectrum numbers.
-        transmissionCommands = createProcessingCommandsFromDetectorWS(
-            detectorWS, transmissionWS, m_detectors);
-      }
-
-      MatrixWorkspace_sptr secondTransmissionWS =
-          getProperty("SecondTransmissionRun");
-      auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
-      alg->initialize();
-      alg->setProperty("FirstTransmissionRun", transmissionWS);
-      alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
-      alg->setPropertyValue("Params", getPropertyValue("Params"));
-      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-      alg->setPropertyValue("I0MonitorIndex",
-                            getPropertyValue("I0MonitorIndex"));
-      alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
-      alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-      alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                            getPropertyValue("MonitorBackgroundWavelengthMin"));
-      alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                            getPropertyValue("MonitorBackgroundWavelengthMax"));
-      alg->setPropertyValue(
-          "MonitorIntegrationWavelengthMin",
-          getPropertyValue("MonitorIntegrationWavelengthMin"));
-      alg->setPropertyValue(
-          "MonitorIntegrationWavelengthMax",
-          getPropertyValue("MonitorIntegrationWavelengthMax"));
-      alg->setProperty("ProcessingInstructions", transmissionCommands);
-      alg->execute();
-      transmissionWS = alg->getProperty("OutputWorkspace");
+    // Processing instructions for transmission workspace. If strict spectrum
+    // checking is not enabled then just use the same processing instructions
+    // that were passed in.
+    std::string transmissionCommands = getProperty("ProcessingInstructions");
+    if (strictSpectrumChecking) {
+      // If we have strict spectrum checking, we should have the same
+      // spectrum numbers in both workspaces, but not necessarily with the
+      // same workspace indices. Therefore, map the processing instructions
+      // from the original workspace to the correct indices in the
+      // transmission workspace. Note that we use the run workspace here
+      // because the detectorWS may already have been reduced and may not
+      // contain the original spectra.
+      transmissionCommands =
+          createProcessingCommandsFromDetectorWS(m_runWS, transmissionWS);
     }
+
+    MatrixWorkspace_sptr secondTransmissionWS =
+        getProperty("SecondTransmissionRun");
+    auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
+    alg->initialize();
+    alg->setProperty("FirstTransmissionRun", transmissionWS);
+    alg->setProperty("SecondTransmissionRun", secondTransmissionWS);
+    alg->setPropertyValue("Params", getPropertyValue("Params"));
+    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+    alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
+    alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
+    alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
+    alg->setPropertyValue("MonitorBackgroundWavelengthMin",
+                          getPropertyValue("MonitorBackgroundWavelengthMin"));
+    alg->setPropertyValue("MonitorBackgroundWavelengthMax",
+                          getPropertyValue("MonitorBackgroundWavelengthMax"));
+    alg->setPropertyValue("MonitorIntegrationWavelengthMin",
+                          getPropertyValue("MonitorIntegrationWavelengthMin"));
+    alg->setPropertyValue("MonitorIntegrationWavelengthMax",
+                          getPropertyValue("MonitorIntegrationWavelengthMax"));
+    alg->setProperty("ProcessingInstructions", transmissionCommands);
+    alg->execute();
+    transmissionWS = alg->getProperty("OutputWorkspace");
+  }
 
   // Rebin the transmission run to be the same as the input.
   auto rebinToWorkspaceAlg = this->createChildAlgorithm("RebinToWorkspace");
@@ -773,22 +729,78 @@ Check whether theif spectrum maps for the given workspaces are the same.
 @param severe: True to indicate that failure to verify should result in an
 exception. Otherwise a warning is generated.
 */
-void ReflectometryReductionOne2::verifySpectrumMaps(MatrixWorkspace_const_sptr ws1,
-                                                    MatrixWorkspace_const_sptr ws2,
-                                                    const bool severe) {
+void ReflectometryReductionOne2::verifySpectrumMaps(
+    MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2,
+    const bool severe) {
   auto map1 = ws1->getSpectrumToWorkspaceIndexMap();
   auto map2 = ws2->getSpectrumToWorkspaceIndexMap();
   if (map1 != map2) {
     const std::string message =
-      "Spectrum maps between workspaces do NOT match up.";
+        "Spectrum maps between workspaces do NOT match up.";
     if (severe) {
       throw std::invalid_argument(message);
-    }
-    else {
+    } else {
       g_log.warning(message);
     }
   }
 }
 
+/**
+* Translate all the workspace indexes in an origin workspace into workspace
+* indexes of a host end-point workspace. This is done using spectrum numbers as
+* the intermediate.
+*
+* @param originWS : Origin workspace, which provides the original workspace
+* index to spectrum number mapping.
+* @param hostWS : Workspace onto which the resulting workspace indexes will be
+* hosted
+* @throws :: If the specId are not found to exist on the host end-point
+*workspace.
+* @return :: Remapped workspace indexes applicable for the host workspace,
+*as comma separated string.
+*/
+std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
+    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS) {
+  auto map = originWS->getSpectrumToWorkspaceIndexMap();
+  std::stringstream result;
+
+  // Get the start and end of the range of detectors.
+  /// todo Add support for different GroupingPatterns rather than just a single
+  /// range?
+  const int hostIdxStart =
+      mapSpectrumIndexToWorkspace(map, m_detectors.front(), hostWS);
+  const int hostIdxEnd =
+      mapSpectrumIndexToWorkspace(map, m_detectors.back(), hostWS);
+  result << hostIdxStart << "-" << hostIdxEnd;
+
+  return result.str();
+}
+
+/**
+* Map a spectrum index from the given map to the given workspace
+* @param map : the original spectrum number to index map
+* @param mapIdx : the index to look up in the map
+* @param destWS : the destination workspace
+*/
+int ReflectometryReductionOne2::mapSpectrumIndexToWorkspace(
+    const spec2index_map &map, const size_t mapIdx,
+    MatrixWorkspace_const_sptr destWS) {
+
+  // Get the spectrum numbers for these indices
+  auto it = std::find_if(map.begin(), map.end(),
+                         [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
+
+  if (it == map.end()) {
+    std::ostringstream errMsg;
+    errMsg << "Workspace index " << mapIdx << " not found in run workspace ";
+    throw std::runtime_error(errMsg.str());
+  }
+  specnum_t specId = it->first;
+
+  // Get the workspace index in the destination workspace
+  int wsIdx = static_cast<int>(destWS->getIndexFromSpectrumNumber(specId));
+
+  return wsIdx;
+}
 } // namespace Algorithms
 } // namespace Mantid

@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE2_H_
 
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 namespace Mantid {
 // Forward declaration
@@ -69,10 +70,12 @@ private:
   directBeamCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission or algorithm correction
   Mantid::API::MatrixWorkspace_sptr
-  transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced);
+  transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                       const bool detectorWSReduced);
   // Performs transmission corrections
   Mantid::API::MatrixWorkspace_sptr
-  transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced);
+  transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,
+                         const bool detectorWSReduced);
   // Performs transmission corrections using alternative correction algorithms
   Mantid::API::MatrixWorkspace_sptr
   algorithmicCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS);
@@ -101,6 +104,12 @@ private:
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
                           const bool severe);
+  std::string createProcessingCommandsFromDetectorWS(
+      API::MatrixWorkspace_const_sptr originWS,
+      API::MatrixWorkspace_const_sptr hostWS);
+  int mapSpectrumIndexToWorkspace(const spec2index_map &map,
+                                  const size_t mapIdx,
+                                  API::MatrixWorkspace_const_sptr destWS);
 
   // Find and cache constants
   void initRun();
@@ -120,16 +129,16 @@ private:
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  bool m_convertUnits; // convert the input workspace to lambda
-  bool m_normalise;    // normalise by monitors etc.
-  bool m_sum;          // whether to do summation
-  double m_thetaMin;   // min angle in detectors of interest
-  double m_thetaMax;   // max angle in detectors of interest
-  double m_theta0;     // horizon angle
-  double m_thetaR;     // reference angle for summation in Q
-  double m_lambdaMin;  // min wavelength in area of interest
-  double m_lambdaMax;  // max wavelength in area of interest
-  std::vector<size_t> m_detectors;
+  bool m_convertUnits;             // convert the input workspace to lambda
+  bool m_normalise;                // normalise by monitors etc.
+  bool m_sum;                      // whether to do summation
+  double m_thetaMin;               // min angle in detectors of interest
+  double m_thetaMax;               // max angle in detectors of interest
+  double m_theta0;                 // horizon angle
+  double m_thetaR;                 // reference angle for summation in Q
+  double m_lambdaMin;              // min wavelength in area of interest
+  double m_lambdaMax;              // max wavelength in area of interest
+  std::vector<size_t> m_detectors; // workspace indices of detectors of interest
   int m_centreDetectorIdx;
 };
 
