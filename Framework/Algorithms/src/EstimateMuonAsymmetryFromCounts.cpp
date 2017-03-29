@@ -47,6 +47,10 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
+  declareProperty(
+      "Normalization Constant", Direction::Output,
+      "The normalization constant used for calculating the asymmetry.");
+
 }
 
 /*
@@ -138,7 +142,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
-
+    setProperty("Normalization Constant", normConst);
+ 
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }

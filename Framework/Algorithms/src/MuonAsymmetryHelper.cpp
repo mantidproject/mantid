@@ -32,7 +32,7 @@ using namespace Kernel;
 using API::Progress;
 using std::size_t;
 
-/** a
+/** 
  * Corrects the data and errors for one spectrum.
  * The muon lifetime is in microseconds, not seconds, because the data is in
  * microseconds.
@@ -104,7 +104,6 @@ double estimateNormalisationConst(const HistogramData::Histogram &histogram,
 * @param xData :: [input] Input HistogramData as bin edges
 * @param startX :: [input] the start time
 * @returns :: The index to start calculations from
-* @throw :: runtime error if the range is zero.
 */
 size_t startIndexFromTime(const HistogramData::BinEdges &xData,
                           const double startX) {
@@ -118,7 +117,6 @@ size_t startIndexFromTime(const HistogramData::BinEdges &xData,
 * @param xData :: [input] HistogramData as bin edges
 * @param endX :: [input] the end time
 * @returns :: The last index to  include in calculations
-* @throw :: runtime error if the range is zero.
 */
 size_t endIndexFromTime(const HistogramData::BinEdges &xData,
                         const double endX) {
