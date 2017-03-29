@@ -16,6 +16,7 @@ Algorithms
 - :ref:`LoadVesuvio <algm-LoadVesuvio>` can now load NeXus files as well as raw files
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
+- :ref:`VesuvioDiffractionReduction <algm-VesuvioDiffractionReduction>` has been deprecated, use :ref:`ISISIndirectDiffractionReduction <ISISIndirectDiffractionReduction>`
 
 Data Reduction
 ##############
@@ -41,6 +42,8 @@ Jump Fit
 Improvements
 ------------
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+- :ref:`ISISIndirectDiffractionReduction <ISISIndirectDiffractionReduction>` now fully supports VESUVIO data
+
 
 Bugfixes
 --------

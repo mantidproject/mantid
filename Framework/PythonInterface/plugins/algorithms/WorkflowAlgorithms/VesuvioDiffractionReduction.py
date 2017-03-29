@@ -25,7 +25,7 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         return 'Diffraction\\Reduction'
 
     def summary(self):
-        return ('Performs diffraction reduction for VESUVIO. This algorithm is deprecated (April-2017).'
+        return ('Performs diffraction reduction for VESUVIO. This algorithm is deprecated (April-2017).')
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('InputFiles'),
