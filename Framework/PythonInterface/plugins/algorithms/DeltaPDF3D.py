@@ -90,6 +90,7 @@ class DeltaPDF3D(PythonAlgorithm):
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
             width = self.getProperty("Width").value
+            cut_shape = self.getProperty("Shape").value
             space_group = self.getProperty("SpaceGroup").value
             if space_group is '':
                 check_space_group = False
@@ -100,13 +101,16 @@ class DeltaPDF3D(PythonAlgorithm):
                 for k in range(int(np.ceil(dimY.getMinimum())), int(np.floor(dimY.getMaximum()))+1):
                     for l in range(int(np.ceil(dimZ.getMinimum())), int(np.floor(dimZ.getMaximum()))+1):
                         if not check_space_group or sg.isAllowedReflection([h,k,l]):
-                            x_min=np.searchsorted(X,h-width)
-                            x_max=np.searchsorted(X,h+width)
-                            y_min=np.searchsorted(Y,k-width)
-                            y_max=np.searchsorted(Y,k+width)
-                            z_min=np.searchsorted(Z,l-width)
-                            z_max=np.searchsorted(Z,l+width)
-                            signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
+                            if cut_shape == 'cube':
+                                x_min=np.searchsorted(X,h-width)
+                                x_max=np.searchsorted(X,h+width)
+                                y_min=np.searchsorted(Y,k-width)
+                                y_max=np.searchsorted(Y,k+width)
+                                z_min=np.searchsorted(Z,l-width)
+                                z_max=np.searchsorted(Z,l+width)
+                                signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
+                            else:
+                                signal[(Xs-h)**2 + (Ys-k)**2 + (Zs-l)**2 < width**2]=np.nan
 
         if self.getProperty("CutSphere").value:
             progress.report("Cutting to sphere")
