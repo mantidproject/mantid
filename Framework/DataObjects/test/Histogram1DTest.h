@@ -35,51 +35,18 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = boost::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
-    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);
     h2.setCountStandardDeviations(100);
   }
 
-  void testcheckAndSanitizeHistogramFillsBothYAndEData() {
+  void testcheckAndSanitizeHistogramThrowsNullY() {
     Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
     BinEdges edges{-0.04, 1.7};
-    h.setHistogram(edges);
-    TS_ASSERT_EQUALS(h.size(), 1)
-    TS_ASSERT_EQUALS(h.x()[0], -0.04)
-    TS_ASSERT_EQUALS(h.x()[1], 1.7);
-    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Counts)
-    TS_ASSERT_EQUALS(h.y()[0], 0.0)
-    TS_ASSERT_EQUALS(h.e()[0], 0.0)
-  }
-
-  void testcheckAndSanitizeHistogramFillsEData() {
-    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
-    BinEdges edges{-0.04, 1.7};
-    Frequencies counts{5.9};
-    h.setHistogram(edges, counts);
-    TS_ASSERT_EQUALS(h.size(), 1);
-    TS_ASSERT_EQUALS(h.x()[0], -0.04)
-    TS_ASSERT_EQUALS(h.x()[1], 1.7);
-    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies)
-    TS_ASSERT_EQUALS(h.y()[0], 5.9)
-    TS_ASSERT_DELTA(h.e()[0], std::sqrt(5.9), 1e-6)
-  }
-
-  void testcheckAndSanitizeHistogramDoesntChangeValidData() {
-    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
-    BinEdges edges{-0.04, 1.7};
-    Frequencies counts{-5.9};
-    FrequencyStandardDeviations stdDevs{2.3};
-    h.setHistogram(edges, counts, stdDevs);
-    TS_ASSERT_EQUALS(h.size(), 1);
-    TS_ASSERT_EQUALS(h.x()[0], -0.04)
-    TS_ASSERT_EQUALS(h.x()[1], 1.7);
-    TS_ASSERT_EQUALS(h.yMode(), Histogram::YMode::Frequencies)
-    TS_ASSERT_EQUALS(h.y()[0], -5.9)
-    TS_ASSERT_EQUALS(h.e()[0], 2.3)
+    TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
   }
 
   void testsetgetXvector() {
