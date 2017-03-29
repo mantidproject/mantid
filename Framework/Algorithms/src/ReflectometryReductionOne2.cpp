@@ -427,12 +427,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   const bool strictSpectrumChecking = getProperty("StrictSpectrumChecking");
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
 
-  // If the detector workspace has not been reduced then the spectrum maps
-  // should match BEFORE reducing the transmission workspace
-  if (!detectorWSReduced) {
-    verifySpectrumMaps(detectorWS, transmissionWS, strictSpectrumChecking);
-  }
-
   // Reduce the transmission workspace, if not already done (assume that if
   // the workspace is in wavelength then it has already been reduced)
   Unit_const_sptr xUnit = transmissionWS->getAxis(0)->unit();
