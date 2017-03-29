@@ -46,6 +46,31 @@ public:
   VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
+  /** Multiple conditions constructor - takes two unique pointers to
+  * VisibleWhenProperty objects and returns the product of them
+  * with the specified logic operator.
+  * Note: With Unique pointers you will need to use std::move
+  * to transfer ownership of those objects to this one.
+  *
+  * @param conditionOne :: First VisibleWhenProperty object to use
+  * @param conditionTwo :: Second VisibleWhenProperty object to use
+  * @param localOperator :: The logic operator to apply across both
+  *conditions
+  *
+  */
+  VisibleWhenProperty(std::unique_ptr<VisibleWhenProperty> &&conditionOne,
+                      std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
+                      eLogicOperator logicalOperator);
+
+  /**
+  * Checks if the user specified combination of visible criterion
+  * returns a true or false value
+  *
+  * @return true if user specified combination was true.
+  * @throw If any problems was found
+  */
+  virtual bool checkComparison(const IPropertyManager *algo) const;
+
   //--------------------------------------------------------------------------------------------
   /// Return true always
   bool isEnabled(const IPropertyManager *) const override;

@@ -111,7 +111,7 @@ public:
   virtual bool checkCriterion(const IPropertyManager *algo) const;
 
   /**
-   * Checks if a the user specified combination of criterion
+   * Checks if the user specified combination of enabled criterion
    * returns a true or false value
    *
    * @return true if user specified combination was true.
