@@ -57,9 +57,8 @@ void CreateTransmissionWorkspace::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Output Workspace IvsQ.");
 
-  setPropertySettings("Params",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SecondTransmissionRun", IS_NOT_DEFAULT));
+  setPropertySettings("Params", make_unique<Kernel::EnabledWhenProperty>(
+                                    "SecondTransmissionRun", IS_NOT_DEFAULT));
 
   setPropertySettings("StartOverlap",
                       make_unique<Kernel::EnabledWhenProperty>(
