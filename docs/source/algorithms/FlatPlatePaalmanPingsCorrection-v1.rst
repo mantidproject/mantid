@@ -30,8 +30,8 @@ Efixed mode
 ###########
 
 - In **Efixed** mode, the correction will be computed for a single wavelength number derived from the analyser or monochromator energy,
-which by default will be attempted to be read from the instrument parameters (named **Efixed**), but can also be overridden in the **Efixed** input property.
-In this case, the `NumberWavelengths` and `Interpolate` options will be ignored.
+  which by default will be attempted to be read from the instrument parameters (named **Efixed**), but can also be overridden in the **Efixed** input property.
+  In this case, the `NumberWavelengths` and `Interpolate` options will be ignored.
 
 Workflow
 --------

@@ -23,11 +23,11 @@ namespace {
 //----------------------------------------------------------------------------------------------
 /** Generate a matrix workspace for writing to gsas file
 */
-API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
+API::MatrixWorkspace_sptr generateTestMatrixWorkspace(int nbins = 100) {
   // Create workspace
   MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-          2, 100, false, false, true, "TestFake"));
+          2, nbins, false, false, true, "TestFake"));
   dataws->getAxis(0)->setUnit("TOF");
 
   // Set data with logarithm bin
@@ -370,7 +370,7 @@ class SaveGSSTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace(20000);
     AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
     for (int i = 0; i < numberOfIterations; ++i) {

@@ -116,7 +116,7 @@ void ConvertToConstantL2::exec() {
     V3D newPos;
     newPos.spherical(m_l2, theta, phi);
 
-    const size_t detIndex = inputSpecInfo.spectrumDefinition(i)[0].first;
+    const auto detIndex = inputSpecInfo.spectrumDefinition(i)[0];
     outputDetInfo.setPosition(detIndex, newPos);
 
     m_outputWS->mutableX(i) -= deltaTOF;

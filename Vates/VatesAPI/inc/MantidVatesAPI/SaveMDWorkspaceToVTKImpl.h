@@ -50,7 +50,7 @@ public:
   void saveMDWorkspace(const Mantid::API::IMDWorkspace_sptr &workspace,
                        const std::string &filename,
                        VisualNormalization normalization, int recursionDepth,
-                       const std::string &compressorType) const;
+                       const std::string &compressorType);
 
   const static std::string structuredGridExtension;
   const static std::string unstructuredGridExtension;
@@ -60,6 +60,7 @@ public:
   VisualNormalization
   translateStringToVisualNormalization(const std::string &normalization) const;
   bool is3DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
+  void progressFunction(vtkObject *caller, unsigned long, void *);
 
 private:
   mutable API::Progress m_progress;
@@ -68,7 +69,7 @@ private:
   bool is4DWorkspace(const Mantid::API::IMDWorkspace &workspace) const;
   int writeDataSetToVTKFile(vtkXMLWriter *writer, vtkDataSet *dataSet,
                             const std::string &filename,
-                            vtkXMLWriter::CompressorType compressor) const;
+                            vtkXMLWriter::CompressorType compressor);
   double selectTimeSliceValue(const Mantid::API::IMDWorkspace &workspace) const;
   std::string getFullFilename(std::string filename,
                               bool isHistoWorkspace) const;

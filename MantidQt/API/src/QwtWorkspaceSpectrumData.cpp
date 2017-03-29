@@ -5,6 +5,8 @@
 
 #include <QStringBuilder>
 
+using namespace Mantid::HistogramData;
+
 /**
  * Construct a QwtWorkspaceSpectrumData object with a source workspace
  * @param workspace The workspace containing the data
@@ -17,15 +19,13 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(
     const Mantid::API::MatrixWorkspace &workspace, int wsIndex,
     const bool logScaleY, const bool plotAsDistribution)
     : MantidQwtMatrixWorkspaceData(logScaleY), m_wsIndex(wsIndex),
-      m_X(workspace.readX(wsIndex)), m_Y(workspace.readY(wsIndex)),
-      m_E(workspace.readE(wsIndex)), m_xTitle(), m_yTitle(),
-      m_isHistogram(workspace.isHistogramData()),
-      m_dataIsNormalized(workspace.isDistribution()), m_binCentres(false),
-      m_isDistribution(false) {
+      m_hist(workspace.binEdges(wsIndex), workspace.counts(wsIndex),
+             workspace.countStandardDeviations(wsIndex)),
+      m_xTitle(), m_yTitle(), m_dataIsNormalized(workspace.isDistribution()),
+      m_binCentres(false), m_isDistribution(false) {
+
   // Actual plotting based on what type of data we have
-  setAsDistribution(plotAsDistribution &&
-                    !m_dataIsNormalized); // takes into account if this is a
-                                          // histogram and sets m_isDistribution
+  setAsDistribution(plotAsDistribution && !m_dataIsNormalized);
 
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized || m_isDistribution),
@@ -52,13 +52,7 @@ QwtWorkspaceSpectrumData *QwtWorkspaceSpectrumData::copyWithNewSource(
 
 /** Size of the data set
  */
-size_t QwtWorkspaceSpectrumData::size() const {
-  if (m_binCentres || m_isHistogram) {
-    return m_Y.size();
-  }
-
-  return m_X.size();
-}
+size_t QwtWorkspaceSpectrumData::size() const { return m_hist.size(); }
 
 /**
 Return the x value of data point i
@@ -66,7 +60,7 @@ Return the x value of data point i
 @return x X value of data point i
 */
 double QwtWorkspaceSpectrumData::getX(size_t i) const {
-  return m_binCentres ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i];
+  return m_binCentres ? m_hist.points()[i] : m_hist.binEdges()[i];
 }
 
 /**
@@ -75,26 +69,17 @@ Return the y value of data point i
 @return y Y value of data point i
 */
 double QwtWorkspaceSpectrumData::getY(size_t i) const {
-  double tmp = i < m_Y.size() ? m_Y[i] : m_Y.back();
-  if (m_isDistribution) {
-    tmp /= fabs(m_X[i + 1] - m_X[i]);
-  }
-  return tmp;
+  return m_isDistribution ? m_hist.frequencies()[i] : m_hist.counts()[i];
 }
 
-double QwtWorkspaceSpectrumData::getEX(size_t i) const {
-  return m_isHistogram ? (m_X[i] + m_X[i + 1]) / 2 : m_X[i];
-}
+double QwtWorkspaceSpectrumData::getEX(size_t i) const { return m_hist.x()[i]; }
 
 double QwtWorkspaceSpectrumData::getE(size_t i) const {
-  double ei = (i < m_E.size()) ? m_E[i] : m_E.back();
-  if (m_isDistribution) {
-    ei /= fabs(m_X[i + 1] - m_X[i]);
-  }
-  return ei;
+  return m_isDistribution ? m_hist.frequencyStandardDeviations()[i]
+                          : m_hist.countStandardDeviations()[i];
 }
 
-size_t QwtWorkspaceSpectrumData::esize() const { return m_E.size(); }
+size_t QwtWorkspaceSpectrumData::esize() const { return m_hist.e().size(); }
 
 /**
  * @return A string containin the text to use as an X axis label
@@ -107,7 +92,7 @@ QString QwtWorkspaceSpectrumData::getXAxisLabel() const { return m_xTitle; }
 QString QwtWorkspaceSpectrumData::getYAxisLabel() const { return m_yTitle; }
 
 bool QwtWorkspaceSpectrumData::setAsDistribution(bool on) {
-  m_isDistribution = on && m_isHistogram;
+  m_isDistribution = on;
   return m_isDistribution;
 }
 
@@ -123,12 +108,9 @@ operator=(const QwtWorkspaceSpectrumData &rhs) {
   if (this != &rhs) {
     static_cast<MantidQwtMatrixWorkspaceData &>(*this) = rhs;
     m_wsIndex = rhs.m_wsIndex;
-    m_X = rhs.m_X;
-    m_Y = rhs.m_Y;
-    m_E = rhs.m_E;
+    m_hist = rhs.m_hist;
     m_xTitle = rhs.m_xTitle;
     m_yTitle = rhs.m_yTitle;
-    m_isHistogram = rhs.m_isHistogram;
     m_binCentres = rhs.m_binCentres;
   }
   return *this;

@@ -6,7 +6,6 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"

@@ -4,9 +4,9 @@ import mantid
 
 from mantid.api import AnalysisDataService
 from sans.state.state_functions import (get_output_workspace_name, is_pure_none_or_not_none, one_is_none,
-                                            validation_message, is_not_none_and_first_larger_than_second,
-                                            write_hash_into_reduced_can_workspace, get_reduced_can_workspace_from_ads)
-from test_director import TestDirector
+                                        validation_message, is_not_none_and_first_larger_than_second,
+                                        write_hash_into_reduced_can_workspace, get_reduced_can_workspace_from_ads)
+from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, OutputParts)
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -80,7 +80,7 @@ class StateFunctionsTest(unittest.TestCase):
         # Act
         output_workspace = get_output_workspace_name(state, ISISReductionMode.LAB)
         # Assert
-        self.assertTrue("12345rear_1D12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
+        self.assertTrue("12345rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37" == output_workspace)
 
     def test_that_detects_if_all_entries_are_none_or_not_none_as_true(self):
         self.assertFalse(is_pure_none_or_not_none(["test", None, "test"]))
