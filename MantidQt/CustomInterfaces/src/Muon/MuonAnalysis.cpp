@@ -3078,7 +3078,12 @@ void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
 */
 void MuonAnalysis::setTFAsymm(Muon::TFAsymmState TFAsymmState){
 	// check the TFAsymm box
-	m_uiForm.chkTFAsymm->setChecked(true);	
+	if (TFAsymmState == Muon::TFAsymmState::Enabled) {
+		m_uiForm.chkTFAsymm->setChecked(true);
+	}
+	else {
+		m_uiForm.chkTFAsymm->setChecked(false);
+	}
 	// If both multiFit and TFAsymm are checked
 	// uncheck the multiFit
 	if (m_uiForm.chkEnableMultiFit->isChecked() && TFAsymmState== Muon::TFAsymmState::Enabled)//m_uiForm.chkTFAsymm->isChecked())
