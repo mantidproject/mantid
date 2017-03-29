@@ -87,7 +87,7 @@ Emode
   For flat plate, all the options except *Efixed*, are equivalent.
   In brief, use *Indirect* for QENS, *Efixed* for FWS and diffraction.
   *Efixed* can be used for QENS also, if the energy transfer can be neglected compared to the incident energy.
-  See :ref:`CylinderPaalmanPingsCorrections <algm-CylinderPaalmanPingsCorrections>` for the details.
+  See :ref:`CylinderPaalmanPingsCorrections <algm-CylinderPaalmanPingsCorrection>` for the details.
 
 Efixed
   The value of the incident (indirect) or final (direct) energy in `mev`. Specified in the instrument parameter file.

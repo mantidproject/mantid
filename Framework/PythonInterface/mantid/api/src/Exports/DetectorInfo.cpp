@@ -9,6 +9,9 @@ void export_DetectorInfo() {
   // its functionality to Python, and should not yet be used in user scripts. DO
   // NOT ADD EXPORTS TO OTHER METHODS without contacting the team working on
   // Instrument-2.0.
+  bool (DetectorInfo::*isMonitor)(const size_t) const =
+      &DetectorInfo::isMonitor;
+  bool (DetectorInfo::*isMasked)(const size_t) const = &DetectorInfo::isMasked;
   class_<DetectorInfo, boost::noncopyable>("DetectorInfo", no_init)
       .def("__len__", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
@@ -16,8 +19,8 @@ void export_DetectorInfo() {
       .def("size", &DetectorInfo::size, (arg("self")),
            "Returns the size of the DetectorInfo, i.e., the number of "
            "detectors in the instrument.")
-      .def("isMonitor", &DetectorInfo::isMonitor, (arg("self"), arg("index")),
+      .def("isMonitor", isMonitor, (arg("self"), arg("index")),
            "Returns True if the detector is a monitor.")
-      .def("isMasked", &DetectorInfo::isMasked, (arg("self"), arg("index")),
+      .def("isMasked", isMasked, (arg("self"), arg("index")),
            "Returns True if the detector is masked.");
 }

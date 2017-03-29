@@ -2,6 +2,7 @@
 #define MANTID_API_DETECTORINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -71,21 +72,35 @@ public:
 
   DetectorInfo &operator=(const DetectorInfo &rhs);
 
+  bool isEquivalent(const DetectorInfo &other) const;
+
   size_t size() const;
 
   bool isMonitor(const size_t index) const;
+  bool isMonitor(const std::pair<size_t, size_t> &index) const;
   bool isMasked(const size_t index) const;
+  bool isMasked(const std::pair<size_t, size_t> &index) const;
   double l2(const size_t index) const;
+  double l2(const std::pair<size_t, size_t> &index) const;
   double twoTheta(const size_t index) const;
+  double twoTheta(const std::pair<size_t, size_t> &index) const;
   double signedTwoTheta(const size_t index) const;
+  double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;
+  Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;
+  Kernel::Quat rotation(const std::pair<size_t, size_t> &index) const;
 
   void setMasked(const size_t index, bool masked);
+  void setMasked(const std::pair<size_t, size_t> &index, bool masked);
   void clearMaskFlags();
 
   void setPosition(const size_t index, const Kernel::V3D &position);
+  void setPosition(const std::pair<size_t, size_t> &index,
+                   const Kernel::V3D &position);
   void setRotation(const size_t index, const Kernel::Quat &rotation);
+  void setRotation(const std::pair<size_t, size_t> &index,
+                   const Kernel::Quat &rotation);
 
   void setPosition(const Geometry::IComponent &comp, const Kernel::V3D &pos);
   void setRotation(const Geometry::IComponent &comp, const Kernel::Quat &rot);
@@ -103,17 +118,25 @@ public:
   /// This will throw an out of range exception if the detector does not exist.
   size_t indexOf(const detid_t id) const { return m_detIDToIndex.at(id); }
 
+  size_t scanCount(const size_t index) const;
+  std::pair<Kernel::DateAndTime, Kernel::DateAndTime>
+  scanInterval(const std::pair<size_t, size_t> &index) const;
+  void setScanInterval(
+      const size_t index,
+      const std::pair<Kernel::DateAndTime, Kernel::DateAndTime> &interval);
+
+  void merge(const DetectorInfo &other);
+
   friend class SpectrumInfo;
 
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
   boost::shared_ptr<const Geometry::IDetector>
   getDetectorPtr(const size_t index) const;
-  void setCachedDetector(
-      size_t index,
-      boost::shared_ptr<const Geometry::IDetector> detector) const;
   const Geometry::IComponent &getSource() const;
   const Geometry::IComponent &getSample() const;
+  const std::vector<size_t> &
+  getAssemblyDetectorIndices(const Geometry::IComponent &comp) const;
 
   void cacheSource() const;
   void cacheSample() const;
@@ -146,6 +169,9 @@ private:
 
   mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
+  mutable std::vector<
+      std::pair<const Geometry::IComponent *, std::vector<size_t>>>
+      m_lastAssemblyDetectorIndices;
   mutable std::vector<size_t> m_lastIndex;
 };
 

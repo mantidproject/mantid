@@ -1,8 +1,8 @@
 .. _isis-powder-diffraction-polaris-ref:
 
-=======================================
+=========================================
 ISIS Powder Diffraction Scripts - Polaris
-=======================================
+=========================================
 
 .. warning:: These scripts and documentation are still undergoing active development.
              They can change in any way during these stages and the validity of all

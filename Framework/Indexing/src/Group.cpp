@@ -1,3 +1,4 @@
+#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
 
@@ -12,14 +13,14 @@ namespace Indexing {
 * vector describes the group for the i-th entry in 'specNums'. Each entry is a
 * vector of indices of spectra in 'source' that are to be grouped.
 */
-IndexInfo group(const IndexInfo &source, std::vector<specnum_t> &&specNums,
+IndexInfo group(const IndexInfo &source, std::vector<SpectrumNumber> &&specNums,
                 const std::vector<std::vector<size_t>> &grouping) {
   if (specNums.size() != grouping.size())
     throw std::runtime_error("Indexing::group: Size mismatch between spectrum "
                              "number and grouping vectors");
-  std::vector<std::vector<detid_t>> detIDs;
+  std::vector<std::vector<DetectorID>> detIDs;
   for (const auto &group : grouping) {
-    detIDs.emplace_back(std::vector<detid_t>());
+    detIDs.emplace_back(std::vector<DetectorID>());
     for (const auto &i : group) {
       const auto &IDs = source.detectorIDs(i);
       auto &newIDs = detIDs.back();
