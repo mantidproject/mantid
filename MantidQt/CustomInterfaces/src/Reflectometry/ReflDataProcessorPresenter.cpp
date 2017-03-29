@@ -7,9 +7,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
-#include <boost/algorithm/string.hpp>
-#include <numeric>
-
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 

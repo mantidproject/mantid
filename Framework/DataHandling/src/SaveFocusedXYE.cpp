@@ -126,6 +126,10 @@ void SaveFocusedXYE::exec() {
         l1 = detectorInfo.l1();
         l2 = detectorInfo.l2(i);
         tth = detectorInfo.twoTheta(i) * 180. / M_PI;
+      } catch (std::logic_error &ex) {
+        // DetectorInfo::twoTheta throws for monitors. Ignore and continue with
+        // default value.
+        g_log.warning() << ex.what() << '\n';
       } catch (std::runtime_error &ex) {
         g_log.warning() << ex.what() << '\n';
       }
