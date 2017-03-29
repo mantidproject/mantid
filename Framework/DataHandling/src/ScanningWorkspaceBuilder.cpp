@@ -16,6 +16,12 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
 
 void ScanningWorkspaceBuilder::setInstrument(
     boost::shared_ptr<const Geometry::Instrument> instrument) {
+  if (instrument->getNumberDetectors() < m_nDetectors) {
+    throw std::logic_error("There are not enough detectors in the instrument "
+                           "for the number of detectors set in the scanning "
+                           "workspace builder.");
+  }
+
   m_instrument = instrument;
 }
 
@@ -118,16 +124,15 @@ void ScanningWorkspaceBuilder::verifyTimeIndexSize(
   if (timeIndexSize != m_nTimeIndexes) {
     throw std::logic_error(
         "Number of " + description +
-        " supplied does not match the number of time indexes being requested.");
+        " supplied does not match the number of time indexes.");
   }
 }
 
 void ScanningWorkspaceBuilder::verifyDetectorSize(
     size_t detectorSize, const std::string &description) const {
   if (detectorSize != m_nDetectors) {
-    throw std::logic_error(
-        "Number of " + description +
-        " supplied does not match the number of detectors being requested.");
+    throw std::logic_error("Number of " + description +
+                           " supplied does not match the number of detectors.");
   }
 }
 
