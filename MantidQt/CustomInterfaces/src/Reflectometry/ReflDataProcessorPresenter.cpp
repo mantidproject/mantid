@@ -179,12 +179,17 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   bool errors = false;
   bool multiRow = group.size() > 1;
   size_t numGroupSlices = INT_MAX;
+  const std::string filterAlg =
+      timeSlicingType == "LogValue" ? "FilterByLogValue" : "FilterByTime";
 
   std::vector<double> startTimes, stopTimes;
+  std::string logFilter; // Set if we are slicing by log value
 
-  // For custom slicing, the start/stop times are the same for all rows
+  // For custom/log value slicing the start/stop times are the same for all rows
   if (timeSlicingType == "Custom")
     parseCustom(timeSlicingValues, startTimes, stopTimes);
+  if (timeSlicingType == "LogValue")
+    parseLogValue(timeSlicingValues, logFilter, startTimes, stopTimes);
 
   for (const auto &row : group) {
 
@@ -192,7 +197,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     const auto data = row.second;         // Vector containing data for this row
     std::string runNo = row.second.at(0); // The run number
 
-    if (timeSlicingType != "Custom") {
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Uniform") {
       const std::string runName = "TOF_" + runNo;
       parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
                    stopTimes);
@@ -203,8 +208,9 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(data);
+        std::string wsName =
+            takeSlice(runNo, i, startTimes[i], stopTimes[i], logFilter);
         slice[0] = wsName;
         auto newData = reduceRow(slice);
         newData[0] = data[0];
@@ -223,8 +229,8 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
   // Post-process (if needed)
   if (multiRow) {
 
-    // All slices are common for uniform even or custom slicing
-    if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
+    // All slices are common for uniform even, custom and log value slicing
+    if (timeSlicingType != "Uniform")
       numGroupSlices = startTimes.size();
 
     m_numGroupSlicesMap[groupID] = numGroupSlices;
@@ -387,7 +393,7 @@ void ReflDataProcessorPresenter::parseLogValue(const std::string &inputStr,
 
 /** Loads an event workspace and puts it into the ADS
 *
-* @param runNo :: the run number as a string
+* @param runNo :: The run number as a string
 * @return :: True if algorithm was executed. False otherwise
 */
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
@@ -406,7 +412,7 @@ bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
 /** Loads a non-event workspace and puts it into the ADS
 *
-* @param runNo :: the run number as a string
+* @param runNo :: The run number as a string
 */
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
@@ -422,42 +428,36 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
-* @param runNo :: the run number as a string
-* @param sliceIndex :: the index of the slice being taken
-* @param startTime :: start time
-* @param stopTime :: stop time
+* @param filterAlg :: The filter algorithm to use
+* @param runNo :: The run number as a string
+* @param sliceIndex :: The index of the slice being taken
+* @param startTime :: Start time
+* @param stopTime :: Stop time
+* @param logFilter :: The log filter to use if slicing by log value
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
                                                   size_t sliceIndex,
                                                   double startTime,
-                                                  double stopTime) {
+                                                  double stopTime,
+                                                  std::string logFilter) {
 
   std::string runName = "TOF_" + runNo;
   std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
   std::string monName = runName + "_monitors";
 
-  // Filter by time
-  IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
-  filter->initialize();
-  filter->setProperty("InputWorkspace", runName);
-  filter->setProperty("OutputWorkspace", sliceName);
-  filter->setProperty("StartTime", startTime);
-  filter->setProperty("StopTime", stopTime);
-  filter->execute();
-
-  // Get the normalization constant for this slice
-  MatrixWorkspace_sptr mws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(runName);
-  double total = mws->run().getProtonCharge();
-  mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sliceName);
-  double slice = mws->run().getProtonCharge();
-  double fraction = slice / total;
+  // Use FilterByTime if logFilter isn't set and FilterByLogValue otherwise
+  double scaleFactor;
+  if (logFilter.empty())
+    doFilterByTime(runName, sliceName, startTime, stopTime, scaleFactor);
+  else
+    doFilterByLogValue(runName, sliceName, startTime, stopTime, logFilter,
+                       scaleFactor);
 
   IAlgorithm_sptr scale = AlgorithmManager::Instance().create("Scale");
   scale->initialize();
   scale->setProperty("InputWorkspace", monName);
-  scale->setProperty("Factor", fraction);
+  scale->setProperty("Factor", scaleFactor);
   scale->setProperty("OutputWorkspace", "__" + monName + "_temp");
   scale->execute();
 
@@ -482,6 +482,72 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
   AnalysisDataService::Instance().remove("__" + monName + "_temp");
 
   return sliceName.substr(4);
+}
+
+/** Performs FilterByTime on a run and obtains the slice normalization constant
+*
+* @param runName :: The name of the run being filtered
+* @param sliceName :: The index of the slice being taken
+* @param startTime :: Start time
+* @param stopTime :: Stop time
+* @param fraction :: The slice normalization constant
+*/
+void ReflDataProcessorPresenter::doFilterByTime(const std::string &runName,
+                                                const std::string &sliceName,
+                                                double startTime,
+                                                double stopTime,
+                                                double &fraction) {
+
+  // Filter the run
+  IAlgorithm_sptr filter = AlgorithmManager::Instance().create("FilterByTime");
+  filter->initialize();
+  filter->setProperty("InputWorkspace", runName);
+  filter->setProperty("OutputWorkspace", sliceName);
+  filter->setProperty("StartTime", startTime);
+  filter->setProperty("StopTime", stopTime);
+  filter->execute();
+
+  // Obtain the normalization constant for this slice
+  MatrixWorkspace_sptr mws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(runName);
+  double total = mws->run().getProtonCharge();
+  mws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sliceName);
+  double slice = mws->run().getProtonCharge();
+  fraction = slice / total;
+}
+
+/** Performs FilterByLogValue on a run and obtains the slice normalization
+*constant
+*
+* @param runName :: The name of the run being filtered
+* @param sliceName :: The index of the slice being taken
+* @param startTime :: Start time
+* @param stopTime :: Stop time
+* @param logFilter :: The name of the log filter
+* @param fraction :: The slice normalization constant
+*/
+void ReflDataProcessorPresenter::doFilterByLogValue(
+    const std::string &runName, const std::string &sliceName, double startTime,
+    double stopTime, const std::string &logFilter, double &fraction) {
+
+  // Filter the run
+  IAlgorithm_sptr filter =
+      AlgorithmManager::Instance().create("FilterByLogValue");
+  filter->initialize();
+  filter->setProperty("InputWorkspace", runName);
+  filter->setProperty("OutputWorkspace", sliceName);
+  filter->setProperty("MinimumValue", startTime);
+  filter->setProperty("MaximumValue", stopTime);
+  filter->setProperty("LogName", logFilter);
+  filter->execute();
+
+  // Obtain the normalization constant for this slice
+  IEventWorkspace_sptr ews =
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(runName);
+  double total = ews->run().getProtonCharge();
+  ews = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(sliceName);
+  double slice = ews->run().getProtonCharge();
+  fraction = slice / total;
 }
 
 /** Plots any currently selected rows */
