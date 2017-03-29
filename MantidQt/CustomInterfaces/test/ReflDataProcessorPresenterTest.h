@@ -286,7 +286,7 @@ public:
     groupList.insert(0);
 
     // We should be warned
-    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(1);
+    EXPECT_CALL(mockMainPresenter, giveUserWarning(_, _)).Times(2);
 
     // The user hits the "process" button with the first group selected
     EXPECT_CALL(mockDataProcessorView, getSelectedChildren())

@@ -358,7 +358,8 @@ std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
   algLoadRun->initialize();
   algLoadRun->setProperty("Filename", fileName);
   algLoadRun->setProperty("OutputWorkspace", outputName);
-  algLoadRun->setProperty("LoadMonitors", true);
+  if (loader == "LoadEventNexus")
+    algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
   if (!algLoadRun->isExecuted()) {
     // Run not loaded from disk
