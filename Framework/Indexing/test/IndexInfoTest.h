@@ -123,10 +123,11 @@ public:
   }
 
   void test_StorageMode_Cloned() {
+    int nrank = 2;
     IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{2, 0});
+                    IndexInfo::Communicator{nrank, 0});
     IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{2, 1});
+                    IndexInfo::Communicator{nrank, 1});
     TS_ASSERT_EQUALS(rank0.size(), 3);
     TS_ASSERT_EQUALS(rank0.globalSize(), 3);
     TS_ASSERT_EQUALS(rank0.spectrumNumber(0), 1);
@@ -140,10 +141,11 @@ public:
   }
 
   void test_StorageMode_Distributed() {
+    int nrank = 2;
     IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{2, 0});
+                    IndexInfo::Communicator{nrank, 0});
     IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{2, 1});
+                    IndexInfo::Communicator{nrank, 1});
     // Current default is RoundRobinPartitioner
     TS_ASSERT_EQUALS(rank0.size(), 2);
     TS_ASSERT_EQUALS(rank0.globalSize(), 3);
@@ -155,16 +157,18 @@ public:
   }
 
   void test_StorageMode_MasterOnly() {
+    int nrank = 2;
     TS_ASSERT_THROWS(IndexInfo(3, IndexInfo::StorageMode::MasterOnly,
-                               IndexInfo::Communicator{2, 0}),
+                               IndexInfo::Communicator{nrank, 0}),
                      std::runtime_error);
   }
 
   void test_isOnThisPartition_StorageMode_Cloned() {
+    int nrank = 2;
     IndexInfo rank0(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{2, 0});
+                    IndexInfo::Communicator{nrank, 0});
     IndexInfo rank1(3, IndexInfo::StorageMode::Cloned,
-                    IndexInfo::Communicator{2, 1});
+                    IndexInfo::Communicator{nrank, 1});
     for (size_t i = 0; i < rank0.globalSize(); ++i)
       TS_ASSERT(rank0.isOnThisPartition(i));
     for (size_t i = 0; i < rank1.globalSize(); ++i)
@@ -172,13 +176,14 @@ public:
   }
 
   void test_isOnThisPartition_StorageMode_Distributed() {
+    int nrank = 2;
     IndexInfo rank0(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{2, 0});
+                    IndexInfo::Communicator{nrank, 0});
     IndexInfo rank1(3, IndexInfo::StorageMode::Distributed,
-                    IndexInfo::Communicator{2, 1});
+                    IndexInfo::Communicator{nrank, 1});
     // Current default is RoundRobinPartitioner
     for (size_t i = 0; i < rank0.globalSize(); ++i) {
-      if (i % 2 == 0) {
+      if (i % nrank == 0) {
         TS_ASSERT(rank0.isOnThisPartition(i));
       } else {
         TS_ASSERT(rank1.isOnThisPartition(i));

@@ -147,9 +147,9 @@ void MatrixWorkspace::setIndexInfoWithoutISpectrumUpdate(
     const Indexing::IndexInfo &indexInfo) {
   // Comparing the *local* size of the indexInfo.
   if (indexInfo.size() != getNumberHistograms())
-    throw std::invalid_arument("MatrixWorkspace::setIndexInfo: IndexInfo size "
-                               "does not match number of histograms in "
-                               "workspace");
+    throw std::invalid_argument("MatrixWorkspace::setIndexInfo: IndexInfo size "
+                                "does not match number of histograms in "
+                                "workspace");
   *m_indexInfo = indexInfo;
   m_indexInfoNeedsUpdate = false;
   setSpectrumDefinitions(m_indexInfo->spectrumDefinitions());
@@ -2024,11 +2024,11 @@ void MatrixWorkspace::buildDefaultSpectrumDefinitions() {
     numberOfSpectra = numberOfDetectors;
   }
   if (numberOfSpectra != m_indexInfo->globalSize())
-    throw std::runtime_error("MatrixWorkspace: IndexInfo does not contain "
-                             "spectrum definitions so building a 1:1 mapping "
-                             "from spectra to detectors was attempted, but the "
-                             "number of spectra in the workspace is not equal "
-                             "to the number of detectors in the instrument.");
+    throw std::invalid_argument(
+        "MatrixWorkspace: IndexInfo does not contain spectrum definitions so "
+        "building a 1:1 mapping from spectra to detectors was attempted, but "
+        "the number of spectra in the workspace is not equal to the number of "
+        "detectors in the instrument.");
   std::vector<SpectrumDefinition> specDefs(m_indexInfo->size());
   size_t specIndex = 0;
   size_t globalSpecIndex = 0;
@@ -2052,15 +2052,15 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
       const size_t detIndex = index.first;
       const size_t timeIndex = index.second;
       if (detIndex >= allDetIDs.size())
-        throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "
-                                 "an out-of-range detector index, i.e., the "
-                                 "spectrum definition does not match the "
-                                 "instrument in the workspace.");
+        throw std::invalid_argument("MatrixWorkspace: SpectrumDefinition "
+                                    "contains an out-of-range detector index, "
+                                    "i.e., the spectrum definition does not "
+                                    "match the instrument in the workspace.");
       if (timeIndex >= detInfo.scanCount(detIndex))
-        throw std::runtime_error("MatrixWorkspace: SpectrumDefinition contains "
-                                 "an out-of-range time index for a detector, "
-                                 "i.e., the spectrum definition does not match "
-                                 "the instrument in the workspace.");
+        throw std::invalid_argument(
+            "MatrixWorkspace: SpectrumDefinition contains an out-of-range time "
+            "index for a detector, i.e., the spectrum definition does not "
+            "match the instrument in the workspace.");
       detIDs.insert(allDetIDs[detIndex]);
     }
     getSpectrum(i).setDetectorIDs(std::move(detIDs));

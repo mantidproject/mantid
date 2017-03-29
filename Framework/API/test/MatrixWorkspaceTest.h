@@ -111,7 +111,8 @@ public:
     ws.initialize(3, 1, 1);
     IndexInfo bad(2);
     TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(bad)),
-                            const std::runtime_error &e, std::string(e.what()),
+                            const std::invalid_argument &e,
+                            std::string(e.what()),
                             "MatrixWorkspace::setIndexInfo: IndexInfo size "
                             "does not match number of histograms in workspace");
   }
@@ -125,7 +126,8 @@ public:
     specDefs[0].add(0);
     indices.setSpectrumDefinitions(specDefs);
     TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::runtime_error &e, std::string(e.what()),
+                            const std::invalid_argument &e,
+                            std::string(e.what()),
                             "MatrixWorkspace: SpectrumDefinition contains an "
                             "out-of-range detector index, i.e., the spectrum "
                             "definition does not match the instrument in the "
@@ -143,7 +145,8 @@ public:
     specDefs[0].add(0, 1);
     indices.setSpectrumDefinitions(specDefs);
     TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::runtime_error &e, std::string(e.what()),
+                            const std::invalid_argument &e,
+                            std::string(e.what()),
                             "MatrixWorkspace: SpectrumDefinition contains an "
                             "out-of-range time index for a detector, i.e., the "
                             "spectrum definition does not match the instrument "
@@ -158,7 +161,8 @@ public:
         ComponentCreationHelper::createTestInstrumentRectangular(1, 2));
     IndexInfo indices(3);
     TS_ASSERT_THROWS_EQUALS(ws.setIndexInfo(std::move(indices)),
-                            const std::runtime_error &e, std::string(e.what()),
+                            const std::invalid_argument &e,
+                            std::string(e.what()),
                             "MatrixWorkspace: IndexInfo does not contain "
                             "spectrum definitions so building a 1:1 mapping "
                             "from spectra to detectors was attempted, but the "
