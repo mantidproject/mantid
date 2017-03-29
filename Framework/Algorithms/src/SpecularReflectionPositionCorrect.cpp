@@ -40,9 +40,9 @@ getParentComponent(IComponent_const_sptr &currentComponent) {
  */
 bool hasCommonParent(const std::vector<IDetector_const_sptr> &detectors) {
   bool sameParentComponent = true;
-  IComponent const *lastParentComponent = detectors[0]->getParent().get();
+  auto lastParentComponent = detectors[0]->getParent()->getComponentID();
   for (size_t i = 1; i < detectors.size(); ++i) {
-    IComponent const *currentParentComponent = detectors[i]->getParent().get();
+    auto currentParentComponent = detectors[i]->getParent()->getComponentID();
     if (lastParentComponent != currentParentComponent) {
       sameParentComponent = false; // Parent components are different.
       break;
