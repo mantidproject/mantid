@@ -1354,7 +1354,8 @@ void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm EvaluateFunction, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1371,7 +1372,8 @@ void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CropWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1388,7 +1390,8 @@ void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm AppendWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1405,7 +1408,8 @@ void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm RebinToWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1448,8 +1452,8 @@ void EnggDiffFittingPresenter::getDifcTzero(MatrixWorkspace_const_sptr wks,
     g_log.warning()
         << "Could not retrieve the DIFC, DIFA, TZERO values from the workspace "
         << wks->getName() << ". Using default, which is not adjusted for this "
-                             "workspace/run: DIFA: " << difa
-        << ", DIFC: " << difc << ", TZERO: " << tzero
+                             "workspace/run: DIFA: "
+        << difa << ", DIFC: " << difc << ", TZERO: " << tzero
         << ". Error details: " << rexc.what() << '\n';
   }
 }
@@ -1494,8 +1498,8 @@ void EnggDiffFittingPresenter::runAlignDetectorsAlg(std::string workspaceName) {
     row << detID << difc << difa << tzero;
   } catch (std::runtime_error &rexc) {
     g_log.error() << "Failed to prepare calibration table input to convert "
-                     "units with the algorithm " << algName
-                  << ". Error details: " << rexc.what() << '\n';
+                     "units with the algorithm "
+                  << algName << ". Error details: " << rexc.what() << '\n';
     return;
   }
 
@@ -1544,9 +1548,11 @@ void EnggDiffFittingPresenter::runConvertUnitsAlg(std::string workspaceName) {
     ConvertUnits->execute();
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm ConvertUnits to convert "
-                     "workspace to " << targetUnit
+                     "workspace to "
+                  << targetUnit
                   << ", Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 
@@ -1564,7 +1570,8 @@ void EnggDiffFittingPresenter::runCloneWorkspaceAlg(
   } catch (std::runtime_error &re) {
     g_log.error() << "Could not run the algorithm CreateWorkspace, "
                      "Error description: " +
-                         static_cast<std::string>(re.what()) << '\n';
+                         static_cast<std::string>(re.what())
+                  << '\n';
   }
 }
 

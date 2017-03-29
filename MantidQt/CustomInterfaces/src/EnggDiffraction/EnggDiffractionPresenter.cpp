@@ -2630,17 +2630,18 @@ std::string EnggDiffractionPresenter::outFileNameFactory(
 
   // calibration output files
   if (inputWorkspace.std::string::find("curves") != std::string::npos) {
-    fullFilename = "ob+ENGINX_" + runNo + "_" + bank + "_bank" + format;
+    fullFilename =
+        "ob+" + m_currentInst + "_" + runNo + "_" + bank + "_bank" + format;
 
     // focus output files
   } else if (inputWorkspace.std::string::find("texture") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_texture_" + bank + format;
+    fullFilename = m_currentInst + "_" + runNo + "_texture_" + bank + format;
   } else if (inputWorkspace.std::string::find("cropped") != std::string::npos) {
-    fullFilename = "ENGINX_" + runNo + "_cropped_" +
+    fullFilename = m_currentInst + "_" + runNo + "_cropped_" +
                    boost::lexical_cast<std::string>(g_croppedCounter) + format;
     g_croppedCounter++;
   } else {
-    fullFilename = "ENGINX_" + runNo + "_bank_" + bank + format;
+    fullFilename = m_currentInst + "_" + runNo + "_bank_" + bank + format;
   }
   return fullFilename;
 }
@@ -2907,6 +2908,8 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
  * Produces the root path where output files are going to be written.
  */
 Poco::Path EnggDiffractionPresenter::outFilesRootDir() {
+  // TODO decide whether to move into settings or use mantid's default directory
+  // after discussion with users
   const std::string rootDir = "EnginX_Mantid";
   Poco::Path dir;
 

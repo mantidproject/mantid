@@ -312,9 +312,6 @@ private:
   /// paths the user has "browsed to", to add them to the search path
   std::vector<std::string> m_browsedToPaths;
 
-  /// string to use for ENGINX file names (as a prefix, etc.)
-  const static std::string g_enginxStr;
-
   /// The message to tell the user that an RB number is needed
   const static std::string g_shortMsgRBNumberRequired;
   const static std::string g_msgRBNumberRequired;
