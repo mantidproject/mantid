@@ -190,20 +190,20 @@ void checkDetectorInfoSize(const Instrument &instr,
 boost::shared_ptr<Beamline::ComponentInfo>
 makeComponentInfo(const Instrument &oldInstr,
                   const API::DetectorInfo &detectorInfo,
-                  std::vector<Geometry::ComponentID> &componentIds) {
+                  std::vector<Geometry::ComponentID> &componentIds,
+                  Geometry::ParameterMap &pmap) {
 
   InfoComponentVisitor visitor(
       detectorInfo.size(),
-      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
+      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1),
+      pmap);
 
   // Register everything via visitor
   oldInstr.registerContents(visitor);
   // Extract component ids. We need this for the ComponentInfo wrapper.
   componentIds = visitor.componentIds();
 
-  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.assemblySortedDetectorIndices(),
-      visitor.componentDetectorRanges());
+  return visitor.makeComponentInfo();
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
@@ -219,7 +219,8 @@ void clearPositionAndRotationsParameters(ParameterMap &pmap,
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
-makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
+makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr,
+                 Geometry::ParameterMap &pmap) {
   if (newInstr.hasDetectorInfo()) {
     // We allocate a new DetectorInfo in case there is an Instrument holding a
     // reference to our current DetectorInfo.
@@ -229,7 +230,6 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   } else {
     // If there is no DetectorInfo in the instrument we create a default one.
     const auto numDets = oldInstr.getNumberDetectors();
-    const auto pmap = oldInstr.getParameterMap();
     // Currently monitors flags are stored in the detector cache of the base
     // instrument. The copy being made here is strictly speaking duplicating
     // that data, but with future refactoring this will no longer be the case.
@@ -252,7 +252,7 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
       // account (if no DetectorInfo is set in the ParameterMap).
       positions.emplace_back(toVector3d(det->getPos()));
       rotations.emplace_back(toQuaterniond(det->getRotation()));
-      clearPositionAndRotationsParameters(*pmap, *det);
+      clearPositionAndRotationsParameters(pmap, *det);
       // Note that scalex and scaley also affect positions when set for a
       // RectangularDetector, but those are not parameters of the detector
       // itself so they are not cleared.
@@ -280,14 +280,14 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   }
   const auto parInstrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
-  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
+  m_detectorInfo = makeDetectorInfo(*parInstrument, *instr, *m_parmap);
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
   std::vector<Geometry::ComponentID> componentIds;
-  m_componentInfo =
-      makeComponentInfo(*sptr_instrument, detectorInfo(), componentIds);
+  m_componentInfo = makeComponentInfo(*sptr_instrument, detectorInfo(),
+                                      componentIds, *m_parmap);
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
       *m_componentInfo, std::move(componentIds));
   // Detector IDs that were previously dropped because they were not part of the
