@@ -31,8 +31,6 @@ namespace {
 Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
-const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
-
 const std::string EnggDiffractionPresenter::g_shortMsgRBNumberRequired =
     "A valid RB Number is required";
 const std::string EnggDiffractionPresenter::g_msgRBNumberRequired =
@@ -75,6 +73,8 @@ EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
         "with an empty/null view (Engineering diffraction interface). "
         "Cannot continue.");
   }
+
+  m_currentInst = m_view->currentInstrument();
 }
 
 EnggDiffractionPresenter::~EnggDiffractionPresenter() { cleanup(); }
@@ -267,7 +267,8 @@ void EnggDiffractionPresenter::grabCalibParms(const std::string &fname) {
             g_log.warning()
                 << "Error when trying to extract parameters from this line:  "
                 << line << ". This calibration file may not load correctly. "
-                           "Error details: " << rexc.what() << '\n';
+                           "Error details: "
+                << rexc.what() << '\n';
           }
         } else {
           g_log.warning() << "Could not parse correctly a parameters "
@@ -610,9 +611,7 @@ void EnggDiffractionPresenter::processLogMsg() {
 }
 
 void EnggDiffractionPresenter::processInstChange() {
-  const std::string err = "Changing instrument is not supported!";
-  g_log.error() << err << '\n';
-  m_view->userError("Fatal error", err);
+  m_currentInst = m_view->currentInstrument();
 }
 
 void EnggDiffractionPresenter::processRBNumberChange() {
@@ -893,10 +892,10 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   }
 
   // check the rules on the file name
-  if (g_enginxStr != parts[0]) {
+  if (m_currentInst != parts[0]) {
     throw std::invalid_argument("The first component of the file name is not "
                                 "the expected instrument name: " +
-                                g_enginxStr + ".\n\n" + explMsg);
+                                m_currentInst + ".\n\n" + explMsg);
   }
   const std::string castMsg =
       "It is not possible to interpret as an integer number ";
@@ -986,7 +985,8 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
         << "The calibration calculations failed. One of the "
            "algorithms did not execute correctly. See log messages for "
            "further details. Error: " +
-               std::string(rexc.what()) << '\n';
+               std::string(rexc.what())
+        << '\n';
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
@@ -1041,15 +1041,10 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
     const std::string &vanNo, const std::string &ceriaNo,
     const std::string &bankName) const {
   // default and only one supported instrument for now
-  std::string instStr = g_enginxStr;
+  std::string instStr = m_currentInst;
   std::string nameAppendix = "_all_banks";
   if (!bankName.empty()) {
     nameAppendix = "_" + bankName;
-  }
-  std::string curInst = m_view->currentInstrument();
-  if ("ENGIN-X" != curInst && "ENGINX" != curInst) {
-    instStr = "UNKNOWNINST";
-    nameAppendix = "_calibration";
   }
 
   // default extension for calibration files
@@ -1275,19 +1270,21 @@ void EnggDiffractionPresenter::appendCalibInstPrefix(
 void EnggDiffractionPresenter::appendCalibInstPrefix(
     const std::string vanNo, const std::string cerNo, std::string &outVanName,
     std::string &outCerName) const {
-  // If the file is numerical only we need to append
-  // it in case the favorite instrument isn't set to ENGINX
-  const std::string currentInst = m_view->currentInstrument();
+
+  // Load uses the default instrument if we don't give it the name of the
+  // instrument as a prefix (m_currentInst), when one isn't set or is set
+  // incorrectly, we prepend the name of the instrument to the vanadium number
+  // so that load can find the file and not cause a crash in Mantid
   // Vanadium file
   if (std::all_of(vanNo.begin(), vanNo.end(), ::isdigit)) {
     // This only has digits - append prefix
-    outVanName = currentInst + vanNo;
+    outVanName = m_currentInst + vanNo;
   }
 
   // Cerium file
   if (std::all_of(cerNo.begin(), cerNo.end(), ::isdigit)) {
     // All digits - append inst prefix
-    outCerName = currentInst + cerNo;
+    outCerName = m_currentInst + cerNo;
   }
 }
 
@@ -1533,7 +1530,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   g_lastValidRun = runNo;
 
   g_log.notice() << "Generating new focusing workspace(s) and file(s) into "
-                    "this directory: " << dir << '\n';
+                    "this directory: "
+                 << dir << '\n';
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -1578,7 +1576,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         loadDetectorGroupingCSV(dgFile, bankIDs, specs);
       } catch (std::runtime_error &re) {
         g_log.error() << "Error loading detector grouping file: " + dgFile +
-                             ". Detailed error: " + re.what() << '\n';
+                             ". Detailed error: " + re.what()
+                      << '\n';
         bankIDs.clear();
         specs.clear();
       }
@@ -1594,8 +1593,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
         fpath.append(effectiveFilenames[idx]).toString();
     g_log.notice() << "Generating new focused file (bank " +
                           boost::lexical_cast<std::string>(bankIDs[idx]) +
-                          ") for run " + runNo +
-                          " into: " << effectiveFilenames[idx] << '\n';
+                          ") for run " + runNo + " into: "
+                   << effectiveFilenames[idx] << '\n';
     try {
       m_focusFinishedOK = false;
       doFocusing(cs, fullFilename, runNo, bankIDs[idx], specs[idx], dgFile);
@@ -1604,12 +1603,13 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
       g_log.error() << "The focusing calculations failed. One of the algorithms"
                        "did not execute correctly. See log messages for "
                        "further details. Error: " +
-                           std::string(rexc.what()) << '\n';
+                           std::string(rexc.what())
+                    << '\n';
     } catch (std::invalid_argument &ia) {
       g_log.error() << "The focusing failed. Some input properties "
                        "were not valid. "
-                       "See log messages for details. Error: " << ia.what()
-                    << '\n';
+                       "See log messages for details. Error: "
+                    << ia.what() << '\n';
     }
   }
 
@@ -1706,7 +1706,8 @@ void EnggDiffractionPresenter::focusingFinished() {
     if (lastRun != lastValid) {
       g_log.warning()
           << "Focussing process has been stopped, last successful "
-             "run number: " << g_lastValidRun
+             "run number: "
+          << g_lastValidRun
           << " , total number of focus run that could not be processed: "
           << (lastRun - lastValid) << '\n';
       m_view->showStatus("Focusing stopped. Ready");
@@ -1951,7 +1952,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << '\n';
+                           std::string(ia.what())
+                    << '\n';
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -1960,14 +1962,15 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << '\n';
+                           std::string(re.what())
+                    << '\n';
       throw;
     }
   } else {
     g_log.notice() << "Found precalculated Vanadium correction features for "
-                      "Vanadium run " << vanNo
-                   << ". Re-using these files: " << preIntegFilename << ", and "
-                   << preCurvesFilename << '\n';
+                      "Vanadium run "
+                   << vanNo << ". Re-using these files: " << preIntegFilename
+                   << ", and " << preCurvesFilename << '\n';
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS, vanNo, specNos);
@@ -2017,11 +2020,11 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 
   const std::string runNo = std::string(2, '0').append(vanNo);
 
-  preIntegFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
+  preIntegFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
+                     "_integration.nxs";
 
-  preCurvesFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
+  preCurvesFilename = m_currentInst + "_precalculated_vanadium_run" + runNo +
+                      "_bank_curves.nxs";
 
   Poco::Path pathInteg(inputDirCalib);
   pathInteg.append(preIntegFilename);
@@ -2859,8 +2862,8 @@ EnggDiffractionPresenter::outFilesUserDir(const std::string &addToDir) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to user "
-                     "directory: " << dir.toString()
-                  << ". Error details: " << e.what() << '\n';
+                     "directory: "
+                  << dir.toString() << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a user path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';
@@ -2891,8 +2894,8 @@ EnggDiffractionPresenter::outFilesGeneralDir(const std::string &addComponent) {
     }
   } catch (Poco::FileAccessDeniedException &e) {
     g_log.error() << "Error caused by file access/permission, path to "
-                     "general directory: " << dir.toString()
-                  << ". Error details: " << e.what() << '\n';
+                     "general directory: "
+                  << dir.toString() << ". Error details: " << e.what() << '\n';
   } catch (std::runtime_error &re) {
     g_log.error() << "Error while finding/creating a general path: "
                   << dir.toString() << ". Error details: " << re.what() << '\n';

@@ -376,6 +376,9 @@ private:
 
   /// Associated model for this presenter (MVP pattern)
   // const boost::scoped_ptr<EnggDiffractionModel> m_model;
+
+  /// the current selected instrument
+  std::string m_currentInst = "";
 };
 
 } // namespace CustomInterfaces

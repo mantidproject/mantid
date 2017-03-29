@@ -175,6 +175,14 @@ public:
 
   void test_loadExistingCalibWithAcceptableName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // by setting this here, when initialising the presenter, the function will
+    // be called and the instrument name will be updated
+    const std::string instrumentName = "ENGINX";
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(1)
+        .WillOnce(Return(instrumentName));
+
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
     // will need basic calibration settings from the user
@@ -183,10 +191,12 @@ public:
         .Times(1)
         .WillOnce(Return(calibSettings));
 
+    // update the selected instrument
     const std::string mockFname = "ENGINX_111111_222222_foo_bar.par";
     EXPECT_CALL(mockView, askExistingCalibFilename())
         .Times(1)
         .WillOnce(Return(mockFname));
+
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
 
@@ -304,9 +314,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -524,9 +535,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // with the normal thread should disable actions at the beginning
@@ -593,9 +605,10 @@ public:
 
     const std::string filename =
         "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView, askNewCalibrationFilename(
-                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
-                              "_both_banks.prm")).Times(0);
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(0);
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // Should not try to use options for focusing
@@ -1369,10 +1382,19 @@ public:
 
   void test_instChange() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // by setting this here, when initialising the presenter, the function will
+    // be called and the instrument name will be updated
+    // we are calling it twice, once on initialisation and a second time after
+    // notify!
+    const std::string instrumentName = "ENGINX";
+    EXPECT_CALL(mockView, currentInstrument())
+        .Times(2)
+        .WillRepeatedly(Return(instrumentName));
+
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    // 1 error, no warnings
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // should not change status
