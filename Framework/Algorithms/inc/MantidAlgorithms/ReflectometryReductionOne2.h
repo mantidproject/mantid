@@ -83,13 +83,12 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Create the output workspace in wavelength
-  Mantid::API::MatrixWorkspace_sptr
-  makeIvsLam(const bool convert, const bool normalise, const bool sum);
+  Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
   // Whether summation should be done in Q or the default lambda
-  bool sumInQ();
+  bool summingInQ();
   // Get angle details for a specific detector
   void getDetectorDetails(const size_t spIdx,
                           const API::SpectrumInfo &spectrumInfo, double &theta,
@@ -98,8 +97,8 @@ private:
   void getProjectedLambdaRange(const double lambda, const double theta,
                                const double bLambda, const double bTwoTheta,
                                double &lambdaTop, double &lambdaBot);
-  // Find and cache constants required for summation in Q
-  void findConstantsForSumInQ();
+  // Find and cache constants
+  void initRun();
   void findLambdaMinMax();
   void findDetectorsOfInterest();
   void findThetaMinMax();
@@ -116,12 +115,15 @@ private:
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  double m_thetaMin;
-  double m_thetaMax;
-  double m_theta0;
-  double m_thetaR;
-  double m_lambdaMin;
-  double m_lambdaMax;
+  bool m_convertUnits; // convert the input workspace to lambda
+  bool m_normalise;    // normalise by monitors etc.
+  bool m_sum;          // whether to do summation
+  double m_thetaMin;   // min angle in detectors of interest
+  double m_thetaMax;   // max angle in detectors of interest
+  double m_theta0;     // horizon angle
+  double m_thetaR;     // reference angle for summation in Q
+  double m_lambdaMin;  // min wavelength in area of interest
+  double m_lambdaMax;  // max wavelength in area of interest
   std::vector<size_t> m_detectors;
   int m_centreDetectorIdx;
 };

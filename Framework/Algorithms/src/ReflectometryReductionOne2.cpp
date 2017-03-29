@@ -125,9 +125,10 @@ ReflectometryReductionOne2::validateInputs() {
   return results;
 }
 
-/** Execute the algorithm.
+/**
+* Initialise class members for a particular run
 */
-void ReflectometryReductionOne2::exec() {
+void ReflectometryReductionOne2::initRun() {
   m_runWS = getProperty("InputWorkspace");
   m_spectrumInfo = &m_runWS->spectrumInfo();
 
@@ -138,20 +139,35 @@ void ReflectometryReductionOne2::exec() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
-  bool convert = true;   // whether to convert to lambda
-  bool normalise = true; // whether to normalise
-  bool sum = true;       // whether to do summation
+  m_convertUnits = true;
+  m_normalise = true;
+  m_sum = true;
+
   if (xUnitID == "Wavelength") {
-    // Assume already reduced (normalised and summed)
-    convert = false;
-    normalise = false;
+    // Assume already reduced (converted, normalised and summed)
+    m_convertUnits = false;
+    m_normalise = false;
     // sum = false;  // temp for testing - still do summation
   }
 
-  findDetectorsOfInterest();
+  if (summingInQ()) {
+    // These values are only required for summation in Q
+    findLambdaMinMax();
+    findDetectorsOfInterest();
+    findThetaMinMax();
+    findTheta0();
+    findThetaR();
+  }
+}
 
-  // Output workspace in wavelength
-  MatrixWorkspace_sptr IvsLam = makeIvsLam(convert, normalise, sum);
+/** Execute the algorithm.
+*/
+void ReflectometryReductionOne2::exec() {
+  // Set up member variables from inputs for this run
+  initRun();
+
+  // Create the output workspace in wavelength
+  MatrixWorkspace_sptr IvsLam = makeIvsLam();
 
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
@@ -169,27 +185,23 @@ void ReflectometryReductionOne2::exec() {
 * @param inputWS :: the input workspace in TOF
 * @return :: the output workspace in wavelength
 */
-MatrixWorkspace_sptr
-ReflectometryReductionOne2::makeIvsLam(const bool convert, const bool normalise,
-                                       const bool sum) {
+MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr IvsLam = m_runWS;
 
-  if (sumInQ()) {
-    findConstantsForSumInQ();
-
+  if (summingInQ()) {
     // Get the normalised detector workspace
     MatrixWorkspace_sptr detectorWS = m_runWS;
-    if (convert) {
+    if (m_convertUnits) {
       // Convert the 2D workspace to wavelength
       detectorWS = convertToWavelength(detectorWS);
     }
-    if (normalise) {
+    if (m_normalise) {
       detectorWS = monitorCorrection(detectorWS);
       detectorWS = transOrAlgCorrection(detectorWS);
     }
 
     // Do the summation in Q
-    if (sum) {
+    if (m_sum) {
       // Construct the output array in virtual lambda
       IvsLam = constructIvsLamWS(detectorWS);
 
@@ -259,13 +271,13 @@ ReflectometryReductionOne2::makeIvsLam(const bool convert, const bool normalise,
     }
   } else {
     // Simple summation in lambda
-    if (sum) {
+    if (m_sum) {
       // Get 1D workspace of detectors, summed, and converted to lambda if
       // applicable
-      IvsLam = makeDetectorWS(IvsLam, convert);
+      IvsLam = makeDetectorWS(IvsLam, m_convertUnits);
     }
 
-    if (normalise) {
+    if (m_normalise) {
       IvsLam = directBeamCorrection(IvsLam);
       IvsLam = monitorCorrection(IvsLam);
       IvsLam = transOrAlgCorrection(IvsLam);
@@ -511,7 +523,7 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
 *
 * @return : true if the reduction should sum in Q; false otherwise
 */
-bool ReflectometryReductionOne2::sumInQ() {
+bool ReflectometryReductionOne2::summingInQ() {
   bool result = false;
   const std::string reductionType = getProperty("ReductionType");
 
@@ -520,16 +532,6 @@ bool ReflectometryReductionOne2::sumInQ() {
   }
 
   return result;
-}
-
-/**
-* Find and cache the constants required for summation in Q
-*/
-void ReflectometryReductionOne2::findConstantsForSumInQ() {
-  findLambdaMinMax();
-  findThetaMinMax();
-  findTheta0();
-  findThetaR();
 }
 
 /**
