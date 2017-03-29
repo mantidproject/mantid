@@ -8,12 +8,9 @@ namespace Mantid {
 namespace Kernel {
 
 /** Same as EnabledWhenProperty, but returns the value for the
- * isVisible() property intead of the isEnabled() property.
+ * isVisible() property instead of the isEnabled() property.
 
-  @author Janik Zikovsky
-  @date 2011-08-26
-
-  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ Copyright &copy; 2011-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -36,51 +33,27 @@ namespace Kernel {
 */
 class DLLExport VisibleWhenProperty : public EnabledWhenProperty {
 public:
-  //--------------------------------------------------------------------------------------------
-  /** Constructor
-   * @param otherPropName :: Name of the OTHER property that we will check.
-   * @param when :: Criterion to evaluate
-   * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
-   * (as string) to check for
-   */
+  /// Constructs a VisibleWhenProperty object which checks the property
+  /// with name given and if it matches the criteria makes it visible
   VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
                       std::string value = "");
 
-  /** Multiple conditions constructor - takes two unique pointers to
-  * VisibleWhenProperty objects and returns the product of them
-  * with the specified logic operator.
-  * Note: With Unique pointers you will need to use std::move
-  * to transfer ownership of those objects to this one.
-  *
-  * @param conditionOne :: First VisibleWhenProperty object to use
-  * @param conditionTwo :: Second VisibleWhenProperty object to use
-  * @param localOperator :: The logic operator to apply across both
-  *conditions
-  *
-  */
+  /// Constructs a VisibleWhenProperty object which takes ownership of two
+  /// already constructed VisibleWhenProperty objects and returns the result
+  /// of both of them with the specified logic operator
   VisibleWhenProperty(std::unique_ptr<VisibleWhenProperty> &&conditionOne,
                       std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
                       eLogicOperator logicalOperator);
 
-  /**
-  * Checks if the user specified combination of visible criterion
-  * returns a true or false value
-  *
-  * @return true if user specified combination was true.
-  * @throw If any problems was found
-  */
   virtual bool checkComparison(const IPropertyManager *algo) const;
 
-  //--------------------------------------------------------------------------------------------
-  /// Return true always
-  bool isEnabled(const IPropertyManager *) const override;
+  /// Return true always as we only consider visible
+  bool isEnabled(const IPropertyManager *algo) const override;
 
-  //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
   bool isVisible(const IPropertyManager *algo) const override;
 
-  //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
   IPropertySettings *clone() override;
 };
