@@ -22,6 +22,10 @@ class DeltaPDF3D(PythonAlgorithm):
                                                        optional=PropertyMode.Mandatory,
                                                        direction=Direction.Input),
                              "Input Workspace")
+        self.declareProperty(WorkspaceProperty("IntermediateWorkspace", "",
+                                               optional=PropertyMode.Optional,
+                                               direction=Direction.Output),
+                             "The resulting workspace after reflection removal and filters applied. What is the input of the FFT.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
@@ -46,7 +50,6 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, "Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
         self.declareProperty("Inpaint", False, "Use inpainting by biharmonic functions to fill remove reflactions")
-        self.declareProperty("FFT", True, "Calculate 3D-deltaPDF")
 
     def validateInputs(self):
         issues = dict()
@@ -62,12 +65,12 @@ class DeltaPDF3D(PythonAlgorithm):
             issues['InputWorkspace'] = 'dimensions must be centered on zero'
         if self.getProperty("Convolution").value:
             try:
-                import astropy
+                import astropy # noqa
             except ImportError:
                 issues["Convolution"] = 'python-astropy required to do convolution'
         if self.getProperty("Inpaint").value:
             try:
-                import skimage
+                import skimage # noqa
             except ImportError:
                 issues["Inpaint"] = 'scikit-image required to do inprinting'
         return issues
@@ -92,11 +95,11 @@ class DeltaPDF3D(PythonAlgorithm):
             width = self.getProperty("Width").value
             cut_shape = self.getProperty("Shape").value
             space_group = self.getProperty("SpaceGroup").value
-            if space_group is '':
-                check_space_group = False
-            else:
+            if space_group:
                 check_space_group = True
                 sg=SpaceGroupFactory.createSpaceGroup(space_group)
+            else:
+                check_space_group = False
             for h in range(int(np.ceil(dimX.getMinimum())), int(np.floor(dimX.getMaximum()))+1):
                 for k in range(int(np.ceil(dimY.getMinimum())), int(np.floor(dimY.getMaximum()))+1):
                     for l in range(int(np.ceil(dimZ.getMinimum())), int(np.floor(dimZ.getMaximum()))+1):
@@ -130,39 +133,41 @@ class DeltaPDF3D(PythonAlgorithm):
             progress.report("Inpainting signal")
             signal = self._inpaint(signal)
 
-        if self.getProperty("FFT").value:
-            progress.report("Running FFT")
-            # Replace any remaining nan's or inf's with 0
-            # Otherwise you end up with a lot of nan's
-            signal[np.isnan(signal)]=0
-            signal[np.isinf(signal)]=0
-
-            signal=np.fft.fftshift(np.fft.fftn(np.fft.fftshift(signal))).real
-
-            # Calculate new extents for fft space
-            extents=''
-            for d in range(inWS.getNumDims()):
-                dim = inWS.getDimension(d)
-                fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
-                extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
-            extents=extents[:-1]
-
-            createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-            createWS_alg.setProperty("SignalInput",signal)
-            createWS_alg.setProperty("ErrorInput",signal**2)
-            createWS_alg.setProperty("Dimensionality",3)
-            createWS_alg.setProperty("Extents",extents)
-            createWS_alg.setProperty("NumberOfBins",signal.shape)
-            createWS_alg.setProperty("Names",'x,y,z')
-            createWS_alg.setProperty("Units",'A,A,A')
-            createWS_alg.execute()
-            outWS = createWS_alg.getProperty("OutputWorkspace").value
-        else:
+        if self.getPropertyValue("IntermediateWorkspace"):
             cloneWS_alg = self.createChildAlgorithm("CloneMDWorkspace", enableLogging=False)
             cloneWS_alg.setProperty("InputWorkspace",inWS)
             cloneWS_alg.execute()
-            outWS = cloneWS_alg.getProperty("OutputWorkspace").value
-            outWS.setSignalArray(signal)
+            signalOutWS = cloneWS_alg.getProperty("OutputWorkspace").value
+            signalOutWS.setSignalArray(signal)
+            self.setProperty("IntermediateWorkspace", signalOutWS)
+
+        # Do FFT
+        progress.report("Running FFT")
+        # Replace any remaining nan's or inf's with 0
+        # Otherwise you end up with a lot of nan's
+        signal[np.isnan(signal)]=0
+        signal[np.isinf(signal)]=0
+
+        signal=np.fft.fftshift(np.fft.fftn(np.fft.fftshift(signal))).real
+
+        # Calculate new extents for fft space
+        extents=''
+        for d in range(inWS.getNumDims()):
+            dim = inWS.getDimension(d)
+            fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
+            extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
+        extents=extents[:-1]
+
+        createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
+        createWS_alg.setProperty("SignalInput",signal)
+        createWS_alg.setProperty("ErrorInput",signal**2)
+        createWS_alg.setProperty("Dimensionality",3)
+        createWS_alg.setProperty("Extents",extents)
+        createWS_alg.setProperty("NumberOfBins",signal.shape)
+        createWS_alg.setProperty("Names",'x,y,z')
+        createWS_alg.setProperty("Units",'A,A,A')
+        createWS_alg.execute()
+        outWS = createWS_alg.getProperty("OutputWorkspace").value
 
         progress.report()
 
