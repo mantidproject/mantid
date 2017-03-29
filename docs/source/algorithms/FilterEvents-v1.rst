@@ -201,7 +201,8 @@ Output:
             OutputWorkspaceBaseName='tempsplitws3',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
             CorrectionToSample = "None", SpectrumWithoutDetector = "Skip", SplitSampleLogs = False,
-            OutputTOFCorrectionWorkspace='mock')
+            OutputTOFCorrectionWorkspace='mock',
+            RelativeTime=True)
 
     # Print result
     wsgroup = mtd["tempsplitws3"]
