@@ -576,10 +576,12 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
   if (!instructions.empty() &&
       !std::all_of(instructions.begin(), instructions.end(), isspace)) {
-    // The processing instructions should be in the format start-end or
-    // start:end (ignore whitespace before/after the digits)
+    // The processing instructions should be in the format <start>-<end>.
+    /// todo Add support for the '+' operator in the GroupingPattern. Could we
+    /// also support ':' and ',' operators? These would result in more than one
+    /// row in the detector workspace.
     std::vector<std::string> matches;
-    boost::split(matches, instructions, boost::is_any_of(":-"));
+    boost::split(matches, instructions, boost::is_any_of("-"));
 
     if (matches.size() != 2) {
       std::ostringstream errMsg;
