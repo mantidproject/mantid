@@ -95,7 +95,6 @@ public:
   // Methods we don't care about
   std::string getTimeSlicingValues() const override { return std::string(); };
   std::string getTimeSlicingType() const override { return std::string(); };
-
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
