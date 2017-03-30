@@ -41,7 +41,8 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("Width", [0.1], validator=val_min_zero),
                              "Width of sphere/cube to remove reflections, in (HKL)")
         self.setPropertySettings("Width", condition)
-        self.declareProperty("SpaceGroup", "", doc="Space groups, for reflection removal")
+        self.declareProperty("SpaceGroup", "",
+                             doc="Space group for reflection removal, either Full name or number. If empty all HKL's will be removed.")
         self.setPropertySettings("SpaceGroup", condition)
         self.declareProperty("CutSphere", False, "Limit min/max q values. Can help with edge effects.")
         condition = EnabledWhenProperty("CutSphere", PropertyCriterion.IsNotDefault)
@@ -88,6 +89,15 @@ class DeltaPDF3D(PythonAlgorithm):
         if len(width) != 1 and len(width) != 3:
             issues["Width"] = 'Must provide 1 or 3 widths'
 
+        if self.getProperty("SpaceGroup").value:
+            space_group=self.getProperty("SpaceGroup").value
+            try:
+                if not SpaceGroupFactory.isSubscribedNumber(int(space_group)):
+                    issues["SpaceGroup"] = 'Space group number is not valid'
+            except ValueError:
+                if not SpaceGroupFactory.isSubscribedSymbol(space_group):
+                    issues["SpaceGroup"] = 'Space group name is not valid'
+
         sphereMin = self.getProperty("SphereMin").value
         if len(sphereMin) != 1 and len(sphereMin) != 3:
             issues["SphereMin"] = 'Must provide 1 or 3 widths'
@@ -122,6 +132,11 @@ class DeltaPDF3D(PythonAlgorithm):
             space_group = self.getProperty("SpaceGroup").value
             if space_group:
                 check_space_group = True
+                try:
+                    space_group=SpaceGroupFactory.subscribedSpaceGroupSymbols(int(space_group))[0]
+                except ValueError:
+                    pass
+                logger.information('Using space group: '+space_group)
                 sg=SpaceGroupFactory.createSpaceGroup(space_group)
             else:
                 check_space_group = False
