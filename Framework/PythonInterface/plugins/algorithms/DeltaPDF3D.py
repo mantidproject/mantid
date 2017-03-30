@@ -55,7 +55,6 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
-        self.declareProperty("Inpaint", False, "Use inpainting by biharmonic functions to fill remove reflactions")
 
     def validateInputs(self):
         issues = dict()
@@ -78,12 +77,6 @@ class DeltaPDF3D(PythonAlgorithm):
                 import astropy # noqa
             except ImportError:
                 issues["Convolution"] = 'python-astropy required to do convolution'
-
-        if self.getProperty("Inpaint").value:
-            try:
-                import skimage # noqa
-            except ImportError:
-                issues["Inpaint"] = 'scikit-image required to do inprinting'
 
         width = self.getProperty("Width").value
         if len(width) != 1 and len(width) != 3:
@@ -172,10 +165,6 @@ class DeltaPDF3D(PythonAlgorithm):
             progress.report("Convoluting signal")
             signal = self._convolution(signal)
 
-        if self.getProperty("Inpaint").value:
-            progress.report("Inpainting signal")
-            signal = self._inpaint(signal)
-
         if self.getPropertyValue("IntermediateWorkspace"):
             cloneWS_alg = self.createChildAlgorithm("CloneMDWorkspace", enableLogging=False)
             cloneWS_alg.setProperty("InputWorkspace",inWS)
@@ -226,10 +215,6 @@ class DeltaPDF3D(PythonAlgorithm):
         except ValueError:
             logger.debug('Using astropy.convolution.convolve for convolution')
             return convolve(signal, G3D)
-
-    def _inpaint(self, signal):
-        from skimage.restoration import inpaint
-        return inpaint.inpaint_biharmonic(signal, np.isnan(signal))
 
 
 AlgorithmFactory.subscribe(DeltaPDF3D)
