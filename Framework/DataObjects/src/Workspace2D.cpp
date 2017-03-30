@@ -280,7 +280,7 @@ Histogram1D &Workspace2D::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
   auto &spec = const_cast<Histogram1D &>(
       static_cast<const Workspace2D &>(*this).getSpectrum(index));
-  spec.setExperimentInfo(this, index);
+  spec.setMatrixWorkspace(this, index);
   return spec;
 }
 

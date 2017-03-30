@@ -21,6 +21,7 @@ QuickRuns
 ~~~~~~~~~
 
 - :ref:`IndirectDiffScan <algm-IndirectDiffScan>` to improve diffraction reduction workflow. Runs a diffraction reduction in diffspec mode with several parameters at fixed values.
+- A new algorithm IndirectSampleChanger was added to work with the sample changer for IRIS
 
 Data Reduction
 ##############
@@ -38,14 +39,19 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+
 - The Delta Function option can now be used with StretchedExpFT mode
+
 
 Jump Fit
 ~~~~~~~~
 
 Improvements
 ------------
+
+- Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+
 
 Bugfixes
 --------

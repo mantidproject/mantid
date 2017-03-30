@@ -52,8 +52,6 @@ double QwtWorkspaceBinData::getEX(size_t i) const { return m_X[i]; }
 
 double QwtWorkspaceBinData::getE(size_t i) const { return m_E[i]; }
 
-// size_t QwtWorkspaceBinData::esize() const { return this->size(); }
-
 /**
  * @return A string containin the text to use as an X axis label
  */
@@ -112,8 +110,8 @@ void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace) {
   m_E.resize(nhist);
   for (size_t i = 0; i < nhist; ++i) {
     m_X[i] = vertAxis->getValue(i);
-    m_Y[i] = workspace.readY(i)[m_binIndex];
-    m_E[i] = workspace.readE(i)[m_binIndex];
+    m_Y[i] = workspace.y(i)[m_binIndex];
+    m_E[i] = workspace.e(i)[m_binIndex];
   }
 
   // meta data

@@ -34,6 +34,7 @@ wavelengths are defined as follows:
 - **Indirect** : :math:`\lambda_1 = \lambda_{step}, \lambda_2 = \lambda_{fixed}`
 
 - **Efixed** : :math:`\lambda_1 = \lambda_2 = \lambda_{fixed}`,
+
 where :math:`\lambda_{fixed}` is computed from the `Efixed` value corresponding to the monochromator or the analyser, and
 :math:`\lambda_{step}` iterates equidistantly over the wavelength points in the input workspace x-axis, controlled by `NumberWavelengths` property.
 

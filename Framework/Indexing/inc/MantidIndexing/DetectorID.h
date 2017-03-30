@@ -1,19 +1,18 @@
-#ifndef MANTID_INDEXING_MAKERANGE_H_
-#define MANTID_INDEXING_MAKERANGE_H_
+#ifndef MANTID_INDEXING_DETECTORID_H_
+#define MANTID_INDEXING_DETECTORID_H_
 
 #include "MantidIndexing/DllConfig.h"
-
-#include <numeric>
-#include <type_traits>
+#include "MantidIndexing/IndexType.h"
 
 namespace Mantid {
 namespace Indexing {
 
-/** Helper function for generating a vector with a range of integers, similar to
-  Python's range(). Return a vector of integers starting at 'first' and eding
-  with 'last' with increments of 1.
+/** Unique ID for a detector in a beamline.
 
-  Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  @author Simon Heybrock
+  @date 2017
+
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -34,16 +33,13 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class T1, class T2,
-          class = typename std::enable_if<std::is_integral<T1>::value &&
-                                          std::is_integral<T2>::value>::type>
-std::vector<T2> makeRange(T1 first, T2 last) {
-  std::vector<T2> vec(last - static_cast<T2>(first) + 1);
-  std::iota(vec.begin(), vec.end(), static_cast<T2>(first));
-  return vec;
-}
+struct MANTID_INDEXING_DLL DetectorID
+    : public detail::IndexType<DetectorID, int32_t> {
+  using detail::IndexType<DetectorID, int32_t>::IndexType;
+  using detail::IndexType<DetectorID, int32_t>::operator=;
+};
 
 } // namespace Indexing
 } // namespace Mantid
 
-#endif /* MANTID_INDEXING_MAKERANGE_H_ */
+#endif /* MANTID_INDEXING_DETECTORID_H_ */
