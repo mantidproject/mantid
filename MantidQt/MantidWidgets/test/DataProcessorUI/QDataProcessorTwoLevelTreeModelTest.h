@@ -126,6 +126,10 @@ public:
                      "Column1");
     TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
                      "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description2");
   }
 
   void testConstructorFourRowTable() {
