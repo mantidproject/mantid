@@ -91,10 +91,10 @@ public:
                      std::map<std::string, std::string>());
   MOCK_CONST_METHOD0(getProcessingOptions, std::string());
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
-
-  // Methods we don't care about
-  std::string getTimeSlicingValues() const override { return std::string(); };
-  std::string getTimeSlicingType() const override { return std::string(); };
+  
+  // Event handling
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {

@@ -52,6 +52,12 @@ public:
       const std::string &loader = "Load");
   ~ReflDataProcessorPresenter() override;
 
+  // The following methods are public for testing purposes only
+  // Add entry for the number of slices for a row in a group
+  void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
+  // Add entry for the number of slices for all rows in a group
+  void addNumGroupSlicesEntry(int groupID, size_t numSlices);
+
 private:
   // Process selected rows
   void process() override;

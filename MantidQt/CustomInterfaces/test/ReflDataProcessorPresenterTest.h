@@ -150,9 +150,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(6)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -174,28 +177,27 @@ public:
         presenter->notify(DataProcessorPresenter::ProcessFlag));
 
     // Check output workspaces were created as expected
-    for (size_t i = 0; i < 30; i += 10) {
+    for (size_t i = 0; i < 3; i++) {
+      std::string sliceIndex = std::to_string(i);
+
       TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+          "IvsLam_13460_slice_" + sliceIndex));
       TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsLam_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+          "IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
+                                                          sliceIndex));
       TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
       TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+          "IvsQ_binned_13460_slice_" + sliceIndex));
       TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_13460_" + std::to_string(i) + "_" + std::to_string(i + 10) +
-          "_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13460_" + std::to_string(i) + "_" +
-          std::to_string(i + 10)));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "IvsQ_binned_13462_" + std::to_string(i) + "_" +
-          std::to_string(i + 10)));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "TOF_13460_" + std::to_string(i) + "_" + std::to_string(i + 10)));
-      TS_ASSERT(AnalysisDataService::Instance().doesExist(
-          "TOF_13462_" + std::to_string(i) + "_" + std::to_string(i + 10)));
+          "IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
+                                                          sliceIndex));
     }
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
@@ -240,9 +242,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -295,9 +300,12 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("Custom"));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -336,12 +344,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-    createSampleEventWS("IvsQ_13460_0_10");
-    createSampleEventWS("IvsQ_13460_10_20");
-    createSampleEventWS("IvsQ_13460_20_30");
-    createSampleEventWS("IvsQ_13462_0_10");
-    createSampleEventWS("IvsQ_13462_10_20");
-    createSampleEventWS("IvsQ_13462_20_30");
+    // The following code sets up the desired workspaces without having to
+    // process any runs to obtain them
+    presenter->addNumSlicesEntry(0, 0, 3);
+    presenter->addNumSlicesEntry(0, 1, 3);
+    presenter->addNumSlicesEntry(0, 2, 3);
+    presenter->addNumSlicesEntry(1, 0, 3);
+    presenter->addNumSlicesEntry(1, 1, 3);
+    presenter->addNumSlicesEntry(1, 2, 3);
+    presenter->addNumGroupSlicesEntry(0, 3);
+    presenter->addNumGroupSlicesEntry(1, 3);
+
+    createSampleEventWS("IvsQ_13460_slice_0");
+    createSampleEventWS("IvsQ_13460_slice_1");
+    createSampleEventWS("IvsQ_13460_slice_2");
+    createSampleEventWS("IvsQ_13462_slice_0");
+    createSampleEventWS("IvsQ_13462_slice_1");
+    createSampleEventWS("IvsQ_13462_slice_2");
 
     std::map<int, std::set<int>> rowlist;
     rowlist[0].insert(0);
@@ -357,23 +376,23 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
     std::string pythonCode =
-        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_0_10\", 0, "
-        "True, window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_10_20\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_20_30\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_0_10\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_10_20\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_20_30\", 0, True, "
-        "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
+        "0, True, window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_slice_2\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_0\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -401,12 +420,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
-    createSampleEventWS("IvsQ_13460_0_10");
-    createSampleEventWS("IvsQ_13460_10_20");
-    createSampleEventWS("IvsQ_13460_20_30");
-    createSampleEventWS("IvsQ_13462_0_10");
-    createSampleEventWS("IvsQ_13462_10_20");
-    createSampleEventWS("IvsQ_13462_20_30");
+    // The following code sets up the desired workspaces without having to
+    // process any runs to obtain them
+    presenter->addNumSlicesEntry(0, 0, 3);
+    presenter->addNumSlicesEntry(0, 1, 3);
+    presenter->addNumSlicesEntry(0, 2, 3);
+    presenter->addNumSlicesEntry(1, 0, 3);
+    presenter->addNumSlicesEntry(1, 1, 3);
+    presenter->addNumSlicesEntry(1, 2, 3);
+    presenter->addNumGroupSlicesEntry(0, 3);
+    presenter->addNumGroupSlicesEntry(1, 3);
+
+    createSampleEventWS("IvsQ_13460_slice_0");
+    createSampleEventWS("IvsQ_13460_slice_1");
+    createSampleEventWS("IvsQ_13460_slice_2");
+    createSampleEventWS("IvsQ_13462_slice_0");
+    createSampleEventWS("IvsQ_13462_slice_1");
+    createSampleEventWS("IvsQ_13462_slice_2");
 
     std::set<int> groupList;
     groupList.insert(0);
@@ -421,23 +451,23 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
 
     std::string pythonCode =
-        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_0_10\", 0, "
-        "True, window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_10_20\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13460_20_30\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_0_10\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_10_20\", 0, True, "
-        "window = base_graph)\n"
-        "base_graph = plotSpectrum(\"IvsQ_13462_20_30\", 0, True, "
-        "window = base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
+        "base_graph = None\nbase_graph = plotSpectrum(\"IvsQ_13460_slice_0\", "
+        "0, True, window = base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_slice_1\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13460_slice_2\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_0\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_1\", 0, True, window = "
+        "base_graph)\n"
+        "base_graph = plotSpectrum(\"IvsQ_13462_slice_2\", 0, True, window = "
+        "base_graph)\nbase_graph.activeLayer().logLogAxes()\n";
 
     EXPECT_CALL(mockMainPresenter, runPythonAlgorithm(pythonCode)).Times(1);
     TS_ASSERT_THROWS_NOTHING(
@@ -465,6 +495,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
+    presenter->addNumSlicesEntry(0, 0, 1);
+    presenter->addNumGroupSlicesEntry(0, 1);
     createSampleEventWS("13460");
 
     std::map<int, std::set<int>> rowlist;
@@ -480,7 +512,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(std::set<int>()));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
     TS_ASSERT_THROWS_NOTHING(
@@ -508,6 +540,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         presenter->notify(DataProcessorPresenter::OpenTableFlag));
 
+    presenter->addNumSlicesEntry(0, 0, 1);
+    presenter->addNumSlicesEntry(0, 1, 1);
+    presenter->addNumGroupSlicesEntry(0, 1);
     createSampleEventWS("13460");
     createSampleEventWS("13462");
 
@@ -524,7 +559,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getSelectedParents())
         .Times(1)
         .WillRepeatedly(Return(groupList));
-    EXPECT_CALL(mockMainPresenter, getTimeSlicingOptions())
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
         .Times(1)
         .WillOnce(Return("0,10,20,30"));
     TS_ASSERT_THROWS_NOTHING(
