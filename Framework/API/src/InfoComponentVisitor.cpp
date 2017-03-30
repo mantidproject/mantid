@@ -117,22 +117,24 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
   NOT stored! These go into DetectorInfo at present*/
 }
 
-/**
- * @brief InfoComponentVisitor::makeComponentInfo
- * Creates a beamline component info based on the cached visited information
- * @return complete shared_ptr to new Beamline ComponentInfo.
- */
-boost::shared_ptr<Beamline::ComponentInfo>
-InfoComponentVisitor::makeComponentInfo() const {
-  /*
-   * The sorted detector indexes need to be created in blocks (the job of this
-   * type) so
-   * it's better to hide the construction of the ComponentInfo itself from
-   * clients and
-   * allow them to to uses this creational method instead.
-   */
-  return boost::make_shared<Beamline::ComponentInfo>(
-      m_assemblySortedDetectorIndices, m_ranges, m_positions, m_rotations);
+const std::vector<size_t> &
+InfoComponentVisitor::componentSortedDetectorIndices() const {
+  return m_assemblySortedDetectorIndices;
+}
+
+const std::vector<std::pair<size_t, size_t>> &
+InfoComponentVisitor::componentDetectorRanges() const {
+  return m_ranges;
+}
+
+boost::shared_ptr<std::vector<Eigen::Vector3d>>
+InfoComponentVisitor::positions() const {
+  return m_positions;
+}
+
+boost::shared_ptr<std::vector<Eigen::Quaterniond>>
+InfoComponentVisitor::rotations() const {
+  return m_rotations;
 }
 
 /**

@@ -1,4 +1,5 @@
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include <boost/make_shared.hpp>
 #include <numeric>
 #include <utility>
@@ -11,13 +12,15 @@ ComponentInfo::ComponentInfo(
     const std::vector<size_t> &assemblySortedDetectorIndices,
     const std::vector<std::pair<size_t, size_t>> &ranges,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations)
+    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
+    boost::shared_ptr<DetectorInfo> detectorInfo)
     : m_assemblySortedDetectorIndices(boost::make_shared<std::vector<size_t>>(
           assemblySortedDetectorIndices)),
       m_ranges(boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           ranges)),
       m_positions(positions), m_rotations(rotations),
-      m_size(m_assemblySortedDetectorIndices->size() + ranges.size()) {
+      m_size(m_assemblySortedDetectorIndices->size() + ranges.size()),
+      m_detectorInfo(detectorInfo) {
 
   if (m_rotations->size() != m_positions->size()) {
     throw std::invalid_argument("ComponentInfo should have been provided same "
@@ -27,6 +30,10 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument("ComponentInfo should have as many positions "
                                 "and rotations as non-detector component "
                                 "ranges");
+  }
+  if (m_detectorInfo->size() != m_assemblySortedDetectorIndices->size()) {
+    throw std::invalid_argument("ComponentInfo must have detector indices "
+                                "input of same size as size of DetectorInfo");
   }
 }
 
@@ -56,7 +63,7 @@ size_t ComponentInfo::size() const { return m_size; }
 
 Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   if (isDetectorDomain(componentIndex)) {
-    throw std::runtime_error("No detector info yet");
+    return m_detectorInfo->position(componentIndex);
   }
   const auto rangesIndex =
       componentIndex - m_assemblySortedDetectorIndices->size();
@@ -65,7 +72,7 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
 
 Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   if (isDetectorDomain(componentIndex)) {
-    throw std::runtime_error("No detector info yet");
+    return m_detectorInfo->rotation(componentIndex);
   }
   const auto rangesIndex =
       componentIndex - m_assemblySortedDetectorIndices->size();

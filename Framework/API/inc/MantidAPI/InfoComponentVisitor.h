@@ -95,7 +95,13 @@ public:
 
   const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
 
-  boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo() const;
+  const std::vector<size_t> &componentSortedDetectorIndices() const;
+
+  const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
+
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
+
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
 
   size_t size() const;
 };
