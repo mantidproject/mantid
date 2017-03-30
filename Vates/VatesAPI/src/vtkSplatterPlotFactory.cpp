@@ -30,6 +30,8 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkVertex.h>
 
+#include "boost/algorithm/clamp.hpp"
+
 #include <algorithm>
 #include <iterator>
 #include <qwt_double_interval.h>
@@ -587,13 +589,8 @@ void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) {
  *                       to the interval (0,100].
  */
 void vtkSplatterPlotFactory::SetPercentToUse(double percentToUse) {
-  if (percentToUse <= 0) {
-    m_percentToUse = 5;
-  } else if (percentToUse > 100) {
-    m_percentToUse = 100;
-  } else {
-    m_percentToUse = percentToUse;
-  }
+  m_percentToUse = boost::algorithm::clamp(
+      percentToUse, std::numeric_limits<double>::min(), 100.0);
 }
 
 /**
