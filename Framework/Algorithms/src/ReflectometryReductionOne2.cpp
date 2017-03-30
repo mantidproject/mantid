@@ -524,35 +524,56 @@ void ReflectometryReductionOne2::findLambdaMinMax() {
 * Find and cache the indicies of the detectors of interest
 */
 void ReflectometryReductionOne2::findDetectorsOfInterest() {
+  std::string instructions = getPropertyValue("ProcessingInstructions");
+
   // Get the min and max spectrum indicies from the processing instructions, if
   // given, or default to the overall min and max
   size_t minDetectorIdx = 0;
   size_t maxDetectorIdx = static_cast<int>(m_spectrumInfo->size()) - 1;
+  bool done = false;
 
-  std::string instructions = getPropertyValue("ProcessingInstructions");
   if (!instructions.empty() &&
       !std::all_of(instructions.begin(), instructions.end(), isspace)) {
-    // The processing instructions should be in the format <start>-<end>.
-    /// todo Add support for the '+' operator in the GroupingPattern. Could we
-    /// also support ':' and ',' operators? These would result in more than one
-    /// row in the detector workspace.
-    std::vector<std::string> matches;
-    boost::split(matches, instructions, boost::is_any_of("-"));
-
-    if (matches.size() != 2) {
-      std::ostringstream errMsg;
-      errMsg << "Error reading processing instructions; expected a range in "
-                "the format 'start-end' or 'start:end' but got "
-             << instructions;
-      throw std::runtime_error(errMsg.str());
-    }
-
     try {
-      boost::trim(matches[0]);
-      boost::trim(matches[1]);
-      minDetectorIdx = boost::lexical_cast<int>(matches[0]);
-      maxDetectorIdx = boost::lexical_cast<int>(matches[1]);
-    } catch (boost::bad_lexical_cast &ex) {
+      // The processing instructions should be in the format <start>-<end> or
+      // <a>+<b>+<c>... At the moment we only support a single range or set of
+      // values but not combinations of both.
+
+      /// todo Add support for the '+' operator in the GroupingPattern. Could
+      /// we also support ':' and ',' operators? These would result in more
+      /// than one row in the detector workspace.
+      std::vector<std::string> matches;
+
+      // Look for a single occurance of '-' (only support a single range for
+      // now)
+      boost::split(matches, instructions, boost::is_any_of("-"));
+
+      if (matches.size() == 2) {
+        minDetectorIdx = std::stoi(matches[0]);
+        if (matches.size() > 1) {
+          maxDetectorIdx = std::stoi(matches[1]);
+        } else {
+          maxDetectorIdx = minDetectorIdx;
+        }
+      } else {
+        // Look for '+'
+        boost::split(matches, instructions, boost::is_any_of("+"));
+        if (matches.size() > 0) {
+          for (auto match : matches) {
+            m_detectors.push_back(std::stoi(match));
+          }
+          done = true;
+        }
+      }
+
+      // Also set the centre detector index, which is the detector where thetaR
+      // is defined. Use the centre of the region of interest.
+
+      /// todo: check this - should it be the centre pixel of the detector
+      /// (regardless of region of interest?)
+      m_centreDetectorIdx =
+          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
+    } catch (std::exception &ex) {
       std::ostringstream errMsg;
       errMsg << "Error reading processing instructions '" << instructions
              << "'; " << ex.what();
@@ -560,16 +581,12 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
     }
   }
 
-  // Add each detector index in the range to the list
-  for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
-    m_detectors.push_back(i);
+  if (!done) {
+    // Add each detector index in the range to the list
+    for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
+      m_detectors.push_back(i);
+    }
   }
-
-  // Also set the centre detector index, which is the detector where thetaR is
-  // defined. Use the centre of the region of interest.
-  /// todo: check this - should it be the centre pixel of the detector
-  /// (regardless of region of interest?)
-  m_centreDetectorIdx = minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
 }
 
 /**
