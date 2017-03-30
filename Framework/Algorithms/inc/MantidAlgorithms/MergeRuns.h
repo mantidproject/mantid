@@ -66,6 +66,13 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+namespace MergeRunsOptions {
+const std::string SKIP_BEHAVIOUR = "Skip File";
+const std::string STOP_BEHAVIOUR = "Stop";
+const std::string REBIN_BEHAVIOUR = "Rebin";
+const std::string FAIL_BEHAVIOUR = "Fail";
+}
+
 class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

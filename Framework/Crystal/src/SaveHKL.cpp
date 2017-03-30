@@ -92,7 +92,7 @@ void SaveHKL::init() {
   declareProperty(Kernel::make_unique<FileProperty>(
                       "UBFilename", "", FileProperty::OptionalLoad, exts),
                   "Path to an ISAW-style UB matrix text file only needed for "
-                  "DirectionCosines.");
+                  "DirectionCosines if workspace does not have lattice.");
 }
 
 /** Execute the algorithm.
@@ -117,27 +117,33 @@ void SaveHKL::exec() {
   int widthBorder = getProperty("WidthBorder");
   int decimalHKL = getProperty("HKLDecimalPlaces");
   bool cosines = getProperty("DirectionCosines");
-  Mantid::Geometry::OrientedLattice lat;
   Kernel::DblMatrix UB(3, 3);
   if (cosines) {
-    // Find OrientedLattice
-    std::string fileUB = getProperty("UBFilename");
-    // Open the file
-    std::ifstream in(fileUB.c_str());
-    std::string s;
-    double val;
+    if (peaksW->sample().hasOrientedLattice()) {
+      UB = peaksW->sample().getOrientedLattice().getUB();
+    } else {
+      // Find OrientedLattice
+      std::string fileUB = getProperty("UBFilename");
+      // Open the file
+      std::ifstream in(fileUB.c_str());
+      if (!in)
+        throw std::runtime_error(
+            "A file containing the UB matrix must be input into UBFilename.");
+      std::string s;
+      double val;
 
-    // Read the ISAW UB matrix
-    for (size_t row = 0; row < 3; row++) {
-      for (size_t col = 0; col < 3; col++) {
-        s = getWord(in, true);
-        if (!convert(s, val))
-          throw std::runtime_error(
-              "The string '" + s +
-              "' in the file was not understood as a number.");
-        UB[row][col] = val;
+      // Read the ISAW UB matrix
+      for (size_t row = 0; row < 3; row++) {
+        for (size_t col = 0; col < 3; col++) {
+          s = getWord(in, true);
+          if (!convert(s, val))
+            throw std::runtime_error(
+                "The string '" + s +
+                "' in the file was not understood as a number.");
+          UB[row][col] = val;
+        }
+        readToEndOfLine(in, true);
       }
-      readToEndOfLine(in, true);
     }
   }
 
