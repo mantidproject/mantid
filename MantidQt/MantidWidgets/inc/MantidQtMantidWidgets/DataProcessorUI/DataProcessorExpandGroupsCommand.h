@@ -1,13 +1,13 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorWorkspaceCommand
+/** @class DataProcessorExpandGroupsCommand
 
-DataProcessorWorkspaceCommand defines a workspace action
+DataProcessorExpandGroupsCommand defines the action "Expand All Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -30,26 +30,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWorkspaceCommand : public DataProcessorCommandBase {
+class DataProcessorExpandGroupsCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
-                                const std::string &name)
-      : DataProcessorCommandBase(tablePresenter), m_name(name){};
-  virtual ~DataProcessorWorkspaceCommand(){};
+  DataProcessorExpandGroupsCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorExpandGroupsCommand(){};
 
   void execute() override {
-    // Tell the presenter which of the available workspaces was selected
-    m_presenter->setModel(m_name);
+    m_presenter->notify(DataProcessorPresenter::ExpandAllGroupsFlag);
   };
-  std::string name() override { return m_name; }
-  std::string icon() override { return std::string("://worksheet.png"); }
-  std::string tooltip() override { return std::string("Table Workspace"); }
-  std::string whatsthis() override { return std::string("Table Workspace"); }
+  std::string name() override { return std::string("Expand All Groups"); }
+  std::string icon() override { return std::string("://expand_all.png"); }
+  std::string tooltip() override { return std::string("Expands all groups"); }
+  std::string whatsthis() override {
+    return std::string(
+        "If any groups in the table are currently collapsed this will expand "
+        "all collapsed groups, revealing their individual runs.");
+  }
   std::string shortcut() override { return std::string(); }
-
-private:
-  std::string m_name;
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPANDGROUPSCOMMAND_H*/

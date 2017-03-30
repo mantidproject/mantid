@@ -19,6 +19,7 @@ Powder Diffraction
 
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
 
 Single Crystal Diffraction
 --------------------------

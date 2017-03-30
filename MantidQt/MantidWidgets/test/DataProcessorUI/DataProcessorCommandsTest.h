@@ -330,9 +330,6 @@ public:
 
     // The presenter should set the name of the ws
     EXPECT_CALL(mockPresenter, setModel("workspace")).Times(Exactly(1));
-    // The presenter should be notified with the OpenTableFlag
-    EXPECT_CALL(mockPresenter, notify(DataProcessorPresenter::OpenTableFlag))
-        .Times(Exactly(1));
     // Execute the command
     command.execute();
     // Verify expectations

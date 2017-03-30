@@ -70,6 +70,8 @@ Improved
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
 
+- :ref:`MergeRuns <func-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
+
 Python
 ------
 

@@ -26,6 +26,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionFWSTest.py
   IndirectILLReductionQENSTest.py
   IndirectResolutionTest.py
+  IndirectSampleChangerTest.py
   IndirectTransmissionMonitorTest.py
   IqtFitMultipleTest.py
   IqtFitSequentialTest.py
