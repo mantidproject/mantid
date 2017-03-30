@@ -9,6 +9,7 @@
 #include "MantidAPI/InfoComponentVisitor.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <set>
+#include <boost/make_shared.hpp>
 
 using Mantid::API::InfoComponentVisitor;
 using Mantid::Kernel::V3D;
@@ -42,6 +43,30 @@ public:
     TSM_ASSERT_EQUALS("Should have registered 4 components", visitor.size(), 4);
   }
 
+  void test_visitor_purges_parameter_map() {
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/,
+                                           V3D(11, 0, 0) /*detector position*/);
+    Mantid::Geometry::ParameterMap pmap;
+    auto detector = visitee->getDetector(visitee->getDetectorIDs()[0]);
+    pmap.addV3D(detector->getComponentID(), "pos",
+                Mantid::Kernel::V3D{12, 0, 0});
+    pmap.addV3D(visitee->getComponentID(), "pos",
+                Mantid::Kernel::V3D{13, 0, 0});
+
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+
+    // Create the visitor.
+    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) { return 0; },
+                                 pmap);
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    TS_ASSERT_EQUALS(pmap.size(), 1);
+  }
   void test_visitor_detector_indexes_check() {
 
     // Create a very basic instrument to visit
