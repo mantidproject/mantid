@@ -51,17 +51,17 @@ EnabledWhenProperty::EnabledWhenProperty(
 *
 * @param conditionOne :: First EnabledWhenProperty object to use
 * @param conditionTwo :: Second EnabledWhenProperty object to use
-* @param localOperator :: The logic operator to apply across both
+* @param logicOperator :: The logic operator to apply across both
 *conditions
 *
 */
 EnabledWhenProperty::EnabledWhenProperty(
     std::unique_ptr<EnabledWhenProperty> &&conditionOne,
     std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
-    eLogicOperator logicalOperator)
+    eLogicOperator logicOperator)
     : IPropertySettings() {
   m_comparisonDetails = Kernel::make_unique<ComparisonDetails>(
-      std::move(conditionOne), std::move(conditionTwo), logicalOperator);
+      std::move(conditionOne), std::move(conditionTwo), logicOperator);
 }
 
 /**
@@ -202,7 +202,7 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
   * Always returns true as EnabledWhenProperty always sets the visibility
   * on while altering whether the property is Enabled or disabled
   *
-  * @param :: algo Pointer to the algorithm
+  * @param algo :: Pointer to the algorithm containing the property
   * @return :: True always
   */
 bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {

@@ -98,7 +98,7 @@ public:
   /// of both of them with the specified logic operator
   EnabledWhenProperty(std::unique_ptr<EnabledWhenProperty> &&conditionOne,
                       std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
-                      eLogicOperator logicalOperator);
+                      eLogicOperator logicOperator);
 
   /// Copy constructor for EnabledWhenProperty
   EnabledWhenProperty(const EnabledWhenProperty &original);

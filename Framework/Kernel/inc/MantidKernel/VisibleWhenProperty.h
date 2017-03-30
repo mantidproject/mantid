@@ -59,7 +59,7 @@ public:
 
   /// Checks two VisisbleWhenProperty objects to determine the
   /// result of both of them
-  virtual bool checkComparison(const IPropertyManager *algo) const;
+  virtual bool checkComparison(const IPropertyManager *algo) const override;
 
   /// Return true always as we only consider visible
   bool isEnabled(const IPropertyManager *algo) const override;

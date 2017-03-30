@@ -89,6 +89,7 @@ bool VisibleWhenProperty::checkComparison(const IPropertyManager *algo) const {
   * @return :: True - Property is always enabled
   */
 bool VisibleWhenProperty::isEnabled(const IPropertyManager *algo) const {
+  UNUSED_ARG(algo);
   return true;
 }
 
