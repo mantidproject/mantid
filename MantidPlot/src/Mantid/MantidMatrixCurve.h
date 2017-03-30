@@ -158,6 +158,7 @@ private slots:
 private:
   /// Make the curve name
   QString createCurveName(
+      const QString prefix,
       const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
 
   QString

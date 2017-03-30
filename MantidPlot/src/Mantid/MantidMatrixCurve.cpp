@@ -102,7 +102,7 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
  */
 void MantidMatrixCurve::init(Graph *g, bool distr,
                              GraphOptions::CurveType style,
-                             bool mutipleSpectra ) {
+                             bool multipleSpectra ) {
   // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -125,8 +125,11 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
     // name
     if (workspace->getNumberHistograms() == 1)
       this->setTitle(m_wsName);
-    else // ???
-      this->setTitle(createCurveName(workspace));
+    else 
+      this->setTitle(createCurveName("",workspace));
+  }
+  else if(multipleSpectra) {
+    this->setTitle(createCurveName(this->title().text(),workspace));
   }
   // Here we have to catch the case when there is more than on spectrum and 
   // append the spectrum name like in createCurveName(Workspace).
@@ -275,15 +278,24 @@ void MantidMatrixCurve::itemChanged() {
 
 /**
  * Create the name for a curve from the following input:
+ * @param prefix :: prefix for name, if empty, workspace name is used.
  * @param ws :: Pointer to workspace
  */
 QString MantidMatrixCurve::createCurveName(
+    const QString prefix,
     const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws) {
-  QString name = m_wsName + "-";
+  QString name = "";
+
+  if (prefix.isEmpty())
+    name += m_wsName + "-";
+  else
+    name += prefix + "-";
+
   if (m_indexType == Spectrum)
     name += QString::fromStdString(ws->getAxis(1)->label(m_index));
   else
     name += "bin-" + QString::number(m_index);
+
   return name;
 }
 

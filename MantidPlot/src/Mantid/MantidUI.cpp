@@ -3135,7 +3135,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
 
       auto *wsCurve =
           new MantidMatrixCurve(logValue, it.key(), g, it.value(), indexType,
-                                errs, plotAsDistribution, style);
+                                errs, plotAsDistribution, style, multipleSpectra);
       if (!firstCurve) {
         firstCurve = wsCurve;
         g->setNormalizable(firstCurve->isNormalizable());
