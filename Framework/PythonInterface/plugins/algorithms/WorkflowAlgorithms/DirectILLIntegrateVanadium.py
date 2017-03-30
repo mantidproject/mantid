@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator, Property, StringListValidator
+from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, Property, StringListValidator)
 from mantid.simpleapi import ComputeCalibrationCoefVan
 
 
@@ -49,12 +49,13 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
             temperature = self.getProperty(common.PROP_TEMPERATURE).value
         else:
             temperature = 293.0
-            MLZ_TEMPERATURE_ENTRY = 'temperature'
             ILL_TEMPERATURE_ENTRY = 'sample.temperature'
-            if mainWS.run().hasProperty(MLZ_TEMPERATURE_ENTRY):
-                temperature = mainWS.run().getProperty(MLZ_TEMPERATURE_ENTRY).value
-            elif mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
-                temperature = mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY).value
+            if mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
+                temperatureProperty = mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY)
+                if hasattr(temperatureProperty, 'getStatistics'):
+                    temperature = temperatureProperty.getStatistics().mean
+                else:
+                    temperature = temperatureProperty.value
         calibrationWS = self.getPropertyValue(common.PROP_OUTPUT_WS)
         calibrationWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
                                                   EPPTable=eppWS,
