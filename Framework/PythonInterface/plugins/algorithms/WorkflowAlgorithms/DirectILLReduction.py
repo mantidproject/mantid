@@ -17,6 +17,7 @@ def _createDetectorGroups(ws):
     """Find workspace indices with (almost) same theta and group them. Masked
     detectors are ignored.
     """
+    import ctypes
     numHistograms = ws.getNumberHistograms()
     groups = list()
     detectorGrouped = numHistograms * [False]
@@ -33,9 +34,9 @@ def _createDetectorGroups(ws):
         twoThetaDiff = numpy.abs(twoThetas[i + 1:] - twoTheta1)
         equalTwoThetas = numpy.flatnonzero(twoThetaDiff < 0.01 / 180.0 * constants.pi)
         for j in (i + 1) + equalTwoThetas:
-            if spectrumInfo.isMasked(j):
+            if spectrumInfo.isMasked(int(j)):
                 continue
-            currentGroup.append(ws.getDetector(j).getID())
+            currentGroup.append(ws.getDetector(int(j)).getID())
             detectorGrouped[j] = True
         groups.append(currentGroup)
     return groups
@@ -355,6 +356,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         groupsXml = _detectorGroupsToXml(groups, instrumentName)
         fileHandle, path = tempfile.mkstemp(suffix='.xml', prefix='grouping-{}-'.format(instrumentName))
         _writeXml(groupsXml, path)
+        os.close(fileHandle)
         groupedWSName = wsNames.withSuffix('grouped_detectors')
         groupedWS = GroupDetectors(InputWorkspace=mainWS,
                                    OutputWorkspace=groupedWSName,
