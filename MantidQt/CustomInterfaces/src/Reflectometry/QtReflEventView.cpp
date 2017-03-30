@@ -64,7 +64,7 @@ std::string QtReflEventView::getTimeSlicingValues() const {
   else if (m_sliceType == "LogValue")
     values =
         "Slicing=\"" + m_ui.logValueEdit->text().toStdString() +
-        "\",LogFilter=" + m_ui.logValueComboBox->currentText().toStdString();
+        "\",LogFilter=" + m_ui.logValueTypeEdit->text().toStdString();
 
   return values;
 }
@@ -103,7 +103,9 @@ void QtReflEventView::toggleSlicingOptions() const {
   m_ui.customLabel->setEnabled(entriesEnabled[2]);
   // LogValue
   m_ui.logValueEdit->setEnabled(entriesEnabled[3]);
-  m_ui.logValueComboBox->setEnabled(entriesEnabled[3]);
+  m_ui.logValueLabel->setEnabled(entriesEnabled[3]);
+  m_ui.logValueTypeEdit->setEnabled(entriesEnabled[3]);
+  m_ui.logValueTypeLabel->setEnabled(entriesEnabled[3]);
 }
 
 } // namespace CustomInterfaces

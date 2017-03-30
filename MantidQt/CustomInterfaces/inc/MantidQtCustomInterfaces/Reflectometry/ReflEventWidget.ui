@@ -123,7 +123,7 @@
             <item>
               <widget class="QLabel" name="customLabel">
                 <property name="text">
-                  <string> Python list (sec)</string>
+                  <string>Python list (sec)</string>
                 </property>
               </widget>
             </item>
@@ -167,6 +167,13 @@
               </widget>
             </item>
             <item>
+              <widget class="QLabel" name="logValueLabel">
+                <property name="text">
+                  <string>Python list (sec)</string>
+                </property>
+              </widget>
+            </item>
+            <item>
               <widget class="QLineEdit" name="logValueEdit">
                 <property name="sizeHint" stdset="0">
                   <size>
@@ -177,16 +184,24 @@
               </widget>
             </item>
             <item>
-              <widget class="QComboBox" name="logValueComboBox">
-                <item>
-                  <property name="text">
-                    <string>T1</string>
-                  </property>
-                </item>
+              <widget class="QLabel" name="logValueTypeLabel">
+                <property name="text">
+                  <string>Log name</string>
+                </property>
               </widget>
             </item>
             <item>
-              <spacer name="logValueSpacer">
+              <widget class="QLineEdit" name="logValueTypeEdit">
+                <property name="sizeHint" stdset="0">
+                  <size>
+                    <width>10</width>
+                    <height>10</height>
+                  </size>
+                </property>
+              </widget>
+            </item>
+            <item>
+              <spacer name="logValueSpacer1">
                 <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                 </property>
