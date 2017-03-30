@@ -386,7 +386,7 @@ Usage
    #myFunc = 'name=LinearBackground, A0=0.3;name=Gaussian, Height='+height+', PeakCentre='+tryCentre+', Sigma='+sigma
 
    # Do the fitting
-   fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \
+   fitStatus, chiSq, nIter, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \
       WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
 
    print "The fit was: " + fitStatus

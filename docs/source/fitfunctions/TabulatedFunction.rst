@@ -41,7 +41,7 @@ Usage
     
     # Call the Fit algorithm and perform the fit
     myFunc='name=TabulatedFunction,Workspace=ws1,WorkspaceIndex=0,Scaling=1.0,Shift=0.0'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    fitStatus, chiSq, nIter, covarianceTable, paramTable, fitWorkspace =\
     Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')
 
     print "The fit was: " + fitStatus

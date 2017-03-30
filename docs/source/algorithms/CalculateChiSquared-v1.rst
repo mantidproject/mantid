@@ -144,8 +144,8 @@ Output:
     # Fit the function
     res = Fit(fun,ws,Output='out')
     # res[3] is a table with the fitted parameters
-    nParams = res[3].rowCount() - 1
-    params = [res[3].cell(i,1) for i in range(nParams)]
+    nParams = res[4].rowCount() - 1
+    params = [res[4].cell(i,1) for i in range(nParams)]
     # Build a new function and populate it with the fitted parameters
     fun = fun_t % tuple(params)
     # Test the chi squared.

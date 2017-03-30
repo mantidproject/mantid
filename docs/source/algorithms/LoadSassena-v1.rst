@@ -66,7 +66,7 @@ Usage
     myFunc = 'name=Gaussian,Height={0},PeakCentre={1},Sigma={2}'.format(intensity,center,sigma)
 
     # Call the Fit algorithm and perform the fit
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    fitStatus, chiSq, nIter, covarianceTable, paramTable, fitWorkspace =\
     Fit(Function=myFunc, InputWorkspace=fqtReal, WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit')
 
     print "The fit was: " + fitStatus

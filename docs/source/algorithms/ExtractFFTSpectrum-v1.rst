@@ -79,12 +79,12 @@ Usage
 
     # Test the real part with a fitting to the expected Lorentzian
     myFunc = 'name=Lorentzian,Amplitude=0.05,PeakCentre=0,FWHM=6,ties=(PeakCentre=0)'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfr', StartX=-40, EndX=40, CreateOutput=1)
+    fitStatus, chiSq, nIter, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfr', StartX=-40, EndX=40, CreateOutput=1)
     print("Theoretical FWHM = 1/(pi*tau)=6.367 -- Fitted FWHM value is: %.3f" % paramTable.column(1)[2])
 
     # Test the imaginary part with a fitting to the expected Gaussian
     myFunc = 'name=Gaussian,Height=0.1,PeakCentre=0,Sigma=3.0, ties=(PeakCentre=0)'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfi', StartX=-15, EndX=15, CreateOutput=1)
+    fitStatus, chiSq, nIter, covarianceTable, paramTable, fitWorkspace = Fit(Function=myFunc, InputWorkspace='wsfi', StartX=-15, EndX=15, CreateOutput=1)
     print("Theoretical Sigma = 1/(2*pi*sigma)=3.183 -- Fitted Sigma value is: %.3f" % paramTable.column(1)[2])
 
 Output:
