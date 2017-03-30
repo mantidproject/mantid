@@ -612,6 +612,7 @@ void EnggDiffractionPresenter::processLogMsg() {
 
 void EnggDiffractionPresenter::processInstChange() {
   m_currentInst = m_view->currentInstrument();
+  m_view->updateTabsInstrument(m_currentInst);
 }
 
 void EnggDiffractionPresenter::processRBNumberChange() {
@@ -1086,7 +1087,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   // save vanIntegWS and vanCurvesWS as open genie
   // see where spec number comes from
-
   loadOrCalcVanadiumWorkspaces(vanFileHint, cs.m_inputDirCalib, vanIntegWS,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
@@ -1941,7 +1941,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
   // if pre calculated not found ..
   if (forceRecalc || !foundPrecalc) {
     g_log.notice() << "Calculating Vanadium corrections. This may take a "
-                      "few seconds...\n";
+                      "while...\n";
     try {
       calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
     } catch (std::invalid_argument &ia) {

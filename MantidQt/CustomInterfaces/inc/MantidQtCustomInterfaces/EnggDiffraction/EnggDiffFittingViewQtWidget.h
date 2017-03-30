@@ -159,6 +159,12 @@ public:
 
   void resetView();
 
+  std::string getCurrentInstrument() const override { return m_currentInst; }
+
+  void setCurrentInstrument(const std::string &newInstrument) override {
+    m_currentInst = newInstrument;
+  }
+
 protected:
   void initLayout();
 
@@ -240,6 +246,10 @@ private:
 
   /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffFittingPresenter> m_presenter;
+
+  /// current selected instrument
+  /// updated from the EnggDiffractionPresenter processInstChange
+  std::string m_currentInst = "";
 };
 
 } // namespace CustomInterfaces

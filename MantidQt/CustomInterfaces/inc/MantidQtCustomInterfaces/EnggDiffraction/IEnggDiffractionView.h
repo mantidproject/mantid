@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
-#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPythonRunner.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionSettings.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionUserMsg.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -355,6 +355,13 @@ public:
   virtual void plotReplacingWindow(const std::string &wsName,
                                    const std::string &spectrum,
                                    const std::string &type) = 0;
+
+  /**
+  * Updates the instrument in all child tabs
+  *
+  * @param newInstrument name of the new instrument that will be set
+  */
+  virtual void updateTabsInstrument(const std::string &newInstrument) = 0;
 };
 
 } // namespace CustomInterfaces

@@ -4,6 +4,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
 
+#include "EnggDiffFittingViewMock.h"
 #include "EnggDiffractionViewMock.h"
 #include <cxxtest/TestSuite.h>
 
@@ -1385,20 +1386,23 @@ public:
 
     // by setting this here, when initialising the presenter, the function will
     // be called and the instrument name will be updated
-    // we are calling it twice, once on initialisation and a second time after
-    // notify!
     const std::string instrumentName = "ENGINX";
+
+    // we are calling it twice, once on presenter initialisation
+    // and a second time after when using pres.notify!
     EXPECT_CALL(mockView, currentInstrument())
         .Times(2)
         .WillRepeatedly(Return(instrumentName));
 
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
+    // we don't expect any warnings or errors
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
 
     // should not change status
     EXPECT_CALL(mockView, showStatus(testing::_)).Times(0);
+    EXPECT_CALL(mockView, updateTabsInstrument(testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::InstrumentChange);
     TSM_ASSERT(
