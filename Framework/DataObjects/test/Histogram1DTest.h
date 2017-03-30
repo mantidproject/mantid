@@ -35,8 +35,10 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = boost::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
-    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)), Counts(100, 0.0), CountVariances(100, 0.0)));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                             Counts(100, 0.0), CountVariances(100, 0.0)));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                              Counts(100, 0.0), CountVariances(100, 0.0)));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);

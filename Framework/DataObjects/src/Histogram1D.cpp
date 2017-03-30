@@ -73,7 +73,8 @@ const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 void Histogram1D::checkAndSanitizeHistogram(
     HistogramData::Histogram &histogram) {
   if (!histogram.sharedY()) {
-    throw std::invalid_argument("Histogram1D: invalid input: Y data set to nullptr");
+    throw std::invalid_argument(
+        "Histogram1D: invalid input: Y data set to nullptr");
   }
 }
 
