@@ -91,7 +91,7 @@ public:
   /// of both of them with the specified logic operator
   EnabledWhenProperty(const EnabledWhenProperty &conditionOne,
                       const EnabledWhenProperty &conditionTwo,
-                      eLogicOperator logicalOperator);
+                      eLogicOperator logicOperator);
 
   /// Constructs a EnabledWhenProperty object which takes ownership of two
   /// already constructed EnabledWhenProperty objects and returns the result

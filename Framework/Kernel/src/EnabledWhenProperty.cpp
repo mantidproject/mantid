@@ -9,9 +9,6 @@ using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace Kernel {
-
-using EnabledPropPtr = std::unique_ptr<EnabledWhenProperty>;
-
 /** Constructor
 * @param otherPropName :: Name of the OTHER property that we will check.
 * @param when :: Criterion to evaluate
@@ -32,19 +29,19 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
   *
   * @param conditionOne :: First EnabledWhenProperty object to use
   * @param conditionTwo :: Second EnabledWhenProperty object to use
-  * @param localOperator :: The logic operator to apply across both
+  * @param logicOperator :: The logic operator to apply across both
   * conditions
   */
 EnabledWhenProperty::EnabledWhenProperty(
     const EnabledWhenProperty &conditionOne,
-    const EnabledWhenProperty &conditionTwo, eLogicOperator logicalOperator)
+    const EnabledWhenProperty &conditionTwo, eLogicOperator logicOperator)
     : // This method allows the Python interface to easily construct these
       // objects
       // Copy the object then forward onto our unique pointer constructor
       EnabledWhenProperty(
           std::move(Kernel::make_unique<EnabledWhenProperty>(conditionOne)),
           std::move(Kernel::make_unique<EnabledWhenProperty>(conditionTwo)),
-          logicalOperator) {}
+          logicOperator) {}
 
 /** Multiple conditions constructor - takes two unique pointers to
 * EnabledWhenProperty objects and returns the product of them
@@ -58,9 +55,10 @@ EnabledWhenProperty::EnabledWhenProperty(
 *conditions
 *
 */
-EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
-                                         EnabledPropPtr &&conditionTwo,
-                                         eLogicOperator logicalOperator)
+EnabledWhenProperty::EnabledWhenProperty(
+    std::unique_ptr<EnabledWhenProperty> &&conditionOne,
+    std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
+    eLogicOperator logicalOperator)
     : IPropertySettings() {
   m_comparisonDetails = Kernel::make_unique<ComparisonDetails>(
       std::move(conditionOne), std::move(conditionTwo), logicalOperator);
@@ -72,7 +70,8 @@ EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
   * @param original :: Object to deep copy
   * @return :: EnabledWhenProperty object
   */
-EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original) {
+EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original)
+    : IPropertySettings() {
   // This can be triggered several times during Mantid startup so leave
   // this check as a debug assertion
   assert(original.m_comparisonDetails || original.m_propertyDetails);
@@ -89,9 +88,9 @@ EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original) {
 * Checks if the user specified combination of enabled criterion
 * returns a true or false value
 *
-* @param :: algo The algorithm containing the property to check
+* @param algo :: The algorithm containing the property to check
 * @return :: true if user specified combination was true, else false.
-* @throw::  If any problems was found
+* @throw ::  If any problems was found
 */
 bool EnabledWhenProperty::checkComparison(const IPropertyManager *algo) const {
   const auto &comparison = m_comparisonDetails;
@@ -207,6 +206,8 @@ bool EnabledWhenProperty::isEnabled(const IPropertyManager *algo) const {
   * @return :: True always
   */
 bool EnabledWhenProperty::isVisible(const IPropertyManager *algo) const {
+  // VisisbleWhenProperty uses algo so we have to keep it to match interface
+  UNUSED_ARG(algo);
   return true;
 }
 

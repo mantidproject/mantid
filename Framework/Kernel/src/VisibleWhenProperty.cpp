@@ -20,7 +20,7 @@ VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
 *
 * @param conditionOne :: First VisibleWhenProperty object to use
 * @param conditionTwo :: Second VisibleWhenProperty object to use
-* @param localOperator :: The logic operator to apply across both
+* @param logicOperator :: The logic operator to apply across both
 *conditions
 *
 */
@@ -42,7 +42,7 @@ VisibleWhenProperty::VisibleWhenProperty(
 *
 * @param conditionOne :: First VisibleWhenProperty object to use
 * @param conditionTwo :: Second VisibleWhenProperty object to use
-* @param localOperator :: The logic operator to apply across both
+* @param logicOperator :: The logic operator to apply across both
 *conditions
 *
 */
@@ -57,6 +57,7 @@ VisibleWhenProperty::VisibleWhenProperty(
 * Checks if the user specified combination of visible criterion
 * returns a true or false value
 *
+* @param algo :: Pointer to the algorithm containing the property
 * @return true if user specified combination was true.
 * @throw If any problems was found
 */
