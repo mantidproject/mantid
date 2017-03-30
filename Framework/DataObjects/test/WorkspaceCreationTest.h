@@ -181,7 +181,7 @@ public:
     // parent has no instrument set, so spectrum definitions created by
     // make_indices are bad.
     TS_ASSERT_THROWS(create<Workspace2D>(*parent, make_indices()),
-                     std::runtime_error);
+                     std::invalid_argument);
   }
 
   void test_create_parent_IndexInfo() {
