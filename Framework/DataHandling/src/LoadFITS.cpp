@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
@@ -862,15 +862,14 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   // Treat buffer as a series of bytes
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
-  HistogramData::Counts sharedXCounts(ncols,
-                                      HistogramData::LinearGenerator(0, 0));
-  HistogramData::CountStandardDeviations sharedErrors(
+  HistogramData::Points sharedX(ncols,HistogramData::LinearGenerator(0, 0));
+  HistogramData::PointStandardDeviations sharedErrors(
       ncols, HistogramData::LinearGenerator(0, 0));
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
-    ws->setCounts(i, sharedXCounts);
+    ws->setPoints(i, sharedX);
     auto &yVals = ws->mutableY(i);
-    ws->setCountStandardDeviations(i, sharedErrors);
+    ws->setPointStandardDeviations(i, sharedErrors);
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index
