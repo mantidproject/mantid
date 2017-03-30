@@ -122,6 +122,206 @@ public:
 
   ReflDataProcessorPresenterTest() { FrameworkManager::Instance(); }
 
+  void testProcessEventWorkspacesUniformEvenSlicing() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
+
+    std::set<int> groupList;
+    groupList.insert(0);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+        .Times(1)
+        .WillOnce(Return("3"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("UniformEven"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(6)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(3)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(14)
+        .WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
+
+    // Check output workspaces were created as expected
+    for (size_t i = 0; i < 3; i++) {
+      std::string sliceIndex = std::to_string(i);
+
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
+                                                          sliceIndex));
+    }
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+
+    // Tidy up
+    AnalysisDataService::Instance().clear();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessEventWorkspacesUniformSlicing() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    auto presenter = presenterFactory.create();
+    presenter->acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter->accept(&mockMainPresenter);
+
+    createPrefilledWorkspace("TestWorkspace", presenter->getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::OpenTableFlag));
+
+    std::set<int> groupList;
+    groupList.insert(0);
+
+    // We should not receive any errors
+    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<int, std::set<int>>()));
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents())
+        .Times(1)
+        .WillRepeatedly(Return(groupList));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingValues())
+        .Times(1)
+        .WillOnce(Return("500"));
+    EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
+        .Times(1)
+        .WillOnce(Return("Uniform"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
+        .Times(8)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions())
+        .Times(8)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
+        .Times(3)
+        .WillRepeatedly(Return(""));
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
+        .Times(18)
+        .WillRepeatedly(Return("INTER"));
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(
+        presenter->notify(DataProcessorPresenter::ProcessFlag));
+
+    // Check output workspaces were created as expected
+    for (size_t i = 0; i < 3; i++) {
+      std::string sliceIndex = std::to_string(i);
+
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13460_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_13460_slice_" + sliceIndex + "_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13460_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
+                                                          sliceIndex));
+    }
+    // Uniform slicing allows for different runs to have different numbers
+    // of output slices
+    for (size_t i = 3; i < 4; i++) {
+      std::string sliceIndex = std::to_string(i);
+
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsLam_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13462_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist(
+          "IvsQ_binned_13462_slice_" + sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
+                                                          sliceIndex));
+      TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_slice_" +
+                                                          sliceIndex));
+    }
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13460_monitors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_13462_monitors"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13464"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_13463_13464"));
+
+    // Tidy up
+    AnalysisDataService::Instance().clear();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
   void testProcessEventWorkspacesCustomSlicing() {
     NiceMock<MockDataProcessorView> mockDataProcessorView;
     NiceMock<MockProgressableView> mockProgress;
