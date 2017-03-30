@@ -55,8 +55,8 @@ void ProcessBankData::run() { // override {
     const size_t numEventLists = outputWS.getNumberHistograms();
     for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
       if (counts[pixID - m_min_id] > 0) {
+        size_t wi = getWorkspaceIndexFromPixelID(pixID);
         // Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
         // Allocate it
         if (wi < numEventLists) {
           outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
@@ -202,7 +202,7 @@ void ProcessBankData::run() { // override {
     for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
       if (usedDetIds[pixID - m_min_id]) {
         // Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
+        size_t wi = getWorkspaceIndexFromPixelID(pixID);
         auto &el = outputWS.getSpectrum(wi);
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
@@ -242,5 +242,25 @@ void ProcessBankData::run() { // override {
 #endif
 } // END-OF-RUN()
 
+/**
+ * Get the workspace index for a given pixel ID. Throws if the pixel ID is
+ * not in the expected range.
+ *
+ * @param pixID :: The pixel ID to look up
+ * @return The workspace index for this pixel
+ */
+size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
+  // Check that the vector index is not out of range
+  const detid_t offset_pixID = pixID + pixelID_to_wi_offset;
+  if (offset_pixID < 0 ||
+      offset_pixID >= static_cast<int32_t>(pixelID_to_wi_vector.size())) {
+    std::stringstream msg;
+    msg << "Error finding workspace index; pixelID " << pixID << " with offset "
+        << pixelID_to_wi_offset
+        << " is out of range (length=" << pixelID_to_wi_vector.size() << ")";
+    throw std::runtime_error(msg.str());
+  }
+  return pixelID_to_wi_vector[offset_pixID];
+}
 } // namespace Mantid{
 } // namespace DataHandling{
