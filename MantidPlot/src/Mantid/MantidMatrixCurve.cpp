@@ -37,6 +37,8 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
  *  @param err :: True if the errors are to be plotted
  *  @param distr :: True if it is a distribution
  *  @param style :: CurveType style to use
+ *  @param multipleSpectra :: indicates that there are multiple spectra and
+ *  so spectrum numbers must always be shown in the plot legend.
  *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be
  *found
  *  @throw std::invalid_argument if the index is out of range for the given
@@ -45,7 +47,8 @@ Mantid::Kernel::Logger g_log("MantidMatrixCurve");
 MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
                                      Graph *g, int index, IndexDir indexType,
                                      bool err, bool distr,
-                                     GraphOptions::CurveType style)
+                                     GraphOptions::CurveType style,
+                                     bool multipleSpectra )
     : MantidCurve(err), m_wsName(wsName), m_index(index),
       m_indexType(indexType) {
   if (!g) {
@@ -54,7 +57,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
   }
   if (!name.isEmpty())
     this->setTitle(name);
-  init(g, distr, style);
+  init(g, distr, style, multipleSpectra);
 }
 
 /**
@@ -94,9 +97,12 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
  *  @param g :: The Graph widget which will display the curve
  *  @param distr :: True for a distribution
  *  @param style :: The curve type to use
+ *  @param multipleSpectra :: indicates that there are multiple spectra and
+ *  so spectrum numbers must always be shown in the plot legend.
  */
 void MantidMatrixCurve::init(Graph *g, bool distr,
-                             GraphOptions::CurveType style) {
+                             GraphOptions::CurveType style,
+                             bool mutipleSpectra ) {
   // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -115,13 +121,16 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   // Set the curve name if it the non-naming constructor was called
   // or the naming constructor was called with empty name.
   if (this->title().isEmpty()) {
-    // If there's only one spectrum in the workspace, title is simply workspace
+    // If there's only one histrogram in the workspace, title is simply workspace
     // name
     if (workspace->getNumberHistograms() == 1)
       this->setTitle(m_wsName);
-    else
+    else // ???
       this->setTitle(createCurveName(workspace));
   }
+  // Here we have to catch the case when there is more than on spectrum and 
+  // append the spectrum name like in createCurveName(Workspace).
+  // Perhaps, with new CreateCurveName(this->title(), Workspace)
 
   Mantid::API::MatrixWorkspace_const_sptr matrixWS =
       boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(

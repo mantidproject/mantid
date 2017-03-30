@@ -2983,10 +2983,12 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
                              bool waterfallPlot, const QString &log,
                              const std::set<double> &customLogValues) {
   // Convert the list into a map (with the same workspace as key in each case)
+  bool multipleSpectra = false;
   QMultiMap<QString, int> pairs;
   // Need to iterate through the workspaces
   QMultiMap<QString, std::set<int>>::const_iterator it;
   for (it = toPlot.constBegin(); it != toPlot.constEnd(); ++it) {
+    multipleSpectra = multipleSpectra || (it.value().size() > 1);
     std::set<int>::const_reverse_iterator itSet;
     for (itSet = it->rbegin(); itSet != it->rend(); ++itSet) {
       pairs.insert(it.key(), *itSet);
@@ -2995,7 +2997,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, set<int>> &toPlot,
 
   // Pass over to the overloaded method
   return plot1D(pairs, spectrumPlot, distr, errs, GraphOptions::Unspecified,
-                plotWindow, clearWindow, waterfallPlot, log, customLogValues);
+                plotWindow, clearWindow, waterfallPlot, log, customLogValues,
+                multipleSpectra);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3041,6 +3044,8 @@ Ignored if plotWindow == NULL
 @param waterfallPlot :: If true create a waterfall type plot
 @param log :: log name for advanced plotting
 @param customLogValues :: custom log values for advanced plotting
+@param multipleSpectra :: indicates that there are multiple spectra and
+so spectrum numbers must always be shown in the plot legend.
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if
 not NULL - plotWindow
 */
@@ -3050,7 +3055,8 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              GraphOptions::CurveType style,
                              MultiLayer *plotWindow, bool clearWindow,
                              bool waterfallPlot, const QString &log,
-                             const std::set<double> &customLogValues) {
+                             const std::set<double> &customLogValues,
+                             bool multipleSpectra ) {
   if (toPlot.size() == 0)
     return NULL;
 
