@@ -16,10 +16,10 @@ namespace {
 
 class CostFuncMock : public CostFuncFitting {
 public:
-  std::string name() const { return "CostFuncMock"; }
-  double val() const { return 0.0; }
-  void deriv(std::vector<double> &der) const {}
-  double valAndDeriv(std::vector<double> &der) const { return 0.0; }
+  std::string name() const override { return "CostFuncMock"; }
+  double val() const override { return 0.0; }
+  void deriv(std::vector<double> &) const override {}
+  double valAndDeriv(std::vector<double> &) const override { return 0.0; }
 };
 }
 
