@@ -79,8 +79,6 @@ public:
   static CommunicatorTest *createSuite() { return new CommunicatorTest(); }
   static void destroySuite(CommunicatorTest *suite) { delete suite; }
 
-  void test_construct_default() { TS_ASSERT_THROWS_NOTHING(Communicator{}); }
-
   void test_defaults() {
     Communicator comm;
 #ifdef MPI_EXPERIMENTAL
