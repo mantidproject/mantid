@@ -593,8 +593,8 @@ void ReflDataProcessorPresenter::addNumSlicesEntry(int groupID, int rowID,
 
 /** Add entry for the number of slices for all rows in a group
 *
-* @param groupID::The ID of the group
-* @param numSlices::Number of slices
+* @param groupID :: The ID of the group
+* @param numSlices :: Number of slices
 */
 void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
                                                         size_t numSlices) {
