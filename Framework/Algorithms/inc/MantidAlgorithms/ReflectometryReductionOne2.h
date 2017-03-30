@@ -3,6 +3,7 @@
 
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 // Forward declaration
@@ -87,6 +88,16 @@ private:
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
   // Create the output workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
+  // Do the reduction by summation in Q
+  Mantid::API::MatrixWorkspace_sptr
+  sumInQ(API::MatrixWorkspace_sptr detectorWS);
+  // Do the summation in Q for a single input value
+  void sumInQProcessValue(const int inputIdx, const double theta,
+                          const double bTwoTheta,
+                          const HistogramData::HistogramX &inputX,
+                          const HistogramData::HistogramY &inputY,
+                          const HistogramData::HistogramX &outputX,
+                          MantidVec &outputY);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);

@@ -12,6 +12,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 
 namespace Mantid {
 namespace Algorithms {
@@ -161,112 +162,43 @@ void ReflectometryReductionOne2::exec() {
 * the type of reduction. For the latter, the output is projected to "virtual
 * lambda" at a reference angle thetaR.
 *
-* @param inputWS :: the input workspace in TOF
 * @return :: the output workspace in wavelength
 */
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
-  MatrixWorkspace_sptr IvsLam = m_runWS;
+  MatrixWorkspace_sptr result = m_runWS;
 
   if (summingInQ()) {
-    // Get the normalised detector workspace
-    MatrixWorkspace_sptr detectorWS = m_runWS;
+    // Convert to lambda
     if (m_convertUnits) {
-      // Convert the 2D workspace to wavelength
-      detectorWS = convertToWavelength(detectorWS);
+      result = convertToWavelength(result);
     }
+    // Normalise
     if (m_normalise) {
-      detectorWS = monitorCorrection(detectorWS);
-      detectorWS = transOrAlgCorrection(detectorWS, false);
+      result = directBeamCorrection(result);
+      result = monitorCorrection(result);
+      result = transOrAlgCorrection(result, false);
     }
-
     // Do the summation in Q
     if (m_sum) {
-      // Construct the output array in virtual lambda
-      IvsLam = constructIvsLamWS(detectorWS);
-
-      // Loop through each spectrum in the region of interest
-      const auto &spectrumInfo = detectorWS->spectrumInfo();
-      for (size_t spIdx : m_detectors) {
-        // Get the angle of this detector and its size in twoTheta
-        double theta = 0.0;
-        double bTwoTheta = 0.0;
-        getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
-
-        // Loop through each value in this spectrum
-        const auto &inputX = detectorWS->x(spIdx);
-        const auto &inputY = detectorWS->y(spIdx);
-        if (inputX.size() != inputY.size() + 1) {
-          throw std::runtime_error("Expected input data to be binned");
-        }
-
-        // Convenience points to the output array X and Y values
-        const auto &outputX = IvsLam->x(0);
-        auto &outputY = IvsLam->dataY(0);
-        if (outputX.size() != outputY.size() + 1) {
-          throw std::runtime_error("Expected output data to be binned");
-        }
-
-        for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-          // Get the bin width and the bin centre
-          const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
-          const double lambda = inputX[inputIdx] + bLambda / 2.0;
-
-          // Skip if outside area of interest
-          if (lambda < lambdaMin() || lambda > lambdaMax()) {
-            continue;
-          }
-
-          // Project these coordinates onto the virtual-lambda output (at
-          // thetaR)
-          double lambdaMin = 0.0;
-          double lambdaMax = 0.0;
-          getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
-                                  lambdaMax);
-
-          // Share the counts from the detector into the output bins that
-          // overlap
-          // this range
-          const double inputCounts = inputY[inputIdx];
-          const double totalWidth = lambdaMax - lambdaMin;
-
-          // Loop through all output bins that overlap the projected range
-          for (int outputIdx = 0; outputIdx < outputY.size(); ++outputIdx) {
-            const double binStart = outputX[outputIdx];
-            const double binEnd = outputX[outputIdx + 1];
-            if (binEnd < lambdaMin) {
-              continue; // doesn't overlap
-            } else if (binStart > lambdaMax) {
-              break; // finished
-            }
-            // Add a share of the input counts to this bin based on the
-            // proportion
-            // of overlap.
-            const double overlapWidth =
-                std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
-            outputY[outputIdx] += (inputCounts * overlapWidth) / (totalWidth);
-          }
-        }
-      }
+      result = sumInQ(result);
     }
   } else {
-    // Simple summation in lambda
+    // Do the summation in lambda
     if (m_sum) {
-      // Get 1D workspace of detectors, summed, and converted to lambda if
-      // applicable
-      IvsLam = makeDetectorWS(IvsLam, m_convertUnits);
+      result = makeDetectorWS(result, m_convertUnits);
     }
-
+    // Normalise the 1D result
     if (m_normalise) {
-      IvsLam = directBeamCorrection(IvsLam);
-      IvsLam = monitorCorrection(IvsLam);
-      IvsLam = transOrAlgCorrection(IvsLam, true);
+      result = directBeamCorrection(result);
+      result = monitorCorrection(result);
+      result = transOrAlgCorrection(result, true);
     }
   }
 
   // Crop to wavelength limits
-  IvsLam = cropWavelength(IvsLam);
+  result = cropWavelength(result);
 
-  return IvsLam;
+  return result;
 }
 
 /**
@@ -682,6 +614,103 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   }
 
   return ws;
+}
+
+/**
+* Sum counts from the input workspace in lambda along lines of constant Q by
+* projecting to "virtual lambda" at a reference angle thetaR.
+*
+* @param detectorWS :: the input workspace in wavelength
+* @return :: the output workspace in wavelength
+*/
+MatrixWorkspace_sptr
+ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
+  // Construct the output array in virtual lambda
+  MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS);
+
+  // Loop through each spectrum in the region of interest
+  const auto &spectrumInfo = detectorWS->spectrumInfo();
+  for (size_t spIdx : m_detectors) {
+    // Get the angle of this detector and its size in twoTheta
+    double theta = 0.0;
+    double bTwoTheta = 0.0;
+    getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
+
+    // Get the X and Y values for this spectrum
+    const auto &inputX = detectorWS->x(spIdx);
+    const auto &inputY = detectorWS->y(spIdx);
+    if (inputX.size() != inputY.size() + 1) {
+      throw std::runtime_error("Expected input data to be binned");
+    }
+
+    // Convenience pointers to the output array X and Y values
+    const auto &outputX = IvsLam->x(0);
+    auto &outputY = IvsLam->dataY(0);
+    if (outputX.size() != outputY.size() + 1) {
+      throw std::runtime_error("Expected output data to be binned");
+    }
+
+    // Loop through each value in this spectrum
+    for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
+      sumInQProcessValue(inputIdx, theta, bTwoTheta, inputX, inputY, outputX,
+                         outputY);
+    }
+  }
+
+  return IvsLam;
+}
+
+/**
+* Share counts from an input value onto the projected output in virtual-lambda
+*
+* @param inputIdx [in] :: the index into the input arrays
+* @param theta [in] :: the value of theta for this spectrum
+* @param bTwoTheta [in] :: the size of the pixel in theta
+* @param inputX [in] :: the input spectrum X values
+* @param inputY [in] :: the input spectrum Y values
+* @param outputX [in] :: the output spectrum X values
+* @param outputY [in,out] :: the output spectrum Y values
+*/
+void ReflectometryReductionOne2::sumInQProcessValue(
+    const int inputIdx, const double theta, const double bTwoTheta,
+    const HistogramX &inputX, const HistogramY &inputY,
+    const HistogramX &outputX, MantidVec &outputY) {
+
+  // Get the bin width and the bin centre
+  const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
+  const double lambda = inputX[inputIdx] + bLambda / 2.0;
+
+  // Skip if outside area of interest
+  if (lambda < lambdaMin() || lambda > lambdaMax()) {
+    return;
+  }
+
+  // Project these coordinates onto the virtual-lambda output (at thetaR)
+  double lambdaMin = 0.0;
+  double lambdaMax = 0.0;
+  getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
+                          lambdaMax);
+
+  // Share the counts from the detector into the output bins that overlap this
+  // range
+  const double inputCounts = inputY[inputIdx];
+  const double totalWidth = lambdaMax - lambdaMin;
+
+  // Loop through all output bins that overlap the projected range
+  for (int outputIdx = 0; outputIdx < outputY.size(); ++outputIdx) {
+    const double binStart = outputX[outputIdx];
+    const double binEnd = outputX[outputIdx + 1];
+    if (binEnd < lambdaMin) {
+      continue; // doesn't overlap
+    } else if (binStart > lambdaMax) {
+      break; // finished
+    }
+    // Add a share of the input counts to this bin based on the proportion of
+    // overlap.
+    const double overlapWidth =
+        std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
+    outputY[outputIdx] += (inputCounts * overlapWidth) / (totalWidth);
+  }
 }
 
 /**
