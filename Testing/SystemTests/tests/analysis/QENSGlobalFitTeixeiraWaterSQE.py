@@ -86,7 +86,8 @@ class GlobalFitTest(MantidStressTest):
                 dataE = curveset.dataE(0)
                 modelY = curveset.dataY(1)
                 residuals = np.append(residuals, ((dataY-modelY)/dataE)**2)  # don't trust residuals of curveset
-            otherChi2 = residuals.sum()/(len(residuals)*curves.size())
+            otherChi2 = residuals.sum()/len(residuals)
+            print otherChi2, chi2, abs(otherChi2-chi2)/chi2
             self.assertTrue(abs(otherChi2-chi2)/chi2 < 0.1)
         except:
             self._success = False
