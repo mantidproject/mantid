@@ -1,3 +1,4 @@
+#include "MantidDataHandling/LoadFITS.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/NumericAxis.h"
@@ -5,8 +6,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -121,12 +123,12 @@ void LoadFITS::init() {
   declareProperty(make_unique<API::WorkspaceProperty<API::Workspace>>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
-  declareProperty(
-      make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", false,
-                                                   Kernel::Direction::Input),
-      "If enabled (not by default), the output Workspace2D will have "
-      "one histogram per row and one bin per pixel, such that a 2D "
-      "color plot (color fill plot) will display an image.");
+  // declareProperty(
+  //     make_unique<Kernel::PropertyWithValue<bool>>("LoadAsRectImg", true,
+  //                                                  Kernel::Direction::Input),
+  //     "If enabled (not by default), the output Workspace2D will have "
+  //     "one histogram per row and one bin per pixel, such that a 2D "
+  //     "color plot (color fill plot) will display an image.");
 
   auto zeroOrPosDbl = boost::make_shared<BoundedValidator<double>>();
   zeroOrPosDbl->setLower(0.0);
@@ -166,7 +168,10 @@ void LoadFITS::exec() {
 
   int binSize = getProperty("BinSize");
   double noiseThresh = getProperty("FilterNoiseLevel");
-  bool loadAsRectImg = getProperty("LoadAsRectImg");
+  bool loadAsRectImg = true;
+  // This is disabled because not loading as a rectangle makes a
+  // 16 MB image into a 7GB workspace.
+  // bool loadAsRectImg = getProperty("LoadAsRectImg");
   const std::string outWSName = getPropertyValue("OutputWorkspace");
 
   doLoadFiles(paths, outWSName, loadAsRectImg, binSize, noiseThresh);
@@ -381,16 +386,16 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the first dimension differs "
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
   if (hdr.axisPixelLengths[1] != hdrFirst.axisPixelLengths[1]) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": the number of pixels in the second dimension differs"
-                     "from the first file loaded (" << hdrFirst.filePath
-                  << "): " << hdr.axisPixelLengths[0]
+                     "from the first file loaded ("
+                  << hdrFirst.filePath << "): " << hdr.axisPixelLengths[0]
                   << " != " << hdrFirst.axisPixelLengths[0] << '\n';
   }
 
@@ -857,12 +862,15 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
   // Treat buffer as a series of bytes
   uint8_t *buffer8 = reinterpret_cast<uint8_t *>(buffer.data());
 
+  HistogramData::Counts sharedXCounts(ncols,
+                                      HistogramData::LinearGenerator(0, 0));
+  HistogramData::CountStandardDeviations sharedErrors(
+      ncols, HistogramData::LinearGenerator(0, 0));
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
-    auto &xVals = ws->mutableX(i);
+    ws->setCounts(i, sharedXCounts);
     auto &yVals = ws->mutableY(i);
-    auto &eVals = ws->mutableE(i);
-    xVals = static_cast<double>(i) * cmpp;
+    ws->setCountStandardDeviations(i, sharedErrors);
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index
@@ -888,9 +896,7 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
         val = toDouble<double>(byteValue);
       }
 
-      val = fileInfo.scale * val - fileInfo.offset;
-      yVals[j] = val;
-      eVals[j] = sqrt(val);
+      yVals[j] = fileInfo.scale * val - fileInfo.offset;
     }
   }
 }
