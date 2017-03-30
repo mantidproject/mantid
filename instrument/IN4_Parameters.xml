@@ -26,8 +26,11 @@
 		</parameter>
 
 		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, duration, monitor.monsum" />
+		</parameter>
 		<parameter name="sample_logs_time_series" type="string">
-			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, monitor.monsum, sample.temperature" />
+			<value val="sample.temperature" />
 		</parameter>
 		<parameter name="sample_logs_warn" type="string">
 			<value val="sample.temperature" />
