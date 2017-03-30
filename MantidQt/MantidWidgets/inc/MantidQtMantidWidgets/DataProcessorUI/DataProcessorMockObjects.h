@@ -91,7 +91,7 @@ public:
                      std::map<std::string, std::string>());
   MOCK_CONST_METHOD0(getProcessingOptions, std::string());
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
-  
+
   // Event handling
   MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
   MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
