@@ -14,16 +14,83 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-  void test_empty_size() {
-    ComponentInfo info;
-    TS_ASSERT_EQUALS(info.size(), 0);
-  }
-
   void test_size() {
     std::vector<size_t> bankSortedDetectorIndices{0, 1, 2};
     std::vector<std::pair<size_t, size_t>> ranges;
-    ComponentInfo info(bankSortedDetectorIndices, ranges);
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+
+    ComponentInfo info(bankSortedDetectorIndices, ranges, positions, rotations);
     TS_ASSERT_EQUALS(info.size(), 3);
+  }
+
+  void test_throw_if_positions_rotation_inputs_different_sizes() {
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+        1); // 1 position provided
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+        0); // 0 rotations provided
+
+    TS_ASSERT_THROWS(
+        ComponentInfo(detectorIndices, ranges, positions, rotations),
+        std::invalid_argument &);
+  }
+
+  void test_throw_if_positions_and_rotations_not_same_size_as_ranges() {
+    /*
+     * Positions are rotations are only currently stored for non-detector
+     * components
+     * We should have as many ranges as we have non-detector components too.
+     * All vectors should be the same size.
+     */
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
+    std::vector<std::pair<size_t, size_t>> ranges; // Empty ranges!
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+        1); // 1 position provided
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+        1); // 1 rotation provided
+
+    TS_ASSERT_THROWS(
+        ComponentInfo(detectorIndices, ranges, positions, rotations),
+        std::invalid_argument &);
+  }
+
+  void test_read_positions_rotations() {
+
+    /*
+           |
+     ------------
+     |         | 1
+    -------
+    | 0  | 2
+    */
+    std::vector<size_t> bankSortedDetectorIndices{0, 2, 1};
+
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 3));
+    ranges.push_back(std::make_pair(0, 2));
+
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    positions->emplace_back(1, 0, 0);
+    positions->emplace_back(1, 1, 0);
+
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+    rotations->emplace_back(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
+    rotations->emplace_back(
+        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
+
+    ComponentInfo info(bankSortedDetectorIndices, ranges, positions, rotations);
+    /*
+     * Remember. We have 3 detectors. So component index 3 corresponds to
+     * position
+     * index 0 since we don't input positions for detectors.
+     */
+    TS_ASSERT(info.position(3).isApprox(positions->at(0)));
+    TS_ASSERT(info.position(4).isApprox(positions->at(1)));
+    TS_ASSERT(info.rotation(3).isApprox(rotations->at(0)));
+    TS_ASSERT(info.rotation(4).isApprox(rotations->at(1)));
   }
 
   void test_detector_indexes() {
@@ -39,7 +106,11 @@ public:
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 3));
     ranges.push_back(std::make_pair(0, 2));
-    ComponentInfo info(bankSortedDetectorIndices, ranges);
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+        2); // 2 positions provided. 2 non-detectors
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+        2); // 2 rotations provided. 2 non-detectors
+    ComponentInfo info(bankSortedDetectorIndices, ranges, positions, rotations);
 
     /*
     Note that detectors are always the first n component indexes!

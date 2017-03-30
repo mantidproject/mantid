@@ -7,12 +7,6 @@
 namespace Mantid {
 namespace Beamline {
 
-/*
-ComponentInfo::ComponentInfo()
-    : m_assemblySortedDetectorIndices(
-          boost::make_shared<std::vector<size_t>>(0)),
-      m_size(0) {}
-*/
 ComponentInfo::ComponentInfo(
     const std::vector<size_t> &assemblySortedDetectorIndices,
     const std::vector<std::pair<size_t, size_t>> &ranges,
@@ -36,9 +30,13 @@ ComponentInfo::ComponentInfo(
   }
 }
 
+bool ComponentInfo::isDetectorDomain(const size_t componentIndex) const {
+  return componentIndex < m_assemblySortedDetectorIndices->size();
+}
+
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {
-  if (componentIndex < m_assemblySortedDetectorIndices->size()) {
+  if (isDetectorDomain(componentIndex)) {
     /* This is a single detector. Just return the corresponding index.
      * detectorIndex == componentIndex
      */
@@ -55,6 +53,24 @@ ComponentInfo::detectorIndices(const size_t componentIndex) const {
 }
 
 size_t ComponentInfo::size() const { return m_size; }
+
+Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+  if (isDetectorDomain(componentIndex)) {
+    throw std::runtime_error("No detector info yet");
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  return (*m_positions)[rangesIndex];
+}
+
+Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
+  if (isDetectorDomain(componentIndex)) {
+    throw std::runtime_error("No detector info yet");
+  }
+  const auto rangesIndex =
+      componentIndex - m_assemblySortedDetectorIndices->size();
+  return (*m_rotations)[rangesIndex];
+}
 
 } // namespace Beamline
 } // namespace Mantid

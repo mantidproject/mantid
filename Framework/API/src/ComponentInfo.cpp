@@ -41,6 +41,14 @@ ComponentInfo::detectorIndices(size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
 
+Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+  return m_componentInfo.position(componentIndex);
+}
+
+Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
+  return m_componentInfo.rotation(componentIndex);
+}
+
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);
 }

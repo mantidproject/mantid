@@ -17,38 +17,6 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-  void test_throw_if_positions_rotation_inputs_different_sizes() {
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges;
-    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-        1); // 1 position provided
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-        0); // 0 rotations provided
-
-    TS_ASSERT_THROWS(Mantid::Beamline::ComponentInfo(detectorIndices, ranges,
-                                                     positions, rotations),
-                     std::invalid_argument &);
-  }
-
-  void test_throw_if_positions_and_rotations_not_same_size_as_ranges() {
-    /*
-     * Positions are rotations are only currently stored for non-detector
-     * components
-     * We should have as many ranges as we have non-detector components too.
-     * All vectors should be the same size.
-     */
-    std::vector<size_t> detectorIndices{}; // No detectors in this example
-    std::vector<std::pair<size_t, size_t>> ranges; // Empty ranges!
-    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
-        1); // 1 position provided
-    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
-        1); // 1 rotation provided
-
-    TS_ASSERT_THROWS(Mantid::Beamline::ComponentInfo(detectorIndices, ranges,
-                                                     positions, rotations),
-                     std::invalid_argument &);
-  }
 
   void test_size() {
 
@@ -68,6 +36,52 @@ public:
     ComponentInfo info(internalInfo, std::vector<Mantid::Geometry::ComponentID>{
                                          &comp1, &comp2});
     TS_ASSERT_EQUALS(info.size(), 2);
+  }
+
+  void test_read_positions_rotations() {
+
+    /*
+           |
+     ------------
+     |         | 1
+    -------
+    | 0  | 2
+    */
+    std::vector<size_t> bankSortedDetectorIndices{0, 2, 1};
+
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 3));
+    ranges.push_back(std::make_pair(0, 2));
+
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    positions->emplace_back(1, 0, 0);
+    positions->emplace_back(1, 1, 0);
+
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+    rotations->emplace_back(Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
+    rotations->emplace_back(
+        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
+
+    Mantid::Beamline::ComponentInfo internalInfo(bankSortedDetectorIndices,
+                                                 ranges, positions, rotations);
+
+    Mantid::Geometry::ObjComponent comp1("det1");
+    Mantid::Geometry::ObjComponent comp2("det2");
+    Mantid::Geometry::ObjComponent comp3("det3");
+    Mantid::Geometry::ObjComponent assemb1("bank1");
+    Mantid::Geometry::ObjComponent assemb2("instrument");
+    ComponentInfo info(internalInfo,
+                       std::vector<Mantid::Geometry::ComponentID>{
+                           &comp1, &comp2, &comp3, &assemb1, &assemb2});
+    /*
+     * Remember. We have 3 detectors. So component index 3 corresponds to
+     * position
+     * index 0 since we don't input positions for detectors.
+     */
+    TS_ASSERT(info.position(3).isApprox(positions->at(0)));
+    TS_ASSERT(info.position(4).isApprox(positions->at(1)));
+    TS_ASSERT(info.rotation(3).isApprox(rotations->at(0)));
+    TS_ASSERT(info.rotation(4).isApprox(rotations->at(1)));
   }
 
   void test_indexOf() {
