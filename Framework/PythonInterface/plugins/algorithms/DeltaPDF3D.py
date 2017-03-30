@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IMDHistoWorkspaceProperty, PropertyMode, WorkspaceProperty, Progress
 from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Property, StringListValidator, FloatArrayBoundedValidator,
-                           FloatArrayProperty, FloatBoundedValidator)
+                           FloatArrayProperty, FloatBoundedValidator, IntArrayProperty)
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
@@ -55,6 +55,8 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
+        self.declareProperty(IntArrayProperty("FFTaxes", [Property.EMPTY_INT]),
+                             "Axes which to perform FFT over. Empty will do all.")
 
     def validateInputs(self):
         issues = dict()
@@ -113,7 +115,7 @@ class DeltaPDF3D(PythonAlgorithm):
         Y=np.linspace(dimY.getMinimum(),dimY.getMaximum(),dimY.getNBins()+1)
         Z=np.linspace(dimZ.getMinimum(),dimZ.getMaximum(),dimZ.getNBins()+1)
         Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:dimX.getNBins()*1j,
-                              (Y[0]+Y[1])/2:(Y[-1]+Z[-2])/2:dimY.getNBins()*1j,
+                              (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:dimY.getNBins()*1j,
                               (Z[0]+Z[1])/2:(Y[-1]+Z[-2])/2:dimZ.getNBins()*1j]
 
         if self.getProperty("RemoveReflections").value:
@@ -180,14 +182,22 @@ class DeltaPDF3D(PythonAlgorithm):
         signal[np.isnan(signal)]=0
         signal[np.isinf(signal)]=0
 
-        signal=np.fft.fftshift(np.fft.fftn(np.fft.fftshift(signal))).real
+        fft_axes = self.getProperty("FFTaxes").value
+        if fft_axes[0] == Property.EMPTY_INT:
+            fft_axes=None
+
+        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal,axes=fft_axes),axes=fft_axes),axes=fft_axes).real
 
         # Calculate new extents for fft space
         extents=''
         for d in range(inWS.getNumDims()):
             dim = inWS.getDimension(d)
-            fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
-            extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
+            if dim.getNBins() == 1:
+                fft_dim = 1./(dim.getMaximum()-dim.getMinimum())
+                extents+=str(-fft_dim/2.)+','+str(fft_dim/2.)+','
+            else:
+                fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
+                extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
         extents=extents[:-1]
 
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
