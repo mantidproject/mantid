@@ -69,9 +69,9 @@ private:
   std::vector<double> m_peaksInDspacing;
   std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin;
-  double m_tofMax;
-  bool m_hasDasIds;
+  double m_tofMin{0.};
+  double m_tofMax{0.};
+  bool m_hasDasIds{false};
 };
 
 } // namespace Algorithms
