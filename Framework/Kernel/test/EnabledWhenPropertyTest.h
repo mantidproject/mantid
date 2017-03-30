@@ -205,9 +205,10 @@ private:
   getEnabledWhenProp(const std::string &propName, ePropertyCriterion criterion,
                      const std::string &value = "") {
     if (value.length() == 0) {
-      return std::make_unique<EnabledWhenProperty>(propName, criterion);
+      return Kernel::make_unique<EnabledWhenProperty>(propName, criterion);
     } else {
-      return std::make_unique<EnabledWhenProperty>(propName, criterion, value);
+      return Kernel::make_unique<EnabledWhenProperty>(propName, criterion,
+                                                      value);
     }
   }
 
@@ -215,7 +216,7 @@ private:
   std::unique_ptr<IPropertySettings>
   getCombinationProperty(EnabledPropPtr &&condOne, EnabledPropPtr &&condTwo,
                          eLogicOperator logicalOperator) {
-    return std::make_unique<EnabledWhenProperty>(
+    return Kernel::make_unique<EnabledWhenProperty>(
         std::move(condOne), std::move(condTwo), logicalOperator);
   }
 };

@@ -185,8 +185,7 @@ private:
         getVisibleWhenProp(m_propertyOneName, IS_EQUAL_TO, m_propertyTrueValue);
     auto propTwo =
         getVisibleWhenProp(m_propertyTwoName, IS_EQUAL_TO, m_propertyTrueValue);
-    auto combination = getCombinationProperty(
-        std::move(propOne), std::move(propTwo), logicOperation);
+    auto combination = getCombinationProperty(propOne, propTwo, logicOperation);
     // Set both to the same value to check
     PropertyManagerOwner alg;
     alg.declareProperty(m_propertyOneName, m_propertyTrueValue);
@@ -200,22 +199,23 @@ private:
     return alg;
   }
 
-  std::unique_ptr<VisibleWhenProperty>
-  getVisibleWhenProp(const std::string &propName, ePropertyCriterion criterion,
-                     const std::string &value = "") {
+  VisibleWhenProperty getVisibleWhenProp(const std::string &propName,
+                                         ePropertyCriterion criterion,
+                                         const std::string &value = "") {
     if (value.length() == 0) {
-      return std::make_unique<VisibleWhenProperty>(propName, criterion);
+      return VisibleWhenProperty(propName, criterion);
     } else {
-      return std::make_unique<VisibleWhenProperty>(propName, criterion, value);
+      return VisibleWhenProperty(propName, criterion, value);
     }
   }
 
-  using VisisblePropPtre = std::unique_ptr<VisibleWhenProperty>;
+  // Check the copy constructor works instead of std::make_unique
   std::unique_ptr<IPropertySettings>
-  getCombinationProperty(VisisblePropPtre &&condOne, VisisblePropPtre &&condTwo,
+  getCombinationProperty(const VisibleWhenProperty &condOne,
+                         const VisibleWhenProperty &condTwo,
                          eLogicOperator logicalOperator) {
-    return std::make_unique<VisibleWhenProperty>(
-        std::move(condOne), std::move(condTwo), logicalOperator);
+    return std::make_unique<VisibleWhenProperty>(condOne, condTwo,
+                                                 logicalOperator);
   }
 };
 

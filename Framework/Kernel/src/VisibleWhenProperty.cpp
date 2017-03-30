@@ -30,8 +30,8 @@ VisibleWhenProperty::VisibleWhenProperty(
     : // For the python interface to be able to easily copy objects in
       // Make a deep copy and turn into a unique pointer and forward on
       VisibleWhenProperty(
-          std::move(std::make_unique<VisibleWhenProperty>(conditionOne)),
-          std::move(std::make_unique<VisibleWhenProperty>(conditionTwo)),
+          std::move(Kernel::make_unique<VisibleWhenProperty>(conditionOne)),
+          std::move(Kernel::make_unique<VisibleWhenProperty>(conditionTwo)),
           logicOperator) {}
 
 /** Multiple conditions constructor - takes two unique pointers to

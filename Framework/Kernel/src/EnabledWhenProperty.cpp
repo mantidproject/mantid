@@ -1,4 +1,5 @@
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <exception>
@@ -22,7 +23,7 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const std::string &value)
     : IPropertySettings() {
   m_propertyDetails =
-      std::make_unique<PropertyDetails>(otherPropName, when, value);
+      Kernel::make_unique<PropertyDetails>(otherPropName, when, value);
 }
 
 /** Multiple conditions constructor - takes two enable when property
@@ -41,8 +42,8 @@ EnabledWhenProperty::EnabledWhenProperty(
       // objects
       // Copy the object then forward onto our unique pointer constructor
       EnabledWhenProperty(
-          std::move(std::make_unique<EnabledWhenProperty>(conditionOne)),
-          std::move(std::make_unique<EnabledWhenProperty>(conditionTwo)),
+          std::move(Kernel::make_unique<EnabledWhenProperty>(conditionOne)),
+          std::move(Kernel::make_unique<EnabledWhenProperty>(conditionTwo)),
           logicalOperator) {}
 
 /** Multiple conditions constructor - takes two unique pointers to
@@ -61,7 +62,7 @@ EnabledWhenProperty::EnabledWhenProperty(EnabledPropPtr &&conditionOne,
                                          EnabledPropPtr &&conditionTwo,
                                          eLogicOperator logicalOperator)
     : IPropertySettings() {
-  m_comparisonDetails = std::make_unique<ComparisonDetails>(
+  m_comparisonDetails = Kernel::make_unique<ComparisonDetails>(
       std::move(conditionOne), std::move(conditionTwo), logicalOperator);
 }
 
