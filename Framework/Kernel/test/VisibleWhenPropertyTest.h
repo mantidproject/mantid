@@ -214,8 +214,8 @@ private:
   getCombinationProperty(const VisibleWhenProperty &condOne,
                          const VisibleWhenProperty &condTwo,
                          eLogicOperator logicalOperator) {
-    return std::make_unique<VisibleWhenProperty>(condOne, condTwo,
-                                                 logicalOperator);
+    return Kernel::make_unique<VisibleWhenProperty>(condOne, condTwo,
+                                                    logicalOperator);
   }
 };
 
