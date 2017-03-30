@@ -24,20 +24,17 @@ def _createDetectorGroups(ws):
     twoThetas = numpy.empty(numHistograms)
     for i in range(numHistograms):
         det = ws.getDetector(i)
-        if spectrumInfo.isMasked(i):
-            twoThetas[i] = numpy.nan
-        else:
-            twoThetas[i] = ws.detectorTwoTheta(det)
+        twoThetas[i] = ws.detectorTwoTheta(det)
     for i in range(numHistograms):
-        if detectorGrouped[i]:
+        if spectrumInfo.isMasked(i) or detectorGrouped[i]:
             continue
         twoTheta1 = twoThetas[i]
-        if numpy.isnan(twoTheta1):
-            continue
         currentGroup = [ws.getDetector(i).getID()]
         twoThetaDiff = numpy.abs(twoThetas[i + 1:] - twoTheta1)
         equalTwoThetas = numpy.flatnonzero(twoThetaDiff < 0.01 / 180.0 * constants.pi)
         for j in (i + 1) + equalTwoThetas:
+            if spectrumInfo.isMasked(j):
+                continue
             currentGroup.append(ws.getDetector(j).getID())
             detectorGrouped[j] = True
         groups.append(currentGroup)
