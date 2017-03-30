@@ -636,24 +636,19 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
     double bTwoTheta = 0.0;
     getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
 
-    // Get the X and Y values for this spectrum
+    // Check X length is Y length + 1
     const auto &inputX = detectorWS->x(spIdx);
     const auto &inputY = detectorWS->y(spIdx);
     if (inputX.size() != inputY.size() + 1) {
-      throw std::runtime_error("Expected input data to be binned");
+      std::ostringstream errMsg;
+      errMsg << "Expected input workspace to be histogram data (got X len="
+             << inputX.size() << ", Y len=" << inputY.size() << ")";
+      throw std::runtime_error(errMsg.str());
     }
 
-    // Convenience pointers to the output array X and Y values
-    const auto &outputX = IvsLam->dataX(0);
-    auto &outputY = IvsLam->dataY(0);
-    if (outputX.size() != outputY.size() + 1) {
-      throw std::runtime_error("Expected output data to be binned");
-    }
-
-    // Loop through each value in this spectrum
+    // Process each value in the spectrum
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-      sumInQProcessValue(inputIdx, theta, bTwoTheta, inputX, inputY, outputX,
-                         outputY);
+      sumInQProcessValue(inputIdx, theta, bTwoTheta, inputX, inputY, IvsLam);
     }
   }
 
@@ -666,34 +661,56 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 * @param inputIdx [in] :: the index into the input arrays
 * @param theta [in] :: the value of theta for this spectrum
 * @param bTwoTheta [in] :: the size of the pixel in theta
-* @param inputX [in] :: the input spectrum X values
 * @param inputY [in] :: the input spectrum Y values
-* @param outputX [in] :: the output spectrum X values
-* @param outputY [in,out] :: the output spectrum Y values
+* @param inputX [in] :: the input spectrum Y values
+* @param IvsLam [in,out] :: the output workspace
 */
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double theta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
-    const MantidVec &outputX, MantidVec &outputY) {
+    MatrixWorkspace_sptr IvsLam) {
 
   // Get the bin width and the bin centre
   const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
   const double lambda = inputX[inputIdx] + bLambda / 2.0;
-
   // Skip if outside area of interest
   if (lambda < lambdaMin() || lambda > lambdaMax()) {
     return;
   }
-
   // Project these coordinates onto the virtual-lambda output (at thetaR)
   double lambdaMin = 0.0;
   double lambdaMax = 0.0;
   getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
                           lambdaMax);
-
-  // Share the counts from the detector into the output bins that overlap this
-  // range
+  // Share the input counts into the output array
   const double inputCounts = inputY[inputIdx];
+  sumInQShareCounts(inputCounts, bLambda, lambdaMin, lambdaMax, IvsLam);
+}
+
+/**
+* Share the given input counts into the output array bins proportionally
+* according to how much the bins overlap the given lambda range.
+* outputX.size() must equal outputY.size() + 1
+*
+* @param inputCounts [in] :: the input counts to share out
+* @param bLambda [in] :: the bin width in lambda
+* @param lambdaMin [in] :: the start of the range to share counts to
+* @param lambdaMax [in] :: the end of the range to share counts to
+* @param IvsLam [in,out] :: the output workspace
+*/
+void ReflectometryReductionOne2::sumInQShareCounts(
+    const double inputCounts, const double bLambda, const double lambdaMin,
+    const double lambdaMax, MatrixWorkspace_sptr IvsLam) {
+  // Check that we have histogram data
+  const auto &outputX = IvsLam->dataX(0);
+  auto &outputY = IvsLam->dataY(0);
+  if (outputX.size() != outputY.size() + 1) {
+    std::ostringstream errMsg;
+    errMsg << "Expected output array to be histogram data (got X len="
+           << outputX.size() << ", Y len=" << outputY.size() << ")";
+    throw std::runtime_error(errMsg.str());
+  }
+
   const double totalWidth = lambdaMax - lambdaMin;
 
   // Get the first bin edge in the output X array that is within range.
@@ -750,7 +767,12 @@ void ReflectometryReductionOne2::getDetectorDetails(
 * Get the projected wavelength range onto the line theataR from the given
 * coordinates.
 *
-* @returns : the projected wavelength in virtual-lambda
+* @param lambda [in] :: the lambda coord to project
+* @param theta [in] :: the theta coord to project
+* @param bLambda [in] :: the pixel size in lambda
+* @param bTwoTheta [in] :: the pixel size in twoTheta
+* @param lambdaMin [out] :: the projected range start
+* @param lambdaMax [out] :: the projected range end
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double theta, const double bLambda,

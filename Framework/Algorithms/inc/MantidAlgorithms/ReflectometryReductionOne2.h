@@ -96,7 +96,11 @@ private:
                           const double bTwoTheta,
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
-                          const MantidVec &outputX, MantidVec &outputY);
+                          API::MatrixWorkspace_sptr IvsLam);
+  // Share counts to a projected value for summation in Q
+  void sumInQShareCounts(const double inputCounts, const double bLambda,
+                         const double lambdaMin, const double lambdaMax,
+                         API::MatrixWorkspace_sptr IvsLam);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
