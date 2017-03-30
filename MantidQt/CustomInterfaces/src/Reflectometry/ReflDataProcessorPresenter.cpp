@@ -8,9 +8,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
-#include <boost/algorithm/string.hpp>
-#include <numeric>
-
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -204,7 +201,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     }
 
     size_t numSlices = startTimes.size();
-    m_numSlicesMap[groupID][rowID] = numSlices;
+    addNumSlicesEntry(groupID, rowID, numSlices);
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
@@ -233,7 +230,7 @@ bool ReflDataProcessorPresenter::processGroupAsEventWS(
     if (timeSlicingType != "Uniform")
       numGroupSlices = startTimes.size();
 
-    m_numGroupSlicesMap[groupID] = numGroupSlices;
+    addNumGroupSlicesEntry(groupID, numGroupSlices);
 
     for (size_t i = 0; i < numGroupSlices; i++) {
       GroupData groupNew;
@@ -573,7 +570,7 @@ void ReflDataProcessorPresenter::plotRow() {
 
     for (const auto &run : item.second) {
 
-      const size_t numSlices = m_numSlicesMap[item.first][run.first];
+      const size_t numSlices = m_numSlicesMap.at(item.first).at(run.first);
       const std::string wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
@@ -642,7 +639,7 @@ void ReflDataProcessorPresenter::plotGroup() {
 
     if (item.second.size() > 1) {
 
-      size_t numSlices = m_numGroupSlicesMap[item.first];
+      size_t numSlices = m_numGroupSlicesMap.at(item.first);
 
       for (size_t slice = 0; slice < numSlices; slice++) {
 
@@ -667,6 +664,27 @@ void ReflDataProcessorPresenter::plotGroup() {
         "Error plotting groups.");
 
   plotWorkspaces(workspaces);
+}
+
+/** Add entry for the number of slices for a row in a group
+*
+* @param groupID :: The ID of the group
+* @param rowID :: The ID of the row in group
+* @param numSlices :: Number of slices
+*/
+void ReflDataProcessorPresenter::addNumSlicesEntry(int groupID, int rowID,
+                                                   size_t numSlices) {
+  m_numSlicesMap[groupID][rowID] = numSlices;
+}
+
+/** Add entry for the number of slices for all rows in a group
+*
+* @param groupID :: The ID of the group
+* @param numSlices :: Number of slices
+*/
+void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
+                                                        size_t numSlices) {
+  m_numGroupSlicesMap[groupID] = numSlices;
 }
 }
 }

@@ -32,6 +32,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now splits all the sample logs if the input splitters are given by MatrixWorkspace or a general TableWorkspace.
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
 
 Bug Fixes
 #########
@@ -90,6 +91,13 @@ Python
       3.0
       3.0
 
+- A `SpectraAxis` object can now be created from Python, in a similar way to the other Axis types:
+
+  .. code-block:: python
+  
+     ws1 = CreateSampleWorkspace()
+     # Create a new axis reference
+     s_axis = SpectraAxis.create(ws1)
 
 
 Python Algorithms

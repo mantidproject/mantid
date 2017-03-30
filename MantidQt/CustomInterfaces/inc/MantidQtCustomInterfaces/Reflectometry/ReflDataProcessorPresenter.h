@@ -4,8 +4,12 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorMainPresenter.h"
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
+
 namespace MantidQt {
 namespace CustomInterfaces {
+
+using namespace MantidQt::MantidWidgets;
 
 /** @class ReflDataProcessorPresenter
 
@@ -33,24 +37,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ReflDataProcessorPresenter
-    : public MantidQt::MantidWidgets::GenericDataProcessorPresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL ReflDataProcessorPresenter
+    : public GenericDataProcessorPresenter {
 public:
   // Constructor
   ReflDataProcessorPresenter(
-      const MantidQt::MantidWidgets::DataProcessorWhiteList &whitelist,
-      const std::map<
-          std::string,
-          MantidQt::MantidWidgets::DataProcessorPreprocessingAlgorithm> &
+      const DataProcessorWhiteList &whitelist,
+      const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
-      const MantidQt::MantidWidgets::DataProcessorProcessingAlgorithm &
-          processor,
-      const MantidQt::MantidWidgets::DataProcessorPostprocessingAlgorithm &
-          postprocessor,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<std::string, std::string> &postprocessMap =
           std::map<std::string, std::string>(),
       const std::string &loader = "Load");
   ~ReflDataProcessorPresenter() override;
+
+  // The following methods are public for testing purposes only
+  // Add entry for the number of slices for a row in a group
+  void addNumSlicesEntry(int groupID, int rowID, size_t numSlices);
+  // Add entry for the number of slices for all rows in a group
+  void addNumGroupSlicesEntry(int groupID, size_t numSlices);
 
 private:
   // Process selected rows
