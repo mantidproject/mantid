@@ -40,7 +40,7 @@ Bug Fixes
 - Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
 - Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
-
+- Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 
 Deprecated
 ##########
@@ -58,7 +58,7 @@ As a consequence of these changes, :ref:`CopyInstrumentParmeters <algm-CopyInstr
 Bugs
 ----
 
-- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
+- We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
 
 CurveFitting
 ------------
