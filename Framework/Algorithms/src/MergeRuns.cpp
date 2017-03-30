@@ -347,7 +347,8 @@ void MergeRuns::execEvent() {
 
   // Create a new output event workspace, by copying the first WS in the list
   EventWorkspace_sptr inputWS = m_inEventWS[0];
-  auto outWS = create<EventWorkspace>(*inputWS, m_outputSize);
+  auto outWS =
+      create<EventWorkspace>(*inputWS, m_outputSize, inputWS->binEdges(0));
   const auto inputSize = inputWS->getNumberHistograms();
   for (size_t i = 0; i < inputSize; ++i)
     outWS->getSpectrum(i) = inputWS->getSpectrum(i);
