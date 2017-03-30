@@ -49,9 +49,6 @@
       <location/>
     </component>
   </type>
-  <component idlist="bank1" type="bank1">
-    <location/>
-  </component>
   <type name="bank1">
     <component type="pixel">
       <location name="5" x="0.487260681056" y="0.21631015625" z="2.39457769788">
@@ -22736,9 +22733,6 @@
     <id val="3568"/>
     <id val="3569"/>
   </idlist>
-  <component idlist="bank2" type="bank2">
-    <location/>
-  </component>
   <type name="bank2">
     <component type="pixel">
       <location name="4110" x="0.487260681056" y="-1.9345015625" z="2.39457769788">
@@ -45423,9 +45417,6 @@
     <id val="7673"/>
     <id val="7674"/>
   </idlist>
-  <component idlist="bank3" type="bank3">
-    <location/>
-  </component>
   <type name="bank3">
     <component type="pixel">
       <location name="8197" x="-0.487260681056" y="0.21631015625" z="-2.39457769788">
@@ -68110,9 +68101,6 @@
     <id val="11760"/>
     <id val="11761"/>
   </idlist>
-  <component idlist="bank4" type="bank4">
-    <location/>
-  </component>
   <type name="bank4">
     <component type="pixel">
       <location name="12302" x="-0.487260681056" y="-1.9345015625" z="-2.39457769788">
