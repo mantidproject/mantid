@@ -70,6 +70,13 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
+ declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<double>>("NormalizationConstant", Direction::Output));
+ std::vector<double> emptyDoubles;
+ declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<double>>("PreviousNormalizationConstant",emptyDoubles),"Normalization constant used"
+	" to estimate asymmetry");
+
 }
 /*
 * Validate the input parameters
@@ -88,6 +95,19 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
     validationOutput["StartX"] = "Start and end times are equal, there is no "
                                  "data to apply the algorithm to.";
   }
+  std::string dataType = getProperty("InputDataType");
+  std::vector<double> oldNorm = getProperty("PreviousNormalizationConstant");
+  std::vector<int> spectra=getProperty("Spectra");
+  if(dataType =="asymmetry" && oldNorm.empty()){
+   validationOutput["PreviousNormalizationConstant"] = "Asymmetry data has been provided but"
+		" no normalization constants have been provided.";
+  
+  }
+  if(dataType=="asymmetry" && oldNorm.size() != spectra.size() ){
+
+   validationOutput["PreviousNormalizationConstant"] = "Number of spectra and the list"
+		" of normalization constants are inconsistant.";
+  }
   return validationOutput;
 }
 /** Executes the algorithm
@@ -105,13 +125,16 @@ void CalculateMuonAsymmetry::exec() {
   if (inputWS != outputWS) {
     outputWS = API::WorkspaceFactory::Instance().create(inputWS);
   }
-
+  std::vector<double> norm;
+  std::vector<double> oldNorm=getProperty("PreviousNormalizationConstant") ;
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");
   auto dataType = getPropertyValue("InputDataType");
 
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
+
+  g_log.warning("Assuming that the spectra and normalization constants are in the same order"); 
 
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
@@ -161,10 +184,12 @@ void CalculateMuonAsymmetry::exec() {
       // Calculate the normalised counts
       outputWS->setHistogram(
           specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+      norm.push_back(1.0);//estNormConst);
     } else {
       estNormConst = 1.0;
       outputWS->setHistogram(specNum, inputWS->histogram(specNum));
       outputWS->mutableY(specNum) += 1.0; // add offset back in
+      norm.push_back(1.0);//oldNorm[i]);
     }
     // get the normalisation constant
     const double normConst =
@@ -174,11 +199,13 @@ void CalculateMuonAsymmetry::exec() {
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
 
+    norm[i]=norm[i]*normConst;
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+   setProperty("NormalizationConstant", norm);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 

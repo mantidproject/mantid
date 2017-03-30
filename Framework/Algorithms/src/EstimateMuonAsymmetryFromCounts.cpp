@@ -47,9 +47,9 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
-  declareProperty(
-      "Normalization Constant", Direction::Output,
-      "The normalization constant used for calculating the asymmetry.");
+ 
+ declareProperty(
+      Kernel::make_unique<Kernel::ArrayProperty<double>>("NormalizationConstant", Direction::Output));
 
 }
 
@@ -92,7 +92,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-
+  std::vector<double> norm;
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
     outputWS->setSharedX(i, inputWS->sharedX(i));
@@ -142,13 +142,13 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
-    setProperty("Normalization Constant", normConst);
- 
+    norm.push_back(normConst);
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+   setProperty("NormalizationConstant", norm);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 
