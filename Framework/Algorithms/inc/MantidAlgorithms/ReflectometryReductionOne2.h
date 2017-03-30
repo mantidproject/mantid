@@ -125,7 +125,7 @@ private:
   double thetaMax() { return m_thetaMax; }
   double theta0() { return m_theta0; }
   double thetaR() { return m_thetaR; }
-  int centreDetectorIdx() { return m_centreDetectorIdx; };
+  size_t centreDetectorIdx() { return m_centreDetectorIdx; };
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -139,7 +139,7 @@ private:
   double m_lambdaMin;              // min wavelength in area of interest
   double m_lambdaMax;              // max wavelength in area of interest
   std::vector<size_t> m_detectors; // workspace indices of detectors of interest
-  int m_centreDetectorIdx;
+  size_t m_centreDetectorIdx;
 };
 
 } // namespace Algorithms
