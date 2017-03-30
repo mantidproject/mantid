@@ -405,8 +405,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
 
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
-        params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
-        if not params:
+        if self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
             binBorders = _energyBinning(mainWS)
             params = list()
             binWidths = numpy.diff(binBorders)
@@ -414,6 +413,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
                 params.append(start)
                 params.append(width)
             params.append(binBorders[-1])
+        else:
+            params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
         rebinnedWS = _rebin(mainWS, params, wsNames, subalgLogging)
         wsCleanup.cleanup(mainWS)
         return rebinnedWS
@@ -421,13 +422,14 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _sOfQW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Run the SofQWNormalisedPolygon algorithm."""
         sOfQWWSName = wsNames.withSuffix('sofqw')
-        params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
-        if not params:
+        if self.getProperty(common.PROP_BINNING_PARAMS_Q).isDefault:
             qMin, qMax = _minMaxQ(mainWS)
             dq = _deltaQ(mainWS)
             dq = 10 * roundinghelper.round(dq, roundinghelper.ROUNDING_TEN_TO_INT)
             params = [qMin, dq, qMax]
             report.notice('Binned momentum transfer axis to bin width {0}.'.format(dq))
+        else:
+            params = self.getProperty(common.PROP_BINNING_PARAMS_Q).value
         Ei = mainWS.run().getLogData('Ei').value
         sOfQWWS = SofQWNormalisedPolygon(InputWorkspace=mainWS,
                                          OutputWorkspace=sOfQWWSName,
