@@ -48,7 +48,7 @@ MantidMatrixCurve::MantidMatrixCurve(const QString &name, const QString &wsName,
                                      Graph *g, int index, IndexDir indexType,
                                      bool err, bool distr,
                                      GraphOptions::CurveType style,
-                                     bool multipleSpectra )
+                                     bool multipleSpectra)
     : MantidCurve(err), m_wsName(wsName), m_index(index),
       m_indexType(indexType) {
   if (!g) {
@@ -102,7 +102,7 @@ MantidMatrixCurve::MantidMatrixCurve(const MantidMatrixCurve &c)
  */
 void MantidMatrixCurve::init(Graph *g, bool distr,
                              GraphOptions::CurveType style,
-                             bool multipleSpectra ) {
+                             bool multipleSpectra) {
   // Will throw if name not found but return NULL ptr if the type is incorrect
   MatrixWorkspace_const_sptr workspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -121,17 +121,17 @@ void MantidMatrixCurve::init(Graph *g, bool distr,
   // Set the curve name if it the non-naming constructor was called
   // or the naming constructor was called with empty name.
   if (this->title().isEmpty()) {
-    // If there's only one histrogram in the workspace, title is simply workspace
+    // If there's only one histrogram in the workspace, title is simply
+    // workspace
     // name
     if (workspace->getNumberHistograms() == 1)
       this->setTitle(m_wsName);
-    else 
-      this->setTitle(createCurveName("",workspace));
+    else
+      this->setTitle(createCurveName("", workspace));
+  } else if (multipleSpectra) {
+    this->setTitle(createCurveName(this->title().text(), workspace));
   }
-  else if(multipleSpectra) {
-    this->setTitle(createCurveName(this->title().text(),workspace));
-  }
-  // Here we have to catch the case when there is more than on spectrum and 
+  // Here we have to catch the case when there is more than on spectrum and
   // append the spectrum name like in createCurveName(Workspace).
   // Perhaps, with new CreateCurveName(this->title(), Workspace)
 

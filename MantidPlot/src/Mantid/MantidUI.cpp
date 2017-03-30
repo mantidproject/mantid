@@ -3056,7 +3056,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              MultiLayer *plotWindow, bool clearWindow,
                              bool waterfallPlot, const QString &log,
                              const std::set<double> &customLogValues,
-                             bool multipleSpectra ) {
+                             bool multipleSpectra) {
   if (toPlot.size() == 0)
     return NULL;
 
@@ -3133,9 +3133,9 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
         logValue = logValue.number(logVal, 'g', 6);
       }
 
-      auto *wsCurve =
-          new MantidMatrixCurve(logValue, it.key(), g, it.value(), indexType,
-                                errs, plotAsDistribution, style, multipleSpectra);
+      auto *wsCurve = new MantidMatrixCurve(logValue, it.key(), g, it.value(),
+                                            indexType, errs, plotAsDistribution,
+                                            style, multipleSpectra);
       if (!firstCurve) {
         firstCurve = wsCurve;
         g->setNormalizable(firstCurve->isNormalizable());

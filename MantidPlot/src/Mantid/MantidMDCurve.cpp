@@ -53,10 +53,11 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve &c)
  *  @param distr :: True if this is a distribution,
  *  not applicable here.
  *  @param style :: The graph style to use
- *  @param multipleSpectra :: True if there are multiple spectra, 
+ *  @param multipleSpectra :: True if there are multiple spectra,
  *  not applicable here.
  */
-void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style, bool multipleSpectra) {
+void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
+                         bool multipleSpectra) {
   UNUSED_ARG(distr);
   UNUSED_ARG(multipleSpectra);
   IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(

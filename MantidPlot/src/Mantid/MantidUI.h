@@ -287,7 +287,7 @@ public slots:
          MultiLayer *plotWindow = NULL, bool clearWindow = false,
          bool waterfallPlot = false, const QString &log = "",
          const std::set<double> &customLogValues = std::set<double>(),
-         const bool multipleSpectra = false );
+         const bool multipleSpectra = false);
 
   MultiLayer *
   plot1D(const QMultiMap<QString, std::set<int>> &toPlot, bool spectrumPlot,
