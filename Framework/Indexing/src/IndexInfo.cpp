@@ -63,6 +63,13 @@ IndexInfo::IndexInfo(IndexInfo &&) = default;
 // Defined as default in source for forward declaration with std::unique_ptr.
 IndexInfo::~IndexInfo() = default;
 
+IndexInfo &IndexInfo::operator=(const IndexInfo &other) {
+  auto copy(other);
+  return *this = std::move(copy);
+}
+
+IndexInfo &IndexInfo::operator=(IndexInfo &&other) = default;
+
 /// The *local* size, i.e., the number of spectra in this partition.
 size_t IndexInfo::size() const {
   if (!m_spectrumNumberTranslator)

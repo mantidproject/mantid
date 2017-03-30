@@ -87,6 +87,8 @@ public:
   IndexInfo(const IndexInfo &other);
   IndexInfo(IndexInfo &&other);
   ~IndexInfo();
+  IndexInfo &operator=(const IndexInfo &other);
+  IndexInfo &operator=(IndexInfo &&other);
 
   size_t size() const;
   size_t globalSize() const;
