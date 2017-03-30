@@ -69,7 +69,7 @@ ExperimentInfo::ExperimentInfo()
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
+      m_componentInfo(boost::shared_ptr<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());

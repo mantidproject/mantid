@@ -17,6 +17,39 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
+  void test_throw_if_positions_rotation_inputs_different_sizes() {
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+        1); // 1 position provided
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+        0); // 0 rotations provided
+
+    TS_ASSERT_THROWS(Mantid::Beamline::ComponentInfo(detectorIndices, ranges,
+                                                     positions, rotations),
+                     std::invalid_argument &);
+  }
+
+  void test_throw_if_positions_and_rotations_not_same_size_as_ranges() {
+    /*
+     * Positions are rotations are only currently stored for non-detector
+     * components
+     * We should have as many ranges as we have non-detector components too.
+     * All vectors should be the same size.
+     */
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
+    std::vector<std::pair<size_t, size_t>> ranges; // Empty ranges!
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
+        1); // 1 position provided
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
+        1); // 1 rotation provided
+
+    TS_ASSERT_THROWS(Mantid::Beamline::ComponentInfo(detectorIndices, ranges,
+                                                     positions, rotations),
+                     std::invalid_argument &);
+  }
+
   void test_size() {
 
     std::vector<size_t> detectorIndices{}; // No detectors in this example
@@ -24,7 +57,12 @@ public:
     ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
     ranges.push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
+
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges,
+                                                 positions, rotations);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
     ComponentInfo info(internalInfo, std::vector<Mantid::Geometry::ComponentID>{
@@ -39,7 +77,10 @@ public:
     ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
     ranges.push_back(
         std::make_pair(0, 0)); // Another component with no detectors
-    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges,
+                                                 positions, rotations);
     Mantid::Geometry::ObjComponent comp1("component1");
     Mantid::Geometry::ObjComponent comp2("component2");
 
@@ -64,7 +105,10 @@ public:
     std::vector<std::pair<size_t, size_t>> ranges;
     ranges.push_back(std::make_pair(0, 3));
     ranges.push_back(std::make_pair(2, 3));
-    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
+    auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(2);
+    auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(2);
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges,
+                                                 positions, rotations);
     Mantid::Geometry::ObjComponent fakeComposite1("fakeComp1");
     Mantid::Geometry::ObjComponent fakeComposite2("fakeComp2");
     Mantid::Geometry::ObjComponent fakeDetector1("fakeDetector1");

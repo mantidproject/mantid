@@ -7,19 +7,34 @@
 namespace Mantid {
 namespace Beamline {
 
+/*
 ComponentInfo::ComponentInfo()
     : m_assemblySortedDetectorIndices(
           boost::make_shared<std::vector<size_t>>(0)),
       m_size(0) {}
-
+*/
 ComponentInfo::ComponentInfo(
     const std::vector<size_t> &assemblySortedDetectorIndices,
-    const std::vector<std::pair<size_t, size_t>> &ranges)
+    const std::vector<std::pair<size_t, size_t>> &ranges,
+    boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+    boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations)
     : m_assemblySortedDetectorIndices(boost::make_shared<std::vector<size_t>>(
           assemblySortedDetectorIndices)),
       m_ranges(boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           ranges)),
-      m_size(m_assemblySortedDetectorIndices->size() + ranges.size()) {}
+      m_positions(positions), m_rotations(rotations),
+      m_size(m_assemblySortedDetectorIndices->size() + ranges.size()) {
+
+  if (m_rotations->size() != m_positions->size()) {
+    throw std::invalid_argument("ComponentInfo should have been provided same "
+                                "number of postions and rotations");
+  }
+  if (m_rotations->size() != m_ranges->size()) {
+    throw std::invalid_argument("ComponentInfo should have as many positions "
+                                "and rotations as non-detector component "
+                                "ranges");
+  }
+}
 
 std::vector<size_t>
 ComponentInfo::detectorIndices(const size_t componentIndex) const {

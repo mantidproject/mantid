@@ -2,10 +2,12 @@
 #define MANTID_BEAMLINE_COMPONENTINFO_H_
 
 #include "MantidBeamline/DllConfig.h"
+#include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <utility>
 #include <cstddef>
+#include <Eigen/Geometry>
 
 namespace Mantid {
 namespace Beamline {
@@ -40,12 +42,16 @@ class MANTID_BEAMLINE_DLL ComponentInfo {
 private:
   boost::shared_ptr<std::vector<size_t>> m_assemblySortedDetectorIndices;
   boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>> m_ranges;
+  Mantid::Kernel::cow_ptr<std::vector<Eigen::Vector3d>> m_positions;
+  Mantid::Kernel::cow_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
   const size_t m_size = 0;
 
 public:
-  ComponentInfo();
+  // ComponentInfo();
   ComponentInfo(const std::vector<size_t> &assemblySortedDetectorIndices,
-                const std::vector<std::pair<size_t, size_t>> &ranges);
+                const std::vector<std::pair<size_t, size_t>> &ranges,
+                boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+                boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations);
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   size_t size() const;
 };

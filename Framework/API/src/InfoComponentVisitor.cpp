@@ -132,7 +132,7 @@ InfoComponentVisitor::makeComponentInfo() const {
    * allow them to to uses this creational method instead.
    */
   return boost::make_shared<Beamline::ComponentInfo>(
-      m_assemblySortedDetectorIndices, m_ranges);
+      m_assemblySortedDetectorIndices, m_ranges, m_positions, m_rotations);
 }
 
 /**
