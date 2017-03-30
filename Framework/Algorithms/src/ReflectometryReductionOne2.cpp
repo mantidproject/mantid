@@ -640,8 +640,10 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
-  cropWorkspaceAlg->setProperty("StartWorkspaceIndex", centreDetectorIdx());
-  cropWorkspaceAlg->setProperty("EndWorkspaceIndex", centreDetectorIdx());
+  cropWorkspaceAlg->setProperty("StartWorkspaceIndex",
+                                static_cast<int>(centreDetectorIdx()));
+  cropWorkspaceAlg->setProperty("EndWorkspaceIndex",
+                                static_cast<int>(centreDetectorIdx()));
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr ws = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
