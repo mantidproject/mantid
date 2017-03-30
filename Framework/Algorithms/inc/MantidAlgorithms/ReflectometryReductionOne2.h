@@ -96,8 +96,7 @@ private:
                           const double bTwoTheta,
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
-                          const HistogramData::HistogramX &outputX,
-                          MantidVec &outputY);
+                          const MantidVec &outputX, MantidVec &outputY);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
   constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);

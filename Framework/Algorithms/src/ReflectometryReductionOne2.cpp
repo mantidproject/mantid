@@ -644,7 +644,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
     }
 
     // Convenience pointers to the output array X and Y values
-    const auto &outputX = IvsLam->x(0);
+    const auto &outputX = IvsLam->dataX(0);
     auto &outputY = IvsLam->dataY(0);
     if (outputX.size() != outputY.size() + 1) {
       throw std::runtime_error("Expected output data to be binned");
@@ -674,7 +674,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double theta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
-    const HistogramX &outputX, MantidVec &outputY) {
+    const MantidVec &outputX, MantidVec &outputY) {
 
   // Get the bin width and the bin centre
   const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
@@ -696,14 +696,23 @@ void ReflectometryReductionOne2::sumInQProcessValue(
   const double inputCounts = inputY[inputIdx];
   const double totalWidth = lambdaMax - lambdaMin;
 
-  // Loop through all output bins that overlap the projected range
-  for (int outputIdx = 0; outputIdx < outputY.size(); ++outputIdx) {
+  // Get the first bin edge in the output X array that is within range.
+  // There will probably be some overlap, so start from the bin edge before
+  // this (unless we're already at the first bin edge).
+  auto startIter = std::lower_bound(outputX.begin(), outputX.end(), lambdaMin);
+  if (startIter != outputX.begin()) {
+    --startIter;
+  }
+
+  // Loop through all overlapping output bins. Convert the iterator to an
+  // index because we need to index both the X and Y arrays.
+  for (auto outputIdx = startIter - outputX.begin();
+       outputIdx < outputX.size() - 1; ++outputIdx) {
     const double binStart = outputX[outputIdx];
     const double binEnd = outputX[outputIdx + 1];
-    if (binEnd < lambdaMin) {
-      continue; // doesn't overlap
-    } else if (binStart > lambdaMax) {
-      break; // finished
+    if (binStart > lambdaMax) {
+      // No longer in the overlap region so we're finished
+      break;
     }
     // Add a share of the input counts to this bin based on the proportion of
     // overlap.
