@@ -22,7 +22,8 @@ digraph DirectILLCollectData {
     CalibrateEi [label="Calibrate incident energy"]
     CorrectTOFAxis [label="CorrectTOFAxis"]
     ExtractMonitors [label="ExtractMonitors"]
-    FindEPP [label="FindEPP"]
+    FindEPP [label="FindEPP \n or \n CreateEPP"]
+    FindEPPAgain [label="FindEPP \n or \n CreateEPP"]
     IntegrateMonitor [label="Integrate monitor"]
     LoadILLTOF [label="LoadILLTOF"]
     MergeRuns [label="MergeRuns"]
@@ -49,10 +50,9 @@ digraph DirectILLCollectData {
   inputFileGiven -> inputFile [label="yes"]
   inputFile -> LoadILLTOF
   LoadILLTOF -> MergeRuns
-  MergeRuns -> CorrectTOFAxis
+  MergeRuns -> ExtractMonitors
   inputFileGiven -> inputWS [label="no"]
-  inputWS -> CorrectTOFAxis
-  CorrectTOFAxis -> ExtractMonitors
+  inputWS -> ExtractMonitors
   ExtractMonitors -> monitors
   monitors -> SubtractBkgMonitor
   SubtractBkgMonitor -> IntegrateMonitor
@@ -70,7 +70,6 @@ digraph DirectILLCollectData {
   Normalize -> SubtractBkgDetector
   inputEPPGiven -> FindEPP [label="no"]
   SubtractBkgDetector -> FindEPP
-  FindEPP -> outputEPP
   FindEPP -> CalibrateEi
   inputEPPGiven -> inputEPP [label="yes"]
   inputEPP -> CalibrateEi
@@ -79,5 +78,8 @@ digraph DirectILLCollectData {
   CalibrateEi -> outputEi
   inputEiGiven -> inputEi [label="yes"]
   inputEi -> CalibrateEi
-  CalibrateEi -> outputWS
+  CalibrateEi -> CorrectTOFAxis
+  CorrectTOFAxis -> FindEPPAgain
+  CorrectTOFAxis ->outputWS
+  FindEPPAgain -> outputEPP
 }

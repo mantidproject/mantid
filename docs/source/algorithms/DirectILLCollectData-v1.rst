@@ -23,19 +23,18 @@ Basic reduction steps
 
 Some basic reduction steps are done to the input data.
 
-#. Adjust the TOF axis so that the elastic time-of-flight corresponds to the L1+L2 distances.
 #. Separate monitor and detector spectra to different workspaces.
 #. Optionally normalise the detector specta to monitor counts or acquisition time.
 #. Subtract time-independent background from the detector spectra.
-#. Optionally find the elastic peak positions for later use.
+#. Optionally find the elastic peak positions.
 #. Optionally calibrate the incident energy.
+#. Adjust the TOF axis so that the elastic time-of-flight corresponds to the L1+L2 distances.
+#. Find elastic peak positions again, if *OutputEPPWorkspace* is requested.
 
 More detailed description of some of these steps is given below.
 
-TOF axis adjustment
-^^^^^^^^^^^^^^^^^^^
-
-The TOF axis is adjusted according to the elastic channel number found in the 'Detector.elasticpeak' sample log.
+.. note::
+    The initial time-of-flight axis of ILL's spectrometers has an arbitrary starting point. Therefore, the TOF values in the intermediate workspaces do not correspond to any physical flight distances until they are corrected at step 6. 
 
 Normalisation to monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -66,6 +65,11 @@ Incident energy is calibrated either by giving a new energy as a single-value wo
 The calibrated energy can be retrieved as a single-value workspace using the *OutputIncidentEnergyWorkspace* property.
 
 This step applies to IN4 and IN6 only.
+
+TOF axis adjustment
+^^^^^^^^^^^^^^^^^^^
+
+The TOF axis is adjusted according to the elastic channel number found in the 'Detector.elasticpeak' sample log.
 
 Optional inputs and outputs
 ###########################
