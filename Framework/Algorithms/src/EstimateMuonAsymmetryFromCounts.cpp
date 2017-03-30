@@ -92,7 +92,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   double endX = getProperty("EndX");
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
-  std::vector<double> norm;
+
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
     outputWS->setSharedX(i, inputWS->sharedX(i));
@@ -103,7 +103,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     spectra = std::vector<int>(numSpectra);
     std::iota(spectra.begin(), spectra.end(), 0);
   }
-
+ 
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
   if (inputWS != outputWS) {
 
@@ -121,7 +121,8 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
 
   // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size());
+  int specLength = static_cast<int>(spectra.size()); 
+  std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -142,7 +143,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
-    norm.push_back(normConst);
+    norm[i]=normConst;
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
