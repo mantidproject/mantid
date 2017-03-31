@@ -1694,13 +1694,24 @@ void Algorithm::execMasterOnly() {
  * support execution with multiple MPI ranks and require a special behavior on
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
-  for (const auto &wsProp : m_pureOutputWorkspaceProps) {
-    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
-    // so it should never fail.
-    const Property &prop = dynamic_cast<Property &>(*wsProp);
-    setProperty(prop.name(),
-                boost::make_shared<NonMasterDummyWorkspace>(communicator()));
+  if (m_inputWorkspaceProps.size() == 1 &&
+      m_pureOutputWorkspaceProps.size() == 1) {
+    if (const auto &ws = m_inputWorkspaceProps.front()->getWorkspace()) {
+      if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
+        const auto &wsProp = m_pureOutputWorkspaceProps.front();
+        // This is the reverse cast of what is done in
+        // cacheWorkspaceProperties(), so it should never fail.
+        const Property &prop = dynamic_cast<Property &>(*wsProp);
+        setProperty(prop.name(), ws->cloneEmpty());
+        return;
+      }
+    }
   }
+  throw std::runtime_error(
+      "Algorithm with " +
+      Parallel::toString(Parallel::ExecutionMode::MasterOnly) +
+      ": Automatic creation of dummy workspaces on non-master ranks not "
+      "possible.");
 }
 
 /** Get a (valid) execution mode for this algorithm.

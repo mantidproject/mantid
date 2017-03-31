@@ -207,7 +207,7 @@ private:
     return new WorkspaceTester(*this);
   }
   WorkspaceTester *doCloneEmpty() const override {
-    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+    return new WorkspaceTester(storageMode());
   }
 };
 

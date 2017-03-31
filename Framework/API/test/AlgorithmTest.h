@@ -209,13 +209,13 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
         "InputWorkspace", "", Direction::Input));
     declareProperty(make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
+    boost::shared_ptr<Workspace> ws = getProperty("InputWorkspace");
     fprintf(stderr, "exec %d %s\n", communicator().rank(), Parallel::toString(ws->storageMode()).c_str());
     setProperty("OutputWorkspace", ws->clone());
   }
@@ -271,24 +271,18 @@ void run_ParallelAlgorithm(const Parallel::Communicator &comm) {
     ParallelAlgorithm alg;
     alg.setCommunicator(comm);
     alg.initialize();
+    auto in = boost::make_shared<WorkspaceTester>(storageMode);
+    in->initialize(1, 1, 1);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
-      auto in = boost::make_shared<WorkspaceTester>(storageMode);
-      in->initialize(1, 1, 1);
       alg.setProperty("InputWorkspace", in);
     } else {
-      auto in = boost::make_shared<NonMasterDummyWorkspace>(comm);
-      fprintf(stderr, "uh oh\n");
-      alg.setProperty("InputWorkspace", in);
-      fprintf(stderr, "ok?\n");
+      alg.setProperty("InputWorkspace", in->cloneEmpty());
     }
     std::string outName("out" + Strings::toString(comm.rank()));
     alg.setProperty("OutputWorkspace", outName);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     auto out = AnalysisDataService::Instance().retrieve(outName);
     TS_ASSERT_EQUALS(out->storageMode(), storageMode);
-    if (storageMode == Parallel::StorageMode::MasterOnly && comm.rank() != 0) {
-      TS_ASSERT(dynamic_cast<NonMasterDummyWorkspace *>(out.get()));
-    }
   }
 }
 #endif
