@@ -143,6 +143,13 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
       (m_supportedInstruments.find(directBeam) != m_supportedInstruments.end()))
     result["DirectBeam"] = "Instrument not supported.";
   // compatibility check for reflected and direct beam in loadBeam
+
+  // further input validation is needed for general LoadDialog and Python
+  if ((angleOption != "user defined") && (thetaUserDefined != EMPTY_DBL()))
+    result["BraggAngle"] = "No input value required";
+  if (directBeam.empty() && (angleOption == "detector angle")) {
+    result["BraggAngleIs"] = "DirectBeam input required";
+  }
   return result;
 }
 
@@ -314,6 +321,7 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
+  m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 }
 
 /**
@@ -413,8 +421,10 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
       chopper = "Virtual chopper";
     } else {
       // use chopper values
-      chop1_speed = getValue(std::string(m_chopper1Name).append(".rotation_speed"));
-      chop2_speed = getValue(std::string(m_chopper2Name).append(".rotation_speed"));
+      chop1_speed =
+          getValue(std::string(m_chopper1Name).append(".rotation_speed"));
+      chop2_speed =
+          getValue(std::string(m_chopper2Name).append(".rotation_speed"));
       chop2_phase = getValue(std::string(m_chopper2Name).append(".phase"));
     }
     // logging
@@ -523,7 +533,6 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-  runDetails.addProperty("Facility", std::string("ILL"));
   stat = NXclose(&nxfileID);
 }
 
