@@ -32,7 +32,8 @@ namespace Diffraction {
 */
 
 MANTID_KERNEL_DLL double calcTofMin(const double difc, const double difa,
-                                    const double tzero, const double tofmin = 0.);
+                                    const double tzero,
+                                    const double tofmin = 0.);
 
 MANTID_KERNEL_DLL double calcTofMax(const double difc, const double difa,
                                     const double tzero, const double tofmax);

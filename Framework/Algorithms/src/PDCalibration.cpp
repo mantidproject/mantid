@@ -617,8 +617,8 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
           Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
       m_tofMax <
           Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
-      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax || difa2 < m_difaMin ||
-      difa2 > m_difaMax) {
+      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax ||
+      difa2 < m_difaMin || difa2 > m_difaMax) {
     tZero2 = 0;
     difc2 = 0;
     difa2 = 0;
