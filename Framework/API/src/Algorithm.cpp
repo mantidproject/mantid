@@ -443,30 +443,12 @@ bool Algorithm::execute() {
   // Cache the workspace in/out properties for later use
   cacheWorkspaceProperties();
 
-  Parallel::ExecutionMode executionMode = getExecutionMode();
-
-  // On non-master ranks, there may be input workspace properties that are null. This implies that the storage mode is Parallel::StorageMode::MasterOnly. We skip anything below such as property validation and exit immediately.
-  bool nonMasterExecution = (executionMode == Parallel::ExecutionMode::MasterOnly) && (communicator().rank() != 0);
- /* {
-    for (const auto &wsProp : m_inputWorkspaceProps) {
-      if (auto ws = wsProp->getWorkspace()) {
-        if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
-          nonMasterExecution = true;
-          break;
-        }
-      }
-    }
-  }
-  */
-
   // no logging of input if a child algorithm (except for python child algos)
   if (!m_isChildAlgorithm || m_alwaysStoreInADS)
     logAlgorithmInfo();
 
   // Check all properties for validity
-  // Skip validation for non-master execution (StorageMode::MasterOnly on
-  // non-master rank).
-  if (!nonMasterExecution && !validateProperties()) {
+  if (!validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
     for (auto &prop : props) {
@@ -555,6 +537,8 @@ bool Algorithm::execute() {
 
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
+
+  Parallel::ExecutionMode executionMode = getExecutionMode();
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
