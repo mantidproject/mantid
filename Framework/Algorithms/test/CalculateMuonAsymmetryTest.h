@@ -74,21 +74,11 @@ IAlgorithm_sptr setUpAlg() {
   return asymmAlg;
 }
 
-std::vector<double> convertToVec(std::string list) {
+std::vector<double> convertToVec(std::string const &list) {
   std::vector<double> vec;
-  std::string tmp;
-  size_t start = 0;
-  size_t end = 0;
-  // search for ','
-  while ((end = list.find(",", start)) != std::string::npos) {
-    tmp.assign(list, start, end - start);
-    vec.push_back(std::stod(tmp.c_str()));
-    start = end + 1;
-  }
-  // record last value
-  tmp.assign(list, start, end - start);
-  vec.push_back(std::stod(tmp.c_str()));
-
+  std::vector<std::string> tmpVec;
+  boost::split(tmpVec,list,boost::is_any_of(","));  
+  std::for_each(tmpVec.begin(),tmpVec.end(),[&vec](std::string const &element){vec.push_back(std::stod(element));});
   return vec;
 }
 
