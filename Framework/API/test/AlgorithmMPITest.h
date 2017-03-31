@@ -4,17 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/HistogramValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Strings.h"
+
+
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidKernel/ReadLock.h"
-#include "MantidKernel/WriteLock.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/Strings.h"
 #ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/ParallelRunner.h"
 #endif
@@ -69,13 +69,16 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
-        "InputWorkspace", "", Direction::Input));
+    auto wsValidator = boost::make_shared<Kernel::CompositeValidator>();
+    wsValidator->add<HistogramValidator>();
+    //wsValidator->add<RawCountValidator>();
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "InputWorkspace", "", Kernel::Direction::Input, wsValidator));
     declareProperty(make_unique<WorkspaceProperty<Workspace>>(
         "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    boost::shared_ptr<Workspace> ws = getProperty("InputWorkspace");
+    boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
     fprintf(stderr, "exec %d %s\n", communicator().rank(), Parallel::toString(ws->storageMode()).c_str());
     setProperty("OutputWorkspace", ws->clone());
   }
@@ -132,7 +135,7 @@ void run_ParallelAlgorithm(const Parallel::Communicator &comm) {
     alg.setCommunicator(comm);
     alg.initialize();
     auto in = boost::make_shared<WorkspaceTester>(storageMode);
-    in->initialize(1, 1, 1);
+    in->initialize(1, 2, 1);
     if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
       alg.setProperty("InputWorkspace", in);
     } else {

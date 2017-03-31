@@ -426,6 +426,7 @@ private:
   Parallel::ExecutionMode getExecutionMode() const;
   std::map<std::string, Parallel::StorageMode>
   getInputWorkspaceStorageModes() const;
+  void setupSkipValidationMasterOnly();
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.

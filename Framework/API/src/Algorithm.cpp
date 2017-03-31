@@ -260,6 +260,7 @@ void Algorithm::initialize() {
   try {
     try {
       this->init();
+      setupSkipValidationMasterOnly();
     } catch (std::runtime_error &) {
       throw;
     }
@@ -1775,6 +1776,18 @@ Parallel::ExecutionMode Algorithm::getCorrespondingExecutionMode(
   default:
     return Parallel::ExecutionMode::Invalid;
   }
+}
+
+/// Sets up skipping workspace validation on non-master ranks for
+/// StorageMode::MasterOnly.
+void Algorithm::setupSkipValidationMasterOnly() {
+  // If workspaces have StorageMode::MasterOnly, validation on non-master ranks
+  // would usually fail. Therefore, WorkspaceProperty needs to skip validation.
+  // Thus, we must notify it whether or not it is on the master rank or not.
+  if (communicator().rank() != 0)
+    for (auto *prop : getProperties())
+      if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop))
+        wsProp->setIsMasterRank(false);
 }
 
 /// Returns a const reference to the (MPI) communicator of the algorithm.
