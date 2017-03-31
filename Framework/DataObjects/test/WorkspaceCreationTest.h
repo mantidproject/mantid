@@ -214,7 +214,6 @@ public:
     check_instrument(*ws);
   }
 
-
   void test_create_parent_same_size() {
     const auto parent = create<Workspace2D>(m_instrument, make_indices(),
                                             Histogram(BinEdges{1, 2, 4}));
