@@ -82,7 +82,7 @@ def get_monitor_names_from_idf_file(idf_file, invalid_monitor_names=None):
 
     # Remove any monitor entries where the
     if invalid_monitor_names:
-        output = {key: value for key, value in output.items() if value not in invalid_monitor_names}
+        output = {key: value for key, value in list(output.items()) if value not in invalid_monitor_names}
     return output
 
 

@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-
+from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (SANSInstrument, DetectorType)
@@ -175,7 +175,7 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     spectrum_range_stop = mask_info.spectrum_range_stop
     if spectrum_range_start and spectrum_range_stop:
         for start, stop in zip(spectrum_range_start, spectrum_range_stop):
-            total_spectra.extend(range(start, stop + 1))
+            total_spectra.extend(list(range(start, stop + 1)))
 
     # Detector specific masks
     detector = mask_info.detectors[DetectorType.to_string(detector_type)]
@@ -319,9 +319,7 @@ def mask_beam_stop(mask_info, workspace, instrument):
 # Masker classes
 # ------------------------------------------------------------------
 
-class Masker(object):
-    __metaclass__ = ABCMeta
-
+class Masker(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(Masker, self).__init__()
 
@@ -331,8 +329,6 @@ class Masker(object):
 
 
 class NullMasker(Masker):
-    __metaclass__ = ABCMeta
-
     def __init__(self):
         super(NullMasker, self).__init__()
 

@@ -411,7 +411,7 @@ def get_geometry_information_isis_nexus(file_name):
 
 def get_date_and_run_number_added_nexus(file_name):
     with h5.File(file_name) as h5_file:
-        keys = h5_file.keys()
+        keys = list(h5_file.keys())
         first_entry = h5_file[keys[0]]
         logs = first_entry[LOGS]
         # Start time
@@ -433,12 +433,12 @@ def get_added_nexus_information(file_name):  # noqa
     def get_all_keys_for_top_level(key_collection):
         top_level_key_collection = []
         for key in key_collection:
-            if key.startswith(u'mantid_workspace_'):
+            if key.startswith('mantid_workspace_'):
                 top_level_key_collection.append(key)
         return sorted(top_level_key_collection)
 
     def check_if_event_mode(entry):
-        return EVENT_WORKSPACE in entry.keys()
+        return EVENT_WORKSPACE in list(entry.keys())
 
     def get_workspace_name(entry):
         return entry[WORKSPACE_NAME][0]
@@ -505,7 +505,7 @@ def get_added_nexus_information(file_name):  # noqa
         try:
             with h5.File(file_name) as h5_file:
                 # Get all mantid_workspace_X keys
-                keys = h5_file.keys()
+                keys = list(h5_file.keys())
                 top_level_keys = get_all_keys_for_top_level(keys)
 
                 # Check if entries are added event data, if we don't have a hit, then it can always be

@@ -25,6 +25,7 @@ from sans.state.calculate_transmission import get_calculate_transmission_builder
 from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.state.convert_to_q import get_convert_to_q_builder
 from sans.state.compatibility import get_compatibility_builder
+import collections
 
 
 def check_if_contains_only_one_element(to_check, element_name):
@@ -94,7 +95,7 @@ def set_background_tof_monitor(builder, user_file_items):
     monitor_exclusion_list = []
     if BackId.monitor_off in user_file_items:
         back_monitor_off = user_file_items[BackId.monitor_off]
-        monitor_exclusion_list = back_monitor_off.values()
+        monitor_exclusion_list = list(back_monitor_off.values())
 
     # Get all individual monitor background settings. But ignore those settings where there was an explicit
     # off setting. Those monitors were collected in the monitor_exclusion_list collection
@@ -463,7 +464,7 @@ class UserFileStateDirectorISIS(object):
             check_if_contains_only_one_element(monitor_4_shift, TransId.spec_shift)
             monitor_4_shift = monitor_4_shift[-1]
             set_monitor_4_offset = getattr(self._move_builder, "set_monitor_4_offset", None)
-            if callable(set_monitor_4_offset):
+            if isinstance(set_monitor_4_offset, collections.Callable):
                 self._move_builder.set_monitor_4_offset(convert_mm_to_m(monitor_4_shift))
             else:
                 log_non_existing_field("set_monitor_4_offset")
