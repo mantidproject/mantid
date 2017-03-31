@@ -30,7 +30,7 @@ Usage
     for c in vp.keys():
         print('%s: %f' %(c, vp.column(c)[0]))
     vp = mtd['vesuvio_einstein_params']
-    print('--------Einstein--------')
+    print('\n--------Einstein--------')
     for c in vp.keys():
         print('%s: %f' %(c, vp.column(c)[0]))
 
