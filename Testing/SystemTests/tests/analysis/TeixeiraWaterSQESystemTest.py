@@ -68,8 +68,8 @@ class GlobalFitTest(MantidStressTest):
         # Invoke the Fit algorithm using global_model and domain_model:
         output_workspace = "glofit_" + data.name()
         status,chi2,niter,covar,params,curves = sm.Fit(Function=global_model, Output=output_workspace,
-                                                 CreateOutput=True, MaxIterations=500,
-                                                 **domain_model)
+                                                       CreateOutput=True, MaxIterations=500,
+                                                       **domain_model)
 
         # Validate
         self._success = True
