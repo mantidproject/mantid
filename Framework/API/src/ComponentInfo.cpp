@@ -1,6 +1,7 @@
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <boost/make_shared.hpp>
 #include <exception>
 #include <string>
@@ -41,12 +42,12 @@ ComponentInfo::detectorIndices(size_t componentIndex) const {
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
 
-Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
-  return m_componentInfo.position(componentIndex);
+Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo.position(componentIndex));
 }
 
-Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
-  return m_componentInfo.rotation(componentIndex);
+Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
+  return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
 }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {

@@ -2,10 +2,11 @@
 #define MANTID_API_COMPONENTINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Geometry>
 
 namespace Mantid {
 
@@ -59,8 +60,8 @@ public:
                 std::vector<Mantid::Geometry::IComponent *> &&componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
   size_t size() const;
-  Eigen::Vector3d position(const size_t componentIndex) const;
-  Eigen::Quaterniond rotation(const size_t componentIndex) const;
+  Mantid::Kernel::V3D position(const size_t componentIndex) const;
+  Mantid::Kernel::Quat rotation(const size_t componentIndex) const;
   size_t indexOf(Geometry::IComponent *id) const;
 };
 

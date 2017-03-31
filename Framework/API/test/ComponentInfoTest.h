@@ -8,6 +8,7 @@
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 
 using Mantid::API::ComponentInfo;
 
@@ -97,17 +98,18 @@ public:
      * position
      * index 0 since we don't input positions for detectors.
      */
-    TS_ASSERT(info.position(3).isApprox(compPositions->at(0)));
-    TS_ASSERT(info.position(4).isApprox(compPositions->at(1)));
-    TS_ASSERT(info.rotation(3).isApprox(compRotations->at(0)));
-    TS_ASSERT(info.rotation(4).isApprox(compRotations->at(1)));
+    using namespace Mantid::Kernel;
+    TS_ASSERT(toVector3d(info.position(3)).isApprox(compPositions->at(0)));
+    TS_ASSERT(toVector3d(info.position(4)).isApprox(compPositions->at(1)));
+    TS_ASSERT(toQuaterniond(info.rotation(3)).isApprox(compRotations->at(0)));
+    TS_ASSERT(toQuaterniond(info.rotation(4)).isApprox(compRotations->at(1)));
 
-    TS_ASSERT(info.position(0).isApprox(detPositions.at(0)));
-    TS_ASSERT(info.position(1).isApprox(detPositions.at(1)));
-    TS_ASSERT(info.position(2).isApprox(detPositions.at(2)));
-    TS_ASSERT(info.rotation(0).isApprox(detRotations.at(0)));
-    TS_ASSERT(info.rotation(1).isApprox(detRotations.at(1)));
-    TS_ASSERT(info.rotation(2).isApprox(detRotations.at(2)));
+    TS_ASSERT(toVector3d(info.position(0)).isApprox(detPositions.at(0)));
+    TS_ASSERT(toVector3d(info.position(1)).isApprox(detPositions.at(1)));
+    TS_ASSERT(toVector3d(info.position(2)).isApprox(detPositions.at(2)));
+    TS_ASSERT(toQuaterniond(info.rotation(0)).isApprox(detRotations.at(0)));
+    TS_ASSERT(toQuaterniond(info.rotation(1)).isApprox(detRotations.at(1)));
+    TS_ASSERT(toQuaterniond(info.rotation(2)).isApprox(detRotations.at(2)));
   }
 
   void test_indexOf() {
