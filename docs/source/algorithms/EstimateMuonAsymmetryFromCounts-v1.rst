@@ -34,14 +34,14 @@ input = CreateWorkspace(x,y)
 run = input.getRun()
 run.addProperty("goodfrm","10","None",True)
 
-output=EstimateAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
+output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
 print "Asymmetry estimate: ", output.readY(0)
-
+print "Normalization constant: ",norm[0]
 Output:
 
 .. testoutput:: ExSimple
 Asymmetry estimate:  [-0.1232116   1.07330834  0.08948306 -0.65649875 -0.7292452 ]
-
+Normalization Constant: 17.9797250909
 .. categories::
 
 .. sourcelink::
