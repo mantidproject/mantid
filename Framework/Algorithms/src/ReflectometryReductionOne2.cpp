@@ -134,9 +134,9 @@ void ReflectometryReductionOne2::initRun() {
   if (summingInQ()) {
     // These values are only required for summation in Q
     findLambdaMinMax();
-    findThetaMinMax();
+    findTwoThetaMinMax();
     findTheta0();
-    findThetaR();
+    findTwoThetaR();
   }
 }
 
@@ -160,7 +160,7 @@ void ReflectometryReductionOne2::exec() {
 * Creates the output 1D array in wavelength from an input 2D workspace in
 * TOF. Summation is done over lambda or over lines of constant Q depending on
 * the type of reduction. For the latter, the output is projected to "virtual
-* lambda" at a reference angle thetaR.
+* lambda" at a reference angle twoThetaR.
 *
 * @return :: the output workspace in wavelength
 */
@@ -498,12 +498,11 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
         }
       }
 
-      // Also set the centre detector index, which is the detector where thetaR
-      // is defined. Use the centre of the region of interest.
+      // Also set the centre and the reference detector indices
 
-      /// todo: check this - should it be the centre pixel of the detector
-      /// (regardless of region of interest?)
-      m_centreDetectorIdx =
+      /// todo: find correct centre detector
+      m_centreDetectorIdx = 400;
+      m_twoThetaRDetectorIdx =
           minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
     } catch (std::exception &ex) {
       std::ostringstream errMsg;
@@ -522,15 +521,15 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 }
 
 /**
-* Find and cache the min/max theta for the area of interest
+* Find and cache the min/max twoTheta for the area of interest
 */
-void ReflectometryReductionOne2::findThetaMinMax() {
+void ReflectometryReductionOne2::findTwoThetaMinMax() {
 
-  m_thetaMin = std::min(m_spectrumInfo->twoTheta(m_detectors.front()),
-                        m_spectrumInfo->twoTheta(m_detectors.back()));
+  m_twoThetaMin = std::min(m_spectrumInfo->twoTheta(m_detectors.front()),
+                           m_spectrumInfo->twoTheta(m_detectors.back()));
 
-  m_thetaMax = std::max(m_spectrumInfo->twoTheta(m_detectors.front()),
-                        m_spectrumInfo->twoTheta(m_detectors.back()));
+  m_twoThetaMax = std::max(m_spectrumInfo->twoTheta(m_detectors.front()),
+                           m_spectrumInfo->twoTheta(m_detectors.back()));
 }
 
 /**
@@ -549,14 +548,15 @@ void ReflectometryReductionOne2::findTheta0() {
 }
 
 /**
-* Find and cache the (arbitrary) reference angle thetaR for use for summation in
-* Q.
+* Find and cache the (arbitrary) reference angle twoThetaR for use for summation
+* in
+* Q, and the detector pixel it corresponds to.
 *
-* @return : the angle thetaR
+* @return : the angle twoThetaR
 * @throws : if the angle could not be found
 */
-void ReflectometryReductionOne2::findThetaR() {
-  m_thetaR = thetaMin() + ((thetaMax() - thetaMin()) / 2.0);
+void ReflectometryReductionOne2::findTwoThetaR() {
+  m_twoThetaR = m_spectrumInfo->twoTheta(twoThetaRDetectorIdx());
 }
 
 /**
@@ -568,14 +568,15 @@ void ReflectometryReductionOne2::findThetaR() {
 */
 MatrixWorkspace_sptr
 ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
-  // Construct the new workspace from the centre pixel (where thetaR is defined)
+  // Construct the new workspace from the centre pixel (where twoThetaR is
+  // defined)
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
   cropWorkspaceAlg->setProperty("StartWorkspaceIndex",
-                                static_cast<int>(centreDetectorIdx()));
+                                static_cast<int>(twoThetaRDetectorIdx()));
   cropWorkspaceAlg->setProperty("EndWorkspaceIndex",
-                                static_cast<int>(centreDetectorIdx()));
+                                static_cast<int>(twoThetaRDetectorIdx()));
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr ws = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
@@ -586,10 +587,10 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   const int numBins = static_cast<int>(detectorWS->blocksize());
   const double bLambda = (lambdaMax() - lambdaMin()) / numBins;
   const double bTwoTheta =
-      (thetaMax() - thetaMin()) / detectorWS->getNumberHistograms();
-  getProjectedLambdaRange(lambdaMax(), thetaMin(), bLambda, bTwoTheta,
+      (twoThetaMax() - twoThetaMin()) / detectorWS->getNumberHistograms();
+  getProjectedLambdaRange(lambdaMax(), twoThetaMin(), bLambda, bTwoTheta,
                           lambdaVMin, dummy);
-  getProjectedLambdaRange(lambdaMin(), thetaMax(), bLambda, bTwoTheta, dummy,
+  getProjectedLambdaRange(lambdaMin(), twoThetaMax(), bLambda, bTwoTheta, dummy,
                           lambdaVMax);
 
   if (lambdaVMin > lambdaVMax) {
@@ -618,7 +619,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 
 /**
 * Sum counts from the input workspace in lambda along lines of constant Q by
-* projecting to "virtual lambda" at a reference angle thetaR.
+* projecting to "virtual lambda" at a reference angle twoThetaR.
 *
 * @param detectorWS :: the input workspace in wavelength
 * @return :: the output workspace in wavelength
@@ -632,9 +633,9 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
   const auto &spectrumInfo = detectorWS->spectrumInfo();
   for (size_t spIdx : m_detectors) {
     // Get the angle of this detector and its size in twoTheta
-    double theta = 0.0;
+    double twoTheta = 0.0;
     double bTwoTheta = 0.0;
-    getDetectorDetails(spIdx, spectrumInfo, theta, bTwoTheta);
+    getDetectorDetails(spIdx, spectrumInfo, twoTheta, bTwoTheta);
 
     // Check X length is Y length + 1
     const auto &inputX = detectorWS->x(spIdx);
@@ -648,7 +649,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 
     // Process each value in the spectrum
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-      sumInQProcessValue(inputIdx, theta, bTwoTheta, inputX, inputY, IvsLam);
+      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam);
     }
   }
 
@@ -659,14 +660,14 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
 * Share counts from an input value onto the projected output in virtual-lambda
 *
 * @param inputIdx [in] :: the index into the input arrays
-* @param theta [in] :: the value of theta for this spectrum
-* @param bTwoTheta [in] :: the size of the pixel in theta
+* @param twoTheta [in] :: the value of twotTheta for this spectrum
+* @param bTwoTheta [in] :: the size of the pixel in twoTheta
 * @param inputY [in] :: the input spectrum Y values
 * @param inputX [in] :: the input spectrum Y values
 * @param IvsLam [in,out] :: the output workspace
 */
 void ReflectometryReductionOne2::sumInQProcessValue(
-    const int inputIdx, const double theta, const double bTwoTheta,
+    const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
     MatrixWorkspace_sptr IvsLam) {
 
@@ -677,10 +678,10 @@ void ReflectometryReductionOne2::sumInQProcessValue(
   if (lambda < lambdaMin() || lambda > lambdaMax()) {
     return;
   }
-  // Project these coordinates onto the virtual-lambda output (at thetaR)
+  // Project these coordinates onto the virtual-lambda output (at twoThetaR)
   double lambdaMin = 0.0;
   double lambdaMax = 0.0;
-  getProjectedLambdaRange(lambda, theta, bLambda, bTwoTheta, lambdaMin,
+  getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaMin,
                           lambdaMax);
   // Share the input counts into the output array
   const double inputCounts = inputY[inputIdx];
@@ -744,18 +745,17 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 *
 * @param spIdx : the spectrum index
 * @param spectrumInfo : the cached spectrum info
-* @param theta [out] : the angle of the detector
+* @param twoTheta [out] : the twoTheta angle of the detector
 * @param bTwoTheta [out] : the range twoTheta covered by this detector
 */
 void ReflectometryReductionOne2::getDetectorDetails(
-    const size_t spIdx, const SpectrumInfo &spectrumInfo, double &theta,
+    const size_t spIdx, const SpectrumInfo &spectrumInfo, double &twoTheta,
     double &bTwoTheta) {
 
-  const double twoTheta = spectrumInfo.twoTheta(spIdx);
-  theta = twoTheta / 2.0;
+  twoTheta = spectrumInfo.twoTheta(spIdx);
 
   // Get the range of covered by this pixel (assume it's the diff between this
-  // pixel's theta and the prev/next pixel) / todo - check this
+  // pixel's twoTheta and the prev/next pixel) / todo - check this
   if (spIdx > 0) {
     bTwoTheta = twoTheta - spectrumInfo.twoTheta(spIdx - 1);
   } else if (spIdx + 1 < spectrumInfo.size()) {
@@ -768,34 +768,34 @@ void ReflectometryReductionOne2::getDetectorDetails(
 * coordinates.
 *
 * @param lambda [in] :: the lambda coord to project
-* @param theta [in] :: the theta coord to project
+* @param twoTheta [in] :: the twoTheta coord to project
 * @param bLambda [in] :: the pixel size in lambda
 * @param bTwoTheta [in] :: the pixel size in twoTheta
 * @param lambdaMin [out] :: the projected range start
 * @param lambdaMax [out] :: the projected range end
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
-    const double lambda, const double theta, const double bLambda,
+    const double lambda, const double twoTheta, const double bLambda,
     const double bTwoTheta, double &lambdaMin, double &lambdaMax) {
-  // Convenince values for the calculation
-  const double gamma = theta - thetaR();
-  const double bTwoThetaOver2 = bTwoTheta;
-  const double twoThetaR = thetaR() * 2.0;
-  const double thetaR_theta0 = twoThetaR - theta0();
+  // Get the angle from twoThetaR to this detector
+  const double gamma = twoTheta - twoThetaR();
+  // Get the angle from the horizon to this detector
+  const double theta = twoTheta - theta0();
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop = std::sin(thetaR_theta0) * (lambda + bLambda / 2) /
-                             std::sin(thetaR_theta0 + gamma - bTwoTheta / 2);
-    const double lambdaBot = std::sin(thetaR_theta0) * (lambda - bLambda / 2) /
-                             std::sin(thetaR_theta0 + gamma + bTwoTheta / 2);
+    const double lambdaTop = std::sin(theta) * (lambda + bLambda / 2) /
+                             std::sin(theta + gamma - bTwoTheta / 2);
+    const double lambdaBot = std::sin(theta) * (lambda - bLambda / 2) /
+                             std::sin(theta + gamma + bTwoTheta / 2);
 
     lambdaMin = std::min(lambdaTop, lambdaBot);
     lambdaMax = std::max(lambdaTop, lambdaBot);
   } catch (std::exception &ex) {
     std::stringstream errMsg;
-    errMsg << "Failed to project (lambda, theta) = (" << lambda << "," << theta
-           << ") onto thetaR = " << thetaR() << ": " << ex.what();
+    errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
+           << twoTheta << ") onto twoThetaR = " << twoThetaR() << ": "
+           << ex.what();
     throw std::runtime_error(errMsg.str());
   }
 }

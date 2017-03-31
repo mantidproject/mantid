@@ -92,7 +92,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   sumInQ(API::MatrixWorkspace_sptr detectorWS);
   // Do the summation in Q for a single input value
-  void sumInQProcessValue(const int inputIdx, const double theta,
+  void sumInQProcessValue(const int inputIdx, const double twoTheta,
                           const double bTwoTheta,
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
@@ -108,10 +108,10 @@ private:
   bool summingInQ();
   // Get angle details for a specific detector
   void getDetectorDetails(const size_t spIdx,
-                          const API::SpectrumInfo &spectrumInfo, double &theta,
-                          double &bTwoTheta);
-  // Get projected coordinates onto thetaR
-  void getProjectedLambdaRange(const double lambda, const double theta,
+                          const API::SpectrumInfo &spectrumInfo,
+                          double &twoTheta, double &bTwoTheta);
+  // Get projected coordinates onto twoThetaR
+  void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
                                double &lambdaTop, double &lambdaBot);
   // Check whether two spectrum maps match
@@ -129,16 +129,17 @@ private:
   void initRun();
   void findLambdaMinMax();
   void findDetectorsOfInterest();
-  void findThetaMinMax();
-  void findThetaR();
+  void findTwoThetaMinMax();
+  void findTwoThetaR();
   void findTheta0();
   // Accessors for theta and lambda values
   double lambdaMin() { return m_lambdaMin; }
   double lambdaMax() { return m_lambdaMax; }
-  double thetaMin() { return m_thetaMin; }
-  double thetaMax() { return m_thetaMax; }
+  double twoThetaMin() { return m_twoThetaMin; }
+  double twoThetaMax() { return m_twoThetaMax; }
   double theta0() { return m_theta0; }
-  double thetaR() { return m_thetaR; }
+  double twoThetaR() { return m_twoThetaR; }
+  size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
   size_t centreDetectorIdx() { return m_centreDetectorIdx; };
 
   API::MatrixWorkspace_sptr m_runWS;
@@ -146,14 +147,15 @@ private:
   bool m_convertUnits;             // convert the input workspace to lambda
   bool m_normalise;                // normalise by monitors etc.
   bool m_sum;                      // whether to do summation
-  double m_thetaMin;               // min angle in detectors of interest
-  double m_thetaMax;               // max angle in detectors of interest
+  double m_twoThetaMin;            // min angle in detectors of interest
+  double m_twoThetaMax;            // max angle in detectors of interest
   double m_theta0;                 // horizon angle
-  double m_thetaR;                 // reference angle for summation in Q
+  double m_twoThetaR;              // reference angle for summation in Q
   double m_lambdaMin;              // min wavelength in area of interest
   double m_lambdaMax;              // max wavelength in area of interest
   std::vector<size_t> m_detectors; // workspace indices of detectors of interest
-  size_t m_centreDetectorIdx;
+  size_t m_centreDetectorIdx;      // detector index of centre pixel
+  size_t m_twoThetaRDetectorIdx;   // detector index at reference angle thetaR
 };
 
 } // namespace Algorithms
