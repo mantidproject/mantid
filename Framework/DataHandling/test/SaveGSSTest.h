@@ -371,7 +371,7 @@ private:
   std::vector<SaveGSS *> saveAlgPtrs;
 
   // Controls the speed of the test
-  const int m_numberOfBinsToSave = 100000;
+  const int m_numberOfBinsToSave = 20000;
   // Multiplied by n times specified below
   const int m_numberOfIterations = 5;
 
