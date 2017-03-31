@@ -345,22 +345,18 @@ public:
         generateTestMatrixWorkspace(2, m_numberOfBinsToSave);
     AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
-    for (int i = 0; i < m_numberOfIterations; ++i) {
-      saveAlgPtrs.emplace_back(setupAlg());
-    }
+    m_alg = new SaveGSS();
+    m_alg->initialize();
+    m_alg->setPropertyValue("InputWorkspace", wsName);
+    m_alg->setProperty("Filename", filename);
+    m_alg->setRethrows(true);
   }
 
-  void testSaveGSSPerformance() {
-    for (auto alg : saveAlgPtrs) {
-      TS_ASSERT_THROWS_NOTHING(alg->execute());
-    }
-  }
+  void testSaveGSSPerformance() { TS_ASSERT_THROWS_NOTHING(m_alg->execute()); }
 
   void tearDown() override {
-    for (int i = 0; i < m_numberOfIterations; i++) {
-      delete saveAlgPtrs[i];
-      saveAlgPtrs[i] = nullptr;
-    }
+    delete m_alg;
+    m_alg = nullptr;
     Mantid::API::AnalysisDataService::Instance().remove(wsName);
     Poco::File gsasfile(filename);
     if (gsasfile.exists())
@@ -368,24 +364,13 @@ public:
   }
 
 private:
-  std::vector<SaveGSS *> saveAlgPtrs;
-
   // Controls the speed of the test
-  const int m_numberOfBinsToSave = 20000;
-  // Multiplied by n times specified below
-  const int m_numberOfIterations = 5;
+  const int m_numberOfBinsToSave = 100000;
 
   const std::string wsName = "Test2BankWS";
   const std::string filename = "test_performance.gsa";
 
-  SaveGSS *setupAlg() {
-    SaveGSS *saver = new SaveGSS;
-    saver->initialize();
-    saver->setPropertyValue("InputWorkspace", wsName);
-    saver->setProperty("Filename", filename);
-    saver->setRethrows(true);
-    return saver;
-  }
+  SaveGSS *m_alg = nullptr;
 };
 
 #endif // SAVEGSSTEST_H_
