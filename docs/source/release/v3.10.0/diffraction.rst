@@ -21,6 +21,7 @@ Powder Diffraction
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
 - A new NOMAD instrument definition file with corrected values.
+- :ref:`algm-PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results.
 
 Single Crystal Diffraction
 --------------------------
