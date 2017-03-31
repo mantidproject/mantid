@@ -6,7 +6,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/NonMasterDummyWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/WriteLock.h"

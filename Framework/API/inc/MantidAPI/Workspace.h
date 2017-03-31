@@ -68,6 +68,10 @@ public:
    *   clone() is not virtual this is a non-issue.
    */
   Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
+
+  /// Returns a default-initialized clone of the workspace
+  Workspace_uptr cloneEmpty() const { return Workspace_uptr(doCloneEmpty()); }
+
   Workspace &operator=(const Workspace &other) = delete;
   // DataItem interface
   /** Marks the workspace as safe for multiple threads to edit data
@@ -115,8 +119,12 @@ private:
   /// Storage mode of the Workspace (used for MPI runs)
   Parallel::StorageMode m_storageMode{Parallel::StorageMode::Cloned};
 
-  /// Virtual clone method. Not implemented to force implementation in childs.
+  /// Virtual clone method. Not implemented to force implementation in children.
   virtual Workspace *doClone() const = 0;
+  /// Virtual cloneEmpty method. Not implemented to force implementation in
+  /// children.
+  virtual Workspace *doCloneEmpty() const = 0;
+
 
   friend class AnalysisDataServiceImpl;
 };
