@@ -94,12 +94,12 @@ public:
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory &getHistory() const { return *m_history; }
 
-  void setStorageMode(Parallel::StorageMode mode);
   Parallel::StorageMode storageMode() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace(const Workspace &);
+  void setStorageMode(Parallel::StorageMode mode);
 
 private:
   void setName(const std::string &);

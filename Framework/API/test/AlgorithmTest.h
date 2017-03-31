@@ -6,6 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/NonMasterDummyWorkspace.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/WriteLock.h"
@@ -209,13 +210,15 @@ public:
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
   void init() override {
-    declareProperty(make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                                     Direction::Input));
-    declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                     Direction::Output));
+    declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
+        "InputWorkspace", "", Direction::Input));
+    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        "OutputWorkspace", "", Direction::Output));
   }
   void exec() override {
-    setProperty("OutputWorkspace", boost::make_shared<WorkspaceTester>());
+    boost::shared_ptr<MatrixWorkspace> ws = getProperty("InputWorkspace");
+    fprintf(stderr, "exec %d %s\n", communicator().rank(), Parallel::toString(ws->storageMode()).c_str());
+    setProperty("OutputWorkspace", ws->clone());
   }
 
 protected:
@@ -233,8 +236,7 @@ void run_NoParallelismAlgorithm(const Parallel::Communicator &comm) {
         Parallel::StorageMode::MasterOnly}) {
     NoParallelismAlgorithm alg;
     alg.setCommunicator(comm);
-    auto in = boost::make_shared<WorkspaceTester>();
-    in->setStorageMode(storageMode);
+    auto in = boost::make_shared<WorkspaceTester>(storageMode);
     alg.initialize();
     alg.setProperty("InputWorkspace", in);
     if (comm.size() == 1) {
@@ -265,22 +267,28 @@ void run_AlgorithmWithBad_getParallelExecutionMode(const Parallel::Communicator 
 
 void run_ParallelAlgorithm(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
+       {//Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
     ParallelAlgorithm alg;
     alg.setCommunicator(comm);
-    auto in = boost::make_shared<WorkspaceTester>();
-    in->setStorageMode(storageMode);
-    std::string outName("out" + Strings::toString(comm.rank()));
     alg.initialize();
-    alg.setProperty("InputWorkspace", in);
+    if (storageMode != Parallel::StorageMode::MasterOnly || comm.rank() == 0) {
+      auto in = boost::make_shared<WorkspaceTester>(storageMode);
+      in->initialize(1, 1, 1);
+      alg.setProperty("InputWorkspace", in);
+    } else {
+      auto in = boost::make_shared<NonMasterDummyWorkspace>(comm);
+      fprintf(stderr, "uh oh\n");
+      alg.setProperty("InputWorkspace", in);
+      fprintf(stderr, "ok?\n");
+    }
+    std::string outName("out" + Strings::toString(comm.rank()));
     alg.setProperty("OutputWorkspace", outName);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     auto out = AnalysisDataService::Instance().retrieve(outName);
-    if (comm.size() == 1) {
-      TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Cloned);
-    } else {
-      TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+    TS_ASSERT_EQUALS(out->storageMode(), storageMode);
+    if (storageMode == Parallel::StorageMode::MasterOnly && comm.rank() != 0) {
+      TS_ASSERT(dynamic_cast<NonMasterDummyWorkspace *>(out.get()));
     }
   }
 }

@@ -80,14 +80,14 @@ std::string Workspace::getMemorySizeAsStr() const {
       static_cast<uint64_t>(getMemorySize()) / 1024);
 }
 
-/// Sets the storage mode (used for MPI runs)
-void Workspace::setStorageMode(Parallel::StorageMode storageMode) {
-  m_storageMode = storageMode;
-}
-
 /// Returns the storage mode (used for MPI runs)
 Parallel::StorageMode Workspace::storageMode() const {
   return m_storageMode;
+}
+
+/// Sets the storage mode (used for MPI runs)
+void Workspace::setStorageMode(Parallel::StorageMode storageMode) {
+  m_storageMode = storageMode;
 }
 
 } // namespace API

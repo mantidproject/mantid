@@ -99,7 +99,11 @@ private:
 //===================================================================================================================
 class AxeslessWorkspaceTester : public MatrixWorkspace {
 public:
-  AxeslessWorkspaceTester() : MatrixWorkspace(), m_spec(0) {}
+  AxeslessWorkspaceTester(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(), m_spec(0) {
+    setStorageMode(storageMode);
+  }
 
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
@@ -163,7 +167,9 @@ private:
 
 class WorkspaceTester : public AxeslessWorkspaceTester {
 public:
-  WorkspaceTester() : AxeslessWorkspaceTester() {}
+  WorkspaceTester(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : AxeslessWorkspaceTester(storageMode) {}
 
   const std::string id() const override { return "WorkspaceTester"; }
 

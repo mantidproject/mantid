@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/NonMasterDummyWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -439,6 +440,30 @@ bool Algorithm::execute() {
     throw std::runtime_error("Algorithm is not initialised:" + this->name());
   }
 
+  // On non-master ranks, there may be input workspace properties that are null. This implies that the storage mode is Parallel::StorageMode::MasterOnly. We skip anything below such as property validation and exit immediately.
+  bool nonMasterExecution = false;
+  /*
+  if (communicator().rank() != 0) {
+    for (const auto &prop : getProperties()) {
+      if (auto *wsProp = dynamic_cast<const IWorkspaceProperty *>(prop)) {
+        if (prop->direction() == Kernel::Direction::Input ||
+            prop->direction() == Kernel::Direction::InOut) {
+          //if (!wsProp->isOptional() && !wsProp->getWorkspace()) {
+          //  nonMasterExecution = true;
+          //  break;
+          //}
+          if (auto ws = wsProp->getWorkspace()) {
+            if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
+              nonMasterExecution = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  */
+
   // Cache the workspace in/out properties for later use
   cacheWorkspaceProperties();
 
@@ -447,7 +472,9 @@ bool Algorithm::execute() {
     logAlgorithmInfo();
 
   // Check all properties for validity
-  if (!validateProperties()) {
+  // Skip validation for non-master execution (StorageMode::MasterOnly on
+  // non-master rank).
+  if (!nonMasterExecution && !validateProperties()) {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const std::vector<Property *> &props = getProperties();
     for (auto &prop : props) {
@@ -564,8 +591,6 @@ bool Algorithm::execute() {
         fillHistory();
         linkHistoryWithLastChild();
       }
-
-      propagateWorkspaceStorageMode();
 
       // Put any output workspaces into the AnalysisDataService - if this is not
       // a child algorithm
@@ -1665,10 +1690,19 @@ void Algorithm::execMasterOnly() {
 /** By default execMasterOnly() runs this in `master-only` execution mode on all
  * but rank 0.
  *
- * The default implementation does nothing. Classes inheriting from Algorithm
- * can re-implement this if they support execution with multiple MPI ranks and
- * require a special behavior on non-master ranks in master-only execution. */
-void Algorithm::execNonMaster() {}
+ * The default implementation creates dummy workspaces for all pure output
+ * workspaces. Classes inheriting from Algorithm can re-implement this if they
+ * support execution with multiple MPI ranks and require a special behavior on
+ * non-master ranks in master-only execution. */
+void Algorithm::execNonMaster() {
+  for (const auto &wsProp : m_pureOutputWorkspaceProps) {
+    // This is the reverse cast of what is done in cacheWorkspaceProperties(),
+    // so it should never fail.
+    const Property &prop = dynamic_cast<Property &>(*wsProp);
+    setProperty(prop.name(),
+                boost::make_shared<NonMasterDummyWorkspace>(communicator()));
+  }
+}
 
 /** Get a (valid) execution mode for this algorithm.
  *
@@ -1715,30 +1749,6 @@ Algorithm::getInputWorkspaceStorageModes() const {
   return map;
 }
 
-/// Propages storage modes to all output workspaces.
-void Algorithm::propagateWorkspaceStorageMode() const {
-  if (communicator().size() == 1) {
-    for (const auto &wsProp : m_outputWorkspaceProps)
-      if (wsProp->getWorkspace())
-        wsProp->getWorkspace()->setStorageMode(Parallel::StorageMode::Cloned);
-  } else {
-    for (const auto &wsProp : m_outputWorkspaceProps) {
-      if (!wsProp->getWorkspace())
-        continue;
-      // This is the reverse cast of what is done in cacheWorkspaceProperties(),
-      // so it should never fail.
-      const Property &prop = dynamic_cast<Property &>(*wsProp);
-      Parallel::StorageMode mode =
-          getStorageModeForOutputWorkspace(prop.name());
-      wsProp->getWorkspace()->setStorageMode(mode);
-      getLogger().notice() << "Set storage mode of output \"" + prop.name() +
-                                  "\" to " + Parallel::toString(mode) +
-                                  ". Workspace name is " +
-                                  wsProp->getWorkspace()->getName() + "\n";
-    }
-  }
-}
-
 /** Get correct execution mode based on input storage modes for an MPI run.
  *
  * The default implementation returns ExecutionMode::Invalid. Classes inheriting
@@ -1750,24 +1760,6 @@ Parallel::ExecutionMode Algorithm::getParallelExecutionMode(
   UNUSED_ARG(storageModes)
   // By default no parallel execution is possible.
   return Parallel::ExecutionMode::Invalid;
-}
-
-/** Get storage mode for an output workspace.
- *
- * The default implementation returns the storage mode of the input workspace.
- * If there is more than one input workspace it throws an exception. Classes
- * inheriting from Algorithm can re-implement this when needed. The workspace is
- * identified by the name if its property in the Algorithm (*not* the name of
- * the Workspace). */
-Parallel::StorageMode Algorithm::getStorageModeForOutputWorkspace(
-    const std::string &propertyName) const {
-  if (m_inputWorkspaceProps.size() == 1)
-    if (m_inputWorkspaceProps.front()->getWorkspace())
-      return m_inputWorkspaceProps.front()->getWorkspace()->storageMode();
-  std::string error("Could not determine StorageMode for output workspace " +
-                    propertyName + ".");
-  getLogger().error() << error << "\n";
-  throw std::runtime_error(error);
 }
 
 /// Helper function to translate from StorageMode to ExecutionMode.
