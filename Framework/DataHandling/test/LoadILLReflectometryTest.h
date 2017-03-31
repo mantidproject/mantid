@@ -3,12 +3,12 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLReflectometry.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/LoadILLReflectometry.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
@@ -68,10 +68,12 @@ public:
                      3.1909999847412109);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
                      0.013958706061406229);
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
+                     0.013958706061406229);
     AnalysisDataService::Instance().clear();
   }
 
-  void testInputThetaD17() {
+  void testInputBraggAngleIsD17() {
     loadSpecificThrows(m_d17File, outWSName, "BraggAngleIs", "user defined");
   }
 
@@ -125,7 +127,8 @@ public:
     // Direct beam is the reflected beam
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", m_d17File));
     TS_ASSERT_EQUALS(
-        loader.fitReflectometryPeak("DirectBeam", "detector angle"), 200.463);
+        loader.fitReflectometryPeak("DirectBeam", "detector angle"),
+        std::vector<double>(0.0, 200.463));
     TS_ASSERT_THROWS_NOTHING(loader.execute(););
     TS_ASSERT(loader.isExecuted());
   }
@@ -164,6 +167,8 @@ public:
         40.0);
     TS_ASSERT_DELTA(output->run().getPropertyValueAsType<double>("san.value"),
                     1.3877788e-17, 1e-16);
+    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
+                     2.4221309013948832e-19);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
                      2.4221309013948832e-19);
     AnalysisDataService::Instance().clear();

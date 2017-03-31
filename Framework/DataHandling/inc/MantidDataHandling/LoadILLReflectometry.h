@@ -50,29 +50,32 @@ public:
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   std::map<std::string, std::string> validateInputs() override;
   /// Return the detector position of the peak
-  double fitReflectometryPeak(std::string beam = "ReflectedBeam",
-                         std::string angleDirectBeam = "");
+  std::vector<double>
+  fitReflectometryPeak(const std::__cxx11::string beam = "ReflectedBeam",
+                       const std::__cxx11::string angleDirectBeam = "");
 
 private:
   void init() override;
   void exec() override;
 
   void initWorkspace(std::vector<std::vector<int>> monitorsData);
+  void initNames(NeXus::NXEntry &entry);
   void setInstrumentName(const NeXus::NXEntry &firstEntry,
                          const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
   void getXValues(std::vector<double> &xVals);
   void convertToWavelength();
   void loadData(NeXus::NXEntry &entry,
-                std::vector<std::vector<int>> monitorsData,
+                std::vector<std::vector<int> > &monitorsData,
                 std::vector<double> &xVals);
   void loadNexusEntriesIntoProperties(NeXus::NXEntry &entry);
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
                                      std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
   void runLoadInstrument();
-  void loadBeam(API::MatrixWorkspace_sptr &beamWS, const std::string beam,
-                std::string angleDirectBeam);
+  void loadBeam(API::MatrixWorkspace_sptr &beamWS,
+                const std::__cxx11::string beam,
+                std::__cxx11::string angleDirectBeam);
   double computeBraggAngle();
   void placeDetector();
 
@@ -88,6 +91,16 @@ private:
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
   double m_BraggAngleDirectBeam{0.0};
+  std::string m_detectorDistance{std::string()};
+  std::string m_detectorAngleName{std::string()};
+  std::string m_offsetName{std::string()};
+  std::string m_offsetFrom{std::string()};
+  std::string m_chopper1Name{std::string()};
+  std::string m_chopper2Name{std::string()};
+  double m_detectorDistanceDirectBeam{0.0};
+  double m_detectorDistanceValue{0.0};
+  double m_pixelCentre{0.0};
+  double m_pixelWidth{0.0};
   std::unordered_set<std::string> m_supportedInstruments{"D17", "d17", "Figaro",
                                                          "figaro"};
   Mantid::DataHandling::LoadHelper m_loader;
