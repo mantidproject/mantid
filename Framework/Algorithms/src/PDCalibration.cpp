@@ -18,6 +18,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/make_unique.h"
 #include <cassert>
+#include <limits>
 
 namespace Mantid {
 namespace Algorithms {
@@ -236,6 +237,12 @@ void PDCalibration::init() {
                   boost::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("TZEROrange"),
+      "Range for allowable TZERO from calibration (default is all)");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("DIFArange"),
+                  "Range for allowable DIFA from calibration (default is all)");
+
   declareProperty(Kernel::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "OutputCalibrationTable", "", Direction::Output),
                   "An output workspace containing the Calibration Table");
@@ -266,6 +273,30 @@ void PDCalibration::init() {
   setPropertyGroup("StartFromObservedPeakCentre", findPeaksGroup);
 }
 
+std::map<std::string, std::string> PDCalibration::validateInputs() {
+  std::map<std::string, std::string> messages;
+
+  vector<double> tzeroRange = getProperty("TZEROrange");
+  if (!tzeroRange.empty()) {
+    if (tzeroRange.size() != 2) {
+      messages["TZEROrange"] = "Require two values [min,max]";
+    } else if (tzeroRange[0] >= tzeroRange[1]) {
+      messages["TZEROrange"] = "min must be less than max";
+    }
+  }
+
+  vector<double> difaRange = getProperty("DIFArange");
+  if (!difaRange.empty()) {
+    if (difaRange.size() != 2) {
+      messages["DIFArange"] = "Require two values [min,max]";
+    } else if (difaRange[0] >= difaRange[1]) {
+      messages["DIFArange"] = "min must be less than max";
+    }
+  }
+
+  return messages;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -273,6 +304,38 @@ void PDCalibration::exec() {
   vector<double> tofBinningParams = getProperty("TofBinning");
   m_tofMin = tofBinningParams.front();
   m_tofMax = tofBinningParams.back();
+
+  vector<double> tzeroRange = getProperty("TZEROrange");
+  if (tzeroRange.size() == 2) {
+    m_tzeroMin = tzeroRange[0];
+    m_tzeroMax = tzeroRange[1];
+
+    std::stringstream msg;
+    msg << "Using tzero range of " << m_tzeroMin << " <= "
+        << "TZERO <= " << m_tzeroMax;
+    g_log.information(msg.str());
+  } else {
+    g_log.information("Using all TZERO values");
+
+    m_tzeroMin = -1. * std::numeric_limits<double>::max();
+    m_tzeroMax = std::numeric_limits<double>::max();
+  }
+
+  vector<double> difaRange = getProperty("DIFArange");
+  if (difaRange.size() == 2) {
+    m_difaMin = difaRange[0];
+    m_difaMax = difaRange[1];
+
+    std::stringstream msg;
+    msg << "Using difa range of " << m_difaMin << " <= "
+        << "DIFA <= " << m_difaMax;
+    g_log.information(msg.str());
+  } else {
+    g_log.information("Using all DIFA values");
+
+    m_difaMin = -1. * std::numeric_limits<double>::max();
+    m_difaMax = std::numeric_limits<double>::max();
+  }
 
   m_peaksInDspacing = getProperty("PeakPositions");
   // Sort peak positions, requried for correct peak window calculations
@@ -491,7 +554,8 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   // check that the value is reasonable, only need to check minimum
   // side since difa is not in play - shift to a higher minimum
   // means something went wrong
-  if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin)) {
+  if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin) ||
+      tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
     difc1 = 0;
     tZero1 = 0;
     chisq1 = CHISQ_BAD;
@@ -552,7 +616,9 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   if (m_tofMin <
           Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
       m_tofMax <
-          Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax)) {
+          Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
+      tZero2 < m_tzeroMin || tZero2 > m_tzeroMax || difa2 < m_difaMin ||
+      difa2 > m_difaMax) {
     tZero2 = 0;
     difc2 = 0;
     difa2 = 0;
