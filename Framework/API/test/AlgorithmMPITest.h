@@ -21,29 +21,27 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 class FakeWorkspaceA : public WorkspaceTester {
-  public:
-    using WorkspaceTester::WorkspaceTester;
-    const std::string id() const override { return "FakeWorkspaceA"; }
-  private:
-    FakeWorkspaceA *doClone() const override {
-      return new FakeWorkspaceA(*this);
-    }
-    FakeWorkspaceA *doCloneEmpty() const override {
-      return new FakeWorkspaceA(storageMode());
-    }
+public:
+  using WorkspaceTester::WorkspaceTester;
+  const std::string id() const override { return "FakeWorkspaceA"; }
+
+private:
+  FakeWorkspaceA *doClone() const override { return new FakeWorkspaceA(*this); }
+  FakeWorkspaceA *doCloneEmpty() const override {
+    return new FakeWorkspaceA(storageMode());
+  }
 };
 
 class FakeWorkspaceB : public WorkspaceTester {
-  public:
-    using WorkspaceTester::WorkspaceTester;
-    const std::string id() const override { return "FakeWorkspaceB"; }
-  private:
-    FakeWorkspaceB *doClone() const override {
-      return new FakeWorkspaceB(*this);
-    }
-    FakeWorkspaceB *doCloneEmpty() const override {
-      return new FakeWorkspaceB(storageMode());
-    }
+public:
+  using WorkspaceTester::WorkspaceTester;
+  const std::string id() const override { return "FakeWorkspaceB"; }
+
+private:
+  FakeWorkspaceB *doClone() const override { return new FakeWorkspaceB(*this); }
+  FakeWorkspaceB *doCloneEmpty() const override {
+    return new FakeWorkspaceB(storageMode());
+  }
 };
 
 class NoParallelismAlgorithm : public Algorithm {
@@ -76,16 +74,14 @@ protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
       const override {
-        static_cast<void>(storageModes);
-        return Parallel::ExecutionMode::Serial;
-      }
+    static_cast<void>(storageModes);
+    return Parallel::ExecutionMode::Serial;
+  }
 };
 
 class FakeAlg1To1 : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlg1To1";
-  }
+  const std::string name() const override { return "FakeAlg1To1"; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
@@ -111,9 +107,7 @@ protected:
 
 class FakeAlgNTo0 : public Algorithm {
 public:
-  const std::string name() const override {
-    return "FakeAlgNTo0";
-  }
+  const std::string name() const override { return "FakeAlgNTo0"; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
@@ -277,11 +271,12 @@ void run_NoParallelismAlgorithm(const Parallel::Communicator &comm) {
   }
 }
 
-void run_AlgorithmWithBad_getParallelExecutionMode(const Parallel::Communicator &comm) {
+void run_AlgorithmWithBad_getParallelExecutionMode(
+    const Parallel::Communicator &comm) {
   AlgorithmWithBad_getParallelExecutionMode alg;
   alg.setCommunicator(comm);
   alg.initialize();
-  if(comm.size() == 1) {
+  if (comm.size() == 1) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   } else {
     TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
@@ -340,7 +335,7 @@ void runNTo0(const Parallel::Communicator &comm) {
 
 void runNTo1StorageModeFailure(const Parallel::Communicator &comm) {
   for (auto storageMode :
-       {//Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
+       {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
     FakeAlgNTo1StorageModeFailure alg;
     alg.setCommunicator(comm);
