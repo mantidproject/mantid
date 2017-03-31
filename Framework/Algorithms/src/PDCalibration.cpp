@@ -555,7 +555,7 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
   // side since difa is not in play - shift to a higher minimum
   // means something went wrong
   if (m_tofMin < Kernel::Diffraction::calcTofMin(difc1, 0., tZero1, m_tofMin) ||
-      tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
+      difc1 <= 0. || tZero1 < m_tzeroMin || tZero1 > m_tzeroMax) {
     difc1 = 0;
     tZero1 = 0;
     chisq1 = CHISQ_BAD;
@@ -617,7 +617,7 @@ void PDCalibration::fitDIFCtZeroDIFA(const std::vector<double> &d,
           Kernel::Diffraction::calcTofMin(difc2, difa2, tZero2, m_tofMin) ||
       m_tofMax <
           Kernel::Diffraction::calcTofMax(difc2, difa2, tZero2, m_tofMax) ||
-      tZero2 < m_tzeroMin || tZero2 > m_tzeroMax || difa2 < m_difaMin ||
+      difc2 <= 0. || tZero2 < m_tzeroMin || tZero2 > m_tzeroMax || difa2 < m_difaMin ||
       difa2 > m_difaMax) {
     tZero2 = 0;
     difc2 = 0;
