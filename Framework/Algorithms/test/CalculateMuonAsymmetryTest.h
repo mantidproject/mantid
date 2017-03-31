@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/CalculateMuonAsymmetry.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -36,17 +37,18 @@ struct eData {
 };
 
 struct yAsymmData {
-  double operator()(const double x, size_t) {
+  double operator()(const double x, size_t spec) {
 
     // Create a fake muon dataset
-    double a = 1.05; // Amplitude of the oscillations
+    double a = 1.20; // Amplitude of the oscillations
     double w = 5.0;  // Frequency of the oscillations
+    double tau = Mantid::PhysicalConstants::MuonLifetime *
+                 1e6; // Muon life time in microseconds
     double phi = 0.1;
-    return (a * cos(w * x + phi)) + 0.5;
+    double e = exp(-x / tau);
+    double factor=(static_cast<double>(spec)+1.0)*0.5;
+    return (20. *factor* (1.0 + a * cos(w * x*factor + phi)) * e);
   }
-};
-struct eAsymmData {
-  double operator()(const double, size_t) { return 0.0005; }
 };
 
 MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
@@ -70,6 +72,24 @@ IAlgorithm_sptr setUpAlg() {
       "FittingFunction",
       "name=UserFunction,Formula=A*cos(omega*x+phi),A=10,omega=3.0,phi=0.0");
   return asymmAlg;
+}
+
+std::vector<double> convertToVec(std::string list){
+	std::vector<double> vec;
+	std::string tmp;
+	size_t start=0;
+	size_t end = 0;
+	// search for ','
+	while((end=list.find(",",start))!=std::string::npos){
+		tmp.assign(list,start,end-start);
+		vec.push_back(std::stod(tmp.c_str()));
+		start=end+1;
+	}	
+	//record last value
+        tmp.assign(list,start,end-start);
+	vec.push_back(std::stod(tmp.c_str()));
+		
+	return vec;
 }
 
 class CalculateMuonAsymmetryTest : public CxxTest::TestSuite {
@@ -257,35 +277,70 @@ public:
   }
 
   void test_FitToEstimateAsymmetry() {
-
+    // create count data	
     double dx = 10.0 * (1.0 / static_cast<double>(100.0));
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
-        yAsymmData(), 1, 0.0, 10.0, dx, true, eAsymmData());
+        yAsymmData(), 4, 0.0, 10.0, dx, true, eData());
     ws->mutableRun().addProperty("goodfrm", 10);
 
+    // Calculate everything in one step
     IAlgorithm_sptr alg = setUpAlg();
     alg->setProperty("InputWorkspace", ws);
-    alg->setPropertyValue("OutputWorkspace", "asymm");
-    alg->setPropertyValue("InputDataType", "asymmetry");
+    alg->setPropertyValue("OutputWorkspace", "fromCounts");
+    alg->setProperty("StartX", 0.1);
+    alg->setProperty("EndX", 10.);
+    alg->setPropertyValue("InputDataType", "counts");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr outFromCounts = alg->getProperty("OutputWorkspace");
+    auto normFromCounts = convertToVec(alg->getPropertyValue("NormalizationConstant"));
+    //calculate in two parts
+    // get estimate for asymmetry 
+  IAlgorithm_sptr estAlg =
+      AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
+  estAlg->initialize();
+  estAlg->setChild(true);
+  estAlg->setProperty("StartX", 0.1);
+  estAlg->setProperty("EndX", 10.0);
+  estAlg->setProperty("InputWorkspace", ws);
+  estAlg->setPropertyValue("OutputWorkspace", "est");
+  TS_ASSERT_THROWS_NOTHING(estAlg->execute());
+  TS_ASSERT(estAlg->isExecuted());
+  MatrixWorkspace_sptr estAsymm = estAlg->getProperty("OutputWorkspace");
+  auto estNorm = estAlg->getPropertyValue("NormalizationConstant");
+  // get asymmetry from estimate
+  IAlgorithm_sptr alg2 = setUpAlg();
+    alg2->setProperty("InputWorkspace",estAsymm);
+    alg2->setPropertyValue("OutputWorkspace", "fromEst");
+    alg2->setProperty("StartX", 0.1);
+    alg2->setProperty("EndX", 10.);
+    alg2->setPropertyValue("InputDataType", "asymmetry");
+    std::vector<int> spec={0,1,2,3};
+    alg2->setProperty("spectra",spec );
+    alg2->setProperty("PreviousnormalizationConstant",estNorm );
+    TS_ASSERT_THROWS_NOTHING(alg2->execute());
+    TS_ASSERT(alg2->isExecuted());
+  MatrixWorkspace_sptr outFromAsymm = alg2->getProperty("OutputWorkspace");
+  auto normFromAsymm = convertToVec(alg2->getPropertyValue("NormalizationConstant"));
 
-    double Delta = 0.0001;
-    // First spectrum
-    // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 1.000, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 1.900, Delta);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 4.900, Delta);
-    // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 0.2742, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -0.6869, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], 0.6152, Delta);
-    // Test some E values
-    TS_ASSERT_DELTA(outWS->e(0)[10], 0.0003, Delta);
-    TS_ASSERT_DELTA(outWS->e(0)[19], 0.0003, Delta);
-    TS_ASSERT_DELTA(outWS->e(0)[49], 0.0003, Delta);
-  }
+     //normalization constants should be the same for both methods
+    double Delta = 1.e-4;
+    for(unsigned int j=0; j<normFromAsymm.size();j++){
+       TS_ASSERT_DELTA(normFromCounts[j],normFromAsymm[j],Delta);
+    }
+    // asymmetry values should be the same for both methods
+    Delta = 0.0001;
+    for (int j = 0; j < 4; j++) { 	
+      for(int k=0; k<20;k++){ 
+	 // Test some X values
+      TS_ASSERT_DELTA(outFromAsymm->x(j)[k*4], outFromCounts->x(j)[k*4], Delta);
+      // Test some Y values
+      TS_ASSERT_DELTA(outFromAsymm->y(j)[k*4], outFromCounts->y(j)[k*4], Delta);
+      // Test some E values
+      TS_ASSERT_DELTA(outFromAsymm->e(j)[k*4], outFromCounts->e(j)[k*4], Delta);
+    }
+ }
+}
 };
 
 class CalculateMuonAsymmetryTestPerformance : public CxxTest::TestSuite {

@@ -56,9 +56,9 @@ Asymmetry:  [ 10.           1.41745897  -9.59816201  -4.13845915   8.4249428
   -1.48001632  -9.99980013  -1.35484497   9.6157127    4.08082062
   -8.45883354  -6.47883052   6.62213825   8.35615238  -4.25323762
   -9.56191034   1.5425145 ]
-Normalization constnat: 41.75221372
+Normalization constnat: 4.99999999931
 
-**Example - Calculating Asymmetry from Asymmetry:**
+**Example - Calculating Asymmetry From Estimated Asymmetry:**
 This example is for calculating the Asymmetry from an estimate of the asymmetry.
 .. testcode:: ExSimple
 
@@ -73,7 +73,8 @@ input = CreateWorkspace(xData,yData)
 run = input.getRun()
 run.addProperty("goodfrm","10","None",True)
 
-output,norm=CalculateMuonAsymmetry(InputWorkspace=input,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="counts",Minimizer="Levenberg-MarquardtMD",MaxIterations=500 )
+estAsymm,estNorm=CalculateMuonAsymmetry(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
+output,norm=CalculateMuonAsymmetry(InputWorkspace=estAsymm,spectra=0,StartX=1,EndX=5,FittingFunction= "name = GausOsc, A = 10.0, Sigma = 0.2, Frequency = 1.0, Phi = 0.0",InputDataType="asymmetry",Minimizer="Levenberg-MarquardtMD",MaxIterations=500,PreviousNormalizationConstant=estNorm )
 print "Asymmetry: ", output.readY(0)
 print "Normalization constant: ", norm[0]
 
@@ -85,7 +86,7 @@ Asymmetry:  [ 10.           1.41745897  -9.59816201  -4.13845915   8.4249428
   -1.48001632  -9.99980013  -1.35484497   9.6157127    4.08082062
   -8.45883354  -6.47883052   6.62213825   8.35615238  -4.25323762
   -9.56191034   1.5425145 ]
-Normalization constnat: 41.75221372
+Normalization constnat: 4.99999999992
 
 .. categories::
 
