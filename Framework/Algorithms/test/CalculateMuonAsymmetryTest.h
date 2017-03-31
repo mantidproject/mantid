@@ -78,9 +78,9 @@ std::vector<double> convertToVec(std::string const &list) {
   std::vector<double> vec;
   std::vector<std::string> tmpVec;
   boost::split(tmpVec, list, boost::is_any_of(","));
-  std::for_each(tmpVec.begin(), tmpVec.end(),
-                [&vec](std::string const &element) {
-                  vec.push_back(std::stod(element));
+  std::transform(tmpVec.begin(), tmpVec.end(),
+                std::back_inserter(vec),[](std::string const &element) {
+                  return std::stod(element);
                 });
   return vec;
 }
