@@ -302,6 +302,9 @@ public:
 
   bool isParametrized() const override;
 
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor) const override;
+
 protected:
   /// Parent component in the tree
   const IComponent *m_parent;

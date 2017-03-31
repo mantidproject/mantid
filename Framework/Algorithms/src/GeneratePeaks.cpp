@@ -760,7 +760,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
       xvalue += fabs(dx) * xvalue;
   }
 
-  std::vector<specnum_t> specNums;
+  std::vector<Indexing::SpectrumNumber> specNums;
   for (const auto &item : m_SpectrumMap) {
     specnum_t specid = item.first;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()

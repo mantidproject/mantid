@@ -205,6 +205,16 @@ std::string QDataProcessorWidget::requestNotebookPath() {
 }
 
 /**
+Expand all currently closed groups
+*/
+void QDataProcessorWidget::expandAll() { ui.viewTable->expandAll(); }
+
+/**
+Collapse all currently expanded groups
+*/
+void QDataProcessorWidget::collapseAll() { ui.viewTable->collapseAll(); }
+
+/**
 Save settings
 @param options : map of user options to save
 */

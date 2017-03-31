@@ -58,8 +58,6 @@ class Workspace2D;
   create<T>(IndexInfo,  Histogram)
   create<T>(ParentWS)
   create<T>(ParentWS, Histogram)
-  create<T>(ParentWS, NumSpectra)
-  create<T>(ParentWS, IndexInfo)
   create<T>(ParentWS, NumSpectra, Histogram)
   create<T>(ParentWS, IndexInfo, Histogram)
   ~~~
@@ -68,7 +66,7 @@ class Workspace2D;
     identical to the size of the parent, the created workspace has the same
     number of spectra as the parent workspace and spectrum number as well as
     detector ID information is copied from the parent.
-  - If Histogram is not given, the created workspace has X identical to the
+  - If only ParentWS is given, the created workspace has X identical to the
     parent workspace and Y and E are initialized to 0.
   - If a Histogram with 'NULL' Y and E is given, Y and E are initialized to 0.
 
@@ -158,10 +156,8 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
       ws = detail::createConcreteHelper<T>();
     }
   }
-
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
   detail::initializeFromParent(parent, *ws);
-
   return ws;
 }
 
@@ -172,22 +168,20 @@ template <class T, class IndexArg, class HistArg,
 std::unique_ptr<T> create(const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = Kernel::make_unique<T>();
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  return std::move(ws);
+  return ws;
 }
 
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
-  return create<T>(parent, parent.getNumberHistograms(),
-                   detail::stripData(parent.histogram(0)));
-}
-
-template <class T, class P, class IndexArg,
-          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
-                                                  P>::value>::type * = nullptr>
-std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg) {
-  return create<T>(parent, indexArg, detail::stripData(parent.histogram(0)));
+  const auto numHistograms = parent.getNumberHistograms();
+  auto ws =
+      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
 }
 
 // Templating with HistArg clashes with the IndexArg template above. Could be

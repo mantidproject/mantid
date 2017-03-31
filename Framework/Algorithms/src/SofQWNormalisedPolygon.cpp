@@ -79,7 +79,7 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<std::vector<detid_t>> detIDMapping(
+  std::vector<std::vector<Indexing::DetectorID>> detIDMapping(
       outputWS->getNumberHistograms());
 
   // Progress reports & cancellation
@@ -133,7 +133,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
-    const specnum_t specNo = inputIndices.spectrumNumber(i);
+    const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -407,7 +407,8 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1);
+  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1,
+                                                inputWorkspace.binEdges(0));
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);
