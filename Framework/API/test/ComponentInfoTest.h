@@ -18,7 +18,6 @@ public:
   static ComponentInfoTest *createSuite() { return new ComponentInfoTest(); }
   static void destroySuite(ComponentInfoTest *suite) { delete suite; }
 
-
   void test_size() {
 
     auto detectorInfo = boost::make_shared<Mantid::Beamline::DetectorInfo>();
