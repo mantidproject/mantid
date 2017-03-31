@@ -1,13 +1,13 @@
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H
+#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
+#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
 
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-/** @class DataProcessorWorkspaceCommand
+/** @class DataProcessorCollapseGroupsCommand
 
-DataProcessorWorkspaceCommand defines a workspace action
+DataProcessorCollapseGroupsCommand defines the action "Collapse All Groups"
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -30,26 +30,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorWorkspaceCommand : public DataProcessorCommandBase {
+class DataProcessorCollapseGroupsCommand : public DataProcessorCommandBase {
 public:
-  DataProcessorWorkspaceCommand(DataProcessorPresenter *tablePresenter,
-                                const std::string &name)
-      : DataProcessorCommandBase(tablePresenter), m_name(name){};
-  virtual ~DataProcessorWorkspaceCommand(){};
+  DataProcessorCollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
+      : DataProcessorCommandBase(tablePresenter){};
+  virtual ~DataProcessorCollapseGroupsCommand(){};
 
   void execute() override {
-    // Tell the presenter which of the available workspaces was selected
-    m_presenter->setModel(m_name);
+    m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag);
   };
-  std::string name() override { return m_name; }
-  std::string icon() override { return std::string("://worksheet.png"); }
-  std::string tooltip() override { return std::string("Table Workspace"); }
-  std::string whatsthis() override { return std::string("Table Workspace"); }
+  std::string name() override { return std::string("Collapse All Groups"); }
+  std::string icon() override { return std::string("://collapse_all.png"); }
+  std::string tooltip() override { return std::string("Collapse all groups"); }
+  std::string whatsthis() override {
+    return std::string(
+        "If any groups in the table are currently expanded this will collapse "
+        "all expanded groups, hiding their individual runs.");
+  }
   std::string shortcut() override { return std::string(); }
-
-private:
-  std::string m_name;
 };
 }
 }
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORWORKSPACECOMMAND_H*/
+#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H*/

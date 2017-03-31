@@ -44,6 +44,7 @@ Summary of impact
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
 | 19161 | Simultaneous fitting produces correct fitted functions when plotted               | Changed the way parameters are reported.    | **medium**   |
 +-------+-----------------------------------------------------------------------------------+---------------------------------------------+--------------+
+
 .. _download page: http://download.mantidproject.org
 
 .. _forum: http://forum.mantidproject.org
