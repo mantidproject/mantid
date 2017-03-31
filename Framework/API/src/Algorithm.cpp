@@ -439,32 +439,24 @@ bool Algorithm::execute() {
     throw std::runtime_error("Algorithm is not initialised:" + this->name());
   }
 
+  // Cache the workspace in/out properties for later use
+  cacheWorkspaceProperties();
+
+  Parallel::ExecutionMode executionMode = getExecutionMode();
+
   // On non-master ranks, there may be input workspace properties that are null. This implies that the storage mode is Parallel::StorageMode::MasterOnly. We skip anything below such as property validation and exit immediately.
-  bool nonMasterExecution = false;
-  /*
-  if (communicator().rank() != 0) {
-    for (const auto &prop : getProperties()) {
-      if (auto *wsProp = dynamic_cast<const IWorkspaceProperty *>(prop)) {
-        if (prop->direction() == Kernel::Direction::Input ||
-            prop->direction() == Kernel::Direction::InOut) {
-          //if (!wsProp->isOptional() && !wsProp->getWorkspace()) {
-          //  nonMasterExecution = true;
-          //  break;
-          //}
-          if (auto ws = wsProp->getWorkspace()) {
-            if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
-              nonMasterExecution = true;
-              break;
-            }
-          }
+  bool nonMasterExecution = (executionMode == Parallel::ExecutionMode::MasterOnly) && (communicator().rank() != 0);
+ /* {
+    for (const auto &wsProp : m_inputWorkspaceProps) {
+      if (auto ws = wsProp->getWorkspace()) {
+        if (ws->storageMode() == Parallel::StorageMode::MasterOnly) {
+          nonMasterExecution = true;
+          break;
         }
       }
     }
   }
   */
-
-  // Cache the workspace in/out properties for later use
-  cacheWorkspaceProperties();
 
   // no logging of input if a child algorithm (except for python child algos)
   if (!m_isChildAlgorithm || m_alwaysStoreInADS)
@@ -562,8 +554,6 @@ bool Algorithm::execute() {
 
   // Read or write locks every input/output workspace
   this->lockWorkspaces();
-
-  Parallel::ExecutionMode executionMode = getExecutionMode();
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
