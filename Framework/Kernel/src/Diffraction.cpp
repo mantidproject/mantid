@@ -10,9 +10,9 @@ double calcTofMin(const double difc, const double difa, const double tzero,
   if (difa == 0.) {
     if (tzero != 0.) {
       // check for negative d-spacing
-      return std::max<double>(-1. * tzero, tofmin);
+      return std::max<double>(tzero, tofmin);
     }
-  } else if (difa > 0) {
+  } else if (difa > 0.) {
     // check for imaginary part in quadratic equation
     return std::max<double>(tzero - .25 * difc * difc / difa, tofmin);
   }
@@ -21,11 +21,20 @@ double calcTofMin(const double difc, const double difa, const double tzero,
   return tofmin;
 }
 
+/**
+ * Returns the maximum TOF that can be used or tofmax. Whichever is smaller. In
+ * the case when this is a negative number, just return 0.
+ */
 double calcTofMax(const double difc, const double difa, const double tzero,
                   const double tofmax) {
   if (difa < 0.) {
     // check for imaginary part in quadratic equation
-    return std::min<double>(tzero - .25 * difc * difc / difa, tofmax);
+    if (tzero > 0.) {
+      // rather than calling abs multiply difa by -1
+      return std::min<double>(tzero + .25 * difc * difc / difa, tofmax);
+    } else {
+      return 0.;
+    }
   }
 
   // everything else is fine so just return supplied tofmax
