@@ -140,7 +140,6 @@ private:
   double theta0() { return m_theta0; }
   double twoThetaR() { return m_twoThetaR; }
   size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
-  size_t centreDetectorIdx() { return m_centreDetectorIdx; };
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
@@ -154,7 +153,6 @@ private:
   double m_lambdaMin;              // min wavelength in area of interest
   double m_lambdaMax;              // max wavelength in area of interest
   std::vector<size_t> m_detectors; // workspace indices of detectors of interest
-  size_t m_centreDetectorIdx;      // detector index of centre pixel
   size_t m_twoThetaRDetectorIdx;   // detector index at reference angle thetaR
 };
 

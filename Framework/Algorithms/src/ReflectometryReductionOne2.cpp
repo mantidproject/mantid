@@ -38,6 +38,9 @@ void ReflectometryReductionOne2::init() {
                   boost::make_shared<StringListValidator>(reductionTypes),
                   "The type of reduction to perform.");
 
+  // Theta0
+  declareProperty("Theta0", 0.0, "Horizon angle in degrees", Direction::Input);
+
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
@@ -498,10 +501,8 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
         }
       }
 
-      // Also set the centre and the reference detector indices
-
-      /// todo: find correct centre detector
-      m_centreDetectorIdx = 400;
+      // Also set the reference detector index as the centre of the
+      // region of interest
       m_twoThetaRDetectorIdx =
           minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
     } catch (std::exception &ex) {
@@ -541,9 +542,9 @@ void ReflectometryReductionOne2::findTheta0() {
   m_theta0 = 0.0;
 
   if (reductionType == "DivergentBeam") {
-    // theta0 is at the centre detector pixel
-    /// todo: check this is true for all instruments
-    m_theta0 = m_spectrumInfo->twoTheta(centreDetectorIdx()) / 2.0;
+    // theta0 is at the angle at the centre of the detector. This is the
+    // angle the detector has been rotated around and should be defined in
+    m_theta0 = getProperty("Theta0");
   }
 }
 
