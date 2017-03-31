@@ -19,7 +19,7 @@ class DirectILLDiagnosticsTest(unittest.TestCase):
 
     def setUp(self):
         if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL)
+            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
         inWSName = 'inputWS'
         mtd.addOrReplace(inWSName, self._testIN5WS)
         kwargs = {

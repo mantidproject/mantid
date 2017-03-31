@@ -17,7 +17,7 @@ class DirectILLCollectData(unittest.TestCase):
 
     def setUp(self):
         if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL)
+            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
         tempName = 'temp_testWS_'
         mtd.addOrReplace(tempName, self._testIN5WS)
         CloneWorkspace(InputWorkspace=tempName,

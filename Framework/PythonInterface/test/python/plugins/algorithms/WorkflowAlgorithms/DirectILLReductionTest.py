@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+import collections
 from mantid.api import mtd
 from mantid.simpleapi import (DirectILLCollectData, DirectILLReduction)
 import numpy
@@ -21,7 +22,8 @@ class DirectILLReductionTest(unittest.TestCase):
 
     def setUp(self):
         if not self._testIN5WS:
-            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL)
+            self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, 
+                                                                        illhelpers.default_test_detectors)
         inWSName = 'inputWS'
         mtd.addOrReplace(inWSName, self._testIN5WS)
         kwargs = {
@@ -56,6 +58,29 @@ class DirectILLReductionTest(unittest.TestCase):
         run_algorithm('DirectILLReduction', **algProperties)
         self.assertTrue(mtd.doesExist(outWSName))
 
+    def testDetectorGrouping(self):
+        ws = illhelpers.create_poor_mans_in5_workspace(0.0, _groupingTestDetectors)
+        originalNDetectors = ws.getNumberHistograms()
+        detectorIds = list()
+        for i in range(originalNDetectors):
+            detectorIds.append(ws.getDetector(i).getID())
+        mtd.addOrReplace('inWS', ws)
+        outWSName = 'outWS'
+        algProperties = {
+            'InputWorkspace': ws,
+            'OutputWorkspace': outWSName,
+            'Cleanup': 'Cleanup OFF',
+            'Transposing': 'Transposing OFF',
+            'rethrow': True
+        }
+        alg = run_algorithm('DirectILLReduction', **algProperties)
+        groupedWSName = outWSName + '_grouped_detectors_'
+        self.assertTrue(groupedWSName in mtd)
+        groupedWS = mtd[groupedWSName]
+        self.assertEqual(groupedWS.getNumberHistograms(), 1)
+        groupIds = groupedWS.getDetector(0).getDetectorIDs()
+        self.assertEqual(collections.Counter(detectorIds), collections.Counter(groupIds))
+
     def _checkAlgorithmsInHistory(self, ws, *args):
         """Return true if algorithm names listed in *args are found in the
         workspace's history.
@@ -68,6 +93,38 @@ class DirectILLReductionTest(unittest.TestCase):
         algNames = [alg.name() for alg in algHistories]
         for algName in args:
             return algName in algNames
+
+def _groupingTestDetectors(ws):
+    """Mask detectors for detector grouping tests."""
+    indexBegin = 63106  # Detector at L2 and at 2theta = 40.6.
+    kwargs = {
+        'Workspace': ws,
+        'StartWorkspaceIndex': 0,
+        'EndWorkspaceIndex': indexBegin - 1,
+        'child': True
+    }
+    alg = run_algorithm('MaskDetectors', **kwargs)
+    referenceDetector = ws.getDetector(indexBegin)
+    reference2Theta = ws.detectorTwoTheta(referenceDetector)
+    mask = list()
+    for i in range(indexBegin + 1, indexBegin + 10000):
+        det = ws.getDetector(i)
+        twoTheta = ws.detectorTwoTheta(det)
+        if abs(reference2Theta - twoTheta) >= 0.01 / 180 * constants.pi:
+            mask.append(i)
+    kwargs = {
+        'Workspace': ws,
+        'DetectorList': mask,
+        'child': True
+    }
+    alg = run_algorithm('MaskDetectors', **kwargs)
+    kwargs = {
+        'Workspace': ws,
+        'StartWorkspaceIndex': indexBegin + 10000,
+        'child': True
+    }
+    alg = run_algorithm('MaskDetectors', **kwargs)
+    return ws
 
 if __name__ == '__main__':
     unittest.main()

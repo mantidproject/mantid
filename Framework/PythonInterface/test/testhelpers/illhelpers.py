@@ -119,13 +119,23 @@ def _fillTemplateWorkspace(templateWS, bkgLevel):
     return ws
 
 
-def create_poor_mans_in5_workspace(bkgLevel):
+def create_poor_mans_in5_workspace(bkgLevel, removeDetectors):
     kwargs = {
         'InstrumentName': 'IN5',
         'child': True
     }
     alg = run_algorithm('LoadEmptyInstrument', **kwargs)
+    ws = removeDetectors(alg.getProperty('OutputWorkspace').value)
+    kwargs = {
+        'InputWorkspace': ws,
+        'child': True
+    }
+    alg = run_algorithm('RemoveMaskedSpectra', **kwargs)
     ws = alg.getProperty('OutputWorkspace').value
+    ws = _fillTemplateWorkspace(ws, bkgLevel)
+    return ws
+
+def default_test_detectors(ws):
     mask = list()
     for i in range(513):
         if i % 10 != 0:
@@ -142,11 +152,4 @@ def create_poor_mans_in5_workspace(bkgLevel):
         'child': True
     }
     alg = run_algorithm('MaskDetectors', **kwargs)
-    kwargs = {
-        'InputWorkspace': ws,
-        'child': True
-    }
-    alg = run_algorithm('RemoveMaskedSpectra', **kwargs)
-    ws = alg.getProperty('OutputWorkspace').value
-    ws = _fillTemplateWorkspace(ws, bkgLevel)
     return ws
