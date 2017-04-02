@@ -33,6 +33,7 @@ Improved
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
 - :ref:`PredictPeaks <algm-PredictPeaks-v1>` is now faster on instruments that do not have rectangular detectors
+- :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
 
 Bug Fixes
 #########
@@ -40,7 +41,7 @@ Bug Fixes
 - Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
 - Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
-
+- Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 
 Deprecated
 ##########
@@ -58,7 +59,7 @@ As a consequence of these changes, :ref:`CopyInstrumentParmeters <algm-CopyInstr
 Bugs
 ----
 
-- We have fixed a bug where Mantid could crash when deleteing a large number of workspaces.
+- We have fixed a bug where Mantid could crash when deleting a large number of workspaces.
 
 CurveFitting
 ------------
@@ -69,6 +70,8 @@ Improved
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
+
+- :ref:`MergeRuns <func-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 
 Python
 ------
@@ -91,6 +94,13 @@ Python
       3.0
       3.0
 
+- A `SpectraAxis` object can now be created from Python, in a similar way to the other Axis types:
+
+  .. code-block:: python
+  
+     ws1 = CreateSampleWorkspace()
+     # Create a new axis reference
+     s_axis = SpectraAxis.create(ws1)
 
 
 Python Algorithms
