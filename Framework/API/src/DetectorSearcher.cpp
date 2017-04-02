@@ -42,10 +42,8 @@ void DetectorSearcher::createDetectorCache() {
   m_indexMap.reserve(m_detInfo.size());
 
   for (size_t pointNo = 0; pointNo < m_detInfo.size(); ++pointNo) {
-    if (m_detInfo.isMonitor(pointNo))
-      continue; // skip monitor
-    if (m_detInfo.isMasked(pointNo))
-      continue; // detector is masked so don't use
+    if (m_detInfo.isMonitor(pointNo) || m_detInfo.isMasked(pointNo))
+      continue; // detector is a monitor or masked so don't use
 
     // calculate a Q vector for each detector
     // This follows a method similar to that used in IntegrateEllipsoids
@@ -109,8 +107,12 @@ DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
 
   if (!det)
     return std::make_tuple(false, 0);
-
+  
   const auto detIndex = m_detInfo.indexOf(det->getID());
+
+  if (m_detInfo.isMasked(detIndex) || m_detInfo.isMonitor(detIndex))
+    return std::make_tuple(false, 0);
+
   return std::make_tuple(true, detIndex);
 }
 
