@@ -780,15 +780,15 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double bTwoTheta, double &lambdaMin, double &lambdaMax) {
   // Get the angle from twoThetaR to this detector
   const double gamma = twoTheta - twoThetaR();
-  // Get the angle from the horizon to this detector
-  const double theta = twoTheta - theta0();
+  // Get the angle from the horizon to the reference angle
+  const double horizonThetaR = twoThetaR() - theta0();
 
   // Calculate the projected wavelength range
   try {
-    const double lambdaTop = std::sin(theta) * (lambda + bLambda / 2) /
-                             std::sin(theta + gamma - bTwoTheta / 2);
-    const double lambdaBot = std::sin(theta) * (lambda - bLambda / 2) /
-                             std::sin(theta + gamma + bTwoTheta / 2);
+    const double lambdaTop = std::sin(horizonThetaR) * (lambda + bLambda / 2) /
+                             std::sin(horizonThetaR + gamma - bTwoTheta / 2);
+    const double lambdaBot = std::sin(horizonThetaR) * (lambda - bLambda / 2) /
+                             std::sin(horizonThetaR + gamma + bTwoTheta / 2);
 
     lambdaMin = std::min(lambdaTop, lambdaBot);
     lambdaMax = std::max(lambdaTop, lambdaBot);
