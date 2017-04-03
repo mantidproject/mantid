@@ -74,8 +74,7 @@ std::string fileExtension(const std::string &format) {
 bool isFileExtension(const std::string &extension,
                      const std::string &shortName) {
   size_t pos = extension.find_last_of('.');
-  std::string lowExt = lowExt.substr(pos + 1);
-
+  std::string lowExt = extension.substr(pos + 1);
   std::transform(lowExt.begin(), lowExt.end(), lowExt.begin(), ::tolower);
 
   const auto &valid = extensions.at(shortName);
