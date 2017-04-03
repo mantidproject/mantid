@@ -107,7 +107,7 @@ DetectorSearcher::searchUsingInstrumentRayTracing(const V3D &q) {
 
   if (!det)
     return std::make_tuple(false, 0);
-  
+
   const auto detIndex = m_detInfo.indexOf(det->getID());
 
   if (m_detInfo.isMasked(detIndex) || m_detInfo.isMonitor(detIndex))
