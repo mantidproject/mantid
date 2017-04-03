@@ -324,7 +324,7 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto inst = createEmptyInstrument(m_currentInstrumentName);
 
   // Collect all default values and set them in view
-  std::vector<std::string> defaults(6);
+  std::vector<std::string> defaults(8);
   defaults[0] = alg->getPropertyValue("AnalysisMode");
   defaults[1] = alg->getPropertyValue("PolarizationAnalysis");
 
@@ -343,6 +343,12 @@ void ReflSettingsPresenter::getExpDefaults() {
   auto cPp = inst->getStringParameter("cPp");
   if (!cPp.empty())
     defaults[5] = cPp[0];
+
+  defaults[6] = boost::lexical_cast<std::string>(
+      inst->getNumberParameter("TransRunStartOverlap")[0]);
+
+  defaults[7] = boost::lexical_cast<std::string>(
+      inst->getNumberParameter("TransRunEndOverlap")[0]);
 
   m_view->setExpDefaults(defaults);
 }
