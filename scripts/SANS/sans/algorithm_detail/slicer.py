@@ -89,8 +89,9 @@ class ISISSlicer(Slicer):
             return workspace, 1.0
 
         if len(start_time) > 1 or len(end_time) > 1:
-            raise "Slicer: There seem to be too many start or end values for slicing present. Can have only 1 "
-                  "but found {0} and {1} for the start and end time, respectively."
+            raise RuntimeError("Slicer: There seem to be too many start or end values for slicing present. "
+                               "Can have only 1 but found {0} and {1} for the start and end time,"
+                               " respectively.".format(len(start_time), len(end_time)))
 
         start_time = start_time[0]
         end_time = end_time[0]
