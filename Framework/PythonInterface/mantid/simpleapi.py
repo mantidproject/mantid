@@ -866,22 +866,21 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
     nvals = len(retvals)
     nlhs = lhs[0]
 
-    if nlhs == 0:
-        return None
-
-    if nvals != nlhs:
-        if nlhs == 1:
-            pass  # This is fine as we do not need to unpack
+    # If we have more than one value but not the same number of values throw
+    if 1 < nlhs != nvals:
+        # There is a discrepancy in the number are unpacking variables
+        # Let's not have the more cryptic unpacking error raised
+        raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
+                           "These numbers must match." % (func_name, nvals, nlhs))
+    if nvals > 0:
+        ret_type = namedtuple(func_name+"_returns", retvals.keys())
+        ret_value = ret_type(**retvals)
+        if nvals == 1:
+            return ret_value[0]
         else:
-            # There is a discrepancy in the number whilst unpacking variables
-            # Let's not have the more cryptic unpacking error raised
-            raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
-                               "These numbers must match." % (func_name, nvals, nlhs))
-
-    # Unpack and return
-    ret_type = namedtuple(func_name + "_returns", retvals.keys())
-    ret_value = ret_type(**retvals)
-    return ret_value[0] if nvals == 1 else ret_value
+            return ret_value
+    else:
+        return None
 
 
 def _set_logging_option(algm_obj, kwargs):
