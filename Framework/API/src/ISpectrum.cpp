@@ -146,7 +146,6 @@ void ISpectrum::checkAndSanitizeHistogram(HistogramData::Histogram &histogram) {
         "Histogram1D: invalid input: Y data set to nullptr");
   }
   if (!histogram.sharedE()) {
-    std::cout << "Failed histogram sanity check." << std::endl;
     throw std::invalid_argument(
         "Histogram1D: invalid input: E data set to nullptr");
   }
