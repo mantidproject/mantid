@@ -6,8 +6,8 @@ from core.parallel import two_shared_mem as ptsm
 
 
 def cli_register(parser):
-    # this doesn't have anything to add, 
-    # the options are added in the funcitonal config, 
+    # this doesn't have anything to add,
+    # the options are added in the funcitonal config,
     # which should be moved to here TODO
     return parser
 
@@ -42,13 +42,13 @@ def execute(data, flat=None, dark=None, cores=None, chunksize=None):
     """
     h.check_data_stack(data)
 
-    if flat is not None and dark is not None \
-    and isinstance(flat, np.ndarray)and  isinstance(dark, np.ndarray):
+    if flat is not None and dark is not None and isinstance(
+            flat, np.ndarray) and isinstance(dark, np.ndarray):
         if 2 != len(flat.shape) or 2 != len(dark.shape):
             raise ValueError(
-                "Incorrect shape of the flat image ({0}) or dark image ({1}) which should match the "
-                "shape of the sample images ({2})".format(
-                    flat.shape, dark.shape, data[0].shape))
+                "Incorrect shape of the flat image ({0}) or dark image ({1}) \
+                which should match the shape of the sample images ({2})"
+                .format(flat.shape, dark.shape, data[0].shape))
 
         if pu.multiprocessing_available():
             _execute_par(data, flat, dark, cores, chunksize)
@@ -69,9 +69,10 @@ def _execute_par(data, flat=None, dark=None, cores=None, chunksize=None):
     norm_divide[:] = np.subtract(flat, dark)
 
     # prevent divide-by-zero issues, and negative pixels make no sense
-    norm_divide[norm_divide == 0] = 1e-6
+    norm_divide[norm_divide == 0] = 1e-9
 
-    # subtract the dark from all images, specify out to do in place, otherwise the data is copied
+    # subtract the dark from all images,
+    # specify out to do in place, otherwise the data is copied
     np.subtract(data[:], dark, out=data[:])
 
     f = ptsm.create_partial(
@@ -80,12 +81,12 @@ def _execute_par(data, flat=None, dark=None, cores=None, chunksize=None):
     data, norm_divide = ptsm.execute(data, norm_divide, f, cores, chunksize,
                                      "Norm by Flat/Dark")
 
-    h.tomo_print_note("Clipping nonsense values below -2 and above +2.")
-    # This clipping is actually important, if removed some images will have pixels 
-    # with big negative values -25626262 which throws off any contrast adjustments. 
-    # This will crop those negative pixels out, and set them to nearly zero (but not zero).
-    # The negative values will also get scaled back after this in the value_scaling which will increase their values futher!
-    np.clip(data, 1e-6, 3, data)
+    # This clipping is important, if removed some images will have pixels
+    # with big negative values -25626262 which throws off contrast adjustments.
+    # This will crop those negative pixels out, and set them to nearly zero
+    # The negative values will also get scaled back after this in
+    # value_scaling which will increase their values futher!
+    np.clip(data, 1e-9, 3, data)
     h.pstop("Finished PARALLEL normalization by flat/dark images.")
 
     return data
