@@ -132,7 +132,7 @@ class IntermediateWSCleanup:
         if not self._doDelete:
             return
         ws = str(ws)
-        if not ws in self._protected and mtd.doesExist(ws):
+        if ws not in self._protected and mtd.doesExist(ws):
             DeleteWorkspace(Workspace=ws,
                             EnableLogging=self._deleteAlgorithmLogging)
 

@@ -8,8 +8,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, Fi
 from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedValidator, IntBoundedValidator, IntArrayBoundedValidator,
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CloneWorkspace, CorrectTOFAxis, CreateEPP, CreateSingleValuedWorkspace,
-                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus, NormaliseToMonitor,
-                              Scale)
+                              CreateWorkspace, CropWorkspace, Divide, ExtractMonitors, FindEPP, GetEiMonDet, Load, MergeRuns, Minus,
+                              NormaliseToMonitor, Scale)
 import numpy
 
 
@@ -371,7 +371,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                                  common.EPP_METHOD_FIT,
                                  common.EPP_MEHTOD_CALCULATE]),
                              direction=Direction.Input,
-                             doc='Method to create the EPP table for detectors (monitor is awlays fitted) if ' + common.PROP_EPP_WS + ' is not given.')
+                             doc='Method to create the EPP table for detectors (monitor is awlays fitted) if '
+                                 + common.PROP_EPP_WS + ' is not given.')
         self.declareProperty(name=common.PROP_EPP_SIGMA,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
@@ -391,7 +392,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              defaultValue='',
                              direction=Direction.Input,
                              optional=PropertyMode.Optional),
-                             doc='A single value workspace containing the elatic channel index. Overrides ' + common.PROP_ELASTIC_CHANNEL_MODE + '.')
+                             doc='A single value workspace containing the elatic channel index. Overrides '
+                                 + common.PROP_ELASTIC_CHANNEL_MODE + '.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -663,7 +665,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                 monIndex = self._monitorIndex(monWS)
                 eppRow = monEPPWS.row(monIndex)
                 if eppRow['FitStatus'] != 'success':
-                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over the entire TOF range for normalisation.')
+                    self.log().warning('Fitting to monitor data failed. Integrating the intensity over ' +
+                                       'the entire TOF range for normalisation.')
                     begin = monWS.dataX(monIndex)[0]
                     end = monWS.dataX(monIndex)[-1]
                 else:

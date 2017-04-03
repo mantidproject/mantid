@@ -4,7 +4,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator,
-                        MatrixWorkspaceProperty, PropertyMode, WorkspaceGroupProperty, WorkspaceUnitValidator)
+                        MatrixWorkspaceProperty, PropertyMode, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, IntBoundedValidator,
                            Property, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, MonteCarloAbsorption)

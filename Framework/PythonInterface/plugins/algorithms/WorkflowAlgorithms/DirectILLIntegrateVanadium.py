@@ -36,7 +36,6 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 3)
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
-        wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 

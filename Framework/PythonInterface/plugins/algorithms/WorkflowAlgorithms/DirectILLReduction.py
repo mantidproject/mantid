@@ -17,7 +17,6 @@ def _createDetectorGroups(ws):
     """Find workspace indices with (almost) same theta and group them. Masked
     detectors are ignored.
     """
-    import ctypes
     numHistograms = ws.getNumberHistograms()
     groups = list()
     detectorGrouped = numHistograms * [False]
@@ -114,7 +113,7 @@ def _minMaxQ(ws):
     maxEf = Ei - minW
     # In Ånströms
     maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 *
-                     (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
+                      (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
     minQ = 0.0
     return (minQ, maxQ)
 

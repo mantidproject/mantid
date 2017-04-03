@@ -34,13 +34,13 @@ def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
         reportWS = CreateEmptyTableWorkspace(OutputWorkspace=reportWSName,
                                              EnableLogging=algorithmLogging)
     existingColumnNames = reportWS.getColumnNames()
-    if not 'WorkspaceIndex' in existingColumnNames:
+    if 'WorkspaceIndex' not in existingColumnNames:
         reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
-    if not 'ElasticIntensity' in existingColumnNames:
+    if 'ElasticIntensity' not in existingColumnNames:
         reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
-    if not 'FlatBkg' in existingColumnNames:
+    if 'FlatBkg' not in existingColumnNames:
         reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
-    if not 'Diagnosed' in existingColumnNames:
+    if 'Diagnosed' not in existingColumnNames:
         reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
     reportWS.setRowCount(0)
     for i in range(elasticIntensityWS.getNumberHistograms()):
