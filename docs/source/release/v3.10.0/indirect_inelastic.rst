@@ -59,5 +59,6 @@ Bugfixes
 - The *Diffraction* Interface no longer crashes when in OSIRIS diffonly mode
 - *Abins*:  fix setting very small off-diagonal elements of b tensors
 - Fix errors from calling Rebin from VisionReduction.
+- Fixed validation of inputs in *CalculatePaalmanPings*
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
