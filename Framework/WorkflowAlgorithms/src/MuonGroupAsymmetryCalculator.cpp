@@ -1,9 +1,16 @@
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::AlgorithmManager;
+using Mantid::API::WorkspaceFactory;
+
+
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -57,15 +64,16 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::calculate() const {
     }
   } else {
     // Only one period was supplied
-	  tempWS = EstimateAsymmetry(m_inputWS->getItem(0), -1);
+	  tempWS = EstimateAsymmetry(m_inputWS->getItem(0), m_groupIndex);// change -1 to m_groupIndex and follow through to store as a table for later. 
 
   }
 
   // Extract the requested spectrum
   MatrixWorkspace_sptr outWS = extractSpectrum(tempWS, m_groupIndex);
-
   return outWS;
 }
+
+
 
 /**
 * Removes exponential decay from the given workspace.
@@ -107,7 +115,7 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
 MatrixWorkspace_sptr
 MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 	const int index) const {
-
+	std::vector<double> normEst;
 	MatrixWorkspace_sptr outWS;
 	// Remove decay
 	if (inputWS) {
@@ -115,7 +123,7 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 			AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
 		asym->setChild(true);
 		asym->setProperty("InputWorkspace", inputWS);
-		if (index > 0) {
+		if (index > -1) {
 			// GroupIndex as vector
 			// Necessary if we want RemoveExpDecay to fit only the requested
 			// spectrum
@@ -127,8 +135,29 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 		asym->setProperty("EndX", EndX);
 		asym->execute();
 		outWS = asym->getProperty("OutputWorkspace");
+		auto tmp = asym->getPropertyValue("NormalizationConstant");
+		normEst = convertToVec(tmp);
+		ITableWorkspace_sptr table= WorkspaceFactory::Instance().createTable();
+			API::AnalysisDataService::Instance().addOrReplace("norm", table);
+			table->addColumn("double", "norm");
+			table->addColumn("int", "spectra");
+
+			for (double norm : normEst) {
+				API::TableRow row = table->appendRow();
+
+				row << norm<<index;
+			}
 	}
 	return outWS;
+}
+
+std::vector<double> convertToVec(std::string const &list) {
+	std::vector<double> vec;
+	std::vector<std::string> tmpVec;
+	boost::split(tmpVec, list, boost::is_any_of(","));
+	std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
+		[](std::string const &element) { return std::stod(element); });
+	return vec;
 }
 } // namespace WorkflowAlgorithms
 } // namespace Mantid

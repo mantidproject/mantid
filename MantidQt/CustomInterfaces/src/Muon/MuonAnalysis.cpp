@@ -1190,7 +1190,7 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
 
     // Now apply DTC, if used, and grouping
     correctedGroupedWS =
-        m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed);
+        m_dataLoader.correctAndGroup(*loadResult, *groupResult->groupingUsed); 
 
   } catch (const std::exception &e) {
     g_log.error(e.what());

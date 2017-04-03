@@ -401,6 +401,20 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		asymmAlg->setPropertyValue("OutputWorkspace", wsName);
 		asymmAlg->setPropertyValue("Minimizer", minimizer(true));
 		asymmAlg->setProperty("MaxIterations", maxIterations);
+		Mantid::API::ITableWorkspace_sptr table =
+			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+				Mantid::API::AnalysisDataService::Instance().retrieve("norm"));
+		
+		auto colNorm = table->getColumn("norm");
+		std::vector<double> norm; 
+		std::vector<int> spectra;
+		spectra.push_back(0);
+		for (int j = 0; j < table->rowCount(); j++)
+		{
+			norm.push_back((*colNorm)[j]);
+		}
+		asymmAlg->setProperty("Spectra", spectra);
+		asymmAlg->setProperty("PreviousNormalizationConstant", norm);
 		asymmAlg->execute();
 		if (!asymmAlg->isExecuted()) {
 			throw std::runtime_error("Asymmetry Calculation has failed.");

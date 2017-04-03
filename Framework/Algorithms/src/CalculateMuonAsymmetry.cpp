@@ -176,7 +176,7 @@ void CalculateMuonAsymmetry::exec() {
 				  " is greater than the number of spectra!");
 			  throw std::invalid_argument("The spectral index " +
 				  std::to_string(spectra[i]) +
-				  " is greater than the number of spectra!");
+				  " is greater than the number of spectra " +std::to_string(specLength)+ "!");
 		  }
 		  double estNormConst;
 		  if (dataType == "counts") {
