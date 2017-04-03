@@ -7,9 +7,9 @@
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)
-#include "ISIS/private/Kafka/Schema/det_spec_mapping_schema_generated.h"
-#include "ISIS/private/Kafka/Schema/event_schema_generated.h"
-#include "ISIS/private/Kafka/Schema/run_info_schema_generated.h"
+#include "Kafka/private/Schema/det_spec_mapping_schema_generated.h"
+#include "Kafka/private/Schema/event_schema_generated.h"
+#include "Kafka/private/Schema/run_info_schema_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <ctime>

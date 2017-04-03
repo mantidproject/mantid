@@ -58,27 +58,27 @@ find_package ( LibRDKafka )
 if ( LIBRDKAFKA_FOUND )
   set ( SRC_FILES
     ${SRC_FILES}
-    src/ISIS/ISISKafkaEventListener.cpp
-    src/ISIS/ISISKafkaEventStreamDecoder.cpp
+    src/Kafka/KafkaEventListener.cpp
+    src/Kafka/KafkaEventStreamDecoder.cpp
     src/Kafka/KafkaBroker.cpp
-          src/Kafka/KafkaTopicSubscriber.cpp
+    src/Kafka/KafkaTopicSubscriber.cpp
   )
   set ( INC_FILES
     ${INC_FILES}
-    inc/MantidLiveData/ISIS/ISISKafkaEventListener.h
-    inc/MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h
+    inc/MantidLiveData/Kafka/KafkaEventListener.h
+    inc/MantidLiveData/Kafka/KafkaEventStreamDecoder.h
     inc/MantidLiveData/Kafka/IKafkaStreamSubscriber.h
     inc/MantidLiveData/Kafka/IKafkaBroker.h
     inc/MantidLiveData/Kafka/KafkaBroker.h
-		  inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
-    src/ISIS/private/Kafka/Schema/flatbuffers/flatbuffers.h
-    src/ISIS/private/Kafka/Schema/det_spec_mapping_schema_generated.h
-    src/ISIS/private/Kafka/Schema/event_schema_generated.h
-    src/ISIS/private/Kafka/Schema/run_info_schema_generated.h
+    inc/MantidLiveData/Kafka/KafkaTopicSubscriber.h
+    src/Kafka/private/Schema/flatbuffers/flatbuffers.h
+    src/Kafka/private/Schema/det_spec_mapping_schema_generated.h
+    src/Kafka/private/Schema/event_schema_generated.h
+    src/Kafka/private/Schema/run_info_schema_generated.h
   )
   set ( TEST_FILES
     ${TEST_FILES}
-    ISISKafkaEventStreamDecoderTest.h
+    KafkaEventStreamDecoderTest.h
     KafkaTopicSubscriberTest.h
   )
 endif()

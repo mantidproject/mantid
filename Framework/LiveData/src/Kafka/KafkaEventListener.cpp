@@ -1,24 +1,24 @@
-#include "MantidLiveData/ISIS/ISISKafkaEventListener.h"
+#include "MantidLiveData/Kafka/KafkaEventListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidLiveData/ISIS/ISISKafkaEventStreamDecoder.h"
+#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 namespace {
-Mantid::Kernel::Logger g_log("ISISKafkaEventListener");
+Mantid::Kernel::Logger g_log("KafkaEventListener");
 }
 
 namespace Mantid {
 namespace LiveData {
 
-DECLARE_LISTENER(ISISKafkaEventListener)
+DECLARE_LISTENER(KafkaEventListener)
 
-ISISKafkaEventListener::ISISKafkaEventListener() {
+KafkaEventListener::KafkaEventListener() {
   declareProperty("InstrumentName", "");
 }
 
 /// @copydoc ILiveListener::connect
-bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
+bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     std::string instrumentName = getProperty("InstrumentName");
@@ -27,10 +27,10 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
         runInfoTopic(instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
         spDetInfoTopic(instrumentName +
                        KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
-    m_decoder = Kernel::make_unique<ISISKafkaEventStreamDecoder>(
+    m_decoder = Kernel::make_unique<KafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic);
   } catch (std::exception &exc) {
-    g_log.error() << "ISISKafkaEventListener::connect - Connection Error: "
+    g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
     return false;
   }
@@ -38,7 +38,7 @@ bool ISISKafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
 }
 
 /// @copydoc ILiveListener::start
-void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
+void KafkaEventListener::start(Kernel::DateAndTime startTime) {
   bool startNow = true;
   // Workaround for existing LiveListener interface
   // startTime of 0 means start from now
@@ -54,7 +54,7 @@ void ISISKafkaEventListener::start(Kernel::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
+boost::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
   assert(m_decoder);
   // The first call to extract is very early in the start live data process
   // and we may not be completely ready yet, wait upto a maximum of 5 seconds
@@ -70,17 +70,17 @@ boost::shared_ptr<API::Workspace> ISISKafkaEventListener::extractData() {
 }
 
 /// @copydoc ILiveListener::isConnected
-bool ISISKafkaEventListener::isConnected() {
+bool KafkaEventListener::isConnected() {
   return (m_decoder ? m_decoder->isCapturing() : false);
 }
 
 /// @copydoc ILiveListener::runStatus
-API::ILiveListener::RunStatus ISISKafkaEventListener::runStatus() {
+API::ILiveListener::RunStatus KafkaEventListener::runStatus() {
   return m_decoder->hasReachedEndOfRun() ? EndRun : Running;
 }
 
 /// @copydoc ILiveListener::runNumber
-int ISISKafkaEventListener::runNumber() const {
+int KafkaEventListener::runNumber() const {
   return (m_decoder ? m_decoder->runNumber() : -1);
 }
 }
