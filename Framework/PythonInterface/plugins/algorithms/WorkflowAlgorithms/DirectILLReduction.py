@@ -131,7 +131,7 @@ def _rebin(ws, params, wsNames, algorithmLogging):
 def _writeXml(element, filename):
     """Write XML element to a file."""
     from xml.etree import ElementTree
-    with open(filename, mode='w') as outFile:
+    with open(filename, mode='wb') as outFile:
         ElementTree.ElementTree(element).write(outFile)
 
 
