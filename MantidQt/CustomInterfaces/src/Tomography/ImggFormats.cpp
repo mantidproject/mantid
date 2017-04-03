@@ -71,7 +71,8 @@ std::string fileExtension(const std::string &format) {
  * @param extension a file name extension like .fits, or a filename
  * @param shortName name of a file format
  */
-bool isFileExtension(std::string extension, const std::string &shortName) {
+bool isFileExtension(const std::string &extension,
+                     const std::string &shortName) {
   std::string lowExt = extension;
   size_t pos = lowExt.find_last_of('.');
   lowExt = lowExt.substr(pos + 1);
