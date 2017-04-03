@@ -2,21 +2,19 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy.testing as npt
 from tests import test_helper as th
+from core.filters import rotate_stack
 
 
 class RotateStackTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(RotateStackTest, self).__init__(*args, **kwargs)
 
-        from filters import rotate_stack
-        self.alg = rotate_stack
-
     def test_not_executed(self):
         # only works on square images
         images, control = th.gen_img_shared_array_and_copy((10, 10, 10))
 
         # empty params
-        result = self.alg.execute(images, None)[0]
+        result = rotate_stack.execute(images, None)[0]
         npt.assert_equal(result, control)
 
     def test_executed_par(self):
@@ -33,7 +31,7 @@ class RotateStackTest(unittest.TestCase):
 
         rotation = 1  # once clockwise
         images[:, 0, 0] = 42  # set all images at 0,0 to 42
-        result = self.alg.execute(images, rotation)[0]
+        result = rotate_stack.execute(images, rotation)[0]
         w = result.shape[2]
         npt.assert_equal(result[:, 0, w - 1], 42.0)
 

@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
 from tests import test_helper as th
+from core.parallel import two_shared_mem as ptsm
 
 
 def add_inplace(first_shared, second_shared, add_arg):
@@ -31,7 +32,6 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[6, 0, 1] != img[6, 0, 1]
 
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             add_inplace, fwd_function=ptsm.inplace_fwd_func, add_arg=5)
 
@@ -55,14 +55,16 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[1, 0, 0] != img[1, 0, 0]
         assert expected[0, 4, 0] != img[0, 4, 0]
         assert expected[6, 0, 1] != img[6, 0, 1]
+
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             add_inplace,
             fwd_function=ptsm.inplace_fwd_func_second_2d,
             add_arg=5)
+
         # execute parallel
         ptsm.execute(img, img2nd, f, name="Second 2D test")
+
         # compare results
         th.assert_equals(img, expected)
         th.assert_equals(img2nd, orig_2nd[0])
@@ -78,14 +80,16 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[1, 0, 0] != img[1, 0, 0]
         assert expected[0, 4, 0] != img[0, 4, 0]
         assert expected[6, 0, 1] != img[6, 0, 1]
+
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_first,
             add_arg=5)
+
         # execute parallel
         res1, res2 = ptsm.execute(img, img2nd, f, name="Return to first test")
+
         # compare results
         th.assert_equals(res1, expected)
         th.assert_equals(res2, orig_2nd)
@@ -101,14 +105,16 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[1, 0, 0] != img[1, 0, 0]
         assert expected[0, 4, 0] != img[0, 4, 0]
         assert expected[6, 0, 1] != img[6, 0, 1]
+
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_second,
             add_arg=5)
+
         # execute parallel
         res1, res2 = ptsm.execute(img, img2nd, f, name="Return to second test")
+
         # compare results
         th.assert_equals(res2, expected)
         th.assert_equals(res1, orig_img)
@@ -132,10 +138,11 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[6, 0, 1] != img[6, 0, 1]
 
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(add_inplace, add_arg=5)
+
         # execute parallel
         ptsm.execute(img, img2nd, f, name="Fail Inplace test")
+
         # compare results
         th.assert_not_equals(img, expected)
         th.assert_not_equals(img2nd, expected)
@@ -161,13 +168,14 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[6, 0, 1] != img[6, 0, 1]
 
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             add_inplace,
             fwd_function=ptsm.inplace_fwd_func_second_2d,
             add_arg=5)
+
         # execute parallel
         ptsm.execute(img, img2nd, f, name="Fail Second 2D test")
+
         # compare results
         th.assert_not_equals(img, expected)
         th.assert_not_equals(img2nd, expected)
@@ -189,7 +197,6 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[6, 0, 1] != img[6, 0, 1]
 
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_first,
@@ -223,7 +230,6 @@ class TwoSharedMemTest(unittest.TestCase):
         assert expected[6, 0, 1] != img[6, 0, 1]
 
         # create partial
-        from parallel import two_shared_mem as ptsm
         f = ptsm.create_partial(
             return_from_func,
             fwd_function=ptsm.fwd_func_return_to_second,
@@ -237,7 +243,6 @@ class TwoSharedMemTest(unittest.TestCase):
         th.assert_equals(res1, img)
         th.assert_equals(res2, img2nd)
         th.assert_not_equals(res2, expected)
-
 
 if __name__ == '__main__':
     unittest.main()

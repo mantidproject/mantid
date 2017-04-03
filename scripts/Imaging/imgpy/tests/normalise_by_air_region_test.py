@@ -1,76 +1,29 @@
 from __future__ import (absolute_import, division, print_function)
 import unittest
+import numpy as np
 import numpy.testing as npt
 from tests import test_helper as th
+from core.filters import normalise_by_air_region
 
 
 class NormaliseByAirRegionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(NormaliseByAirRegionTest, self).__init__(*args, **kwargs)
 
-        from filters import normalise_by_air_region
-        self.alg = normalise_by_air_region
-
-    def test_not_executed_no_crop_before_norm(self):
-        # Duplicated code because 'nose.main()' failed to run it properly
-        crop = False
+    def test_not_executed_empty_params(self):
         images, control = th.gen_img_shared_array_and_copy()
 
-        # empty params
         air = None
-        roi = None
-        result = self.alg.execute(images, air, roi, crop)
+        result = normalise_by_air_region.execute(images, air)
         npt.assert_equal(result, control)
 
-        # invalid air region type
-        air = '[1,1,1,1]'
-        roi = [1, 1, 8, 8]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-        # invalid roi region type
-        roi = '[1,2,3,4]'
-        air = [3, 3, 4, 4]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-        # invalid data shape
-        import numpy as np
-        images = np.arange(100).reshape(10, 10)
-        roi = [1, 1, 8, 8]
-        air = [3, 3, 4, 4]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-    def test_not_executed_with_crop_before_norm(self):
-        # Duplicated code because 'nose.main()' failed to run it properly
-        crop = True
+    def test_not_executed_invalid_shape(self):
         images, control = th.gen_img_shared_array_and_copy()
 
-        # empty params
-        air = None
-        roi = None
-        result = self.alg.execute(images, air, roi, crop)
-        npt.assert_equal(result, control)
-
-        # invalid air region type
-        air = '[1,1,1,1]'
-        roi = [1, 1, 8, 8]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-        # invalid air region coords
-        air = [13, 13, 13, 31]
-        roi = [1, 1, 8, 8]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-        # invalid roi region type
-        roi = '[1,2,3,4]'
-        air = [3, 3, 4, 4]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
-
-        # invalid data type
-        import numpy as np
         images = np.arange(100).reshape(10, 10)
-        roi = [1, 1, 8, 8]
         air = [3, 3, 4, 4]
-        npt.assert_raises(ValueError, self.alg.execute, images, air, roi, crop)
+        npt.assert_raises(ValueError, normalise_by_air_region.execute, images,
+                          air)
 
     def test_executed_par(self):
         self.do_execute()
@@ -83,18 +36,8 @@ class NormaliseByAirRegionTest(unittest.TestCase):
     def do_execute(self):
         images, control = th.gen_img_shared_array_and_copy()
 
-        roi = [1, 1, 8, 8]
         air = [3, 3, 4, 4]
-        crop = True
-        result = self.alg.execute(images, air, roi, crop)
-        th.assert_not_equals(result, control)
-
-        images, control = th.gen_img_shared_array_and_copy()
-
-        roi = [1, 1, 8, 8]
-        air = [3, 3, 4, 4]
-        crop = False
-        result = self.alg.execute(images, air, roi, crop)
+        result = normalise_by_air_region.execute(images, air)
         th.assert_not_equals(result, control)
 
 

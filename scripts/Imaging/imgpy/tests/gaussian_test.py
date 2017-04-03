@@ -13,7 +13,7 @@ class GaussianTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(GaussianTest, self).__init__(*args, **kwargs)
 
-        from filters import gaussian
+        from core.filters import gaussian
         self.alg = gaussian
 
     def test_not_executed(self):

@@ -8,7 +8,7 @@ class CircularMaskTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(CircularMaskTest, self).__init__(*args, **kwargs)
 
-        from filters import circular_mask
+        from core.filters import circular_mask
         self.alg = circular_mask
 
     def test_not_executed(self):
