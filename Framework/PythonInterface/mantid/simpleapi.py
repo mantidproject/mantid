@@ -863,25 +863,31 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
                 raise RuntimeError('Internal error. Unknown property type encountered. "%s" '
                                    'on algorithm "%s" is not understood by '
                                    'Python. Please contact development team' % (name, algm_obj.name()))
-    nvals = len(retvals)
-    nlhs = lhs[0]
+    # For reference this ensures multiple returns works eg
+    # foo, bar = myFunc(...)
+    # In the case foo and bar mean we have 2 on LHS and myFunc should return 2 member vars
 
-    if nlhs == 0:
-        return None
+    number_of_returned_values = len(retvals)
+    number_of_vars_lhs_of_func = lhs[0]
 
-    if nvals != nlhs:
-        if nlhs == 1:
+    if number_of_returned_values != number_of_vars_lhs_of_func:
+        if number_of_vars_lhs_of_func == 0:
             pass  # This is fine as we do not need to unpack
         else:
             # There is a discrepancy in the number whilst unpacking variables
             # Let's not have the more cryptic unpacking error raised
             raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
-                               "These numbers must match." % (func_name, nvals, nlhs))
+                               "These numbers must match." % (func_name, number_of_returned_values, number_of_vars_lhs_of_func))
+
+    if number_of_returned_values == 0:
+        # Nothing was returned so return None type
+        return None
 
     # Unpack and return
     ret_type = namedtuple(func_name + "_returns", retvals.keys())
     ret_value = ret_type(**retvals)
-    return ret_value[0] if nvals == 1 else ret_value
+    # If we have only one variable on LHS unpack for the caller. Otherwise forward the original return.
+    return ret_value[0] if number_of_returned_values == 1 else ret_value
 
 
 def _set_logging_option(algm_obj, kwargs):
