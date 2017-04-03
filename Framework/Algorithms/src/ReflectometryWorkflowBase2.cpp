@@ -431,6 +431,14 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
 void ReflectometryWorkflowBase2::populateMonitorProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
+  const auto startOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "StartOverlap", instrument, "TransRunStartOverlap");
+  if (startOverlap.is_initialized())
+    alg->setProperty("StartOverlap", startOverlap.get());
+  const auto endOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "EndOverlap", instrument, "TransRunEndOverlap");
+  if (endOverlap.is_initialized())
+    alg->setProperty("EndOverlap", endOverlap.get());
   const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
