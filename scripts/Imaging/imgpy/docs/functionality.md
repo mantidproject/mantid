@@ -52,11 +52,11 @@
                         Default output-path/pre_processed/.
 ## Save out pre-processing images as Radiograms.
   --swap_axes          NOT RECOMMENDED: This means an additional conversion will be done inside Tomopy, which will double the memory usage temporarily.
-                        Pre-processed images will be saved as swap_axes if --save-preproc is specified.
-                        If --reuse-preproc is specified, then the images that will be loaded will be expected to be swap_axes.
+                       The axis will be flipped on the pre-processing images before saving. This means if sinograms are passed, they will be turned into radiograms, and vice versa.
 ## Data type
   --data-dtype DATA_DTYPE
-                        The data type in which the data will be processed.
+                        Default (and recommended): float32
+                        The data type in which the data converted to after loading and processed.
                         Supported: float32, float64
 
 ## Centers of rotation for slices specified with --cor-slices
@@ -82,7 +82,7 @@
 
 Run Modes:
 ## Convert images from one file format to another
-  --convert             Convert images to a different format.
+  --convert             Convert images to a different format. The output format will be the one specified with --out-format
 
 ## Prefix for saved out files from conversion
   --convert-prefix CONVERT_PREFIX

@@ -2,16 +2,16 @@
 ## Region of interest
 ```
   -R [REGION_OF_INTEREST [REGION_OF_INTEREST ...]], --region-of-interest [REGION_OF_INTEREST [REGION_OF_INTEREST ...]]
-                        Crop original images using these coordinates, after rotating the images.
+                        Crop original images using these coordinates. The selection is a rectangle and expected order is - Left Top Right Bottom.
                         If not given, the whole images are used.
-                        Example: --region-of-interest='[150,234,23,22]'.
+                        Example: --region-of-interest 150 234 23 22
 ```
 ## Air Region
 ```
   -A [AIR_REGION [AIR_REGION ...]], --air-region [AIR_REGION [AIR_REGION ...]]
-                        Air region /region for normalisation.
-                        For best results it should avoid being blocked by any object.
-                        Example: --air-region='[150,234,23,22]'
+                        Air region /region for normalisation. The selection is a rectangle and expected order is - Left Top Right Bottom.
+                        For best results the region selected should not be blocked by any object in the Tomography.
+                        Example: --air-region 150 234 23 22
 ```
 ## Median Filter
 ```
@@ -23,8 +23,19 @@
 ```
 ## Remove stripes
 ```
-  --remove-stripes REMOVE_STRIPES
-                        Methods supported: 'wf' (Wavelet-Fourier).
+  --pre-stripe-removal-wf [PRE_STRIPE_REMOVAL_WF [PRE_STRIPE_REMOVAL_WF ...]]
+                        Stripe removal using wavelett-fourier method. Available parameters:
+                                level (int, optional) Number of discrete wavelet transform levels.
+                                wname (str, optional) Type of the wavelet filter. 'haar', 'db5', 'sym5', etc.
+                                sigma (float, optional) Damping parameter in Fourier space.
+                                pad (bool, optional) If True, extend the size of the sinogram by padding with zeros.
+  --pre-stripe-removal-ti [PRE_STRIPE_REMOVAL_TI [PRE_STRIPE_REMOVAL_TI ...]]
+                        Stripe removal using Titarenko's approach. Available parameters:
+                                      nblock (int, optional) Number of blocks.
+                                      alpha (int, optional) Damping factor.
+  --pre-stripe-removal-sf [PRE_STRIPE_REMOVAL_SF [PRE_STRIPE_REMOVAL_SF ...]]
+                        Stripe removal using smoothing-filter method. Available parameters:
+                                size (int, optional) Size of the smoothing filter.
 ```
 
 ## Rotation
@@ -36,9 +47,9 @@
 ## Clip values after flat/dark normalisation
 ```
   --clip-min CLIP_MIN   Default: 0.0
-                        Clip values after normalisations to remove out of bounds pixel values.
+                        Clip values below this after normalisations to remove out of bounds pixel values.
   --clip-max CLIP_MAX   Default: 1.5
-                        Clip values after normalisations to remove out of bounds pixel values.
+                        Clip values above this after normalisations to remove out of bounds pixel values.
 ```
 ## Cut-off **bright** pixels
 ```
@@ -77,7 +88,6 @@
 ## Minus Log
 ```
   -log, --pre-minus-log
-                        Default: 0
                         Calculate the -log of the sample data.
 ```
 
