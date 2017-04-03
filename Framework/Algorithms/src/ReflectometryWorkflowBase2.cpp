@@ -522,5 +522,32 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
   }
 }
 
+/** Set transmission properties
+*
+* @param alg :: The algorithm to populate parameters for
+* @param instrument :: The instrument attached to the workspace
+* @return Bool on whether or not any transmission runs were found
+*/
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(
+    IAlgorithm_sptr alg, Instrument_const_sptr instrument) const {
+
+  bool transRunsExist = false;
+
+  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
+  if (firstWS) {
+    transRunsExist = true;
+    alg->setProperty("FirstTransmissionRun", firstWS);
+    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+    if (secondWS) {
+      alg->setProperty("SecondTransmissionRun", secondWS);
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+    }
+  }
+
+  return transRunsExist;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

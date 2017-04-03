@@ -79,6 +79,11 @@ protected:
       Mantid::API::IAlgorithm_sptr alg,
       Mantid::Geometry::Instrument_const_sptr instrument,
       Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  /// Populate transmission properties
+  bool populateTransmissionProperties(
+      Mantid::API::IAlgorithm_sptr alg,
+      Mantid::Geometry::Instrument_const_sptr instrument) const;
+  
 };
 } // namespace Algorithms
 } // namespace Mantid
