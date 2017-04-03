@@ -240,17 +240,21 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
         QString::fromStdString(matrixWs->getName()));
   }
 
-  // Check to see if all workspaces have only a single spectrum ...
-  bool allSingleWorkspaces = true;
-  foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
-    if (selectedMatrixWs->getNumberHistograms() != 1) {
-      allSingleWorkspaces = false;
-      break;
+  // Check workspaces to see whether to plot immediately without dialog box ...
+  bool plotImmediately = true;
+  if (isAdvanced) {
+    plotImmediately = selectedMatrixWsList.size() == 1 && selectedMatrixWsList[0]->getNumberHistograms() == 1;
+  } else {
+    foreach(const auto selectedMatrixWs, selectedMatrixWsList) {
+      if (selectedMatrixWs->getNumberHistograms() != 1) {
+        plotImmediately = false;
+        break;
+      }
     }
   }
 
   // ... and if so, just return all workspace names mapped to workspace index 0;
-  if (allSingleWorkspaces) {
+  if (plotImmediately) {
     const std::set<int> SINGLE_SPECTRUM = {0};
     QMultiMap<QString, std::set<int>> spectrumToPlot;
     foreach (const auto selectedMatrixWs, selectedMatrixWsList) {

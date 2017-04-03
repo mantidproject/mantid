@@ -235,7 +235,7 @@ QMultiMap<QString, std::set<int>> MantidWSIndexWidget::getPlots() const {
 }
 
 /**
-* Whether the user selected "waterfall"
+* Whether the user selected "1D plot"
 * @returns True if 1D plot selected
 */
 bool MantidWSIndexWidget::is1DPlotSelected() const {
