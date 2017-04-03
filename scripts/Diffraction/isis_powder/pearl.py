@@ -13,12 +13,12 @@ class Pearl(AbstractInst):
         basic_config_dict = yaml_parser.open_yaml_file_as_dictionary(kwargs.get("config_file", None))
 
         self._inst_settings = InstrumentSettings.InstrumentSettings(
-           attr_mapping=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
+           param_map=pearl_param_mapping.attr_mapping, adv_conf_dict=pearl_advanced_config.get_all_adv_variables(),
            basic_conf_dict=basic_config_dict, kwargs=kwargs)
 
         super(Pearl, self).__init__(user_name=self._inst_settings.user_name,
                                     calibration_dir=self._inst_settings.calibration_dir,
-                                    output_dir=self._inst_settings.output_dir)
+                                    output_dir=self._inst_settings.output_dir, inst_prefix="PEARL")
 
         self._cached_run_details = None
         self._cached_run_details_number = None
@@ -45,11 +45,8 @@ class Pearl(AbstractInst):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         run_details.run_number = run_details.vanadium_run_numbers
-        return self._create_vanadium(vanadium_runs=run_details.vanadium_run_numbers,
-                                     empty_runs=run_details.empty_runs,
+        return self._create_vanadium(run_details=run_details,
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
-
-    # Params #
 
     def _get_run_details(self, run_number_string):
         if self._cached_run_details_number == run_number_string:
@@ -60,6 +57,8 @@ class Pearl(AbstractInst):
         self._cached_run_details_number = run_number_string
         self._cached_run_details = run_details
         return run_details
+
+    # Params #
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -84,13 +83,18 @@ class Pearl(AbstractInst):
         common.remove_intermediate_workspace(monitor_ws)
         return normalised_ws
 
+    def _generate_auto_vanadium_calibration(self, run_details):
+        # The instrument scientists prefer everything to be explicit on this instrument so
+        # instead we don't try to run this automatically
+        raise NotImplementedError("You must run the create_vanadium method manually on Pearl")
+
     def _get_monitor_spectra_index(self, run_number):
         return self._inst_settings.monitor_spec_no
 
     def _spline_vanadium_ws(self, focused_vanadium_spectra):
         focused_vanadium_spectra = pearl_algs.strip_bragg_peaks(focused_vanadium_spectra)
-        return common.spline_vanadium_for_focusing(focused_vanadium_spectra=focused_vanadium_spectra,
-                                                   num_splines=self._inst_settings.spline_coefficient)
+        return common.spline_workspaces(focused_vanadium_spectra=focused_vanadium_spectra,
+                                        num_splines=self._inst_settings.spline_coefficient)
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         if not output_mode:
@@ -102,7 +106,7 @@ class Pearl(AbstractInst):
         group_name = "PEARL" + str(run_details.user_input_run_number)
         group_name += '_' + self._inst_settings.tt_mode + "-Results-D-Grp"
         grouped_d_spacing = mantid.GroupWorkspaces(InputWorkspaces=output_spectra, OutputWorkspace=group_name)
-        return grouped_d_spacing
+        return grouped_d_spacing, None
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_in_tof(focused_banks, self._inst_settings.tof_cropping_values)
@@ -117,7 +121,9 @@ class Pearl(AbstractInst):
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws):
+        # TODO move this to an instrument param
+        gen_absorb = False
         if gen_absorb:
             pearl_algs.generate_vanadium_absorb_corrections(van_ws=van_ws)
 
