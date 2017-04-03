@@ -158,7 +158,7 @@ def is_data_transmission_and_event_mode(file_infos):
     @return: True if the file setting is bad else False
     """
     is_bad_file_setting = False
-    for key, value in file_infos.items():
+    for key, value in list(file_infos.items()):
         if is_transmission_type(key) and value.is_event_mode():
             is_bad_file_setting = True
             break
@@ -385,8 +385,8 @@ def run_added_loader(loader, file_information, is_transmission, period, parent_a
             ws_monitor_collection.append(load_alg.getProperty("OutputWorkspace").value)
         else:
             load_alg.execute()
-            workspace_indices = range(1, number_of_periods + 1)
-            monitor_indices = range(number_of_periods + 1, number_of_periods*2 + 1)
+            workspace_indices = list(range(1, number_of_periods + 1))
+            monitor_indices = list(range(number_of_periods + 1, number_of_periods*2 + 1))
             for workspace_index, monitor_index in zip(workspace_indices, monitor_indices):
                 ws_collection.append(load_alg.getProperty(OUTPUT_WORKSPACE_GROUP + str(workspace_index)).value)
                 ws_monitor_collection.append(load_alg.getProperty(OUTPUT_WORKSPACE_GROUP + str(monitor_index)).value)
@@ -721,7 +721,7 @@ class SANSLoadDataISIS(SANSLoadData):
         else:
             calibration_file = ""
 
-        for key, value in file_infos.items():
+        for key, value in list(file_infos.items()):
             # Loading
             report_message = "Loading {0}".format(SANSDataType.to_string(key))
             progress.report(report_message)
@@ -804,7 +804,7 @@ class LOQTransmissionCorrection(TransmissionCorrection):
         """
         # Get the transmission and the direct workspaces and apply the correction to them
         workspace_which_require_transmission_correction = []
-        for data_type, _ in workspaces.items():
+        for data_type, _ in list(workspaces.items()):
             if is_transmission_type(data_type):
                 workspace_which_require_transmission_correction.append(workspaces[data_type])
 

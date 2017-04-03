@@ -86,7 +86,7 @@ class UserFileReaderTest(unittest.TestCase):
                            TubeCalibrationFileId.file: ["TUBE_SANS2D_BOTH_31681_25Sept15.nxs"]}
 
         self.assertTrue(len(expected_values) == len(output))
-        for key, value in expected_values.items():
+        for key, value in list(expected_values.items()):
             self.assertTrue(key in output)
             self.assertTrue(len(output[key]) == len(value))
             if len(output[key]) == 1:

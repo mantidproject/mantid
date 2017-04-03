@@ -111,7 +111,7 @@ def create_managed_non_child_algorithm(name, **kwargs):
     alg = AlgorithmManager.create(name)
     alg.initialize()
     alg.setChild(False)
-    for key, value in kwargs.items():
+    for key, value in list(kwargs.items()):
         alg.setProperty(key, value)
     return alg
 
@@ -127,7 +127,7 @@ def create_child_algorithm(parent_alg, name, **kwargs):
     """
     if parent_alg:
         alg = parent_alg.createChildAlgorithm(name)
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             alg.setProperty(key, value)
     else:
         alg = create_unmanaged_algorithm(name, **kwargs)
@@ -365,7 +365,7 @@ def parse_event_slice_setting(string_to_parse):
         elements.append(stop)
 
         # We generate ranges with [[element[0], element[1]], [element[1], element[2]], ...]
-        ranges = zip(elements[:-1], elements[1:])
+        ranges = list(zip(elements[:-1], elements[1:]))
         return [[e1, e2] for e1, e2 in ranges]
 
     def _extract_full_range(line, range_marker_pattern):
