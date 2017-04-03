@@ -51,6 +51,15 @@ public:
     TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
   }
 
+  void testcheckAndSanitizeHistogramThrowsNullE() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    Histogram histogram{edges};
+    Counts counts{23};
+    histogram.setCounts(counts);
+    TS_ASSERT_THROWS(h.setHistogram(histogram), std::invalid_argument);
+  }
+
   void testsetgetXvector() {
     h.setPoints(x1);
     TS_ASSERT_EQUALS(x1, h.dataX());

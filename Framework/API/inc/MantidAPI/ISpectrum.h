@@ -243,7 +243,7 @@ public:
   void setExperimentInfo(ExperimentInfo *experimentInfo, const size_t index);
 
 protected:
-  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {}
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &histogram);
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 

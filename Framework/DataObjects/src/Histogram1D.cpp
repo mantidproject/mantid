@@ -65,18 +65,5 @@ const MantidVec &Histogram1D::dataDx() const { return m_histogram.dataDx(); }
 /// Deprecated, use dx() instead.
 const MantidVec &Histogram1D::readDx() const { return m_histogram.readDx(); }
 
-/**
- * Makes sure the histogram has valid Y data.
- * @param histogram A histogram to process.
- * @throw std::invalid_argument if Y data is NULL.
- */
-void Histogram1D::checkAndSanitizeHistogram(
-    HistogramData::Histogram &histogram) {
-  if (!histogram.sharedY()) {
-    throw std::invalid_argument(
-        "Histogram1D: invalid input: Y data set to nullptr");
-  }
-}
-
 } // namespace DataObjects
 } // namespace Mantid

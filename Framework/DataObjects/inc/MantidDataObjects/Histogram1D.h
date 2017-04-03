@@ -91,8 +91,6 @@ private:
   HistogramData::Histogram &mutableHistogramRef() override {
     return m_histogram;
   }
-
-  void checkAndSanitizeHistogram(HistogramData::Histogram &histogram) override;
 };
 
 } // namespace DataObjects
