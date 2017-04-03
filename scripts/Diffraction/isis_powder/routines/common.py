@@ -6,23 +6,6 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
-    
-    Provides a light wrapper around the dictionary key helper which provides a generic error
-    message stating the following key could not be found in the calibration mapping file. As
-    several instruments will use this message it makes sense to localise it to common. If a
-    message is passed in append_to_error_message it will append that to the end of the generic
-    error message in its own line when an exception is raised.
-    :param dictionary: The dictionary to search in for the key
-    :param key: The key to search for
-    :param append_to_error_message: (Optional) The message to append to the end of the error message
-    :return: The found key if it exists
-    """
-    err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
-    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
-    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
-
-
-def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
     Provides a light wrapper around the dictionary key helper which provides a generic error
     message stating the following key could not be found in the calibration mapping file. As
