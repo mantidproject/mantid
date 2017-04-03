@@ -189,24 +189,33 @@ QList<MatrixWorkspace_const_sptr>
 MantidTreeWidget::getSelectedMatrixWorkspaces() const {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
-  QSet<QString> selectedWsNames;
+  // We preserve the order, but use a set to avoid adding duplicate workspaces.
+  std::set<QString> selectedWsNameSet;
+  std::vector<QString> selectedWsNameList;
   foreach (const QString wsName, this->getSelectedWorkspaceNames()) {
     const auto groupWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
         m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
       for (auto childWsName : childWsNames) {
-        selectedWsNames.insert(QString::fromStdString(childWsName));
+        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) == selectedWsNameSet.end()) {
+          selectedWsNameSet.insert(QString::fromStdString(childWsName));
+          selectedWsNameList.push_back(QString::fromStdString(childWsName));
+        }
       }
     } else {
-      selectedWsNames.insert(wsName);
+      selectedWsNameSet.insert(wsName);
+      if (selectedWsNameSet.find(wsName) == selectedWsNameSet.end()) {
+        selectedWsNameSet.insert(wsName);
+        selectedWsNameList.push_back(wsName);
+      }
     }
   }
 
   // Get the names of, and pointers to, the MatrixWorkspaces only.
   QList<MatrixWorkspace_const_sptr> selectedMatrixWsList;
   QList<QString> selectedMatrixWsNameList;
-  foreach (const auto selectedWsName, selectedWsNames) {
+  foreach (const auto selectedWsName, selectedWsNameList) {
     const auto matrixWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(
         m_ads.retrieve(selectedWsName.toStdString()));
     if (matrixWs) {
@@ -240,7 +249,7 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
         QString::fromStdString(matrixWs->getName()));
   }
 
-  // Check workspaces to see whether to plot immediately without dialog box ...
+  // Check workspaces to see whether to plot immediately without dialog box 
   bool plotImmediately = true;
   if (isAdvanced) {
     plotImmediately = selectedMatrixWsList.size() == 1 && selectedMatrixWsList[0]->getNumberHistograms() == 1;
