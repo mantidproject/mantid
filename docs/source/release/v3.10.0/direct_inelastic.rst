@@ -5,6 +5,11 @@ Direct Inelastic Changes
 .. contents:: Table of Contents
    :local:
 
+Performance
+-----------
+
+Several system tests for the Direct Inelastic technique area are reporting significant improvements in speed. These are the result of some core framework changes. See Framework notes for more information.
+
 Algorithms
 ----------
 

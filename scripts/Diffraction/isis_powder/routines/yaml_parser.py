@@ -58,6 +58,7 @@ def _find_dictionary_key(dict_to_search, run_number):
                 raise ValueError("Could not parse '" + str(key) + "'\n"
                                  "This should be a range of runs in the mapping file."
                                  " Please check your indentation if the syntax looks correct.")
+
             if run_number in generated_runs:
                 return key
 

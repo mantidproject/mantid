@@ -40,8 +40,6 @@ public:
   void execute() override {
     // Tell the presenter which of the available workspaces was selected
     m_presenter->setModel(m_name);
-    // Now notify the presenter
-    m_presenter->notify(DataProcessorPresenter::OpenTableFlag);
   };
   std::string name() override { return m_name; }
   std::string icon() override { return std::string("://worksheet.png"); }

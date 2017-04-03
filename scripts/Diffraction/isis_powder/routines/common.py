@@ -6,6 +6,23 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 
 def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
+    
+    Provides a light wrapper around the dictionary key helper which provides a generic error
+    message stating the following key could not be found in the calibration mapping file. As
+    several instruments will use this message it makes sense to localise it to common. If a
+    message is passed in append_to_error_message it will append that to the end of the generic
+    error message in its own line when an exception is raised.
+    :param dictionary: The dictionary to search in for the key
+    :param key: The key to search for
+    :param append_to_error_message: (Optional) The message to append to the end of the error message
+    :return: The found key if it exists
+    """
+    err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
+    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
+
+
+def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
     """
     Provides a light wrapper around the dictionary key helper which provides a generic error
     message stating the following key could not be found in the calibration mapping file. As
@@ -118,7 +135,11 @@ def generate_run_numbers(run_number_string):
     """
     # Check its not a single run
     if isinstance(run_number_string, int):
-            return [int(run_number_string)]  # Cast into a list and return
+        # Cast into a list and return
+        return [run_number_string]
+    elif isinstance(run_number_string, str) and run_number_string.isdigit():
+        # We can let Python handle the conversion in this case
+        return [int(run_number_string)]
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
@@ -131,7 +152,9 @@ def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
     any properties passed into this method so that the vanadium
-    can be later loaded.
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
     :param vanadium_string: The name of this vanadium run
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name

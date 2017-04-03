@@ -49,6 +49,7 @@ class Polaris(AbstractInst):
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
 
+
     def _crop_raw_to_expected_tof_range(self, ws_to_crop):
         cropped_ws = common.crop_in_tof(ws_to_crop=ws_to_crop, x_min=self._inst_settings.raw_data_crop_values[0],
                                         x_max=self._inst_settings.raw_data_crop_values[1])

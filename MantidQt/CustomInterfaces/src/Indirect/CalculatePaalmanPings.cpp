@@ -244,6 +244,33 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
     if (containerType != sampleType)
       uiv.addErrorMessage(
           "Sample and can workspaces must contain the same type of data.");
+
+    // Shape validation
+
+    const auto shape = m_uiForm.cbSampleShape->currentIndex();
+    if (shape == 1 && m_uiForm.ckUseCan->isChecked()) {
+      auto sampleRadius = m_uiForm.spCylSampleOuterRadius->value();
+      auto containerRadius = m_uiForm.spCylCanOuterRadius->value();
+      if (containerRadius <= sampleRadius) {
+        uiv.addErrorMessage(
+            "Container radius must be bigger than sample radius");
+      }
+    }
+    if (shape == 2) {
+      auto sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+      auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+      if (sampleOuterRadius <= sampleInnerRadius) {
+        uiv.addErrorMessage(
+            "Sample outer radius must be bigger than sample inner radius");
+      }
+      if (m_uiForm.ckUseCan->isChecked()) {
+        auto containerRadius = m_uiForm.spAnnCanOuterRadius->value();
+        if (containerRadius <= sampleOuterRadius) {
+          uiv.addErrorMessage(
+              "Container outer radius must be bigger than sample outer radius");
+        }
+      }
+    }
   }
 
   // Show error message if needed
