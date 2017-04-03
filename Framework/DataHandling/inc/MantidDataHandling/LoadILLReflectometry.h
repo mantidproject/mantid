@@ -60,8 +60,6 @@ private:
 
   void initWorkspace(std::vector<std::vector<int>> monitorsData);
   void initNames(NeXus::NXEntry &entry);
-  void setInstrumentName(const NeXus::NXEntry &firstEntry,
-                         const std::string &instrumentNamePath);
   void loadDataDetails(NeXus::NXEntry &entry);
   void getXValues(std::vector<double> &xVals);
   void convertToWavelength();
@@ -83,7 +81,7 @@ private:
 
   /* Values parsed from the nexus file */
   std::string m_instrumentName; ///< Name of the instrument
-  size_t m_acqMode{1}; // acquisition mode (TOF (default), monochromatic)
+  size_t m_acqMode{1}; ///< Acquisition mode (TOF (default), monochromatic)
   size_t m_numberOfChannels{0};
   double m_tofDelay{0.0};
   size_t m_numberOfHistograms{

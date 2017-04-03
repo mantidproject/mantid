@@ -9,7 +9,9 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadILLReflectometry.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
+
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
@@ -60,7 +62,7 @@ public:
   void testPropertiesD17() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, outWSName);
-    commonProperties(output);
+    commonProperties(output, "D17");
     TS_ASSERT_EQUALS(
         output->run().getPropertyValueAsType<double>("PSD.time_of_flight_0"),
         57.0);
@@ -161,7 +163,7 @@ public:
   void testPropertiesFigaro() {
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_figaroFile, outWSName);
-    commonProperties(output);
+    commonProperties(output, "Figaro");
     TS_ASSERT_EQUALS(
         output->run().getPropertyValueAsType<double>("PSD.time_of_flight_0"),
         40.0);
@@ -231,13 +233,14 @@ public:
     TS_ASSERT_THROWS_ANYTHING(loader.execute(););
   }
 
-  void commonProperties(MatrixWorkspace_sptr output) {
+  void commonProperties(MatrixWorkspace_sptr output, const std::string& instrName) {
     TS_ASSERT(output->isHistogramData());
     TS_ASSERT(output->spectrumInfo().isMonitor(0));
     TS_ASSERT(output->spectrumInfo().isMonitor(1));
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 256 + 2);
     TS_ASSERT_EQUALS(output->blocksize(), 1000);
     TS_ASSERT_EQUALS(output->run().getProperty("Facility")->value(), "ILL");
+    TS_ASSERT_EQUALS(output->getInstrument()->getName(), instrName);
     // check the sum of all detector counts against Nexus file entry detsum
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("PSD.detsum"),
                      detCounts(output));

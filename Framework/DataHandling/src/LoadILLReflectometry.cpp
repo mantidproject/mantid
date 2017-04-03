@@ -49,7 +49,6 @@ using namespace NeXus;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
-//----------------------------------------------------------------------------------------------
 /**
  * Return the confidence with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -60,20 +59,19 @@ int LoadILLReflectometry::confidence(
     Kernel::NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL
-  if ((descriptor.pathExists("/entry0/wavelength") || // ILL d17
-       descriptor.pathExists("/entry0/theta"))        // ILL figaro
+  if ((descriptor.pathExists("/entry0/wavelength") || // ILL D17
+       descriptor.pathExists("/entry0/theta"))        // ILL Figaro
       &&
       descriptor.pathExists("/entry0/experiment_identifier") &&
       descriptor.pathExists("/entry0/mode") &&
-      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL d17
-       descriptor.pathExists("/entry0/instrument/Theta")) // ILL figaro
+      (descriptor.pathExists("/entry0/instrument/VirtualChopper") || // ILL D17
+       descriptor.pathExists("/entry0/instrument/Theta")) // ILL Figaro
       )
     return 80;
   else
     return 0;
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadILLReflectometry::init() {
@@ -120,7 +118,6 @@ void LoadILLReflectometry::init() {
                           "BraggAngleIs", IS_EQUAL_TO, "detector angle"));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Validate inputs
  * @returns a string map containing the error messages
   */
@@ -153,7 +150,6 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   return result;
 }
 
-//----------------------------------------------------------------------------------------------
 /**
    * Run the Child Algorithm LoadInstrument.
    */
@@ -171,7 +167,6 @@ void LoadILLReflectometry::runLoadInstrument() {
   }
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadILLReflectometry::exec() {
@@ -180,9 +175,6 @@ void LoadILLReflectometry::exec() {
   NXEntry firstEntry{dataRoot.openFirstEntry()};
   // load Monitor details: n. monitors x monitor contents
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
-  // set instrument name
-  std::string instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
-  setInstrumentName(firstEntry, std::string(instrumentPath).append("/name"));
   // load Data details (number of tubes, channels, etc)
   loadDataDetails(firstEntry);
   // initialise workspace
@@ -224,10 +216,24 @@ void LoadILLReflectometry::exec() {
 }
 
 /**
-  * Init names of instrument specific NeXus file entries
+  * Init names of member variables based on instrument specific NeXus file entries
   */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
-  if (m_instrumentName == "d17") {
+  std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
+  instrumentNamePath.append("/name");
+  m_instrumentName = entry.getString(instrumentNamePath);
+  if (m_instrumentName.empty())
+    throw std::runtime_error(
+        "Cannot set the instrument name from the Nexus file!");
+
+  // In NeXus files names are: D17 and figaro. The instrument
+  // definition is independent and names start with a capital letter. This
+  // loader follows its convention.
+  boost::to_lower(m_instrumentName);
+  m_instrumentName[0] = char((std::toupper(m_instrumentName[0])));
+  g_log.debug(
+      std::string("Instrument name : ").append(m_instrumentName).append("\n"));
+  if (m_instrumentName == "D17") {
     m_detectorDistance = "det";
     m_detectorAngleName = "dan.value";
     m_offsetFrom = "VirtualChopper";
@@ -235,13 +241,13 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_pixelCentre = 135.75;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
-  } else if (m_instrumentName == "figaro") {
+  } else if (m_instrumentName == "Figaro") {
     m_detectorDistance = "DTR";
     m_detectorAngleName = "VirtualAxis.dan_actual_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
     m_pixelCentre = double(m_numberOfHistograms) / 2.0;
-    // figaro: find out which of the four choppers are used
+    // Figaro: find out which of the four choppers are used
     NXFloat firstChopper =
         entry.openNXFloat("instrument/ChopperSetting/firstChopper");
     firstChopper.load();
@@ -267,23 +273,6 @@ void LoadILLReflectometry::convertToWavelength() {
                                                          m_localWorkspace);
   convertToWavelength->setPropertyValue("Target", "Wavelength");
   convertToWavelength->executeAsChildAlg();
-}
-
-/**
- * Set member variable with the instrument name
- */
-void LoadILLReflectometry::setInstrumentName(
-    const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
-
-  if (instrumentNamePath == std::string()) {
-    std::string message("Cannot set the instrument name from the Nexus file!");
-    throw std::runtime_error(message);
-  }
-  m_instrumentName =
-      m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath);
-  boost::to_lower(m_instrumentName);
-  g_log.debug(
-      std::string("Instrument name : ").append(m_instrumentName).append("\n"));
 }
 
 /**
@@ -331,7 +320,7 @@ void LoadILLReflectometry::initWorkspace(
  */
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
-  // PSD data figaro 1 x 256 x 1000
+  // PSD data Figaro 1 x 256 x 1000
 
   NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
   timeOfFlight.load();
@@ -405,7 +394,7 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     std::string chopper{"Chopper"};
     PropertyWithValue<double> *chop1_speed{NULL}, *chop2_speed{NULL},
         *chop2_phase{NULL};
-    if (m_instrumentName == "d17") {
+    if (m_instrumentName == "D17") {
       chop1_speed = getValue("VirtualChopper.chopper1_speed_average");
       chop2_speed = getValue("VirtualChopper.chopper2_speed_average");
       chop2_phase = getValue("VirtualChopper.chopper2_phase_average");
@@ -416,7 +405,7 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
     auto open_offset =
         getValue(std::string(m_offsetFrom).append(".").append(m_offsetName));
     if (chop1_speed && chop2_speed && chop2_phase && *chop1_speed != 0.0 &&
-        *chop1_speed != 0.0 && *chop2_phase != 0.0) { // only for d17
+        *chop1_speed != 0.0 && *chop2_phase != 0.0) { // only for D17
       // virtual chopper entries are valid
       chopper = "Virtual chopper";
     } else {
@@ -477,7 +466,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
   size_t nb_monitors = monitorsData.size();
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
 
-  if (m_instrumentName == "d17") {
+  if (m_instrumentName == "D17") {
     m_wavelength = entry.getFloat("wavelength");
     double ei = m_loader.calculateEnergy(m_wavelength);
     m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
@@ -525,14 +514,13 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
     g_log.information("Error loading experiment info of nxs file");
   }
   */
-  const std::string filename{getPropertyValue("Filename")};
-  API::Run &runDetails = m_localWorkspace->mutableRun();
   // Open NeXus file
+  const std::string filename{getPropertyValue("Filename")};
   NXhandle nxfileID;
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
-  m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
+  m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   stat = NXclose(&nxfileID);
 }
 
@@ -707,7 +695,7 @@ double LoadILLReflectometry::computeBraggAngle() {
       throw std::runtime_error("BraggAngleIs (sample or detector option) "
                                "is not defined in Nexus file");
   }
-  // user angle and sample angle behave equivalently for d17
+  // user angle and sample angle behave equivalently for D17
   const std::string scatteringType = getProperty("ScatteringType");
   // the reflected beam
   std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
