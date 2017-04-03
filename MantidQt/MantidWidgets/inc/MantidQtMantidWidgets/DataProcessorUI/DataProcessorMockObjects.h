@@ -40,6 +40,8 @@ public:
   MOCK_CONST_METHOD0(getClipboard, std::string());
   MOCK_CONST_METHOD0(getProcessInstrument, std::string());
   MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(expandAll, void());
+  MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const std::string &text));
 
@@ -91,7 +93,10 @@ public:
                      std::map<std::string, std::string>());
   MOCK_CONST_METHOD0(getProcessingOptions, std::string());
   MOCK_CONST_METHOD0(getPostprocessingOptions, std::string());
-  MOCK_CONST_METHOD0(getTimeSlicingOptions, std::string());
+
+  // Event handling
+  MOCK_CONST_METHOD0(getTimeSlicingValues, std::string());
+  MOCK_CONST_METHOD0(getTimeSlicingType, std::string());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
@@ -119,7 +124,7 @@ private:
 
   std::vector<DataProcessorCommand_uptr> publishCommands() override {
     std::vector<DataProcessorCommand_uptr> commands;
-    for (size_t i = 0; i < 27; i++)
+    for (size_t i = 0; i < 29; i++)
       commands.push_back(
           Mantid::Kernel::make_unique<DataProcessorAppendRowCommand>(this));
     publishCommandsMocked();

@@ -7,6 +7,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -88,8 +89,10 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
 
   // Link workspace with detector
   Mantid::Indexing::IndexInfo indexInfo(nhist);
-  indexInfo.setDetectorIDs(
-      std::vector<Mantid::Indexing::DetectorID>(nhist, id));
+  Mantid::SpectrumDefinition specDef;
+  specDef.add(0); // id 1
+  indexInfo.setSpectrumDefinitions(
+      std::vector<Mantid::SpectrumDefinition>(nhist, specDef));
   ws2d->setIndexInfo(indexInfo);
 
   return ws2d;

@@ -46,11 +46,15 @@ namespace Indexing {
 */
 class MANTID_INDEXING_DLL Partitioner {
 public:
-  enum class MonitorStrategy { CloneOnEachPartition, DedicatedPartition };
+  enum class MonitorStrategy {
+    TreatAsNormalSpectrum,
+    CloneOnEachPartition,
+    DedicatedPartition
+  };
 
   Partitioner(const int numberOfPartitions, const PartitionIndex partition,
               const MonitorStrategy monitorStrategy,
-              std::vector<GlobalSpectrumIndex> monitors);
+              std::vector<GlobalSpectrumIndex> monitors = {});
 
   virtual ~Partitioner() = default;
 

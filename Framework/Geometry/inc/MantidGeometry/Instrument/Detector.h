@@ -85,6 +85,9 @@ public:
   const ParameterMap &parameterMap() const override;
   size_t index() const override;
 
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor) const override;
+
 private:
   /// The detector id
   const detid_t m_id;
