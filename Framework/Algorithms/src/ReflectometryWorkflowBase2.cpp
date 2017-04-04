@@ -526,7 +526,7 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
 *
 * @param alg :: The algorithm to populate parameters for
 * @param instrument :: The instrument attached to the workspace
-* @return Bool on whether or not any transmission runs were found
+* @return Boolean, whether or not any transmission runs were found
 */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) const {
