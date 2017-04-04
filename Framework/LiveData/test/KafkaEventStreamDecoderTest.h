@@ -10,7 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidLiveData/ISIS/KafkaEventStreamDecoder.h"
+#include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
 #include <thread>
