@@ -204,7 +204,6 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
         }
       }
     } else {
-      selectedWsNameSet.insert(wsName);
       if (selectedWsNameSet.find(wsName) == selectedWsNameSet.end()) {
         selectedWsNameSet.insert(wsName);
         selectedWsNameList.push_back(wsName);
