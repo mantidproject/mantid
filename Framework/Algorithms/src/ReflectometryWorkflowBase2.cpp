@@ -525,11 +525,10 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
 /** Set transmission properties
 *
 * @param alg :: The algorithm to populate parameters for
-* @param instrument :: The instrument attached to the workspace
 * @return Boolean, whether or not any transmission runs were found
 */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument) const {
+    IAlgorithm_sptr alg) const {
 
   bool transRunsExist = false;
 

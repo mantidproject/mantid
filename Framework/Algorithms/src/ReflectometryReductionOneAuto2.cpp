@@ -257,7 +257,7 @@ void ReflectometryReductionOneAuto2::exec() {
   populateMonitorProperties(alg, instrument);
   alg->setPropertyValue("NormalizeByIntegratedMonitors",
                         getPropertyValue("NormalizeByIntegratedMonitors"));
-  bool transRunsFound = populateTransmissionProperties(alg, instrument);
+  bool transRunsFound = populateTransmissionProperties(alg);
   if (transRunsFound)
     alg->setProperty("StrictSpectrumChecking",
                      getPropertyValue("StrictSpectrumChecking"));

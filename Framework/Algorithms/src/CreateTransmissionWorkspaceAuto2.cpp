@@ -78,11 +78,11 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   // First transmission run
   MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
 
+  // Transmission properties
+  populateTransmissionProperties(alg);
+
   // Instrument
   auto instrument = firstWS->getInstrument();
-
-  // Transmission properties
-  populateTransmissionProperties(alg, instrument);
 
   // Other mandatory properties
   double wavMin = checkForMandatoryInstrumentDefault<double>(
