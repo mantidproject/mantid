@@ -45,11 +45,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  /// Reads calibration/detector section and returns first word of next line
-  std::string ApplyCalibInfo(std::ifstream &in, std::string startChar,
-                             Geometry::Instrument_const_sptr instr,
-                             API::DetectorInfo &detectorInfo, double &T0);
-
   /// Reads first line of peaks file and returns first word of next line
   std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
                          std::ifstream &in, double &T0);
@@ -77,7 +72,7 @@ private:
                         std::string filename);
 
   /// Local cache of bank IComponents used in file
-  std::map<std::string, boost::shared_ptr<const Geometry::IComponent>> m_banks;
+  std::map<std::string, boost::shared_ptr<const Geometry::IComponent> > m_banks;
 
   /// Retrieve cached bank (or load and cache for next time)
   boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(
