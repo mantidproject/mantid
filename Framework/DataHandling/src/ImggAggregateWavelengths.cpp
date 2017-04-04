@@ -514,8 +514,11 @@ ImggAggregateWavelengths::rangesFromStringProperty(
                       Mantid::Kernel::StringTokenizer::TOK_TRIM);
     if (2 != minMaxTokens.count()) {
       throw std::invalid_argument(
-          "Could not parse a minimum and maximum value separated by '" + sep +
-          "' from the string: " + str);
+          std::string(
+              "Could not parse a minimum and maximum value separated by '")
+              .append(sep)
+              .append("' from the string: ")
+              .append(str));
     }
 
     try {

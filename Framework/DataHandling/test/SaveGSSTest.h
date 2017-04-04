@@ -20,43 +20,53 @@ using namespace Mantid::Kernel;
 using Mantid::DataHandling::SaveGSS;
 
 namespace {
-//----------------------------------------------------------------------------------------------
-/** Generate a matrix workspace for writing to gsas file
-*/
-API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
-  // Create workspace
-  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-          2, 100, false, false, true, "TestFake"));
-  dataws->getAxis(0)->setUnit("TOF");
-
+void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
+  wsPointer->getAxis(0)->setUnit("TOF");
   // Set data with logarithm bin
   double t0 = 5000.;
   double dt = 0.01;
-  size_t numhist = dataws->getNumberHistograms();
+  const size_t numhist = wsPointer->getNumberHistograms();
   for (size_t iws = 0; iws < numhist; ++iws) {
-    auto &dataX = dataws->mutableX(iws);
-    dataX[0] = t0;
-    for (size_t i = 1; i < dataX.size(); ++i)
-      dataX[i] = (1 + dt) * dataX[i - 1];
+    auto &mutableXVals = wsPointer->mutableX(iws);
+    mutableXVals[0] = t0;
+    for (size_t i = 1; i < mutableXVals.size(); ++i)
+      mutableXVals[i] = (1 + dt) * mutableXVals[i - 1];
   }
 
   // Set y and e
   for (size_t iws = 0; iws < numhist; ++iws) {
-    const MantidVec &vecX = dataws->readX(iws);
-    auto &dataY = dataws->mutableY(iws);
-    auto &dataE = dataws->mutableE(iws);
-    double factor = (static_cast<double>(iws) + 1) * 1000.;
-    for (size_t i = 0; i < dataY.size(); ++i) {
-      dataY[i] = factor * std::exp(-(vecX[i] - 7000. - factor) *
-                                   (vecX[i] - 7000. - factor) /
-                                   (0.01 * factor * factor));
-      if (dataY[i] < 0.01)
-        dataE[i] = 0.1;
+    const auto &xVals = wsPointer->x(iws);
+    auto &mutableYVals = wsPointer->mutableY(iws);
+    auto &mutableEVals = wsPointer->mutableE(iws);
+    const double factor = (static_cast<double>(iws) + 1) * 1000.;
+    for (size_t i = 0; i < mutableYVals.size(); ++i) {
+      mutableYVals[i] = factor * std::exp(-(xVals[i] - 7000. - factor) *
+                                          (xVals[i] - 7000. - factor) /
+                                          (0.01 * factor * factor));
+      if (mutableYVals[i] < 0.01)
+        mutableEVals[i] = 0.1;
       else
-        dataE[i] = std::sqrt(dataY[i]);
+        mutableEVals[i] = std::sqrt(mutableYVals[i]);
     }
   }
+}
+
+/**
+  * Generates a fully defined instrument with specified number
+  * of histograms and bins for the test
+  *
+  * @param numHistograms :: The number of histograms the output workspace should
+  *have
+  * @param numBins :: The number of bins the workspace should have
+  * @return :: A workspace with logarithmic binning and test data
+  */
+API::MatrixWorkspace_sptr generateTestMatrixWorkspace(int numHistograms,
+                                                      int numBins) {
+  // Create workspace
+  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+          numHistograms, numBins, false, false, true, "TestFake"));
+  populateWorkspaceWithLogData(dataws.get());
 
   return dataws;
 }
@@ -76,7 +86,8 @@ public:
     */
   void test_2BankInstrument() {
     // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    MatrixWorkspace_sptr dataws =
+        generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
     AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
 
     Mantid::DataHandling::SaveGSS saver;
@@ -156,7 +167,8 @@ public:
     */
   void test_2BankInstrumentRALF() {
     // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    MatrixWorkspace_sptr dataws =
+        generateTestMatrixWorkspace(m_defaultNumHistograms, m_defaultNumBins);
     AnalysisDataService::Instance().addOrReplace("Test2BankWS", dataws);
 
     Mantid::DataHandling::SaveGSS saver;
@@ -235,7 +247,8 @@ public:
   /** Save a 2 bank workspace in point data format and without instrument
     */
   void test_2BankNoInstrumentData() {
-    MatrixWorkspace_sptr dataws = generateNoInstrumentWorkspace();
+    MatrixWorkspace_sptr dataws =
+        generateNoInstrumentWorkspace(m_defaultNumHistograms, m_defaultNumBins);
 
     AnalysisDataService::Instance().addOrReplace("TestNoInstWS", dataws);
 
@@ -312,83 +325,38 @@ public:
   }
 
 private:
-  //----------------------------------------------------------------------------------------------
-  /**
-    */
-  API::MatrixWorkspace_sptr generateNoInstrumentWorkspace() {
+  API::MatrixWorkspace_sptr generateNoInstrumentWorkspace(int numHistograms,
+                                                          int numBins) {
     MatrixWorkspace_sptr dataws =
-        WorkspaceCreationHelper::create2DWorkspace(2, 100);
+        WorkspaceCreationHelper::create2DWorkspace(numHistograms, numBins);
     populateWorkspaceWithLogData(dataws.get());
     return dataws;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Generate a matrix workspace for writing to gsas file
-    */
-  API::MatrixWorkspace_sptr generateTestMatrixWorkspace() {
-    // Create workspace
-    MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            2, 100, false, false, true, "TestFake"));
-    populateWorkspaceWithLogData(dataws.get());
-    return dataws;
-  }
-
-  void populateWorkspaceWithLogData(MatrixWorkspace *wsPointer) {
-    wsPointer->getAxis(0)->setUnit("TOF");
-    // Set data with logarithm bin
-    double t0 = 5000.;
-    double dt = 0.01;
-    const size_t numhist = wsPointer->getNumberHistograms();
-    for (size_t iws = 0; iws < numhist; ++iws) {
-      auto &mutableXVals = wsPointer->mutableX(iws);
-      mutableXVals[0] = t0;
-      for (size_t i = 1; i < mutableXVals.size(); ++i)
-        mutableXVals[i] = (1 + dt) * mutableXVals[i - 1];
-    }
-
-    // Set y and e
-    for (size_t iws = 0; iws < numhist; ++iws) {
-      const auto &xVals = wsPointer->x(iws);
-      auto &mutableYVals = wsPointer->mutableY(iws);
-      auto &mutableEVals = wsPointer->mutableE(iws);
-      const double factor = (static_cast<double>(iws) + 1) * 1000.;
-      for (size_t i = 0; i < mutableYVals.size(); ++i) {
-        mutableYVals[i] = factor * std::exp(-(xVals[i] - 7000. - factor) *
-                                            (xVals[i] - 7000. - factor) /
-                                            (0.01 * factor * factor));
-        if (mutableYVals[i] < 0.01)
-          mutableEVals[i] = 0.1;
-        else
-          mutableEVals[i] = std::sqrt(mutableYVals[i]);
-      }
-    }
-  }
+  const int m_defaultNumHistograms = 2;
+  const int m_defaultNumBins = 100;
 };
 
 class SaveGSSTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
     // Create a workspace for writing out
-    MatrixWorkspace_sptr dataws = generateTestMatrixWorkspace();
+    MatrixWorkspace_sptr dataws =
+        generateTestMatrixWorkspace(2, m_numberOfBinsToSave);
     AnalysisDataService::Instance().addOrReplace(wsName, dataws);
 
-    for (int i = 0; i < numberOfIterations; ++i) {
-      saveAlgPtrs.emplace_back(setupAlg());
-    }
+    m_alg = new SaveGSS();
+    m_alg->initialize();
+    m_alg->setPropertyValue("InputWorkspace", wsName);
+    m_alg->setProperty("Filename", filename);
+    m_alg->setRethrows(true);
   }
 
-  void testSaveGSSPerformance() {
-    for (auto alg : saveAlgPtrs) {
-      TS_ASSERT_THROWS_NOTHING(alg->execute());
-    }
-  }
+  void testSaveGSSPerformance() { TS_ASSERT_THROWS_NOTHING(m_alg->execute()); }
 
   void tearDown() override {
-    for (int i = 0; i < numberOfIterations; i++) {
-      delete saveAlgPtrs[i];
-      saveAlgPtrs[i] = nullptr;
-    }
+    delete m_alg;
+    m_alg = nullptr;
     Mantid::API::AnalysisDataService::Instance().remove(wsName);
     Poco::File gsasfile(filename);
     if (gsasfile.exists())
@@ -396,21 +364,13 @@ public:
   }
 
 private:
-  std::vector<SaveGSS *> saveAlgPtrs;
-
-  const int numberOfIterations = 5;
+  // Controls the speed of the test
+  const int m_numberOfBinsToSave = 100000;
 
   const std::string wsName = "Test2BankWS";
   const std::string filename = "test_performance.gsa";
 
-  SaveGSS *setupAlg() {
-    SaveGSS *saver = new SaveGSS;
-    saver->initialize();
-    saver->setPropertyValue("InputWorkspace", wsName);
-    saver->setProperty("Filename", filename);
-    saver->setRethrows(true);
-    return saver;
-  }
+  SaveGSS *m_alg = nullptr;
 };
 
 #endif // SAVEGSSTEST_H_

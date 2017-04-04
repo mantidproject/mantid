@@ -66,7 +66,6 @@ class IndirectFlatPlateAbsorption2Test(unittest.TestCase):
                                                       SampleChemicalFormula='H2-O',
                                                       NumberWavelengths=10,
                                                       Events=200,
-                                                      DefaultBeamSize=False,
                                                       BeamHeight=2,
                                                       BeamWidth=3)
 

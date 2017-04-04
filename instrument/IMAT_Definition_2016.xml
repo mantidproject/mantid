@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File
+see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
+            name="IMAT" valid-from ="2016-07-15 00:00:00"
+            valid-to ="2017-02-24 23:59:59"
+            last-modified="2016-08-03 18:46:01">
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z"/>
+  </defaults>
+  <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
+       IMAT (Imaging and Materials Science & Engineering)
+  -->
+
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-56.0"/>
+  </component>
+  <type name="source" is="Source" />
+
+  <component type="default-sample-holder">
+    <location />
+  </component>
+
+  <!-- Place detector components (including monitors) -->
+
+  <!-- Monitors -->
+  <component type="monitors" idlist="monitors">
+    <location />
+  </component>
+
+
+  <!-- The current sequence in the nexus files / workspaces seems to be:
+   monitors (13+1): workspace indices 0..13   (0..12+"1 off" monitors)
+   200 elements: workspace indices 14..213 + 224 "additional"?
+   16 PMT (32 elements): workspace indices 416..443
+   -->
+
+  <!-- This places the "200 elements" prototype diffraction detector 1.77m to the left of the sample (seen in the direction of the beam) -->
+  <component type="200-elements" idstart="14" idfillbyfirst="n" idstep="1" idstepbyrow="100">
+	<!--<location r="1.77" theta="-90" phi="0" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-200-elements"/> -->
+	<location x="+1.77" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-200-elements"/>
+  </component>
+
+  <!-- gap of 202 spectra between workspace indices [214..415] -->
+  <!-- use this if we need gaps between the detector blocks: -->
+  <component type="dummy-gap" idstart="214" idfillbyfirst="y" idstep="1" idstepbyrow="1">
+    <location z="-100000"/>
+  </component>
+
+  <!-- Place the 16PMT prototype diffraction detector. 1.895m to the right of the sample (seen in the direction of the beam) -->
+  <component type="16PMT" idstart="416" idfillbyfirst="n" idstep="1" idstepbyrow="16">
+   <!-- <location r="1.895" theta="90" phi="0" rot="90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/> -->
+   <location x="-1.895" rot="-90" axis-x="0.0" axis-y="1.0" axis-z="0.0" name="prototype-detector-16PMT"/>
+  </component>
+
+
+  <!-- "Camera" -->
+  <component type="old-mcp-definition" idstart="1000000" idfillbyfirst="y" idstep="1" idstepbyrow="1">
+    <location z="10" x="0.0" name="detector-old-mcp"/>
+  </component>
+
+  <!-- A cuboid sample holder -->
+  <!-- <type name="default-sample-holder" is="SamplePos" /> -->
+  <type name="default-sample-holder" is="SamplePos">
+    <cuboid id="shape">
+      <left-front-bottom-point  x="0.02"  y="-0.02" z="0.0"   />
+      <left-front-top-point     x="0.02"  y="-0.02" z="0.02"  />
+      <left-back-bottom-point   x="-0.02" y="-0.02" z="0.0"   />
+      <right-front-bottom-point x="0.02"  y="0.02"  z="0.0"   />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+
+  <!-- Matrix structure of the "200 elements" detector -->
+  <type name="200-elements" is="RectangularDetector" type="pixel-200-elements"
+  xpixels="100" xstart="-0.2" xstep="+0.004"
+  ypixels="2" ystart="+0.01" ystep="-0.01" >
+  </type>
+
+  <type name="dummy-gap" is="RectangularDetector" type="pixel"
+  xpixels="202" xstart="0.0" xstep="0.1"
+  ypixels="1" ystart="0.0" ystep="0.1" >
+  </type>
+
+  <!-- Matrix structure of the "16PMT" detector -->
+  <type name="16PMT" is="RectangularDetector" type="pixel-16PMT"
+  xpixels="16" xstart="-0.032" xstep="+0.004"
+  ypixels="2" ystart="+0.002" ystep="-0.004" >
+  </type>
+
+
+  <!-- Old/now fixed definition of the MCP detector. Here for reference in the future -->
+  <type name="old-mcp-definition" is="RectangularDetector" type="pixel"
+  xpixels="512" xstart="-0.048705" xstep="+0.00051"
+  ypixels="512" ystart="-0.048705" ystep="+0.00051" >
+  </type>
+
+  <type name="pixel" is="detector-old-mcp-definition">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.0005104167" y="-0.0005104167" z="0.0" />
+      <left-front-top-point x="0.0005104167" y="-0.0005104167" z="0.000005" />
+      <left-back-bottom-point x="-0.0005104167" y="-0.0005104167" z="0.0" />
+      <right-front-bottom-point x="0.0005104167" y="0.0005104167" z="0.0" />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+
+  <!-- Prototype pixel types -->
+  <type name="pixel-200-elements" is="detector">
+   <cuboid id="pixel-shape">
+     <left-front-bottom-point x="0.002" y="-0.005" z="0.0"  />
+     <left-front-top-point  x="0.002" y="-0.005" z="0.001"  />
+     <left-back-bottom-point  x="-0.002" y="-0.005" z="0.0"  />
+     <right-front-bottom-point  x="0.002" y="0.005" z="0.0"  />
+   </cuboid>
+  <algebra val="pixel-shape"/>
+  </type>
+
+  <type name="pixel-16PMT" is="detector">
+   <cuboid id="pixel-shape">
+     <left-front-bottom-point x="0.002" y="-0.002" z="0.0"  />
+     <left-front-top-point  x="0.002" y="-0.002" z="0.001"  />
+     <left-back-bottom-point  x="-0.002" y="-0.002" z="0.0"  />
+     <right-front-bottom-point  x="0.002" y="0.002" z="0.0"  />
+   </cuboid>
+  <algebra val="pixel-shape"/>
+  </type>
+
+  <!-- DEFINITION OF MONITOR TYPES -->
+
+  <type name="monitors">
+    <component type="monitor-cylinder">
+      <!-- Example, first monitor is at 11.6534 m from the source, in the direction towards the sample => z = 11.6534 - 56 = -44.3466 (from the sample, which is at z=0)-->
+      <location z="-44.3466" name="monitor1a"/> <!-- 11.6534 - 56 -->
+      <location z="-44.3466" name="monitor1b"/>
+      <location z="-36.1856" name="monitor2a"/> <!-- 19.8144 - 56 -->
+      <location z="-36.1856" name="monitor2b"/>
+      <location z="-35.1056" name="monitor3a"/> <!-- 20.8944 - 56 -->
+      <location z="-35.1056" name="monitor3b"/>
+      <location z="-9.8226" name="monitor4a"/> <!-- 46.1774 - 56 -->
+      <location z="-9.8226" name="monitor4b"/>
+      <location z="-7" name="monitor5a"/> <!-- 49.0 - 56 -->
+      <location z="-7" name="monitor5b"/>
+      <location z="0.0" name="CalMon"/> <!-- 56 - 56 -->
+      <location z="4.0" name="He_in"/>  <!-- 60 - 56-->
+      <location z="4.0" name="He_out"/>
+	  <location z="0"/> <!-- dummy monitor (off) -->
+    </component>
+  </type>
+
+  <!-- shape for monitors, borrowed from GEM -->
+  <type name="monitor-cylinder" is="monitor">
+    <properties>
+      Copied from monitor.dat:
+
+      name:: box
+      rank:: 2
+      dimensions:: 2 4
+      values:: -45.00  -2.00
+      45.00  -2.00
+      135.00  -2.00
+      225.00  -2.00
+    </properties>
+
+    <cylinder id="cylinder-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+  </type>
+
+  <!-- DETECTOR and MONITOR ID LISTS -->
+  <idlist idname="monitors">
+    <id start="0" end="13" />
+  </idlist>
+
+  <!-- do not use idlist for the rectangular detectors, they're ignored! -->
+
+</instrument>

@@ -1,7 +1,7 @@
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <map>

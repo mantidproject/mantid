@@ -675,8 +675,13 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
             alg->getPropertyValue(m_whitelist.algPropFromColIndex(i));
 
         if (m_options["Round"].toBool()) {
-          propValue = propValue.substr(
-              0, propValue.find(".") + m_options["RoundPrecision"].toInt() + 1);
+          std::string exp = (propValue.find("e") != std::string::npos)
+                                ? propValue.substr(propValue.find("e"))
+                                : "";
+          propValue =
+              propValue.substr(0, propValue.find(".") +
+                                      m_options["RoundPrecision"].toInt() + 1) +
+              exp;
         }
 
         newData[i] = propValue;
@@ -731,9 +736,20 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
+
+/**
+Collapse all groups
+*/
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
+
   switch (flag) {
   case DataProcessorPresenter::SaveAsFlag:
     saveTableAs();
@@ -797,6 +813,12 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
+    break;
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
+    break;
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -909,8 +931,9 @@ void GenericDataProcessorPresenter::importTable() {
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName = QString::fromStdString(result);
-  auto toOpen = outputWorkspaceName.trimmed().toStdString();
-  m_view->setModel(toOpen);
+  std::string toOpen = outputWorkspaceName.trimmed().toStdString();
+  if (!toOpen.empty())
+    m_view->setModel(toOpen);
 }
 
 /**

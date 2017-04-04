@@ -161,5 +161,20 @@ Qt::ItemFlags ReflSearchModel::flags(const QModelIndex &index) const {
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
+
+/**
+Clear the model
+*/
+void ReflSearchModel::clear() {
+
+  beginResetModel();
+
+  m_runs.clear();
+  m_descriptions.clear();
+  m_locations.clear();
+
+  endResetModel();
+}
+
 } // namespace CustomInterfaces
 } // namespace Mantid

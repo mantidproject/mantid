@@ -58,6 +58,33 @@ public:
     return ws;
   }
 
+  ITableWorkspace_sptr unsortedFourRowTable() {
+    // A table workspace where rows belonging to the same group are
+    // non-consecutive
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Column1");
+    ws->addColumn("str", "Column2");
+
+    TableRow row = ws->appendRow();
+    row << "group0"
+        << "group0_row0_col0"
+        << "group0_row0_col1";
+    row = ws->appendRow();
+    row << "group1"
+        << "group1_row0_col0"
+        << "group1_row0_col1";
+    row = ws->appendRow();
+    row << "group0"
+        << "group0_row1_col0"
+        << "group0_row1_col1";
+    row = ws->appendRow();
+    row << "group1"
+        << "group1_row1_col0"
+        << "group1_row1_col1";
+    return ws;
+  }
+
   void testBadTableWorkspace() {
     auto ws = oneRowTable();
 
@@ -99,6 +126,10 @@ public:
                      "Column1");
     TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
                      "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description2");
   }
 
   void testConstructorFourRowTable() {
@@ -413,11 +444,11 @@ public:
         << "13470"
         << "2.3";
     row = ws->appendRow();
-    row << ""
+    row << "3"
         << "13460"
         << "0.7";
     row = ws->appendRow();
-    row << ""
+    row << "3"
         << "13469"
         << "0.7";
 
@@ -456,6 +487,143 @@ public:
                          .toString()
                          .toStdString(),
                      "0.7");
+  }
+
+  void testRemoveRowUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second row
+    TS_ASSERT_EQUALS(model.removeRows(1, 1, model.index(0, 0)), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(1, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0)), "group1");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(1, 0))),
+                     "group1_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(1, 0))),
+                     "group1_row1_col0");
+  }
+
+  void testRemoveRowsUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete two consecutive rows belonging to second group
+    TS_ASSERT_EQUALS(model.removeRows(0, 2, model.index(1, 0)), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(0, 0, model.index(0, 0))));
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
+  }
+
+  void testRemoveGroupUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second group
+    TS_ASSERT_EQUALS(model.removeRows(1, 1), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
+  }
+
+  void testRemoveGroupsUnsortedTable() {
+    // Create a table ws
+    ITableWorkspace_sptr ws = unsortedFourRowTable();
+    // Add an extra group
+    TableRow row = ws->appendRow();
+    row << "group2"
+        << "group2_row0_col0"
+        << "group2_row0_col1";
+    row = ws->appendRow();
+    row << "group2"
+        << "group2_row1_col0"
+        << "group2_row1_col1";
+
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+
+    // Delete second and third groups
+    TS_ASSERT_EQUALS(model.removeRows(1, 2), true);
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(0, 0, model.index(0, 0))));
+    TS_ASSERT_THROWS_NOTHING(model.data(model.index(1, 0, model.index(0, 0))));
+
+    // Test remaining values
+    TS_ASSERT_EQUALS(model.rowCount(), 1);
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0)), "group0");
+    TS_ASSERT_EQUALS(model.data(model.index(0, 0, model.index(0, 0))),
+                     "group0_row0_col0");
+    TS_ASSERT_EQUALS(model.data(model.index(1, 0, model.index(0, 0))),
+                     "group0_row1_col0");
+  }
+
+  void testUnsortedTableGetsSorted() {
+
+    // Create an unsorted table ws
+    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
+    ws->addColumn("str", "Group");
+    ws->addColumn("str", "Column1");
+    ws->addColumn("str", "Column2");
+
+    TableRow row = ws->appendRow();
+    row << "3"
+        << "13462"
+        << "2.3";
+    row = ws->appendRow();
+    row << "2"
+        << "13470"
+        << "2.3";
+    row = ws->appendRow();
+    row << "0"
+        << "13463"
+        << "0.7";
+    row = ws->appendRow();
+    row << "4"
+        << "13469"
+        << "0.7";
+    row = ws->appendRow();
+    row << "0"
+        << "13460"
+        << "0.7";
+
+    QDataProcessorTwoLevelTreeModel model(ws, m_whitelist);
+    ITableWorkspace_sptr ws_model = model.getTableWorkspace();
+
+    TS_ASSERT_EQUALS(ws_model->rowCount(), 5);
+    TS_ASSERT_EQUALS(ws_model->String(0, 0), "0");
+    TS_ASSERT_EQUALS(ws_model->String(1, 0), "0");
+    TS_ASSERT_EQUALS(ws_model->String(2, 0), "2");
+    TS_ASSERT_EQUALS(ws_model->String(3, 0), "3");
+    TS_ASSERT_EQUALS(ws_model->String(4, 0), "4");
+    TS_ASSERT_EQUALS(ws_model->String(0, 1), "13463");
+    TS_ASSERT_EQUALS(ws_model->String(1, 1), "13460");
+    TS_ASSERT_EQUALS(ws_model->String(2, 1), "13470");
+    TS_ASSERT_EQUALS(ws_model->String(3, 1), "13462");
+    TS_ASSERT_EQUALS(ws_model->String(4, 1), "13469");
+  }
+
+  void testCountRowsOfNonexistentGroup() {
+
+    QDataProcessorTwoLevelTreeModel model(oneRowTable(), m_whitelist);
+
+    TS_ASSERT_THROWS_NOTHING(model.rowCount(model.index(1, 0)));
   }
 
 private:
