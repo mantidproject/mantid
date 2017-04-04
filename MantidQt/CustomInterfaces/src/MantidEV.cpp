@@ -1076,7 +1076,7 @@ void MantidEV::integratePeaks_slot() {
   bool ellipsoid_integrate = m_uiForm.EllipsoidIntegration_rbtn->isChecked();
   bool use_cylinder_integration = m_uiForm.Cylinder_ckbx->isChecked();
 
-  if (sphere_integrate || use_cylinder_integration) {
+  if (sphere_integrate) {
     double peak_radius = 0.20;
     double inner_radius = 0.20;
     double outer_radius = 0.25;

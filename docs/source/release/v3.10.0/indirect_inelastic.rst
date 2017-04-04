@@ -17,6 +17,12 @@ Algorithms
 - :ref:`BASISReduction311 <algm-BASISReduction311>` has been deprecated (2017-03-11). Use :ref:`BASISReduction <algm-BASISReduction>` instead.
 - :ref:`BASISReduction <algm-BASISReduction>` includes now an option to compute and save the dynamic susceptibility.
 
+QuickRuns
+~~~~~~~~~
+
+- :ref:`IndirectDiffScan <algm-IndirectDiffScan>` to improve diffraction reduction workflow. Runs a diffraction reduction in diffspec mode with several parameters at fixed values.
+- A new algorithm IndirectSampleChanger was added to work with the sample changer for IRIS
+
 Data Reduction
 ##############
 
@@ -33,14 +39,19 @@ ConvFit
 ~~~~~~~
 
 * All FABADA minimizer options are now accessible from the function browser.
+
 - The Delta Function option can now be used with StretchedExpFT mode
+
 
 Jump Fit
 ~~~~~~~~
 
 Improvements
 ------------
+
+- Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
+
 
 Bugfixes
 --------
@@ -48,5 +59,6 @@ Bugfixes
 - The *Diffraction* Interface no longer crashes when in OSIRIS diffonly mode
 - *Abins*:  fix setting very small off-diagonal elements of b tensors
 - Fix errors from calling Rebin from VisionReduction.
+- Fixed validation of inputs in *CalculatePaalmanPings*
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

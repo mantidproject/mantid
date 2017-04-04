@@ -5,6 +5,9 @@
 
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/LegacyConversion.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -118,7 +121,8 @@ void MaskDetectors::exec() {
   MaskWorkspace_sptr isMaskWS = boost::dynamic_pointer_cast<MaskWorkspace>(WS);
 
   std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<specnum_t> spectraList = getProperty("SpectraList");
+  auto spectraList =
+      Indexing::makeSpectrumNumberVector(getProperty("SpectraList"));
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   std::vector<std::string> componentList = getProperty("ComponentList");
   if (!componentList.empty()) {
@@ -446,7 +450,8 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
  *                      Boolean indicating if these ranges are defined
  */
 void MaskDetectors::fillIndexListFromSpectra(
-    std::vector<size_t> &indexList, const std::vector<specnum_t> &spectraList,
+    std::vector<size_t> &indexList,
+    const std::vector<Indexing::SpectrumNumber> &spectraList,
     const API::MatrixWorkspace_sptr WS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
@@ -461,14 +466,7 @@ void MaskDetectors::fillIndexListFromSpectra(
     tmp_index.swap(indexList);
   }
 
-  auto SpecID2IndMap = WS->getSpectrumToWorkspaceIndexMap();
-  for (auto specnum : spectraList) {
-    auto element = SpecID2IndMap.find(specnum);
-    if (element == SpecID2IndMap.end()) {
-      continue;
-    }
-    size_t ws_index = element->second;
-
+  for (auto ws_index : WS->indexInfo().makeIndexSet(spectraList)) {
     if (range_constrained && (ws_index < startIndex || ws_index > endIndex)) {
       continue;
     }

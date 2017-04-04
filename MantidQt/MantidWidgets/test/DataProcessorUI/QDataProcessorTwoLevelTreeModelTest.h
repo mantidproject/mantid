@@ -126,6 +126,10 @@ public:
                      "Column1");
     TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::DisplayRole),
                      "Column2");
+    TS_ASSERT_EQUALS(model.headerData(0, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description1");
+    TS_ASSERT_EQUALS(model.headerData(1, Qt::Horizontal, Qt::WhatsThisRole),
+                     "Description2");
   }
 
   void testConstructorFourRowTable() {
@@ -613,6 +617,13 @@ public:
     TS_ASSERT_EQUALS(ws_model->String(2, 1), "13470");
     TS_ASSERT_EQUALS(ws_model->String(3, 1), "13462");
     TS_ASSERT_EQUALS(ws_model->String(4, 1), "13469");
+  }
+
+  void testCountRowsOfNonexistentGroup() {
+
+    QDataProcessorTwoLevelTreeModel model(oneRowTable(), m_whitelist);
+
+    TS_ASSERT_THROWS_NOTHING(model.rowCount(model.index(1, 0)));
   }
 
 private:
