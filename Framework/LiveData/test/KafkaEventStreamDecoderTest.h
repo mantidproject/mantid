@@ -22,9 +22,7 @@ public:
   static KafkaEventStreamDecoderTest *createSuite() {
     return new KafkaEventStreamDecoderTest();
   }
-  static void destroySuite(KafkaEventStreamDecoderTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(KafkaEventStreamDecoderTest *suite) { delete suite; }
 
   void setUp() override {
     // Temporarily change the instrument directory to the testing one
@@ -210,8 +208,8 @@ private:
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
-    return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "",
-                                                                    "", "");
+    return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "", "",
+                                                                "");
   }
 
   void

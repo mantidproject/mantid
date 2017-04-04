@@ -144,10 +144,9 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
     std::string rawMsgBuffer;
     runStream->consumeMessage(&rawMsgBuffer);
     if (rawMsgBuffer.empty()) {
-      throw std::runtime_error(
-          "KafkaEventStreamDecoder::initLocalCaches() - "
-          "Empty message received from run info "
-          "topic. Unable to continue");
+      throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
+                               "Empty message received from run info "
+                               "topic. Unable to continue");
     }
     auto runMsg = ISISStream::GetRunInfo(
         reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
@@ -452,11 +451,9 @@ void KafkaEventStreamDecoder::initLocalCaches() {
  * @param length The length of the spec/udet arrays
  * @return A new workspace of the appropriate size
  */
-DataObjects::EventWorkspace_sptr
-KafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
-                                                   const int32_t *spec,
-                                                   const int32_t *udet,
-                                                   const uint32_t length) {
+DataObjects::EventWorkspace_sptr KafkaEventStreamDecoder::createBufferWorkspace(
+    const size_t nspectra, const int32_t *spec, const int32_t *udet,
+    const uint32_t length) {
   // Order is important here
   std::map<int32_t, std::set<int32_t>> spdetMap;
   for (uint32_t i = 0; i < length; ++i) {
@@ -494,8 +491,7 @@ KafkaEventStreamDecoder::createBufferWorkspace(const size_t nspectra,
  * Create new buffer workspace from an existing copy
  * @param parent A pointer to an existing workspace
  */
-DataObjects::EventWorkspace_sptr
-KafkaEventStreamDecoder::createBufferWorkspace(
+DataObjects::EventWorkspace_sptr KafkaEventStreamDecoder::createBufferWorkspace(
     const DataObjects::EventWorkspace_sptr &parent) {
   auto buffer = boost::static_pointer_cast<DataObjects::EventWorkspace>(
       API::WorkspaceFactory::Instance().create(

@@ -44,13 +44,12 @@ namespace LiveData {
 class DLLExport KafkaEventStreamDecoder {
 public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
-                              const std::string &eventTopic,
-                              const std::string &runInfoTopic,
-                              const std::string &spDetTopic);
+                          const std::string &eventTopic,
+                          const std::string &runInfoTopic,
+                          const std::string &spDetTopic);
   ~KafkaEventStreamDecoder();
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
-  KafkaEventStreamDecoder &
-  operator=(const KafkaEventStreamDecoder &) = delete;
+  KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
 
 public:
   ///@name Start/stop
