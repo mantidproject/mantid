@@ -863,19 +863,25 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
                 raise RuntimeError('Internal error. Unknown property type encountered. "%s" '
                                    'on algorithm "%s" is not understood by '
                                    'Python. Please contact development team' % (name, algm_obj.name()))
-    nvals = len(retvals)
-    nlhs = lhs[0]
+
+    # If there is a snippet of code as follows
+    # foo, bar, baz = simpleAPI.myFunc(...)
+    # The number of values on LHS is 3 (foo, bar baz) and the number of
+    # returned values is the number of values myFunc(...) returns
+    number_of_returned_values = len(retvals)
+    number_of_values_on_lhs = lhs[0]
 
     # If we have more than one value but not the same number of values throw
-    if 1 < nlhs != nvals:
+    if number_of_values_on_lhs > 1 and number_of_returned_values != number_of_values_on_lhs:
         # There is a discrepancy in the number are unpacking variables
         # Let's not have the more cryptic unpacking error raised
         raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
-                           "These numbers must match." % (func_name, nvals, nlhs))
-    if nvals > 0:
+                           "These numbers must match." % (func_name,
+                                                          number_of_returned_values, number_of_values_on_lhs))
+    if number_of_returned_values > 0:
         ret_type = namedtuple(func_name+"_returns", retvals.keys())
         ret_value = ret_type(**retvals)
-        if nvals == 1:
+        if number_of_returned_values == 1:
             return ret_value[0]
         else:
             return ret_value
