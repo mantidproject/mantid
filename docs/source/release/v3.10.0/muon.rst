@@ -17,6 +17,10 @@ Algorithms
 Fit Functions
 -------------
 
+Bugfixes
+--------
+- Fixed a bug that menat transverse field asymmetry data was normalized to bin width. 
+
 |
 
 `Full list of changes <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Muon%22>`_
