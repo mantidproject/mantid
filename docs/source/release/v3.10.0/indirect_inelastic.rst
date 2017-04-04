@@ -45,7 +45,7 @@ Improvements
 
 - Bayes interfaces have the functionality to plot the current preview in the miniplot
 - OSIRIS diffraction now rebins container workspaces to match the sample workspace
-
+- Inelastic pixel ID's in BASIS instrument definition file grouped into continuous physical pixels.
 
 Bugfixes
 --------
