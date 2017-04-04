@@ -30,9 +30,9 @@ Workspace containing splitters
 ==============================
 
 This algorithm accepts three types of workspace that contains event splitters.
- - TableWorkspace: a general TableWorkspace with at three columns
- - MatrixWorkspace: a 1-spectrum MatrixWorkspace
- - SplittersWorkspace: an extended TableWorkspace with restrict definition on start and stop time.
+- TableWorkspace: a general TableWorkspace with at three columns
+- MatrixWorkspace: a 1-spectrum MatrixWorkspace
+- SplittersWorkspace: an extended TableWorkspace with restrict definition on start and stop time.
 
 Event splitter
 ++++++++++++++
