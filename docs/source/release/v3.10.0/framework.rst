@@ -51,7 +51,7 @@ Improved
 LiveData
 --------
 
-- A new live listener for event data at ISIS, `ISISKafkaEventListener`, has been added. This is currently being tested on a limited number of beamlines.
+- A new live listener for event data, `KafkaEventListener`, has been added. This is in development for the ESS and ISIS. It is only available on IBEX instruments at ISIS.
 
 Python
 ------
