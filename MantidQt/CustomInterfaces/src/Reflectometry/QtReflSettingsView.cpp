@@ -34,6 +34,8 @@ void QtReflSettingsView::initLayout() {
           SLOT(requestExpDefaults()));
   connect(m_ui.getInstDefaultsButton, SIGNAL(clicked()), this,
           SLOT(requestInstDefaults()));
+  connect(m_ui.expSettingsGroup, SIGNAL(clicked(bool)), this,
+          SLOT(setPolarisationOptionsEnabled(bool)));
 }
 
 /** Returns the presenter managing this view
@@ -56,6 +58,14 @@ void QtReflSettingsView::requestExpDefaults() const {
 */
 void QtReflSettingsView::requestInstDefaults() const {
   m_presenter->notify(IReflSettingsPresenter::InstDefaultsFlag);
+}
+
+/** This slot sets the value of 'm_isPolCorrEnabled' - whether polarisation
+* corrections should be enabled or not.
+* @param enable :: Value of experiment settings enable status
+*/
+void QtReflSettingsView::setIsPolCorrEnabled(bool enable) const {
+  m_isPolCorrEnabled = enable;
 }
 
 /* Sets default values for all experiment settings given a list of default
@@ -109,6 +119,10 @@ void QtReflSettingsView::setInstDefaults(
 * @param enable :: [input] bool to enable options or not
 */
 void QtReflSettingsView::setPolarisationOptionsEnabled(bool enable) const {
+
+  if (enable && (!m_isPolCorrEnabled || !experimentSettingsEnabled()))
+    return;
+
   m_ui.polCorrComboBox->setEnabled(enable);
   m_ui.CRhoEdit->setEnabled(enable);
   m_ui.CAlphaEdit->setEnabled(enable);
@@ -321,6 +335,22 @@ std::string QtReflSettingsView::getProcessingInstructions() const {
 std::string QtReflSettingsView::getDetectorCorrectionType() const {
 
   return m_ui.detectorCorrectionTypeComboBox->currentText().toStdString();
+}
+
+/** Returns the status of experiment settings group
+* @return :: the status of the checkable group
+*/
+bool QtReflSettingsView::experimentSettingsEnabled() const {
+
+  return m_ui.expSettingsGroup->isChecked();
+}
+
+/** Returns the status of instrument settings group
+* @return :: the status of the checkable group
+*/
+bool QtReflSettingsView::instrumentSettingsEnabled() const {
+
+  return m_ui.instSettingsGroup->isChecked();
 }
 
 } // namespace CustomInterfaces
