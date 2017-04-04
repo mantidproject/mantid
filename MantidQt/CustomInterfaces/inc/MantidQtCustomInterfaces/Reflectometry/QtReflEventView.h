@@ -45,8 +45,14 @@ public:
   /// Returns the presenter managing this view
   IReflEventPresenter *getPresenter() const override;
 
-  /// Returns the number of time slices
-  std::string getTimeSlices() const override;
+  /// Returns time-slicing values
+  std::string getTimeSlicingValues() const override;
+  /// Returns time-slicing type
+  std::string getTimeSlicingType() const override;
+
+public slots:
+  /// Enable / disable slicing option entry fields
+  void toggleSlicingOptions() const;
 
 private:
   /// Initialise the interface
@@ -56,6 +62,12 @@ private:
   Ui::ReflEventWidget m_ui;
   /// The presenter
   std::unique_ptr<IReflEventPresenter> m_presenter;
+
+  /// Current slice type
+  mutable std::string m_sliceType;
+
+  /// List of radio buttons
+  std::vector<QRadioButton *> m_buttonList;
 };
 
 } // namespace Mantid

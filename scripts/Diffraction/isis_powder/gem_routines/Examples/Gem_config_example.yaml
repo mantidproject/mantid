@@ -1,0 +1,12 @@
+# This is an example configuration file
+# It is not set up for any specific machine and is to give the user an idea of the layout
+user_name : "Mantid_Tester"
+
+# By using the ' character instead of the " character we don't need to escape the path
+calibration_directory : 'C:\gem\calibration'
+output_directory : 'C:\gem\output'
+calibration_config_path : 'C:\gem\calibration\cal_map.yaml'
+
+# Or we could set it to always perform vanadium normalisation by default:
+vanadium_normalisation : True
+

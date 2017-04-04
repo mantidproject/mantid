@@ -137,12 +137,12 @@ def save_table_to_file(table_data, errors, group_name, metric_type, file_extensi
     """
     Saves a group results table or overall results table to a given file type.
 
-    :param table_data: the results table
-    :param errors: whether to use observational errors
-    :param group_name: name of this group of problems (example 'NIST "lower difficulty"', or
+    @param table_data :: the results table
+    @param errors :: whether to use observational errors
+    @param group_name :: name of this group of problems (example 'NIST "lower difficulty"', or
                          'Neutron data')
-    :param metric_type: the test type of the table data (e.g. runtime, accuracy)
-    :param file_extension: the file type extension (e.g. html)
+    @param metric_type :: the test type of the table data (e.g. runtime, accuracy)
+    @param file_extension :: the file type extension (e.g. html)
     """
     file_name = ('comparison_{weighted}_{version}_{metric_type}_{group_name}.'
                  .format(weighted=weighted_suffix_string(errors),
@@ -269,31 +269,32 @@ def display_name_for_minimizers(names):
     return display_names
 
 
-def calc_cell_len_rst_table(columns_txt, items_link):
+def calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale=None):
     """
-    Calculate what width in ascii characters we need for an RST table.
+    Calculate ascii character width needed for an RST table, using the length of the longest table cell.
 
     @param columns_txt :: list of the contents of the column headers
+    @param items_link :: the links from rst table cells to other pages/sections of pages
+    @param cells :: the values of the results
+    @param color_scale :: whether a color_scale is used or not
+    @returns :: the length of the longest cell in a table
     """
-    # One length for all cells
-    cell_len = 50
-    cell_len = 0
-    for col in columns_txt:
-        new_len = len(col) + 2
-        if new_len > cell_len:
-            cell_len = new_len
 
-    # Beware of the long links
-    links_len = 0
-    if items_link and isinstance(items_link, list):
-        links_len = max([len(item) for item in items_link])
-    elif items_link:
-        links_len = len(items_link)
-
-    additional_len = 0
-    if items_link:
-        additional_len = links_len
-    cell_len += int(additional_len/1.2)
+    # The length of the longest header (minimizer name)
+    max_header = len(max((col for col in columns_txt), key=len))
+    # The value of the longest (once formatted) value in the table
+    max_value = max(("%.4g" % cell for cell in np.nditer(cells)), key=len)
+    # The length of the longest link reference (angular bracket content present in summary tables)
+    max_item = max(items_link, key=len) if isinstance(items_link, list) else items_link
+    # One space on each end of a cell
+    padding = 2
+    # Set cell length equal to the length of: the longest combination of value, test name, and colour (plus padding)
+    cell_len = len(format_cell_value_rst(value=float(max_value),
+                                         color_scale=color_scale,
+                                         items_link=max_item).strip()) + padding
+    # If the header is longer than any cell's contents, i.e. is a group results table, use that length instead
+    if cell_len < max_header:
+        cell_len = max_header
 
     return cell_len
 
@@ -324,7 +325,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
 
     items_link = build_items_links(comparison_type, comparison_dim, using_errors)
 
-    cell_len = calc_cell_len_rst_table(columns_txt, items_link)
+    cell_len = calc_cell_len_rst_table(columns_txt, items_link, cells, color_scale)
 
     # The first column tends to be disproportionately long if it has a link
     first_col_len = calc_first_col_len(cell_len, rows_txt)
@@ -420,17 +421,23 @@ def build_items_links(comparison_type, comparison_dim, using_errors):
     return items_link
 
 
-def format_cell_value_rst(value, width, color_scale=None, items_link=None):
+def format_cell_value_rst(value, width=None, color_scale=None, items_link=None):
     """
     Build the content string for a table cell, adding style/color tags
     if required.
 
+    @param value :: the value of the result
+    @param width :: the width of the longest table cell
+    @param color_scale :: the colour scale used
+    @param items_link :: the links from rst table cells to other pages/sections of pages
+    @returns :: the (formatted) contents of a cell
+
     """
     if not color_scale:
         if not items_link:
-            value_text = ' {0:.4g}'.format(value).ljust(width, ' ')
+            value_text = ' {0:.4g}'.format(value)
         else:
-            value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link).ljust(width, ' ')
+            value_text = ' :ref:`{0:.4g} <{1}>`'.format(value, items_link)
     else:
         color = ''
         for color_descr in color_scale:
@@ -439,7 +446,10 @@ def format_cell_value_rst(value, width, color_scale=None, items_link=None):
                 break
         if not color:
             color = color_scale[-1][1]
-        value_text = " :{0}:`{1:.4g}`".format(color, value).ljust(width, ' ')
+        value_text = " :{0}:`{1:.4g}`".format(color, value)
+
+    if width is not None:
+        value_text = value_text.ljust(width, ' ')
 
     return value_text
 

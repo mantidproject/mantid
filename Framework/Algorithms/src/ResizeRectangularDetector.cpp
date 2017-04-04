@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/ResizeRectangularDetector.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -100,21 +102,28 @@ void ResizeRectangularDetector::exec() {
   if (!det)
     throw std::runtime_error("Component with name " + ComponentName +
                              " is not a RectangularDetector.");
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
 
-    pmap.clearPositionSensitiveCaches();
-  } else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    // Add a parameter for the new scale factors
-    pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
-    pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  auto input = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+  Geometry::ParameterMap &pmap = input->instrumentParameters();
+  auto oldscalex = pmap.getDouble(det->getName(), std::string("scalex"));
+  auto oldscaley = pmap.getDouble(det->getName(), std::string("scaley"));
+  // Add a parameter for the new scale factors
+  pmap.addDouble(det->getComponentID(), "scalex", ScaleX);
+  pmap.addDouble(det->getComponentID(), "scaley", ScaleY);
+  pmap.clearPositionSensitiveCaches();
 
-    pmap.clearPositionSensitiveCaches();
-  }
+  // Positions of detectors are now stored in DetectorInfo, so we must update
+  // positions there.
+  // This algorithm is setting the absolute scale factor. Since there may be a
+  // previous scaling we have to factor that out.
+  double relscalex = ScaleX;
+  double relscaley = ScaleY;
+  if (!oldscalex.empty())
+    relscalex /= oldscalex[0];
+  if (!oldscaley.empty())
+    relscaley /= oldscaley[0];
+  applyRectangularDetectorScaleToDetectorInfo(input->mutableDetectorInfo(),
+                                              *det, relscalex, relscaley);
 }
 
 } // namespace Mantid

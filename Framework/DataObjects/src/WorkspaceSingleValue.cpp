@@ -49,7 +49,7 @@ void WorkspaceSingleValue::init(const std::size_t &NVectors,
 
 /// Return the underlying Histogram1D at the given workspace index.
 Histogram1D &WorkspaceSingleValue::getSpectrum(const size_t /*index*/) {
-  data.setExperimentInfo(this, 0);
+  data.setMatrixWorkspace(this, 0);
   return data;
 }
 

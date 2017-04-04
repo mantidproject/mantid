@@ -73,9 +73,6 @@
        <property name="autoLoad" stdset="0">
         <bool>true</bool>
        </property>
-       <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
-       </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_red</string>
@@ -85,6 +82,9 @@
         <stringlist>
          <string>_red.nxs</string>
         </stringlist>
+       </property>
+       <property name="showLoad" stdset="0">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -139,6 +139,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbPlotCurrent">
+           <property name="text">
+            <string>Plot Current Preview</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

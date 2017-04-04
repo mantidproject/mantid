@@ -239,5 +239,7 @@
         <file>Open-icon32x32.png</file>
         <file>fileclose.png</file>
         <file>mdPlotting32x32.png</file>
+        <file>expand_all.png</file>
+        <file>collapse_all.png</file>
     </qresource>
 </RCC>
