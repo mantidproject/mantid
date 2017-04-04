@@ -524,8 +524,8 @@ void ReflDataProcessorPresenter::doFilterByTime(const std::string &runName,
 * @param fraction :: The slice normalization constant
 */
 void ReflDataProcessorPresenter::doFilterByLogValue(
-    const std::string &runName, const std::string &sliceName, double startTime,
-    double stopTime, const std::string &logFilter, double &fraction) {
+    const std::string &runName, const std::string &sliceName, double minValue,
+    double maxValue, const std::string &logFilter, double &fraction) {
 
   // Filter the run
   IAlgorithm_sptr filter =
@@ -533,8 +533,8 @@ void ReflDataProcessorPresenter::doFilterByLogValue(
   filter->initialize();
   filter->setProperty("InputWorkspace", runName);
   filter->setProperty("OutputWorkspace", sliceName);
-  filter->setProperty("MinimumValue", startTime);
-  filter->setProperty("MaximumValue", stopTime);
+  filter->setProperty("MinimumValue", minValue);
+  filter->setProperty("MaximumValue", maxValue);
   filter->setProperty("LogName", logFilter);
   filter->execute();
 

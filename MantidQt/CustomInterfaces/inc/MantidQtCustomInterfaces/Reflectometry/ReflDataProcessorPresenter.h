@@ -86,10 +86,10 @@ private:
   void parseCustom(const std::string &timeSlicing,
                    std::vector<double> &startTimes,
                    std::vector<double> &stopTimes);
-  // Parse log value time slicing and filter from input string
+  // Parse log value slicing and filter from input string
   void parseLogValue(const std::string &inputStr, std::string &logFilter,
-                     std::vector<double> &startTimes,
-                     std::vector<double> &stopTimes);
+                     std::vector<double> &minValues,
+                     std::vector<double> &maxValues);
 
   // Load a run as event workspace
   bool loadEventRun(const std::string &runNo);
@@ -105,8 +105,8 @@ private:
                       double startTime, double stopTime, double &fraction);
   // Perform FilterByLogValue on run slice
   void doFilterByLogValue(const std::string &runName,
-                          const std::string &sliceName, double startTime,
-                          double stopTime, const std::string &logFilter,
+                          const std::string &sliceName, double minValue,
+                          double maxValue, const std::string &logFilter,
                           double &fraction);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
