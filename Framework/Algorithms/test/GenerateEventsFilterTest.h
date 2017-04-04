@@ -600,9 +600,9 @@ public:
     TS_ASSERT_EQUALS(splittersws->x(0).size(), 2);
     TS_ASSERT_EQUALS(splittersws->y(0).size(), 1);
     Kernel::DateAndTime runstart(3000000000);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
                      runstart.totalNanoseconds() + 100);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1] * 1.E9),
                      runstart.totalNanoseconds() + 1000000);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
@@ -668,14 +668,14 @@ public:
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
                      runstarttime_ns);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1] * 1.E9),
                      runstarttime_ns + timeinterval_ns);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
     // c) Last interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back() * 1.E9),
                      runstoptime.totalNanoseconds());
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0).back()),
                      numintervals - 1);
@@ -1010,7 +1010,7 @@ public:
     TS_ASSERT_EQUALS(splittersws->y(0).size(), 10);
 
     int64_t factor = static_cast<int64_t>(1.0E9 + 0.5);
-    TS_ASSERT_DELTA(splittersws->x(0)[0],
+    TS_ASSERT_DELTA(splittersws->x(0)[0] * 1.E9,
                     static_cast<double>(11 * factor - 5 * factor / 100),
                     0.000001);
 
@@ -1075,22 +1075,22 @@ public:
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First 3 intervals
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
                      runstarttime_ns);
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1] * 1.E9),
                      runstarttime_ns + timeinterval_ns);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[0]), 0);
 
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[2]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[2] * 1.E9),
                      runstarttime_ns + timeinterval_ns * 3);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[1]), 1);
 
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[3]),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[3] * 1.E9),
                      runstarttime_ns + timeinterval_ns * 6);
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0)[2]), 2);
 
     // Last interval
-    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back()),
+    TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0).back() * 1.E9),
                      runstoptime.totalNanoseconds());
     TS_ASSERT_EQUALS(static_cast<int>(splittersws->y(0).back()),
                      numintervals - 1);
@@ -1118,8 +1118,8 @@ public:
     for (size_t i = 0; i < vecY.size(); ++i) {
       if (vecY[i] >= -0.0) {
         // A valid time interval for Splitters
-        Kernel::DateAndTime tstart(static_cast<int64_t>(vecX[i]));
-        Kernel::DateAndTime tstop(static_cast<int64_t>(vecX[i + 1]));
+        Kernel::DateAndTime tstart(static_cast<int64_t>(vecX[i] * 1.E9));
+        Kernel::DateAndTime tstop(static_cast<int64_t>(vecX[i + 1] * 1.E9));
         int wsindex = static_cast<int>(vecY[i]);
 
         Kernel::SplittingInterval ti(tstart, tstop, wsindex);
