@@ -1660,13 +1660,15 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "      layer.removeCurve(i)"; // remove everything else
 
   // Plot data in the given window with given options
-  if(m_uiForm.frontPlotFuncs->currentText().toStdString() == "Asymmetry"){
-	  s << "def plot_data(ws_name, distribution=DistributionFalse,errors, connect, window_to_use):";
-  }else{
-	  s << "def plot_data(ws_name, distribution=DistributionTrue,errors, connect, window_to_use):";
-  }
-  s << "  w = plotSpectrum(ws_name, 0, error_bars = errors, type = connect, "
+  s << "def plot_data(ws_name,errors, connect, window_to_use):";
+  if(m_uiForm.frontPlotFuncs->currentText().toStdString()=="Asymmetry" ){
+  s << "  w = plotSpectrum(source=ws_name, indices=0,  distribution=mantidqtpython.MantidQt.DistributionFalse,error_bars = errors, type = connect, "
        "window = window_to_use)";
+  }
+  else {
+	  s << "  w = plotSpectrum(source=ws_name, indices=0,  distribution=mantidqtpython.MantidQt.DistributionDefault,error_bars = errors, type = connect, "
+		  "window = window_to_use)";
+  }
   s << "  w.setName(ws_name + '-1')";
   s << "  w.setObjectName(ws_name)";
   s << "  w.show()";
