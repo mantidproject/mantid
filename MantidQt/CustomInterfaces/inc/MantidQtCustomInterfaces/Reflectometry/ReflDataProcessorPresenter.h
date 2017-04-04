@@ -100,14 +100,6 @@ private:
   std::string takeSlice(const std::string &runNo, size_t sliceIndex,
                         double startTime, double stopTime,
                         std::string logFilter = "");
-  // Perform FilterByTime on run slice
-  void doFilterByTime(const std::string &runName, const std::string &sliceName,
-                      double startTime, double stopTime, double &fraction);
-  // Perform FilterByLogValue on run slice
-  void doFilterByLogValue(const std::string &runName,
-                          const std::string &sliceName, double minValue,
-                          double maxValue, const std::string &logFilter,
-                          double &fraction);
 
   std::map<int, std::map<int, size_t>> m_numSlicesMap;
   std::map<int, size_t> m_numGroupSlicesMap;

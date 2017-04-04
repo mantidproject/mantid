@@ -55,16 +55,18 @@ std::string QtReflEventView::getTimeSlicingValues() const {
 
   std::string values;
 
-  if (m_sliceType == "UniformEven")
+  if (m_sliceType == "UniformEven") {
     values = m_ui.uniformEvenEdit->text().toStdString();
-  else if (m_sliceType == "Uniform")
+  } else if (m_sliceType == "Uniform") {
     values = m_ui.uniformEdit->text().toStdString();
-  else if (m_sliceType == "Custom")
+  } else if (m_sliceType == "Custom") {
     values = m_ui.customEdit->text().toStdString();
-  else if (m_sliceType == "LogValue")
-    values =
-        "Slicing=\"" + m_ui.logValueEdit->text().toStdString() +
-        "\",LogFilter=" + m_ui.logValueTypeEdit->text().toStdString();
+  } else if (m_sliceType == "LogValue") {
+    std::string slicingValues = m_ui.logValueEdit->text().toStdString();
+    std::string logFilter = m_ui.logValueTypeEdit->text().toStdString();
+    if (!slicingValues.empty() && !logFilter.empty())
+      values = "Slicing=\"" + slicingValues + "\",LogFilter=" + logFilter;
+  }
 
   return values;
 }
