@@ -411,7 +411,7 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		spectra.push_back(0);
 		for (int j = 0; j < table->rowCount(); j++)
 		{
-			norm.push_back((*colNorm)[j]);
+			norm.push_back((*colNorm)[j]);// record and update norm....
 		}
 		asymmAlg->setProperty("Spectra", spectra);
 		asymmAlg->setProperty("PreviousNormalizationConstant", norm);
