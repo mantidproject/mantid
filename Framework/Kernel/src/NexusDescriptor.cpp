@@ -245,7 +245,8 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   for (auto it = dirents.begin(); it != itend; ++it) {
     const std::string &entryName = it->first;
     const std::string &entryClass = it->second;
-    const std::string entryPath = rootPath + "/" + entryName;
+    const std::string entryPath =
+        std::string(rootPath).append("/").append(entryName);
     if (entryClass == "SDS") {
       pmap.emplace(entryPath, entryClass);
     } else if (entryClass == "CDF0.0") {

@@ -177,18 +177,18 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         elwin_alg.setProperty("IntegrationRangeEnd", self._inelastic_range[1])
         elwin_alg.setProperty("SampleEnvironmentLogName", self._sample_log_name)
         elwin_alg.setProperty("SampleEnvironmentLogValue", self._sample_log_value)
-        elwin_alg.setAlwaysStoreInADS(True)
         elwin_alg.setProperty("OutputInQ", self._scan_ws + '_inel_eq1')
         elwin_alg.setProperty("OutputInQSquared", self._scan_ws + '_inel_eq2')
         elwin_alg.setProperty("OutputELF", self._scan_ws + '_inel_elf')
         elwin_alg.setProperty("OutputELT", self._scan_ws + '_inel_elt')
         elwin_alg.execute()
 
+        # storing in ADS so eisf workspace is created
+        divide_alg.setAlwaysStoreInADS(True)
         divide_alg.setProperty("LHSWorkspace", self._scan_ws + '_el_eq1')
         divide_alg.setProperty("RHSWorkspace", self._scan_ws + '_inel_eq1')
         divide_alg.setProperty("OutputWorkspace", self._scan_ws + '_eisf')
         divide_alg.execute()
-        mtd.addOrReplace(self._scan_ws + '_eisf', divide_alg.getProperty("OutputWorkspace").value)
 
         delete_alg.setProperty("Workspace", self._scan_ws + '_el_elf')
         delete_alg.execute()
@@ -197,8 +197,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
         num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
-        if len(x_values) < 2:
-            logger.error("Unable to perform MSDFit")
+        if len(x_values) < 2 and self._msdfit:
+            logger.warning("Unable to perform MSDFit")
             self._msdfit = False
 
         if self._msdfit:
@@ -213,8 +213,6 @@ class EnergyWindowScan(DataProcessorAlgorithm):
             msd_alg.setProperty("OutputWorkspace", self._scan_ws + '_msd')
             msd_alg.setProperty("FitWorkspaces", self._scan_ws + '_msd_fit')
             msd_alg.execute()
-            mtd.addOrReplace(self._scan_ws + '_msd', msd_alg.getProperty("OutputWorkspace").value)
-            mtd.addOrReplace(self._scan_ws + '_msd_fit', msd_alg.getProperty("FitWorkspaces").value)
 
     def validateInputs(self):
         """
@@ -322,6 +320,7 @@ class EnergyWindowScan(DataProcessorAlgorithm):
 
         if self._grouping_method != 'File' and self._grouping_map_file is not None:
             logger.warning('MapFile will be ignored by selected GroupingMethod')
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(EnergyWindowScan)

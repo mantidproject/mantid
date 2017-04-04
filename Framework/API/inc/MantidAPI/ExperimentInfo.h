@@ -19,6 +19,7 @@ namespace Kernel {
 class Property;
 }
 namespace Beamline {
+class ComponentInfo;
 class DetectorInfo;
 class SpectrumInfo;
 }
@@ -29,6 +30,7 @@ class XMLInstrumentParameter;
 
 namespace API {
 class ChopperModel;
+class ComponentInfo;
 class DetectorInfo;
 class ModeratorModel;
 class Run;
@@ -73,9 +75,6 @@ public:
   const Geometry::ParameterMap &constInstrumentParameters() const;
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();
-
-  void replaceInstrumentParameters(const Geometry::ParameterMap &pmap);
-  void swapInstrumentParameters(Geometry::ParameterMap &pmap);
 
   /// Cache a lookup of grouped detIDs to member IDs
   virtual void cacheDetectorGroupings(const det2group_map &mapping);
@@ -165,6 +164,8 @@ public:
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
+  const ComponentInfo &componentInfo() const;
+
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
@@ -194,6 +195,7 @@ protected:
 private:
   /// Fill with given instrument parameter
   void populateWithParameter(Geometry::ParameterMap &paramMap,
+                             Geometry::ParameterMap &paramMapForPosAndRot,
                              const std::string &name,
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
@@ -222,8 +224,10 @@ private:
   mutable std::recursive_mutex m_mutex;
 
   boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
-  mutable std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
-  mutable std::mutex m_detectorInfoMutex;
+  std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
+
+  boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
+  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
 
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
