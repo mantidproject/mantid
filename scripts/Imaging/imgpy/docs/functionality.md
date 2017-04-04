@@ -1,7 +1,8 @@
 # Available functionality
 ## input formats
 ## output formats
-#Functionality options:
+
+# Functionality options:
 ## Input path
   -i INPUT_PATH, --input-path INPUT_PATH
                         Input directory
@@ -140,3 +141,15 @@ Run Modes:
                         How to spread the load on each worker.
 ## Parallel Load
   --parallel-load       Load the data with multiple reader processes. This CAN MAKE THE LOADING slower on a single local Hard Disk Drive.
+
+## Split execution
+  --split               Works in MEGABYTES! Specify the maximum memory allowed to the reconstruction.
+## Specific image indices
+  --indices [INDICES [INDICES ...]]
+                        Specify which indices you want to be loaded. If none is provided the whole stack will be loaded.
+## Maximum allowed memory for --split execution
+  --max-memory MAX_MEMORY
+                        Default: All memory avialable on the system. Works in MEGABYTES! Specify the maximum memory allowed to the reconstruction.
+## Maximum allowed ratio for predicted memory / allowed memory
+  --max-ratio MAX_RATIO
+                        Default: 1. Specify the maximum ratio of necessary memory to maximum memory. This needs to be in range of 0 < ratio < 1.
