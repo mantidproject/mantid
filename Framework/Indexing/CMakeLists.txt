@@ -2,21 +2,45 @@ set ( SRC_FILES
 	src/Extract.cpp
 	src/Group.cpp
 	src/IndexInfo.cpp
+	src/LegacyConversion.cpp
+	src/Partitioner.cpp
+	src/RoundRobinPartitioner.cpp
+	src/SpectrumNumberTranslator.cpp
 )
 
 set ( INC_FILES
+	inc/MantidIndexing/DetectorID.h
 	inc/MantidIndexing/DllConfig.h
 	inc/MantidIndexing/Extract.h
+	inc/MantidIndexing/GlobalSpectrumIndex.h
 	inc/MantidIndexing/Group.h
 	inc/MantidIndexing/IndexInfo.h
-	inc/MantidIndexing/MakeRange.h
+	inc/MantidIndexing/IndexSet.h
+	inc/MantidIndexing/IndexType.h
+	inc/MantidIndexing/LegacyConversion.h
+	inc/MantidIndexing/PartitionIndex.h
+	inc/MantidIndexing/Partitioner.h
+	inc/MantidIndexing/RoundRobinPartitioner.h
+	inc/MantidIndexing/SpectrumIndexSet.h
+	inc/MantidIndexing/SpectrumNumber.h
+	inc/MantidIndexing/SpectrumNumberTranslator.h
 )
 
 set ( TEST_FILES
+	DetectorIDTest.h
 	ExtractTest.h
+	GlobalSpectrumIndexTest.h
 	GroupTest.h
 	IndexInfoTest.h
-	MakeRangeTest.h
+	IndexSetTest.h
+	IndexTypeTest.h
+	LegacyConversionTest.h
+	PartitionIndexTest.h
+	PartitionerTest.h
+	RoundRobinPartitionerTest.h
+	SpectrumIndexSetTest.h
+	SpectrumNumberTest.h
+	SpectrumNumberTranslatorTest.h
 )
 
 if (COVERALLS)

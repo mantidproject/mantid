@@ -108,6 +108,9 @@ public:
       Track &testRay,
       std::deque<IComponent_const_sptr> &searchQueue) const override;
 
+  virtual void
+  registerContents(class ComponentVisitor &componentVisitor) const override;
+
 private:
   /// Private copy assignment operator
   CompAssembly &operator=(const ICompAssembly &);
