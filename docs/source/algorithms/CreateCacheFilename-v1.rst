@@ -39,20 +39,20 @@ A filename with the form ``<location>/<prefix>_<sha1>.nxs`` will be
 returned as the output property.  If no prefix is specified then file
 result will be ``<location>/<sha1>.nxs``.
 
-* ``property_manager``: an instance of
+* ``PropertyManager``: an instance of
   :class:`~mantid.kernel.PropertyManager` from which property values
   can be retrieved. None means we don't care about property manager --
   all properties will come from ``other_properties``
-* ``properties``: a list of strings. each string is a property managed by the
+* ``Properties``: a list of strings. each string is a property managed by the
   given ``property_manager``, or it can be glob pattern to match prop
   names too. but empty list means taking all properties
   from the ``property_manager``
-* ``other_properties``: a list of strings. each string is in the form of
+* ``OtherProperties``: a list of strings. each string is in the form of
   ``key=value`` for one property not managed by the ``property_manager``.
   no globbing here.
-* ``prefix``: prefix to the output hash name. when it is empty, just the hash.
+* ``Prefix``: prefix to the output hash name. when it is empty, just the hash.
   when it is not empty, it will be ``<prefix>_<sha1>``
-* ``cache_dir``: the directory in which the cach file will be created.
+* ``CacheDir``: the directory in which the cach file will be created.
   empty string means default as described above
 
 Usage
