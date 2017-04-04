@@ -198,7 +198,8 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
       for (auto childWsName : childWsNames) {
-        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) == selectedWsNameSet.end()) {
+        if (selectedWsNameSet.find(QString::fromStdString(childWsName)) ==
+            selectedWsNameSet.end()) {
           selectedWsNameSet.insert(QString::fromStdString(childWsName));
           selectedWsNameList.push_back(QString::fromStdString(childWsName));
         }
@@ -248,12 +249,13 @@ MantidWSIndexWidget::UserInput MantidTreeWidget::chooseSpectrumFromSelected(
         QString::fromStdString(matrixWs->getName()));
   }
 
-  // Check workspaces to see whether to plot immediately without dialog box 
+  // Check workspaces to see whether to plot immediately without dialog box
   bool plotImmediately = true;
   if (isAdvanced) {
-    plotImmediately = selectedMatrixWsList.size() == 1 && selectedMatrixWsList[0]->getNumberHistograms() == 1;
+    plotImmediately = selectedMatrixWsList.size() == 1 &&
+                      selectedMatrixWsList[0]->getNumberHistograms() == 1;
   } else {
-    foreach(const auto selectedMatrixWs, selectedMatrixWsList) {
+    foreach (const auto selectedMatrixWs, selectedMatrixWsList) {
       if (selectedMatrixWs->getNumberHistograms() != 1) {
         plotImmediately = false;
         break;
