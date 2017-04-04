@@ -48,6 +48,7 @@ public:
                      const std::vector<double> &durations);
   void setPositions(std::vector<std::vector<Kernel::V3D>> &positions);
   void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
+  void setInstrumentAngles(std::vector<double> &instrumentAngles);
 
   API::MatrixWorkspace_sptr buildWorkspace() const;
 
@@ -60,9 +61,12 @@ private:
   std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;
+  std::vector<double> m_instrumentAngles;
 
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
+  void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
+
   void verifyTimeIndexSize(size_t timeIndexSize,
                            const std::string &description) const;
   void verifyDetectorSize(size_t detectorSize,

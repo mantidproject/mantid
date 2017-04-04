@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cmath>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -23,6 +25,12 @@ public:
   }
   static void destroySuite(ScanningWorkspaceBuilderTest *suite) {
     delete suite;
+  }
+
+  void tearDown() override {
+    positions.clear();
+    rotations.clear();
+    instrumentAngles.clear();
   }
 
   void test_create_scanning_workspace_with_too_small_instrument() {
@@ -197,6 +205,80 @@ public:
                             "number of time indexes.");
   }
 
+  void test_creating_workspace_with_instrument_angles() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    initialiseInstrumentAngles(nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles));
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    const auto &detectorInfo = ws->detectorInfo();
+
+    for (size_t i = 0; i < nDetectors; ++i) {
+      TS_ASSERT_DELTA(0.0, detectorInfo.position({i, 0}).X(), 1e-12)
+      TS_ASSERT_DELTA(5.0, detectorInfo.position({i, 0}).Z(), 1e-12)
+
+      TS_ASSERT_DELTA(2.5, detectorInfo.position({i, 1}).X(), 1e-12)
+      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detectorInfo.position({i, 1}).Z(),
+                      1e-12)
+
+      TS_ASSERT_DELTA(5.0 * sqrt(3) / 2, detectorInfo.position({i, 2}).X(),
+                      1e-12)
+      TS_ASSERT_DELTA(2.5, detectorInfo.position({i, 2}).Z(), 1e-12)
+
+      TS_ASSERT_DELTA(5.0, detectorInfo.position({i, 3}).X(), 1e-12)
+      TS_ASSERT_DELTA(0.0, detectorInfo.position({i, 3}).Z(), 1e-12)
+
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        TS_ASSERT_EQUALS(0.0, detectorInfo.position({double(i) * 0.1, j}).Y())
+      }
+    }
+
+    for (size_t i = 0; i < nDetectors; ++i) {
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        TS_ASSERT_DELTA(
+            0.0, detectorInfo.rotation({i, j}).getEulerAngles("XYZ")[0], 1e-12)
+        TS_ASSERT_DELTA(
+            0.0, detectorInfo.rotation({i, j}).getEulerAngles("XYZ")[2], 1e-12)
+      }
+
+      TS_ASSERT_DELTA(
+          0.0, detectorInfo.rotation({i, 0}).getEulerAngles("XYZ")[1], 1e-12)
+      TS_ASSERT_DELTA(
+          30.0, detectorInfo.rotation({i, 1}).getEulerAngles("XYZ")[1], 1e-12)
+      TS_ASSERT_DELTA(
+          60.0, detectorInfo.rotation({i, 2}).getEulerAngles("XYZ")[1], 1e-12)
+      TS_ASSERT_DELTA(
+          90.0, detectorInfo.rotation({i, 3}).getEulerAngles("XYZ")[1], 1e-12)
+    }
+  }
+
+  void
+  test_creating_workspace_with_instrument_angles_fails_with_wrong_time_index_size() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initialiseInstrumentAngles(nTimeIndexes + 1);
+    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Number of instrument angles supplied does not "
+                            "match the number of time indexes.")
+  }
+
+  void
+  test_creating_workspace_with_instrument_angles_fails_with_positions_already_set() {
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    initalisePositions(nDetectors, nTimeIndexes);
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
+    initialiseInstrumentAngles(nTimeIndexes);
+    TS_ASSERT_THROWS_EQUALS(builder.setInstrumentAngles(instrumentAngles),
+                            const std::logic_error &e, std::string(e.what()),
+                            "Can not set instrument angles, as positions "
+                            "and/or rotations have already been set.")
+  }
+
 private:
   size_t nDetectors = 5;
   size_t nTimeIndexes = 4;
@@ -209,6 +291,7 @@ private:
 
   std::vector<std::vector<V3D>> positions;
   std::vector<std::vector<Quat>> rotations;
+  std::vector<double> instrumentAngles;
 
   void initalisePositions(size_t nDetectors, size_t nTimeIndexes) {
     for (size_t i = 0; i < nDetectors; ++i) {
@@ -227,6 +310,12 @@ private:
         timeRotations.push_back(Quat(double(i), double(j), 1.0, 2.0));
       }
       rotations.push_back(timeRotations);
+    }
+  }
+
+  void initialiseInstrumentAngles(size_t nTimeIndexes) {
+    for (size_t i = 0; i < nTimeIndexes; ++i) {
+      instrumentAngles.push_back(double(i) * 30.0);
     }
   }
 

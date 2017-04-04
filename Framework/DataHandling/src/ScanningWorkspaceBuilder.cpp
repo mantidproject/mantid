@@ -70,6 +70,28 @@ void ScanningWorkspaceBuilder::setRotations(
   m_rotations = rotations;
 }
 
+/**
+ * Set a vector of rotations corresponding to each time index. These angles
+ *rotate the detector banks around the source, setting the corresponding
+ *positions and rotations of the detectors.
+ *
+ * Here explicit assumptions are made - that the source is at (0, 0, 0), and the
+ *rotation is in the X-Z plane. This corresponds to the common case of moving
+ *detectors to increase angular coverage.
+ *
+ * @param instrumentAngles a vector of angles, the size matching the number of time indexes
+ */
+void ScanningWorkspaceBuilder::setInstrumentAngles(
+    std::vector<double> &instrumentAngles) {
+
+  if (!m_positions.empty() || !m_rotations.empty())
+    throw std::logic_error("Can not set instrument angles, as positions and/or "
+                           "rotations have already been set.");
+
+  verifyTimeIndexSize(instrumentAngles.size(), "instrument angles");
+  m_instrumentAngles = instrumentAngles;
+}
+
 MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   validateInputs();
 
@@ -98,6 +120,10 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   if (!m_rotations.empty())
     buildRotations(outputDetectorInfo);
 
+  if (!m_instrumentAngles.empty()) {
+    buildInstrumentAngles(outputDetectorInfo);
+  }
+
   return outputWorkspace;
 }
 
@@ -115,6 +141,20 @@ void ScanningWorkspaceBuilder::buildPositions(
   for (size_t i = 0; i < m_nDetectors; ++i) {
     for (size_t j = 0; j < m_nTimeIndexes; ++j) {
       outputDetectorInfo.setPosition({i, j}, m_positions[i][j]);
+    }
+  }
+}
+
+void ScanningWorkspaceBuilder::buildInstrumentAngles(
+    DetectorInfo &outputDetectorInfo) const {
+  for (size_t i = 0; i < outputDetectorInfo.size(); ++i) {
+    for (size_t j = 0; j < outputDetectorInfo.scanCount(i); ++j) {
+      auto position = outputDetectorInfo.position({i, j});
+      const auto rotation =
+          Kernel::Quat(m_instrumentAngles[j], Kernel::V3D(0, 1, 0));
+      rotation.rotate(position);
+      outputDetectorInfo.setPosition({i, j}, position);
+      outputDetectorInfo.setRotation({i, j}, rotation);
     }
   }
 }
