@@ -162,9 +162,7 @@ void ConventionalCell::init(const Kernel::DblMatrix &UB, ReducedCell &form_0,
   UB_tran.Invert();
   adjusted_UB = UB * UB_tran;
   if (allowPermutations) {
-    if (cell_type == ReducedCell::ORTHORHOMBIC()) {
-      SetSidesIncreasing(adjusted_UB);
-    } else if (cell_type == ReducedCell::TETRAGONAL()) {
+    if (cell_type == ReducedCell::TETRAGONAL()) {
       StandardizeTetragonal(adjusted_UB);
     } else if (cell_type == ReducedCell::HEXAGONAL() ||
                cell_type == ReducedCell::RHOMBOHEDRAL()) {

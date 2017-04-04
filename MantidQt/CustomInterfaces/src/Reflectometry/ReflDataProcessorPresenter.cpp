@@ -7,8 +7,6 @@
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 
-#include <boost/algorithm/string.hpp>
-
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
@@ -49,15 +47,14 @@ void ReflDataProcessorPresenter::process() {
 
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::process();
     return;
   }
 
-  // Parse time slices
-  std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
+  // Get time slicing type
+  std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
 
   // Get selected runs
   const auto items = m_manager->selectedData(true);
@@ -85,7 +82,8 @@ void ReflDataProcessorPresenter::process() {
 
       if (allEventWS) {
         // Process the group
-        if (processGroupAsEventWS(item.first, group, startTimes, stopTimes))
+        if (processGroupAsEventWS(item.first, group, timeSlicingType,
+                                  timeSlicingValues))
           errors = true;
 
         // Notebook not implemented yet
@@ -166,48 +164,73 @@ bool ReflDataProcessorPresenter::loadGroup(const GroupData &group) {
 *
 * @param groupID :: An integer number indicating the id of this group
 * @param group :: the group of event workspaces
-* @param startTimes :: start times for the set of slices
-* @param stopTimes :: stop times for the set of slices
+* @param timeSlicingType :: The type of time slicing being used
+* @param timeSlicingValues :: The string of values to perform time slicing with
 * @return :: true if errors were encountered
 */
 bool ReflDataProcessorPresenter::processGroupAsEventWS(
-    int groupID, const GroupData &group, const std::vector<double> &startTimes,
-    const std::vector<double> &stopTimes) {
+    int groupID, const GroupData &group, const std::string &timeSlicingType,
+    const std::string &timeSlicingValues) {
 
   bool errors = false;
-  size_t numSlices = startTimes.size();
+  bool multiRow = group.size() > 1;
+  size_t numGroupSlices = INT_MAX;
+
+  std::vector<double> startTimes, stopTimes;
+
+  // For custom slicing, the start/stop times are the same for all rows
+  if (timeSlicingType == "Custom")
+    parseCustom(timeSlicingValues, startTimes, stopTimes);
 
   for (const auto &row : group) {
 
-    // Vector containing data for this row
-    auto data = row.second;
-    // The run number
-    std::string runNo = row.second.at(0);
+    const auto rowID = row.first;         // Integer ID of this row
+    const auto data = row.second;         // Vector containing data for this row
+    std::string runNo = row.second.at(0); // The run number
+
+    if (timeSlicingType != "Custom") {
+      const std::string runName = "TOF_" + runNo;
+      parseUniform(timeSlicingValues, timeSlicingType, runName, startTimes,
+                   stopTimes);
+    }
+
+    size_t numSlices = startTimes.size();
+    addNumSlicesEntry(groupID, rowID, numSlices);
 
     for (size_t i = 0; i < numSlices; i++) {
       try {
-        auto wsName = takeSlice(runNo, startTimes[i], stopTimes[i]);
+        auto wsName = takeSlice(runNo, i, startTimes[i], stopTimes[i]);
         std::vector<std::string> slice(data);
         slice[0] = wsName;
         auto newData = reduceRow(slice);
         newData[0] = data[0];
-        m_manager->update(groupID, row.first, newData);
+        m_manager->update(groupID, rowID, newData);
       } catch (...) {
         return true;
       }
     }
+
+    // For uniform slicing with multiple rows only the minimum number of slices
+    // are common to each row
+    if (multiRow && timeSlicingType == "Uniform")
+      numGroupSlices = std::min(numGroupSlices, numSlices);
   }
 
   // Post-process (if needed)
-  if (group.size() > 1) {
-    for (size_t i = 0; i < numSlices; i++) {
+  if (multiRow) {
 
+    // All slices are common for uniform even or custom slicing
+    if (timeSlicingType == "UniformEven" || timeSlicingType == "Custom")
+      numGroupSlices = startTimes.size();
+
+    addNumGroupSlicesEntry(groupID, numGroupSlices);
+
+    for (size_t i = 0; i < numGroupSlices; i++) {
       GroupData groupNew;
       std::vector<std::string> data;
       for (const auto &row : group) {
         data = row.second;
-        data[0] = row.second[0] + "_" + std::to_string((int)startTimes[i]) +
-                  "_" + std::to_string((int)stopTimes[i]);
+        data[0] = row.second[0] + "_slice_" + std::to_string(i);
         groupNew[row.first] = data;
       }
       try {
@@ -252,17 +275,68 @@ bool ReflDataProcessorPresenter::processGroupAsNonEventWS(
   return errors;
 }
 
-/** Parses a string to extract time slicing
-*
-* @param timeSlicing :: the string to parse
-* @param startTimes :: [output] A vector containing the start time for each
-*slice
-* @param stopTimes :: [output] A vector containing the stop time for each
-*slice
-*/
-void ReflDataProcessorPresenter::parseTimeSlicing(
-    const std::string &timeSlicing, std::vector<double> &startTimes,
-    std::vector<double> &stopTimes) {
+/** Parses a string to extract uniform time slicing
+ *
+ * @param timeSlicing :: The string to parse
+ * @param slicingType :: The type of uniform slicing being used
+ * @param wsName :: The name of the workspace to be sliced
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
+void ReflDataProcessorPresenter::parseUniform(const std::string &timeSlicing,
+                                              const std::string &slicingType,
+                                              const std::string &wsName,
+                                              std::vector<double> &startTimes,
+                                              std::vector<double> &stopTimes) {
+
+  IEventWorkspace_sptr mws;
+  if (AnalysisDataService::Instance().doesExist(wsName)) {
+    mws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wsName);
+    if (!mws) {
+      m_mainPresenter->giveUserCritical("Workspace to slice " + wsName +
+                                            " is not an event workspace!",
+                                        "Time slicing error");
+      return;
+    }
+  } else {
+    m_mainPresenter->giveUserCritical("Workspace to slice not found: " + wsName,
+                                      "Time slicing error");
+    return;
+  }
+
+  const auto run = mws->run();
+  const auto totalDuration = run.endTime() - run.startTime();
+  double totalDurationSec = totalDuration.total_seconds();
+  double sliceDuration = .0;
+  int numSlices = 0;
+
+  if (slicingType == "UniformEven") {
+    numSlices = std::stoi(timeSlicing);
+    sliceDuration = totalDurationSec / numSlices;
+  } else if (slicingType == "Uniform") {
+    sliceDuration = std::stod(timeSlicing);
+    numSlices = static_cast<int>(ceil(totalDurationSec / sliceDuration));
+  }
+
+  // Add the start/stop times
+  startTimes = std::vector<double>(numSlices);
+  stopTimes = std::vector<double>(numSlices);
+
+  for (int i = 0; i < numSlices; i++) {
+    startTimes[i] = sliceDuration * i;
+    stopTimes[i] = sliceDuration * (i + 1);
+  }
+}
+
+/** Parses a string to extract custom time slicing
+ *
+ * @param timeSlicing :: The string to parse
+ * @param startTimes :: Start times for the set of slices
+ * @param stopTimes :: Stop times for the set of slices
+ */
+void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
+                                             std::vector<double> &startTimes,
+                                             std::vector<double> &stopTimes) {
 
   std::vector<std::string> timesStr;
   boost::split(timesStr, timeSlicing, boost::is_any_of(","));
@@ -273,22 +347,19 @@ void ReflDataProcessorPresenter::parseTimeSlicing(
 
   size_t numTimes = times.size();
 
+  // Add the start/stop times
+  startTimes = std::vector<double>(numTimes - 1);
+  stopTimes = std::vector<double>(numTimes - 1);
+
   if (numTimes == 1) {
-    startTimes.push_back(0);
-    stopTimes.push_back(times[0]);
-  } else if (numTimes == 2) {
-    startTimes.push_back(times[0]);
-    stopTimes.push_back(times[1]);
+    startTimes[0] = 0;
+    stopTimes[0] = times[0];
   } else {
     for (size_t i = 0; i < numTimes - 1; i++) {
-      startTimes.push_back(times[i]);
-      stopTimes.push_back(times[i + 1]);
+      startTimes[i] = times[i];
+      stopTimes[i] = times[i + 1];
     }
   }
-
-  if (startTimes.size() != stopTimes.size())
-    m_mainPresenter->giveUserCritical("Error parsing time slices",
-                                      "Time slicing error");
 }
 
 /** Loads an event workspace and puts it into the ADS
@@ -329,17 +400,18 @@ void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
 *
 * @param runNo :: the run number as a string
+* @param sliceIndex :: the index of the slice being taken
 * @param startTime :: start time
 * @param stopTime :: stop time
 * @return :: the name of the sliced workspace (without prefix 'TOF_')
 */
 std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
+                                                  size_t sliceIndex,
                                                   double startTime,
                                                   double stopTime) {
 
   std::string runName = "TOF_" + runNo;
-  std::string sliceName = runName + "_" + std::to_string((int)startTime) + "_" +
-                          std::to_string((int)stopTime);
+  std::string sliceName = runName + "_slice_" + std::to_string(sliceIndex);
   std::string monName = runName + "_monitors";
 
   // Filter by time
@@ -392,34 +464,32 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
 /** Plots any currently selected rows */
 void ReflDataProcessorPresenter::plotRow() {
 
-  // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
+  const auto items = m_manager->selectedData();
+  if (items.size() == 0)
+    return;
+
+  // If slicing values are empty plot normally
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotRow();
     return;
   }
-
-  // Parse time slices
-  std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
-  size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
   std::set<std::string> notFound;
 
-  const auto items = m_manager->selectedData();
-
   for (const auto &item : items) {
+
     for (const auto &run : item.second) {
 
+      const size_t numSlices = m_numSlicesMap.at(item.first).at(run.first);
       const std::string wsName = getReducedWorkspaceName(run.second, "IvsQ_");
 
       for (size_t slice = 0; slice < numSlices; slice++) {
         const std::string sliceName =
-            wsName + "_" + std::to_string((int)startTimes[slice]) + "_" +
-            std::to_string((int)stopTimes[slice]);
+            wsName + "_slice_" + std::to_string(slice);
         if (AnalysisDataService::Instance().doesExist(sliceName))
           workspaces.insert(sliceName);
         else
@@ -445,20 +515,17 @@ void ReflDataProcessorPresenter::plotRow() {
 *
 * @param groupData : The data in a given group
 * @param prefix : A prefix to be appended to the generated ws name
-* @param startTime : start time of the slice
-* @param stopTime : stop time of the slice
+* @param index : The index of the slice
 * @returns : The name of the workspace
 */
 std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData, const std::string &prefix, double startTime,
-    double stopTime) {
+    const GroupData &groupData, const std::string &prefix, size_t index) {
 
   std::vector<std::string> outputNames;
 
   for (const auto &data : groupData) {
-    outputNames.push_back(getReducedWorkspaceName(data.second) + "_" +
-                          std::to_string((int)startTime) + "_" +
-                          std::to_string((int)stopTime));
+    outputNames.push_back(getReducedWorkspaceName(data.second) + "_slice_" +
+                          std::to_string(index));
   }
   return prefix + boost::join(outputNames, "_");
 }
@@ -466,33 +533,32 @@ std::string ReflDataProcessorPresenter::getPostprocessedWorkspaceName(
 /** Plots any currently selected groups */
 void ReflDataProcessorPresenter::plotGroup() {
 
-  // if uniform slicing is empty plot normally
-  std::string timeSlicing = m_mainPresenter->getTimeSlicingOptions();
-  if (timeSlicing.empty()) {
+  const auto items = m_manager->selectedData();
+  if (items.size() == 0)
+    return;
+
+  // If slicing values are empty plot normally
+  std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
+  if (timeSlicingValues.empty()) {
     GenericDataProcessorPresenter::plotGroup();
     return;
   }
-
-  // Parse time slices
-  std::vector<double> startTimes, stopTimes;
-  parseTimeSlicing(timeSlicing, startTimes, stopTimes);
-  size_t numSlices = startTimes.size();
 
   // Set of workspaces to plot
   std::set<std::string> workspaces;
   // Set of workspaces not found in the ADS
   std::set<std::string> notFound;
 
-  const auto items = m_manager->selectedData();
-
   for (const auto &item : items) {
 
     if (item.second.size() > 1) {
 
+      size_t numSlices = m_numGroupSlicesMap.at(item.first);
+
       for (size_t slice = 0; slice < numSlices; slice++) {
 
-        const std::string wsName = getPostprocessedWorkspaceName(
-            item.second, "IvsQ_", startTimes[slice], stopTimes[slice]);
+        const std::string wsName =
+            getPostprocessedWorkspaceName(item.second, "IvsQ_", slice);
 
         if (AnalysisDataService::Instance().doesExist(wsName))
           workspaces.insert(wsName);
@@ -512,6 +578,27 @@ void ReflDataProcessorPresenter::plotGroup() {
         "Error plotting groups.");
 
   plotWorkspaces(workspaces);
+}
+
+/** Add entry for the number of slices for a row in a group
+*
+* @param groupID :: The ID of the group
+* @param rowID :: The ID of the row in group
+* @param numSlices :: Number of slices
+*/
+void ReflDataProcessorPresenter::addNumSlicesEntry(int groupID, int rowID,
+                                                   size_t numSlices) {
+  m_numSlicesMap[groupID][rowID] = numSlices;
+}
+
+/** Add entry for the number of slices for all rows in a group
+*
+* @param groupID :: The ID of the group
+* @param numSlices :: Number of slices
+*/
+void ReflDataProcessorPresenter::addNumGroupSlicesEntry(int groupID,
+                                                        size_t numSlices) {
+  m_numGroupSlicesMap[groupID] = numSlices;
 }
 }
 }

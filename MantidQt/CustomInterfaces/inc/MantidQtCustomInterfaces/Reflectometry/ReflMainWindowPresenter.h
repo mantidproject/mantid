@@ -56,8 +56,10 @@ public:
   std::string getReductionOptions(int group) const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions(int group) const override;
-  /// Returns global options for time-slicing
-  std::string getTimeSlicingOptions(int group) const override;
+  /// Returns time-slicing values
+  std::string getTimeSlicingValues(int group) const override;
+  /// Returns time-slicing type
+  std::string getTimeSlicingType(int group) const override;
 
   /// Dialog/Prompt methods
   std::string askUserString(const std::string &prompt, const std::string &title,

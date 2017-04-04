@@ -22,6 +22,9 @@ private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
   void plotClicked();
+  void getBeamDefaults(const QString &dataName);
+  void changeSampleDensityUnit(int);
+  void changeCanDensityUnit(int);
 
 private:
   void addSaveWorkspace(QString wsName);

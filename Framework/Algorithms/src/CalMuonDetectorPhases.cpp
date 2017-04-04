@@ -198,7 +198,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
 void CalMuonDetectorPhases::extractDetectorInfo(
     const API::ITableWorkspace_sptr &paramTab,
     const API::ITableWorkspace_sptr &resultsTab,
-    const specnum_t spectrumNumber) {
+    const Indexing::SpectrumNumber spectrumNumber) {
 
   double asym = paramTab->Double(0, 1);
   double phase = paramTab->Double(2, 1);

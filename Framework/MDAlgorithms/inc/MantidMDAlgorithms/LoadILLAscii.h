@@ -62,7 +62,6 @@ private:
   void setWorkspaceRotationAngle(API::MatrixWorkspace_sptr,
                                  double rotationAngle);
 
-  // LoadHelper m_loader;
   std::string m_instrumentName; ///< Name of the instrument
   double m_wavelength = 0;
   std::vector<std::string> m_supportedInstruments{"D2B"};

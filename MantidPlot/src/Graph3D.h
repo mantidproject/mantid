@@ -312,7 +312,7 @@ public slots:
 
   //! \name Colors
   //@{
-  void setDataColors(const QColor &cMax, const QColor &cMin);
+  void setDataColors(const QColor &cMin, const QColor &cMax);
 
   void changeTransparency(double t);
   void setTransparency(double t);

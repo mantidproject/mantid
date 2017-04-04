@@ -37,24 +37,27 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace { // anonymous namespace
 // Time we'll wait on a receive call (in seconds)
 // Also used when shutting down the thread so we know how long to wait there
-#define RECV_TIMEOUT 30
+const int64_t RECV_TIMEOUT = 30;
 
 // Names for a couple of time series properties
-#define PAUSE_PROPERTY "pause"
-#define SCAN_PROPERTY "scan_index"
-#define PROTON_CHARGE_PROPERTY "proton_charge"
+const std::string PAUSE_PROPERTY("pause");
+const std::string SCAN_PROPERTY("scan_index");
+const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
-  uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
-  uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
+  const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
+  const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
   return DateAndTime(static_cast<int64_t>(seconds),
                      static_cast<int64_t>(nanoseconds));
 }
+
+} // anonymous namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -70,10 +73,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
-    : ILiveListener(), ADARA::Parser(), m_status(NoRun), m_runNumber(0),
-      m_workspaceInitialized(false), m_socket(), m_isConnected(false),
-      m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
-      m_ignorePackets(true), m_filterUntilRunStart(false)
+    : ILiveListener(), ADARA::Parser(), m_socket()
 // ADARA::Parser() will accept values for buffer size and max packet size,
 // but the defaults will work fine
 {
@@ -85,10 +85,13 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  if (!ConfigService::Instance().getValue("livelistener.keeppausedevents",
-                                          m_keepPausedEvents)) {
+  int keepPausedEvents;
+  if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
+                                         keepPausedEvents)) {
+    m_keepPausedEvents = (keepPausedEvents != 0);
+  } else {
     // If the property hasn't been set, assume false
-    m_keepPausedEvents = 0;
+    m_keepPausedEvents = false;
   }
 }
 
@@ -176,7 +179,7 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// @param startTime Specifies how much historical data the SMS should send
 /// before continuing the current 'live' data.  Use 0 to indicate no
 /// historical data.
-void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void SNSLiveEventDataListener::start(const Kernel::DateAndTime startTime) {
   // Save the startTime and kick off the background thread
   // (Can't really do anything else until we send the hello packet and the SMS
   // sends us
@@ -386,7 +389,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && m_keepPausedEvents == 0) {
+  if (m_runPaused && (!m_keepPausedEvents)) {
     return false;
   }
 
@@ -1227,6 +1230,7 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
+  prop->setUnits("picoCoulomb");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 
@@ -1331,15 +1335,16 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 
 /// Adds an event to the workspace
 void SNSLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime)
+    const uint32_t pixelId, const double tof,
+    const Mantid::Kernel::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
   // It'd be nice to use operator[], but we might end up inserting a value....
   // Have to use find() instead.
-  auto it = m_indexMap.find(pixelId);
+  const auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
-    std::size_t workspaceIndex = it->second;
+    const std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {

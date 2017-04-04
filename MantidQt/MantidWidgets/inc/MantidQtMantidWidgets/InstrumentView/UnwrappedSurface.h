@@ -137,6 +137,8 @@ protected slots:
   void zoom();
   /// Unzoom view to the previous zoom area or to full view
   void unzoom();
+  /// Reset the zoom to the full screen view
+  void resetZoom();
 
 protected:
   /** @name Implemented protected virtual methods */

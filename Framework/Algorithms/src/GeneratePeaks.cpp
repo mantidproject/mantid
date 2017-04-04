@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -760,7 +761,7 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
       xvalue += fabs(dx) * xvalue;
   }
 
-  std::vector<specnum_t> specNums;
+  std::vector<Indexing::SpectrumNumber> specNums;
   for (const auto &item : m_SpectrumMap) {
     specnum_t specid = item.first;
     g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
@@ -770,6 +771,10 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
   Indexing::IndexInfo indices(specNums.size());
   indices.setSpectrumNumbers(std::move(specNums));
+  // There is no instrument, so the automatic build of a 1:1 mapping would fail.
+  // Need to set empty grouping manually.
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(specNums.size()));
   return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 
