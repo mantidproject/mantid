@@ -107,9 +107,8 @@ private:
   // Whether summation should be done in Q or the default lambda
   bool summingInQ();
   // Get angle details for a specific detector
-  void getDetectorDetails(const size_t spIdx,
-                          const API::SpectrumInfo &spectrumInfo,
-                          double &twoTheta, double &bTwoTheta);
+  void getDetectorDetails(const size_t spIdx, double &twoTheta,
+                          double &bTwoTheta);
   // Get projected coordinates onto twoThetaR
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,

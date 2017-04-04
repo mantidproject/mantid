@@ -14,6 +14,17 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 
+// unnamed namespace
+namespace {
+/** Get the twoTheta angle for the given spectrum
+* @return : the twoTheta angle in degrees
+*/
+double getTwoTheta(const SpectrumInfo *spectrumInfo, const int spectrumIdx) {
+  static double conversion = 180 / M_PI;
+  return spectrumInfo->signedTwoTheta(spectrumIdx) * conversion;
+}
+}
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -524,12 +535,11 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 * Find and cache the min/max twoTheta for the area of interest
 */
 void ReflectometryReductionOne2::findTwoThetaMinMax() {
-
-  m_twoThetaMin = std::min(m_spectrumInfo->twoTheta(m_detectors.front()),
-                           m_spectrumInfo->twoTheta(m_detectors.back()));
-
-  m_twoThetaMax = std::max(m_spectrumInfo->twoTheta(m_detectors.front()),
-                           m_spectrumInfo->twoTheta(m_detectors.back()));
+  m_twoThetaMin = getTwoTheta(m_spectrumInfo, m_detectors.front());
+  m_twoThetaMax = getTwoTheta(m_spectrumInfo, m_detectors.back());
+  if (m_twoThetaMin > m_twoThetaMax) {
+    std::swap(m_twoThetaMin, m_twoThetaMax);
+  }
 }
 
 /**
@@ -556,7 +566,7 @@ void ReflectometryReductionOne2::findTheta0() {
 * @throws : if the angle could not be found
 */
 void ReflectometryReductionOne2::findTwoThetaR() {
-  m_twoThetaR = m_spectrumInfo->twoTheta(twoThetaRDetectorIdx());
+  m_twoThetaR = getTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx());
 }
 
 /**
@@ -630,12 +640,11 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
   MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS);
 
   // Loop through each spectrum in the region of interest
-  const auto &spectrumInfo = detectorWS->spectrumInfo();
   for (size_t spIdx : m_detectors) {
     // Get the angle of this detector and its size in twoTheta
     double twoTheta = 0.0;
     double bTwoTheta = 0.0;
-    getDetectorDetails(spIdx, spectrumInfo, twoTheta, bTwoTheta);
+    getDetectorDetails(spIdx, twoTheta, bTwoTheta);
 
     // Check X length is Y length + 1
     const auto &inputX = detectorWS->x(spIdx);
@@ -748,18 +757,18 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 * @param twoTheta [out] : the twoTheta angle of the detector
 * @param bTwoTheta [out] : the range twoTheta covered by this detector
 */
-void ReflectometryReductionOne2::getDetectorDetails(
-    const size_t spIdx, const SpectrumInfo &spectrumInfo, double &twoTheta,
-    double &bTwoTheta) {
+void ReflectometryReductionOne2::getDetectorDetails(const size_t spIdx,
+                                                    double &twoTheta,
+                                                    double &bTwoTheta) {
 
-  twoTheta = spectrumInfo.twoTheta(spIdx);
+  twoTheta = getTwoTheta(m_spectrumInfo, spIdx);
 
   // Get the range of covered by this pixel (assume it's the diff between this
   // pixel's twoTheta and the prev/next pixel) / todo - check this
   if (spIdx > 0) {
-    bTwoTheta = twoTheta - spectrumInfo.twoTheta(spIdx - 1);
-  } else if (spIdx + 1 < spectrumInfo.size()) {
-    bTwoTheta = spectrumInfo.twoTheta(spIdx + 1) - twoTheta;
+    bTwoTheta = twoTheta - getTwoTheta(m_spectrumInfo, spIdx - 1);
+  } else if (spIdx + 1 < m_spectrumInfo->size()) {
+    bTwoTheta = getTwoTheta(m_spectrumInfo, spIdx + 1) - twoTheta;
   }
 }
 
