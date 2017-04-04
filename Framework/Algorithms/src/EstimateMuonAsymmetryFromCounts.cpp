@@ -47,10 +47,9 @@ void EstimateMuonAsymmetryFromCounts::init() {
   declareProperty(
       "EndX", 15.0,
       "The upper limit for calculating the asymmetry  (an X value).");
- 
- declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<double>>("NormalizationConstant", Direction::Output));
 
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+      "NormalizationConstant", Direction::Output));
 }
 
 /*
@@ -103,7 +102,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     spectra = std::vector<int>(numSpectra);
     std::iota(spectra.begin(), spectra.end(), 0);
   }
- 
+
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
   if (inputWS != outputWS) {
 
@@ -121,7 +120,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
 
   // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size()); 
+  int specLength = static_cast<int>(spectra.size());
   std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
@@ -144,13 +143,13 @@ void EstimateMuonAsymmetryFromCounts::exec() {
     outputWS->mutableY(specNum) /= normConst;
     outputWS->mutableY(specNum) -= 1.0;
     outputWS->mutableE(specNum) /= normConst;
-    norm[i]=normConst;
+    norm[i] = normConst;
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-   setProperty("NormalizationConstant", norm);
+  setProperty("NormalizationConstant", norm);
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");
 

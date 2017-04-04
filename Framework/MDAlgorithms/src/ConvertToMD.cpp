@@ -25,6 +25,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
@@ -197,6 +198,25 @@ void ConvertToMD::exec() {
   std::vector<double> dimMin = getProperty("MinValues");
   std::vector<double> dimMax = getProperty("MaxValues");
 
+  // Sanity check some options
+  if (QModReq != MDTransfQ3D().transfID()) {
+    MDWSTransform transform;
+    const std::string autoSelect =
+        transform.getTargetFrames()[CnvrtToMD::AutoSelect];
+    if (QFrame != autoSelect) {
+      g_log.warning("Q3DFrames value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      QFrame = autoSelect;
+    }
+    const std::string noScaling =
+        transform.getQScalings()[CnvrtToMD::NoScaling];
+    if (convertTo_ != noScaling) {
+      g_log.warning("QConversionScales value ignored with QDimensions != " +
+                    MDTransfQ3D().transfID());
+      convertTo_ = noScaling;
+    }
+  }
+
   // Build the target ws description as function of the input & output ws and
   // the parameters, supplied to the algorithm
   MDWSDescription targWSDescr;
@@ -307,22 +327,24 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
   // found detector which is not a monitor to get proper bin boundaries.
   size_t spectra_index(0);
-  bool dector_found(false);
+  bool detector_found(false);
   const auto &spectrumInfo = m_InWS2D->spectrumInfo();
   for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
     if (spectrumInfo.hasDetectors(i) && spectrumInfo.isMonitor(i)) {
       spectra_index = i;
-      dector_found = true;
+      detector_found = true;
       g_log.debug() << "Using spectra N " << i
                     << " as the source of the bin "
                        "boundaries for the resolution corrections \n";
       break;
     }
   }
-  if (!dector_found)
-    g_log.warning() << "No detectors in the workspace are associated with "
-                       "spectra. Using spectrum 0 trying to retrieve the bin "
-                       "boundaries \n";
+  if (!detector_found) {
+    g_log.information()
+        << "No spectra in the workspace have detectors associated "
+           "with them. Storing bin boundaries from first spectrum for"
+           "resolution calculation\n";
+  }
 
   // retrieve representative bin boundaries
   auto binBoundaries = m_InWS2D->x(spectra_index);
@@ -339,8 +361,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
 
       UnitsConversionHelper &unitConv = m_Convertor->getUnitConversionHelper();
       unitConv.updateConversion(spectra_index);
-      for (auto &binBoundarie : binBoundaries) {
-        binBoundarie = unitConv.convertUnits(binBoundarie);
+      for (auto &binBoundary : binBoundaries) {
+        binBoundary = unitConv.convertUnits(binBoundary);
       }
     }
     // sort bin boundaries in case if unit transformation have swapped them.
@@ -436,19 +458,29 @@ bool ConvertToMD::buildTargetWSDescription(
   double m_AbsMin = getProperty("AbsMinQ");
   targWSDescr.setAbsMin(m_AbsMin);
 
-  // instantiate class, responsible for defining Mslice-type projection
+  // Set optional projections for Q3D mode
   MDAlgorithms::MDWSTransform MsliceProj;
-  // identify if u,v are present among input parameters and use defaults if not
-  std::vector<double> ut = getProperty("UProj");
-  std::vector<double> vt = getProperty("VProj");
-  std::vector<double> wt = getProperty("WProj");
-  try {
-    // otherwise input uv are ignored -> later it can be modified to set ub
-    // matrix if no given, but this may over-complicate things.
-    MsliceProj.setUVvectors(ut, vt, wt);
-  } catch (std::invalid_argument &) {
-    g_log.error() << "The projections are coplanar. Will use defaults "
-                     "[1,0,0],[0,1,0] and [0,0,1]\n";
+  if (QModReq == MDTransfQ3D().transfID()) {
+    try {
+      // otherwise input uv are ignored -> later it can be modified to set ub
+      // matrix if no given, but this may over-complicate things.
+      MsliceProj.setUVvectors(getProperty("UProj"), getProperty("VProj"),
+                              getProperty("WProj"));
+    } catch (std::invalid_argument &) {
+      g_log.warning() << "The projections are coplanar. Will use defaults "
+                         "[1,0,0],[0,1,0] and [0,0,1]\n";
+    }
+  } else {
+    auto warnIfSet = [this](const std::string &propName) {
+      Property *prop = this->getProperty(propName);
+      if (!prop->isDefault()) {
+        g_log.warning(propName + " value ignored with QDimensions != " +
+                      MDTransfQ3D().transfID());
+      }
+    };
+    for (const auto &name : {"UProj", "VProj", "WProj"}) {
+      warnIfSet(name);
+    }
   }
 
   if (createNewTargetWs) {

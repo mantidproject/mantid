@@ -72,6 +72,15 @@ void backtraceToStream(std::ostream &os) {
  */
 void terminateHandler() {
   std::cerr << "\n********* UNHANDLED EXCEPTION *********\n";
+  try {
+    std::rethrow_exception(std::current_exception());
+  } catch (const std::exception &exc) {
+    std::cerr << "  what(): " << exc.what() << "\n\n";
+  } catch (...) {
+    std::cerr << "  what(): Unknown exception type. No more information "
+                 "available\n\n";
+  }
+  std::cerr << "Backtrace:\n";
   backtraceToStream(std::cerr);
   exit(1);
 }

@@ -32,7 +32,7 @@ using namespace Kernel;
 using API::Progress;
 using std::size_t;
 
-/** 
+/**
  * Corrects the data and errors for one spectrum.
  * The muon lifetime is in microseconds, not seconds, because the data is in
  * microseconds.

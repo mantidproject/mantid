@@ -73,13 +73,13 @@ void CalculateMuonAsymmetry::init() {
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
- declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<double>>("NormalizationConstant", Direction::Output));
- std::vector<double> emptyDoubles;
- declareProperty(
-      Kernel::make_unique<Kernel::ArrayProperty<double>>("PreviousNormalizationConstant",emptyDoubles),"Normalization constant used"
-	" to estimate asymmetry");
-
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+      "NormalizationConstant", Direction::Output));
+  std::vector<double> emptyDoubles;
+  declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
+                      "PreviousNormalizationConstant", emptyDoubles),
+                  "Normalization constant used"
+                  " to estimate asymmetry");
 }
 /*
 * Validate the input parameters
@@ -100,16 +100,17 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   }
   std::string dataType = getProperty("InputDataType");
   std::vector<double> oldNorm = getProperty("PreviousNormalizationConstant");
-  std::vector<int> spectra=getProperty("Spectra");
-  if(dataType =="asymmetry" && oldNorm.empty()){
-   validationOutput["PreviousNormalizationConstant"] = "Asymmetry data has been provided but"
-		" no normalization constants have been provided.";
-  
+  std::vector<int> spectra = getProperty("Spectra");
+  if (dataType == "asymmetry" && oldNorm.empty()) {
+    validationOutput["PreviousNormalizationConstant"] =
+        "Asymmetry data has been provided but"
+        " no normalization constants have been provided.";
   }
-  if(dataType=="asymmetry" && oldNorm.size() != spectra.size() ){
+  if (dataType == "asymmetry" && oldNorm.size() != spectra.size()) {
 
-   validationOutput["PreviousNormalizationConstant"] = "Number of spectra and the list"
-		" of normalization constants are inconsistant.";
+    validationOutput["PreviousNormalizationConstant"] =
+        "Number of spectra and the list"
+        " of normalization constants are inconsistant.";
   }
   return validationOutput;
 }
@@ -119,7 +120,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
 
 void CalculateMuonAsymmetry::exec() {
   std::vector<int> spectra = getProperty("Spectra");
-  std::vector<double> oldNorm=getProperty("PreviousNormalizationConstant") ;
+  std::vector<double> oldNorm = getProperty("PreviousNormalizationConstant");
   // Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   auto numSpectra = inputWS->getNumberHistograms();
@@ -135,7 +136,8 @@ void CalculateMuonAsymmetry::exec() {
   const Mantid::API::Run &run = inputWS->run();
   const double numGoodFrames = std::stod(run.getProperty("goodfrm")->value());
 
-  g_log.warning("Assuming that the spectra and normalization constants are in the same order"); 
+  g_log.warning("Assuming that the spectra and normalization constants are in "
+                "the same order");
 
   // Share the X values
   for (size_t i = 0; i < static_cast<size_t>(numSpectra); ++i) {
@@ -151,70 +153,69 @@ void CalculateMuonAsymmetry::exec() {
   Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
   if (inputWS != outputWS) {
 
-	  // Copy all the Y and E data
-	  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-		  for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-			  PARALLEL_START_INTERUPT_REGION
-				  const auto index = static_cast<size_t>(i);
-			  outputWS->setSharedY(index, inputWS->sharedY(index));
-			  outputWS->setSharedE(index, inputWS->sharedE(index));
-			  prog.report();
-			  PARALLEL_END_INTERUPT_REGION
-		  }
-	  PARALLEL_CHECK_INTERUPT_REGION
+    // Copy all the Y and E data
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+    for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      const auto index = static_cast<size_t>(i);
+      outputWS->setSharedY(index, inputWS->sharedY(index));
+      outputWS->setSharedE(index, inputWS->sharedE(index));
+      prog.report();
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   // Do the specified spectra only
   int specLength = static_cast<int>(spectra.size());
   std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
-	  for (int i = 0; i < specLength; ++i) {
-		  PARALLEL_START_INTERUPT_REGION
-			  const auto specNum = static_cast<size_t>(spectra[i]);
-		  if (spectra[i] > static_cast<int>(numSpectra)) {
-			  g_log.error("The spectral index " + std::to_string(spectra[i]) +
-				  " is greater than the number of spectra!");
-			  throw std::invalid_argument("The spectral index " +
-				  std::to_string(spectra[i]) +
-				  " is greater than the number of spectra " +std::to_string(specLength)+ "!");
-		  }
-		  double estNormConst;
-		  if (dataType == "counts") {
-			  // inital estimate of N0
-			  estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),
-				  numGoodFrames, startX, endX);
-			  // Calculate the normalised counts
-			  outputWS->setHistogram(
-				  specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
+  for (int i = 0; i < specLength; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto specNum = static_cast<size_t>(spectra[i]);
+    if (spectra[i] > static_cast<int>(numSpectra)) {
+      g_log.error("The spectral index " + std::to_string(spectra[i]) +
+                  " is greater than the number of spectra!");
+      throw std::invalid_argument("The spectral index " +
+                                  std::to_string(spectra[i]) +
+                                  " is greater than the number of spectra!");
+    }
+    double estNormConst;
+    if (dataType == "counts") {
+      // inital estimate of N0
+      estNormConst = estimateNormalisationConst(inputWS->histogram(specNum),
+                                                numGoodFrames, startX, endX);
+      // Calculate the normalised counts
+      outputWS->setHistogram(
+          specNum, normaliseCounts(inputWS->histogram(specNum), numGoodFrames));
 
-		  }
-		  else {
-			  estNormConst =oldNorm[i];
-			  outputWS->setHistogram(specNum, inputWS->histogram(specNum));
-			  // convert the data back to normalised counts
-			  outputWS->mutableY(specNum) += 1.0; 
-			  outputWS->mutableY(specNum) *= estNormConst;
-			  outputWS->mutableE(specNum) *= estNormConst;
-		  }
-		  // get the normalisation constant
-		  const double normConst =
-			  getNormConstant(outputWS, spectra[i], estNormConst, startX, endX);
-		  // calculate the asymmetry
-		  outputWS->mutableY(specNum) /= normConst;
-		  outputWS->mutableY(specNum) -= 1.0;
-		  outputWS->mutableE(specNum) /= normConst;
-		  norm[i]=normConst;
-		  prog.report();
-		  PARALLEL_END_INTERUPT_REGION
-	  }
+    } else {
+      estNormConst = oldNorm[i];
+      outputWS->setHistogram(specNum, inputWS->histogram(specNum));
+      // convert the data back to normalised counts
+      outputWS->mutableY(specNum) += 1.0;
+      outputWS->mutableY(specNum) *= estNormConst;
+      outputWS->mutableE(specNum) *= estNormConst;
+    }
+    // get the normalisation constant
+    const double normConst =
+        getNormConstant(outputWS, spectra[i], estNormConst, startX, endX);
+    // calculate the asymmetry
+    outputWS->mutableY(specNum) /= normConst;
+    outputWS->mutableY(specNum) -= 1.0;
+    outputWS->mutableE(specNum) /= normConst;
+    norm[i] = normConst;
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
   PARALLEL_CHECK_INTERUPT_REGION
 
-	  // Update Y axis units
-	  outputWS->setYUnit("Asymmetry");
+  // Update Y axis units
+  outputWS->setYUnit("Asymmetry");
   setProperty("NormalizationConstant", norm);
   setProperty("OutputWorkspace", outputWS);
 }
-  
+
 /**
  * Calculate normalisation constant after the exponential decay has been removed
  * to a linear fitting function
