@@ -65,6 +65,7 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
 
     def _cloneTestWorkspace(self, wsName=None):
         if not wsName:
+            # Cannot use as default parameter as 'self' is not know in argument list.
             wsName = self._TEST_WS_NAME
         tempName = 'temp_testWS_'
         mtd.addOrReplace(tempName, self._testIN5WS)

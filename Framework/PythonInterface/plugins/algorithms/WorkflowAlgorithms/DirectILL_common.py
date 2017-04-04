@@ -114,7 +114,8 @@ class IntermediateWSCleanup:
 
     def cleanupLater(self, *args):
         """Mark the workspaces listed in *args to be cleaned up later."""
-        map(self._toBeDeleted.add, map(str, args))
+        for arg in args:
+            self._toBeDeleted.add(str(arg))
 
     def finalCleanup(self):
         """Delete all workspaces marked to be cleaned up later."""
@@ -123,7 +124,8 @@ class IntermediateWSCleanup:
 
     def protect(self, *args):
         """Mark the workspaces listed in *args to be never deleted."""
-        map(self._protected.add, map(str, args))
+        for arg in args:
+            self._protected.add(str(arg))
 
     def _delete(self, ws):
         """Delete the given workspace in ws if it is not protected, and
