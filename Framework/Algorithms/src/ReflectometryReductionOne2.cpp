@@ -196,10 +196,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
       result = monitorCorrection(result);
       result = transOrAlgCorrection(result, true);
     }
+    // Crop to wavelength limits
+    result = cropWavelength(result);
   }
-
-  // Crop to wavelength limits
-  result = cropWavelength(result);
 
   return result;
 }
@@ -601,7 +600,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   // Use the same number of bins as the input
   const double binWidth = (lambdaVMax - lambdaVMin) / numBins;
   std::stringstream params;
-  params << lambdaMin() << "," << binWidth << "," << lambdaMax();
+  params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
 
   auto rebinAlg = this->createChildAlgorithm("Rebin");
   rebinAlg->initialize();
