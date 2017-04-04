@@ -29,7 +29,7 @@ for information of splitters.
 Workspace containing splitters
 ==============================
 
-*FilterEvents* accepts three types of workspace that contains event splitters.
+This algorithm accepts three types of workspace that contains event splitters.
  - TableWorkspace: a general TableWorkspace with at three columns
  - MatrixWorkspace: a 1-spectrum MatrixWorkspace
  - SplittersWorkspace: an extended TableWorkspace with restrict definition on start and stop time.
@@ -43,11 +43,9 @@ All the events belonged to the same splitting target will be saved to a same out
 Unit of input splitters
 +++++++++++++++++++++++
 
- - MatrixWorkspace:  the unit must be second.
- 
- - TableWorkspace: the unit must be second.
-
- - SplittersWorkspace: by the definition of SplittersWorkspace, the unit has to be nanosecond.
+- MatrixWorkspace:  the unit must be second.
+- TableWorkspace: the unit must be second.
+- SplittersWorkspace: by the definition of SplittersWorkspace, the unit has to be nanosecond.
 
 
 How to generate input workspace containing splitters
@@ -67,10 +65,10 @@ As the SplittersWorkspace is in format of :ref:`MatrixWorkspace
 <MatrixWorkspace>`, its time, i.e., the value in X vector, can be
 relative time.
 
-Property *RelativeTime* flags that the splitters' time is relative.
-Property *FilterStartTime* specifies the starting time of the filter.
+Property ``RelativeTime`` flags that the splitters' time is relative.
+Property ``FilterStartTime`` specifies the starting time of the filter.
 Or the shift of time of the splitters.
-If it is not specified, then the algorithm will search for sample log *run_start*.
+If it is not specified, then the algorithm will search for sample log ``run_start``.
 
 Outputs
 #######
@@ -107,7 +105,7 @@ Difference from FilterByLogValue
 
 In FilterByLogValue(), EventList.splitByTime() is used.
 
-In FilterEvents(), if FilterByPulse is selected true,
+In FilterEvents, if FilterByPulse is selected true,
 EventList.SplitByTime is called; otherwise, EventList.SplitByFullTime()
 is called instead.
 
@@ -130,16 +128,16 @@ Developer's Note
 Splitters given by TableWorkspace
 #################################
 
- - The *start/stop* time is converted to **m_vecSplitterTime**.
- - The *splitting target* (in string) is mapped to a set of continuous integers that are stored in **m_vecSplitterGroup**.
-   - The mapping will be recorded in **m_targetIndexMap** and **m_wsGroupIndexTargetMap**.
-   - Class variable **m_maxTargetIndex** is set up to record the highest target group/index,i.e., the max value of m_vecSplitterGroup
+- The ``start/stop time`` is converted to ``m_vecSplitterTime``.
+- The splitting target (in string) is mapped to a set of continuous integers that are stored in ``m_vecSplitterGroup``.
+  - The mapping will be recorded in ``m_targetIndexMap`` and ``m_wsGroupIndexTargetMap``.
+  - Class variable ``m_maxTargetIndex`` is set up to record the highest target group/index,i.e., the max value of ``m_vecSplitterGroup``.
 
 
 Undefined splitting target
 ##########################
 
-Indexed as **0** in **m_vecSplitterGroup**.
+Indexed as ``0`` in m_vecSplitterGroup.
 
 
 Usage
@@ -196,7 +194,7 @@ Output:
     split_table_ws.addRow([400., 600., 'c'])
     split_table_ws.addRow([600., 650., 'b'])
 
-    # filter evnets
+    # filter events
     FilterEvents(InputWorkspace=ws, SplitterWorkspace=split_table_ws,
             OutputWorkspaceBaseName='tempsplitws3',  GroupWorkspaces=True,
             FilterByPulseTime = False, OutputWorkspaceIndexedFrom1 = False,
