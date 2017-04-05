@@ -52,11 +52,15 @@ private:
   /// Map of component ids to indexes
   boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
       m_compIDToIndex;
+  void init();
 
 public:
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
+                std::vector<Mantid::Geometry::IComponent *> &componentIds);
+  ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
                 std::vector<Mantid::Geometry::IComponent *> &&componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
+  std::vector<Mantid::Geometry::IComponent *> componentIds() const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
 };

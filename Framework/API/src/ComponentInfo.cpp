@@ -16,13 +16,26 @@ namespace API {
  * @param componentIds : Component Ids ordered by component index
  */
 ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
-                             std::vector<Geometry::ComponentID> &&componentIds)
+                             std::vector<Geometry::ComponentID> &componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(
           boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
       m_compIDToIndex(boost::make_shared<
           std::unordered_map<Geometry::IComponent *, size_t>>()) {
+  init();
+}
 
+ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
+                             std::vector<Geometry::IComponent *> &&componentIds)
+    : m_componentInfo(componentInfo),
+      m_componentIds(
+          boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
+      m_compIDToIndex(boost::make_shared<
+          std::unordered_map<Geometry::IComponent *, size_t>>()) {
+  init();
+}
+
+void ComponentInfo::init() {
   /*
    * Ideally we would check here that componentIds.size() ==
    * m_componentInfo.size().
@@ -37,6 +50,10 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
 std::vector<size_t>
 ComponentInfo::detectorIndices(size_t componentIndex) const {
   return m_componentInfo.detectorIndices(componentIndex);
+}
+
+std::vector<Geometry::IComponent *> ComponentInfo::componentIds() const {
+  return *m_componentIds;
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
