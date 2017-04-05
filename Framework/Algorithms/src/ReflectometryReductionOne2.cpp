@@ -206,7 +206,7 @@ void ReflectometryReductionOne2::initRun() {
     // Assume already reduced (converted, normalised and summed)
     m_convertUnits = false;
     m_normalise = false;
-    // sum = false;  // temp for testing - still do summation
+    sum = false;
   }
 
   findDetectorsOfInterest();
