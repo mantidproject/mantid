@@ -97,7 +97,7 @@ def execute(data, size, mode, order, cores=None, chunksize=None):
     python main.py -i /some/data --pre-gaussian-size 3
     python main.py -i /some/data --pre-gaussian-size 3 --pre-gaussian-mode 'nearest'
     python main.py -i /some/data --pre-gaussian-size 3 --pre-gaussian-mode 'nearest' --pre-gaussian-order 1
-    
+
     python main.py -i /some/data --post-gaussian-size 3
     python main.py -i /some/data --post-gaussian-size 3 --post-gaussian-mode 'nearest'
     python main.py -i /some/data --post-gaussian-size 3 --post-gaussian-mode 'nearest' --post-gaussian-order 1

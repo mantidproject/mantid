@@ -1,5 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
-import numpy as np
+from __future__ import absolute_import, division, print_function
+
 import helper as h
 from core.tools import importer
 

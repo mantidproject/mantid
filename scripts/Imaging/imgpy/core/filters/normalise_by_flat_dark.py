@@ -1,8 +1,10 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
+
 import helper as h
-from core.parallel import utility as pu
 from core.parallel import two_shared_mem as ptsm
+from core.parallel import utility as pu
 
 
 def cli_register(parser):

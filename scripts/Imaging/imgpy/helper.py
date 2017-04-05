@@ -67,7 +67,7 @@ def check_data_stack(data, expected_dims=3):
             format(data))
 
     # the scripts are designed to work with a 3 dimensional dataset
-    # in the case of 4 dimensional data, it's typically reduced to 3 dimensions 
+    # in the case of 4 dimensional data, it's typically reduced to 3 dimensions
     # via the aggregate functionality
     if expected_dims != len(data.shape):
         raise ValueError(

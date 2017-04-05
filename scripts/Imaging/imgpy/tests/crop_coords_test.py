@@ -66,7 +66,6 @@ class CropCoordsTest(unittest.TestCase):
     def test_not_executed_no_sample(self):
         # images that will be put through testing
         images, control = th.gen_img_shared_array_and_copy()
-        image = images[0]
         control = control[0]
 
         # not executed because no Sample is provided

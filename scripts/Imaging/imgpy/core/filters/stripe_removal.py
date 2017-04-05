@@ -49,8 +49,8 @@ def methods():
 
 def execute(data, wf, ti, sf, cores=None, chunksize=None):
     """
-    Execute stripe removal filters. 
-    Multiple filters can be executed, if they are specified on the command line. 
+    Execute stripe removal filters.
+    Multiple filters can be executed, if they are specified on the command line.
     The order for that execution will always be: wavelett-fourier, titarenko, smoothing-filter.
 
     :param data:
@@ -68,14 +68,14 @@ def execute(data, wf, ti, sf, cores=None, chunksize=None):
                size (default: 5, int, optional) Size of the smoothing filter.
 
     Example command line:
-    python main.py -i /some/data --pre-stripe-removal-wf level=1 
+    python main.py -i /some/data --pre-stripe-removal-wf level=1
     python main.py -i /some/data --pre-stripe-removal-wf level=3 pad=False
     python main.py -i /some/data --pre-stripe-removal-wf level=3 pad=False wname=db5
     python main.py -i /some/data --pre-stripe-removal-wf level=3 pad=False wname=db5 sigma=2
-    
+
     python main.py -i /some/data --pre-stripe-removal-ti nblock=3
     python main.py -i /some/data --pre-stripe-removal-ti nblock=3 alpha=2
-    
+
     python main.py -i /some/data --pre-stripe-removal-sf size=3
     """
     # get the first one, the rest will be processed

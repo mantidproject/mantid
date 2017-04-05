@@ -70,7 +70,7 @@ def execute(data, size, mode, cores=None, chunksize=None):
     python main.py -i /some/data --pre-median-size 3
     python main.py -i /some/data --pre-median-size 3 --pre-median-mode 'nearest'
     python main.py -i /some/data --pre-median-size 3 --pre-median-mode 'nearest'
-    
+
     python main.py -i /some/data --post-median-size 3
     python main.py -i /some/data --post-median-size 3 --post-median-mode 'nearest'
     python main.py -i /some/data --post-median-size 3 --post-median-mode 'nearest'

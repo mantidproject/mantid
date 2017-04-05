@@ -76,10 +76,10 @@ class SharedMemTest(unittest.TestCase):
         # create partial
         f = psm.create_partial(
             add_inplace, fwd_func=psm.inplace_fwd_func, add_arg=add_arg)
-       
+
         # execute parallel
         res = psm.execute(img, f, name="Fail Inplace test")
-        
+
         # compare results
         th.assert_not_equals(res, expected)
         th.assert_equals(img, orig)
@@ -95,17 +95,18 @@ class SharedMemTest(unittest.TestCase):
         assert expected[1, 0, 0] != img[1, 0, 0]
         assert expected[0, 4, 0] != img[0, 4, 0]
         assert expected[6, 0, 1] != img[6, 0, 1]
-       
+
         # create partial
         f = psm.create_partial(
             return_from_func, fwd_func=psm.return_fwd_func, add_arg=add_arg)
-       
+
         # execute parallel
         res = psm.execute(img, f, name="Fwd func test")
-       
+
         # compare results
         th.assert_not_equals(res, expected)
         th.assert_equals(img, orig)
+
 
 if __name__ == '__main__':
     unittest.main()

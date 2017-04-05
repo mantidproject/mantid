@@ -27,14 +27,14 @@ def gui_register(par):
 
 def execute(sample, region_of_interest, flat=None, dark=None):
     """
-    Execute the Crop Coordinates by Region of Interest filter. 
+    Execute the Crop Coordinates by Region of Interest filter.
     This does NOT do any checks if the Region of interest is out of bounds!
     If the region of interest is out of bounds, the crop will fail at runtime.
-    If the region of interest is in bounds, but has overlapping coordinates 
+    If the region of interest is in bounds, but has overlapping coordinates
     the crop give back a 0 shape of the coordinates that were wrong.
 
     :param data: The sample image data as a 3D numpy.ndarray
-    :param region_of_interest: Crop original images using these coordinates. 
+    :param region_of_interest: Crop original images using these coordinates.
                                The selection is a rectangle and expected order is - Left Top Right Bottom.
     :param flat: The average flat image to be cropped
     :param dark: The average dark image to be cropped
@@ -56,8 +56,8 @@ def execute(sample, region_of_interest, flat=None, dark=None):
         return _execute(sample, region_of_interest), None, None
     else:  # crop all
         return _execute(sample, region_of_interest), \
-               _execute(flat, region_of_interest), \
-               _execute(dark, region_of_interest)
+            _execute(flat, region_of_interest), \
+            _execute(dark, region_of_interest)
 
 
 def _execute(data, region_of_interest):

@@ -11,8 +11,6 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
 
     def test_not_executed_empty_params(self):
         images, control = th.gen_img_shared_array_and_copy()
-        flat = th.gen_img_shared_array()[0]
-        dark = th.gen_img_shared_array()[0]
 
         # empty params
         result = normalise_by_flat_dark.execute(images)
@@ -21,7 +19,6 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
     def test_not_executed_no_dark(self):
         images, control = th.gen_img_shared_array_and_copy()
         flat = th.gen_img_shared_array()[0]
-        dark = th.gen_img_shared_array()[0]
 
         # no dark
         normalise_by_flat_dark.execute(images, flat[0])
@@ -29,7 +26,6 @@ class NormaliseByFlatDarkTest(unittest.TestCase):
 
     def test_not_executed_no_flat(self):
         images, control = th.gen_img_shared_array_and_copy()
-        flat = th.gen_img_shared_array()[0]
         dark = th.gen_img_shared_array()[0]
 
         # no flat
