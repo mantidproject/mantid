@@ -453,6 +453,7 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
   } else { // FilterByLogValue
     filter->setProperty("MinimumValue", startTime);
     filter->setProperty("MaximumValue", stopTime);
+    filter->setProperty("TimeTolerance", 1.0);
     filter->setProperty("LogName", logFilter);
   }
   filter->execute();
