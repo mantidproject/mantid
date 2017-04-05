@@ -82,12 +82,6 @@ public:
   /// Set the time value.
   void setTime(double timeStep);
 
-  /// Get the max value of the data set
-  virtual double getMinValue();
-
-  /// Get the min value of the data set
-  virtual double getMaxValue();
-
   /// Getter for the instrument
   virtual const std::string &getInstrument();
 
@@ -151,12 +145,6 @@ private:
 
   /// Time value.
   double m_time;
-
-  /// Min data value
-  mutable double m_minValue;
-
-  /// Max data value;
-  mutable double m_maxValue;
 
   /// Instrument
   mutable std::string m_instrument;
