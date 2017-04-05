@@ -31,22 +31,25 @@ Usage
 
 .. testcode:: ExSimple
 
+   from __future__ import (absolute_import, division, print_function)
+   import math
+   import numpy as np
    y = [100, 150, 50, 10, 5]
    x = [1,2,3,4,5,6]
    input = CreateWorkspace(x,y)
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
    output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
-   print "Asymmetry estimate: ", output.readY(0)
-   print "Normalization constant: ",norm[0]
+   print  ("Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)])
+   print ("Normalization constant: {0:.2f}".format(norm[0]))
    
 Output:
 
 .. testoutput:: ExSimple
 
-   Asymmetry estimate:  [-0.1232116   1.07330834  0.08948306 -0.65649875 -0.7292452 ]
-   Normalization Constant: 17.9797250909
-   
+   Asymmetry:  ['-0.12', '1.07', '0.09', '-0.66', '-0.73']   
+   Normalization constant: 17.98
+
 .. categories::
 
 .. sourcelink::
