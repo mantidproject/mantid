@@ -15,8 +15,6 @@ public:
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
   void SetZScaling(double zScaling);
-  double GetMinValue();
-  double GetMaxValue();
   const char *GetInstrument();
   int GetSpecialCoordinates();
 
@@ -36,9 +34,6 @@ private:
   double m_xScaling;
   double m_yScaling;
   double m_zScaling;
-
-  double m_minValue;
-  double m_maxValue;
   std::string m_instrument;
   int m_specialCoordinates;
 
