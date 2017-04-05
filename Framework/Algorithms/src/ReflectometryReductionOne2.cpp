@@ -107,13 +107,7 @@ void ReflectometryReductionOne2::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Run to reduce.");
 
-  // Reduction type
-  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
-                                             "NonFlatSample"};
-  std::string defaultCorrection = "None";
-  declareProperty("ReductionType", "Normal",
-                  boost::make_shared<StringListValidator>(reductionTypes),
-                  "The type of reduction to perform.");
+  initReductionProperties();
 
   // Theta0
   declareProperty("Theta0", 0.0, "Horizon angle in degrees", Direction::Input);
@@ -172,6 +166,9 @@ ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
 
+  const auto reduction = validateReductionProperties();
+  results.insert(reduction.begin(), reduction.end());
+
   const auto wavelength = validateWavelengthRanges();
   results.insert(wavelength.begin(), wavelength.end());
 
@@ -206,7 +203,7 @@ void ReflectometryReductionOne2::initRun() {
     // Assume already reduced (converted, normalised and summed)
     m_convertUnits = false;
     m_normalise = false;
-    sum = false;
+    m_sum = false;
   }
 
   findDetectorsOfInterest();
@@ -514,9 +511,9 @@ ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
 */
 bool ReflectometryReductionOne2::summingInQ() {
   bool result = false;
-  const std::string reductionType = getProperty("ReductionType");
+  const std::string summationType = getProperty("SummationType");
 
-  if (reductionType == "DivergentBeam" || reductionType == "NonFlatSample") {
+  if (summationType == "SumInQ") {
     result = true;
   }
 

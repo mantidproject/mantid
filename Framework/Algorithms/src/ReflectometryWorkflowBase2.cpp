@@ -4,7 +4,9 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Unit.h"
 
@@ -14,6 +16,23 @@ using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
+
+/** Initialize properties related to the type of reduction
+*/
+void ReflectometryWorkflowBase2::initReductionProperties() {
+  // Summation type
+  std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
+  declareProperty("SummationType", "SumInLambda",
+                  boost::make_shared<StringListValidator>(summationTypes),
+                  "The type of summation to perform.", Direction::Input);
+
+  // Reduction type
+  std::vector<std::string> reductionTypes = {"None", "DivergentBeam",
+                                             "NonFlatSample"};
+  declareProperty("ReductionType", "None",
+                  boost::make_shared<StringListValidator>(reductionTypes),
+                  "The type of reduction to perform.", Direction::Input);
+}
 
 /** Initialize properties related to direct beam normalization
 */
@@ -176,6 +195,33 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
                   Direction::Input);
   declareProperty("ScaleFactor", Mantid::EMPTY_DBL(),
                   "Factor you wish to scale Q workspace by.", Direction::Input);
+}
+
+/** Validate reduction properties, if given
+*
+* @return :: A map with results of validation
+*/
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateReductionProperties() const {
+
+  std::map<std::string, std::string> results;
+
+  // If summing in Q, then reduction type must be given
+  const std::string summationType = getProperty("SummationType");
+  const std::string reductionType = getProperty("ReductionType");
+  if (summationType == "SumInQ") {
+    if (reductionType == "None") {
+      results["ReductionType"] =
+          "ReductionType must be set if SummationType is SumInQ";
+    }
+  } else {
+    if (reductionType != "None") {
+      results["ReductionType"] =
+          "ReductionType should not be set unless SummationType is SumInQ";
+    }
+  }
+
+  return results;
 }
 
 /** Validate direct beam if given

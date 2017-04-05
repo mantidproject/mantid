@@ -113,12 +113,7 @@ void ReflectometryReductionOneAuto2::init() {
       "Input run in TOF or wavelength");
 
   // Reduction type
-  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
-                                             "NonFlatSample"};
-  std::string defaultCorrection = "None";
-  declareProperty("ReductionType", "Normal",
-                  boost::make_shared<StringListValidator>(reductionTypes),
-                  "The type of reduction to perform.");
+  initReductionProperties();
 
   // Analysis mode
   const std::vector<std::string> analysisMode{"PointDetectorAnalysis",
@@ -240,6 +235,7 @@ void ReflectometryReductionOneAuto2::exec() {
   alg->initialize();
 
   // Mandatory properties
+  alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
   alg->setProperty("Theta0", getPropertyValue("Theta0"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
