@@ -1,14 +1,12 @@
 include(ExternalProject)
 
-# Use version 3.2.10 of Eigen
-# A newer version existed at the time of choosing this version (3.3.2), but this had warnings when building
-set(eigen_version "3.2.10")
+set(eigen_version "3.3.3")
 
 option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OFF)
 
 if(USE_SYSTEM_EIGEN)
   message(STATUS "Using system Eigen")
-  find_package(Eigen3 3.2 REQUIRED)
+  find_package(Eigen3 3.3 REQUIRED)
 else()
   message(STATUS "Using Eigen in ExternalProject")
 
