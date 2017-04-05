@@ -29,17 +29,18 @@ const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
 
 /**
  * Calculate the corrected full time in nanoseconds
- * @param totalNanoseconds : Time in nanoseconds
- * @param tof : Time of flight
+ * @param event : The event with pulse time and time-of-flight
  * @param tofFactor : Time of flight coefficient factor
  * @param tofShift : Tof shift in seconds
  * @return Corrected full time at sample in Nanoseconds.
  */
-int64_t calculateCorrectedFullTime(const int64_t &totalNanoseconds,
-                                   const double &tof, const double &tofFactor,
-                                   const double &tofShift) {
-  return totalNanoseconds +
-         static_cast<int64_t>(tofFactor * (tof * 1.0E3) + (tofShift * 1.0E9));
+template <typename EventType>
+int64_t calculateCorrectedFullTime(const EventType &event,
+                                   const double tofFactor,
+                                   const double tofShift) {
+  return event.pulseTime().totalNanoseconds() +
+         static_cast<int64_t>(tofFactor * (event.tof() * 1.0E3) +
+                              (tofShift * 1.0E9));
 }
 
 /**
@@ -53,7 +54,7 @@ private:
   const double m_tofShift;
 
 public:
-  CompareTimeAtSample(const double &tofFactor, const double &tofShift)
+  CompareTimeAtSample(const double tofFactor, const double tofShift)
       : m_tofFactor(tofFactor), m_tofShift(tofShift) {}
 
   /**
@@ -66,10 +67,10 @@ public:
    * @return True if first event evaluates to be < second event, otherwise false
    */
   bool operator()(const EventType &e1, const EventType &e2) const {
-    const auto tAtSample1 = calculateCorrectedFullTime(
-        e1.pulseTime().totalNanoseconds(), e1.tof(), m_tofFactor, m_tofShift);
-    const auto tAtSample2 = calculateCorrectedFullTime(
-        e2.pulseTime().totalNanoseconds(), e2.tof(), m_tofFactor, m_tofShift);
+    const auto tAtSample1 =
+        calculateCorrectedFullTime(e1, m_tofFactor, m_tofShift);
+    const auto tAtSample2 =
+        calculateCorrectedFullTime(e2, m_tofFactor, m_tofShift);
     return (tAtSample1 < tAtSample2);
   }
 };
@@ -1870,12 +1871,13 @@ template <class T>
 typename std::vector<T>::const_iterator
 EventList::findFirstPulseEvent(const std::vector<T> &events,
                                const double seek_pulsetime) {
-  const DateAndTime seek_dateandtime(seek_pulsetime, 0.);
   auto itev = events.begin();
   auto itev_end = events.end(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) && (itev->pulseTime() < seek_dateandtime))
+  while ((itev != itev_end) &&
+         (static_cast<double>(itev->pulseTime().totalNanoseconds()) <
+          seek_pulsetime))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -1899,16 +1901,12 @@ template <class T>
 typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
     const std::vector<T> &events, const double seek_time,
     const double &tofFactor, const double &tofOffset) const {
-  const int64_t seek_time_int64 =
-      DateAndTime::nanosecondsFromSeconds(seek_time);
   auto itev = events.cbegin();
   auto itev_end = events.cend(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < seek_time_int64))
+  while ((itev != itev_end) && (static_cast<double>(calculateCorrectedFullTime(
+                                    *itev, tofFactor, tofOffset)) < seek_time))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -2304,8 +2302,7 @@ void EventList::generateCountsHistogramTimeAtSample(
     size_t bin = 0;
 
     double tAtSample = static_cast<double>(
-        calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                   itev->tof(), tofFactor, tofOffset));
+        calculateCorrectedFullTime(*itev, tofFactor, tofOffset));
     while (bin < x_size - 1) {
       // Within range?
       if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
@@ -2320,8 +2317,7 @@ void EventList::generateCountsHistogramTimeAtSample(
     // Keep going through all the events
     while ((itev != itev_end) && (bin < x_size - 1)) {
       tAtSample = static_cast<double>(
-          calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                     itev->tof(), tofFactor, tofOffset));
+          calculateCorrectedFullTime(*itev, tofFactor, tofOffset));
       while (bin < x_size - 1) {
         // Within range?
         if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
@@ -3208,17 +3204,14 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(
-          this->events.rbegin()->pulseTime().totalNanoseconds(),
-          this->events.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->events.rbegin()), tofFactor,
+                                        tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(
-          this->weightedEvents.rbegin()->pulseTime().totalNanoseconds(),
-          this->weightedEvents.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEvents.rbegin()),
+                                        tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(
-          this->weightedEventsNoTime.rbegin()->pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime.rbegin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.rbegin()),
+                                        tofFactor, tofOffset);
     }
   }
 
@@ -3228,19 +3221,15 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor,
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(
-          this->events[i].pulseTime().totalNanoseconds(), this->events[i].tof(),
-          tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(
-          this->weightedEvents[i].pulseTime().totalNanoseconds(),
-          this->weightedEvents[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor,
+                                        tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(
-          this->weightedEventsNoTime[i].pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i],
+                                        tofFactor, tofOffset);
       break;
     }
     if (temp > tMax)
@@ -3262,17 +3251,14 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor,
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(
-          this->events.begin()->pulseTime().totalNanoseconds(),
-          this->events.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->events.begin()), tofFactor,
+                                        tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(
-          this->weightedEvents.begin()->pulseTime().totalNanoseconds(),
-          this->weightedEvents.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEvents.begin()),
+                                        tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(
-          this->weightedEventsNoTime.begin()->pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime.begin()->tof(), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.begin()),
+                                        tofFactor, tofOffset);
     }
   }
 
@@ -3282,19 +3268,15 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor,
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(
-          this->events[i].pulseTime().totalNanoseconds(), this->events[i].tof(),
-          tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(
-          this->weightedEvents[i].pulseTime().totalNanoseconds(),
-          this->weightedEvents[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor,
+                                        tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(
-          this->weightedEventsNoTime[i].pulseTime().totalNanoseconds(),
-          this->weightedEventsNoTime[i].tof(), tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i],
+                                        tofFactor, tofOffset);
       break;
     }
     if (temp < tMin)
@@ -3800,15 +3782,13 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events,
   auto itev_end = events.end();
   // Find the first event with m_pulsetime >= start
   while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < start.totalNanoseconds()))
+         (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
+          start.totalNanoseconds()))
     itev++;
 
   while ((itev != itev_end) &&
-         (calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                     itev->tof(), tofFactor,
-                                     tofOffset) < stop.totalNanoseconds())) {
+         (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
+          stop.totalNanoseconds())) {
     // Add the copy to the output
     output.push_back(*itev);
     ++itev;
@@ -4143,9 +4123,7 @@ void EventList::splitByFullTimeHelper(Kernel::TimeSplitterType &splitter,
     while (itev != itev_end) {
       int64_t fulltime;
       if (docorrection)
-        fulltime =
-            calculateCorrectedFullTime(itev->m_pulsetime.totalNanoseconds(),
-                                       itev->m_tof, toffactor, tofshift);
+        fulltime = calculateCorrectedFullTime(*itev, toffactor, tofshift);
       else
         fulltime = itev->m_pulsetime.totalNanoseconds() +
                    static_cast<int64_t>(itev->m_tof * 1000);
