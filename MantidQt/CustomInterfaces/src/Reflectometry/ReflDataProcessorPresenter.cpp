@@ -350,7 +350,7 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
   std::transform(timesStr.begin(), timesStr.end(), std::back_inserter(times),
                  [](const std::string &astr) { return std::stod(astr); });
 
-  size_t numSlices = std::max(times.size() - 1.0, 1.0);
+  size_t numSlices = times.size() > 1 ? times.size() - 1 : 1;
 
   // Add the start/stop times
   startTimes = std::vector<double>(numSlices);
