@@ -8,7 +8,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/make_shared.hpp>
 
