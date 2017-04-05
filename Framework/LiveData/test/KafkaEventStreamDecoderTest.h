@@ -65,24 +65,24 @@ public:
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TSM_ASSERT(!decoder->hasData(),
-               "Decoder should not have create data buffers yet");
+    TSM_ASSERT("Decoder should not have create data buffers yet",
+               !decoder->hasData());
     TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     Workspace_sptr workspace;
-    TSM_ASSERT(decoder->hasData(),
-               "Decoder's data buffers should be created now");
+    TSM_ASSERT("Decoder's data buffers should be created now",
+               decoder->hasData());
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
 
     // -- Workspace checks --
-    TSM_ASSERT(workspace,
-               "Expected non-null workspace pointer from extractData()");
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
     auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
-        eventWksp,
-        "Expected an EventWorkspace from extractData(). Found something else");
+        "Expected an EventWorkspace from extractData(). Found something else",
+        eventWksp);
 
     checkWorkspaceMetadata(*eventWksp);
     checkWorkspaceEventData(*eventWksp);
@@ -111,19 +111,19 @@ public:
     TS_ASSERT(!decoder->isCapturing());
 
     // --- Workspace checks ---
-    TSM_ASSERT(workspace,
-               "Expected non-null workspace pointer from extractData()");
+    TSM_ASSERT("Expected non-null workspace pointer from extractData()",
+               workspace);
     auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TSM_ASSERT(
-        group,
-        "Expected a WorkspaceGroup from extractData(). Found something else.");
+        "Expected a WorkspaceGroup from extractData(). Found something else.",
+        group);
 
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
       auto eventWksp =
           boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
-      TSM_ASSERT(eventWksp,
-                 "Expected an EventWorkspace for each member of the group");
+      TSM_ASSERT("Expected an EventWorkspace for each member of the group",
+                 eventWksp);
       checkWorkspaceMetadata(*eventWksp);
       checkWorkspaceEventData(*eventWksp);
     }
