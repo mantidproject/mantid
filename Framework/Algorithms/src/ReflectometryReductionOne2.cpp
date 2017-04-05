@@ -595,6 +595,12 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
       m_detectors.push_back(i);
     }
   }
+
+  // Log the results
+  g_log.debug() << "Minimum spectrum index: " << spectrumMin() << std::endl
+                << "Maximum spectrum index: " << spectrumMax() << std::endl
+                << "twoThetaR spectrum index: " << twoThetaRDetectorIdx()
+                << std::endl;
 }
 
 /**
@@ -621,6 +627,8 @@ void ReflectometryReductionOne2::findTheta0() {
     // angle the detector has been rotated around and should be defined in
     m_theta0 = getProperty("Theta0");
   }
+
+  g_log.debug() << "theta0: " << theta0() << std::endl;
 }
 
 /**
@@ -632,6 +640,7 @@ void ReflectometryReductionOne2::findTheta0() {
 */
 void ReflectometryReductionOne2::findTwoThetaR() {
   m_twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx());
+  g_log.debug() << "twoThetaR: " << twoThetaR() << std::endl;
 }
 
 /**
