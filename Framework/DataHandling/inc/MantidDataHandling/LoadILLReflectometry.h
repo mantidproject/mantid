@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadILLReflectometry : Loads a ILL Reflectometry data file.
+/*! LoadILLReflectometry : Loads a ILL Reflectometry data file.
 
  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -61,16 +61,16 @@ private:
   void initWorkspace(std::vector<std::vector<int>> monitorsData);
   void initNames(NeXus::NXEntry &entry);
   void loadDataDetails(NeXus::NXEntry &entry);
-  void getXValues(std::vector<double> &xVals);
-  void convertToWavelength();
+  std::vector<double> getXValues();
+  void convertTofToWavelength();
   void loadData(NeXus::NXEntry &entry,
                 std::vector<std::vector<int> > &monitorsData,
-                std::vector<double> &xVals);
-  void loadNexusEntriesIntoProperties(NeXus::NXEntry &entry);
+                std::vector<double> xVals);
+  void loadNexusEntriesIntoProperties(NeXus::NXEntry &entry, NeXus::NXRoot &root);
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
                                      std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);
-  void runLoadInstrument();
+  void loadInstrument();
   void loadBeam(API::MatrixWorkspace_sptr &beamWS,
                 const std::__cxx11::string beam,
                 std::__cxx11::string angleDirectBeam);

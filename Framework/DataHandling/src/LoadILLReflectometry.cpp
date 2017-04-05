@@ -2,6 +2,8 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -10,10 +12,44 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
 //#include "MantidDataObjects/WorkspaceCreation.h"
+//#include "MantidNexus/NexusClasses.h"
+
+/*!
+ * \def atanFor(a)
+ * Computes the antan of an angle in rad used for the coherence equation, where
+ * \a is a peak position.
+ * \def coherenceEq1(a, b, c)
+ * Computes the incoherence equation for an angle centre \a, and peak positions
+ * \b and \c.
+ * \def coherenceEq2(a, b, c)
+ * Computes the coherent equation for an angle centre \a, and peak positions \b
+ * and \c.
+ * \def iterator(a, b, c)
+ * Returns an iterator for an iterator \a and \b and a double value \c
+ * \def StringConcat(string1, string2)
+ * Concatenates \string1 and \string2, where the \string1 string will not be
+ * modified but copied
+ * \def debugLog(myString, myValue)
+ * Logs a debug message \myString for \myValue
+ * \def debugLog2(myString, aString, myValue)
+ * Logs a debug message for \myValue explained by two strings \myString and
+ * \aString
+ * \def debugLogWithUnitDegrees(myString, myValue)
+ * Logs a debug message \myString for a \myValue in degrees
+ * \def debugLogWithUnitMeter(myString, myValue)
+ * Logs a debug message \myString for \myValue in meters
+ * \def infoLog(myString)
+ * Logs an information message \myString using the generated error message
+ * what()
+ * \def getDouble(myString)
+ * Get a double value from the workspace to be loaded (SampleLogs) for \myString
+ * \def inRad *M_PI / 180.
+ * Convert an angle from degree to radiant
+ * \def #define inMeter *1.0e-3
+ * Convert a value from millimeter to meter
+ */
 
 // formula
 #define atanFor(a)                                                             \
@@ -22,22 +58,28 @@
 #define coherenceEq2(a, b, c) a + 0.5 * (atanFor(b) + atanFor(c))
 #define iterator(a, b, c)                                                      \
   std::find_if(a, b, [c](double value) { return value < 0.5 * c; })
+// string concatenation
+#define StringConcat(string1, string2) std::string(string1).append(string2)
 // logging
 #define debugLog(myString, myValue)                                            \
-  g_log.debug(                                                                 \
-      std::string(myString).append(std::to_string(myValue)).append("\n"))
+  g_log.debug(StringConcat(myString, std::to_string(myValue)).append("\n"))
 #define debugLog2(myString, aString, myValue)                                  \
-  g_log.debug(std::string(myString)                                            \
-                  .append(aString)                                             \
-                  .append(": ")                                                \
-                  .append(std::to_string(myValue))                             \
+  g_log.debug(StringConcat(myString, aString)                                  \
+                  .append(StringConcat(": ", std::to_string(myValue)))         \
                   .append("\n"))
+#define debugLogWithUnitDegrees(myString, myValue)                             \
+  g_log.debug(                                                                 \
+      StringConcat(myString, std::to_string(myValue).append(" degrees\n")))
+#define debugLogWithUnitMeter(myString, myValue)                               \
+  g_log.debug(StringConcat(myString, std::to_string(myValue)).append(" m\n"))
 #define infoLog(myString)                                                      \
-  g_log.information(std::string(myString).append(e.what()).append("\n"))
-// get value from sample logs of the (output) workspace
-#define getValue(myString)                                                     \
-  dynamic_cast<PropertyWithValue<double> *>(                                   \
-      m_localWorkspace->run().getProperty(myString))
+  g_log.information(StringConcat(myString, e.what()).append("\n"))
+// get a double value from sample logs of the (output) workspace
+#define getDouble(myString)                                                    \
+  m_localWorkspace->run().getPropertyValueAsType<double>(myString)
+// unit
+#define inRad *M_PI / 180.
+#define inMeter *1.0e-3
 
 namespace Mantid {
 namespace DataHandling {
@@ -72,8 +114,7 @@ int LoadILLReflectometry::confidence(
     return 0;
 }
 
-/** Initialize the algorithm's properties.
- */
+/// Initialize the algorithm's properties.
 void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", std::string(),
                                                     FileProperty::Load, ".nxs",
@@ -118,9 +159,10 @@ void LoadILLReflectometry::init() {
                           "BraggAngleIs", IS_EQUAL_TO, "detector angle"));
 }
 
-/** Validate inputs
+/**
+ * Validate inputs
  * @returns a string map containing the error messages
-  */
+ */
 std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   std::map<std::string, std::string> result;
   // check input file
@@ -139,8 +181,7 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   if (!directBeam.empty() &&
       (m_supportedInstruments.find(directBeam) != m_supportedInstruments.end()))
     result["DirectBeam"] = "Instrument not supported.";
-  // compatibility check for reflected and direct beam in loadBeam
-
+  // compatibility check for reflected and direct beam located in loadBeam
   // further input validation is needed for general LoadDialog and Python
   if ((angleOption != "user defined") && (thetaUserDefined != EMPTY_DBL()))
     result["BraggAngle"] = "No input value required";
@@ -150,11 +191,38 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   return result;
 }
 
-/**
-   * Run the Child Algorithm LoadInstrument.
-   */
-void LoadILLReflectometry::runLoadInstrument() {
+/// Execute the algorithm.
+void LoadILLReflectometry::exec() {
+  // open the root node
+  NeXus::NXRoot root(getPropertyValue("Filename"));
+  NXEntry firstEntry{root.openFirstEntry()};
+  // load Monitor details: n. monitors x monitor contents
+  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
+  // load Data details (number of tubes, channels, etc)
+  loadDataDetails(firstEntry);
+  // set instrument specific names of Nexus file entries
+  initNames(firstEntry);
+  // initialise workspace
+  initWorkspace(monitorsData);
+  // load the instrument from the IDF if it exists
+  loadInstrument();
+  // get properties
+  loadNexusEntriesIntoProperties(firstEntry, root);
+  // load data into the workspace
+  loadData(firstEntry, monitorsData, getXValues());
+  root.close();
+  firstEntry.close();
+  // position the detector
+  placeDetector();
+  convertTofToWavelength();
+  // Set the output workspace property
+  setProperty("OutputWorkspace", m_localWorkspace);
+} // exec
+
+/// Run the Child Algorithm LoadInstrument.
+void LoadILLReflectometry::loadInstrument() {
   // execute the Child Algorithm. Catch and log any error, but don't stop.
+  g_log.debug("Loading instrument definition...");
   try {
     IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
@@ -167,72 +235,25 @@ void LoadILLReflectometry::runLoadInstrument() {
   }
 }
 
-/** Execute the algorithm.
- */
-void LoadILLReflectometry::exec() {
-  // open the root node
-  NeXus::NXRoot dataRoot(getPropertyValue("Filename"));
-  NXEntry firstEntry{dataRoot.openFirstEntry()};
-  // load Monitor details: n. monitors x monitor contents
-  std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
-  // load Data details (number of tubes, channels, etc)
-  loadDataDetails(firstEntry);
-  // initialise workspace
-  initWorkspace(monitorsData);
-  // set instrument specific names of Nexus file entries
-  initNames(firstEntry);
-  // get properties
-  loadNexusEntriesIntoProperties(firstEntry);
-  // get acquisition mode
-  m_acqMode =
-      m_localWorkspace->run().getPropertyAsIntegerValue("acquisition_mode");
-  m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
-  // load the instrument from the IDF if it exists
-  g_log.debug("Loading instrument definition...");
-  runLoadInstrument(); // ExperimentInfo
-  // get TOF values -> move out of exec
-  std::vector<double> xVals;
-  if (m_channelWidth) {
-    getXValues(xVals);
-  } else {
-    g_log.debug("No TOF values for axis description (no "
-                "conversion to wavelength possible). \n");
-    xVals.reserve(m_numberOfChannels + 1);
-    for (size_t t = 0; t <= m_numberOfChannels; ++t) {
-      xVals.push_back(double(t));
-    }
-  }
-  // load data into the workspace
-  loadData(firstEntry, monitorsData, xVals);
-  dataRoot.close();
-  // position the detector
-  placeDetector();
-  const std::string unit = getPropertyValue("XUnit");
-  if (m_channelWidth && m_acqMode && (unit == "Wavelength")) {
-    convertToWavelength();
-  }
-  // Set the output workspace property
-  setProperty("OutputWorkspace", m_localWorkspace);
-}
-
 /**
-  * Init names of member variables based on instrument specific NeXus file entries
+  * Init names of member variables based on instrument specific NeXus file
+  * entries
+  *
+  * @params entry :: the NeXus file entry
   */
 void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
   std::string instrumentNamePath = m_loader.findInstrumentNexusPath(entry);
-  instrumentNamePath.append("/name");
-  m_instrumentName = entry.getString(instrumentNamePath);
+  m_instrumentName = entry.getString(instrumentNamePath.append("/name"));
   if (m_instrumentName.empty())
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
-
   // In NeXus files names are: D17 and figaro. The instrument
   // definition is independent and names start with a capital letter. This
   // loader follows its convention.
   boost::to_lower(m_instrumentName);
   m_instrumentName[0] = char((std::toupper(m_instrumentName[0])));
   g_log.debug(
-      std::string("Instrument name : ").append(m_instrumentName).append("\n"));
+      StringConcat("Instrument name : ", m_instrumentName).append("\n"));
   if (m_instrumentName == "D17") {
     m_detectorDistance = "det";
     m_detectorAngleName = "dan.value";
@@ -241,6 +262,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_pixelCentre = 135.75;
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
+    // m_wavelength = getFloat("wavelength");
   } else if (m_instrumentName == "Figaro") {
     m_detectorDistance = "DTR";
     m_detectorAngleName = "VirtualAxis.dan_actual_angle";
@@ -254,25 +276,29 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     NXFloat secondChopper =
         entry.openNXFloat("instrument/ChopperSetting/secondChopper");
     secondChopper.load();
-    m_chopper1Name =
-        std::string("CH").append(std::to_string(int(firstChopper[0])));
-    m_chopper2Name =
-        std::string("CH").append(std::to_string(int(secondChopper[0])));
+    m_chopper1Name = StringConcat("CH", std::to_string(int(firstChopper[0])));
+    m_chopper2Name = StringConcat("CH", std::to_string(int(secondChopper[0])));
   }
+  // get acquisition mode
+  NXInt acqMode = entry.openNXInt("acquisition_mode");
+  acqMode.load();
+  m_acqMode = acqMode[0];
+  m_acqMode ? g_log.debug("TOF mode") : g_log.debug("Monochromatic Mode");
 }
 
-/**
-  * Call child algorithm ConvertUnits for conversion from TOF to wavelength
-  */
-void LoadILLReflectometry::convertToWavelength() {
-  auto convertToWavelength = createChildAlgorithm("ConvertUnits", -1, -1, true);
-  convertToWavelength->initialize();
-  convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
-                                                         m_localWorkspace);
-  convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
-                                                         m_localWorkspace);
-  convertToWavelength->setPropertyValue("Target", "Wavelength");
-  convertToWavelength->executeAsChildAlg();
+/// Call child algorithm ConvertUnits for conversion from TOF to wavelength
+void LoadILLReflectometry::convertTofToWavelength() {
+  if (m_acqMode && (getPropertyValue("XUnit") == "Wavelength")) {
+    auto convertToWavelength =
+        createChildAlgorithm("ConvertUnits", -1, -1, true);
+    convertToWavelength->initialize();
+    convertToWavelength->setProperty<MatrixWorkspace_sptr>("InputWorkspace",
+                                                           m_localWorkspace);
+    convertToWavelength->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
+                                                           m_localWorkspace);
+    convertToWavelength->setPropertyValue("Target", "Wavelength");
+    convertToWavelength->executeAsChildAlg();
+  }
 }
 
 /**
@@ -297,13 +323,13 @@ void LoadILLReflectometry::initWorkspace(
         m_numberOfChannels + 1, m_numberOfChannels);
   } catch (std::out_of_range &) {
     throw std::runtime_error(
-        std::string("Workspace2D cannot be created, check number of "
-                    "histograms (")
-            .append(std::to_string(m_numberOfHistograms))
-            .append("), monitors (")
-            .append(std::to_string(monitorsData.size()))
-            .append("), and channels (")
-            .append(std::to_string(m_numberOfChannels))
+        StringConcat("Workspace2D cannot be created, check number of "
+                     "histograms (",
+                     std::to_string(m_numberOfHistograms))
+            .append(StringConcat("), monitors (",
+                                 std::to_string(monitorsData.size())))
+            .append(StringConcat("), and channels (",
+                                 std::to_string(m_numberOfChannels)))
             .append(")\n"));
   }
   if (m_acqMode)
@@ -311,6 +337,10 @@ void LoadILLReflectometry::initWorkspace(
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
   m_localWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+  if (m_wavelength > 0.0) {
+    double ei = m_loader.calculateEnergy(m_wavelength);
+    m_localWorkspace->mutableRun().addProperty<double>("Ei", ei, true);
+  }
 }
 
 /**
@@ -334,7 +364,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
 
   NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/mppy");
   pixelWidth.load();
-  m_pixelWidth = static_cast<double>(pixelWidth[0]) * 1.0e-3;
+  m_pixelWidth = static_cast<double>(pixelWidth[0]) inMeter;
 
   g_log.debug("Please note that ILL reflectometry instruments have "
               "several tubes, after integration one "
@@ -345,7 +375,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   debugLog("Number of time channels: ", m_numberOfChannels);
   g_log.debug() << "Channel width: " << m_channelWidth << " 10e-6 sec\n";
   debugLog("TOF delay: ", m_tofDelay);
-  g_log.debug() << "Pixel width " << m_pixelWidth << " m\n";
+  debugLogWithUnitMeter("Pixel width ", m_pixelWidth);
 }
 
 /**
@@ -375,8 +405,7 @@ LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
  */
 std::vector<std::vector<int>>
 LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
-  // read in the data
-  g_log.debug("Fetching monitor data...");
+  g_log.debug("Read monitor data...");
   // vector of monitors with one entry
   std::vector<std::vector<int>> monitors{
       loadSingleMonitor(entry, "monitor1/data"),
@@ -389,63 +418,63 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
  *
  * @param xVals :: vector holding the x values
  */
-void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
+std::vector<double> LoadILLReflectometry::getXValues() {
+  std::vector<double> xVals;                  // no initialisation
+  xVals.reserve(int(m_numberOfChannels) + 1); // reserve memory
   try {
-    std::string chopper{"Chopper"};
-    PropertyWithValue<double> *chop1_speed{NULL}, *chop2_speed{NULL},
-        *chop2_phase{NULL};
-    if (m_instrumentName == "D17") {
-      chop1_speed = getValue("VirtualChopper.chopper1_speed_average");
-      chop2_speed = getValue("VirtualChopper.chopper2_speed_average");
-      chop2_phase = getValue("VirtualChopper.chopper2_phase_average");
-    }
-    // use phase of first chopper
-    auto chop1_phase = getValue(std::string(m_chopper1Name).append(".phase"));
-    auto POFF = getValue(std::string(m_offsetFrom).append(".poff"));
-    auto open_offset =
-        getValue(std::string(m_offsetFrom).append(".").append(m_offsetName));
-    if (chop1_speed && chop2_speed && chop2_phase && *chop1_speed != 0.0 &&
-        *chop1_speed != 0.0 && *chop2_phase != 0.0) { // only for D17
-      // virtual chopper entries are valid
-      chopper = "Virtual chopper";
-    } else {
-      // use chopper values
-      chop1_speed =
-          getValue(std::string(m_chopper1Name).append(".rotation_speed"));
-      chop2_speed =
-          getValue(std::string(m_chopper2Name).append(".rotation_speed"));
-      chop2_phase = getValue(std::string(m_chopper2Name).append(".phase"));
-    }
-    // logging
-    debugLog("Poff: ", *POFF);
-    debugLog("Open offset: ", *open_offset);
-    debugLog("Chopper 1 phase : ", *chop1_phase);
-    debugLog(chopper + " 1 speed : ", *chop1_speed);
-    debugLog(chopper + " 2 phase : ", *chop2_phase);
-    debugLog(chopper + " 2 speed : ", *chop2_speed);
+    if (m_acqMode) {
+      std::string chopper{"Chopper"};
+      double chop1Speed{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
+      if (m_instrumentName == "D17") {
+        chop1Speed = getDouble("VirtualChopper.chopper1_speed_average");
+        chop2Speed = getDouble("VirtualChopper.chopper2_speed_average");
+        chop2Phase = getDouble("VirtualChopper.chopper2_phase_average");
+      }
+      // use phase of first chopper
+      double chop1Phase = getDouble(StringConcat(m_chopper1Name, ".phase"));
+      double POFF = getDouble(StringConcat(m_offsetFrom, ".poff"));
+      double openOffset =
+          getDouble(StringConcat(m_offsetFrom, ".").append(m_offsetName));
+      if (chop1Speed && chop2Speed && chop2Phase) { // only D17
+        // virtual chopper entries are valid
+        chopper = "Virtual chopper";
+      } else {
+        // use chopper values
+        chop1Speed = getDouble(StringConcat(m_chopper1Name, ".rotation_speed"));
+        chop2Speed = getDouble(StringConcat(m_chopper2Name, ".rotation_speed"));
+        chop2Phase = getDouble(StringConcat(m_chopper2Name, ".phase"));
+      }
+      // logging
+      debugLog("Poff: ", POFF);
+      debugLog("Open offset: ", openOffset);
+      debugLog("Chopper 1 phase : ", chop1Phase);
+      debugLog(StringConcat(chopper, " 1 speed : "), chop1Speed);
+      debugLog(StringConcat(chopper, " 2 phase : "), chop2Phase);
+      debugLog(StringConcat(chopper, " 2 speed : "), chop2Speed);
 
-    double t_TOF2{0.0};
-    if (chop1_speed && chop1_phase && chop2_phase && open_offset && POFF &&
-        *chop1_speed != 0.0) {
-      t_TOF2 = -1.e+6 * 60.0 *
-               (*POFF - 45.0 + *chop2_phase - *chop1_phase + *open_offset) /
-               (2.0 * 360 * *chop1_speed);
-    }
-    debugLog("t_TOF2 : ", t_TOF2);
-    if (!t_TOF2)
-      g_log.warning("TOF values may be incorrect, check chopper values\n");
-    // compute tof values
-    xVals.reserve(m_numberOfChannels + 1);
-    for (size_t timechannelnumber = 0; timechannelnumber <= m_numberOfChannels;
-         ++timechannelnumber) {
-      double t_TOF1 =
-          (static_cast<int>(timechannelnumber) + 0.5) * m_channelWidth +
-          m_tofDelay;
-      xVals.push_back(t_TOF1 + t_TOF2);
+      double t_TOF2{0.0};
+      if (chop1Speed && chop1Phase && chop2Phase && openOffset && POFF)
+        t_TOF2 = -1.e+6 * 60.0 *
+                 (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
+                 (2.0 * 360 * chop1Speed);
+      if (!t_TOF2)
+        g_log.warning("TOF values may be incorrect, check chopper values\n");
+      debugLog("t_TOF2 : ", t_TOF2);
+      // compute tof values
+      for (int channelIndex = 0; channelIndex <= int(m_numberOfChannels);
+           ++channelIndex) {
+        double t_TOF1 = (channelIndex + 0.5) * m_channelWidth + m_tofDelay;
+        xVals.push_back(t_TOF1 + t_TOF2);
+      }
+    } else {
+      g_log.debug("Time channel index for axis description \n");
+      for (size_t t = 0; t <= m_numberOfChannels; ++t)
+        xVals.push_back(double(t));
     }
   } catch (std::runtime_error &e) {
     infoLog("Unable to access Nexus file entry : ");
   }
+  return xVals;
 }
 
 /**
@@ -457,7 +486,7 @@ void LoadILLReflectometry::getXValues(std::vector<double> &xVals) {
  */
 void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
                                     std::vector<std::vector<int>> &monitorsData,
-                                    std::vector<double> &xVals) {
+                                    std::vector<double> xVals) {
   g_log.debug("Loading data...");
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();
@@ -466,46 +495,43 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
   size_t nb_monitors = monitorsData.size();
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
 
-  if (m_instrumentName == "D17") {
-    m_wavelength = entry.getFloat("wavelength");
-    double ei = m_loader.calculateEnergy(m_wavelength);
-    m_localWorkspace->mutableRun().addProperty<double>("Ei", ei,
-                                                       true); // overwrite
-  }
   // write monitors
-  HistogramData::BinEdges binEdges(xVals);
-  for (size_t im = 0; im < nb_monitors; im++) {
-    int *monitor_p = monitorsData[im].data();
-    const HistogramData::Counts histoCounts(monitor_p,
-                                            monitor_p + m_numberOfChannels);
-    m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
-    progress.report();
-  }
-  // write data
-  size_t spec = 0;
-  for (size_t j = 0; j < m_numberOfHistograms; ++j) {
-    int *data_p = &data(0, static_cast<int>(j), 0);
-    const HistogramData::Counts histoCounts(data_p,
-                                            data_p + m_numberOfChannels);
-    m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
-                                   std::move(histoCounts));
-    ++spec;
-    progress.report();
-  }
+  if (!xVals.empty()) {
+    HistogramData::BinEdges binEdges(xVals);
+    for (size_t im = 0; im < nb_monitors; im++) {
+      int *monitor_p = monitorsData[im].data();
+      const HistogramData::Counts histoCounts(monitor_p,
+                                              monitor_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
+      progress.report();
+    }
+    // write data
+    size_t spec = 0;
+    for (size_t j = 0; j < m_numberOfHistograms; ++j) {
+      int *data_p = &data(0, static_cast<int>(j), 0);
+      const HistogramData::Counts histoCounts(data_p,
+                                              data_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
+                                     std::move(histoCounts));
+      ++spec;
+      progress.report();
+    }
+  } else
+    g_log.debug("Vector of x values is empty");
 } // LoadILLIndirect::loadData
 
 /**
  * Use the LoadHelper utility to load most of the nexus entries into workspace
  * log properties
  */
-void LoadILLReflectometry::loadNexusEntriesIntoProperties(
-    NeXus::NXEntry &entry) {
-
-  /*
+void LoadILLReflectometry::loadNexusEntriesIntoProperties(NeXus::NXEntry &entry,
+                                                          NeXus::NXRoot &root) {
   g_log.debug("Building properties...");
+  /*
+  // "Open" the same file but with the C++ interface
+  ::NeXus::File *file = new ::NeXus::File(root.m_fileID);
   std::string parameterStr;
-  ::NeXus::File *file;
-  file->openGroup(entry, "NXentry");
+  file->openPath(entry.path());
   try {
     // load logs, sample, and instrument
     m_localWorkspace->loadExperimentInfoNexus(getPropertyValue("Filename"),
@@ -513,7 +539,12 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     g_log.information("Error loading experiment info of nxs file");
   }
+  // Parameter map parsing
+  //progress(progressStart + 0.11 * progressRange,
+  //         "Reading the parameter maps...");
+  m_localWorkspace->readParameterMap(parameterStr);
   */
+
   // Open NeXus file
   const std::string filename{getPropertyValue("Filename")};
   NXhandle nxfileID;
@@ -541,12 +572,6 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     beamWS = WorkspaceFactory::Instance().create(
         "Workspace2D", m_numberOfHistograms, m_numberOfChannels + 1,
         m_numberOfChannels);
-    // set x values
-    std::vector<double> xVals;
-    xVals.reserve(m_numberOfChannels + 1);
-    for (size_t t = 0; t < m_numberOfChannels + 1; ++t) {
-      xVals.push_back(double(t));
-    }
     // open the root node
     NeXus::NXRoot dataRoot(getPropertyValue(beam));
     NXEntry entry{dataRoot.openFirstEntry()};
@@ -558,34 +583,39 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     if (beam == "DirectBeam") {
       if (data.dim0() * data.dim1() * data.dim2() !=
           int(m_numberOfChannels * m_numberOfHistograms))
-        g_log.error()
-            << beam << " has incompatible size with beam read from Filename\n";
+        g_log.error(
+            StringConcat(beam, " has incompatible size with Filename beam\n"));
       // get sample detector distance
       std::replace(m_detectorDistance.begin(), m_detectorDistance.end(), '.',
                    '/');
-      m_detectorDistanceDirectBeam =
-          entry.getFloat(std::string("instrument/")
-                             .append(m_detectorDistance)
-                             .append("/value"));
+      m_detectorDistanceDirectBeam = entry.getFloat(
+          StringConcat("instrument/", m_detectorDistance).append("/value"));
       // set Bragg angle of the direct beam for later use
       if (!angleDirectBeam.empty()) {
         std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
         m_BraggAngleDirectBeam =
-            entry.getFloat(std::string("instrument/").append(angleDirectBeam));
-        g_log.debug() << "Bragg angle of the direct beam: "
-                      << m_BraggAngleDirectBeam << " degrees\n"; //?
+            entry.getFloat(StringConcat("instrument/", angleDirectBeam));
+        debugLogWithUnitDegrees("Bragg angle of the direct beam: ",
+                                m_BraggAngleDirectBeam); //?
       }
     }
     dataRoot.close();
+    // set x values
+    std::vector<double> xVals;
+    xVals.reserve(int(m_numberOfChannels) + 1);
+    for (size_t t = 0; t < m_numberOfChannels + 1; ++t)
+      xVals.push_back(double(t));
     // write data
-    HistogramData::BinEdges binEdges(xVals);
-    size_t spec = 0;
-    for (size_t j = 0; j < m_numberOfHistograms; ++j) {
-      int *data_p = &data(0, static_cast<int>(j), 0);
-      const HistogramData::Counts histoCounts(data_p,
-                                              data_p + m_numberOfChannels);
-      beamWS->setHistogram(spec, binEdges, std::move(histoCounts));
-      ++spec;
+    if (!xVals.empty()) {
+      HistogramData::BinEdges binEdges(xVals);
+      size_t spec = 0;
+      for (size_t j = 0; j < m_numberOfHistograms; ++j) {
+        int *data_p = &data(0, static_cast<int>(j), 0);
+        const HistogramData::Counts histoCounts(data_p,
+                                                data_p + m_numberOfChannels);
+        beamWS->setHistogram(spec, binEdges, std::move(histoCounts));
+        ++spec;
+      }
     }
   } else
     throw std::runtime_error("Name of the beam is missing");
@@ -623,9 +653,8 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
     auto spectrum = oneSpectrum->y(0);
     // check sum of detector counts
     if ((beam == "Filename") &&
-        (m_localWorkspace->run().getPropertyValueAsType<double>("PSD.detsum") !=
-         std::accumulate(oneSpectrum->y(0).begin(), oneSpectrum->y(0).end(),
-                         0)))
+        getDouble("PSD.detsum") != std::accumulate(oneSpectrum->y(0).begin(),
+                                                   oneSpectrum->y(0).end(), 0))
       g_log.error("Error after integrating and transposing beam\n");
     // determine initial height: maximum value
     auto maxValueIt = std::max_element(spectrum.begin(), spectrum.end());
@@ -667,13 +696,11 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
     debugLog2("Estimated peak position of ", beam, centre[0]);
   } else
     throw std::runtime_error(
-        std::string("The input ").append(beam).append(" does not exist"));
+        StringConcat("The input ", beam).append(" does not exist"));
   return centre;
 }
 
-/**
-  * Compute Bragg angle
-  */
+/// Compute Bragg angle
 double LoadILLReflectometry::computeBraggAngle() {
   // compute bragg angle
   const std::string thetaIn = getPropertyValue("BraggAngleIs");
@@ -686,11 +713,9 @@ double LoadILLReflectometry::computeBraggAngle() {
   double theta = getProperty("BraggAngle");
   // no user input for theta means we take sample or detector angle value
   if (theta == EMPTY_DBL()) {
-    // error message without this check would be: Unknown property search
-    // object ... and thus not be meaningful
+    // modify error message Unknown property search object
     if (m_localWorkspace->run().hasProperty(thetaAngle))
-      theta =
-          m_localWorkspace->run().getPropertyValueAsType<double>(thetaAngle);
+      theta = getDouble(thetaAngle);
     else
       throw std::runtime_error("BraggAngleIs (sample or detector option) "
                                "is not defined in Nexus file");
@@ -703,34 +728,28 @@ double LoadILLReflectometry::computeBraggAngle() {
     // DirectBeam is abvailable and we can read from its NeXus file
     std::vector<double> peakPosDB =
         fitReflectometryPeak("DirectBeam", thetaAngle);
-    double angleCentre = ((theta - m_BraggAngleDirectBeam) / 2.) * M_PI / 180.;
+    double angleCentre = ((theta - m_BraggAngleDirectBeam) / 2.)inRad;
     debugLog("Center angle ", angleCentre);
     if (scatteringType == "incoherent")
       theta = coherenceEq1(angleCentre, peakPosDB[0], peakPosRB[0]);
     else if (scatteringType == "coherent")
       theta = coherenceEq1(angleCentre, peakPosDB[0], peakPosRB[1]);
   } else if (scatteringType == "coherent")
-    theta = coherenceEq2(theta * (M_PI / 180.), peakPosRB[1], peakPosRB[0]);
-  g_log.debug() << "Using " << thetaIn << " to calculate the Bragg angle "
-                << theta << " degrees\n";
+    theta = coherenceEq2(theta inRad, peakPosRB[1], peakPosRB[0]);
+  debugLogWithUnitDegrees("Bragg angle ", theta);
   return theta;
 }
 
-/**
- * Utility to place detector in space, according to data file
- */
+/// Utility to place detector in space, according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  double detectorAngle = m_localWorkspace->run().getPropertyValueAsType<double>(
-      m_detectorAngleName);
-  auto dist = getValue(std::string(m_detectorDistance).append(".value"));
-  m_detectorDistanceValue = *dist * 1.0e-3; // convert to meter
+  double detectorAngle = getDouble(m_detectorAngleName);
+  double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
+  m_detectorDistanceValue = dist inMeter;
   debugLog("Sample-detector distance in meter ", m_detectorDistanceValue);
-  double theta =
-      computeBraggAngle(); // can be in exec, theta can be a private variable
-  double twotheta_rad = (2. * theta) * M_PI / 180.;
-  // incident theta angle for easier calling the algorithm
-  // ConvertToReflectometryQ
+  double theta = computeBraggAngle();
+  double twotheta_rad = (2. * theta)inRad;
+  // incident theta angle for calling the algorithm ConvertToReflectometryQ
   m_localWorkspace->mutableRun().addProperty("stheta",
                                              double(twotheta_rad / 2.));
   const std::string componentName = "bank";
@@ -739,13 +758,13 @@ void LoadILLReflectometry::placeDetector() {
              m_detectorDistanceValue * cos(twotheta_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // offset angle
-  double sampleAngle =
-      m_localWorkspace->run().getPropertyValueAsType<double>("san.value");
+  double sampleAngle = getDouble("san.value");
   debugLog("sample angle ", sampleAngle);
   debugLog("detector angle ", detectorAngle);
   double offsetAngle = detectorAngle / 2. * sampleAngle;
-  g_log.debug() << "Offset angle of the direct beam (will be added to the "
-                   "scattering angle) " << offsetAngle << " degrees\n";
+  debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to "
+                          "the scattering angle) ",
+                          offsetAngle);
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
   const Quat rotation(2. * theta + offsetAngle, axis);
