@@ -89,21 +89,20 @@ class UserFileReaderTest(unittest.TestCase):
         for key, value in list(expected_values.items()):
             self.assertTrue(key in output)
             self.assertTrue(len(output[key]) == len(value))
-            if len(output[key]) == 1:
-                self.assertTrue(output[key] == value)
-            else:
-                self.assertTrue(sorted(output[key]) == sorted(value))
+            elements = output[key]
+            # Make sure that the different entries are sorted
+            UserFileReaderTest._sort_list(elements)
+            UserFileReaderTest._sort_list(value)
+            self.assertTrue(elements == value)
 
         # clean up
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
 
-if __name__ == "__main__":
-    unittest.main()
+    @staticmethod
     def _sort_list(elements):
         if len(elements) == 1:
             return
-
         if isinstance(elements[0], single_entry_with_detector):
             UserFileReaderTest._sort(elements, lambda x: x.entry)
         elif isinstance(elements[0], simple_range):

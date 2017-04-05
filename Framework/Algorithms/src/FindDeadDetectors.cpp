@@ -1,9 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <fstream>
@@ -90,7 +86,6 @@ void FindDeadDetectors::exec() {
   int64_t iprogress_step = numSpec / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
-  const auto &indexInfo = integratedWorkspace->indexInfo();
   for (int64_t i = 0; i < int64_t(numSpec); ++i) {
     // Spectrum in the integratedWorkspace
     double &y = integratedWorkspace->mutableY(i)[0];
@@ -99,17 +94,15 @@ void FindDeadDetectors::exec() {
     } else {
       ++countSpec;
       y = deadValue;
-      const specnum_t specNo = indexInfo.spectrumNumber(i);
+      const auto &spec = integratedWorkspace->getSpectrum(i);
       // Write the spectrum number to file
-      file << i << " " << specNo;
-      // Get the list of detectors for this spectrum and iterate over
-      const auto &dets = indexInfo.detectorIDs(i);
-      for (const auto &det : dets) {
+      file << i << " " << spec.getSpectrumNo();
+      for (const auto &id : spec.getDetectorIDs()) {
         // Write the detector ID to file, log & the FoundDead output property
-        file << " " << det;
+        file << " " << id;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(det);
+        deadDets.push_back(id);
         ++countDets;
       }
       file << '\n';

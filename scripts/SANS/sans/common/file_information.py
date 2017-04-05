@@ -58,9 +58,9 @@ WIDTH = "width"
 HEIGHT = "height"
 THICKNESS = "thickness"
 SHAPE = 'shape'
-CYLINDER = "Cylinder"
-FLAT_PLATE = "Flat plate"
-DISC = "Disc"
+CYLINDER = "CYLINDER"
+FLAT_PLATE = "FLAT PLATE"
+DISC = "DISC"
 GEOM_HEIGHT = 'geom_height'
 GEOM_WIDTH = 'geom_width'
 GEOM_THICKNESS = 'geom_thickness'
@@ -385,7 +385,7 @@ def get_geometry_information_isis_nexus(file_name):
         height = float(sample[HEIGHT][0])
         width = float(sample[WIDTH][0])
         thickness = float(sample[THICKNESS][0])
-        shape_as_string = sample[SHAPE][0]
+        shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
         if shape_as_string == CYLINDER:
             shape = SampleShape.CylinderAxisUp
         elif shape_as_string == FLAT_PLATE:
@@ -441,7 +441,7 @@ def get_added_nexus_information(file_name):  # noqa
         return EVENT_WORKSPACE in list(entry.keys())
 
     def get_workspace_name(entry):
-        return entry[WORKSPACE_NAME][0]
+        return entry[WORKSPACE_NAME][0].decode("utf-8")
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)

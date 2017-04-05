@@ -102,6 +102,9 @@ public:
       Track & /*testRay*/,
       std::deque<IComponent_const_sptr> & /*searchQueue*/) const override;
 
+  void registerContents(
+      class Mantid::Geometry::ComponentVisitor &visitor) const override;
+
 private:
   /// Private copy assignment operator
   ObjCompAssembly &operator=(const ICompAssembly &);
