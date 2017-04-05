@@ -11,7 +11,6 @@ from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, E
 import mantid.simpleapi as api
 
 
-
 class AlignComponents(PythonAlgorithm):
     """
     Class to align components
