@@ -383,6 +383,7 @@ protected:
   void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
+  QtProperty *addStringProperty(const QString &name) const;
 
   /// Create a double property and set some settings
   QtProperty *addDoubleProperty(const QString &name,
@@ -502,7 +503,6 @@ private:
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes);
   /// Create a string property and set some settings
-  QtProperty *addStringProperty(const QString &name) const;
   void setStringPropertyValue(QtProperty *prop, const QString &value) const;
   QString getStringPropertyValue(QtProperty *prop) const;
   /// Check that the properties match the function

@@ -4,8 +4,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtMantidWidgets/StringEditorFactory.h"
+
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -90,7 +92,10 @@ void MuonFitPropertyBrowser::init() {
       addDoubleProperty(QString("Start (%1s)").arg(QChar(0x03BC))); //(mu);
   m_endX = addDoubleProperty(QString("End (%1s)").arg(QChar(0x03BC)));
 
-  // m_workspace = m_enumManager->addProperty("Workspace");
+  m_normalization=m_enumManager->addProperty("Normalization");
+  setNormalization();
+
+  m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_output = m_stringManager->addProperty("Output");
   m_minimizer = m_enumManager->addProperty("Minimizer");
@@ -122,8 +127,10 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
-  settingsGroup->addSubProperty(m_endX);
-
+  settingsGroup->addSubProperty(m_endX); // add to settings group here.....
+  settingsGroup->addSubProperty(m_normalization);
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
+	  SLOT(currentItemChanged(QtBrowserItem *)));
   /* Create editors and assign them to the managers */
   createEditors(w);
 
@@ -288,7 +295,8 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
     emit endXChanged(endX());
     emit xRangeChanged(startX(), endX());
     return;
-  } else { // check if it is a constraint
+  }
+  else { // check if it is a constraint
     MantidQt::MantidWidgets::PropertyHandler *h =
         getHandler()->findHandler(prop);
     if (!h)
@@ -307,6 +315,15 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
       h->setAttribute(prop);
     }
   }
+}
+/// Get the normalization
+double MuonFitPropertyBrowser::Normalization() const {
+	return readNormalization()[0];
+}
+void MuonFitPropertyBrowser::setNormalization() {
+	m_normalizationValue.clear();
+	m_normalizationValue.append(QString::number(Normalization()));
+	m_enumManager->setEnumNames(m_normalization, m_normalizationValue);
 }
 
 /** Called when a bool property changed
@@ -359,6 +376,15 @@ void MuonFitPropertyBrowser::populateFunctionNames() {
   }
 }
 
+//move this to helper later 
+std::vector<double> convertToVec(std::string const &list) {
+	std::vector<double> vec;
+	std::vector<std::string> tmpVec;
+	boost::split(tmpVec, list, boost::is_any_of(","));
+	std::transform(tmpVec.begin(), tmpVec.end(), std::back_inserter(vec),
+		[](std::string const &element) { return std::stod(element); });
+	return vec;
+}
 //#include "../FitDialog.h"
 /**
 * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -401,24 +427,30 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		asymmAlg->setPropertyValue("OutputWorkspace", wsName);
 		asymmAlg->setPropertyValue("Minimizer", minimizer(true));
 		asymmAlg->setProperty("MaxIterations", maxIterations);
-		Mantid::API::ITableWorkspace_sptr table =
-			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("norm"));
-		
-		auto colNorm = table->getColumn("norm");
-		std::vector<double> norm; 
+		std::vector<double> norm=readNormalization(); 
 		std::vector<int> spectra;
 		spectra.push_back(0);
-		for (int j = 0; j < table->rowCount(); j++)
-		{
-			norm.push_back((*colNorm)[j]);// record and update norm....
-		}
+	
 		asymmAlg->setProperty("Spectra", spectra);
 		asymmAlg->setProperty("PreviousNormalizationConstant", norm);
 		asymmAlg->execute();
 		if (!asymmAlg->isExecuted()) {
 			throw std::runtime_error("Asymmetry Calculation has failed.");
 		}
+		//record result -> move to a helper later as a function 
+		auto tmp = asymmAlg->getPropertyValue("NormalizationConstant");
+		std::vector<double>normEst = convertToVec(tmp);
+		ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
+		AnalysisDataService::Instance().addOrReplace("norm", table);
+		table->addColumn("double", "norm");
+		table->addColumn("int", "spectra");
+
+		for (double norm : normEst) {
+			TableRow row = table->appendRow();
+
+			row << norm << 0;
+		}
+		/////////////////////////////////////////////////
 		// calculate the fit explicitly -> above does not get the function exactly right
 		try{
 		Mantid::API::IAlgorithm_sptr alg =
@@ -454,6 +486,26 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		QString msg = "Fit algorithm failed.\n\n" + QString(e.what()) + "\n";
 		QMessageBox::critical(this, "Mantid - Error", msg);
 	}
+	setNormalization();
+}
+
+std::vector<double> readNormalization() {
+	std::vector<double> norm;
+	if(!AnalysisDataService::Instance().doesExist("norm") ){
+		norm.push_back(22.423);
+	}
+	else {
+		Mantid::API::ITableWorkspace_sptr table =
+			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+				Mantid::API::AnalysisDataService::Instance().retrieve("norm"));
+		auto colNorm = table->getColumn("norm");
+
+		for (int j = 0; j < table->rowCount(); j++)
+		{
+			norm.push_back((*colNorm)[j]);// record and update norm....
+		}
+	}
+	return norm;
 }
 
 /**
@@ -700,6 +752,8 @@ void MuonFitPropertyBrowser::setWorkspaceNames(const QStringList &wsNames) {
                  [](const QString &qs) { return qs.toStdString(); });
   // Update listeners
   emit workspacesToFitChanged(static_cast<int>(m_workspacesToFit.size()));
+  // Update norm
+  setNormalization();
 }
 
 /**
@@ -754,12 +808,16 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {
 	// First, clear whatever model is currently set
 	this->clear();
+
 	// Show or hide the TFAsymmetry fit
 	if (enabled) {
 		m_fitMenu->addAction(m_fitActiontest);
+		m_settingsGroup->property()->addSubProperty(m_normalization);
+		setNormalization();
 	}
 	else {
-		m_fitMenu->removeAction(m_fitActiontest);
+		m_fitMenu->removeAction(m_fitActiontest);	
+		m_settingsGroup->property()->removeSubProperty(m_normalization);
 
 	}
 }

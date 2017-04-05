@@ -120,14 +120,13 @@ signals:
   void fitRawDataClicked(bool enabled) override;
   /// Emitted when fit is about to be run
   void preFitChecksRequested(bool sequential) override;
-
 protected:
   void showEvent(QShowEvent *e) override;
-
+  double Normalization() const;
+  void setNormalization();
 private slots:
   void doubleChanged(QtProperty *prop) override;
   void boolChanged(QtProperty *prop) override;
-
 private:
    /// new menu option
    QAction *m_fitActiontest;
@@ -148,7 +147,11 @@ private:
   std::vector<std::string> m_workspacesToFit;
   /// Label to use for simultaneous fits
   std::string m_simultaneousLabel;
+  QtProperty *m_normalization; 
+  mutable QStringList m_normalizationValue;
 };
+
+	std::vector<double> readNormalization();
 
 } // MantidQt
 } // API

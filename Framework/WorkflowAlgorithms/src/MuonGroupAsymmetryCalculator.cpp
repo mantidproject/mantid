@@ -136,6 +136,7 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 		asym->execute();
 		outWS = asym->getProperty("OutputWorkspace");
 		auto tmp = asym->getPropertyValue("NormalizationConstant");
+		// move to helper later as a function 
 		normEst = convertToVec(tmp);
 		ITableWorkspace_sptr table= WorkspaceFactory::Instance().createTable();
 			API::AnalysisDataService::Instance().addOrReplace("norm", table);
@@ -150,7 +151,7 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 	}
 	return outWS;
 }
-
+// move to helper later
 std::vector<double> convertToVec(std::string const &list) {
 	std::vector<double> vec;
 	std::vector<std::string> tmpVec;
