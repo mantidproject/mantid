@@ -1870,12 +1870,12 @@ template <class T>
 typename std::vector<T>::const_iterator
 EventList::findFirstPulseEvent(const std::vector<T> &events,
                                const double seek_pulsetime) {
+  const DateAndTime seek_dateandtime(seek_pulsetime, 0.);
   auto itev = events.begin();
   auto itev_end = events.end(); // cache for speed
 
   // if tof < X[0], that means that you need to skip some events
-  while ((itev != itev_end) &&
-         (itev->pulseTime().totalNanoseconds() < seek_pulsetime))
+  while ((itev != itev_end) && (itev->pulseTime() < seek_dateandtime))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -1899,6 +1899,8 @@ template <class T>
 typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
     const std::vector<T> &events, const double seek_time,
     const double &tofFactor, const double &tofOffset) const {
+  const int64_t seek_time_int64 =
+      DateAndTime::nanosecondsFromSeconds(seek_time);
   auto itev = events.cbegin();
   auto itev_end = events.cend(); // cache for speed
 
@@ -1906,7 +1908,7 @@ typename std::vector<T>::const_iterator EventList::findFirstTimeAtSampleEvent(
   while ((itev != itev_end) &&
          (calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
                                      itev->tof(), tofFactor,
-                                     tofOffset) < seek_time))
+                                     tofOffset) < seek_time_int64))
     itev++;
   // Better fix would be to use a binary search instead of the linear one used
   // here.
@@ -2271,7 +2273,7 @@ void EventList::generateCountsHistogramTimeAtSample(
     const MantidVec &X, MantidVec &Y, const double &tofFactor,
     const double &tofOffset) const {
   // For slight speed=up.
-  size_t x_size = X.size();
+  const size_t x_size = X.size();
 
   if (x_size <= 1) {
     // X was not set. Return an empty array.
@@ -2301,9 +2303,9 @@ void EventList::generateCountsHistogramTimeAtSample(
     // Find the first bin
     size_t bin = 0;
 
-    int64_t tAtSample =
+    double tAtSample = static_cast<double>(
         calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                   itev->tof(), tofFactor, tofOffset);
+                                   itev->tof(), tofFactor, tofOffset));
     while (bin < x_size - 1) {
       // Within range?
       if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
@@ -2317,9 +2319,9 @@ void EventList::generateCountsHistogramTimeAtSample(
 
     // Keep going through all the events
     while ((itev != itev_end) && (bin < x_size - 1)) {
-      tAtSample =
+      tAtSample = static_cast<double>(
           calculateCorrectedFullTime(itev->pulseTime().totalNanoseconds(),
-                                     itev->tof(), tofFactor, tofOffset);
+                                     itev->tof(), tofFactor, tofOffset));
       while (bin < x_size - 1) {
         // Within range?
         if ((tAtSample >= X[bin]) && (tAtSample < X[bin + 1])) {
