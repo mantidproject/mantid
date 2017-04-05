@@ -193,9 +193,10 @@ def parse_float_array(array_str):
 def parse_integer_list(array_str, expected_size=None):
     """ Parse a string to an array of integer separated by ','
     also, the format as 'a-b' is supported too
+    :exception: RuntimeError
     :param array_str:
     :param expected_size
-    :return: boolean, list of floats/error message
+    :return: list of floats/error message
     """
     # check input type
     assert isinstance(array_str, str), 'Input {0} must be a string but not a {1}'.format(array_str, type(array_str))

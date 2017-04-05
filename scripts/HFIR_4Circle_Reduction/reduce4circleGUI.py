@@ -2401,14 +2401,14 @@ class MainWindow(QtGui.QMainWindow):
         set the detector size to controller
         :return:
         """
-        status, ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()))
-        if status:
+        try:
+            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
             size_x, size_y = ret_obj
             self._myControl.set_detector_geometry(size_x, size_y)
             if size_x != size_y or (size_x != 256 and size_x != 512):
                 self.pop_one_button_dialog('Detector geometry should be either 256 x 256 or 512 x 512.')
-        else:
-            self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!')
+        except RuntimeError as run_err:
+            self.pop_one_button_dialog('Detector geometry is not correct! Re-set it!  FYI: {0}'.format(run_err))
 
         return
 
@@ -3579,11 +3579,8 @@ class MainWindow(QtGui.QMainWindow):
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
         # get the configuration of detector from GUI
-        status, ret_obj = gutil.parse_integer_list(self.ui.lineEdit_detectorGeometry.text(), expected_size=2)
-        if status:
-            x_max, y_max = ret_obj
-        else:
-            raise RuntimeError(ret_obj)
+        ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
+        x_max, y_max = ret_obj
         self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)

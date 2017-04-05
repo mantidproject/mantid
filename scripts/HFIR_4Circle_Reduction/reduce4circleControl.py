@@ -1415,16 +1415,13 @@ class CWSCDReductionControl(object):
 
         # load SPICE Pt.  detector file
         pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
-        # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
-        new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
-        if os.path.exists(new_idf_name) is False:
-            raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
+        # # new_idf_name = '/home/wzz/Projects/HB3A/NewDetector/HB3A_ND_Definition.xml'
+        # new_idf_name = '/SNS/users/wzz/Projects/HB3A/HB3A_ND_Definition.xml'
+        # if os.path.exists(new_idf_name) is False:
+        #     raise RuntimeError('Instrument file {0} cannot be found!'.format(new_idf_name))
         try:
             mantidsimple.LoadSpiceXML2DDet(Filename=xml_file_name,
                                            OutputWorkspace=pt_ws_name,
-                                           # FIXME/TEST/TODO: should not need external input for detector geometry
-                                           # DetectorGeometry='512,512',
-                                           InstrumentFilename=new_idf_name,
                                            SpiceTableWorkspace=spice_table_name,
                                            PtNumber=pt_no)
         except RuntimeError as run_err:
