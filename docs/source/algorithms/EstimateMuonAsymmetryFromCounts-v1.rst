@@ -31,7 +31,6 @@ Usage
 
 .. testcode:: ExSimple
 
-   from __future__ import (absolute_import, division, print_function)
    import math
    import numpy as np
    y = [100, 150, 50, 10, 5]
@@ -40,8 +39,8 @@ Usage
    run = input.getRun()
    run.addProperty("goodfrm","10","None",True)
    output,norm=EstimateMuonAsymmetryFromCounts(InputWorkspace=input,spectra=0,StartX=1,EndX=5)
-   print  ("Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)])
-   print ("Normalization constant: {0:.2f}".format(norm[0]))
+   print  "Asymmetry: ",['{0:.2f}'.format(value)  for value in output.readY(0)]
+   print "Normalization constant: {0:.2f}".format(norm[0])
    
 Output:
 
