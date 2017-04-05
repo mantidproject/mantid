@@ -7,6 +7,7 @@
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <thread>
 
@@ -123,6 +124,9 @@ private:
   /// Exception object indicating there was an error
   boost::shared_ptr<std::runtime_error> m_exception;
 
+  /// For notifying other threads of changes to conditions (the following bools)
+  std::condition_variable m_cv;
+  std::condition_variable m_cvRunStatus;
   /// Indicate that decoder has reached the last message in a run
   std::atomic<bool> m_endRun;
   /// Indicate that LoadLiveData is waiting for access to the buffer workspace
@@ -130,7 +134,6 @@ private:
   /// Indicate that MonitorLiveData has seen the runStatus since it was set to
   /// EndRun
   bool m_runStatusSeen;
-
   std::atomic<bool> m_extractedEndRunData;
 };
 

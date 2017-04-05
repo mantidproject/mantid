@@ -20,7 +20,6 @@ GCC_DIAG_ON(conversion)
 #include <boost/make_shared.hpp>
 
 #include <cassert>
-#include <condition_variable>
 #include <functional>
 #include <map>
 
@@ -31,9 +30,6 @@ Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
 std::string PROTON_CHARGE_PROPERTY = "proton_charge";
 std::string RUN_NUMBER_PROPERTY = "run_number";
 std::string RUN_START_PROPERTY = "run_start";
-
-std::condition_variable cv;
-std::condition_variable cvRunStatus;
 
 /**
  * Append sample log data to existing log or create a new log if one with
@@ -114,8 +110,7 @@ using Kernel::DateAndTime;
  * @param broker A reference to a Broker object for creating topic streams
  * @param eventTopic The name of the topic streaming the event data
  * @param spDetTopic The name of the topic streaming the spectrum-detector
- * run
- * mapping
+ * run mapping
  */
 KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     std::shared_ptr<IKafkaBroker> broker, const std::string &eventTopic,
@@ -200,7 +195,7 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
   if (m_endRun) {
     std::lock_guard<std::mutex> runStatusLock(m_runStatusMutex);
     m_runStatusSeen = true;
-    cvRunStatus.notify_one();
+    m_cvRunStatus.notify_one();
   }
   return m_endRun;
 }
@@ -218,12 +213,12 @@ API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
   }
 
   m_extractWaiting = true;
-  cv.notify_one();
+  m_cv.notify_one();
 
   auto workspace_ptr = extractDataImpl();
 
   m_extractWaiting = false;
-  cv.notify_one();
+  m_cv.notify_one();
 
   return workspace_ptr;
 }
@@ -336,14 +331,14 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     // then we wait for it to finish
     std::unique_lock<std::mutex> readyLock(m_waitMutex);
     if (m_extractWaiting) {
-      cv.wait(readyLock, [&] { return !m_extractWaiting; });
+      m_cv.wait(readyLock, [&] { return !m_extractWaiting; });
       readyLock.unlock();
       if (m_endRun) {
         m_extractedEndRunData = true;
         // Wait until MonitorLiveData has seen that end of run was
         // reached before setting m_endRun back to false and continuing
         std::unique_lock<std::mutex> runStatusLock(m_runStatusMutex);
-        cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
+        m_cvRunStatus.wait(runStatusLock, [&] { return m_runStatusSeen; });
         m_endRun = false;
         m_runStatusSeen = false;
         runStatusLock.unlock();
@@ -382,7 +377,8 @@ void KafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer
