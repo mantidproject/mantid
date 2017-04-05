@@ -159,8 +159,6 @@ public:
     presenter.executeLoadMetadata();
     TSM_ASSERT("Should export geometry xml metadata on request.",
                !presenter.getGeometryXML().empty());
-    TSM_ASSERT("Should export min value metadata on request.",
-               presenter.getMinValue() <= presenter.getMaxValue())
     TSM_ASSERT("Should export instrument metadata on request",
                presenter.getInstrument().empty())
   }

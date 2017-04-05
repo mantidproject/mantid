@@ -21,8 +21,6 @@ public:
   void SetRadiusNoShape(double radius);
   void SetRadiusType(int type);
   void updateAlgorithmProgress(double progress, const std::string &message);
-  double GetMinValue();
-  double GetMaxValue();
   const char *GetInstrument();
 
 protected:
@@ -37,8 +35,6 @@ private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr>
   getPeaksWorkspaces(const Mantid::Kernel::StringTokenizer &workspaceNames);
   double m_radiusNoShape;
-  double m_minValue;
-  double m_maxValue;
   int m_coordinateSystem;
   Mantid::Geometry::PeakShape::RadiusType m_radiusType;
   std::string m_instrument;
