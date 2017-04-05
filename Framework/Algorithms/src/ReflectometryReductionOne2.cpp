@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
 #include <boost/algorithm/string/split.hpp>
@@ -89,6 +91,32 @@ double getLambda(const HistogramX &xValues, const int idx) {
   // The centre of the bin is the lower bin edge plus half the width
   return xValues[idx] + getLambdaRange(xValues, idx) / 2.0;
 }
+
+/*
+Get the value of theta from the logs
+@param inputWs : the input workspace
+@return : theta found in the logs
+@throw: runtime_errror if 'stheta' was not found.
+*/
+double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
+
+  double theta = -1.;
+  const Mantid::API::Run &run = inputWs->run();
+  try {
+    Property *p = run.getLogData("stheta");
+    auto incidentThetas = dynamic_cast<TimeSeriesProperty<double> *>(p);
+    if (!incidentThetas) {
+      throw std::runtime_error("stheta log not found");
+    }
+    theta =
+        incidentThetas->valuesAsVector().back(); // Not quite sure what to do
+                                                 // with the time series for
+                                                 // stheta
+  } catch (Exception::NotFoundError &) {
+    return theta;
+  }
+  return theta;
+}
 }
 
 namespace Mantid {
@@ -110,7 +138,10 @@ void ReflectometryReductionOne2::init() {
   initReductionProperties();
 
   // Theta0
-  declareProperty("Theta0", 0.0, "Horizon angle in degrees", Direction::Input);
+  declareProperty(
+    make_unique<PropertyWithValue<double>>("Theta0", Mantid::EMPTY_DBL(),
+      Direction::Input),
+    "Horizon angle in degrees");
 
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -622,7 +653,12 @@ void ReflectometryReductionOne2::findTheta0() {
   if (reductionType == "DivergentBeam") {
     // theta0 is at the angle at the centre of the detector. This is the
     // angle the detector has been rotated around and should be defined in
-    m_theta0 = getProperty("Theta0");
+    Property *theta0Property = getProperty("Theta0");
+    if (!theta0Property->isDefault()) {
+      m_theta0 = getProperty("Theta0");
+    } else {
+      m_theta0 = getThetaFromLogs(m_runWS);
+    }
   }
 
   g_log.debug() << "theta0: " << theta0() << std::endl;

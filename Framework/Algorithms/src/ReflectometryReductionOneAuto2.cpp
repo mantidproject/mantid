@@ -135,9 +135,6 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty("ThetaIn", Mantid::EMPTY_DBL(), "Angle in degrees",
                   Direction::Input);
 
-  // Theta0
-  declareProperty("Theta0", 0.0, "Horizon angle in degrees", Direction::Input);
-
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
@@ -237,7 +234,7 @@ void ReflectometryReductionOneAuto2::exec() {
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
   alg->setProperty("ReductionType", getPropertyValue("ReductionType"));
-  alg->setProperty("Theta0", getPropertyValue("Theta0"));
+  alg->setProperty("Theta0", getPropertyValue("ThetaIn"));
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
