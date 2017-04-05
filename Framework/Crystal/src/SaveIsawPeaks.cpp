@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -26,7 +27,7 @@ DECLARE_ALGORITHM(SaveIsawPeaks)
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "InputWorkspace", "", Direction::Input,
                       boost::make_shared<InstrumentValidator>()),
                   "An input PeaksWorkspace with an instrument.");
@@ -34,13 +35,13 @@ void SaveIsawPeaks::init() {
   declareProperty("AppendFile", false, "Append to file if true.\n"
                                        "If false, new file (default).");
 
-  const std::vector<std::string> exts{".peaks", ".integrate"};
+  const std::vector<std::string> exts{ ".peaks", ".integrate" };
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Save, exts),
                   "Path to an ISAW-style peaks or integrate file to save.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<Workspace2D>>(
+      make_unique<WorkspaceProperty<Workspace2D> >(
           "ProfileWorkspace", "", Direction::Input, PropertyMode::Optional),
       "An optional Workspace2D of profiles from integrating cylinder.");
 }
@@ -58,15 +59,35 @@ void SaveIsawPeaks::exec() {
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
 
-  // We cannot assume the peaks have bank type detector modules, so we have a
-  // string to check this
-  std::string bankPart = "?";
-
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
-  typedef std::map<int, std::vector<size_t>> bankMap_t;
+  typedef std::map<int, std::vector<size_t> > bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
-  std::set<int, std::less<int>> uniqueBanks;
+  std::set<int, std::less<int> > uniqueBanks;
+  if (!inst)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (inst->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  inst->getChildren(comps, true);
+
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    if (bank == 0)
+      continue;
+    // Track unique bank numbers
+    uniqueBanks.insert(bank);
+  }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -90,8 +111,6 @@ void SaveIsawPeaks::exec() {
 
     // Save in the map
     runMap[run][bank].push_back(i);
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
   }
 
   if (!inst)
