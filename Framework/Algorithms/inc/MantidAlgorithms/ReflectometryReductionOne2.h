@@ -139,6 +139,8 @@ private:
   double theta0() { return m_theta0; }
   double twoThetaR() { return m_twoThetaR; }
   size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
+  size_t spectrumMin();
+  size_t spectrumMax();
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;

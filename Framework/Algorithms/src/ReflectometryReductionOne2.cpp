@@ -45,6 +45,50 @@ double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
 
   return bTwoTheta;
 }
+
+/** Get the start/end of the lambda range for the detector associated
+* with the given spectrum
+*
+* @return : the lambda range
+*/
+double getLambdaRange(const HistogramX &xValues, const int idx) {
+  // The lambda range is the bin width from the given index to the next.
+  if (idx + 1 >= xValues.size()) {
+    std::ostringstream errMsg;
+    errMsg << "Error accessing X values out of range (index=" << idx + 1
+           << ", size=" << xValues.size();
+    throw std::runtime_error(errMsg.str());
+  }
+
+  double result = xValues[idx + 1] - xValues[idx];
+  return result;
+}
+
+/** Get the start/end of the lambda range for the detector associated
+* with the given spectrum
+*
+* @return : the lambda range
+*/
+double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx) {
+  return getLambdaRange(ws->x(spectrumIdx), static_cast<int>(spectrumIdx));
+}
+
+/** Get the lambda value at the centre of the detector associated
+* with the given spectrum
+*
+* @return : the lambda range
+*/
+double getLambda(const HistogramX &xValues, const int idx) {
+  if (idx >= xValues.size()) {
+    std::ostringstream errMsg;
+    errMsg << "Error accessing X values out of range (index=" << idx
+           << ", size=" << xValues.size();
+    throw std::runtime_error(errMsg.str());
+  }
+
+  // The centre of the bin is the lower bin edge plus half the width
+  return xValues[idx] + getLambdaRange(xValues, idx) / 2.0;
+}
 }
 
 namespace Mantid {
@@ -557,8 +601,8 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 * Find and cache the min/max twoTheta for the area of interest
 */
 void ReflectometryReductionOne2::findTwoThetaMinMax() {
-  m_twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, m_detectors.front());
-  m_twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, m_detectors.back());
+  m_twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spectrumMin());
+  m_twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spectrumMax());
   if (m_twoThetaMin > m_twoThetaMax) {
     std::swap(m_twoThetaMin, m_twoThetaMax);
   }
@@ -591,6 +635,24 @@ void ReflectometryReductionOne2::findTwoThetaR() {
 }
 
 /**
+* Get the minimum spectrum index in the area of interest
+* @return : the spectrum index
+*/
+size_t ReflectometryReductionOne2::spectrumMin() {
+  // The list of detector indices should be sorted so just return the first
+  return m_detectors.front();
+}
+
+/**
+* Get the maximum spectrum index in the area of interest
+* @return : the spectrum index
+*/
+size_t ReflectometryReductionOne2::spectrumMax() {
+  // The list of detector indices should be sorted so just return the last
+  return m_detectors.back();
+}
+
+/**
 * Construct an "empty" output workspace in virtual-lambda for summation in Q.
 * The workspace will have the same x values as the input workspace but the y
 * values will all be zero.
@@ -617,18 +679,15 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   double dummy = 0.0;
   const int numBins = static_cast<int>(detectorWS->blocksize());
 
-  /// todo Get correct bLambda for the start/end pixels
-  const double bLambdaMin = (lambdaMax() - lambdaMin()) / numBins;
-  const double bLambdaMax = (lambdaMax() - lambdaMin()) / numBins;
-
+  const double bLambdaMax = getLambdaRange(detectorWS, spectrumMax());
   const double bTwoThetaMin =
-      getDetectorTwoThetaRange(m_spectrumInfo, m_detectors.front());
-  const double bTwoThetaMax =
-      getDetectorTwoThetaRange(m_spectrumInfo, m_detectors.back());
-
+      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin());
   getProjectedLambdaRange(lambdaMax(), twoThetaMin(), bLambdaMax, bTwoThetaMin,
                           lambdaVMin, dummy);
 
+  const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin());
+  const double bTwoThetaMax =
+      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax());
   getProjectedLambdaRange(lambdaMin(), twoThetaMax(), bLambdaMin, bTwoThetaMax,
                           dummy, lambdaVMax);
 
@@ -710,8 +769,8 @@ void ReflectometryReductionOne2::sumInQProcessValue(
     MatrixWorkspace_sptr IvsLam) {
 
   // Get the bin width and the bin centre
-  const double bLambda = inputX[inputIdx + 1] - inputX[inputIdx];
-  const double lambda = inputX[inputIdx] + bLambda / 2.0;
+  const double bLambda = getLambdaRange(inputX, inputIdx);
+  const double lambda = getLambda(inputX, inputIdx);
   // Skip if outside area of interest
   if (lambda < lambdaMin() || lambda > lambdaMax()) {
     return;
@@ -877,9 +936,9 @@ std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
   /// todo Add support for different GroupingPatterns rather than just a single
   /// range?
   const int hostIdxStart =
-      mapSpectrumIndexToWorkspace(map, m_detectors.front(), hostWS);
+      mapSpectrumIndexToWorkspace(map, spectrumMin(), hostWS);
   const int hostIdxEnd =
-      mapSpectrumIndexToWorkspace(map, m_detectors.back(), hostWS);
+      mapSpectrumIndexToWorkspace(map, spectrumMax(), hostWS);
   result << hostIdxStart << "-" << hostIdxEnd;
 
   return result.str();
