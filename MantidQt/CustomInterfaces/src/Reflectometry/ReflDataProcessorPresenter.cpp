@@ -356,7 +356,7 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
   startTimes = std::vector<double>(numSlices);
   stopTimes = std::vector<double>(numSlices);
 
-  if (numSlices == 1) {
+  if (times.size() == 1) {
     startTimes[0] = 0;
     stopTimes[0] = times[0];
   } else {
@@ -456,6 +456,7 @@ std::string ReflDataProcessorPresenter::takeSlice(const std::string &runNo,
     filter->setProperty("TimeTolerance", 1.0);
     filter->setProperty("LogName", logFilter);
   }
+
   filter->execute();
 
   // Obtain the normalization constant for this slice
