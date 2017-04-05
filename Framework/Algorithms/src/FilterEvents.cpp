@@ -206,7 +206,7 @@ void FilterEvents::exec() {
     generateSplitterTSP(split_tsp_vector);
   }
 
-  // TODO:FIXME - assign split_tsp_vector to all the output workspaces!
+  // assign split_tsp_vector to all the output workspaces!
   mapSplitterTSPtoWorkspaces(split_tsp_vector);
 
   // Optional to group detector
@@ -1700,7 +1700,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
       if (0 <= miter->first &&
           miter->first < static_cast<int>(split_tsp_vec.size())) {
         DataObjects::EventWorkspace_sptr outws = miter->second;
-        outws->mutableRun().addProperty(split_tsp_vec[miter->first]);
+        outws->mutableRun().addProperty(split_tsp_vec[miter->first], true);
       }
     }
   } else {
