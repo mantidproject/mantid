@@ -38,6 +38,7 @@ Improved
 - Two new properties were added to :ref:`algm-Integration` *RangeLowerList* and *RangeUpperList* can be used to give histogram-specific integration ranges.
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
 - :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency. 
+- :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 
 Bug Fixes
 #########
@@ -74,8 +75,6 @@ Improved
 - :ref:`UserFunction <func-UserFunction>` now supports :math:`erf` and :math:`erfc`.
 
 - :ref:`IkedaCarpenterPV <func-IkedaCarpenterPV>` now constrains all parameters to be non-negative which helps the fits converge faster and produces better fits.
-
-- :ref:`MergeRuns <func-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 
 Python
 ------
