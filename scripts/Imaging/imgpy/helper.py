@@ -1,4 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
+import time
 """
 Class for commonly used functions across the modules
 
@@ -6,12 +8,13 @@ verbosity: Default 2, existing levels:
     0 - Silent, no output at all (not recommended)
     1 - Low verbosity, will output each step that is being performed
     2 - Normal verbosity, will output each step and execution time
-    3 - High verbosity, will output the step name, execution time and memory usage before and after each step
+    3 - High verbosity, will output the step name, execution time and memory
+        usage before and after each step
 """
 
 # do we want to wrap this in a global class?
-# so that helper will just store the funcitonality, but helper_data will
-# store the actual data?
+# so that helper will just store the functionality,
+# but helper_data will store the actual data?
 
 _whole_exec_timer = None
 _timer_running = False
@@ -26,14 +29,13 @@ _note_str = " > Note: "
 _warning_str = " >> WARNING: "
 _error_str = " >>> ERROR: "
 
-# for timer
 _progress_bar = None
 
 _readme = None
 
 
 def check_config_class(config):
-    from configs.recon_config import ReconstructionConfig
+    from core.configs.recon_config import ReconstructionConfig
     assert isinstance(
         config, ReconstructionConfig
     ), "The provided config is not of type ReconstructionConfig and cannot be used!"
@@ -43,7 +45,7 @@ def initialise(config, saver=None):
     global _verbosity
     global _readme
     _verbosity = config.func.verbosity
-    if saver is not None:
+    if saver:
         from readme import Readme
         _readme = Readme(config, saver)
 
@@ -56,15 +58,18 @@ def check_config_integrity(config):
             "No output path specified, no output will be produced!")
 
 
-def check_data_stack(data):
-    import numpy
+def check_data_stack(data, expected_dims=3):
 
-    if not isinstance(data, numpy.ndarray):
+    # the data must be a np array, otherwise most functionality won't work
+    if not isinstance(data, np.ndarray):
         raise ValueError(
-            "Invalid stack of images data. It is not a numpy array: {0}".
+            "Invalid stack of images data. It is not a Numpy ndarray: {0}".
             format(data))
 
-    if 3 != len(data.shape):
+    # the scripts are designed to work with a 3 dimensional dataset
+    # in the case of 4 dimensional data, it's typically reduced to 3 dimensions 
+    # via the aggregate functionality
+    if expected_dims != len(data.shape):
         raise ValueError(
             "Invalid stack of images data. It does not have 3 dimensions. Shape: {0}".
             format(data.shape))
@@ -97,7 +102,7 @@ def run_import_checks(config):
     """
     Run the import checks to notify the user which features are available in the execution.
     """
-    from parallel import utility as pu
+    from core.parallel import utility as pu
     progress_available()
 
     if not pu.multiprocessing_available():
@@ -107,32 +112,43 @@ def run_import_checks(config):
             "Running process on {0} cores.".format(config.func.cores))
 
 
-def get_memory_usage_linux():
+def get_memory_usage_linux(kb=False, mb=False):
+    """
+    :param kb: Return the value in Kilobytes
+    :param mb: Return the value in Megabytes
+    """
     try:
         # Windows doesn't seem to have resource package, so this will
         # silently fail
         import resource as res
-
-        memory_in_kbs = int(res.getrusage(res.RUSAGE_SELF).ru_maxrss)
-
-        memory_in_mbs = int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) / 1024
-
-        # handle caching
-        memory_string = " {0} KB, {1} MB".format(memory_in_kbs, memory_in_mbs)
-
-        global _cache_last_memory
-        if _cache_last_memory is None:
-            _cache_last_memory = memory_in_kbs
-        else:
-            # get memory difference in Megabytes
-            delta_memory = (memory_in_kbs - _cache_last_memory) / 1024
-
-            # remove cached memory
-            _cache_last_memory = None
-            memory_string += ". Memory change: {0} MB".format(delta_memory)
-
     except ImportError:
-        memory_string = " <not available on Windows> "
+        return " <not available on Windows> "
+
+    tuple_to_return = tuple()  # start with empty tuple
+    if kb:
+        tuple_to_return += (int(res.getrusage(res.RUSAGE_SELF).ru_maxrss), )
+
+    if mb:
+        tuple_to_return += (int(res.getrusage(res.RUSAGE_SELF).ru_maxrss) /
+                            1024, )
+    return tuple_to_return
+
+
+def get_memory_usage_linux_str():
+    memory_in_kbs, memory_in_mbs = get_memory_usage_linux(kb=True, mb=True)
+    # handle caching
+    memory_string = " {0} KB, {1} MB".format(memory_in_kbs, memory_in_mbs)
+
+    global _cache_last_memory
+    if not _cache_last_memory:
+        _cache_last_memory = memory_in_kbs
+    else:
+        # get memory difference in Megabytes
+        delta_memory = (memory_in_kbs - _cache_last_memory) / 1024
+
+        # remove cached memory
+        _cache_last_memory = None
+        memory_string += ". Memory change: {0} MB".format(delta_memory)
 
     return memory_string
 
@@ -169,9 +185,12 @@ def tomo_print(message, verbosity=2):
             THE MEMORY USAGE DOES NOT WORK ON WINDOWS.
             This will probably use more resources.
     """
-
     # will be printed if the message verbosity is lower or equal
     # i.e. level 1,2,3 messages will not be printed on level 0 verbosity
+    global _readme
+    # we need is not None, because at the start if _readme gets the len(_readme)
+    # which returns 0, because there is nothing appended to it yet, which evaluates to False,
+    # and nothing is ever appended to the readme!
     if _readme is not None:
         _readme.append(message)
 
@@ -202,7 +221,6 @@ def pstart(message, verbosity=2):
     if not _timer_running:
         _timer_running = True
 
-    import time
     print_string = str(message)
     # will be printed on levels 2 and 3
     if _verbosity >= 2:
@@ -211,7 +229,7 @@ def pstart(message, verbosity=2):
 
     # will be printed on level 3 only
     if _verbosity >= 3:
-        print_string += " Memory usage before execution: " + get_memory_usage_linux(
+        print_string += " Memory usage before execution: " + get_memory_usage_linux_str(
         )
 
     tomo_print(_timer_print_prefix + print_string, verbosity)
@@ -229,7 +247,6 @@ def pstop(message, verbosity=2):
     if not _timer_running:
         raise ValueError("helper.pstart(...) was not called previously!")
 
-    import time
     print_string = ""
     if _verbosity >= 2:
         _timer_running = False
@@ -238,7 +255,7 @@ def pstop(message, verbosity=2):
             str(message) + " Elapsed time: " + timer_string + " sec.")
 
     if _verbosity >= 3:
-        print_string += " Memory usage after execution: " + get_memory_usage_linux(
+        print_string += " Memory usage after execution: " + get_memory_usage_linux_str(
         )
 
     tomo_print(_timer_print_prefix + print_string, verbosity)
@@ -250,7 +267,6 @@ def total_execution_timer(message="Total execution time was "):
     The first call to this will be in tomo_reconstruct.py and it will start it.abs
     The last call will be at the end of find_center or do_recon.
     """
-    import time
     global _whole_exec_timer
     global _readme
 
@@ -261,7 +277,7 @@ def total_execution_timer(message="Total execution time was "):
         # change from timer to string
         _whole_exec_timer = str(time.time() - _whole_exec_timer)
         message += _whole_exec_timer + " sec"
-        if _readme is not None:
+        if _readme:
             _readme.append(message)
         print(message)
 
@@ -281,7 +297,7 @@ def prog_init(total, desc="Progress", ascii=False, unit='images'):
     if _verbosity > 0:
         try:
             from tqdm import tqdm
-            if _progress_bar is not None:
+            if _progress_bar:
                 raise ValueError(
                     "Timer was not closed previously. Please do prog_close()!")
             _progress_bar = tqdm(
@@ -299,7 +315,7 @@ def prog_update(value=1):
     This function will print a simple ascii bar if tqdm is not present.
     """
     global _progress_bar
-    if _progress_bar is not None:
+    if _progress_bar:
         _progress_bar.update(value)
 
 
@@ -308,7 +324,7 @@ def prog_close():
     This function will do nothing if the tqdm library is not present.
     """
     global _progress_bar
-    if _progress_bar is not None:
+    if _progress_bar:
         _progress_bar.close()
 
     _progress_bar = None
@@ -317,24 +333,3 @@ def prog_close():
 def set_readme(readme):
     global _readme
     _readme = readme
-
-
-def save_debug(sample, config, flat, dark, path_append, *args):
-    return
-    # if any of the arguments are none
-    for a in args:
-        if a is None or a is False:
-            return
-
-    from imgdata.saver import Saver
-
-    saver = Saver(config)
-    saver._img_format = 'fits'  # force fits files
-    saver.save_single_image(sample, subdir=path_append, name='sample')
-
-    saver._data_as_stack = True  # force data as stack to save out single images
-    if flat is not None:
-        saver.save_single_image(flat, subdir=path_append, name='flat')
-
-    if dark is not None:
-        saver.save_single_image(dark, subdir=path_append, name='dark')
