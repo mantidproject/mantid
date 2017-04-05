@@ -10,8 +10,6 @@ Crystal Improvements
 
  - :ref:`algm-PredictPeaks` has a new option ``PredictPeaksOutsideDetectors`` which will predict peaks which fall outside of any defined detectors. This feature requires an extended detector space definition and will do nothing if this is not present in the IDF.
  - :ref:`StartLiveData <algm-StartLiveData>` will load "live" data streaming from MaNDi data server.
- - :ref:`SaveIsawPeaks <algm-SaveIsawPeaks>` now saves the calibration data for all detector banks in instrument so the header may be longer
- - :ref:`LoadIsawPeaks <algm-LoadIsawPeaks>` now uses the calibration lines to calibrate the detectors banks for CORELLI
 
 Engineering Diffraction
 -----------------------
