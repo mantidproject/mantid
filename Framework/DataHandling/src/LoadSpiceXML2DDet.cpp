@@ -652,7 +652,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
         double dvalue = atof(nodevalue.c_str());
         dbl_log_map.emplace(nodename, dvalue);
       } else if (xmlnode.isInteger()) {
-        int ivalue = atoi(nodevalue.c_str());
+        int ivalue = std::stoi(nodevalue);
         int_log_map.emplace(nodename, ivalue);
       } else {
         if (nodename.compare("start_time") == 0) {

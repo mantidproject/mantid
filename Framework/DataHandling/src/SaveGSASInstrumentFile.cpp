@@ -258,7 +258,7 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
   vector<unsigned int> vecinteger;
   for (auto &str : strs) {
     if (!str.empty()) {
-      int item = atoi(str.c_str());
+      int item = std::stoi(str);
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
