@@ -561,7 +561,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   // Rotate coordinate system of this component
   if (pElem->hasAttribute("rot")) {
     double rotAngle =
-        angleConvertConst * std::stod(pElem->getAttribute("rot")); // assumed to be in degrees
+        angleConvertConst *
+        std::stod(pElem->getAttribute("rot")); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
@@ -626,8 +627,9 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
     } // end translation
 
     if (rElem) {
-      double rotAngle = angleConvertConst *
-                        std::stod(rElem->getAttribute("val")); // assumed to be in degrees
+      double rotAngle =
+          angleConvertConst *
+          std::stod(rElem->getAttribute("val")); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -1877,8 +1879,7 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
     if (pElem->hasAttribute("R"))
       R = std::stod((pElem->getAttribute("R")));
     if (pElem->hasAttribute("theta"))
-      theta =
-          m_angleConvertConst * std::stod(pElem->getAttribute("theta"));
+      theta = m_angleConvertConst * std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
       phi = m_angleConvertConst * std::stod(pElem->getAttribute("phi"));
 
@@ -1931,7 +1932,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
     if (facingElem->hasAttribute("rot")) {
       double rotAngle =
-          m_angleConvertConst * std::stod(facingElem->getAttribute("rot")); // assumed to be in degrees
+          m_angleConvertConst * std::stod(facingElem->getAttribute(
+                                    "rot")); // assumed to be in degrees
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0, 0, 1)));
     }
 

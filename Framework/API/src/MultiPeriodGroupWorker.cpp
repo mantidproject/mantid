@@ -288,8 +288,7 @@ void MultiPeriodGroupWorker::validateMultiPeriodGroupInputs(
         }
         Property *currentPeriodProperty =
             currentNestedWS->run().getLogData("current_period");
-        size_t currentPeriod =
-            std::stoi(currentPeriodProperty->value());
+        size_t currentPeriod = std::stoi(currentPeriodProperty->value());
         if (currentPeriod != (j + 1)) {
           throw std::runtime_error("Multiperiod group workspaces must be "
                                    "ordered by current_period. Correct: " +

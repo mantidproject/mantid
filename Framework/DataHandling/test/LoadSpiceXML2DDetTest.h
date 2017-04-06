@@ -95,19 +95,16 @@ public:
     // Check the sample logs loaded from XML node
     // monitor counts
     TS_ASSERT(outws->run().hasProperty("_monitor"));
-    int monitorcount =
-        std::stoi(outws->run().getProperty("_monitor")->value());
+    int monitorcount = std::stoi(outws->run().getProperty("_monitor")->value());
     TS_ASSERT_EQUALS(monitorcount, 29);
 
     // Check motor angles
     TS_ASSERT(outws->run().hasProperty("_2theta"));
-    double _2theta =
-        std::stod(outws->run().getProperty("_2theta")->value());
+    double _2theta = std::stod(outws->run().getProperty("_2theta")->value());
     TS_ASSERT_DELTA(_2theta, 42.709750, 0.0000001);
 
     TS_ASSERT(outws->run().hasProperty("_omega"));
-    double _omega =
-        std::stod(outws->run().getProperty("_omega")->value());
+    double _omega = std::stod(outws->run().getProperty("_omega")->value());
     TS_ASSERT_DELTA(_omega, 21.354500, 0.0000001);
 
     TS_ASSERT(outws->run().hasProperty("_chi"));

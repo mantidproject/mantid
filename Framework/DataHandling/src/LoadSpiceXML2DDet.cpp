@@ -280,8 +280,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   if (!outws->run().hasProperty("2theta") &&
       outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
-    double logvalue =
-        std::stod(outws->run().getProperty("_2theta")->value());
+    double logvalue = std::stod(outws->run().getProperty("_2theta")->value());
     TimeSeriesProperty<double> *newlogproperty =
         new TimeSeriesProperty<double>("2theta");
     newlogproperty->addValue(anytime, logvalue);
@@ -899,8 +898,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
     } else if (!ts) {
       g_log.warning("Log _m1 is not TimeSeriesProperty.  Treat it as a single "
                     "value property.");
-      double m1pos =
-          std::stod(dataws->run().getProperty("_m1")->value());
+      double m1pos = std::stod(dataws->run().getProperty("_m1")->value());
       if (fabs(m1pos - (-25.870000)) < 0.2) {
         wavelength = 1.003;
         haswavelength = true;
