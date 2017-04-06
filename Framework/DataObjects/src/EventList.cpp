@@ -1624,7 +1624,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = -std::numeric_limits<double>::max();
+  double lastTof = std::numeric_limits<double>::lowest();
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
@@ -1701,7 +1701,7 @@ void EventList::compressEventsParallelHelper(
     localOut.reserve(numPerBlock / 20);
 
     // The last TOF to which we are comparing.
-    double lastTof = -std::numeric_limits<double>::max();
+    double lastTof = std::numeric_limits<double>::lowest();
     // For getting an accurate average TOF
     double totalTof = 0;
     int num = 0;
