@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from functools import (partial, wraps)
 import inspect
 
@@ -60,7 +61,7 @@ def create_automatic_setters_for_state(attribute_value, builder_instance, attrib
     all_descriptors = get_all_typed_parameter_descriptors(attribute_value)
 
     # Go through each descriptor and create a setter for it.
-    for name, value in all_descriptors.items():
+    for name, value in list(all_descriptors.items()):
         # If the name is in the exception list, then we don't want to create a setter for this attribute
         if name in exclusions:
             continue
@@ -74,7 +75,7 @@ def create_automatic_setters_for_state(attribute_value, builder_instance, attrib
             if dict_parameter_value is None or len(dict_parameter_value) == 0:
                 update_the_method(builder_instance, new_methods, setter_name, name, attribute_name_list)
             else:
-                for dict_key, dict_value in dict_parameter_value.items():
+                for dict_key, dict_value in list(dict_parameter_value.items()):
                     setter_name_copy = list(setter_name)
                     setter_name_copy.append(dict_key)
 
@@ -91,7 +92,7 @@ def create_automatic_setters_for_state(attribute_value, builder_instance, attrib
 def create_automatic_setters(builder_instance, state_class, exclusions):
     # Get the name of the state object
     new_methods = {}
-    for attribute_name, attribute_value in builder_instance.__dict__.items():
+    for attribute_name, attribute_value in list(builder_instance.__dict__.items()):
         if isinstance(attribute_value, state_class):
             attribute_name_list = [attribute_name]
             setter_name = ["set"]
@@ -99,7 +100,7 @@ def create_automatic_setters(builder_instance, state_class, exclusions):
                                                setter_name, exclusions, new_methods)
 
     # Apply the methods
-    for method_name, method in new_methods.items():
+    for method_name, method in list(new_methods.items()):
         builder_instance.__dict__.update({method_name: method})
 
 

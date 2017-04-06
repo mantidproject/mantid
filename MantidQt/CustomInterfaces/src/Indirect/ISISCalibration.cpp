@@ -411,7 +411,7 @@ void ISISCalibration::calPlotRaw() {
   MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-  const Mantid::MantidVec &dataX = input->readX(0);
+  const auto &dataX = input->x(0);
   QPair<double, double> range(dataX.front(), dataX.back());
 
   m_uiForm.ppCalibration->clear();
@@ -491,7 +491,7 @@ void ISISCalibration::calPlotEnergy() {
     return;
   }
 
-  const Mantid::MantidVec &dataX = energyWs->readX(0);
+  const auto &dataX = energyWs->x(0);
   QPair<double, double> range(dataX.front(), dataX.back());
 
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
@@ -529,11 +529,12 @@ void ISISCalibration::calSetDefaultResolution(MatrixWorkspace_const_sptr ws) {
     if (params.size() > 0) {
       double res = params[0];
 
+      const auto energyRange = m_uiForm.ppResolution->getCurveRange("Energy");
       // Set default rebinning bounds
       QPair<double, double> peakRange(-res * 10, res * 10);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"],
-                           m_properties["ResEHigh"], peakRange);
+                           m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"],
                        m_properties["ResEHigh"], peakRange);
 

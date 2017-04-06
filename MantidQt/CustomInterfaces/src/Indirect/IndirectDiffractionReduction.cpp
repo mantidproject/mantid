@@ -115,7 +115,7 @@ void IndirectDiffractionReduction::run() {
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
       if (!validateVanCal()) {
-        showInformationBox("Vaniduium and Calibration input is invalid.");
+        showInformationBox("Vanadium and Calibration input is invalid.");
         return;
       }
       runOSIRISdiffonlyReduction();
@@ -125,14 +125,15 @@ void IndirectDiffractionReduction::run() {
             "Calibration and rebinning parameters are incorrect.");
         return;
       }
+      runGenericReduction(instName, mode);
     }
   } else {
     if (!validateRebin()) {
       showInformationBox("Rebinning parameters are incorrect.");
       return;
     }
+    runGenericReduction(instName, mode);
   }
-  runGenericReduction(instName, mode);
 }
 
 /**
@@ -364,7 +365,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                     m_uiForm.spCanScale->value());
   }
 
-  // Add the pproperty for grouping policy if needed
+  // Add the property for grouping policy if needed
   if (m_uiForm.ckIndividualGrouping->isChecked())
     msgDiffReduction->setProperty("GroupingPolicy", "Individual");
 
@@ -470,7 +471,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
  *
  * Optionally loads an IPF if a reflection was provided.
  *
- * @param instrumentName Name of an inelastic indiretc instrument (IRIS, OSIRIN,
+ * @param instrumentName Name of an inelastic indirect instrument (IRIS, OSIRIS,
  *TOSCA, VESUVIO)
  * @param reflection Reflection mode to load parameters for (diffspec or
  *diffonly)
@@ -645,7 +646,7 @@ void IndirectDiffractionReduction::saveSettings() {
 /**
  * Validates the rebinning fields and updates invalid markers.
  *
- * @returns True if reinning options are valid, flase otherwise
+ * @returns True if reining options are valid, false otherwise
  */
 bool IndirectDiffractionReduction::validateRebin() {
   QString rebStartTxt = m_uiForm.leRebinStart->text();
@@ -736,7 +737,7 @@ bool IndirectDiffractionReduction::validateCalOnly() {
 }
 
 /**
- * Disables and shows message on run button indicating that run files have benn
+ * Disables and shows message on run button indicating that run files have been
  * changed.
  */
 void IndirectDiffractionReduction::runFilesChanged() {

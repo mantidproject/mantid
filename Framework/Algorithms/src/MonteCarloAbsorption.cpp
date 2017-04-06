@@ -9,6 +9,8 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -28,6 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::interpolateLinearInplace;
+using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -121,7 +124,7 @@ void MonteCarloAbsorption::exec() {
   auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
                                seed, interpolateOpt);
 
-  setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", std::move(outputWS));
 }
 
 /**
@@ -134,7 +137,7 @@ void MonteCarloAbsorption::exec() {
  * @param interpolateOpt Method of interpolation to compute unsimulated points
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_sptr
+MatrixWorkspace_uptr
 MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
                                    size_t nevents, int nlambda, int seed,
                                    const InterpolationOption &interpolateOpt) {
@@ -220,9 +223,9 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   return outputWS;
 }
 
-MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
+MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  MatrixWorkspace_sptr outputWS = inputWS.clone();
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);

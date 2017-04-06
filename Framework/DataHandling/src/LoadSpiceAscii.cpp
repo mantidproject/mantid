@@ -515,11 +515,11 @@ std::string LoadSpiceAscii::processDateString(const std::string &rawdate,
     else if (formatterms[i].find('M') != std::string::npos) {
       month = dateterms[i];
       if (month.size() == 1)
-        month = "0" + month;
+        month.insert(0, 1, '0');
     } else {
       day = dateterms[i];
       if (day.size() == 1)
-        day = "0" + day;
+        day.insert(0, 1, '0');
     }
   }
 

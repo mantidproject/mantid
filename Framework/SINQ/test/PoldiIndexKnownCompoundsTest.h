@@ -239,7 +239,8 @@ public:
     std::vector<Workspace_sptr> badWorkspaces;
     badWorkspaces.push_back(
         PoldiPeakCollectionHelpers::createPoldiPeakTableWorkspace());
-    badWorkspaces.push_back(WorkspaceCreationHelper::create1DWorkspaceRand(10));
+    badWorkspaces.push_back(
+        WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
 
     TS_ASSERT_THROWS(alg.getPeakCollections(badWorkspaces),
                      std::invalid_argument);
@@ -670,7 +671,7 @@ private:
   void storeRandomWorkspaces(const std::vector<std::string> &wsNames) {
     for (auto it = wsNames.begin(); it != wsNames.end(); ++it) {
       WorkspaceCreationHelper::storeWS(
-          *it, WorkspaceCreationHelper::create1DWorkspaceRand(10));
+          *it, WorkspaceCreationHelper::create1DWorkspaceRand(10, true));
     }
   }
 

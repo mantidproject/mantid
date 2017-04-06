@@ -64,9 +64,6 @@ public:
                        const Kernel::Quat &rot);
   Kernel::V3D getComponentPosition(API::MatrixWorkspace_sptr ws,
                                    const std::string &componentName);
-  template <typename T>
-  T getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
-                       const std::string &propertyName);
 
 private:
   void recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,

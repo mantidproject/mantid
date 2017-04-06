@@ -139,6 +139,8 @@ public:
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                          const IComponent &comp) const;
+  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                           const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors
@@ -152,7 +154,8 @@ public:
   getPlottable() const;
 
   /// Returns a shared pointer to a component
-  boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByID(const IComponent *id) const;
 
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<const IComponent>>
@@ -212,20 +215,6 @@ public:
   boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
   void setPhysicalInstrument(boost::shared_ptr<const Instrument>);
 
-  // ----- Useful static functions ------
-  static double calcConversion(const double l1, const Kernel::V3D &beamline,
-                               const double beamline_norm,
-                               const Kernel::V3D &samplePos,
-                               const Kernel::V3D &detectorPos,
-                               const double offset);
-
-  static double
-  calcConversion(const double l1, const Kernel::V3D &beamline,
-                 const double beamline_norm, const Kernel::V3D &samplePos,
-                 const boost::shared_ptr<const Instrument> &instrument,
-                 const std::vector<detid_t> &detectors,
-                 const std::map<detid_t, double> &offsets);
-
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
                                double &beamline_norm,
                                Kernel::V3D &samplePos) const;
@@ -254,8 +243,11 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
+  size_t detectorIndex(const detid_t detID) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+
+  boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -336,6 +328,17 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 };
+namespace Conversion {
+
+MANTID_GEOMETRY_DLL double tofToDSpacingFactor(const double l1, const double l2,
+                                               const double twoTheta,
+                                               const double offset);
+
+double MANTID_GEOMETRY_DLL
+tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
+                    const std::vector<detid_t> &detectors,
+                    const std::map<detid_t, double> &offsets);
+}
 
 } // namespace Geometry
 } // Namespace Mantid

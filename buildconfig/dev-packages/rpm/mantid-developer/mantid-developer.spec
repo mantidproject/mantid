@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.21
+Version:        1.22
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -33,6 +33,7 @@ Requires: hdf-devel
 Requires: hdf5-devel
 Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
+Requires: librdkafka-dev
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -54,7 +55,7 @@ Requires: python-matplotlib
 %{?el7:Requires: python-matplotlib-qt4}
 Requires: python-pip
 Requires: python-sphinx
-Requires: python-sphinx-theme-bootstrap
+Requires: python2-sphinx-bootstrap-theme
 Requires: PyYAML
 Requires: python2-mock
 Requires: qscintilla-devel
@@ -97,7 +98,7 @@ Requires: python3-PyQt4-devel
 Requires: python3-numpy
 Requires: python3-scipy
 Requires: python3-sphinx
-Requires: python3-sphinx-theme-bootstrap
+Requires: python3-sphinx-bootstrap-theme
 Requires: python3-dateutil
 Requires: python3-h5py
 Requires: python3-ipython-gui
@@ -129,6 +130,13 @@ required for Mantid development.
 %files
 
 %changelog
+
+* Sat Feb 18 2017 Stuart Campbell <scampbell@bnl.gov>
+- Updated to use upstream sphinx-bootstrap-theme 
+
+* Mon Jan 09 2017 Lamar Moore <lamar.moore@stfc.ac.uk>
+- Require librdkafka-dev
+
 * Wed Dec 21 2016 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Require python-mock & python3-mock on fedora
 

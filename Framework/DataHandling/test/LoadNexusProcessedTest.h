@@ -964,7 +964,7 @@ public:
     for (size_t index = 0; index < 2; ++index) {
       // Create a sample workspace and add it to the ADS, so it gets a name.
       auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
-          3, static_cast<double>(index), static_cast<double>(index));
+          3, static_cast<double>(index), static_cast<double>(index), true);
       AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
       alg.setProperty("InputWorkspace",
                       boost::dynamic_pointer_cast<MatrixWorkspace>(ws));

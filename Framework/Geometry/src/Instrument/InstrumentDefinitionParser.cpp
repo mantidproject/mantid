@@ -261,12 +261,15 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
     // Each type in the IDF must be uniquely named, hence return error if type
     // has already been defined
     if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error("XML file: " + filename +
-                  "contains more than one type element named " + typeName);
+      g_log.error(std::string("XML file: ")
+                      .append(filename)
+                      .append("contains more than one type element named ")
+                      .append(typeName));
       throw Kernel::Exception::InstrumentDefinitionError(
-          "XML instrument file contains more than one type element named " +
-              typeName,
-          filename);
+          std::string(
+              "XML instrument file contains more than one type element named ")
+              .append(typeName)
+              .append(filename));
     }
     getTypeElement[typeName] = pTypeElem;
 
@@ -305,12 +308,15 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
     // Each type in the IDF must be uniquely named, hence return error if type
     // has already been defined
     if (getTypeElement.find(typeName) != getTypeElement.end()) {
-      g_log.error("XML file: " + filename +
-                  "contains more than one type element named " + typeName);
+      g_log.error(std::string("XML file: ")
+                      .append(filename)
+                      .append("contains more than one type element named ")
+                      .append(typeName));
       throw Kernel::Exception::InstrumentDefinitionError(
-          "XML instrument file contains more than one type element named " +
-              typeName,
-          filename);
+          std::string(
+              "XML instrument file contains more than one type element named ")
+              .append(typeName)
+              .append(filename));
     }
     getTypeElement[typeName] = pTypeElem;
 

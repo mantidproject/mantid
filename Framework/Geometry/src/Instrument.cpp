@@ -3,7 +3,9 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -48,7 +50,9 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {}
+      m_detectorInfo(instr->m_detectorInfo) {
+  m_map_nonconst->setInstrument(m_instr.get());
+}
 
 /** Copy constructor
  *  This method was added to deal with having distinct neutronic and physical
@@ -189,9 +193,7 @@ void Instrument::getDetectors(detid2det_map &out_map) const {
     const auto &in_dets = m_instr->m_detectorCache;
     // And turn them into parametrized versions
     for (const auto &in_det : in_dets) {
-      out_map.emplace(std::get<0>(in_det),
-                      ParComponentFactory::createDetector(
-                          std::get<1>(in_det).get(), m_map));
+      out_map.emplace(std::get<0>(in_det), getDetector(std::get<0>(in_det)));
     }
   } else {
     // You can just return the detector cache directly.
@@ -265,7 +267,33 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
   max = std::get<0>(*in_dets->rbegin());
 }
 
-//------------------------------------------------------------------------------------------
+/** Fill a vector with all the detectors contained (at any depth) in a named
+ *component. For example,
+ * you might have a bank10 with 4 tubes with 100 pixels each; this will return
+ *the
+ * 400 contained Detector objects.
+ *
+ * @param[out] dets :: vector filled with detector pointers
+ * @param comp :: the parent component assembly that contains detectors.
+ */
+void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                                    const IComponent &comp) const {
+  const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
+  if (bank) {
+    // Get a vector of children (recursively)
+    std::vector<boost::shared_ptr<const IComponent>> children;
+    bank->getChildren(children, true);
+    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
+    for (it = children.begin(); it != children.end(); ++it) {
+      IDetector_const_sptr det =
+          boost::dynamic_pointer_cast<const IDetector>(*it);
+      if (det) {
+        dets.push_back(det);
+      }
+    }
+  }
+}
+
 /** Fill a vector with all the detectors contained (at any depth) in a named
  *component. For example,
  * you might have a bank10 with 4 tubes with 100 pixels each; this will return
@@ -282,21 +310,7 @@ void Instrument::getMinMaxDetectorIDs(detid_t &min, detid_t &max) const {
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
   boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
-  boost::shared_ptr<const ICompAssembly> bank =
-      boost::dynamic_pointer_cast<const ICompAssembly>(comp);
-  if (bank) {
-    // Get a vector of children (recursively)
-    std::vector<boost::shared_ptr<const IComponent>> children;
-    bank->getChildren(children, true);
-    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
-    for (it = children.begin(); it != children.end(); ++it) {
-      IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const IDetector>(*it);
-      if (det) {
-        dets.push_back(det);
-      }
-    }
-  }
+  getDetectorsInBank(dets, *comp);
 }
 
 //------------------------------------------------------------------------------------------
@@ -396,7 +410,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
 *   @return A pointer to the component.
 */
 boost::shared_ptr<const IComponent>
-Instrument::getComponentByID(ComponentID id) const {
+Instrument::getComponentByID(const IComponent *id) const {
   const IComponent *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
@@ -497,9 +511,6 @@ IDetector_const_sptr Instrument::getDetector(const detid_t &detector_id) const {
     return baseDet;
 
   auto det = ParComponentFactory::createDetector(baseDet.get(), m_map);
-  // Set the linear detector index, used for legacy accessors to obtain data
-  // from Beamline::DetectorInfo, which is stored in the ParameterMap.
-  det->setIndex(std::distance(baseInstr.m_detectorCache.cbegin(), it));
   return det;
 }
 
@@ -883,73 +894,6 @@ void Instrument::appendPlottable(
 const double CONSTANT = (PhysicalConstants::h * 1e10) /
                         (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing) for a single pixel, i.e.,
- *1/DIFC for that pixel.
- *
- * @param l1 :: Primary flight path.
- * @param beamline: vector = samplePos-sourcePos = a vector pointing from the
- *source to the sample,
- *        the length of the distance between the two.
- * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
- * @param samplePos: position of the sample
- * @param detPos: position of the detector
- * @param offset: value (close to zero) that changes the factor := factor *
- *(1+offset).
- */
-double Instrument::calcConversion(const double l1, const Kernel::V3D &beamline,
-                                  const double beamline_norm,
-                                  const Kernel::V3D &samplePos,
-                                  const Kernel::V3D &detPos,
-                                  const double offset) {
-  if (offset <=
-      -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset
-        << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
-
-  // Now detPos will be set with respect to samplePos
-  Kernel::V3D relDetPos = detPos - samplePos;
-  // 0.5*cos(2theta)
-  double l2 = relDetPos.norm();
-  double halfcosTwoTheta =
-      relDetPos.scalar_prod(beamline) / (l2 * beamline_norm);
-  // This is sin(theta)
-  double sinTheta = sqrt(0.5 - halfcosTwoTheta);
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-  return (numerator * CONSTANT) / sinTheta;
-}
-
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing)
- * for a LIST of detectors assigned to a single spectrum.
- */
-double Instrument::calcConversion(
-    const double l1, const Kernel::V3D &beamline, const double beamline_norm,
-    const Kernel::V3D &samplePos,
-    const boost::shared_ptr<const Instrument> &instrument,
-    const std::vector<detid_t> &detectors,
-    const std::map<detid_t, double> &offsets) {
-  double factor = 0.;
-  double offset;
-  for (auto detector : detectors) {
-    auto off_iter = offsets.find(detector);
-    if (off_iter != offsets.cend()) {
-      offset = offsets.find(detector)->second;
-    } else {
-      offset = 0.;
-    }
-    factor +=
-        calcConversion(l1, beamline, beamline_norm, samplePos,
-                       instrument->getDetector(detector)->getPos(), offset);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
-
 //------------------------------------------------------------------------------------------------
 /** Get several instrument parameters used in tof to D-space conversion
  *
@@ -1049,19 +993,9 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {
-    Geometry::ParameterMap params(*getParameterMap());
-    // Masking is in DetectorInfo. Insert it into ParameterMap so it is saved
-    // alongside other parameters.
-    if (m_detectorInfo) {
-      const auto &detIDs = getDetectorIDs();
-      for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
-        if (m_detectorInfo->isMasked(i)) {
-          const auto *det = getBaseDetector(detIDs.at(i));
-          params.forceUnsafeSetMasked(det, true);
-        }
-      }
-    }
-    params.saveNexus(file, "instrument_parameter_map");
+    // Map with data extracted from DetectorInfo -> legacy compatible files.
+    const auto &params = makeLegacyParameterMap();
+    params->saveNexus(file, "instrument_parameter_map");
   }
 
   // Add physical detector and monitor data
@@ -1302,10 +1236,144 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
-  if (m_map_nonconst)
-    m_map_nonconst->setDetectorInfo(detectorInfo);
   m_detectorInfo = std::move(detectorInfo);
 }
 
+/// Returns the index for a detector ID. Used for accessing DetectorInfo.
+size_t Instrument::detectorIndex(const detid_t detID) const {
+  const auto &baseInstr = m_map ? *m_instr : *this;
+  const auto it = find(baseInstr.m_detectorCache, detID);
+  return std::distance(baseInstr.m_detectorCache.cbegin(), it);
+}
+
+/// Returns a legacy ParameterMap, containing information that is now stored in
+/// DetectorInfo (masking, positions, rotations).
+boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+  // Information will be stored directly in pmap so we do not need DetectorInfo.
+  pmap->setDetectorInfo(nullptr);
+  // Instrument is only needed for DetectorInfo access so it is not needed.
+  pmap->setInstrument(nullptr);
+
+  if (!hasDetectorInfo())
+    return pmap;
+
+  const auto &baseInstr = m_map ? *m_instr : *this;
+
+  // Tolerance 1e-9 m with rotation center at a distance of L = 1000 m as in
+  // Beamline::DetectorInfo::isEquivalent.
+  constexpr double d_max = 1e-9;
+  constexpr double L = 1000.0;
+  constexpr double safety_factor = 2.0;
+  const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
+
+  const IComponent *oldParent{nullptr};
+  Eigen::Quaterniond invParentRot;
+  Eigen::Affine3d transformation;
+  for (size_t i = 0; i < m_detectorInfo->size(); ++i) {
+    const auto &det = std::get<1>(baseInstr.m_detectorCache[i]);
+    if (m_detectorInfo->isMasked(i)) {
+      pmap->forceUnsafeSetMasked(det.get(), true);
+    }
+
+    // Obtain parent position/rotation/scale.
+    const auto parent = det->getParent();
+    if (parent.get() != oldParent) {
+      oldParent = parent.get();
+      const auto parParent = ParComponentFactory::create(parent, pmap.get());
+      const auto parentPos = toVector3d(parParent->getPos());
+      invParentRot = toQuaterniond(parParent->getRotation()).conjugate();
+      transformation = invParentRot;
+      transformation.translate(-parentPos);
+      // Special case: scaling for RectangularDetectorPixel
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det)) {
+        const auto *panel = det->getParent()->getParent().get();
+        Eigen::Vector3d scale(1, 1, 1);
+        if (auto scalex = pmap->get(panel, "scalex"))
+          scale[0] = 1.0 / scalex->value<double>();
+        if (auto scaley = pmap->get(panel, "scaley"))
+          scale[1] = 1.0 / scaley->value<double>();
+        transformation.prescale(scale);
+      }
+    }
+
+    // Undo parent transformation to obtain relative position/rotation.
+    auto relPos = transformation * m_detectorInfo->position(i);
+    auto relRot = invParentRot * m_detectorInfo->rotation(i);
+
+    // Tolerance 1e-9 m as in Beamline::DetectorInfo::isEquivalent.
+    if ((relPos - toVector3d(det->getRelativePos())).norm() >= 1e-9) {
+      if (boost::dynamic_pointer_cast<const RectangularDetectorPixel>(det))
+        throw std::runtime_error("Cannot create legacy ParameterMap: Position "
+                                 "parameters for RectangularDetectorPixel are "
+                                 "not supported");
+      pmap->addV3D(det->getComponentID(), ParameterMap::pos(), toV3D(relPos));
+    }
+
+    if ((relRot * toQuaterniond(det->getRelativeRot()).conjugate())
+            .vec()
+            .norm() >= imag_norm_max)
+      pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
+  }
+  return pmap;
+}
+
+namespace Conversion {
+
+/**
+ * Calculate and return conversion factor from tof to d-spacing.
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param offset
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta, const double offset) {
+  if (offset <=
+      -1.) // not physically possible, means result is negative d-spacing
+  {
+    std::stringstream msg;
+    msg << "Encountered offset of " << offset
+        << " which converts data to negative d-spacing\n";
+    throw std::logic_error(msg.str());
+  }
+
+  auto sinTheta = std::sin(twoTheta / 2);
+
+  const double numerator = (1.0 + offset);
+  sinTheta *= (l1 + l2);
+
+  return (numerator * CONSTANT) / sinTheta;
+}
+
+/** Calculate the conversion factor from tof -> d-spacing
+ * for a LIST of detector ids assigned to a single spectrum.
+ * @brief tofToDSpacingFactor
+ * @param l1
+ * @param l2
+ * @param twoTheta scattering angle
+ * @param detectors
+ * @param offsets
+ * @return
+ */
+double tofToDSpacingFactor(const double l1, const double l2,
+                           const double twoTheta,
+                           const std::vector<detid_t> &detectors,
+                           const std::map<detid_t, double> &offsets) {
+  double factor = 0.;
+  double offset;
+  for (auto detector : detectors) {
+    auto off_iter = offsets.find(detector);
+    if (off_iter != offsets.cend()) {
+      offset = offsets.find(detector)->second;
+    } else {
+      offset = 0.;
+    }
+    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
+  }
+  return factor / static_cast<double>(detectors.size());
+}
+}
 } // namespace Geometry
 } // Namespace Mantid

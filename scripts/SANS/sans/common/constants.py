@@ -2,6 +2,8 @@
 
 # pylint: disable=too-few-public-methods
 
+from __future__ import (absolute_import, division, print_function)
+
 # ----------------------------------------
 # Proeprty names for Algorithms
 # ---------------------------------------
@@ -26,8 +28,8 @@ EMPTY_NAME = "dummy"
 SANS_SUFFIX = "sans"
 TRANS_SUFFIX = "trans"
 
-high_angle_bank = "HAB"
-low_angle_bank = "LAB"
+HIGH_ANGLE_BANK = "HAB"
+LOW_ANGLE_BANK = "LAB"
 
 SANS2D = "SANS2D"
 LARMOR = "LARMOR"

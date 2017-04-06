@@ -66,7 +66,7 @@ std::string MultiFileValidator::checkValidity(
           accumulatedErrors =
               "Could not validate the following file(s): " + valueIt;
         else
-          accumulatedErrors = accumulatedErrors + ", " + valueIt;
+          accumulatedErrors.append(", ").append(valueIt);
       }
     }
   }

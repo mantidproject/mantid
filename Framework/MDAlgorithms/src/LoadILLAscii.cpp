@@ -21,8 +21,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidMDAlgorithms/LoadILLAsciiHelper.h"
 
-#include <boost/shared_ptr.hpp>
 #include <Poco/TemporaryFile.h>
+#include <boost/shared_ptr.hpp>
 
 #include <fstream>
 #include <iterator> // std::distance
@@ -276,16 +276,16 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
 
   if (!workspaceList.empty()) {
     Progress progress(this, 0, 1, workspaceList.size());
-    for (auto it = workspaceList.begin(); it < workspaceList.end(); ++it) {
-      std::size_t pos = std::distance(workspaceList.begin(), it);
-      API::MatrixWorkspace_sptr thisWorkspace = *it;
 
-      std::size_t nHist = thisWorkspace->getNumberHistograms();
-      const auto &specInfo = thisWorkspace->spectrumInfo();
+    for (size_t pos = 0; pos < workspaceList.size(); ++pos) {
+      const auto &workspace = workspaceList[pos];
+
+      std::size_t nHist = workspace->getNumberHistograms();
+      const auto &specInfo = workspace->spectrumInfo();
       for (std::size_t i = 0; i < nHist; ++i) {
-        Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-        const auto &signal = thisWorkspace->y(i);
-        const auto &error = thisWorkspace->e(i);
+        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
+        const auto &signal = workspace->y(i);
+        const auto &error = workspace->e(i);
         myfile << signal[0] << " ";
         myfile << error[0] << " ";
         myfile << specInfo.detector(i).getID() << " ";
@@ -318,7 +318,6 @@ IMDEventWorkspace_sptr LoadILLAscii::mergeWorkspaces(
                                "ImportMDEventWorkspace"));
 
     return workspace;
-
   } else {
     throw std::runtime_error("Error: No workspaces were found to be merged!");
   }

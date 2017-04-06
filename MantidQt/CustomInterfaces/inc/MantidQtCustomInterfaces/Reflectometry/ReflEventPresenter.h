@@ -13,7 +13,7 @@ class IReflEventView;
 /** @class ReflEventPresenter
 
 ReflEventPresenter is a presenter class for the widget 'Event' in the
-Reflectometry (Polref) Interface.
+ISIS Reflectometry Interface.
 
 Copyright &copy; 2011-16 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -44,8 +44,10 @@ public:
   /// Destructor
   ~ReflEventPresenter() override;
 
-  /// Returns global options for time slicing
-  std::string getTimeSlicingOptions() const override;
+  /// Returns time-slicing values
+  std::string getTimeSlicingValues() const override;
+  /// Returns time-slicing type
+  std::string getTimeSlicingType() const override;
 
 private:
   /// The view we are managing

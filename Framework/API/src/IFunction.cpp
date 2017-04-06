@@ -206,9 +206,7 @@ std::string IFunction::asString() const {
   }
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    if (!isFixed(i)) {
-      ostr << ',' << parameterName(i) << '=' << getParameter(i);
-    }
+    ostr << ',' << parameterName(i) << '=' << getParameter(i);
   }
 
   // collect non-default constraints

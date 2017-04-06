@@ -127,8 +127,8 @@ def fitGaussian(fitPar, index, ws, outputWs):
 
     RIGHTLIMIT = len(all_values)
 
-    min_index = max(centre-margin,0)
-    max_index = min(centre+margin, RIGHTLIMIT)
+    min_index = max(centre-int(margin),0)
+    max_index = min(centre+int(margin), RIGHTLIMIT)
     values = all_values[min_index:max_index]
 
     # find the peak position

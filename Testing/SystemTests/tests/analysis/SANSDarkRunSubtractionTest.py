@@ -1,7 +1,8 @@
-﻿#pylint: disable=no-init
+#pylint: disable=no-init
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
@@ -328,7 +329,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert
@@ -350,7 +351,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
             self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should be set to 0
-        detector_indices = range(4,14)
+        detector_indices = list(range(4,14))
         for i in detector_indices:
             y = transmission_workspace.dataY(i)
             self.assertFalse(np.greater(y, 1e-14).any(), "All detectors entries should be 0")
@@ -370,7 +371,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert

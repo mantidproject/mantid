@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
@@ -22,7 +23,7 @@ class StateNormalizeToMonitorTest(unittest.TestCase):
                            "background_TOF_monitor_start": {"1": 123, "2": 123},
                            "background_TOF_monitor_stop": {"1": 234, "2": 2323}}
 
-        for key, value in default_entries.items():
+        for key, value in list(default_entries.items()):
             if key in kwargs:
                 value = kwargs[key]
             if value is not None:  # If the value is None, then don't set it

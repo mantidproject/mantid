@@ -1937,6 +1937,8 @@ class NormalizeToMonitor(ReductionStep):
         self.output_wksp = None
 
     def execute(self, reducer, workspace):
+        self.set_prompt_parameter_if_not_set(reducer)
+
         normalization_spectrum = self._normalization_spectrum
         if normalization_spectrum is None:
             # the -1 converts from spectrum number to spectrum index
@@ -1979,6 +1981,17 @@ class NormalizeToMonitor(ReductionStep):
         else:
             r_alg = 'Rebin'
         reducer.to_wavelen.execute(reducer, self.output_wksp, bin_alg=r_alg)
+
+    def set_prompt_parameter_if_not_set(self, reducer):
+        """
+        This method sets default prompt peak values in case the user has not provided some. Currently
+        we only use default values for LOQ.
+        """
+        if (reducer.transmission_calculator.removePromptPeakMin is None and
+           reducer.transmission_calculator.removePromptPeakMax is None):
+            if reducer.instrument.name() == "LOQ":
+                reducer.transmission_calculator.removePromptPeakMin = 19000.0  # Units of micro-seconds
+                reducer.transmission_calculator.removePromptPeakMax = 20500.0  # Units of micro-seconds
 
 
 class TransmissionCalc(ReductionStep):
@@ -2077,7 +2090,7 @@ class TransmissionCalc(ReductionStep):
             order_str = fit_method[10:]
             fit_method = 'POLYNOMIAL'
             self.fit_settings[select + ORDER] = int(order_str)
-        if fit_method not in self.TRANS_FIT_OPTIONS.keys():
+        if fit_method not in list(self.TRANS_FIT_OPTIONS.keys()):
             _issueWarning(
                 'ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
             fit_method = self.DEFAULT_FIT
@@ -2375,7 +2388,7 @@ class TransmissionCalc(ReductionStep):
         calc_trans_alg.setProperty("IncidentBeamMonitor", pre_sample)
         calc_trans_alg.setProperty("RebinParams", reducer.to_wavelen.get_rebin())
         calc_trans_alg.setProperty("OutputUnfittedData", True)
-        for name, value in options.items():
+        for name, value in list(options.items()):
             calc_trans_alg.setProperty(name, value)
 
         if self.trans_mon:
@@ -3307,7 +3320,7 @@ class UserFile(ReductionStep):
         upper_line = line.upper()
 
         # check for a recognised command
-        for keyword in self.key_functions.keys():
+        for keyword in list(self.key_functions.keys()):
             if upper_line.startswith(keyword):
                 # remove the keyword as it has already been parsed
                 params = line[len(keyword):]

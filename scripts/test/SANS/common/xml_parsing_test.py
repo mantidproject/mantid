@@ -1,8 +1,11 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 
+from mantid.kernel import DateAndTime
 from sans.common.file_information import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)
-from sans.common.xml_parsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file)
+from sans.common.xml_parsing import (get_named_elements_from_ipf_file, get_monitor_names_from_idf_file,
+                                     get_valid_to_time_from_idf_string)
 
 
 class XMLParsingTest(unittest.TestCase):
@@ -39,7 +42,7 @@ class XMLParsingTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(len(results) == 10)
-        for key, value in results.items():
+        for key, value in list(results.items()):
             self.assertTrue(value == ("monitor"+str(key)))
 
     def test_that_monitors_can_be_found_v2(self):
@@ -56,9 +59,29 @@ class XMLParsingTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(len(results) == 2)
-        for key, value in results.items():
+        for key, value in list(results.items()):
             self.assertTrue(value == ("monitor"+str(key)))
+
+    def test_that_get_valid_to_date_from_idf_string(self):
+        # Arrange
+        idf_string = '<?xml version="1.0" encoding="UTF-8" ?>' \
+                     '<!-- For help on the notation used to specify an Instrument Definition File ' \
+                     'see http://www.mantidproject.org/IDF -->' \
+                     '<instrument xmlns="http://www.mantidproject.org/IDF/1.0" ' \
+                     '            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' \
+                     '            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
+                     '            name="PEARL" valid-from   ="1900-01-31 23:59:59" ' \
+                     '            valid-to     ="2011-05-01 23:59:50" ' \
+                     '            last-modified="2008-09-17 05:00:00">' \
+                     '</instrument>'
+
+        # Act
+        extracted_time = get_valid_to_time_from_idf_string(idf_string)
+        # Assert
+        self.assertTrue(extracted_time == DateAndTime("2011-05-01 23:59:50"))
 
 
 if __name__ == '__main__':
     unittest.main()
+
+

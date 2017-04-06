@@ -1,10 +1,11 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
 take considerable time because it involves loading data. Besides, it uses data that is
 currently available inside the systemtests.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
@@ -131,7 +132,7 @@ class LoadSampleTest(unittest.TestCase):
         loadSample = steps.LoadSample('5512')
         loadSample.execute(ici.ReductionSingleton(), True)
         self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_1')
-        self.assertEqual(loadSample.entries, range(0,13))
+        self.assertEqual(loadSample.entries, list(range(0,13)))
         for index in [0,5,12]:
             loadSample.move2ws(index)
             self.assertEqual(loadSample.wksp_name, '5512_sans_nxs_'+str(index+1))
@@ -219,7 +220,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
 
                 if not self.validateWorkspaces(valPair,mismatchName):
                     validationResult[index/2] = False
-                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik])
+                    print('Workspace {0} not equal to its reference file'.format(valNames[ik]))
             #end check All results
 
         # Check if a comparison went wrong
