@@ -1314,22 +1314,22 @@ void InstrumentDefinitionParser::createRectangularDetector(
 
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
-    xpixels = std::stoi((pType->getAttribute("xpixels")).c_str());
+    xpixels = std::stoi((pType->getAttribute("xpixels")));
   if (pType->hasAttribute("xstart"))
-    xstart = atof((pType->getAttribute("xstart")).c_str());
+    xstart = std::stod((pType->getAttribute("xstart")));
   if (pType->hasAttribute("xstep"))
-    xstep = atof((pType->getAttribute("xstep")).c_str());
+    xstep = std::stod((pType->getAttribute("xstep")));
   if (pType->hasAttribute("ypixels"))
-    ypixels = std::stoi((pType->getAttribute("ypixels")).c_str());
+    ypixels = std::stoi((pType->getAttribute("ypixels")));
   if (pType->hasAttribute("ystart"))
-    ystart = atof((pType->getAttribute("ystart")).c_str());
+    ystart = std::stod((pType->getAttribute("ystart")));
   if (pType->hasAttribute("ystep"))
-    ystep = atof((pType->getAttribute("ystep")).c_str());
+    ystep = std::stod((pType->getAttribute("ystep")));
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
   if (pCompElem->hasAttribute("idstart"))
-    idstart = std::stoi((pCompElem->getAttribute("idstart")).c_str());
+    idstart = std::stoi((pCompElem->getAttribute("idstart")));
   if (pCompElem->hasAttribute("idfillbyfirst"))
     idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
   // Default ID row step size
@@ -1338,11 +1338,11 @@ void InstrumentDefinitionParser::createRectangularDetector(
   else
     idstepbyrow = xpixels;
   if (pCompElem->hasAttribute("idstepbyrow")) {
-    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")));
   }
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
-    idstep = std::stoi((pCompElem->getAttribute("idstep")).c_str());
+    idstep = std::stoi((pCompElem->getAttribute("idstep")));
 
   // Now, initialize all the pixels in the bank
   bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,
@@ -1418,14 +1418,14 @@ void InstrumentDefinitionParser::createStructuredDetector(
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
-    xpixels = std::stoi((pType->getAttribute("xpixels")).c_str());
+    xpixels = std::stoi((pType->getAttribute("xpixels")));
   if (pType->hasAttribute("ypixels"))
-    ypixels = std::stoi((pType->getAttribute("ypixels")).c_str());
+    ypixels = std::stoi((pType->getAttribute("ypixels")));
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
   if (pCompElem->hasAttribute("idstart"))
-    idstart = std::stoi((pCompElem->getAttribute("idstart")).c_str());
+    idstart = std::stoi((pCompElem->getAttribute("idstart")));
   if (pCompElem->hasAttribute("idfillbyfirst"))
     idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
   // Default ID row step size
@@ -1434,11 +1434,11 @@ void InstrumentDefinitionParser::createStructuredDetector(
   else
     idstepbyrow = xpixels;
   if (pCompElem->hasAttribute("idstepbyrow")) {
-    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")));
   }
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
-    idstep = std::stoi((pCompElem->getAttribute("idstep")).c_str());
+    idstep = std::stoi((pCompElem->getAttribute("idstep")));
 
   // Access type element which defines structured detecor vertices
   Element *pElem = nullptr;
@@ -1659,17 +1659,17 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
   // Otherwise id sub-elements
 
   if (pE->hasAttribute("start")) {
-    int startID = std::stoi((pE->getAttribute("start")).c_str());
+    int startID = std::stoi((pE->getAttribute("start")));
 
     int endID;
     if (pE->hasAttribute("end"))
-      endID = std::stoi((pE->getAttribute("end")).c_str());
+      endID = std::stoi((pE->getAttribute("end")));
     else
       endID = startID;
 
     int increment = 1;
     if (pE->hasAttribute("step"))
-      increment = std::stoi((pE->getAttribute("step")).c_str());
+      increment = std::stoi((pE->getAttribute("step")));
 
     if (0 == increment) {
       std::stringstream ss;
@@ -1716,20 +1716,20 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
         Element *pIDElem = static_cast<Element *>(pNode);
 
         if (pIDElem->hasAttribute("val")) {
-          int valID = std::stoi((pIDElem->getAttribute("val")).c_str());
+          int valID = std::stoi((pIDElem->getAttribute("val")));
           idList.vec.push_back(valID);
         } else if (pIDElem->hasAttribute("start")) {
-          int startID = std::stoi((pIDElem->getAttribute("start")).c_str());
+          int startID = std::stoi((pIDElem->getAttribute("start")));
 
           int endID;
           if (pIDElem->hasAttribute("end"))
-            endID = std::stoi((pIDElem->getAttribute("end")).c_str());
+            endID = std::stoi((pIDElem->getAttribute("end")));
           else
             endID = startID;
 
           int increment = 1;
           if (pIDElem->hasAttribute("step"))
-            increment = std::stoi((pIDElem->getAttribute("step")).c_str());
+            increment = std::stoi((pIDElem->getAttribute("step")));
 
           // check the start end and increment values are sensible
           if (0 == increment) {

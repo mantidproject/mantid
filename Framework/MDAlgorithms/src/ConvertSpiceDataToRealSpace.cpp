@@ -373,7 +373,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
       // anode
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));
-      size_t anodeid = static_cast<size_t>(std::stoi(terms.back().c_str()));
+      size_t anodeid = static_cast<size_t>(std::stoi(terms.back()));
       anodelist.emplace_back(anodeid, icol);
     } else {
       samplenameindexmap.emplace(colname, icol);
@@ -492,7 +492,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
       ExperimentInfo_sptr tmpei = mdws->getExperimentInfo(i);
       // check run number matches
       int runnumber =
-          std::stoi(tmpei->run().getProperty("run_number")->value().c_str());
+          std::stoi(tmpei->run().getProperty("run_number")->value());
       if (runnumber != static_cast<int>(vecrunno[i]))
         throw std::runtime_error("Run number does not match to Pt. value.");
       // add property
@@ -526,7 +526,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
     tmp_expinfo->setInstrument(tmp_inst);
 
     int runnumber =
-        std::stoi(ws2d->run().getProperty("run_number")->value().c_str());
+        std::stoi(ws2d->run().getProperty("run_number")->value());
     tmp_expinfo->mutableRun().addProperty(
         new PropertyWithValue<int>("run_number", runnumber));
 
@@ -594,7 +594,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
 
   for (const auto &thisWorkspace : vec_ws2d) {
     short unsigned int runnumber = static_cast<short unsigned int>(std::stoi(
-        thisWorkspace->run().getProperty("run_number")->value().c_str()));
+        thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
 
@@ -670,7 +670,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
     short unsigned int runnumber = static_cast<short unsigned int>(std::stoi(
-        thisWorkspace->run().getProperty("run_number")->value().c_str()));
+        thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;
     float signal = static_cast<float>(vecmonitor[iws]);

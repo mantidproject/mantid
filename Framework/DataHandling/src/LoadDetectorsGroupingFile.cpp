@@ -471,7 +471,7 @@ void LoadGroupXMLFile::parseXML() {
       if (autogroupid) {
         curgroupid++;
       } else {
-        curgroupid = std::stoi(idstr.c_str());
+        curgroupid = std::stoi(idstr);
       }
 
       // b) Set in map

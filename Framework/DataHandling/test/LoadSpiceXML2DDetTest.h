@@ -96,26 +96,26 @@ public:
     // monitor counts
     TS_ASSERT(outws->run().hasProperty("_monitor"));
     int monitorcount =
-        std::stoi(outws->run().getProperty("_monitor")->value().c_str());
+        std::stoi(outws->run().getProperty("_monitor")->value());
     TS_ASSERT_EQUALS(monitorcount, 29);
 
     // Check motor angles
     TS_ASSERT(outws->run().hasProperty("_2theta"));
     double _2theta =
-        std::stod(outws->run().getProperty("_2theta")->value().c_str());
+        std::stod(outws->run().getProperty("_2theta")->value());
     TS_ASSERT_DELTA(_2theta, 42.709750, 0.0000001);
 
     TS_ASSERT(outws->run().hasProperty("_omega"));
     double _omega =
-        std::stod(outws->run().getProperty("_omega")->value().c_str());
+        std::stod(outws->run().getProperty("_omega")->value());
     TS_ASSERT_DELTA(_omega, 21.354500, 0.0000001);
 
     TS_ASSERT(outws->run().hasProperty("_chi"));
-    double _chi = std::stod(outws->run().getProperty("_chi")->value().c_str());
+    double _chi = std::stod(outws->run().getProperty("_chi")->value());
     TS_ASSERT_DELTA(_chi, 1.215250, 0.0000001);
 
     TS_ASSERT(outws->run().hasProperty("_phi"));
-    double _phi = std::stod(outws->run().getProperty("_phi")->value().c_str());
+    double _phi = std::stod(outws->run().getProperty("_phi")->value());
     TS_ASSERT_DELTA(_phi, 144.714218, 0.0000001);
 
     // check start_time and end_time
