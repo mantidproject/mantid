@@ -170,4 +170,32 @@ public:
   }
 };
 
+class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
+private:
+  const int m_nPixels = 1000;
+  boost::shared_ptr<Mantid::Geometry::Instrument> m_instrument;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InfoComponentVisitorTestPerformance *createSuite() {
+    return new InfoComponentVisitorTestPerformance();
+  }
+  static void destroySuite(InfoComponentVisitorTestPerformance *suite) {
+    delete suite;
+  }
+
+  InfoComponentVisitorTestPerformance() {
+    m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/);
+  }
+
+  void test_process_rectangular_instrument() {
+    InfoComponentVisitor visitor(
+        m_nPixels * m_nPixels,
+        [](const Mantid::detid_t id) { return static_cast<size_t>(id); });
+    m_instrument->registerContents(visitor);
+    TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
+  }
+};
 #endif /* MANTID_API_INFOCOMPONENTVISITORTEST_H_ */

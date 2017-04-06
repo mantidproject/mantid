@@ -13,7 +13,8 @@ namespace API {
 /**
  * Constructor
  * @param componentInfo : Beamline wrapped ComponentInfo
- * @param componentIds : Component Ids ordered by component index
+ * @param componentIds : l-value reference to ComponentIDs ordered by component
+ * index
  */
 ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
                              std::vector<Geometry::ComponentID> &componentIds)
@@ -25,6 +26,13 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
   init();
 }
 
+/**
+ * Constructor
+ * @brief ComponentInfo::ComponentInfo
+ * @param componentInfo
+ * @param componentIds : r-value reference to ComponentIDs ordered by component
+ * index
+ */
 ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
                              std::vector<Geometry::IComponent *> &&componentIds)
     : m_componentInfo(componentInfo),
