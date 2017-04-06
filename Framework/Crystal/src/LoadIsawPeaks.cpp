@@ -248,13 +248,13 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   col = std::stod(getWord(in, false), nullptr);
   row = std::stod(getWord(in, false), nullptr);
-  std::stod(getWord(in, false), nullptr); // chan
-  std::stod(getWord(in, false), nullptr); // L2
-  std::stod(getWord(in, false), nullptr); // ScatAng
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
 
-  std::stod(getWord(in, false), nullptr); // Az
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
   wl = std::stod(getWord(in, false), nullptr);
-  std::stod(getWord(in, false), nullptr); // D
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
   IPK = std::stod(getWord(in, false), nullptr);
 
   Inti = std::stod(getWord(in, false), nullptr);
