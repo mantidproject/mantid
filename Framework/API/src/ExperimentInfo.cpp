@@ -190,21 +190,26 @@ void checkDetectorInfoSize(const Instrument &instr,
 }
 
 boost::shared_ptr<Beamline::ComponentInfo>
-makeComponentInfo(const Instrument &newInstr, const Instrument &oldInstr,
+makeComponentInfo(const Instrument &instrument,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  if (newInstr.hasComponentInfo()) {
-    const auto &componentInfo = newInstr.componentInfo();
-    componentIds = newInstr.componentIds();
+  if (instrument.hasComponentInfo()) {
+    const auto &componentInfo = instrument.componentInfo();
+    componentIds = instrument.componentIds();
     return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
   } else {
   InfoComponentVisitor visitor(
       detectorInfo.size(),
       std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
 
-  // Register everything via visitor
-  oldInstr.registerContents(visitor);
+  if (instrument.isParametrized()) {
+    // Register everything via visitor
+    instrument.baseInstrument()->registerContents(visitor);
+  } else {
+    instrument.registerContents(visitor);
+  }
+
   // Extract component ids. We need this for the ComponentInfo wrapper.
   componentIds = visitor.componentIds();
 
@@ -293,8 +298,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
-  m_componentInfo =
-      makeComponentInfo(*parInstrument, *instr, detectorInfo(), m_componentIds);
+  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), m_componentIds);
   m_parmap->setComponentInfo(m_componentInfo, m_componentIds);
   m_componentInfoWrapper =
       Kernel::make_unique<ComponentInfo>(*m_componentInfo, m_componentIds);
