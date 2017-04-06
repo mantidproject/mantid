@@ -106,8 +106,8 @@ MuonGroupAsymmetryCalculator::removeExpDecay(const Workspace_sptr &inputWS,
   return outWS;
 }
 /**
-* Removes exponential decay from the given workspace.
-* @param inputWS :: [input] Workspace to remove decay from
+* Estimate the asymmetrey for the given workspace (TF data).
+* @param inputWS :: [input] Workspace to calculate asymmetry for
 * @param index :: [input] GroupIndex (fit only the requested spectrum): use -1
 * for "unset"
 * @returns Result of the removal
@@ -117,16 +117,13 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 	const int index) const {
 	std::vector<double> normEst;
 	MatrixWorkspace_sptr outWS;
-	// Remove decay
+	// calculate asymmetry
 	if (inputWS) {
 		IAlgorithm_sptr asym =
 			AlgorithmManager::Instance().create("EstimateMuonAsymmetryFromCounts");
 		asym->setChild(true);
 		asym->setProperty("InputWorkspace", inputWS);
 		if (index > -1) {
-			// GroupIndex as vector
-			// Necessary if we want RemoveExpDecay to fit only the requested
-			// spectrum
 			std::vector<int> spec(1, index);
 			asym->setProperty("Spectra", spec);
 		}

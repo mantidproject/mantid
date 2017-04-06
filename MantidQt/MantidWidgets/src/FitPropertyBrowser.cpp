@@ -278,13 +278,12 @@ void FitPropertyBrowser::initLayout(QWidget *w) {
 }
 
 /**
-* @brief Initialise the layout.
+* @brief Initialise the layout for the fit button.
 * This initialization includes:
 *   1. SIGNALs/SLOTs when properties change.
-*   2. Action menus and associated SIGNALs/SLOTs.
-*   3. Initialize the CompositeFunction, the root from which to build the Model.
-*   4. Update the list of available functions
+*   2. Actions and associated SIGNALs/SLOTs.
 * @param w widget parenting the action menus and the property tree browser
+* @return push botton for the fit menu
 */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 	QPushButton *btnFit = new QPushButton("Fit");
@@ -326,6 +325,7 @@ QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
 *   3. Initialize the CompositeFunction, the root from which to build the Model.
 *   4. Update the list of available functions
 * @param w widget parenting the action menus and the property tree browser
+* @param btnFit the fit push button
 */
 void FitPropertyBrowser::initBasicLayout(QWidget *w, QPushButton *btnFit) {
   // to be able to change windows title from tread

@@ -412,7 +412,7 @@ namespace MantidQt {
 				}
 			}
 			/**
-			* Returns whether or not "enable multiple fitting" is set.
+			* Returns whether or not "enable TFAsymmetry" is set.
 			* @returns whether the checkbox is ticked
 			*/
 			Muon::TFAsymmState MuonAnalysisOptionTab::getTFAsymmState() const {

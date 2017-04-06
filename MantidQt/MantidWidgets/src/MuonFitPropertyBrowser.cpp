@@ -127,7 +127,7 @@ void MuonFitPropertyBrowser::init() {
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
-  settingsGroup->addSubProperty(m_endX); // add to settings group here.....
+  settingsGroup->addSubProperty(m_endX); 
   settingsGroup->addSubProperty(m_normalization);
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem *)), this,
 	  SLOT(currentItemChanged(QtBrowserItem *)));
@@ -205,13 +205,12 @@ void MuonFitPropertyBrowser::executeMuonFitMenu(const QString &item) {
  }
 }
 /**
-* @brief Initialise the layout.
+* @brief Initialise the layout of the fit menu button.
 * This initialization includes:
 *   1. SIGNALs/SLOTs when properties change.
 *   2. Action menus and associated SIGNALs/SLOTs.
-*   3. Initialize the CompositeFunction, the root from which to build the Model.
-*   4. Update the list of available functions
 * @param w widget parenting the action menus and the property tree browser
+* @return QPushButton for the fit menu
 */
 QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w) {
 	QPushButton *btnFit = new QPushButton("Fit");
@@ -250,7 +249,7 @@ QPushButton *MuonFitPropertyBrowser::createMuonFitMenuButton(QWidget *w) {
 	return btnFit;
 }
 
-
+/// Enable/disable the Fit button;
 void MuonFitPropertyBrowser::setFitEnabled(bool yes) {
 	m_fitActionFit->setEnabled(yes);
 	m_fitActionSeqFit->setEnabled(yes);
@@ -316,7 +315,8 @@ void MuonFitPropertyBrowser::doubleChanged(QtProperty *prop) {
     }
   }
 }
-/// Get the normalization
+/** @returns the normalization
+*/
 double MuonFitPropertyBrowser::Normalization() const {
 	return readNormalization()[0];
 }
@@ -385,9 +385,9 @@ std::vector<double> convertToVec(std::string const &list) {
 		[](std::string const &element) { return std::stod(element); });
 	return vec;
 }
-//#include "../FitDialog.h"
 /**
 * Creates an instance of Fit algorithm, sets its properties and launches it.
+* @params maxIterations is the maximum number of iterations for the fit
 */
 void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 	const std::string wsName = workspaceName();
@@ -797,12 +797,10 @@ void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   }
 }
 /**
-* Set multiple fitting mode on or off.
-* If turned off, all parts of the fit property browser are shown and all extra
-* widgets (like the function browser or data selector) are hidden, so it looks
-* just like it used to before the changes in Mantid 3.8.
-* If turned on, the "Function" and "Data" sections of the fit property browser
-* are hidden and the extra widgets are shown.
+* Set TF asymmetry mode on or off.
+* If turned off, the fit property browser looks like Mantid 3.8.
+* If turned on, the fit menu has an extra button and
+* normalization is shown in the data table
 * @param enabled :: [input] Whether to turn this mode on or off
 */
 void MuonFitPropertyBrowser::setTFAsymmMode(bool enabled) {

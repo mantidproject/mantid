@@ -2089,7 +2089,7 @@ void MuonAnalysis::loadFittings() {
   // Add Data Selector widget to the fit tab
   m_dataSelector = new MuonFitDataSelector(m_uiForm.fitBrowser);
   m_dataSelector->sizePolicy().setVerticalStretch(0);
-  m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);// need to add my widget (maybe to a new list?)
+  m_uiForm.fitBrowser->addExtraWidget(m_dataSelector);
   // Set up fit data and function presenters
   m_fitDataPresenter =
       Mantid::Kernel::make_unique<MuonAnalysisFitDataPresenter>(
@@ -3039,7 +3039,7 @@ void MuonAnalysis::multiFitCheckboxChanged(int state) {
                                                 : Muon::MultiFitState::Disabled;
   // If both multiFit and TFAsymm are checked
   // uncheck the TFAsymm
-  if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)//m_uiForm.chkTFAsymm->isChecked())
+  if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)
   {
 	  //uncheck the box
 	  m_uiForm.chkTFAsymm->setChecked(false);
@@ -3063,7 +3063,7 @@ void MuonAnalysis::TFAsymmCheckboxChanged(int state) {
 		: Muon::TFAsymmState::Disabled;
 	// If both multiFit and TFAsymm are checked
 	// uncheck the multiFit
-	if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)//m_uiForm.chkTFAsymm->isChecked())
+	if (m_uiForm.chkEnableMultiFit->isChecked() && state!=0)
 	{
 		//uncheck the box
 		m_uiForm.chkEnableMultiFit->setChecked(false);
