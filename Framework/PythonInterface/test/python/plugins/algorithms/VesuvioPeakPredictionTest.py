@@ -8,23 +8,23 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
         """
         Test of debye model with multiple temperatures
         """
-        VesuvioPeakPrediction(Model='Debye', Temperature=[100, 120, 240, 300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+        vesuvio_debye_params = VesuvioPeakPrediction(Model='Debye', Temperature=[100, 120, 240, 300],
+                                                     AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
 
-        vesuvio_params = mtd['vesuvio_debye_params']
-        self.assertTrue(isinstance(vesuvio_params, ITableWorkspace))
-        self.assertEqual(vesuvio_params.cell(1, 1), 63.5)
-        self.assertEqual(round(vesuvio_params.cell(2, 5), 7), 0.0694442)
+        self.assertTrue(isinstance(vesuvio_debye_params, ITableWorkspace))
+        self.assertEqual(vesuvio_debye_params.cell(1, 1), 63.5)
+        self.assertEqual(round(vesuvio_debye_params.cell(2, 5), 7), 0.0694458)
 
     def test_einstein(self):
         """
         Test of einstein model with multiple temperatures
         """
-        VesuvioPeakPrediction(Model='Einstein', Temperature=[100, 120, 240, 300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+        vesuvio_einstein_params = VesuvioPeakPrediction(Model='Einstein', Temperature=[100, 120, 240, 300],
+                                                        AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
 
-        vesuvio_params = mtd['vesuvio_einstein_params']
-        self.assertTrue(isinstance(vesuvio_params, ITableWorkspace))
-        self.assertEqual(vesuvio_params.cell(1, 1), 63.5)
-        self.assertEqual(round(vesuvio_params.cell(2, 5), 7), 18.474165)
+        self.assertTrue(isinstance(vesuvio_einstein_params, ITableWorkspace))
+        self.assertEqual(vesuvio_einstein_params.cell(1, 1), 63.5)
+        self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 7), 18.4738102)
 
     # -------------------------Failure Cases-------------------------
 

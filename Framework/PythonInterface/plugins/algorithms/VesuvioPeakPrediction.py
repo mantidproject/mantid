@@ -2,9 +2,13 @@ from mantid.api import *
 from mantid.kernel import *
 from vesuvio.base import VesuvioBase
 from mantid.simpleapi import *
+import scipy.constants
 
 import math
 import numpy as np
+
+MIN_TEMPERATURE = 1e-6
+K_IN_MEV = scipy.constants.value('electron volt-kelvin relationship') / 1e3
 
 
 class VesuvioPeakPrediction(VesuvioBase):
@@ -47,6 +51,10 @@ class VesuvioPeakPrediction(VesuvioBase):
                              validator=floatvalid,
                              doc='Debye Temperature (K)')
 
+        self.declareProperty(ITableWorkspaceProperty("OutputTable", "vesuvio_params",
+                                                     direction=Direction.Output),
+                             doc="The name of the output table")
+
     def setup(self):
 
         self._model = self.getPropertyValue('Model')
@@ -59,7 +67,9 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         self.setup()
 
-        vesuvio_params = CreateEmptyTableWorkspace(OutputWorkspace='vesuvio_' + self._model.lower() + '_params')
+        print(K_IN_MEV)
+
+        vesuvio_params = WorkspaceFactory.Instance().createTable()
         vesuvio_params.setTitle('Vesuvio Peak Parameters')
         vesuvio_params.addColumn('float', 'Temperature(K)')
         vesuvio_params.addColumn('float', 'Atomic Mass(AMU)')
@@ -71,16 +81,15 @@ class VesuvioPeakPrediction(VesuvioBase):
             vesuvio_params.addColumn('float', 'RMS Momentum(A)')
 
             for temp in self._temperature:
-
                 if temp == 0:
-                    temp = 1e-6
+                    temp = MIN_TEMPERATURE
 
                 # Convert to mEV
-                temp_mev = temp / 11.604
+                temp_mev = temp / K_IN_MEV
                 # Kinetic Energy
                 kinetic_energy = 0.25 * self._frequency / math.tanh(self._frequency / (2 * temp_mev))
                 # Effective temperature in K
-                t_star = 2 * kinetic_energy * 11.604
+                t_star = 2 * kinetic_energy * K_IN_MEV
                 # RMS moment
                 sig = math.sqrt(self._atomic_mass * kinetic_energy / 2.0717)
 
@@ -102,6 +111,8 @@ class VesuvioPeakPrediction(VesuvioBase):
 
                 vesuvio_params.addRow([temp, self._atomic_mass, self._debye_temp, kinetic, rms_momentum, rms_disp])
 
+        self.setProperty("OutputTable", vesuvio_params)
+
     def mean_energy(self, temp, debye_temp, atomic_mass):
         """
         temp: temperature in K
@@ -111,8 +122,8 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         n = 1000
         y = np.empty(n + 1, float)
-        debye_energy = debye_temp / 11.604
-        temp /= 11.604
+        debye_energy = debye_temp / K_IN_MEV
+        temp /= K_IN_MEV
 
         # calculate mean energy
         dx = debye_energy / (n - 1)
@@ -136,8 +147,8 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         n = 1000
         y = np.empty(n + 1, float)
-        debye_energy = debye_temp / 11.604
-        temp /= 11.604
+        debye_energy = debye_temp / K_IN_MEV
+        temp /= K_IN_MEV
 
         # calculate mean energy
         dx = debye_energy / (n - 1)
