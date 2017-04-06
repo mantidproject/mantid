@@ -261,13 +261,13 @@ void GSLMatrix::solve(const GSLVector &rhs, GSLVector &x) {
   gsl_permutation *p = gsl_permutation_alloc(n);
   gsl_linalg_LU_decomp(gsl(), p, &s); // matrix is modified at this moment
   int res = gsl_linalg_LU_solve(gsl(), p, rhs.gsl(), x.gsl());
+  gsl_permutation_free(p);
   if (res != GSL_SUCCESS) {
     std::string message = "Failed to solve system of linear equations.\n"
                           "Error message returned by the GSL:\n" +
                           std::string(gsl_strerror(res));
     throw std::runtime_error(message);
   }
-  gsl_permutation_free(p);
 }
 
 /// Invert this matrix
