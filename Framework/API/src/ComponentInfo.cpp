@@ -16,8 +16,9 @@ namespace API {
  * @param componentIds : l-value reference to ComponentIDs ordered by component
  * index
  */
-ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
-                             std::vector<Geometry::IComponent *> &componentIds)
+ComponentInfo::ComponentInfo(
+    const Mantid::Beamline::ComponentInfo &componentInfo,
+    std::vector<Mantid::Geometry::IComponent *> &componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(
           boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
@@ -33,8 +34,9 @@ ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
  * @param componentIds : r-value reference to ComponentIDs ordered by component
  * index
  */
-ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
-                             std::vector<Geometry::IComponent *> &&componentIds)
+ComponentInfo::ComponentInfo(
+    const Mantid::Beamline::ComponentInfo &componentInfo,
+    std::vector<Mantid::Geometry::IComponent *> &&componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(
           boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
