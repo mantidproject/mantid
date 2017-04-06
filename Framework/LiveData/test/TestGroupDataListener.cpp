@@ -1,10 +1,10 @@
 #include "TestGroupDataListener.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -18,8 +18,6 @@ DECLARE_LISTENER(TestGroupDataListener)
 TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   // Set up the first workspace buffer
   this->createWorkspace();
-
-  m_dataReset = false;
 }
 
 bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
@@ -29,9 +27,16 @@ bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
 
 bool TestGroupDataListener::isConnected() { return true; }
 
+bool TestGroupDataListener::dataReset() {
+  // No support for reset signal
+  return false;
+}
+
 ILiveListener::RunStatus TestGroupDataListener::runStatus() { return Running; }
 
 int TestGroupDataListener::runNumber() const { return 0; }
+
+void TestGroupDataListener::setSpectra(const std::vector<specnum_t> &) {}
 
 void TestGroupDataListener::start(
     Kernel::DateAndTime /*startTime*/) // Ignore the start time
@@ -46,8 +51,6 @@ void TestGroupDataListener::createWorkspace() {
 }
 
 boost::shared_ptr<Workspace> TestGroupDataListener::extractData() {
-  m_dataReset = false;
-
   // Copy the workspace pointer to a temporary variable
   API::WorkspaceGroup_sptr extracted = m_buffer;
   this->createWorkspace();
