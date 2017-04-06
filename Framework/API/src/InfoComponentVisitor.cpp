@@ -68,8 +68,8 @@ void InfoComponentVisitor::registerDetector(const IDetector &detector) {
     detectorIndex = m_detectorIdToIndexMapperFunction(detector.getID());
   } catch (std::out_of_range &) {
     /*
-     Do not register a detector with an invalid id.
-     Some IDFs contain duff detectors.
+     Do not register a detector with an invalid id. if we can't determine
+     the index, we cannot register it in the right place!
     */
     ++m_droppedDetectors;
     return;

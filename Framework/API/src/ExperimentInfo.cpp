@@ -199,23 +199,23 @@ makeComponentInfo(const Instrument &instrument,
     componentIds = instrument.componentIds();
     return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
   } else {
-  InfoComponentVisitor visitor(
-      detectorInfo.size(),
-      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
+    InfoComponentVisitor visitor(
+        detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
+                                       std::placeholders::_1));
 
-  if (instrument.isParametrized()) {
-    // Register everything via visitor
-    instrument.baseInstrument()->registerContents(visitor);
-  } else {
-    instrument.registerContents(visitor);
-  }
+    if (instrument.isParametrized()) {
+      // Register everything via visitor
+      instrument.baseInstrument()->registerContents(visitor);
+    } else {
+      instrument.registerContents(visitor);
+    }
 
-  // Extract component ids. We need this for the ComponentInfo wrapper.
-  componentIds = visitor.componentIds();
+    // Extract component ids. We need this for the ComponentInfo wrapper.
+    componentIds = visitor.componentIds();
 
-  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.assemblySortedDetectorIndices(),
-      visitor.componentDetectorRanges());
+    return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+        visitor.assemblySortedDetectorIndices(),
+        visitor.componentDetectorRanges());
   }
 }
 
