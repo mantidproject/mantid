@@ -117,13 +117,15 @@ void GenerateEventsFilter::init() {
       "LogValueInterval",
       Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
+  std::vector<std::string> filteroptions{"Both", "Separate", "Increase",
+                                         "Decrease"};
   declareProperty(
       "FilterLogValueByChangingDirection", "Both",
       boost::make_shared<Kernel::StringListValidator>(filteroptions),
       "d(log value)/dt can be positive and negative.  They can be put to "
       "different splitters."
-      "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
+      "There are 4 options, 'Both', 'Separate', 'Increase' and 'Decrease' "
+      "corresponding to "
       "d(log value)/dt can be any value, positive only and negative only "
       "respectively.");
   setPropertySettings(
@@ -519,9 +521,15 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       getProperty("FilterLogValueByChangingDirection");
   bool filterIncrease;
   bool filterDecrease;
+  bool separateUpDown = true;
   if (filterdirection.compare("Both") == 0) {
     filterIncrease = true;
     filterDecrease = true;
+    separateUpDown = false;
+  } else if (filterdirection.compare("Separate") == 0) {
+    filterIncrease = true;
+    filterDecrease = true;
+    separateUpDown = true;
   } else if (filterdirection.compare("Increase") == 0) {
     filterIncrease = true;
     filterDecrease = false;
@@ -573,11 +581,12 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
     if (toProcessSingleValueFilter) {
       // Generate a filter for a single log value
       processSingleValueFilter(minvalue, maxvalue, filterIncrease,
-                               filterDecrease);
+                               filterDecrease, separateUpDown);
     } else {
       // Generate filters for a series of log value
       processMultipleValueFilters(minvalue, deltaValue, maxvalue,
-                                  filterIncrease, filterDecrease);
+                                  filterIncrease, filterDecrease,
+                                  separateUpDown);
     }
   } else {
     // Integer TimeSeriesProperty log
@@ -624,12 +633,14 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
   * @param filterincrease :: if true, log value in the increasing curve should
  * be included;
   * @param filterdecrease :: if true, log value in the decreasing curve should
+  * @param separateupdown ::
  * be included;
   */
 void GenerateEventsFilter::processSingleValueFilter(double minvalue,
                                                     double maxvalue,
                                                     bool filterincrease,
-                                                    bool filterdecrease) {
+                                                    bool filterdecrease,
+                                                    bool separateupdown) {
   // Get parameters time-tolerance and log-boundary
   double timetolerance = this->getProperty("TimeTolerance");
   int64_t timetolerance_ns =
@@ -645,24 +656,36 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   makeFilterBySingleValue(minvalue, maxvalue,
                           static_cast<double>(timetolerance_ns) * 1.0E-9,
                           logboundary.compare("centre") == 0, filterincrease,
-                          filterdecrease, m_startTime, m_stopTime, wsindex);
+                          filterdecrease, separateupdown, m_startTime, m_stopTime);
 
   // Create information table workspace
   if (!m_filterInfoWS)
     throw runtime_error("m_filterInfoWS has not been initialized.");
 
   API::TableRow row = m_filterInfoWS->appendRow();
-  std::stringstream ss;
-  ss << "Log " << m_dblLog->name() << " From " << minvalue << " To " << maxvalue
-     << "  Value-change-direction ";
-  if (filterincrease && filterdecrease) {
-    ss << " both ";
-  } else if (filterincrease) {
-    ss << " increase";
+  if (filterincrease && filterdecrease && separateupdown) {
+      std::stringstream ss;
+      ss << "Log " << m_dblLog->name() << " From " << minvalue << " To "
+         << maxvalue << "  Value-change-direction: increase ";
+      row << 0 << ss.str();
+      std::stringstream ss2;
+      ss2 << "Log " << m_dblLog->name() << " From " << maxvalue << " To "
+         << minvalue << "  Value-change-direction: decrease ";
+      row << 1 << ss2.str();
+
   } else {
-    ss << " decrease";
+      std::stringstream ss;
+    ss << "Log " << m_dblLog->name() << " From " << minvalue << " To "
+       << maxvalue << "  Value-change-direction ";
+    if (filterincrease && filterdecrease) {
+      ss << " both ";
+    } else if (filterincrease) {
+      ss << " increase";
+    } else {
+      ss << " decrease";
+    }
+    row << 0 << ss.str();
   }
-  row << 0 << ss.str();
 }
 
 //----------------------------------------------------------------------------------------------
@@ -675,11 +698,9 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   * @param filterdecrease :: if true, log value in the decreasing curve should
  * be included;
  */
-void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
-                                                       double valueinterval,
-                                                       double maxvalue,
-                                                       bool filterincrease,
-                                                       bool filterdecrease) {
+void GenerateEventsFilter::processMultipleValueFilters(
+    double minvalue, double valueinterval, double maxvalue, bool filterincrease,
+    bool filterdecrease, bool separateupdown) {
   // Read more input
   if (valueinterval <= 0)
     throw std::invalid_argument(
@@ -795,14 +816,15 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
  *include this range in the filter.
  * @param filterDecrease :: As log value increase, and within (min, max),
  *include this range in the filter.
+ * @param separateUpDown ::
  * @param startTime :: Start time.
  * @param stopTime :: Stop time.
- * @param wsindex :: Workspace index.
  */
-void GenerateEventsFilter::makeFilterBySingleValue(
-    double min, double max, double TimeTolerance, bool centre,
-    bool filterIncrease, bool filterDecrease, DateAndTime startTime,
-    Kernel::DateAndTime stopTime, int wsindex) {
+void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, double TimeTolerance, bool centre,
+    bool filterIncrease, bool filterDecrease, bool separateUpDown, DateAndTime startTime,
+    Kernel::DateAndTime stopTime) {
+
+    raise RuntimeError('From here!')
   // Do nothing if the log is empty.
   if (m_dblLog->size() == 0) {
     g_log.warning() << "There is no entry in this property " << this->name()

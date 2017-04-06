@@ -92,17 +92,19 @@ private:
   void setFilterByLogValue(std::string logname);
 
   void processSingleValueFilter(double minvalue, double maxvalue,
-                                bool filterincrease, bool filterdecrease);
+                                bool filterincrease, bool filterdecrease,
+                                bool separateupdown);
 
   void processMultipleValueFilters(double minvalue, double valueinterval,
                                    double maxvalue, bool filterincrease,
-                                   bool filterdecrease);
+                                   bool filterdecrease, bool separateupdown);
 
   void makeFilterBySingleValue(double min, double max, double TimeTolerance,
                                bool centre, bool filterIncrease,
                                bool filterDecrease,
+                               bool separateUpDown,
                                Kernel::DateAndTime startTime,
-                               Kernel::DateAndTime stopTime, int wsindex);
+                               Kernel::DateAndTime stopTime);
 
   /// Make multiple-log-value filters in serial
   void makeMultipleFiltersByValues(std::map<size_t, int> indexwsindexmap,
