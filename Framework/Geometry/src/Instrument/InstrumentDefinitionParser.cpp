@@ -679,17 +679,17 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     if (pElem->hasAttribute("r"))
       R = std::stod((pElem->getAttribute("r")).c_str());
     if (pElem->hasAttribute("t")) {
-      theta = angleConvertConst * atof((pElem->getAttribute("t")).c_str());
+      theta = angleConvertConst * std::stod(pElem->getAttribute("t"));
     }
     if (pElem->hasAttribute("p"))
-      phi = angleConvertConst * std::stod((pElem->getAttribute("p")).c_str());
+      phi = angleConvertConst * std::stod(pElem->getAttribute("p"));
 
     if (pElem->hasAttribute("R"))
       R = std::stod((pElem->getAttribute("R")).c_str());
     if (pElem->hasAttribute("theta"))
-      theta = angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+      theta = angleConvertConst * std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
-      phi = angleConvertConst * std::stod((pElem->getAttribute("phi")).c_str());
+      phi = angleConvertConst * std::stod(pElem->getAttribute("phi"));
 
     if (deltaOffsets) {
       // In this case, locations given are radial offsets to the (radial)
@@ -742,11 +742,11 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod(pElem->getAttribute("x"));
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod(pElem->getAttribute("y"));
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod(pElem->getAttribute("z"));
 
     retVal(x, y, z);
   }
@@ -1478,9 +1478,9 @@ void InstrumentDefinitionParser::createStructuredDetector(
       Element *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
-        xValues.push_back(atof(pVertElem->getAttribute("x").c_str()));
+        xValues.push_back(std::stod(pVertElem->getAttribute("x")));
       if (pVertElem->hasAttribute("y"))
-        yValues.push_back(atof(pVertElem->getAttribute("y").c_str()));
+        yValues.push_back(std::stod(pVertElem->getAttribute("y")));
     }
 
     pNode = it.nextNode();
@@ -1870,30 +1870,30 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
+      R = std::stod(pElem->getAttribute("r"));
     if (pElem->hasAttribute("t"))
-      theta = m_angleConvertConst * atof((pElem->getAttribute("t")).c_str());
+      theta = m_angleConvertConst * std::stod(pElem->getAttribute("t"));
     if (pElem->hasAttribute("p"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("p")).c_str());
+      phi = m_angleConvertConst * std::stod(pElem->getAttribute("p"));
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = std::stod((pElem->getAttribute("R")));
     if (pElem->hasAttribute("theta"))
       theta =
-          m_angleConvertConst * atof((pElem->getAttribute("theta")).c_str());
+          m_angleConvertConst * std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
-      phi = m_angleConvertConst * atof((pElem->getAttribute("phi")).c_str());
+      phi = m_angleConvertConst * std::stod(pElem->getAttribute("phi"));
 
     retV3D.spherical(R, theta, phi);
   } else {
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod(pElem->getAttribute("x"));
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod(pElem->getAttribute("y"));
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod(pElem->getAttribute("z"));
 
     retV3D(x, y, z);
   }
@@ -1933,8 +1933,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
     if (facingElem->hasAttribute("rot")) {
       double rotAngle =
-          m_angleConvertConst * atof((facingElem->getAttribute("rot"))
-                                         .c_str()); // assumed to be in degrees
+          m_angleConvertConst * std::stod(facingElem->getAttribute("rot")); // assumed to be in degrees
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0, 0, 1)));
     }
 
@@ -2205,8 +2204,8 @@ void InstrumentDefinitionParser::setLogfile(
 
       for (unsigned long i = 0; i < numberPoint; i++) {
         Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
-        double x = atof(pPoint->getAttribute("x").c_str());
-        double y = atof(pPoint->getAttribute("y").c_str());
+        double x = std::stod(pPoint->getAttribute("x"));
+        double y = std::stod(pPoint->getAttribute("y"));
         interpolation->addPoint(x, y);
       }
     }
@@ -2929,11 +2928,11 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("R"))
-      R = atof((pElem->getAttribute("R")).c_str());
+      R = std::stod(pElem->getAttribute("R"));
     if (pElem->hasAttribute("theta"))
-      theta = atof((pElem->getAttribute("theta")).c_str());
+      theta = std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
-      phi = atof((pElem->getAttribute("phi")).c_str());
+      phi = std::stod(pElem->getAttribute("phi"));
 
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
@@ -2945,22 +2944,22 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = atof((pElem->getAttribute("r")).c_str());
+      R = std::stod(pElem->getAttribute("r"));
     if (pElem->hasAttribute("t"))
-      theta = atof((pElem->getAttribute("t")).c_str());
+      theta = std::stod(pElem->getAttribute("t"));
     if (pElem->hasAttribute("p"))
-      phi = atof((pElem->getAttribute("p")).c_str());
+      phi = std::stod(pElem->getAttribute("p"));
 
     retVal.spherical(R, theta, phi);
   } else {
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = atof((pElem->getAttribute("x")).c_str());
+      x = std::stod(pElem->getAttribute("x"));
     if (pElem->hasAttribute("y"))
-      y = atof((pElem->getAttribute("y")).c_str());
+      y = std::stod(pElem->getAttribute("y"));
     if (pElem->hasAttribute("z"))
-      z = atof((pElem->getAttribute("z")).c_str());
+      z = std::stod(pElem->getAttribute("z"));
 
     retVal(x, y, z);
   }

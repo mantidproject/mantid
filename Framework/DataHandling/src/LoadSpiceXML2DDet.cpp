@@ -649,7 +649,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
       const std::string nodename = xmlnode.getName();
       const std::string nodevalue = xmlnode.getValue();
       if (xmlnode.isDouble()) {
-        double dvalue = atof(nodevalue.c_str());
+        double dvalue = std::stod(nodevalue);
         dbl_log_map.emplace(nodename, dvalue);
       } else if (xmlnode.isInteger()) {
         int ivalue = std::stoi(nodevalue);
@@ -787,7 +787,7 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
 
     // scan per column
     for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
-      double counts = atof(veccounts[j_row].c_str());
+      double counts = std::stod(veccounts[j_row]);
       size_t rowIndex, columnIndex;
 
       if (loadinstrument) {
