@@ -205,7 +205,6 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("EndOverlap=" + endOv);
 
     // Add transmission runs
-    // Add transmission runs
     auto transRuns = this->getTransmissionRuns(true);
     if (!transRuns.empty()) {
       std::vector<std::string> splitRuns;
