@@ -205,8 +205,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                           OutputWorkspace=ws_name)
 
                 if self._vanadium_ws:
-                    van_ws = mtd[self._vanadium_ws[index]]
                     van_ws_name = self._vanadium_ws[index]
+                    van_ws = mtd[van_ws_name]
                     if self._container_workspace is not None:
                         cont_ws = mtd[self._container_workspace]
 
