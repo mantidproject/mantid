@@ -17,7 +17,7 @@ namespace API {
  * index
  */
 ComponentInfo::ComponentInfo(const Beamline::ComponentInfo &componentInfo,
-                             std::vector<Geometry::ComponentID> &componentIds)
+                             std::vector<Geometry::IComponent *> &componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(
           boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
