@@ -9,6 +9,8 @@ import numpy as np
 
 MIN_TEMPERATURE = 1e-6
 K_IN_MEV = scipy.constants.value('electron volt-kelvin relationship') / 1e3
+EINSTEIN_CONSTANT = 2.0717
+DEBYE_CONSTANT = 4.18036
 
 
 class VesuvioPeakPrediction(VesuvioBase):
@@ -67,8 +69,6 @@ class VesuvioPeakPrediction(VesuvioBase):
 
         self.setup()
 
-        print(K_IN_MEV)
-
         vesuvio_params = WorkspaceFactory.Instance().createTable()
         vesuvio_params.setTitle('Vesuvio Peak Parameters')
         vesuvio_params.addColumn('float', 'Temperature(K)')
@@ -91,7 +91,7 @@ class VesuvioPeakPrediction(VesuvioBase):
                 # Effective temperature in K
                 t_star = 2 * kinetic_energy * K_IN_MEV
                 # RMS moment
-                sig = math.sqrt(self._atomic_mass * kinetic_energy / 2.0717)
+                sig = math.sqrt(self._atomic_mass * kinetic_energy / EINSTEIN_CONSTANT)
 
                 vesuvio_params.addRow([temp, self._atomic_mass, self._frequency, kinetic_energy, t_star, sig])
 
@@ -134,7 +134,7 @@ class VesuvioPeakPrediction(VesuvioBase):
         w_bar = self.r_integral(y, dx, n)
 
         k = 3.0 * w_bar / 4.0  # mean kinetic energy in 3D in mEV
-        y_bar = math.sqrt(atomic_mass * w_bar / (2 * 4.18036))  # RMS momentum along Q
+        y_bar = math.sqrt(atomic_mass * w_bar / (2 * DEBYE_CONSTANT))  # RMS momentum along Q
 
         return k, y_bar
 
@@ -156,7 +156,7 @@ class VesuvioPeakPrediction(VesuvioBase):
             x = dx * (i - 1) + dx / 1e6
             y[i] = (3.0 * x ** 2 / debye_energy ** 3) / (x * math.tanh(x / (2 * temp)))
 
-        disp = math.sqrt(self.r_integral(y, dx, n) * 4.18036 / (2 * atomic_mass))
+        disp = math.sqrt(self.r_integral(y, dx, n) * DEBYE_CONSTANT / (2 * atomic_mass))
         return disp
 
     def r_integral(self, y, dx, n):
