@@ -22,7 +22,6 @@
 #include "MantidQtAPI/TSVSerialiser.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
-#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"

@@ -15,6 +15,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -79,8 +80,7 @@ void SofQWNormalisedPolygon::exec() {
   const size_t nHistos = inputWS->getNumberHistograms();
 
   // Holds the spectrum-detector mapping
-  std::vector<std::vector<detid_t>> detIDMapping(
-      outputWS->getNumberHistograms());
+  std::vector<SpectrumDefinition> detIDMapping(outputWS->getNumberHistograms());
 
   // Progress reports & cancellation
   const size_t nreports(nHistos * nEnergyBins);
@@ -133,7 +133,7 @@ void SofQWNormalisedPolygon::exec() {
     const double phiUpper = phi + phiHalfWidth;
 
     const double efixed = m_EmodeProperties.getEFixed(spectrumInfo.detector(i));
-    const specnum_t specNo = inputIndices.spectrumNumber(i);
+    const auto specNo = static_cast<specnum_t>(inputIndices.spectrumNumber(i));
     std::stringstream logStream;
     for (size_t j = 0; j < nEnergyBins; ++j) {
       m_progress->report("Computing polygon intersections");
@@ -170,7 +170,11 @@ void SofQWNormalisedPolygon::exec() {
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
         PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
-          detIDMapping[qIndex - 1].push_back(spectrumInfo.detector(i).getID());
+          // Could do a more complete merge of spectrum definitions here, but
+          // historically only the ID of the first detector in the spectrum is
+          // used, so I am keeping that for now.
+          detIDMapping[qIndex - 1].add(
+              spectrumInfo.spectrumDefinition(i)[0].first);
         }
       }
     }
@@ -187,7 +191,7 @@ void SofQWNormalisedPolygon::exec() {
 
   // Set the output spectrum-detector mapping
   auto outputIndices = outputWS->indexInfo();
-  outputIndices.setDetectorIDs(std::move(detIDMapping));
+  outputIndices.setSpectrumDefinitions(std::move(detIDMapping));
   outputWS->setIndexInfo(outputIndices);
 
   // Replace any NaNs in outputWorkspace with zeroes
@@ -407,7 +411,8 @@ RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
       VectorHelper::createAxisFromRebinParams(binParams, newAxis));
 
   // Create output workspace, bin edges are same as in inputWorkspace index 0
-  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1);
+  auto outputWorkspace = create<RebinnedOutput>(inputWorkspace, yLength - 1,
+                                                inputWorkspace.binEdges(0));
 
   // Create a binned numeric axis to replace the default vertical one
   Axis *const verticalAxis = new BinEdgeAxis(newAxis);

@@ -1,7 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-def calibration_file_sanity_check(yaml_dict):
+def calibration_file_sanity_check(yaml_dict, file_path):
+    # Check that the dictionary has data
+    if not yaml_dict:
+        raise ValueError("YAML dictionary appear to be empty at:\n" + str(file_path))
+
     # Check that we only have one unbounded range at maximum
     unbound_key_exists = _does_single_unbound_key_exist(yaml_dict)
     if unbound_key_exists:

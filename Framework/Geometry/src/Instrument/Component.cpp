@@ -1,6 +1,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
 
@@ -641,6 +642,13 @@ void Component::setDescription(const std::string &descr) {
                                                  "not implemented for "
                                                  "non-Parametrized Component)");
 }
+
+void Component::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+
+  componentVisitor.registerGenericComponent(*this);
+}
+
 } // Namespace Geometry
 
 } // Namespace Mantid
