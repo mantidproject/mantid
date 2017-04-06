@@ -394,10 +394,10 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         std::vector<std::string> terms;
         boost::iter_split(terms, strvalue,
                           boost::algorithm::first_finder("+/-"));
-        value = std::stod(terms[0].c_str());
-        error = std::stod(terms[1].c_str());
+        value = std::stod(terms[0]);
+        error = std::stod(terms[1]);
       } else {
-        value = std::stod(strvalue.c_str());
+        value = std::stod(strvalue);
         error = 0;
       }
 

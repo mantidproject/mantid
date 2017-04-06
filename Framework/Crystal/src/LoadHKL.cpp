@@ -75,14 +75,14 @@ void LoadHKL::exec() {
     getline(in, line);
     if (line.length() > 125)
       cosines = true;
-    double h = std::stod(line.substr(0, 4).c_str());
-    double k = std::stod(line.substr(4, 4).c_str());
-    double l = std::stod(line.substr(8, 4).c_str());
+    double h = std::stod(line.substr(0, 4));
+    double k = std::stod(line.substr(4, 4));
+    double l = std::stod(line.substr(8, 4));
     if (h == 0.0 && k == 0 && l == 0)
       break;
-    double Inti = std::stod(line.substr(12, 8).c_str());
-    double SigI = std::stod(line.substr(20, 8).c_str());
-    double wl = std::stod(line.substr(32, 8).c_str());
+    double Inti = std::stod(line.substr(12, 8));
+    double SigI = std::stod(line.substr(20, 8));
+    double wl = std::stod(line.substr(32, 8));
     double tbar, trans, scattering;
     int run, bank;
     if (cosines) {

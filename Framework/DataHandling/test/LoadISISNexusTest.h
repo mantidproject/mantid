@@ -503,7 +503,7 @@ public:
     PropertyWithValue<double> *totalChargeProperty =
         dynamic_cast<PropertyWithValue<double> *>(
             run.getLogData("gd_prtn_chrg"));
-    double totalCharge = std::stod(totalChargeProperty->value().c_str());
+    double totalCharge = std::stod(totalChargeProperty->value());
     TSM_ASSERT_DELTA("Something is badly wrong if the sum across the periods "
                      "does not correspond to the total charge.",
                      totalCharge, chargeSum, 0.000001);

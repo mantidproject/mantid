@@ -280,17 +280,17 @@ ShapeFactory::createShape(Poco::XML::Element *pElem) {
       return retVal;
 
     double xmin = std::stod(
-        ((getShapeElement(pElem, "x-min"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "x-min"))->getAttribute("val"));
     double ymin = std::stod(
-        ((getShapeElement(pElem, "y-min"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "y-min"))->getAttribute("val"));
     double zmin = std::stod(
-        ((getShapeElement(pElem, "z-min"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "z-min"))->getAttribute("val"));
     double xmax = std::stod(
-        ((getShapeElement(pElem, "x-max"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "x-max"))->getAttribute("val"));
     double ymax = std::stod(
-        ((getShapeElement(pElem, "y-max"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "y-max"))->getAttribute("val"));
     double zmax = std::stod(
-        ((getShapeElement(pElem, "z-max"))->getAttribute("val")).c_str());
+        (getShapeElement(pElem, "z-max"))->getAttribute("val"));
 
     retVal->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
 
@@ -1314,7 +1314,7 @@ ShapeFactory::getOptionalShapeElement(Poco::XML::Element *pElem,
 double ShapeFactory::getDoubleAttribute(Poco::XML::Element *pElem,
                                         const std::string &name) {
   if (pElem->hasAttribute(name)) {
-    return std::stod((pElem->getAttribute(name)).c_str());
+    return std::stod(pElem->getAttribute(name));
   } else {
     throw std::invalid_argument("XML element: <" + pElem->tagName() +
                                 "> does not have the attribute: " + name + ".");
@@ -1334,11 +1334,11 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("R"))
-      R = std::stod((pElem->getAttribute("R")).c_str());
+      R = std::stod(pElem->getAttribute("R"));
     if (pElem->hasAttribute("theta"))
-      theta = std::stod((pElem->getAttribute("theta")).c_str());
+      theta = std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
-      phi = std::stod((pElem->getAttribute("phi")).c_str());
+      phi = std::stod(pElem->getAttribute("phi"));
 
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
@@ -1350,22 +1350,22 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element *pElem) {
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = std::stod((pElem->getAttribute("r")).c_str());
+      R = std::stod(pElem->getAttribute("r"));
     if (pElem->hasAttribute("t"))
-      theta = std::stod((pElem->getAttribute("t")).c_str());
+      theta = std::stod(pElem->getAttribute("t"));
     if (pElem->hasAttribute("p"))
-      phi = std::stod((pElem->getAttribute("p")).c_str());
+      phi = std::stod(pElem->getAttribute("p"));
 
     retVal.spherical(R, theta, phi);
   } else {
     double x = 0.0, y = 0.0, z = 0.0;
 
     if (pElem->hasAttribute("x"))
-      x = std::stod((pElem->getAttribute("x")).c_str());
+      x = std::stod(pElem->getAttribute("x"));
     if (pElem->hasAttribute("y"))
-      y = std::stod((pElem->getAttribute("y")).c_str());
+      y = std::stod(pElem->getAttribute("y"));
     if (pElem->hasAttribute("z"))
-      z = std::stod((pElem->getAttribute("z")).c_str());
+      z = std::stod(pElem->getAttribute("z"));
 
     retVal(x, y, z);
   }
@@ -1443,7 +1443,7 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     if (pElemCentre)
       centre = parsePosition(pElemCentre);
     geomHandler->setSphere(
-        centre, std::stod((pElemRadius->getAttribute("val")).c_str()));
+        centre, std::stod(pElemRadius->getAttribute("val")));
   } else if (pElem->tagName() == "cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1453,8 +1453,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     normVec.normalize();
     geomHandler->setCylinder(
         parsePosition(pElemCentre), normVec,
-        std::stod((pElemRadius->getAttribute("val")).c_str()),
-        std::stod((pElemHeight->getAttribute("val")).c_str()));
+        std::stod(pElemRadius->getAttribute("val")),
+        std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "segmented-cylinder") {
     Element *pElemCentre = getShapeElement(pElem, "centre-of-bottom-base");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1464,8 +1464,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
     normVec.normalize();
     geomHandler->setSegmentedCylinder(
         parsePosition(pElemCentre), normVec,
-        std::stod((pElemRadius->getAttribute("val")).c_str()),
-        std::stod((pElemHeight->getAttribute("val")).c_str()));
+        std::stod(pElemRadius->getAttribute("val")),
+        std::stod(pElemHeight->getAttribute("val")));
   } else if (pElem->tagName() == "cone") {
     Element *pElemTipPoint = getShapeElement(pElem, "tip-point");
     Element *pElemAxis = getShapeElement(pElem, "axis");
@@ -1474,11 +1474,10 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem,
 
     V3D normVec = parsePosition(pElemAxis);
     normVec.normalize();
-    double height = std::stod((pElemHeight->getAttribute("val")).c_str());
+    double height = std::stod(pElemHeight->getAttribute("val"));
     double radius =
         height *
-        tan(M_PI * std::stod((pElemAngle->getAttribute("val")).c_str()) /
-            180.0);
+        tan(M_PI * std::stod(pElemAngle->getAttribute("val")) / 180.0);
     geomHandler->setCone(parsePosition(pElemTipPoint), normVec, radius, height);
   }
 }

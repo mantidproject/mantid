@@ -561,19 +561,18 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
   // Rotate coordinate system of this component
   if (pElem->hasAttribute("rot")) {
     double rotAngle =
-        angleConvertConst * std::stod((pElem->getAttribute("rot"))
-                                          .c_str()); // assumed to be in degrees
+        angleConvertConst * std::stod(pElem->getAttribute("rot")); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
     double axis_z = 1.0;
 
     if (pElem->hasAttribute("axis-x"))
-      axis_x = std::stod((pElem->getAttribute("axis-x")).c_str());
+      axis_x = std::stod(pElem->getAttribute("axis-x"));
     if (pElem->hasAttribute("axis-y"))
-      axis_y = std::stod((pElem->getAttribute("axis-y")).c_str());
+      axis_y = std::stod(pElem->getAttribute("axis-y"));
     if (pElem->hasAttribute("axis-z"))
-      axis_z = std::stod((pElem->getAttribute("axis-z")).c_str());
+      axis_z = std::stod(pElem->getAttribute("axis-z"));
 
     comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
   }
@@ -628,19 +627,18 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle = angleConvertConst *
-                        std::stod((rElem->getAttribute("val"))
-                                      .c_str()); // assumed to be in degrees
+                        std::stod(rElem->getAttribute("val")); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
       double axis_z = 1.0;
 
       if (rElem->hasAttribute("axis-x"))
-        axis_x = std::stod((rElem->getAttribute("axis-x")).c_str());
+        axis_x = std::stod(rElem->getAttribute("axis-x"));
       if (rElem->hasAttribute("axis-y"))
-        axis_y = std::stod((rElem->getAttribute("axis-y")).c_str());
+        axis_y = std::stod(rElem->getAttribute("axis-y"));
       if (rElem->hasAttribute("axis-z"))
-        axis_z = std::stod((rElem->getAttribute("axis-z")).c_str());
+        axis_z = std::stod(rElem->getAttribute("axis-z"));
 
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(axis_x, axis_y, axis_z)));
 
@@ -677,7 +675,7 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     double R = 0.0, theta = 0.0, phi = 0.0;
 
     if (pElem->hasAttribute("r"))
-      R = std::stod((pElem->getAttribute("r")).c_str());
+      R = std::stod(pElem->getAttribute("r"));
     if (pElem->hasAttribute("t")) {
       theta = angleConvertConst * std::stod(pElem->getAttribute("t"));
     }
@@ -685,7 +683,7 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
       phi = angleConvertConst * std::stod(pElem->getAttribute("p"));
 
     if (pElem->hasAttribute("R"))
-      R = std::stod((pElem->getAttribute("R")).c_str());
+      R = std::stod(pElem->getAttribute("R"));
     if (pElem->hasAttribute("theta"))
       theta = angleConvertConst * std::stod(pElem->getAttribute("theta"));
     if (pElem->hasAttribute("phi"))
@@ -1314,22 +1312,22 @@ void InstrumentDefinitionParser::createRectangularDetector(
 
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
-    xpixels = std::stoi((pType->getAttribute("xpixels")));
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
   if (pType->hasAttribute("xstart"))
-    xstart = std::stod((pType->getAttribute("xstart")));
+    xstart = std::stod(pType->getAttribute("xstart"));
   if (pType->hasAttribute("xstep"))
-    xstep = std::stod((pType->getAttribute("xstep")));
+    xstep = std::stod(pType->getAttribute("xstep"));
   if (pType->hasAttribute("ypixels"))
-    ypixels = std::stoi((pType->getAttribute("ypixels")));
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
   if (pType->hasAttribute("ystart"))
-    ystart = std::stod((pType->getAttribute("ystart")));
+    ystart = std::stod(pType->getAttribute("ystart"));
   if (pType->hasAttribute("ystep"))
-    ystep = std::stod((pType->getAttribute("ystep")));
+    ystep = std::stod(pType->getAttribute("ystep"));
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
   if (pCompElem->hasAttribute("idstart"))
-    idstart = std::stoi((pCompElem->getAttribute("idstart")));
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
   if (pCompElem->hasAttribute("idfillbyfirst"))
     idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
   // Default ID row step size
@@ -1338,11 +1336,11 @@ void InstrumentDefinitionParser::createRectangularDetector(
   else
     idstepbyrow = xpixels;
   if (pCompElem->hasAttribute("idstepbyrow")) {
-    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")));
+    idstepbyrow = std::stoi(pCompElem->getAttribute("idstepbyrow"));
   }
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
-    idstep = std::stoi((pCompElem->getAttribute("idstep")));
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
 
   // Now, initialize all the pixels in the bank
   bank->initialize(shape, xpixels, xstart, xstep, ypixels, ystart, ystep,

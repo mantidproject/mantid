@@ -542,7 +542,7 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string duration_str = expinfo->run().getProperty("duration")->value();
-    double duration = static_cast<double>(std::stod(duration_str.c_str()));
+    double duration = static_cast<double>(std::stod(duration_str));
     run_time_map.insert(std::make_pair(run_number, duration));
     g_log.information() << "MD workspace exp info " << iexpinfo << ": run "
                         << run_number << ", measuring time = " << duration

@@ -637,10 +637,10 @@ void Quat::readPrinted(std::istream &IX) {
       c3 == std::string::npos)
     throw std::runtime_error("Wrong format for Quat input: [" + in + "]");
 
-  w = std::stod(in.substr(i + 1, c1 - i - 1).c_str());
-  a = std::stod(in.substr(c1 + 1, c2 - c1 - 1).c_str());
-  b = std::stod(in.substr(c2 + 1, c3 - c2 - 1).c_str());
-  c = std::stod(in.substr(c3 + 1, j - c3 - 1).c_str());
+  w = std::stod(in.substr(i + 1, c1 - i - 1));
+  a = std::stod(in.substr(c1 + 1, c2 - c1 - 1));
+  b = std::stod(in.substr(c2 + 1, c3 - c2 - 1));
+  c = std::stod(in.substr(c3 + 1, j - c3 - 1));
 }
 
 /** Prints a string representation
