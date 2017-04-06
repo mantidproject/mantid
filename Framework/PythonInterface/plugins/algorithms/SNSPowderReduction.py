@@ -1523,10 +1523,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if time0 > 3600. * 24 * 356:
                 # longer than 1 Y. Cannot be relative time.
-                is_relative_time = True
+                is_relative_time = False
             else:
                 # even just shorter than 1 year, but there was no experiment in 1991.
-                is_relative_time = False
+                is_relative_time = True
 
         if self._splitinfotablews is None:
             # split without information table
