@@ -104,7 +104,7 @@ class VesuvioPeakPrediction(VesuvioBase):
             for temp in self._temperature:
 
                 if temp == 0:
-                    temp = 1e-6
+                    temp = MIN_TEMPERATURE
 
                 kinetic, rms_momentum = self.mean_energy(temp, self._debye_temp, self._atomic_mass)
                 rms_disp = self.displacement(temp, self._debye_temp, self._atomic_mass)
