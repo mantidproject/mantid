@@ -57,7 +57,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('InstrumentParFile', '',
                                           action=FileAction.OptionalLoad,
                                           extensions=['.dat', '.par']),
-                             doc='PAR file containing instrument definition.')
+                             doc='PAR file containing instrument definition. For VESUVIO only')
 
         self.declareProperty(StringArrayProperty(name='VanadiumFiles'),
                              doc='Comma separated array of vanadium runs')
@@ -136,6 +136,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
+
         from IndirectReductionCommon import (get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
@@ -205,33 +206,34 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
                 if self._vanadium_ws:
                     van_ws = mtd[self._vanadium_ws[index]]
+                    van_ws_name = self._vanadium_ws[index]
                     if self._container_workspace is not None:
                         cont_ws = mtd[self._container_workspace]
 
                         if van_ws.blocksize() > cont_ws.blocksize():
-                            RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
+                            RebinToWorkspace(WorkspaceToRebin=van_ws_name,
                                              WorkspaceToMatch=self._container_workspace,
-                                             OutputWorkspace=self._vanadium_ws[index])
+                                             OutputWorkspace=van_ws_name)
                         elif cont_ws.blocksize() > van_ws.blocksize():
                             RebinToWorkspace(WorkspaceToRebin=self._container_workspace,
-                                             WorkspaceToMatch=self._vanadium_ws[index],
+                                             WorkspaceToMatch=van_ws_name,
                                              OutputWorkspace=self._container_workspace)
 
-                        Minus(LHSWorkspace=self._vanadium_ws[index],
+                        Minus(LHSWorkspace=van_ws_name,
                               RHSWorkspace=self._container_workspace,
-                              OutputWorkspace=self._vanadium_ws[index])
+                              OutputWorkspace=van_ws_name)
 
                     if mtd[ws_name].blocksize() > van_ws.blocksize():
                         RebinToWorkspace(WorkspaceToRebin=ws_name,
-                                         WorkspaceToMatch=self._vanadium_ws[index],
+                                         WorkspaceToMatch=van_ws_name,
                                          OutputWorkspace=ws_name)
                     elif van_ws.blocksize() > mtd[ws_name].blocksize():
-                        RebinToWorkspace(WorkspaceToRebin=self._vanadium_ws[index],
+                        RebinToWorkspace(WorkspaceToRebin=van_ws_name,
                                          WorkspaceToMatch=ws_name,
-                                         OutputWorkspace=self._vanadium_ws[index])
+                                         OutputWorkspace=van_ws_name)
 
                     Divide(LHSWorkspace=ws_name,
-                           RHSWorkspace=self._vanadium_ws[index],
+                           RHSWorkspace=van_ws_name,
                            OutputWorkspace=ws_name,
                            AllowDifferentNumberSpectra=True)
 
