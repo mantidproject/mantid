@@ -69,7 +69,7 @@ class SANSMove(DataProcessorAlgorithm):
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
 
         # Move Type
-        move_types = StringListValidator(self._make_move_type_map().keys())
+        move_types = StringListValidator(list(self._make_move_type_map().keys()))
         self.declareProperty('MoveType', 'ElementaryDisplacement', validator=move_types, direction=Direction.Input,
                              doc='The type of movement. This can be: '
                                  '1) InitialMove for freshly workspaces, '
