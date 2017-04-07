@@ -1675,7 +1675,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
     s << "w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionDefault,"
-	 "error_bars = errors,"
+	  "error_bars = errors,"
          "type = connect,"
          "window = window_to_use)";
     // clang-format on
