@@ -117,6 +117,120 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
   }
   return theta;
 }
+
+/** @todo The following translate functions are duplicates of code in 
+* GroupDetectors2.cpp. We should move them to a common location if possible */
+
+/* The following functions are used to translate single operators into
+* groups, just like the ones this algorithm loads from .map files.
+*
+* Each function takes a string, such as "3+4", or "6:10" and then adds
+* the resulting groups of spectra to outGroups.
+*/
+
+// An add operation, i.e. "3+4" -> [3+4]
+void translateAdd(const std::string &instructions,
+                  std::vector<std::vector<size_t>> &outGroups) {
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of("+"));
+
+  std::vector<size_t> outSpectra;
+  for (auto spectrum : spectra) {
+    // remove leading/trailing whitespace
+    boost::trim(spectrum);
+    // add this spectrum to the group we're about to add
+    outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
+  }
+  outGroups.push_back(outSpectra);
+}
+
+// A range summation, i.e. "3-6" -> [3+4+5+6]
+void translateSumRange(const std::string &instructions,
+                       std::vector<std::vector<size_t>> &outGroups) {
+  // add a group with the sum of the spectra in the range
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of("-"));
+  if (spectra.size() != 2)
+    throw std::runtime_error("Malformed range (-) operation.");
+  // fetch the start and stop spectra
+  size_t first = boost::lexical_cast<size_t>(spectra[0]);
+  size_t last = boost::lexical_cast<size_t>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to the output group
+  std::vector<size_t> outSpectra;
+  for (size_t i = first; i <= last; ++i)
+    outSpectra.push_back(i);
+  if (!outSpectra.empty())
+    outGroups.push_back(outSpectra);
+}
+
+// A range insertion, i.e. "3:6" -> [3,4,5,6]
+void translateRange(const std::string &instructions,
+                    std::vector<std::vector<size_t>> &outGroups) {
+  // add a group per spectra
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of(":"));
+  if (spectra.size() != 2)
+    throw std::runtime_error("Malformed range (:) operation.");
+  // fetch the start and stop spectra
+  size_t first = boost::lexical_cast<size_t>(spectra[0]);
+  size_t last = boost::lexical_cast<size_t>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to separate output groups
+  for (size_t i = first; i <= last; ++i) {
+    // create group of size 1 with the spectrum in it
+    std::vector<size_t> newGroup(1, i);
+    // and add it to output
+    outGroups.push_back(newGroup);
+  }
+}
+
+/**
+* Translate the processing instructions into a vector of groups of indices
+*
+* @param instructions : Instructions to translate
+* @return : A vector of groups, each group being a vector of its 0-based
+* spectrum indices
+*/
+std::vector<std::vector<size_t>>
+translateInstructions(const std::string &instructions) {
+  std::vector<std::vector<size_t>> outGroups;
+
+  // split into comma separated groups, each group potentially containing
+  // an operation (+-:) that produces even more groups.
+  std::vector<std::string> groups;
+  boost::split(groups, instructions, boost::is_any_of(","));
+
+  for (auto groupStr : groups) {
+    // remove leading/trailing whitespace
+    boost::trim(groupStr);
+
+    // Look for the various operators in the string. If one is found then
+    // do the necessary translation into groupings.
+    if (groupStr.find('+') != std::string::npos) {
+      // add a group with the given spectra
+      translateAdd(groupStr, outGroups);
+    } else if (groupStr.find('-') != std::string::npos) {
+      translateSumRange(groupStr, outGroups);
+    } else if (groupStr.find(':') != std::string::npos) {
+      translateRange(groupStr, outGroups);
+    } else if (!groupStr.empty()) {
+      // contains no instructions, just add this spectrum as a new group
+      // create group of size 1 with the spectrum in it
+      std::vector<size_t> newGroup(1, boost::lexical_cast<size_t>(groupStr));
+      // and add it to output
+      outGroups.push_back(newGroup);
+    }
+  }
+
+  return outGroups;
+}
 }
 
 namespace Mantid {
@@ -138,10 +252,9 @@ void ReflectometryReductionOne2::init() {
   initReductionProperties();
 
   // Theta0
-  declareProperty(
-    make_unique<PropertyWithValue<double>>("Theta0", Mantid::EMPTY_DBL(),
-      Direction::Input),
-    "Horizon angle in degrees");
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "Theta0", Mantid::EMPTY_DBL(), Direction::Input),
+                  "Horizon angle in degrees");
 
   // Processing instructions
   declareProperty(Kernel::make_unique<PropertyWithValue<std::string>>(
@@ -242,7 +355,7 @@ void ReflectometryReductionOne2::initRun() {
   if (summingInQ()) {
     // These values are only required for summation in Q
     findLambdaMinMax();
-    findTwoThetaMinMax();
+    findTwoThetaMinMax(m_detectors[0]);
     findTheta0();
     findTwoThetaR();
   }
@@ -288,7 +401,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     }
     // Do the summation in Q
     if (m_sum) {
-      result = sumInQ(result);
+      result = sumInQ(result, m_detectors[0]);
     }
   } else {
     // Do the summation in lambda
@@ -565,64 +678,32 @@ void ReflectometryReductionOne2::findLambdaMinMax() {
 void ReflectometryReductionOne2::findDetectorsOfInterest() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
-  if (instructions.empty() ||
-    std::all_of(instructions.begin(), instructions.end(), isspace)) {
-    return;
+  m_detectors = translateInstructions(instructions);
+  if (m_detectors.size() == 0) {
+    throw std::runtime_error("Invalid processing instructions");
+  } else if (m_detectors.size() > 1 && summingInQ()) {
+    throw std::runtime_error(
+        "Only a single range is supported for summing in Q");
   }
 
-  try {
-    /// todo Add support for ':' and ',' operators for the processing
-    /// instructions. This will result in more than one input group and
-    /// therefore we need to set up more than one output group.
-
-    // Split on '+' to get each value or range to add to the list
-    std::vector<std::string> matches;
-    boost::split(matches, instructions, boost::is_any_of("+"));
-
-    for (auto &match : matches) {
-      // Check for a single occurance of '-', which indicates a range. We 
-      // should have two matches: start and end; or none, if this is a single value
-      std::vector<std::string> ranges;
-      boost::split(ranges, match, boost::is_any_of("-"));
-
-      if (ranges.size() == 2) {
-        const size_t minDetectorIdx = std::stoi(ranges[0]);
-        const size_t maxDetectorIdx = std::stoi(ranges[1]);
-        // Add each detector index in the range to the output
-        for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
-          m_detectors.push_back(i);
-        }
-      } else {
-        // Just add the single value
-        m_detectors.push_back(std::stoi(match));
-      }
-    }
-
-    // Also set the reference detector index as the centre of the
-    // region of interest
-    /// todo Get correct centre pixel
-    m_twoThetaRDetectorIdx = 403;
-    //          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
-  } catch (std::exception &ex) {
-    std::ostringstream errMsg;
-    errMsg << "Error reading processing instructions '" << instructions
-            << "'; " << ex.what();
-    throw std::runtime_error(errMsg.str());
-  }
+  // Also set the reference detector index as the centre of the
+  // region of interest
+  /// @todo Get correct centre pixel
+  m_twoThetaRDetectorIdx = 403;
+  //          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
 
   // Log the results
-  g_log.debug() << "Minimum spectrum index: " << spectrumMin() << std::endl
-                << "Maximum spectrum index: " << spectrumMax() << std::endl
-                << "twoThetaR spectrum index: " << twoThetaRDetectorIdx()
+  g_log.debug() << "twoThetaR spectrum index: " << twoThetaRDetectorIdx()
                 << std::endl;
 }
 
 /**
 * Find and cache the min/max twoTheta for the area of interest
 */
-void ReflectometryReductionOne2::findTwoThetaMinMax() {
-  m_twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spectrumMin());
-  m_twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spectrumMax());
+void ReflectometryReductionOne2::findTwoThetaMinMax(
+    const std::vector<size_t> &detectors) {
+  m_twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spectrumMin(detectors));
+  m_twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spectrumMax(detectors));
   if (m_twoThetaMin > m_twoThetaMax) {
     std::swap(m_twoThetaMin, m_twoThetaMax);
   }
@@ -666,18 +747,20 @@ void ReflectometryReductionOne2::findTwoThetaR() {
 * Get the minimum spectrum index in the area of interest
 * @return : the spectrum index
 */
-size_t ReflectometryReductionOne2::spectrumMin() {
+size_t
+ReflectometryReductionOne2::spectrumMin(const std::vector<size_t> &detectors) {
   // The list of detector indices should be sorted so just return the first
-  return m_detectors.front();
+  return detectors.front();
 }
 
 /**
 * Get the maximum spectrum index in the area of interest
 * @return : the spectrum index
 */
-size_t ReflectometryReductionOne2::spectrumMax() {
+size_t
+ReflectometryReductionOne2::spectrumMax(const std::vector<size_t> &detectors) {
   // The list of detector indices should be sorted so just return the last
-  return m_detectors.back();
+  return detectors.back();
 }
 
 /**
@@ -687,8 +770,8 @@ size_t ReflectometryReductionOne2::spectrumMax() {
 *
 * @return : a 1D workspace where y values are all zero
 */
-MatrixWorkspace_sptr
-ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
+MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
+    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors) {
   // Construct the new workspace from the centre pixel (where twoThetaR is
   // defined)
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
@@ -707,15 +790,15 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   double dummy = 0.0;
   const int numBins = static_cast<int>(detectorWS->blocksize());
 
-  const double bLambdaMax = getLambdaRange(detectorWS, spectrumMax());
+  const double bLambdaMax = getLambdaRange(detectorWS, spectrumMax(detectors));
   const double bTwoThetaMin =
-      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin());
+      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin(detectors));
   getProjectedLambdaRange(lambdaMax(), twoThetaMin(), bLambdaMax, bTwoThetaMin,
                           lambdaVMin, dummy);
 
-  const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin());
+  const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin(detectors));
   const double bTwoThetaMax =
-      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax());
+      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax(detectors));
   getProjectedLambdaRange(lambdaMin(), twoThetaMax(), bLambdaMin, bTwoThetaMax,
                           dummy, lambdaVMax);
 
@@ -751,12 +834,13 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
 * @return :: the output workspace in wavelength
 */
 MatrixWorkspace_sptr
-ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
+ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
+                                   const std::vector<size_t> &detectors) {
   // Construct the output array in virtual lambda
-  MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS);
+  MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS, detectors);
 
   // Loop through each spectrum in the region of interest
-  for (size_t spIdx : m_detectors) {
+  for (size_t spIdx : detectors) {
     // Get the angle of this detector and its size in twoTheta
     double twoTheta = 0.0;
     double bTwoTheta = 0.0;
@@ -961,44 +1045,54 @@ std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
   std::stringstream result;
 
   // Map the original indices to the host workspace
-  std::vector<size_t> hostDetectors;
-  for (auto i : m_detectors) {
-    const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
-    hostDetectors.push_back(hostIdx);
+  std::vector<std::vector<size_t>> hostGroups;
+  for (auto group : m_detectors) {
+    std::vector<size_t> hostDetectors;
+    for (auto i : group) {
+      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
+      hostDetectors.push_back(hostIdx);
+    }
+    hostGroups.push_back(hostDetectors);
   }
 
-  // Add each host index to the output string separated by '+' to indicate
-  // that all detectors in this group will be summed. We also check for
-  // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
-  bool contiguous = false;
-  size_t contiguousStart = 0;
+  // Add each group to the output, separated by ','
+  /// @todo Add support to separate contiguous groups by ':' to avoid having
+  /// long lists in the processing instructions
+  for (auto &hostDetectors : hostGroups) {
+    // Add each detector index to the output string separated by '+' to indicate
+    // that all detectors in this group will be summed. We also check for
+    // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
+    bool contiguous = false;
+    size_t contiguousStart = 0;
 
-  for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
-    // Check if the next iterator is a contiguous increment from this one
-    auto &nextIt = it + 1;
-    if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
-      // If this is a start of a new contiguous region, remember the start index
-      if (!contiguous) {
-        contiguousStart = *it;
-        contiguous = true;
+    for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
+      // Check if the next iterator is a contiguous increment from this one
+      auto &nextIt = it + 1;
+      if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
+        // If this is a start of a new contiguous region, remember the start
+        // index
+        if (!contiguous) {
+          contiguousStart = *it;
+          contiguous = true;
+        }
+        // Continue to find the end of the contiguous region
+        continue;
       }
-      // Continue to find the end of the contiguous region
-      continue;
-    }
 
-    if (contiguous) {
-      // Output the contiguous range, then reset the flag
-      result << contiguousStart << "-" << *it;
-      contiguousStart = 0;
-      contiguous = false;
-    } else  {
-      // Just output the value
-      result << *it;
-    }
+      if (contiguous) {
+        // Output the contiguous range, then reset the flag
+        result << contiguousStart << "-" << *it;
+        contiguousStart = 0;
+        contiguous = false;
+      } else {
+        // Just output the value
+        result << *it;
+      }
 
-    // Add a separator ready for the next value/range
-    if (nextIt != hostDetectors.end()) {
-      result << "+";
+      // Add a separator ready for the next value/range
+      if (nextIt != hostDetectors.end()) {
+        result << "+";
+      }
     }
   }
 

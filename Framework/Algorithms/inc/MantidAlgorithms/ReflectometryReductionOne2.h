@@ -90,7 +90,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr makeIvsLam();
   // Do the reduction by summation in Q
   Mantid::API::MatrixWorkspace_sptr
-  sumInQ(API::MatrixWorkspace_sptr detectorWS);
+  sumInQ(API::MatrixWorkspace_sptr detectorWS,
+         const std::vector<size_t> &detectors);
   // Do the summation in Q for a single input value
   void sumInQProcessValue(const int inputIdx, const double twoTheta,
                           const double bTwoTheta,
@@ -103,7 +104,8 @@ private:
                          API::MatrixWorkspace_sptr IvsLam);
   // Construct the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS);
+  constructIvsLamWS(API::MatrixWorkspace_sptr detectorWS,
+                    const std::vector<size_t> &detectors);
   // Whether summation should be done in Q or the default lambda
   bool summingInQ();
   // Get angle details for a specific detector
@@ -128,7 +130,7 @@ private:
   void initRun();
   void findLambdaMinMax();
   void findDetectorsOfInterest();
-  void findTwoThetaMinMax();
+  void findTwoThetaMinMax(const std::vector<size_t> &detectors);
   void findTwoThetaR();
   void findTheta0();
   // Accessors for theta and lambda values
@@ -139,22 +141,23 @@ private:
   double theta0() { return m_theta0; }
   double twoThetaR() { return m_twoThetaR; }
   size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
-  size_t spectrumMin();
-  size_t spectrumMax();
+  size_t spectrumMin(const std::vector<size_t> &detectors);
+  size_t spectrumMax(const std::vector<size_t> &detectors);
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
-  bool m_convertUnits;             // convert the input workspace to lambda
-  bool m_normalise;                // normalise by monitors etc.
-  bool m_sum;                      // whether to do summation
-  double m_twoThetaMin;            // min angle in detectors of interest
-  double m_twoThetaMax;            // max angle in detectors of interest
-  double m_theta0;                 // horizon angle
-  double m_twoThetaR;              // reference angle for summation in Q
-  double m_lambdaMin;              // min wavelength in area of interest
-  double m_lambdaMax;              // max wavelength in area of interest
-  std::vector<size_t> m_detectors; // workspace indices of detectors of interest
-  size_t m_twoThetaRDetectorIdx;   // detector index at reference angle thetaR
+  bool m_convertUnits;           // convert the input workspace to lambda
+  bool m_normalise;              // normalise by monitors etc.
+  bool m_sum;                    // whether to do summation
+  double m_twoThetaMin;          // min angle in detectors of interest
+  double m_twoThetaMax;          // max angle in detectors of interest
+  double m_theta0;               // horizon angle
+  double m_twoThetaR;            // reference angle for summation in Q
+  double m_lambdaMin;            // min wavelength in area of interest
+  double m_lambdaMax;            // max wavelength in area of interest
+  size_t m_twoThetaRDetectorIdx; // detector index at reference angle thetaR
+  // groups of spectrum indices of the detectors of interest
+  std::vector<std::vector<size_t>> m_detectors;
 };
 
 } // namespace Algorithms
