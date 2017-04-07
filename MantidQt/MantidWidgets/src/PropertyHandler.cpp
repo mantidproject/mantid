@@ -239,7 +239,8 @@ void PropertyHandler::initParameters() {
       }
     } else if (m_fun->isFixed(i)) {
       QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
-      m_browser->m_stringManager->setValue(tieProp, QString::number(m_fun->getParameter(i)));
+      m_browser->m_stringManager->setValue(
+          tieProp, QString::number(m_fun->getParameter(i)));
       prop->addSubProperty(tieProp);
       m_ties[parName] = tieProp;
     }
