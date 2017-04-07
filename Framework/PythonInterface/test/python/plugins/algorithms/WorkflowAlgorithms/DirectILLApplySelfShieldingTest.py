@@ -14,7 +14,6 @@ class DirectILLApplySelfShieldingTest(unittest.TestCase):
     def __init__(self, methodName='runTest'):
         unittest.TestCase.__init__(self, methodName)
         self._testIN5WS = illhelpers.create_poor_mans_in5_workspace(self._BKG_LEVEL, illhelpers.default_test_detectors)
-        tempName = 'temp_testWS_'
 
     def tearDown(self):
         mtd.clear()

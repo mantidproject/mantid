@@ -11,6 +11,7 @@ set ( TEST_PY_FILES
   DirectILLApplySelfShieldingTest.py
   DirectILLCollectDataTest.py
   DirectILLDiagnosticsTest.py
+  DirectILLIntegrateVanadiumTest.py
   DirectILLReductionTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py

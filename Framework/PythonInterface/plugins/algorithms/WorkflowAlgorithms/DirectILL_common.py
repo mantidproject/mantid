@@ -12,6 +12,9 @@ CLEANUP_ON = 'Cleanup ON'
 DIAGNOSTICS_OFF = 'Diagnostics OFF'
 DIAGNOSTICS_ON = 'Diagnostics ON'
 
+DWF_OFF = 'Correction OFF'
+DWF_ON = 'Correction ON'
+
 ELASTIC_CHANNEL_SAMPLE_LOG = 'Default Elastic Channel'
 ELASTIC_CHANNEL_FIT = 'Fit Elastic Channel'
 
@@ -36,6 +39,7 @@ PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST = 'NoisyBkgErrorThreshold'
 PROP_CLEANUP_MODE = 'Cleanup'
 PROP_DIAGNOSTICS_WS = 'DiagnosticsWorkspace'
 PROP_DET_DIAGNOSTICS = 'Diagnostics'
+PROP_DWF_CORRECTION = 'DebyeWallerCorrection'
 PROP_EC_SCALING = 'EmptyContainerScaling'
 PROP_EC_WS = 'EmptyContainerWorkspace'
 PROP_ELASTIC_CHANNEL_MODE = 'ElasticChannel'

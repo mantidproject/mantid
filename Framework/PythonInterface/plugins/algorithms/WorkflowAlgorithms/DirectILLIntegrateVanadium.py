@@ -5,8 +5,10 @@ from __future__ import (absolute_import, division, print_function)
 import DirectILL_common as common
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentValidator, ITableWorkspaceProperty,
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
-from mantid.kernel import (CompositeValidator, Direction, FloatBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import ComputeCalibrationCoefVan
+from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty, FloatBoundedValidator, Property,
+                           PropertyCriterion, StringListValidator)
+from mantid.simpleapi import (ComputeCalibrationCoefVan, Integration)
+import numpy
 
 
 class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
@@ -40,30 +42,12 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
         wsCleanup = common.IntermediateWSCleanup(cleanupMode, subalgLogging)
 
         progress.report('Loading inputs')
-        mainWS = self.getProperty(common.PROP_INPUT_WS).value
-        eppWS = self.getProperty(common.PROP_EPP_WS).value
+        mainWS = self._inputWS(wsCleanup)
 
         progress.report('Integrating')
-        if not self.getProperty(common.PROP_TEMPERATURE).isDefault:
-            temperature = self.getProperty(common.PROP_TEMPERATURE).value
-        else:
-            temperature = 293.0
-            ILL_TEMPERATURE_ENTRY = 'sample.temperature'
-            if mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
-                temperatureProperty = mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY)
-                if hasattr(temperatureProperty, 'getStatistics'):
-                    temperature = temperatureProperty.getStatistics().mean
-                else:
-                    temperature = temperatureProperty.value
-        calibrationWS = self.getPropertyValue(common.PROP_OUTPUT_WS)
-        calibrationWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
-                                                  EPPTable=eppWS,
-                                                  OutputWorkspace=calibrationWS,
-                                                  Temperature=temperature,
-                                                  EnableLogging=subalgLogging)
-        self.setProperty(common.PROP_OUTPUT_WS, calibrationWS)
-        wsCleanup.cleanup(calibrationWS)
-        wsCleanup.finalCleanup()
+        mainWS = self._integrate(mainWS, wsCleanup, subalgLogging)
+
+        self._finalize(mainWS, wsCleanup)
         progress.report('Done')
 
     def PyInit(self):
@@ -104,11 +88,75 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Mandatory),
             doc='Table workspace containing results from the FindEPP algorithm.')
+        self.declareProperty(name=common.PROP_DWF_CORRECTION,
+                             defaultValue=common.DWF_ON,
+                             validator=StringListValidator([
+                                 common.DWF_ON,
+                                 common.DWF_OFF]),
+                             direction=Direction.Input,
+                             doc='Enable or disable the correction for the Debye-Waller factor for ' + common.PROP_OUTPUT_WS + '.')
         self.declareProperty(name=common.PROP_TEMPERATURE,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc='Experimental temperature (Vanadium ' +
-                                 'reduction type only), in Kelvins.')
+                                 'reduction type only) for the Debye-Waller correction, in Kelvins.')
+        self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
+                                                                              PropertyCriterion.IsDefault))
+
+    def _inputWS(self, wsCleanup):
+        """Return the raw input workspace."""
+        mainWS = self.getProperty(common.PROP_INPUT_WS).value
+        wsCleanup.protect(mainWS)
+        return mainWS
+
+    def _finalize(self, outWS, wsCleanup):
+        """Do final cleanup and set the output property."""
+        self.setProperty(common.PROP_OUTPUT_WS, outWS)
+        wsCleanup.cleanup(outWS)
+        wsCleanup.finalCleanup()
+
+    def _integrate(self, mainWS, wsCleanup, subalgLogging):
+        """Integrate mainWS applying Debye-Waller correction, if requested."""
+        eppWS = self.getProperty(common.PROP_EPP_WS).value
+        calibrationWS = self.getPropertyValue(common.PROP_OUTPUT_WS)
+        if self.getProperty(common.PROP_DWF_CORRECTION).value == common.DWF_ON:
+            if not self.getProperty(common.PROP_TEMPERATURE).isDefault:
+                temperature = self.getProperty(common.PROP_TEMPERATURE).value
+            else:
+                temperature = 293.0
+                ILL_TEMPERATURE_ENTRY = 'sample.temperature'
+                if mainWS.run().hasProperty(ILL_TEMPERATURE_ENTRY):
+                    temperatureProperty = mainWS.run().getProperty(ILL_TEMPERATURE_ENTRY)
+                    if hasattr(temperatureProperty, 'getStatistics'):
+                        temperature = temperatureProperty.getStatistics().mean
+                    else:
+                        temperature = temperatureProperty.value
+            calibrationWS = ComputeCalibrationCoefVan(VanadiumWorkspace=mainWS,
+                                                      EPPTable=eppWS,
+                                                      OutputWorkspace=calibrationWS,
+                                                      Temperature=temperature,
+                                                      EnableLogging=subalgLogging)
+            wsCleanup.cleanup(mainWS)
+            return calibrationWS
+        # No DWF correction - integrate manually.
+        # TODO revise when ComputeCalibrationCoefVan supports this option.
+        size = eppWS.rowCount()
+        starts = numpy.zeros(size)
+        ends = numpy.zeros(size)
+        for i in range(size):
+            row = eppWS.row(i)
+            if row['FitStatus'] == 'success':
+                fwhm = 2.0 * numpy.sqrt(2.0 * numpy.log(2.0)) * row['Sigma']
+                centre = row['PeakCentre']
+                starts[i] = centre - 3.0 * fwhm
+                ends[i] = centre + 3.0 * fwhm
+        calibrationWS = Integration(InputWorkspace=mainWS,
+                                    OutputWorkspace=calibrationWS,
+                                    RangeLowerList=starts,
+                                    RangeUpperList=ends,
+                                    EnableLogging=subalgLogging)
+        wsCleanup.cleanup(mainWS)
+        return calibrationWS
 
 AlgorithmFactory.subscribe(DirectILLIntegrateVanadium)
