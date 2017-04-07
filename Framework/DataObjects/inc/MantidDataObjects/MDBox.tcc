@@ -19,7 +19,7 @@ TMDE(MDBox)::~MDBox() {
     // BAD!!! TODO: make correct destructors order.
     if (this->m_BoxController) // it is destructor, in tests everything may fall
                                // apart, though it should not be issue for a
-                               // worspace
+                               // workspace
     {
       if (this->m_BoxController->isFileBacked()) {
         this->m_BoxController->getFileIO()->objectDeleted(m_Saveable);
@@ -81,7 +81,7 @@ TMDE(MDBox)::MDBox(
  * @param depth :: splitting depth of the new box.
  * @param extentsVector :: vector defining the extents
  * @param nBoxEvents :: Initial number of events to reserve memory for. If left
- * undefined, the memory will be alocated on request.
+ * undefined, the memory will be allocated on request.
  * @param boxID :: id for the given box
  */
 TMDE(MDBox)::MDBox(
@@ -280,7 +280,7 @@ TMDE(void MDBox)::releaseEvents() {
 }
 
 /** The method to convert events in a box into a table of
- * coodrinates/signal/errors casted into coord_t type
+ * coordinates/signal/errors casted into coord_t type
   *   Used to save events from plain binary file
   *   @returns coordTable -- vector of events parameters in the form signal,
  * error, [detID,rinId], eventsCoordinates....
@@ -399,7 +399,7 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
   if (this->m_signal == 0)
     return;
 
-  for (const MDE &Evnt :data) {
+  for (const MDE &Evnt : data) {
     double signal = Evnt.getSignal();
     for (size_t d = 0; d < nd; d++) {
       // Total up the coordinate weighted by the signal.
@@ -408,7 +408,7 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
   }
 
   // Normalize by the total signal
-  const coord_t reciprocal = 1.0f/static_cast<coord_t>(this->m_signal);
+  const coord_t reciprocal = 1.0f / static_cast<coord_t>(this->m_signal);
   for (size_t d = 0; d < nd; ++d) {
     centroid[d] *= reciprocal;
   }
@@ -422,25 +422,25 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
 TMDE(void MDBox)::calculateCentroid(coord_t *centroid,
                                     const int runindex) const {
 
-  std::fill_n(centroid,nd,0.0f);
+  std::fill_n(centroid, nd, 0.0f);
 
   // Signal was calculated before (when adding)
   // Keep 0.0 if the signal is null. This avoids dividing by 0.0
   if (this->m_signal == 0)
     return;
 
-for (const MDE & Evnt : data) {
+  for (const MDE &Evnt : data) {
     coord_t signal = Evnt.getSignal();
     if (Evnt.getRunIndex() == runindex) {
       for (size_t d = 0; d < nd; d++) {
         // Total up the coordinate weighted by the signal.
         centroid[d] += Evnt.getCenter(d) * signal;
-    }
+      }
     }
   }
 
   // Normalize by the total signal
-  const coord_t reciprocal = 1.0f/static_cast<coord_t>(this->m_signal);
+  const coord_t reciprocal = 1.0f / static_cast<coord_t>(this->m_signal);
   for (size_t d = 0; d < nd; ++d) {
     centroid[d] *= reciprocal;
   }
@@ -488,7 +488,7 @@ TMDE(void MDBox)::centerpointBin(MDBin<MDE, nd> &bin,
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   // For each MDLeanEvent
-  for (const auto & evnt : events) {
+  for (const auto &evnt : events) {
     size_t d;
     // Go through each dimension
     for (d = 0; d < nd; ++d) {
@@ -554,7 +554,8 @@ TMDE(void MDBox)::generalBin(
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                                   const coord_t radiusSquared, signal_t &signal,
-                                  signal_t &errorSquared, const coord_t innerRadiusSquared) const {
+                                  signal_t &errorSquared,
+                                  const coord_t innerRadiusSquared) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   if (innerRadiusSquared == 0.0) {
@@ -568,26 +569,31 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
       }
     }
   } else {
-      // For each MDLeanEvent
-    std::vector<double> eventVec, errsqVec;
+    // For each MDLeanEvent
+    using valAndErrorPair = std::pair<signal_t, signal_t>;
+    std::vector<valAndErrorPair> vals;
     for (const auto &it : events) {
       coord_t out[nd];
       radiusTransform.apply(it.getCenter(), out);
       if (out[0] < radiusSquared && out[0] > innerRadiusSquared) {
-        eventVec.push_back(static_cast<signal_t>(it.getSignal()));
-        errsqVec.push_back(static_cast<signal_t>(it.getErrorSquared()));
-        //signal += static_cast<signal_t>(it.getSignal());
-        //errorSquared += static_cast<signal_t>(it.getErrorSquared());
+        const auto signal = static_cast<signal_t>(it.getSignal());
+        const auto errSquared = static_cast<signal_t>(it.getErrorSquared());
+        vals.emplace_back(std::make_pair(signal, errSquared));
       }
     }
-    std::sort(errsqVec.begin(), errsqVec.end(), MyComparator(eventVec));
-    std::sort(eventVec.begin(), eventVec.end());
+    // Sort based on signal values
+    std::sort(vals.begin(), vals.end(),
+              [](const valAndErrorPair &a, const valAndErrorPair &b) {
+                return a.first < b.first;
+              });
+
     // Remove top 1% of background
-    for (size_t k = 0;
-         k < static_cast<size_t>(0.99 * static_cast<double>(eventVec.size()));
-         k++) {
-      signal += eventVec[k];
-      errorSquared += errsqVec[k];
+    const size_t endIndex =
+        static_cast<size_t>(0.99 * static_cast<double>(vals.size()));
+
+    for (size_t k = 0; k < endIndex; k++) {
+      signal += vals[k].first;
+      errorSquared += vals[k].second;
     }
   }
   // it is constant access, so no saving or fiddling with the buffer is needed.
@@ -623,7 +629,7 @@ TMDE(void MDBox)::integrateCylinder(
   double deltaQ = length / static_cast<double>(numSteps - 1);
 
   // For each MDLeanEvent
-  for (const auto & evnt : events) {
+  for (const auto &evnt : events) {
     coord_t out[2]; // radius and length of cylinder
     radiusTransform.apply(evnt.getCenter(), out);
     if (out[0] < radius && std::fabs(out[1]) < 0.5 * length) {
@@ -668,7 +674,7 @@ TMDE(void MDBox)::centroidSphere(Mantid::API::CoordTransform &radiusTransform,
   const std::vector<MDE> &events = this->getConstEvents();
 
   // For each MDLeanEvent
-  for (const auto & evnt : events) {
+  for (const auto &evnt : events) {
     coord_t out[nd];
     radiusTransform.apply(evnt.getCenter(), out);
     if (out[0] < radiusSquared) {
@@ -696,7 +702,7 @@ TMDE(void MDBox)::transformDimensions(std::vector<double> &scaling,
   MDBoxBase<MDE, nd>::transformDimensions(scaling, offset);
   this->calculateCentroid(this->m_centroid);
   std::vector<MDE> &events = this->getEvents();
-  for (auto & evnt : events) {
+  for (auto &evnt : events) {
     coord_t *center = evnt.getCenterNonConst();
     for (size_t d = 0; d < nd; d++)
       center[d] = (center[d] * static_cast<coord_t>(scaling[d])) +

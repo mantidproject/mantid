@@ -9,11 +9,13 @@ class RunDetails(object):
     def __init__(self, run_number):
         # Essential attribute
         self.run_number = run_number
+        self.user_input_run_number = None
 
         self.empty_runs = None
+        self.sample_empty = None
         self.label = None
 
-        self.calibration_file_path = None
+        self.offset_file_path = None
         self.grouping_file_path = None
 
         self.splined_vanadium_file_path = None

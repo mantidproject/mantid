@@ -163,21 +163,27 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceBinned(int nhist, const int numBoundaries,
                         const double xBoundaries[]);
 
+struct returnOne {
+  double operator()(const double, size_t) { return 1; }
+};
+
 /**
  * Creates a 2D workspace from taking the function values from the input
  * function. The type must define operator()()
- * @param f :: A function to use for the signal values
+ * @param yFunc :: A function to use for the y values
  * @param nSpec :: The number of spectra
  * @param x0 :: The start of the x range
  * @param x1 :: The end of the x range
  * @param dx :: The steps in x
  * @param isHist :: True if it should be a histogram
+ * @param eFunc :: A function to use for the y error values
  * @return The new workspace. The errors are set to 1.0
  */
-template <typename Func>
+template <typename fT, typename gT = returnOne>
 Mantid::DataObjects::Workspace2D_sptr
-create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
-                              double dx, bool isHist = false) {
+create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
+                              double dx, bool isHist = false,
+                              gT eFunc = returnOne()) {
   int nX = int((x1 - x0) / dx) + 1;
   int nY = nX - (isHist ? 1 : 0);
   if (nY <= 0)
@@ -195,8 +201,8 @@ create2DWorkspaceFromFunction(Func f, int nSpec, double x0, double x1,
     for (int i = 0; i < nY; i++) {
       double x = x0 + dx * i;
       X[i] = x;
-      Y[i] = f(x, iSpec);
-      E[i] = 1;
+      Y[i] = yFunc(x, iSpec);
+      E[i] = eFunc(x, iSpec);
     }
     if (isHist)
       X.back() = X[nY - 1] + dx;

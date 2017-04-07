@@ -23,7 +23,7 @@ IF(QT4_FOUND)
         PATH_SUFFIXES "Qsci"	
     )
 
-    SET(QSCINTILLA_NAMES ${QSCINTILLA_NAMES} qscintilla2 libqscintilla2)
+    SET(QSCINTILLA_NAMES ${QSCINTILLA_NAMES} qscintilla2 libqscintilla2 qscintilla2_qt4)
     FIND_LIBRARY(QSCINTILLA_LIBRARY
         NAMES ${QSCINTILLA_NAMES}
         PATHS ${QT_LIBRARY_DIR}

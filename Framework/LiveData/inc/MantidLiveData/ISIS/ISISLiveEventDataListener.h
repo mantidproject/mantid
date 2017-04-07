@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
 
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include "Poco/Net/StreamSocket.h"
@@ -53,7 +53,7 @@ namespace LiveData {
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-class ISISLiveEventDataListener : public API::ILiveListener,
+class ISISLiveEventDataListener : public API::LiveListener,
                                   public Poco::Runnable {
 public:
   /// Constructor.

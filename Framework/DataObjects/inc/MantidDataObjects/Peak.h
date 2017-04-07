@@ -45,18 +45,25 @@ public:
 
   /// Copy constructor
   Peak(const Peak &other);
-// MSVC 2015 won't build with noexcept.
-// error C2610: 'Mantid::DataObjects::Peak::Peak(Mantid::DataObjects::Peak &&)
-// noexcept': is not a special member function which can be defaulted
-#if defined(_MSC_VER) && _MSC_VER <= 1900
-  Peak(Peak &&);
-  Peak &operator=(Peak &&);
-#elif defined(__GNUC__) && (__GNUC__ == 5)
+
+// MSVC 2015/17 can build with noexcept = default however
+// intellisense still incorrectly reports this as an error despite compiling.
+// https://connect.microsoft.com/VisualStudio/feedback/details/1795240/visual-c-2015-default-move-constructor-and-noexcept-keyword-bug
+// For that reason we still use the supplied default which should be noexcept
+// once the above is fixed we can remove this workaround
+
+#if defined(_MSC_VER) && _MSC_VER <= 1910
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
+#elif((__GNUC__ < 4) || (__GNUC__ == 4 && __GNUC_MINOR__ <= 8))
+  // The noexcept default declaration was fixed in GCC 4.9.0
+  // so for versions 4.8.x and below use default only
+  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53903
+  Peak(Peak &&) = default;
+  Peak &operator=(Peak &&) = default;
+#else
   Peak(Peak &&) noexcept = default;
   Peak &operator=(Peak &&) noexcept = default;
-#else
-  Peak(Peak &&) noexcept;
-  Peak &operator=(Peak &&) noexcept;
 #endif
 
   // Construct a peak from a reference to the interface
@@ -135,7 +142,7 @@ public:
   void setRow(int m_row);
   void setCol(int m_col);
 
-  Mantid::Kernel::V3D getDetPos() const override;
+  virtual Mantid::Kernel::V3D getDetPos() const override;
   double getL1() const override;
   double getL2() const override;
 
@@ -152,6 +159,9 @@ public:
 
   /// Assignment
   Peak &operator=(const Peak &other);
+
+  /// Get the approximate position of a peak that falls off the detectors
+  Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
 
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam);

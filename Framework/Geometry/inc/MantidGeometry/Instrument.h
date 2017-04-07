@@ -139,6 +139,8 @@ public:
   void getMinMaxDetectorIDs(detid_t &min, detid_t &max) const;
 
   void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
+                          const IComponent &comp) const;
+  void getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                           const std::string &bankName) const;
 
   /// Returns a list containing the detector ids of monitors
@@ -152,7 +154,8 @@ public:
   getPlottable() const;
 
   /// Returns a shared pointer to a component
-  boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
+  boost::shared_ptr<const IComponent>
+  getComponentByID(const IComponent *id) const;
 
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<const IComponent>>
@@ -240,8 +243,11 @@ public:
 
   bool hasDetectorInfo() const;
   const Beamline::DetectorInfo &detectorInfo() const;
+  size_t detectorIndex(const detid_t detID) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
+
+  boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
 private:
   /// Save information about a set of detectors to Nexus

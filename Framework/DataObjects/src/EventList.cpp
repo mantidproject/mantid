@@ -1624,7 +1624,7 @@ EventList::compressEventsHelper(const std::vector<T> &events,
   out.reserve(events.size() / 20);
 
   // The last TOF to which we are comparing.
-  double lastTof = -std::numeric_limits<double>::max();
+  double lastTof = std::numeric_limits<double>::lowest();
   // For getting an accurate average TOF
   double totalTof = 0;
   int num = 0;
@@ -1701,7 +1701,7 @@ void EventList::compressEventsParallelHelper(
     localOut.reserve(numPerBlock / 20);
 
     // The last TOF to which we are comparing.
-    double lastTof = -std::numeric_limits<double>::max();
+    double lastTof = std::numeric_limits<double>::lowest();
     // For getting an accurate average TOF
     double totalTof = 0;
     int num = 0;
@@ -4319,17 +4319,123 @@ std::string EventList::splitByFullTimeVectorSplitterHelper(
   return (msgss.str());
 }
 
+//------------------------------------------------------------------------------------------------
+/** Split the event list into n outputs, operating on a vector of either
+ *TofEvent's or WeightedEvent's
+ *  The comparison between neutron event and splitter is based on neutron
+ *event's pulse time plus
+ *
+ * @param vectimes :: a vector of absolute time in nanoseconds serving as
+ *boundaries of splitters
+ * @param vecgroups :: a vector of integer serving as the target workspace group
+ *for splitters
+ * @param outputs :: a vector of where the split events will end up. The # of
+ *entries in there should
+ *        be big enough to accommodate the indices.
+ * @param vecEvents :: either this->events or this->weightedEvents.
+ * @param docorrection :: flag to determine whether or not to apply correction
+ * @param toffactor :: factor multiplied to TOF for correcting event time from
+ *detector to sample
+ * @param tofshift :: shift in SECOND to TOF for correcting event time from
+ *detector to sample
+ */
+template <class T>
+std::string EventList::splitByFullTimeSparseVectorSplitterHelper(
+    const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+    std::map<int, EventList *> outputs, typename std::vector<T> &vecEvents,
+    bool docorrection, double toffactor, double tofshift) const {
+  // Define variables for events
+  // size_t numevents = events.size();
+  // typename std::vector<T>::iterator eviter;
+  std::stringstream msgss;
+
+  size_t num_splitters = vecgroups.size();
+  // prepare to Iterate through all events (sorted by tof)
+  auto iter_events = vecEvents.begin();
+  auto iter_events_end = vecEvents.end();
+
+  // std::stringstream debug_ss;
+  // debug_ss << "\nFilter events...:\n";
+
+  for (size_t i = 0; i < num_splitters; ++i) {
+    // get one splitter
+    int64_t start_i64 = vectimes[i];
+    int64_t stop_i64 = vectimes[i + 1];
+    int group = vecgroups[i];
+    // debug_ss << "working on splitter: " << i << " from " << start_i64 << " to
+    // " << stop_i64 << "\n";
+
+    // go over events
+    while (iter_events != iter_events_end) {
+      int64_t absolute_time;
+      if (docorrection)
+        absolute_time =
+            iter_events->m_pulsetime.totalNanoseconds() +
+            static_cast<int64_t>(toffactor * iter_events->m_tof * 1000 +
+                                 tofshift * 1.0E9);
+      else
+        absolute_time = iter_events->m_pulsetime.totalNanoseconds() +
+                        static_cast<int64_t>(iter_events->m_tof * 1000);
+
+      // debug_ss << "  event " << iter_events - vecEvents.begin() << " abs.time
+      // = " << absolute_time << "\n";
+
+      if (absolute_time < start_i64) {
+        // event occurs before the splitter. only can happen with first
+        // splitter. Then ignore and move to next
+        ++iter_events;
+        continue;
+      }
+
+      if (absolute_time < stop_i64) {
+        // in the splitter, then copy the event into another
+        const T eventCopy(*iter_events);
+        // Copy event to the proper group
+        EventList *myOutput = outputs[group];
+        if (!myOutput) {
+          // there is no such group defined. quit for this group
+          std::stringstream errss;
+          errss << "Group " << group << " has a NULL output EventList. "
+                << "\n";
+          msgss << errss.str();
+          throw std::runtime_error(errss.str());
+        }
+        // Add the copy to the output
+        myOutput->addEventQuickly(eventCopy);
+        ++iter_events;
+      } else {
+        // event occurs after the stop time, it should belonged to the next
+        // splitter
+        break;
+      }
+    } // while
+
+    // quit the loop if there is no more event left
+    if (iter_events == iter_events_end)
+      break;
+  } // for splitter
+
+  // std::cout << debug_ss.str();
+
+  return (msgss.str());
+}
+
 //----------------------------------------------------------------------------------------------
 /**
- * @param vectimes :: vector of splitting times
+ * @brief EventList::splitByFullTimeMatrixSplitter
+ * @param vec_splitters_time  :: vector of splitting times
  * @param vecgroups :: vector of index group for splitters
  * @param vec_outputEventList :: vector of groups of splitted events
  * @param docorrection :: flag to do TOF correction from detector to sample
  * @param toffactor :: factor multiplied to TOF for correction
  * @param tofshift :: shift to TOF in unit of SECOND for correction
+ * @return
  */
+// TODO/FIXME/NOW - Consider to use vector to replace vec_outputEventList and
+// have an option to ignore the un-filtered events!
 std::string EventList::splitByFullTimeMatrixSplitter(
-    const std::vector<int64_t> &vectimes, const std::vector<int> &vecgroups,
+    const std::vector<int64_t> &vec_splitters_time,
+    const std::vector<int> &vecgroups,
     std::map<int, EventList *> vec_outputEventList, bool docorrection,
     double toffactor, double tofshift) const {
   // Check validity
@@ -4337,8 +4443,8 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     throw std::runtime_error("EventList::splitByTime() called on an EventList "
                              "that no longer has time information.");
 
-  // Start by sorting the event list by pulse time.
-  // FIXME - Should find a good algorithm for sorted event list
+  // Start by sorting the event list by pulse time, if its flag is not set up
+  // right
   sortPulseTimeTOF();
 
   // Initialize all the output event list
@@ -4362,16 +4468,31 @@ std::string EventList::splitByFullTimeMatrixSplitter(
     // this->duplicate(outputs[-1]);
   } else {
     // Split
+
+    // Try to find out which filtering algorithm to use by comparing number of
+    // splitters and number of events
+    bool sparse_splitter = vec_splitters_time.size() < this->getNumberEvents();
+
     switch (eventType) {
     case TOF:
-      debugmessage = splitByFullTimeVectorSplitterHelper(
-          vectimes, vecgroups, vec_outputEventList, this->events, docorrection,
-          toffactor, tofshift);
+      if (sparse_splitter)
+        debugmessage = splitByFullTimeSparseVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList, this->events,
+            docorrection, toffactor, tofshift);
+      else
+        debugmessage = splitByFullTimeVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList, this->events,
+            docorrection, toffactor, tofshift);
       break;
     case WEIGHTED:
-      debugmessage = splitByFullTimeVectorSplitterHelper(
-          vectimes, vecgroups, vec_outputEventList, this->weightedEvents,
-          docorrection, toffactor, tofshift);
+      if (sparse_splitter)
+        debugmessage = splitByFullTimeSparseVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList,
+            this->weightedEvents, docorrection, toffactor, tofshift);
+      else
+        debugmessage = splitByFullTimeVectorSplitterHelper(
+            vec_splitters_time, vecgroups, vec_outputEventList,
+            this->weightedEvents, docorrection, toffactor, tofshift);
       break;
     case WEIGHTED_NOTIME:
       debugmessage = "TOF type is weighted no time.  Impossible to split. ";
@@ -4490,6 +4611,111 @@ void EventList::splitByPulseTime(Kernel::TimeSplitterType &splitter,
       break;
     }
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Split the event list by pulse time
+ */
+// TODO/NOW - TEST
+void EventList::splitByPulseTimeWithMatrix(
+    const std::vector<int64_t> &vec_times, const std::vector<int> &vec_target,
+    std::map<int, EventList *> outputs) const {
+  // Check for supported event type
+  if (eventType == WEIGHTED_NOTIME)
+    throw std::runtime_error("EventList::splitByTime() called on an EventList "
+                             "that no longer has time information.");
+
+  // Start by sorting the event list by pulse time.
+  this->sortPulseTimeTOF();
+
+  // Initialize all the output event lists
+  std::map<int, EventList *>::iterator outiter;
+  for (outiter = outputs.begin(); outiter != outputs.end(); ++outiter) {
+    EventList *opeventlist = outiter->second;
+    opeventlist->clear();
+    opeventlist->setDetectorIDs(this->getDetectorIDs());
+    opeventlist->setHistogram(m_histogram);
+    // Match the output event type.
+    opeventlist->switchTo(eventType);
+  }
+
+  // Split
+  if (vec_target.size() == 0) {
+    // No splitter: copy all events to group workspace = -1
+    (*outputs[-1]) = (*this);
+  } else {
+    // Split
+    switch (eventType) {
+    case TOF:
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->events);
+      break;
+    case WEIGHTED:
+      splitByPulseTimeWithMatrixHelper(vec_times, vec_target, outputs,
+                                       this->weightedEvents);
+      break;
+    case WEIGHTED_NOTIME:
+      break;
+    }
+  }
+}
+
+template <class T>
+void EventList::splitByPulseTimeWithMatrixHelper(
+    const std::vector<int64_t> &vec_split_times,
+    const std::vector<int> &vec_split_target,
+    std::map<int, EventList *> outputs, typename std::vector<T> &events) const {
+  // Prepare to TimeSplitter Iterate through the splitter at the same time
+  if (vec_split_times.size() != vec_split_target.size() + 1)
+    throw std::runtime_error("Splitter time vector size and splitter target "
+                             "vector size are not correct.");
+
+  // Prepare to Events Iterate through all events (sorted by tof)
+  auto itev = events.begin();
+  auto itev_end = events.end();
+
+  // Iterate (loop) on all splitters
+  for (size_t i_target = 0; i_target < vec_split_target.size(); ++i_target) {
+    // Get the splitting interval times and destination group
+    int64_t start = vec_split_times[i_target];
+    int64_t stop = vec_split_times[i_target + 1];
+    const int index = vec_split_target[i_target];
+
+    // Skip the events before the start of the time and put to 'unfiltered'
+    // EventList
+    EventList *myOutput = outputs[-1];
+    while (itev != itev_end) {
+      if (itev->m_pulsetime < start) {
+        // Record to index = -1 space
+        const T eventCopy(*itev);
+        myOutput->addEventQuickly(eventCopy);
+        ++itev;
+      } else {
+        // Event within a splitter interval
+        break;
+      }
+    }
+
+    // Go through all the events that are in the interval (if any)
+    while (itev != itev_end) {
+
+      if (itev->m_pulsetime < stop) {
+        // Duplicate event
+        const T eventCopy(*itev);
+        EventList *myOutput = outputs[index];
+        // Add the copy to the output
+        myOutput->addEventQuickly(eventCopy);
+        ++itev;
+      } else {
+        // Out of interval
+        break;
+      }
+    }
+
+    // No need to keep looping through the filter if we are out of events
+    if (itev == itev_end)
+      break;
+  } // END-WHILE Splitter
 }
 
 //--------------------------------------------------------------------------

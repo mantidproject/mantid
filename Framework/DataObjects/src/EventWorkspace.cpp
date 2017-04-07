@@ -151,7 +151,7 @@ EventList &EventWorkspace::getSpectrum(const size_t index) {
   invalidateCommonBinsFlag();
   auto &spec = const_cast<EventList &>(
       static_cast<const EventWorkspace &>(*this).getSpectrum(index));
-  spec.setExperimentInfo(this, index);
+  spec.setMatrixWorkspace(this, index);
   return spec;
 }
 
@@ -327,7 +327,7 @@ double EventWorkspace::getEventXMin() const {
  */
 double EventWorkspace::getEventXMax() const {
   // set to crazy values to start
-  double xmax = -1.0 * std::numeric_limits<double>::max();
+  double xmax = std::numeric_limits<double>::lowest();
   size_t numWorkspace = this->data.size();
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
        workspaceIndex++) {

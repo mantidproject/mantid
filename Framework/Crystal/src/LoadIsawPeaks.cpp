@@ -109,133 +109,6 @@ void LoadIsawPeaks::exec() {
   this->checkNumberPeaks(ws, getPropertyValue("Filename"));
 }
 
-//----------------------------------------------------------------------------------------------
-std::string LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in,
-                                          std::string startChar,
-                                          Geometry::Instrument_const_sptr instr,
-                                          DetectorInfo &detectorInfo,
-                                          double &T0) {
-
-  while (in.good() && (startChar.empty() || startChar != "7")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-  if (!(in.good())) {
-    throw std::invalid_argument("Peaks file has no time shift and L0 info");
-  }
-  std::string L1s = getWord(in, false);
-  std::string T0s = getWord(in, false);
-  if (L1s.length() < 1 || T0s.length() < 1) {
-    g_log.error() << "Missing L1 or Time offset\n";
-    throw std::invalid_argument("Missing L1 or Time offset");
-  }
-
-  try {
-    std::istringstream iss(L1s + " " + T0s, std::istringstream::in);
-    double L1;
-    iss >> L1;
-    iss >> T0;
-    V3D sampPos = instr->getSample()->getPos();
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(*instr, L1 / 100,
-                                                         sampPos, detectorInfo);
-  } catch (...) {
-    g_log.error() << "Invalid L1 or Time offset\n";
-    throw std::invalid_argument("Invalid L1 or Time offset");
-  }
-
-  readToEndOfLine(in, true);
-  startChar = getWord(in, false);
-  while (in.good() && (startChar.empty() || startChar != "5")) {
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false);
-  }
-
-  if (!(in.good())) {
-    g_log.error() << "Peaks file has no detector panel info\n";
-    throw std::invalid_argument("Peaks file has no detector panel info");
-  }
-
-  while (startChar == "5") {
-
-    std::string line;
-    for (int i = 0; i < 16; i++) {
-      std::string s = getWord(in, false);
-      if (s.empty()) {
-        g_log.error() << "Not enough info to describe panel \n";
-        throw std::length_error("Not enough info to describe panel ");
-      }
-      line += " " + s;
-      ;
-    }
-
-    readToEndOfLine(in, true);
-    startChar = getWord(in, false); // blank lines ?? and # lines ignore
-
-    std::istringstream iss(line, std::istringstream::in);
-    int bankNum;
-    double width, height, Centx, Centy, Centz, Basex, Basey, Basez, Upx, Upy,
-        Upz;
-    try {
-      int nrows, ncols;
-      double depth, detD;
-      iss >> bankNum >> nrows >> ncols >> width >> height >> depth >> detD >>
-          Centx >> Centy >> Centz >> Basex >> Basey >> Basez >> Upx >> Upy >>
-          Upz;
-    } catch (...) {
-
-      g_log.error() << "incorrect type of data for panel \n";
-      throw std::length_error("incorrect type of data for panel ");
-    }
-
-    std::string SbankNum = std::to_string(bankNum);
-    std::string bankName = "bank";
-    if (instr->getName() == "WISH") {
-      if (bankNum < 10)
-        bankName = "WISHpanel0";
-      else
-        bankName = "WISHpanel";
-    }
-    bankName += SbankNum;
-    boost::shared_ptr<const Geometry::IComponent> bank =
-        getCachedBankByName(bankName, instr);
-
-    if (!bank) {
-      g_log.error() << "There is no bank " << bankName
-                    << " in the instrument\n";
-      throw std::length_error("There is no bank " + bankName +
-                              " in the instrument");
-    }
-
-    V3D dPos = V3D(Centx, Centy, Centz) / 100.0 - bank->getPos();
-    V3D Base(Basex, Basey, Basez), Up(Upx, Upy, Upz);
-    V3D ToSamp = Base.cross_prod(Up);
-    Base.normalize();
-    Up.normalize();
-    ToSamp.normalize();
-    Quat thisRot(Base, Up, ToSamp);
-    Quat bankRot(bank->getRotation());
-    bankRot.inverse();
-    Quat dRot = thisRot * bankRot;
-
-    auto bankR =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(bank);
-
-    if (!bankR)
-      return startChar;
-
-    double DetWScale = 1, DetHtScale = 1;
-    if (bank) {
-      DetWScale = width / bankR->xsize() / 100;
-      DetHtScale = height / bankR->ysize() / 100;
-    }
-    const std::vector<std::string> bankNames{bankName};
-
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instr, dPos, dRot, DetWScale, DetHtScale, detectorInfo);
-  }
-  return startChar;
-}
-
 //-----------------------------------------------------------------------------------------------
 /** Reads the header of a .peaks file
  * @param outWS :: the workspace in which to place the information
@@ -297,13 +170,16 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
   Geometry::Instrument_const_sptr instr = tempWS->getInstrument();
   outWS->setInstrument(instr);
 
-  auto &detInfo = outWS->mutableDetectorInfo();
-  instr = outWS->getInstrument();
-
-  std::string s = ApplyCalibInfo(in, "", instr, detInfo, T0);
+  IAlgorithm_sptr applyCal = createChildAlgorithm("LoadIsawDetCal");
+  applyCal->initialize();
+  applyCal->setProperty("InputWorkspace", outWS);
+  applyCal->setProperty("Filename", getPropertyValue("Filename"));
+  applyCal->executeAsChildAlg();
+  T0 = applyCal->getProperty("TimeOffset");
 
   // Now skip all lines on L1, detector banks, etc. until we get to a block of
   // peaks. They start with 0.
+  std::string s;
   while (s != "0" && in.good()) {
     readToEndOfLine(in, true);
     s = getWord(in, false);

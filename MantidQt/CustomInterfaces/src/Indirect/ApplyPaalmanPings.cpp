@@ -223,7 +223,8 @@ void ApplyPaalmanPings::run() {
           boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
       // Check for matching binning
-      if (sampleWs && (sampleWs->blocksize() != factorWs->blocksize())) {
+      if (sampleWs && (factorWs->blocksize() != sampleWs->blocksize() &&
+                       factorWs->blocksize() != 1)) {
         int result;
         if (interpolateAll) {
           result = QMessageBox::Yes;
