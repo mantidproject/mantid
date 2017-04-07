@@ -156,6 +156,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("UniformEven"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(6)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -248,6 +254,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Uniform"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(8)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(8)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(8)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -356,6 +368,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(6)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(6)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -448,6 +466,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(1)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(1)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
@@ -506,6 +530,12 @@ public:
     EXPECT_CALL(mockMainPresenter, getTimeSlicingType())
         .Times(1)
         .WillOnce(Return("Custom"));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingValues())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::string>()));
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
+        .Times(2)
+        .WillRepeatedly(Return(std::map<std::string, std::set<std::string>>()));
     EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
         .Times(2)
         .WillRepeatedly(Return(std::map<std::string, std::string>()));
