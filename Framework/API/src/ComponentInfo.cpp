@@ -37,7 +37,13 @@ ComponentInfo::ComponentInfo(
 ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
     std::vector<Mantid::Geometry::IComponent *> &&componentIds)
-    : ComponentInfo::ComponentInfo(componentInfo, componentIds) {}
+    : m_componentInfo(componentInfo),
+      m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(
+          std::move(componentIds))),
+      m_compIDToIndex(boost::make_shared<
+          std::unordered_map<Geometry::IComponent *, size_t>>()) {
+  init();
+}
 
 void ComponentInfo::init() {
   /*
