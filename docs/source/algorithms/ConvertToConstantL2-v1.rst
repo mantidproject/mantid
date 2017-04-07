@@ -13,7 +13,7 @@ Moves the instrument and then corrects the flight paths such that a flat detecto
 
 Both time-of-flight sample-detector time and sample to detector distance are corrected to constant values.
 
-The sample to detector distance must be specified as **l2** number parameter in the instrument parameters file.
+The sample to detector distance must be specified as **l2** in the instrument parameters file.
 
 So far this has only be tested on the ILL IN5 instrument.
 

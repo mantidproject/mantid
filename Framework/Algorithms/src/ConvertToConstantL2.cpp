@@ -150,14 +150,14 @@ double ConvertToConstantL2::getRunProperty(std::string s) {
  *
  */
 double ConvertToConstantL2::getInstrumentProperty(std::string s) {
-  std::vector<double> prop = m_instrument->getNumberParameter(s);
+  std::vector<std::string> prop = m_instrument->getStringParameter(s);
   if (prop.empty()) {
     std::string mesg = "Property <" + s + "> doesn't exist!";
     g_log.error(mesg);
     throw std::runtime_error(mesg);
   }
   g_log.debug() << "prop[0] = " << prop[0] << '\n';
-  return prop[0];
+  return boost::lexical_cast<double>(prop[0]);
 }
 
 /*
