@@ -105,6 +105,8 @@ void IntegratePeaksCWSD::exec() {
   // Merge peak if necessary
   if (m_doMergePeak)
     mergePeaks();
+  else
+    normalizePeaksIntensities();	// TODO/FIXME/NOW - Implement this method to normalize the intensity of each Pt.
 
   // Output
   DataObjects::PeaksWorkspace_sptr outws =
@@ -161,6 +163,7 @@ void IntegratePeaksCWSD::processInputs() {
         "Either being normalized by time or being normalized "
         "by monitor must be selected if merge-peak is selected.");
   m_scaleFactor = getProperty("ScaleFactor");
+  g_log.warning() << "[DB...BAT] Scale factor = " << m_scaleFactor << "\n";
 
   // monitor counts
   if (m_normalizeByMonitor)
@@ -544,7 +547,7 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     std::string duration_str = expinfo->run().getProperty("duration")->value();
     double duration = static_cast<double>(atof(duration_str.c_str()));
     run_time_map.insert(std::make_pair(run_number, duration));
-    g_log.information() << "MD workspace exp info " << iexpinfo << ": run "
+    g_log.warning() << "MD workspace exp info " << iexpinfo << ": run "
                         << run_number << ", measuring time = " << duration
                         << "\n";
   }
