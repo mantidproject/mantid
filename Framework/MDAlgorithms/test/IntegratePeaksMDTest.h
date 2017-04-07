@@ -368,8 +368,8 @@ public:
         std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
     double actualBackgroundOutterRadius = std::stod(
         outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
-    double actualBackgroundInnerRadius =
-        std::stod(outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
+    double actualBackgroundInnerRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
 
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
