@@ -56,7 +56,7 @@ private:
 
 public:
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
-                std::vector<Mantid::Geometry::IComponent *> &componentIds);
+                const std::vector<Mantid::Geometry::IComponent *> &componentIds);
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
                 std::vector<Mantid::Geometry::IComponent *> &&componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;

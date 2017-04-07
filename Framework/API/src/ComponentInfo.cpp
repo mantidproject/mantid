@@ -18,7 +18,7 @@ namespace API {
  */
 ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
-    std::vector<Mantid::Geometry::IComponent *> &componentIds)
+    const std::vector<Mantid::Geometry::IComponent *> &componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(
           boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
