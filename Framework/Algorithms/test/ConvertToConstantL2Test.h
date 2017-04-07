@@ -168,9 +168,9 @@ private:
     inputWS->mutableRun().addProperty(
         "wavelength", boost::lexical_cast<std::string>(m_wavelength));
 
-    inputWS->instrumentParameters().addDouble(
+    inputWS->instrumentParameters().addString(
         inputWS->getInstrument()->getComponentID(), "l2",
-        m_l2);
+        boost::lexical_cast<std::string>(m_l2));
   }
 };
 
