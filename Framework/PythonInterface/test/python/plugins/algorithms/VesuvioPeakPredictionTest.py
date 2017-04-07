@@ -24,7 +24,7 @@ class VesuvioPeakPredictionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(vesuvio_einstein_params, ITableWorkspace))
         self.assertEqual(vesuvio_einstein_params.cell(1, 1), 63.5)
-        self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 7), 18.4738102)
+        self.assertEqual(round(vesuvio_einstein_params.cell(2, 5), 5), 18.47381)
 
     # -------------------------Failure Cases-------------------------
 
