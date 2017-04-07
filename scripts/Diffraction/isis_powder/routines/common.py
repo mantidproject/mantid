@@ -174,8 +174,8 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     :param instrument: The instrument to query for the monitor position
     :return: The extracted monitor as a workspace
     """
-    number_list = generate_run_numbers(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
+    first_run_number = get_first_run_number(run_number_string)
+    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
 
