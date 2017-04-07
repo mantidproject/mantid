@@ -43,16 +43,19 @@ using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::Unit;
 
 namespace {
+/// An enum specifying a line profile orientation.
 enum class LineDirection {
   horizontal,
   vertical
 };
 
+///A private namespace for the options for the Direction property.
 namespace DirectionChoices{
 const static std::string HORIZONTAL{"Horizontal"};
 const static std::string VERTICAL{"Vertical"};
 }
 
+/// A private namespace for property names.
 namespace PropertyNames {
 const static std::string CENTRE{"Centre"};
 const static std::string DIRECTION{"Direction"};
@@ -66,6 +69,7 @@ const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 const static std::string START{"Start"};
 }
 
+/// A convenience struct for rectangular constraints.
 struct Box {
   double top;
   double bottom;
@@ -73,6 +77,7 @@ struct Box {
   double right;
 };
 
+/// Profile constraints as array indices.
 struct IndexLimits {
   size_t lineStart;
   size_t lineEnd;
@@ -80,6 +85,13 @@ struct IndexLimits {
   size_t averageEnd;
 };
 
+/**
+ * Set correct units and vertical axis binning.
+ * @param outWS A single-histogram workspace whose axes to modify.
+ * @param ws A workspace to copy units from.
+ * @param box Line profile constraints.
+ * @param dir Line profile orientation.
+ */
 void setAxesAndUnits(const Workspace2D_sptr &outWS, const MatrixWorkspace_const_sptr &ws, const Box &box, const LineDirection dir) {
   // Y units.
   outWS->setYUnit(ws->YUnit());
@@ -105,6 +117,16 @@ void setAxesAndUnits(const Workspace2D_sptr &outWS, const MatrixWorkspace_const_
   outWS->replaceAxis(1, outVertAxis.release());
 }
 
+/**
+ * Find the start and end indices for a line profile.
+ * @param start An output parameter for the start index.
+ * @param end An output parameter for the end index.
+ * @param bins Binning in a std::vector like container.
+ * @param isBinEdges Whether bins contains edges or points.
+ * @param lowerLimit A lower constraint.
+ * @param upperLImit An upper constraint.
+ * @throw std::runtime_error if given constraints don't make sense.
+ */
 template <typename Container>
 void startAndEnd(size_t &start, size_t &end, const Container &bins, const bool isBinEdges, const double lowerLimit, const double upperLimit) {
   auto lowerIt = std::upper_bound(bins.cbegin(), bins.cend(), lowerLimit);
@@ -125,6 +147,13 @@ void startAndEnd(size_t &start, size_t &end, const Container &bins, const bool i
   end = std::distance(bins.cbegin(), upperIt);
 }
 
+/**
+ * Extract values (binning) from (vertical) axis as vector. For
+ * spectrum axis, spectrum numbers are returned.
+ * @param axis An axis.
+ * @param numberHistograms The actual number of histograms.
+ * @return Axis bins.
+ */
 std::vector<double> extractVerticalBins(const Axis &axis, const size_t numberHistograms) {
   if (axis.isSpectra()) {
     std::vector<double> spectrumNumbers(numberHistograms);
@@ -138,6 +167,20 @@ std::vector<double> extractVerticalBins(const Axis &axis, const size_t numberHis
   return bins;
 }
 
+/**
+ * Calculate a line profile by averaging the workspace perpendicular to
+ * the line direction.
+ * @param Xs Output for line profile histogram's X data.
+ * @param Ys Output for line profile histogram's Y data.
+ * @param Es Output for line profile histogram's E data.
+ * @param ws A workspace where to extract a profile from.
+ * @param dir Line orientation.
+ * @param limits Line dimensions.
+ * @param lineBins Bins in line's direction.
+ * @param isBinEdges Whether lineBins represent edges or points.
+ * @param ignoreNans Whether NaN values should be ignored or not.
+ * @param ignoreInfs Whether infinities should be ignored or not.
+ */
 template <typename Container>
 void average(std::vector<double> &Xs, std::vector<double> &Ys, std::vector<double> &Es, const MatrixWorkspace_const_sptr &ws, const LineDirection dir, const IndexLimits &limits, const Container &lineBins, const bool isBinEdges, const bool ignoreNans, const bool ignoreInfs) {
   const auto lineSize = limits.lineEnd - limits.lineStart;
@@ -264,12 +307,14 @@ void LineProfile::exec() {
     bounds.left = centre - halfWidth;
     bounds.right = centre + halfWidth;
   }
+  // Convert the bounds from workspace units to indices.
   size_t vertStart;
   size_t vertEnd;
   startAndEnd(vertStart, vertEnd, verticalBins, verticalIsBinEdges, bounds.top, bounds.bottom);
   size_t horStart;
   size_t horEnd;
   startAndEnd(horStart, horEnd, horizontalBins, horizontalIsBinEdges, bounds.left, bounds.right);
+  // Build the actual profile.
   std::vector<double> averageYs;
   std::vector<double> averageEs;
   std::vector<double> Xs;
@@ -288,12 +333,15 @@ void LineProfile::exec() {
     limits.averageEnd = horEnd;
     average(Xs, averageYs, averageEs, ws, dir, limits, verticalBins, verticalIsBinEdges, ignoreNans, ignoreInfs);
    }
+  // Prepare and set output.
   Workspace2D_sptr outWS;
   if (Xs.size() > averageYs.size()) {
     outWS = create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(averageYs), CountStandardDeviations(averageEs)));
   } else {
     outWS = create<Workspace2D>(1, Histogram(Points(Xs), Counts(averageYs), CountStandardDeviations(averageEs)));
   }
+  // The actual profile might be of different size than what user
+  // specified.
   Box actualBounds;
   actualBounds.top = verticalBins[vertStart];
   actualBounds.bottom = verticalBins[vertEnd];
@@ -303,6 +351,8 @@ void LineProfile::exec() {
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }
 
+/** Validate the algorithm's inputs.
+ */
 std::map<std::string, std::string> LineProfile::validateInputs() {
   std::map<std::string, std::string> issues;
   const double length = getProperty(PropertyNames::LENGTH);
