@@ -361,7 +361,6 @@ void ReflectometryReductionOne2::initRun() {
     // These values are only required for summation in Q
     findLambdaMinMax();
     findTheta0();
-    findTwoThetaR();
   }
 }
 
@@ -689,16 +688,6 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
     throw std::runtime_error(
         "Only a single range is supported for summing in Q");
   }
-
-  // Also set the reference detector index as the centre of the
-  // region of interest
-  /// @todo Get correct centre pixel
-  m_twoThetaRDetectorIdx = 403;
-  //          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
-
-  // Log the results
-  g_log.debug() << "twoThetaR spectrum index: " << twoThetaRDetectorIdx()
-                << std::endl;
 }
 
 /**
@@ -724,15 +713,14 @@ void ReflectometryReductionOne2::findTheta0() {
 }
 
 /**
-* Find and cache the (arbitrary) reference angle twoThetaR for use for summation
-* in Q, and the detector pixel it corresponds to.
+* Get the (arbitrary) reference angle twoThetaR for use for summation
+* in Q
 *
 * @return : the angle twoThetaR
 * @throws : if the angle could not be found
 */
-void ReflectometryReductionOne2::findTwoThetaR() {
-  m_twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx());
-  g_log.debug() << "twoThetaR: " << twoThetaR() << std::endl;
+double ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
+  return getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
 }
 
 /**
@@ -751,6 +739,16 @@ ReflectometryReductionOne2::twoThetaMin(const std::vector<size_t> &detectors) {
 double
 ReflectometryReductionOne2::twoThetaMax(const std::vector<size_t> &detectors) {
   return getDetectorTwoTheta(m_spectrumInfo, spectrumMax(detectors));
+}
+
+/**
+* Get the spectrum index which defines the twoThetaR reference angle
+* @return : the spectrum index
+*/
+size_t
+ReflectometryReductionOne2::twoThetaRDetectorIdx(const std::vector<size_t> &detectors) {
+  // Get the mid-point of the area of interest
+  return detectors.front() + (detectors.back() - detectors.front()) / 2;
 }
 
 /**
@@ -788,9 +786,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
   cropWorkspaceAlg->setProperty("StartWorkspaceIndex",
-                                static_cast<int>(twoThetaRDetectorIdx()));
+                                static_cast<int>(twoThetaRDetectorIdx(detectors)));
   cropWorkspaceAlg->setProperty("EndWorkspaceIndex",
-                                static_cast<int>(twoThetaRDetectorIdx()));
+                                static_cast<int>(twoThetaRDetectorIdx(detectors)));
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr ws = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
@@ -804,13 +802,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   const double bTwoThetaMin =
       getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin(detectors));
   getProjectedLambdaRange(lambdaMax(), twoThetaMin(detectors), bLambdaMax,
-                          bTwoThetaMin, lambdaVMin, dummy);
+                          bTwoThetaMin, lambdaVMin, dummy, detectors);
 
   const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin(detectors));
   const double bTwoThetaMax =
       getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax(detectors));
   getProjectedLambdaRange(lambdaMin(), twoThetaMax(detectors), bLambdaMin,
-                          bTwoThetaMax, dummy, lambdaVMax);
+                          bTwoThetaMax, dummy, lambdaVMax, detectors);
 
   if (lambdaVMin > lambdaVMax) {
     std::swap(lambdaVMin, lambdaVMax);
@@ -868,7 +866,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 
     // Process each value in the spectrum
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam);
+      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam, detectors);
     }
   }
 
@@ -888,7 +886,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
-    MatrixWorkspace_sptr IvsLam) {
+    MatrixWorkspace_sptr IvsLam, const std::vector<size_t> &detectors) {
 
   // Get the bin width and the bin centre
   const double bLambda = getLambdaRange(inputX, inputIdx);
@@ -901,7 +899,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(
   double lambdaMin = 0.0;
   double lambdaMax = 0.0;
   getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaMin,
-                          lambdaMax);
+                          lambdaMax, detectors);
   // Share the input counts into the output array
   const double inputCounts = inputY[inputIdx];
   sumInQShareCounts(inputCounts, bLambda, lambdaMin, lambdaMax, IvsLam);
@@ -987,11 +985,12 @@ void ReflectometryReductionOne2::getDetectorDetails(const size_t spIdx,
 */
 void ReflectometryReductionOne2::getProjectedLambdaRange(
     const double lambda, const double twoTheta, const double bLambda,
-    const double bTwoTheta, double &lambdaMin, double &lambdaMax) {
+    const double bTwoTheta, double &lambdaMin, double &lambdaMax,
+    const std::vector<size_t> &detectors) {
   // Get the angle from twoThetaR to this detector
-  const double gamma = twoTheta - twoThetaR();
+  const double gamma = twoTheta - twoThetaR(detectors);
   // Get the angle from the horizon to the reference angle
-  const double horizonThetaR = twoThetaR() - theta0();
+  const double horizonThetaR = twoThetaR(detectors) - theta0();
 
   // Calculate the projected wavelength range
   try {
@@ -1005,7 +1004,7 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
   } catch (std::exception &ex) {
     std::stringstream errMsg;
     errMsg << "Failed to project (lambda, twoTheta) = (" << lambda << ","
-           << twoTheta << ") onto twoThetaR = " << twoThetaR() << ": "
+           << twoTheta << ") onto twoThetaR = " << twoThetaR(detectors) << ": "
            << ex.what();
     throw std::runtime_error(errMsg.str());
   }

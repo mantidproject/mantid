@@ -97,7 +97,8 @@ private:
                           const double bTwoTheta,
                           const HistogramData::HistogramX &inputX,
                           const HistogramData::HistogramY &inputY,
-                          API::MatrixWorkspace_sptr IvsLam);
+                          API::MatrixWorkspace_sptr IvsLam,
+                          const std::vector<size_t> &detectors);
   // Share counts to a projected value for summation in Q
   void sumInQShareCounts(const double inputCounts, const double bLambda,
                          const double lambdaMin, const double lambdaMax,
@@ -114,7 +115,8 @@ private:
   // Get projected coordinates onto twoThetaR
   void getProjectedLambdaRange(const double lambda, const double twoTheta,
                                const double bLambda, const double bTwoTheta,
-                               double &lambdaTop, double &lambdaBot);
+                               double &lambdaTop, double &lambdaBot,
+                               const std::vector<size_t> &detectors);
   // Check whether two spectrum maps match
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
@@ -130,8 +132,6 @@ private:
   void initRun();
   void findLambdaMinMax();
   void findDetectorsOfInterest();
-  void findTwoThetaMinMax(const std::vector<size_t> &detectors);
-  void findTwoThetaR();
   void findTheta0();
   // Accessors for theta and lambda values
   double lambdaMin() { return m_lambdaMin; }
@@ -139,8 +139,8 @@ private:
   double twoThetaMin(const std::vector<size_t> &detectors);
   double twoThetaMax(const std::vector<size_t> &detectors);
   double theta0() { return m_theta0; }
-  double twoThetaR() { return m_twoThetaR; }
-  size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
+  double twoThetaR(const std::vector<size_t> &detectors);
+  size_t twoThetaRDetectorIdx(const std::vector<size_t> &detectors);
   size_t spectrumMin(const std::vector<size_t> &detectors);
   size_t spectrumMax(const std::vector<size_t> &detectors);
 
