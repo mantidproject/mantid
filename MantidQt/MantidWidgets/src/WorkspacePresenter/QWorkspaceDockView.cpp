@@ -576,9 +576,9 @@ void QWorkspaceDockView::createWorkspaceMenuActions() {
   connect(m_plotSpecErr, SIGNAL(triggered()), this,
           SLOT(onClickPlotSpectraErr()));
 
-  m_plotSpecAdv = new QAction(tr("Plot Spectrum Advanced..."), this);
-  connect(m_plotSpecAdv, SIGNAL(triggered()), this,
-          SLOT(onClickPlotSpectraAdv()));
+  m_plotAdvanced = new QAction(tr("Plot Advanced..."), this);
+  connect(m_plotAdvanced, SIGNAL(triggered()), this,
+          SLOT(onClickPlotAdvanced()));
 
   m_colorFill = new QAction(tr("Color Fill Plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this,
@@ -912,12 +912,12 @@ void QWorkspaceDockView::addMatrixWorkspaceMenuItems(
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);
-  menu->addAction(m_plotSpecAdv);
+  menu->addAction(m_plotAdvanced);
 
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled(matrixWS->blocksize() > 1);
   m_plotSpecErr->setEnabled(matrixWS->blocksize() > 1);
-  m_plotSpecAdv->setEnabled(matrixWS->blocksize() > 1);
+  m_plotAdvanced->setEnabled(matrixWS->blocksize() > 1);
 
   menu->addAction(m_showSpectrumViewer); // The 2D spectrum viewer
 
@@ -1005,8 +1005,8 @@ void QWorkspaceDockView::addWorkspaceGroupMenuItems(QMenu *menu) const {
   menu->addAction(m_plotSpec);
   m_plotSpecErr->setEnabled(true);
   menu->addAction(m_plotSpecErr);
-  m_plotSpecAdv->setEnabled(true);
-  menu->addAction(m_plotSpecAdv);
+  m_plotAdvanced->setEnabled(true);
+  menu->addAction(m_plotAdvanced);
   menu->addAction(m_colorFill);
   m_colorFill->setEnabled(true);
 
@@ -1463,7 +1463,7 @@ void QWorkspaceDockView::onClickPlotSpectraErr() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumWithErrors);
 }
 
-void QWorkspaceDockView::onClickPlotSpectraAdv() {
+void QWorkspaceDockView::onClickPlotAdvanced() {
   m_presenter->notifyFromView(ViewNotifiable::Flag::PlotSpectrumAdvanced);
 }
 

@@ -216,7 +216,7 @@ private slots:
   void onClickShowTransposed();
   void onClickPlotSpectra();
   void onClickPlotSpectraErr();
-  void onClickPlotSpectraAdv();
+  void onClickPlotAdvanced();
   void onClickDrawColorFillPlot();
   void onClickShowDetectorTable();
   void onClickConvertToMatrixWorkspace();
@@ -252,7 +252,7 @@ private:
   QFileDialog *m_saveFolderDialog;
 
   // Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotSpecAdv,
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_plotSpecErr, *m_plotAdvanced,
       *m_showDetectors, *m_showBoxData, *m_showVatesGui, *m_showSpectrumViewer,
       *m_showSliceViewer, *m_colorFill, *m_showLogs, *m_showSampleMaterial,
       *m_showHist, *m_showMDPlot, *m_showListData, *m_saveNexus, *m_rename,

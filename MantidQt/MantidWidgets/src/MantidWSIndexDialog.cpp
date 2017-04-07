@@ -774,7 +774,7 @@ void MantidWSIndexDialog::init(bool isAdvanced) {
   m_outer = new QVBoxLayout;
 
   if (isAdvanced) {
-    setWindowTitle(tr("Plot Spectrum Advanced"));
+    setWindowTitle(tr("Plot Advanced"));
   } else {
     setWindowTitle(tr("Plot Spectrum"));
   }
