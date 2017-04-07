@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
 using Mantid::DataHandling::LoadEmptyInstrument;
@@ -68,8 +67,7 @@ public:
         57.0);
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("dan.value"),
                      3.1909999847412109);
-    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
-                     0.013958706061406229);
+    // test defaults: same result as testIncoherentScatteringSampleAngleD17()
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
                      0.013958706061406229);
     AnalysisDataService::Instance().clear();
@@ -111,51 +109,42 @@ public:
     double san = output->run().getPropertyValueAsType<double>("san.value");
     double dan = output->run().getPropertyValueAsType<double>("dan.value");
     double offsetAngle = dan / 2. * san;
-    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(130) * 180.0 / M_PI,
+    TS_ASSERT_LESS_THAN_EQUALS(spectrumInfo.twoTheta(130) * 180. / M_PI,
                                2. * san + offsetAngle);
     AnalysisDataService::Instance().clear();
   }
 
-  void testDirectBeamD17() {
-    LoadILLReflectometry loader;
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
-    TS_ASSERT(loader.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_d17File));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("BraggAngleIs", "detector angle"));
-    // Direct beam is the reflected beam
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", m_d17File));
-    TS_ASSERT_EQUALS(
-        loader.fitReflectometryPeak("DirectBeam", "detector angle"),
-        std::vector<double>(0.0, 200.463));
-    TS_ASSERT_THROWS_NOTHING(loader.execute(););
-    TS_ASSERT(loader.isExecuted());
+  void testIncoherentScatteringSampleAngleD17() {
+    // this must be the san.value in rad or stheta
+    testScatteringAngle(0.013958706061406229, "sample angle", "incoherent",
+                        m_d17File);
   }
 
-  void testGaussianFitD17() {
-    LoadILLReflectometry loader;
-    loader.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());
-    TS_ASSERT(loader.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_d17File));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setPropertyValue("BraggAngleIs", "detector angle"));
-    // Direct beam is the reflected beam
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", m_d17File));
-    TS_ASSERT_THROWS_NOTHING(loader.execute(););
-    TS_ASSERT(loader.isExecuted());
-    if (loader.isExecuted()) {
-      MatrixWorkspace_sptr output =
-          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-              outWSName);
-      TS_ASSERT(output);
-    }
-    AnalysisDataService::Instance().clear();
+  void testCoherentScatteringSampleAngleD17() {
+    testScatteringAngle(0.013869106584602529, "sample angle", "coherent",
+                        m_d17File);
+  }
+
+  void testIncoherentScatteringDetectorAngleD17() {
+    // small value due to centre angle is zero
+    testScatteringAngle(0.0, "detector angle", "incoherent", m_d17File);
+  }
+
+  void testCoherentScatteringDetectorAngleD17() {
+    // small value due to centre angle is zero
+    testScatteringAngle(-7.116595751588406e-06, "detector angle", "coherent",
+                        m_d17File);
+  }
+
+  // user defined input angle only needs to be converted to radiant
+  void testIncoherentScatteringUserAngleD17() {
+    testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
+                        m_d17File);
+  }
+
+  void testCoherentScatteringUserAngleD17() {
+    testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
+                        m_d17File);
   }
 
   // Figaro
@@ -169,12 +158,43 @@ public:
         40.0);
     TS_ASSERT_DELTA(output->run().getPropertyValueAsType<double>("san.value"),
                     1.3877788e-17, 1e-16);
-    TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
-                     2.4221309013948832e-19);
+    // test default inputs
     TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
                      2.4221309013948832e-19);
     AnalysisDataService::Instance().clear();
   }
+
+  void testIncoherentScatteringSampleAngleFigaro() {
+    testScatteringAngle(2.4221309013948832e-19, "sample angle", "incoherent",
+                        m_figaroFile);
+  }
+
+  // void testCoherentScatteringSampleAngleFigaro() {
+  //  testScatteringAngle(xx, "sample angle", "coherent",
+  //                      m_figaroFile);
+  //}
+
+  // void testIncoherentScatteringDetectorAngleFigaro() {
+  //  testScatteringAngle(0.0, "detector angle", "incoherent", m_figaroFile);
+  //  // center angle 0
+  //}
+
+  // void testCoherentScatteringDetectorAngleFigaro() {
+  //  testScatteringAngle(xx, "detector angle", "coherent",
+  //                      m_figaroFile);
+  //}
+
+  // user defined input angle treated like sample angle, test angle 30.0 degrees
+  void testIncoherentScatteringUserAngleFigaro() {
+    testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
+                        m_figaroFile);
+  }
+
+  // user defined input angle treated like sample angle, test angle 30.0 degrees
+  //void testCoherentScatteringUserAngleFigaro() {
+  //  testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
+  //                      m_figaroFile);
+  //}
 
   // helpers
 
@@ -233,7 +253,8 @@ public:
     TS_ASSERT_THROWS_ANYTHING(loader.execute(););
   }
 
-  void commonProperties(MatrixWorkspace_sptr output, const std::string& instrName) {
+  void commonProperties(MatrixWorkspace_sptr output,
+                        const std::string &instrName) {
     TS_ASSERT(output->isHistogramData());
     TS_ASSERT(output->spectrumInfo().isMonitor(0));
     TS_ASSERT(output->spectrumInfo().isMonitor(1));
@@ -254,6 +275,39 @@ public:
       counts = std::accumulate(values.begin(), values.end(), counts);
     }
     return counts;
+  }
+
+  void testScatteringAngle(double comparisonValue, const std::string &angle,
+                           const std::string &scatteringType,
+                           const std::string &file) {
+    LoadILLReflectometry loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT(loader.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("BraggAngleIs", angle));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("ScatteringType", scatteringType));
+    if (angle == "detector angle") {
+      // Direct beam is the reflected beam
+      TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("DirectBeam", file));
+    }
+    if (angle == "user defined") {
+      TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("BraggAngle", "30.0"))
+    }
+    TS_ASSERT_THROWS_NOTHING(loader.execute(););
+    TS_ASSERT(loader.isExecuted());
+    if (loader.isExecuted()) {
+      MatrixWorkspace_sptr output =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              outWSName);
+      TS_ASSERT(output);
+      TS_ASSERT_EQUALS(output->run().getPropertyValueAsType<double>("stheta"),
+                       comparisonValue);
+    }
+    AnalysisDataService::Instance().clear();
   }
 };
 

@@ -95,7 +95,7 @@ private:
   std::string m_offsetFrom{std::string()};
   std::string m_chopper1Name{std::string()};
   std::string m_chopper2Name{std::string()};
-  double m_detectorDistanceDirectBeam{0.0};
+  double m_detectorDistanceDirectBeam{0.0}; ///< Sample detector distance
   double m_detectorDistanceValue{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};

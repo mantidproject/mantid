@@ -16,70 +16,74 @@
 //#include "MantidDataObjects/WorkspaceCreation.h"
 //#include "MantidNexus/NexusClasses.h"
 
-/*!
- * \def atanFor(a)
- * Computes the antan of an angle in rad used for the coherence equation, where
- * \a is a peak position.
- * \def coherenceEq1(a, b, c)
- * Computes the incoherence equation for an angle centre \a, and peak positions
- * \b and \c.
- * \def coherenceEq2(a, b, c)
- * Computes the coherent equation for an angle centre \a, and peak positions \b
- * and \c.
- * \def iterator(a, b, c)
- * Returns an iterator for an iterator \a and \b and a double value \c
- * \def StringConcat(string1, string2)
- * Concatenates \string1 and \string2, where the \string1 string will not be
- * modified but copied
- * \def debugLog(myString, myValue)
- * Logs a debug message \myString for \myValue
- * \def debugLog2(myString, aString, myValue)
- * Logs a debug message for \myValue explained by two strings \myString and
- * \aString
- * \def debugLogWithUnitDegrees(myString, myValue)
- * Logs a debug message \myString for a \myValue in degrees
- * \def debugLogWithUnitMeter(myString, myValue)
- * Logs a debug message \myString for \myValue in meters
- * \def infoLog(myString)
- * Logs an information message \myString using the generated error message
- * what()
- * \def getDouble(myString)
- * Get a double value from the workspace to be loaded (SampleLogs) for \myString
- * \def inRad *M_PI / 180.
- * Convert an angle from degree to radiant
- * \def #define inMeter *1.0e-3
- * Convert a value from millimeter to meter
- */
-
+// unit
+/// Convert an angle from degree to radiant
+#define inRad *M_PI / 180.
+/// Convert and angle from radiant to degree
+#define inDeg *180. / M_PI
+/// Convert a value from millimeter to meter
+#define inMeter *1.0e-3
 // formula
-#define atanFor(a)                                                             \
+/// Computes the antan of an angle in rad used for the coherence equation, where
+/// \a is a peak position. This equation requires the sample-detector distance
+/// of the direct beam.
+#define atanUsingDirectBeam(a)                                                 \
   atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceDirectBeam)
-#define coherenceEq1(a, b, c) a + 0.5 * (atanFor(b) - atanFor(c))
-#define coherenceEq2(a, b, c) a + 0.5 * (atanFor(b) + atanFor(c))
+/// Computes the antan of an angle in rad used for the coherence equation, where
+/// \a is a peak position. This equation requires the sample-detector distance
+/// of the reflected beam.
+#define atanUsingReflectedBeam(a)                                              \
+  atan((a - m_pixelCentre) * m_pixelWidth / m_detectorDistanceValue)
+/** Computes the coherence and incoherence equation for an angle \a, and peak
+  * positions of the reflected beam \b and \c. The signed factor \sign depends
+  * on Figaro's reflection down option.
+  */
+#define eq1(a, b, c, sign)                                                     \
+  (a -                                                                         \
+   (sign)*0.5 * (atanUsingDirectBeam(b) + (sign)*atanUsingReflectedBeam(c)))   \
+      inDeg
+/** Computes the coherence and incoherence equation for an angle \a, and peak
+  * positions of the direct and reflected beam \b and \c, respectively. The
+  *  signed factor \sign depends on Figaro's reflection
+  * down option.
+  */
+#define eq2(a, b, c, sign)                                                     \
+  (a -                                                                         \
+   (sign)*0.5 *                                                                \
+       (atanUsingReflectedBeam(b) + (sign)*atanUsingReflectedBeam(c))) inDeg
+/// Returns an iterator for an iterator \a and \b and a double value \c
 #define iterator(a, b, c)                                                      \
   std::find_if(a, b, [c](double value) { return value < 0.5 * c; })
 // string concatenation
+/// Concatenates \string1 and \string2, where the \string1 string will not be
+/// modified but copied
 #define StringConcat(string1, string2) std::string(string1).append(string2)
 // logging
+/// Logs a debug message \myString for \myValue
 #define debugLog(myString, myValue)                                            \
   g_log.debug(StringConcat(myString, std::to_string(myValue)).append("\n"))
+/// Logs a debug message for \myValue explained by two strings \myString and
+/// \aString
 #define debugLog2(myString, aString, myValue)                                  \
   g_log.debug(StringConcat(myString, aString)                                  \
                   .append(StringConcat(": ", std::to_string(myValue)))         \
                   .append("\n"))
+/// Logs a debug message \myString for a \myValue in degrees
 #define debugLogWithUnitDegrees(myString, myValue)                             \
   g_log.debug(                                                                 \
       StringConcat(myString, std::to_string(myValue).append(" degrees\n")))
+/// Logs a debug message \myString for \myValue in meters
 #define debugLogWithUnitMeter(myString, myValue)                               \
   g_log.debug(StringConcat(myString, std::to_string(myValue)).append(" m\n"))
+/// Logs an information message \myString using the generated error message
+/// what()
 #define infoLog(myString)                                                      \
   g_log.information(StringConcat(myString, e.what()).append("\n"))
 // get a double value from sample logs of the (output) workspace
+/// Get a double value from the workspace to be loaded (SampleLogs) for
+/// \myString
 #define getDouble(myString)                                                    \
   m_localWorkspace->run().getPropertyValueAsType<double>(myString)
-// unit
-#define inRad *M_PI / 180.
-#define inMeter *1.0e-3
 
 namespace Mantid {
 namespace DataHandling {
@@ -125,10 +129,10 @@ void LoadILLReflectometry::init() {
                       "OutputWorkspace", std::string(), Direction::Output),
                   "The name to use for the output workspace");
 
-  const std::vector<std::string> theta{"sample angle", "detector angle",
+  const std::vector<std::string> angle{"sample angle", "detector angle",
                                        "user defined"};
   declareProperty("BraggAngleIs", "sample angle",
-                  boost::make_shared<StringListValidator>(theta),
+                  boost::make_shared<StringListValidator>(angle),
                   "Optional angle for calculating the scattering angle.\n");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
@@ -171,9 +175,9 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
       (m_supportedInstruments.find(fileName) != m_supportedInstruments.end()))
     result["Filename"] = "Instrument not supported.";
   // check user defined angle
-  const double thetaUserDefined{getProperty("BraggAngle")};
+  const double angleUserDefined{getProperty("BraggAngle")};
   const std::string angleOption{getPropertyValue("BraggAngleIs")};
-  if ((angleOption == "user defined") && (thetaUserDefined == EMPTY_DBL()))
+  if ((angleOption == "user defined") && (angleUserDefined == EMPTY_DBL()))
     result["BraggAngle"] =
         "User defined BraggAngle option requires an input value";
   // check direct beam file
@@ -183,11 +187,10 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
     result["DirectBeam"] = "Instrument not supported.";
   // compatibility check for reflected and direct beam located in loadBeam
   // further input validation is needed for general LoadDialog and Python
-  if ((angleOption != "user defined") && (thetaUserDefined != EMPTY_DBL()))
+  if ((angleOption != "user defined") && (angleUserDefined != EMPTY_DBL()))
     result["BraggAngle"] = "No input value required";
-  if (directBeam.empty() && (angleOption == "detector angle")) {
+  if (directBeam.empty() && (angleOption == "detector angle"))
     result["BraggAngleIs"] = "DirectBeam input required";
-  }
   return result;
 }
 
@@ -259,7 +262,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     m_detectorAngleName = "dan.value";
     m_offsetFrom = "VirtualChopper";
     m_offsetName = "open_offset";
-    m_pixelCentre = 135.75;
+    m_pixelCentre = 135.75; // or 135.75 or 132.5
     m_chopper1Name = "Chopper1";
     m_chopper2Name = "Chopper2";
     // m_wavelength = getFloat("wavelength");
@@ -362,7 +365,7 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   nChannels.load();
   m_numberOfHistograms = nChannels[0];
 
-  NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/mppy");
+  NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/mppx");
   pixelWidth.load();
   m_pixelWidth = static_cast<double>(pixelWidth[0]) inMeter;
 
@@ -401,7 +404,7 @@ LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
  * Load monitors data found in nexus file
  *
  * @param entry :: The Nexus entry
- * @return :: A std::vector of vectors containing values from all monitors
+ * @return :: A std::vector of vectors of monitors containing monitor values
  */
 std::vector<std::vector<int>>
 LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
@@ -416,7 +419,7 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
 /**
  * Determine x values
  *
- * @param xVals :: vector holding the x values
+ * @return :: vector holding the x values
  */
 std::vector<double> LoadILLReflectometry::getXValues() {
   std::vector<double> xVals;                  // no initialisation
@@ -528,7 +531,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(NeXus::NXEntry &entry,
                                                           NeXus::NXRoot &root) {
   g_log.debug("Building properties...");
   /*
-  // "Open" the same file but with the C++ interface
+  // "Open" the file with the C++ interface
   ::NeXus::File *file = new ::NeXus::File(root.m_fileID);
   std::string parameterStr;
   file->openPath(entry.path());
@@ -544,7 +547,6 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(NeXus::NXEntry &entry,
   //         "Reading the parameter maps...");
   m_localWorkspace->readParameterMap(parameterStr);
   */
-
   // Open NeXus file
   const std::string filename{getPropertyValue("Filename")};
   NXhandle nxfileID;
@@ -555,8 +557,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties(NeXus::NXEntry &entry,
   stat = NXclose(&nxfileID);
 }
 
-/**
-  * Load direct or reflected beam:
+/** Load direct or reflected beam:
   * - load detector counts
   * - get angle value for computing the Bragg angle, only for direct beam
   * @params beamWS :: workspace holding detector counts
@@ -586,10 +587,18 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
         g_log.error(
             StringConcat(beam, " has incompatible size with Filename beam\n"));
       // get sample detector distance
-      std::replace(m_detectorDistance.begin(), m_detectorDistance.end(), '.',
-                   '/');
-      m_detectorDistanceDirectBeam = entry.getFloat(
-          StringConcat("instrument/", m_detectorDistance).append("/value"));
+      if (m_instrumentName == "D17")
+        m_detectorDistanceDirectBeam = entry.getFloat(
+            StringConcat("instrument/", m_detectorDistance).append("/value"))
+                                           inMeter;
+      else if (m_instrumentName == "Figaro")
+        m_detectorDistanceDirectBeam =
+            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
+                               .append("/value")) inMeter +
+            entry.getFloat(StringConcat("instrument/", m_detectorDistance)
+                               .append("/offset_value")) inMeter;
+      debugLog2("Sample-detector distance (m) ", beam,
+                m_detectorDistanceDirectBeam);
       // set Bragg angle of the direct beam for later use
       if (!angleDirectBeam.empty()) {
         std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
@@ -630,7 +639,7 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
   * @param angleDirectBeam :: Name of the angle for calculating the Bragg angle.
   *This is particularly useful in case of the detector angle.
   * @return centre :: detector position of the peak: Gaussian fit and position
-  *of the maximum
+  *of the maximum (serves as start value for the optimization)
   */
 std::vector<double>
 LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
@@ -662,20 +671,20 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
     // determine initial centre: index of the maximum value
     size_t maxIndex = std::distance(spectrum.begin(), maxValueIt);
     centre[1] = static_cast<double>(maxIndex);
+    debugLog2("Peak maximum position of ", beam, centre[1]);
     // determine sigma
     auto minFwhmIt = iterator(maxValueIt, spectrum.begin(), height);
     auto maxFwhmIt = iterator(maxValueIt, spectrum.end(), height);
-    double sigma =
+    double fwhm =
         0.5 * static_cast<double>(std::distance(minFwhmIt, maxFwhmIt) + 1);
+    debugLog2("Initial fwhm (fixed window at half maximum) ", beam, fwhm);
     // generate Gaussian
     auto func = API::FunctionFactory::Instance().createFunction("Gaussian");
     auto initialGaussian =
         boost::dynamic_pointer_cast<API::IPeakFunction>(func);
     initialGaussian->setHeight(height);
     initialGaussian->setCentre(centre[1]);
-    initialGaussian->setFwhm(sigma);
-    debugLog2("Position of the peak maximum value (initial peak position) of ",
-              beam, centre[1]);
+    initialGaussian->setFwhm(fwhm);
     // call Fit child algorithm
     API::IAlgorithm_sptr fitGaussian =
         createChildAlgorithm("Fit", -1, -1, true);
@@ -689,8 +698,8 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
       g_log.warning("Fit not successful, take initial values\n");
     else {
       // get fitted values back
-      centre[0] = initialGaussian->centre();
-      sigma = initialGaussian->fwhm();
+      centre[0] = initialGaussian->centre() - 1; // correction required!
+      double sigma = initialGaussian->fwhm();
       debugLog("Sigma: ", sigma);
     }
     debugLog2("Estimated peak position of ", beam, centre[0]);
@@ -702,42 +711,56 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
 
 /// Compute Bragg angle
 double LoadILLReflectometry::computeBraggAngle() {
-  // compute bragg angle
-  const std::string thetaIn = getPropertyValue("BraggAngleIs");
-  std::string thetaAngle{std::string()};
-  if (thetaIn == "sample angle" || thetaIn == "detector angle") {
-    thetaIn == "sample angle" ? thetaAngle = "san.value"
-                              : thetaAngle = m_detectorAngleName;
+  // compute bragg angle called angleBragg in the following
+  const std::string inputAngle = getPropertyValue("BraggAngleIs");
+  std::string incidentAngle{std::string()};
+  if (inputAngle == "sample angle" || inputAngle == "detector angle") {
+    inputAngle == "sample angle" ? incidentAngle = "san.value"
+                                 : incidentAngle = m_detectorAngleName;
   } else
-    thetaAngle = "user defined";
-  double theta = getProperty("BraggAngle");
-  // no user input for theta means we take sample or detector angle value
-  if (theta == EMPTY_DBL()) {
-    // modify error message Unknown property search object
-    if (m_localWorkspace->run().hasProperty(thetaAngle))
-      theta = getDouble(thetaAngle);
-    else
-      throw std::runtime_error("BraggAngleIs (sample or detector option) "
-                               "is not defined in Nexus file");
+    incidentAngle = "user defined";
+  double angle = getProperty("BraggAngle");
+  // no user input for BraggAngle means we take sample or detector angle value
+  if (angle == EMPTY_DBL()) {
+    // modify error message "Unknown property search object"
+    if (m_localWorkspace->run().hasProperty(incidentAngle)) {
+      angle = getDouble(incidentAngle);
+      debugLog2("Use angle (degrees), ", incidentAngle, angle);
+    } else
+      throw std::runtime_error(
+          std::string(incidentAngle).append(" is not defined in Nexus file"));
   }
   // user angle and sample angle behave equivalently for D17
   const std::string scatteringType = getProperty("ScatteringType");
+  double angleBragg{angle};
   // the reflected beam
   std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
-  if (thetaIn == "detector angle") {
+  if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
+      (scatteringType == "coherent")) {
+    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], -1.0);
+    // angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], 1.0); // ref
+    // down Figaro
+  } else if (inputAngle == "detector angle") {
     // DirectBeam is abvailable and we can read from its NeXus file
     std::vector<double> peakPosDB =
-        fitReflectometryPeak("DirectBeam", thetaAngle);
-    double angleCentre = ((theta - m_BraggAngleDirectBeam) / 2.)inRad;
-    debugLog("Center angle ", angleCentre);
+        fitReflectometryPeak("DirectBeam", incidentAngle);
+    double angleCentre = ((angle - m_BraggAngleDirectBeam) / 2.)inRad;
+    debugLogWithUnitDegrees("Centre angle ", angleCentre inDeg);
+    // if refdown figaro down = -1.0, else down = 1.0
+    float down{1.0};
     if (scatteringType == "incoherent")
-      theta = coherenceEq1(angleCentre, peakPosDB[0], peakPosRB[0]);
+      angleBragg = eq1(down * angleCentre, peakPosDB[0], peakPosRB[0],
+                       -1.0); // refdown figaro
+    // angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], 1.0);// no
+    // refdown figaro
     else if (scatteringType == "coherent")
-      theta = coherenceEq1(angleCentre, peakPosDB[0], peakPosRB[1]);
-  } else if (scatteringType == "coherent")
-    theta = coherenceEq2(theta inRad, peakPosRB[1], peakPosRB[0]);
-  debugLogWithUnitDegrees("Bragg angle ", theta);
-  return theta;
+      angleBragg = eq1(down * angleCentre, peakPosDB[0], peakPosRB[1] + 0.5,
+                       -1.0); // refdown figaro
+    // angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, 1.0);//no
+    // refdown figaro
+  }
+  debugLogWithUnitDegrees("Bragg angle ", angleBragg);
+  return angleBragg;
 }
 
 /// Utility to place detector in space, according to data file
@@ -746,7 +769,9 @@ void LoadILLReflectometry::placeDetector() {
   double detectorAngle = getDouble(m_detectorAngleName);
   double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
   m_detectorDistanceValue = dist inMeter;
-  debugLog("Sample-detector distance in meter ", m_detectorDistanceValue);
+  if (m_instrumentName == "Figaro")
+    dist += getDouble(StringConcat(m_detectorDistance, ".offset_value"));
+  debugLogWithUnitMeter("Sample-detector distance ", m_detectorDistanceValue);
   double theta = computeBraggAngle();
   double twotheta_rad = (2. * theta)inRad;
   // incident theta angle for calling the algorithm ConvertToReflectometryQ
