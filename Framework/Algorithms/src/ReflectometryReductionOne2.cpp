@@ -118,7 +118,7 @@ double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
   return theta;
 }
 
-/** @todo The following translate functions are duplicates of code in 
+/** @todo The following translate functions are duplicates of code in
 * GroupDetectors2.cpp. We should move them to a common location if possible */
 
 /* The following functions are used to translate single operators into
@@ -217,14 +217,11 @@ translateInstructions(const std::string &instructions) {
       if (groupStr.find('+') != std::string::npos) {
         // add a group with the given spectra
         translateAdd(groupStr, outGroups);
-      }
-      else if (groupStr.find('-') != std::string::npos) {
+      } else if (groupStr.find('-') != std::string::npos) {
         translateSumRange(groupStr, outGroups);
-      }
-      else if (groupStr.find(':') != std::string::npos) {
+      } else if (groupStr.find(':') != std::string::npos) {
         translateRange(groupStr, outGroups);
-      }
-      else if (!groupStr.empty()) {
+      } else if (!groupStr.empty()) {
         // contains no instructions, just add this spectrum as a new group
         // create group of size 1 with the spectrum in it
         std::vector<size_t> newGroup(1, boost::lexical_cast<size_t>(groupStr));
@@ -232,8 +229,9 @@ translateInstructions(const std::string &instructions) {
         outGroups.push_back(newGroup);
       }
     }
-  } catch (boost::bad_lexical_cast &ex) {
-    throw std::runtime_error("Invalid processing instructions: " + instructions);
+  } catch (boost::bad_lexical_cast &) {
+    throw std::runtime_error("Invalid processing instructions: " +
+                             instructions);
   }
 
   return outGroups;
@@ -362,7 +360,6 @@ void ReflectometryReductionOne2::initRun() {
   if (summingInQ()) {
     // These values are only required for summation in Q
     findLambdaMinMax();
-    findTwoThetaMinMax(m_detectors[0]);
     findTheta0();
     findTwoThetaR();
   }
@@ -705,18 +702,6 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
 }
 
 /**
-* Find and cache the min/max twoTheta for the area of interest
-*/
-void ReflectometryReductionOne2::findTwoThetaMinMax(
-    const std::vector<size_t> &detectors) {
-  m_twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spectrumMin(detectors));
-  m_twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spectrumMax(detectors));
-  if (m_twoThetaMin > m_twoThetaMax) {
-    std::swap(m_twoThetaMin, m_twoThetaMax);
-  }
-}
-
-/**
 * Find and cache the horizon angle theta0 for use for summation in Q.
 */
 void ReflectometryReductionOne2::findTheta0() {
@@ -748,6 +733,24 @@ void ReflectometryReductionOne2::findTheta0() {
 void ReflectometryReductionOne2::findTwoThetaR() {
   m_twoThetaR = getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx());
   g_log.debug() << "twoThetaR: " << twoThetaR() << std::endl;
+}
+
+/**
+* Get the minimum twoTheta index in the area of interest
+* @return : the spectrum index
+*/
+double
+ReflectometryReductionOne2::twoThetaMin(const std::vector<size_t> &detectors) {
+  return getDetectorTwoTheta(m_spectrumInfo, spectrumMin(detectors));
+}
+
+/**
+* Get the maximum twoTheta index in the area of interest
+* @return : the spectrum index
+*/
+double
+ReflectometryReductionOne2::twoThetaMax(const std::vector<size_t> &detectors) {
+  return getDetectorTwoTheta(m_spectrumInfo, spectrumMax(detectors));
 }
 
 /**
@@ -800,14 +803,14 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   const double bLambdaMax = getLambdaRange(detectorWS, spectrumMax(detectors));
   const double bTwoThetaMin =
       getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin(detectors));
-  getProjectedLambdaRange(lambdaMax(), twoThetaMin(), bLambdaMax, bTwoThetaMin,
-                          lambdaVMin, dummy);
+  getProjectedLambdaRange(lambdaMax(), twoThetaMin(detectors), bLambdaMax,
+                          bTwoThetaMin, lambdaVMin, dummy);
 
   const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin(detectors));
   const double bTwoThetaMax =
       getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax(detectors));
-  getProjectedLambdaRange(lambdaMin(), twoThetaMax(), bLambdaMin, bTwoThetaMax,
-                          dummy, lambdaVMax);
+  getProjectedLambdaRange(lambdaMin(), twoThetaMax(detectors), bLambdaMin,
+                          bTwoThetaMax, dummy, lambdaVMax);
 
   if (lambdaVMin > lambdaVMax) {
     std::swap(lambdaVMin, lambdaVMax);
@@ -1065,7 +1068,10 @@ std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
   // Add each group to the output, separated by ','
   /// @todo Add support to separate contiguous groups by ':' to avoid having
   /// long lists in the processing instructions
-  for (auto &hostDetectors : hostGroups) {
+  for (auto &groupIt = hostGroups.begin(); groupIt != hostGroups.end();
+       ++groupIt) {
+    const auto &hostDetectors = *groupIt;
+
     // Add each detector index to the output string separated by '+' to indicate
     // that all detectors in this group will be summed. We also check for
     // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
@@ -1100,6 +1106,10 @@ std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
       if (nextIt != hostDetectors.end()) {
         result << "+";
       }
+    }
+
+    if (groupIt + 1 != hostGroups.end()) {
+      result << ",";
     }
   }
 

@@ -136,8 +136,8 @@ private:
   // Accessors for theta and lambda values
   double lambdaMin() { return m_lambdaMin; }
   double lambdaMax() { return m_lambdaMax; }
-  double twoThetaMin() { return m_twoThetaMin; }
-  double twoThetaMax() { return m_twoThetaMax; }
+  double twoThetaMin(const std::vector<size_t> &detectors);
+  double twoThetaMax(const std::vector<size_t> &detectors);
   double theta0() { return m_theta0; }
   double twoThetaR() { return m_twoThetaR; }
   size_t twoThetaRDetectorIdx() { return m_twoThetaRDetectorIdx; }
@@ -149,8 +149,6 @@ private:
   bool m_convertUnits;           // convert the input workspace to lambda
   bool m_normalise;              // normalise by monitors etc.
   bool m_sum;                    // whether to do summation
-  double m_twoThetaMin;          // min angle in detectors of interest
-  double m_twoThetaMax;          // max angle in detectors of interest
   double m_theta0;               // horizon angle
   double m_twoThetaR;            // reference angle for summation in Q
   double m_lambdaMin;            // min wavelength in area of interest
