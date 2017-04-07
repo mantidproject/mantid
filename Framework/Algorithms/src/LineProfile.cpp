@@ -1,0 +1,323 @@
+#include "MantidAlgorithms/LineProfile.h"
+
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/IncreasingAxisValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Unit.h"
+
+#include <algorithm>
+#include "boost/make_shared.hpp"
+
+namespace Mantid {
+namespace Algorithms {
+
+using Mantid::API::Axis;
+using Mantid::API::BinEdgeAxis;
+using Mantid::API::CommonBinsValidator;
+using Mantid::API::IncreasingAxisValidator;
+using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
+using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::create;
+using Mantid::DataObjects::Workspace2D;
+using Mantid::DataObjects::Workspace2D_sptr;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Points;
+using Mantid::Kernel::BoundedValidator;
+using Mantid::Kernel::CompositeValidator;
+using Mantid::Kernel::Direction;
+using Mantid::Kernel::ListValidator;
+using Mantid::Kernel::make_unique;
+using Mantid::Kernel::MandatoryValidator;
+using Mantid::Kernel::Unit;
+
+namespace {
+enum class LineDirection {
+  horizontal,
+  vertical
+};
+
+namespace DirectionChoices{
+const static std::string HORIZONTAL{"Horizontal"};
+const static std::string VERTICAL{"Vertical"};
+}
+
+namespace PropertyNames {
+const static std::string CENTRE{"Centre"};
+const static std::string DIRECTION{"Direction"};
+const static std::string END{"End"};
+const static std::string INPUT_WORKSPACE{"InputWorkspace"};
+const static std::string LENGTH{"Length"};
+const static std::string HALF_WIDTH{"HalfWidth"};
+const static std::string IGNORE_INFS{"IgnoreInfs"};
+const static std::string IGNORE_NANS{"IgnoreNans"};
+const static std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
+const static std::string START{"Start"};
+}
+
+struct Box {
+  double top;
+  double bottom;
+  double left;
+  double right;
+};
+
+struct IndexLimits {
+  size_t lineStart;
+  size_t lineEnd;
+  size_t averageStart;
+  size_t averageEnd;
+};
+
+void setAxesAndUnits(const Workspace2D_sptr &outWS, const MatrixWorkspace_const_sptr &ws, const Box &box, const LineDirection dir) {
+  // Y units.
+  outWS->setYUnit(ws->YUnit());
+  outWS->setYUnitLabel(ws->YUnitLabel());
+  // Horizontal axis.
+  auto axisIndex = dir == LineDirection::horizontal ? 0 : 1;
+  if (ws->getAxis(axisIndex)->isSpectra()) {
+    outWS->getAxis(axisIndex)->setUnit("Empty");
+  } else {
+    outWS->getAxis(0)->setUnit(ws->getAxis(axisIndex)->unit()->unitID());
+  }
+  // Vertical axis. We'll use bin edges set to Centre +/- HalfWidth.
+  std::vector<double> vertBins(2);
+  vertBins.front() = dir == LineDirection::horizontal ? box.top : box.left;
+  vertBins.back() = dir == LineDirection::horizontal ? box.bottom : box.right;
+  auto outVertAxis = make_unique<BinEdgeAxis>(vertBins);
+  axisIndex = dir == LineDirection::horizontal ? 1 : 0;
+  if (ws->getAxis(axisIndex)->isSpectra()) {
+    outVertAxis->setUnit("Empty");
+  } else {
+    outVertAxis->setUnit(ws->getAxis(axisIndex)->unit()->unitID());
+  }
+  outWS->replaceAxis(1, outVertAxis.release());
+}
+
+template <typename Container>
+void startAndEnd(size_t &start, size_t &end, const Container &bins, const bool isBinEdges, const double lowerLimit, const double upperLimit) {
+  auto lowerIt = std::upper_bound(bins.cbegin(), bins.cend(), lowerLimit);
+  if (lowerIt == bins.cend()) {
+    throw std::runtime_error("Profile completely outside input workspace.");
+  }
+  if (lowerIt != bins.cbegin()) {
+    --lowerIt;
+  }
+  auto upperIt = std::upper_bound(lowerIt, bins.cend(), upperLimit);
+  if (upperIt == bins.cbegin()) {
+    throw std::runtime_error("Profile completely outside input workspace.");
+  }
+  if (isBinEdges && upperIt == bins.cend()) {
+    --upperIt;
+  }
+  start = std::distance(bins.cbegin(), lowerIt);
+  end = std::distance(bins.cbegin(), upperIt);
+}
+
+std::vector<double> extractVerticalBins(const Axis &axis, const size_t numberHistograms) {
+  if (axis.isSpectra()) {
+    std::vector<double> spectrumNumbers(numberHistograms);
+    std::iota(spectrumNumbers.begin(), spectrumNumbers.end(), 1.0);
+    return spectrumNumbers;
+  }
+  std::vector<double> bins(axis.length());
+  for (size_t i = 0; i < bins.size(); ++i) {
+    bins[i] = axis.getValue(i);
+  }
+  return bins;
+}
+
+template <typename Container>
+void average(std::vector<double> &Xs, std::vector<double> &Ys, std::vector<double> &Es, const MatrixWorkspace_const_sptr &ws, const LineDirection dir, const IndexLimits &limits, const Container &lineBins, const bool isBinEdges, const bool ignoreNans, const bool ignoreInfs) {
+  const auto lineSize = limits.lineEnd - limits.lineStart;
+  Xs.resize(lineSize + (isBinEdges ? 1 : 0));
+  Ys.resize(lineSize);
+  Es.resize(lineSize);
+  for (size_t i = limits.lineStart; i < limits.lineEnd; ++i) {
+    Xs[i - limits.lineStart] = lineBins[i];
+    double ySum = 0;
+    double eSqSum = 0;
+    int n = 0;
+    for (size_t j = limits.averageStart; j < limits.averageEnd; ++j) {
+      const size_t iHor = dir == LineDirection::horizontal ? i : j;
+      const size_t iVert = dir == LineDirection::horizontal ? j : i;
+      const double y = ws->y(iVert)[iHor];
+      if ((ignoreNans && std::isnan(y)) || (ignoreInfs && std::isinf(y))) {
+        continue;
+      }
+      ySum += y;
+      eSqSum += ws->e(iVert)[iHor] * ws->e(iVert)[iHor];
+      ++n;
+    }
+    Ys[i - limits.lineStart] = n > 0 ? ySum / n : 0;
+    Es[i - limits.lineStart] = n > 0 ? std::sqrt(eSqSum) / n : 0;
+  }
+  if (isBinEdges) {
+    Xs.back() = lineBins[limits.lineEnd];
+  }
+}
+}
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(LineProfile)
+
+//----------------------------------------------------------------------------------------------
+
+/// Algorithms name for identification. @see Algorithm::name
+const std::string LineProfile::name() const { return "LineProfile"; }
+
+/// Algorithm's version for identification. @see Algorithm::version
+int LineProfile::version() const { return 1; }
+
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string LineProfile::category() const {
+  return "Utility";
+}
+
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string LineProfile::summary() const {
+  return "Calculates a line profile over a MatrixWorkspace.";
+}
+
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void LineProfile::init() {
+  const auto mandatoryDouble = boost::make_shared<MandatoryValidator<double>>();
+  const auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  positiveDouble->setLowerExclusive(0.0);
+  const auto mandatoryPositiveDouble = boost::make_shared<CompositeValidator>();
+  mandatoryPositiveDouble->add(mandatoryDouble);
+  mandatoryPositiveDouble->add(positiveDouble);
+  const auto inputWorkspaceValidator = boost::make_shared<CompositeValidator>();
+  inputWorkspaceValidator->add(boost::make_shared<CommonBinsValidator>());
+  inputWorkspaceValidator->add(boost::make_shared<IncreasingAxisValidator>());
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WORKSPACE, "",
+                                                             Direction::Input, inputWorkspaceValidator),
+      "An input workspace.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<Workspace2D>>(PropertyNames::OUTPUT_WORKSPACE, "",
+                                                             Direction::Output),
+      "A single histogram workspace containing the profile.");
+  const std::set<std::string> directions{DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL};
+  declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL, boost::make_shared<ListValidator<std::string>>(directions),
+                  "Orientation of the profile line.");
+  declareProperty(PropertyNames::CENTRE, EMPTY_DBL(), mandatoryDouble, "Centre of the line.");
+  declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(), mandatoryPositiveDouble, "Half of the width over which to calcualte the average.");
+  declareProperty(PropertyNames::START, EMPTY_DBL(), mandatoryDouble, "Starting point of the line.");
+  declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line. Either this of " + PropertyNames::LENGTH + " must be given.");
+  declareProperty(PropertyNames::LENGTH, EMPTY_DBL(), positiveDouble, "Length of the line. Either this or " + PropertyNames::END + " must be given.");
+  declareProperty(PropertyNames::IGNORE_INFS, false, "Do not take infinities into account when calculating the average.");
+  declareProperty(PropertyNames::IGNORE_NANS, true, "Do not take not-a-numbers into account when calculating the average.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void LineProfile::exec() {
+  // Extract properties.
+  MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
+  const bool ignoreNans = getProperty(PropertyNames::IGNORE_NANS);
+  const bool ignoreInfs = getProperty(PropertyNames::IGNORE_INFS);
+  const auto &horizontalBins = ws->x(0);
+  const auto horizontalIsBinEdges = ws->isHistogramData();
+  const auto vertAxis = ws->getAxis(1);
+  // It is easier if the vertical axis values are in a vector.
+  const auto verticalBins = extractVerticalBins(*vertAxis, ws->getNumberHistograms());
+  const auto verticalIsBinEdges = verticalBins.size() > ws->getNumberHistograms();
+  const std::string directionString = getProperty(PropertyNames::DIRECTION);
+  LineDirection dir{LineDirection::horizontal};
+  if (directionString == DirectionChoices::VERTICAL) {
+    dir = LineDirection::vertical;
+  }
+  const double centre = getProperty(PropertyNames::CENTRE);
+  const double halfWidth = getProperty(PropertyNames::HALF_WIDTH);
+  double start = getProperty(PropertyNames::START);
+  double end = getProperty(PropertyNames::END);
+  if (end == EMPTY_DBL()) {
+    const double length = getProperty(PropertyNames::LENGTH);
+    end = start + length;
+  }
+  // Define a box in workspace's units to have a standard representation
+  // of the profile's dimensions.
+  Box bounds;
+  if (dir == LineDirection::horizontal) {
+    bounds.top = centre - halfWidth;
+    bounds.bottom = centre + halfWidth;
+    bounds.left = start;
+    bounds.right = end;
+  } else {
+    bounds.top = start;
+    bounds.bottom = end;
+    bounds.left = centre - halfWidth;
+    bounds.right = centre + halfWidth;
+  }
+  size_t vertStart;
+  size_t vertEnd;
+  startAndEnd(vertStart, vertEnd, verticalBins, verticalIsBinEdges, bounds.top, bounds.bottom);
+  size_t horStart;
+  size_t horEnd;
+  startAndEnd(horStart, horEnd, horizontalBins, horizontalIsBinEdges, bounds.left, bounds.right);
+  std::vector<double> averageYs;
+  std::vector<double> averageEs;
+  std::vector<double> Xs;
+  if (dir == LineDirection::horizontal) {
+    IndexLimits limits;
+    limits.lineStart = horStart;
+    limits.lineEnd = horEnd;
+    limits.averageStart = vertStart;
+    limits.averageEnd = vertEnd;
+    average(Xs, averageYs, averageEs, ws, dir, limits, horizontalBins, horizontalIsBinEdges, ignoreNans, ignoreInfs);
+  } else {
+    IndexLimits limits;
+    limits.lineStart = vertStart;
+    limits.lineEnd = vertEnd;
+    limits.averageStart = horStart;
+    limits.averageEnd = horEnd;
+    average(Xs, averageYs, averageEs, ws, dir, limits, verticalBins, verticalIsBinEdges, ignoreNans, ignoreInfs);
+   }
+  Workspace2D_sptr outWS;
+  if (Xs.size() > averageYs.size()) {
+    outWS = create<Workspace2D>(1, Histogram(BinEdges(Xs), Counts(averageYs), CountStandardDeviations(averageEs)));
+  } else {
+    outWS = create<Workspace2D>(1, Histogram(Points(Xs), Counts(averageYs), CountStandardDeviations(averageEs)));
+  }
+  Box actualBounds;
+  actualBounds.top = verticalBins[vertStart];
+  actualBounds.bottom = verticalBins[vertEnd];
+  actualBounds.left = horizontalBins[horStart];
+  actualBounds.right = horizontalBins[horEnd];
+  setAxesAndUnits(outWS, ws, actualBounds, dir);
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
+}
+
+std::map<std::string, std::string> LineProfile::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const double length = getProperty(PropertyNames::LENGTH);
+  const double end = getProperty(PropertyNames::END);
+  if (length == EMPTY_DBL() && end == EMPTY_DBL()) {
+    const auto msg = "Either " + PropertyNames::END + " or " + PropertyNames::LENGTH + " has to be specified.";
+    issues[PropertyNames::END] = msg;
+    issues[PropertyNames::LENGTH] = msg;
+  }
+  MatrixWorkspace_const_sptr ws = getProperty(PropertyNames::INPUT_WORKSPACE);
+  if (ws->getAxis(1)->isText()) {
+    issues[PropertyNames::INPUT_WORKSPACE] = "The vertical axis in " + PropertyNames::INPUT_WORKSPACE + " is text.";
+  }
+  return issues;
+}
+
+} // namespace Algorithms
+} // namespace Mantid
