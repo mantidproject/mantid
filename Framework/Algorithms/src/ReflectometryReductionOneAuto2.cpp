@@ -305,7 +305,10 @@ void ReflectometryReductionOneAuto2::exec() {
     setProperty("ScaleFactor", 1.0);
 }
 
-/** Returns the detectors of interest, specified via processing instructions
+/** Returns the detectors of interest, specified via processing instructions.
+* Note that this returns the names of the parent detectors of the first and
+* last spectrum indices in the processing instructions. It is assumed that all
+* the interim detectors have the same parent.
 *
 * @param instructions :: processing instructions defining detectors of interest
 * @param inputWS :: the input workspace
@@ -315,7 +318,7 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
     const std::string &instructions, MatrixWorkspace_sptr inputWS) {
 
   std::vector<std::string> wsIndices;
-  boost::split(wsIndices, instructions, boost::is_any_of(":,-"));
+  boost::split(wsIndices, instructions, boost::is_any_of(":,-+"));
   // vector of comopnents
   std::vector<std::string> detectors;
 
