@@ -641,7 +641,7 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
     if (rElem) {
       double rotAngle = angleConvertConst *
-                        attrToDouble(pElem, "val"); // assumed to be in degrees
+                        attrToDouble(rElem, "val"); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
