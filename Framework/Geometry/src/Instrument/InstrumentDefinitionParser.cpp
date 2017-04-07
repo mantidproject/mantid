@@ -538,6 +538,20 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
   outFile.close();
 }
 
+namespace { // anonymous
+// return 0 if the attribute doesn't exist. This is to follow the
+// behavior of atof which always returns 0 if there is a problem.
+double attrToDouble(const Poco::XML::Element *pElem, const std::string &name) {
+  if (pElem->hasAttribute(name)) {
+    const std::string value = pElem->getAttribute(name);
+    if (!value.empty()) {
+      return std::stod(value);
+    }
+  }
+  return 0.;
+}
+} // namespace anonymous
+
 //-----------------------------------------------------------------------------------------------------------------------
 /** Set location (position) of comp as specified in XML location element.
  *
@@ -560,9 +574,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
 
   // Rotate coordinate system of this component
   if (pElem->hasAttribute("rot")) {
-    double rotAngle =
-        angleConvertConst *
-        std::stod(pElem->getAttribute("rot")); // assumed to be in degrees
+    double rotAngle = angleConvertConst *
+                      attrToDouble(pElem, "rot"); // assumed to be in degrees
 
     double axis_x = 0.0;
     double axis_y = 0.0;
@@ -627,9 +640,8 @@ void InstrumentDefinitionParser::setLocation(Geometry::IComponent *comp,
     } // end translation
 
     if (rElem) {
-      double rotAngle =
-          angleConvertConst *
-          std::stod(rElem->getAttribute("val")); // assumed to be in degrees
+      double rotAngle = angleConvertConst *
+                        attrToDouble(pElem, "val"); // assumed to be in degrees
 
       double axis_x = 0.0;
       double axis_y = 0.0;
@@ -674,22 +686,17 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
   if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
       pElem->hasAttribute("p") || pElem->hasAttribute("R") ||
       pElem->hasAttribute("theta") || pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
 
-    if (pElem->hasAttribute("r"))
-      R = std::stod(pElem->getAttribute("r"));
-    if (pElem->hasAttribute("t")) {
-      theta = angleConvertConst * std::stod(pElem->getAttribute("t"));
-    }
-    if (pElem->hasAttribute("p"))
-      phi = angleConvertConst * std::stod(pElem->getAttribute("p"));
+    double R = attrToDouble(pElem, "r");
+    double theta = angleConvertConst * attrToDouble(pElem, "t");
+    double phi = angleConvertConst * attrToDouble(pElem, "p");
 
     if (pElem->hasAttribute("R"))
-      R = std::stod(pElem->getAttribute("R"));
+      R = attrToDouble(pElem, "R");
     if (pElem->hasAttribute("theta"))
-      theta = angleConvertConst * std::stod(pElem->getAttribute("theta"));
+      theta = angleConvertConst * attrToDouble(pElem, "theta");
     if (pElem->hasAttribute("phi"))
-      phi = angleConvertConst * std::stod(pElem->getAttribute("phi"));
+      phi = angleConvertConst * attrToDouble(pElem, "phi");
 
     if (deltaOffsets) {
       // In this case, locations given are radial offsets to the (radial)
@@ -739,14 +746,9 @@ Kernel::V3D InstrumentDefinitionParser::getRelativeTranslation(
     }
 
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
-
-    if (pElem->hasAttribute("x"))
-      x = std::stod(pElem->getAttribute("x"));
-    if (pElem->hasAttribute("y"))
-      y = std::stod(pElem->getAttribute("y"));
-    if (pElem->hasAttribute("z"))
-      z = std::stod(pElem->getAttribute("z"));
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retVal(x, y, z);
   }
@@ -1296,11 +1298,7 @@ void InstrumentDefinitionParser::createRectangularDetector(
 
   // Extract all the parameters from the XML attributes
   int xpixels = 0;
-  double xstart = 0.;
-  double xstep = 0.;
   int ypixels = 0;
-  double ystart = 0.;
-  double ystep = 0.;
   int idstart = 0;
   bool idfillbyfirst_y = true;
   int idstepbyrow = 0;
@@ -1315,16 +1313,13 @@ void InstrumentDefinitionParser::createRectangularDetector(
   // These parameters are in the TYPE defining RectangularDetector
   if (pType->hasAttribute("xpixels"))
     xpixels = std::stoi(pType->getAttribute("xpixels"));
-  if (pType->hasAttribute("xstart"))
-    xstart = std::stod(pType->getAttribute("xstart"));
-  if (pType->hasAttribute("xstep"))
-    xstep = std::stod(pType->getAttribute("xstep"));
+  double xstart = attrToDouble(pType, "xstart");
+  double xstep = attrToDouble(pType, "xstep");
+
   if (pType->hasAttribute("ypixels"))
     ypixels = std::stoi(pType->getAttribute("ypixels"));
-  if (pType->hasAttribute("ystart"))
-    ystart = std::stod(pType->getAttribute("ystart"));
-  if (pType->hasAttribute("ystep"))
-    ystep = std::stod(pType->getAttribute("ystep"));
+  double ystart = attrToDouble(pType, "ystart");
+  double ystep = attrToDouble(pType, "ystep");
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
@@ -1418,14 +1413,14 @@ void InstrumentDefinitionParser::createStructuredDetector(
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
   if (pType->hasAttribute("xpixels"))
-    xpixels = std::stoi((pType->getAttribute("xpixels")));
+    xpixels = std::stoi(pType->getAttribute("xpixels"));
   if (pType->hasAttribute("ypixels"))
-    ypixels = std::stoi((pType->getAttribute("ypixels")));
+    ypixels = std::stoi(pType->getAttribute("ypixels"));
 
   // THESE parameters are in the INSTANCE of this type - since they will
   // change.
   if (pCompElem->hasAttribute("idstart"))
-    idstart = std::stoi((pCompElem->getAttribute("idstart")));
+    idstart = std::stoi(pCompElem->getAttribute("idstart"));
   if (pCompElem->hasAttribute("idfillbyfirst"))
     idfillbyfirst_y = (pCompElem->getAttribute("idfillbyfirst") == "y");
   // Default ID row step size
@@ -1434,11 +1429,11 @@ void InstrumentDefinitionParser::createStructuredDetector(
   else
     idstepbyrow = xpixels;
   if (pCompElem->hasAttribute("idstepbyrow")) {
-    idstepbyrow = std::stoi((pCompElem->getAttribute("idstepbyrow")));
+    idstepbyrow = std::stoi(pCompElem->getAttribute("idstepbyrow"));
   }
   // Default ID row step size
   if (pCompElem->hasAttribute("idstep"))
-    idstep = std::stoi((pCompElem->getAttribute("idstep")));
+    idstep = std::stoi(pCompElem->getAttribute("idstep"));
 
   // Access type element which defines structured detecor vertices
   Element *pElem = nullptr;
@@ -1478,9 +1473,9 @@ void InstrumentDefinitionParser::createStructuredDetector(
       Element *pVertElem = static_cast<Element *>(pNode);
 
       if (pVertElem->hasAttribute("x"))
-        xValues.push_back(std::stod(pVertElem->getAttribute("x")));
+        xValues.push_back(attrToDouble(pVertElem, "x"));
       if (pVertElem->hasAttribute("y"))
-        yValues.push_back(std::stod(pVertElem->getAttribute("y")));
+        yValues.push_back(attrToDouble(pVertElem, "y"));
     }
 
     pNode = it.nextNode();
@@ -1659,17 +1654,17 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
   // Otherwise id sub-elements
 
   if (pE->hasAttribute("start")) {
-    int startID = std::stoi((pE->getAttribute("start")));
+    int startID = std::stoi(pE->getAttribute("start"));
 
     int endID;
     if (pE->hasAttribute("end"))
-      endID = std::stoi((pE->getAttribute("end")));
+      endID = std::stoi(pE->getAttribute("end"));
     else
       endID = startID;
 
     int increment = 1;
     if (pE->hasAttribute("step"))
-      increment = std::stoi((pE->getAttribute("step")));
+      increment = std::stoi(pE->getAttribute("step"));
 
     if (0 == increment) {
       std::stringstream ss;
@@ -1716,20 +1711,20 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
         Element *pIDElem = static_cast<Element *>(pNode);
 
         if (pIDElem->hasAttribute("val")) {
-          int valID = std::stoi((pIDElem->getAttribute("val")));
+          int valID = std::stoi(pIDElem->getAttribute("val"));
           idList.vec.push_back(valID);
         } else if (pIDElem->hasAttribute("start")) {
-          int startID = std::stoi((pIDElem->getAttribute("start")));
+          int startID = std::stoi(pIDElem->getAttribute("start"));
 
           int endID;
           if (pIDElem->hasAttribute("end"))
-            endID = std::stoi((pIDElem->getAttribute("end")));
+            endID = std::stoi(pIDElem->getAttribute("end"));
           else
             endID = startID;
 
           int increment = 1;
           if (pIDElem->hasAttribute("step"))
-            increment = std::stoi((pIDElem->getAttribute("step")));
+            increment = std::stoi(pIDElem->getAttribute("step"));
 
           // check the start end and increment values are sensible
           if (0 == increment) {
@@ -1867,32 +1862,22 @@ InstrumentDefinitionParser::parseFacingElementToV3D(Poco::XML::Element *pElem) {
   if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
       pElem->hasAttribute("p") || pElem->hasAttribute("R") ||
       pElem->hasAttribute("theta") || pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("r"))
-      R = std::stod(pElem->getAttribute("r"));
-    if (pElem->hasAttribute("t"))
-      theta = m_angleConvertConst * std::stod(pElem->getAttribute("t"));
-    if (pElem->hasAttribute("p"))
-      phi = m_angleConvertConst * std::stod(pElem->getAttribute("p"));
+    double R = attrToDouble(pElem, "r");
+    double theta = m_angleConvertConst * attrToDouble(pElem, "t");
+    double phi = m_angleConvertConst * attrToDouble(pElem, "p");
 
     if (pElem->hasAttribute("R"))
-      R = std::stod((pElem->getAttribute("R")));
+      R = attrToDouble(pElem, "R");
     if (pElem->hasAttribute("theta"))
-      theta = m_angleConvertConst * std::stod(pElem->getAttribute("theta"));
+      theta = m_angleConvertConst * attrToDouble(pElem, "theta");
     if (pElem->hasAttribute("phi"))
-      phi = m_angleConvertConst * std::stod(pElem->getAttribute("phi"));
+      phi = m_angleConvertConst * attrToDouble(pElem, "phi");
 
     retV3D.spherical(R, theta, phi);
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
-
-    if (pElem->hasAttribute("x"))
-      x = std::stod(pElem->getAttribute("x"));
-    if (pElem->hasAttribute("y"))
-      y = std::stod(pElem->getAttribute("y"));
-    if (pElem->hasAttribute("z"))
-      z = std::stod(pElem->getAttribute("z"));
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retV3D(x, y, z);
   }
@@ -1932,8 +1917,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
 
     if (facingElem->hasAttribute("rot")) {
       double rotAngle =
-          m_angleConvertConst * std::stod(facingElem->getAttribute(
-                                    "rot")); // assumed to be in degrees
+          m_angleConvertConst *
+          attrToDouble(facingElem, "rot"); // assumed to be in degrees
       comp->rotate(Kernel::Quat(rotAngle, Kernel::V3D(0, 0, 1)));
     }
 
@@ -2204,8 +2189,8 @@ void InstrumentDefinitionParser::setLogfile(
 
       for (unsigned long i = 0; i < numberPoint; i++) {
         Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
-        double x = std::stod(pPoint->getAttribute("x"));
-        double y = std::stod(pPoint->getAttribute("y"));
+        double x = attrToDouble(pPoint, "x");
+        double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
       }
     }
@@ -2925,14 +2910,9 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
 
   if (pElem->hasAttribute("R") || pElem->hasAttribute("theta") ||
       pElem->hasAttribute("phi")) {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("R"))
-      R = std::stod(pElem->getAttribute("R"));
-    if (pElem->hasAttribute("theta"))
-      theta = std::stod(pElem->getAttribute("theta"));
-    if (pElem->hasAttribute("phi"))
-      phi = std::stod(pElem->getAttribute("phi"));
+    double R = attrToDouble(pElem, "R");
+    double theta = attrToDouble(pElem, "theta");
+    double phi = attrToDouble(pElem, "phi");
 
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
@@ -2941,25 +2921,16 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
   // which may be preferred in the long run to the more verbose of
   // using R, theta and phi.
   {
-    double R = 0.0, theta = 0.0, phi = 0.0;
-
-    if (pElem->hasAttribute("r"))
-      R = std::stod(pElem->getAttribute("r"));
-    if (pElem->hasAttribute("t"))
-      theta = std::stod(pElem->getAttribute("t"));
-    if (pElem->hasAttribute("p"))
-      phi = std::stod(pElem->getAttribute("p"));
+    double R = attrToDouble(pElem, "r");
+    double theta = attrToDouble(pElem, "t");
+    double phi = attrToDouble(pElem, "p");
 
     retVal.spherical(R, theta, phi);
   } else {
-    double x = 0.0, y = 0.0, z = 0.0;
 
-    if (pElem->hasAttribute("x"))
-      x = std::stod(pElem->getAttribute("x"));
-    if (pElem->hasAttribute("y"))
-      y = std::stod(pElem->getAttribute("y"));
-    if (pElem->hasAttribute("z"))
-      z = std::stod(pElem->getAttribute("z"));
+    double x = attrToDouble(pElem, "x");
+    double y = attrToDouble(pElem, "y");
+    double z = attrToDouble(pElem, "z");
 
     retVal(x, y, z);
   }
