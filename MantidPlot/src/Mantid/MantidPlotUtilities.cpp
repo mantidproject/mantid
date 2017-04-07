@@ -16,6 +16,18 @@ using Mantid::API::MatrixWorkspace;
 using Mantid::API::ExperimentInfo;
 using Mantid::HistogramData::Histogram;
 
+/**Compare two CurveSpecs to sort according to log value and
+* if equal by workspace index.
+* @param lhs left hand comparee
+* @param rhs right hand comparee
+* @returns true if right hand comparee has greater log value than left hand comparee
+*/
+bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) 
+{ 
+  if (lhs.logVal == rhs.logVal) return (lhs.index < rhs.index);
+  return (lhs.logVal < rhs.logVal); 
+};
+
 /**
  * Gets the given log value from the given workspace as a double.
  * Should be a single-valued log!

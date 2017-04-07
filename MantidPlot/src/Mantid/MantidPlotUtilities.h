@@ -4,9 +4,13 @@
 #include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
 
 /**
-* This utility class generates a surface or contour plot from a group of
-* workspaces.
+* These utilities assist with plotting in Mantid
 */
+// Structure to aid odering of plots
+typedef struct { double logVal; QString wsName; int index; } CurveSpec;
+
+// Compare to sort according to log value
+bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs);
 
 /// Returns a single log value from the given workspace
 double getSingleWorkspaceLogValue(

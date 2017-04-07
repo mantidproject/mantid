@@ -3109,44 +3109,68 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     plotAsDistribution = (distr == MantidQt::DistributionTrue);
   }
 
-  // Try to add curves to the plot
+  // Try to store log values, if needed, and prepare for sorting.
+  vector <CurveSpec> curveSpecList;
+  int i = 0;
+  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
+    it != toPlot.end(); ++it) {
+    CurveSpec curveSpec;
+
+    try {
+      if (!log.isEmpty()) { // Get log value from workspace
+        if (customLogValues.size() > 0) {
+          curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
+        }
+        else {
+          MatrixWorkspace_const_sptr workspace =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              it.key().toStdString());
+          curveSpec.logVal = getSingleWorkspaceLogValue(1, workspace, log);
+        }
+      }
+      else {
+        curveSpec.logVal = 0.1234; // This should not be used.
+      }
+      curveSpec.wsName = it.key();
+      curveSpec.index = it.value();
+      curveSpecList.push_back(curveSpec);
+
+    }
+    catch (Mantid::Kernel::Exception::NotFoundError &) {
+      g_log.warning() << "Workspace " << it.key().toStdString()
+        << " not found\n";
+    }
+    catch (std::exception &ex) {
+      g_log.warning() << ex.what() << '\n';
+    }
+  }
+
+  // Sort curves, if log values are used
+  if (!log.isEmpty()) {
+    sort(curveSpecList.begin(), curveSpecList.end(), byLogValue);
+  }
+
+  // Add curves to the plot
   Graph *g = ml->activeGraph();
   MantidMatrixCurve::IndexDir indexType =
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
   MantidMatrixCurve *firstCurve(NULL);
   QString logValue("");
-  int i = 0;
-  for (QMultiMap<QString, int>::const_iterator it = toPlot.begin();
-       it != toPlot.end(); ++it) {
+  for (size_t i = 0; i < curveSpecList.size(); i++) {
 
-    try {
       if (!log.isEmpty()) { // Get log value from workspace
-        double logVal;
-        if (customLogValues.size() > 0) {
-          logVal = getSingleWorkspaceLogValue(i++, customLogValues);
-        } else {
-          MatrixWorkspace_const_sptr workspace =
-              AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-                  it.key().toStdString());
-          logVal = getSingleWorkspaceLogValue(1, workspace, log);
-        }
-        logValue = logValue.number(logVal, 'g', 6);
+        logValue = logValue.number(curveSpecList[i].logVal, 'g', 6);
       }
 
-      auto *wsCurve = new MantidMatrixCurve(logValue, it.key(), g, it.value(),
-                                            indexType, errs, plotAsDistribution,
+      auto *wsCurve = new MantidMatrixCurve(logValue, curveSpecList[i].wsName, g, 
+                                            curveSpecList[i].index, indexType, 
+                                            errs, plotAsDistribution,
                                             style, multipleSpectra);
       if (!firstCurve) {
         firstCurve = wsCurve;
         g->setNormalizable(firstCurve->isNormalizable());
         g->setDistribution(firstCurve->isDistribution());
-      }
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      g_log.warning() << "Workspace " << it.key().toStdString()
-                      << " not found\n";
-    } catch (std::exception &ex) {
-      g_log.warning() << ex.what() << '\n';
-    }
+      } 
   }
 
   if (!isGraphNew) {
