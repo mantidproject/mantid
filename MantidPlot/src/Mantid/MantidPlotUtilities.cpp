@@ -27,7 +27,7 @@ bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) {
   if (lhs.logVal == rhs.logVal)
     return (lhs.index < rhs.index);
   return (lhs.logVal < rhs.logVal);
-};
+}
 
 /**
  * Gets the given log value from the given workspace as a double.
