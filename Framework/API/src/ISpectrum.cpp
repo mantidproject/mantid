@@ -135,22 +135,6 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
 
-/**
- * Makes sure the histogram has valid Y data.
- * @param histogram A histogram to process.
- * @throw std::invalid_argument if Y data is NULL.
- */
-void ISpectrum::checkAndSanitizeHistogram(HistogramData::Histogram &histogram) {
-  if (!histogram.sharedY()) {
-    throw std::invalid_argument(
-        "Histogram1D: invalid input: Y data set to nullptr");
-  }
-  if (!histogram.sharedE()) {
-    throw std::invalid_argument(
-        "Histogram1D: invalid input: E data set to nullptr");
-  }
-}
-
 /// Copy constructor.
 ISpectrum::ISpectrum(const ISpectrum &other)
     : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
