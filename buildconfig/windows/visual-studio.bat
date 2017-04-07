@@ -7,4 +7,5 @@
 call %~dp0buildenv.bat
 
 :: Start IDE
+set PreferredToolArchitecture=x64
 start "" "%VS140COMNTOOLS%\..\IDE\devenv.exe" Mantid.sln
