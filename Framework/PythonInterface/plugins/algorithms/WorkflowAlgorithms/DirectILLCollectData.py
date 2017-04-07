@@ -529,7 +529,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     def _correctTOFAxis(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Adjust the TOF axis to get the elastic channel correct."""
         try:
-            l2 = mainWS.getInstrument().getNumberParameter('l2')[0]
+            l2 = float(mainWS.getInstrument().getStringParameter('l2')[0])
         except IndexError:
             self.log().warning("No 'l2' instrument parameter defined. TOF axis will not be adjusted")
             return mainWS

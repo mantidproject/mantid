@@ -29,7 +29,7 @@ def _fillTemplateWorkspace(templateWS, bkgLevel):
     instrument = templateWS.getInstrument()
     sample = instrument.getSample()
     l1 = sample.getDistance(instrument.getSource())
-    l2 = instrument.getNumberParameter('l2')[0]
+    l2 = float(instrument.getStringParameter('l2')[0])
     tofElastic = UnitConversion.run('Energy', 'TOF', E_i, l1, l2, 0.0, DeltaEModeType.Direct, 0.0)
     tofBegin = tofElastic - elasticIndex * binWidth
     monitor = instrument.getDetector(0)
