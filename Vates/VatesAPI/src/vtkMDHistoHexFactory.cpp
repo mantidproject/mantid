@@ -71,14 +71,14 @@ void vtkMDHistoHexFactory::validate() const { validateWsNotNull(); }
 
 namespace {
 
-struct CellGhostArrayWorker {
-  vtkDataArray *m_signal;
+template <class Array> struct CellGhostArrayWorker {
+  Array *m_signal;
   vtkUnsignedCharArray *m_cga;
-  CellGhostArrayWorker(vtkDataArray *signal, vtkUnsignedCharArray *cga)
+  CellGhostArrayWorker(Array *signal, vtkUnsignedCharArray *cga)
       : m_signal(signal), m_cga(cga) {}
   void operator()(vtkIdType begin, vtkIdType end) {
     for (vtkIdType index = begin; index < end; ++index) {
-      if (!std::isfinite(m_signal->GetComponent(index, 0))) {
+      if (!std::isfinite(m_signal->GetValue(index))) {
         m_cga->SetValue(index, m_cga->GetValue(index) |
                                    vtkDataSetAttributes::HIDDENCELL);
       }
@@ -195,25 +195,29 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     norm = static_cast<VisualNormalization>(m_normalizationOption);
   }
 
+  progress.eventRaised(0.0);
+
   vtkDataArray *signal = nullptr;
   if (norm == NoNormalization) {
     vtkNew<vtkDoubleArray> raw;
-    signal = raw.Get();
     raw->SetVoidArray(m_workspace->getSignalArray(), imageSize, 1);
     visualDataSet->GetCellData()->SetScalars(raw.Get());
+    auto cga = visualDataSet->AllocateCellGhostArray();
+    CellGhostArrayWorker<vtkDoubleArray> cgafunc(raw.Get(), cga);
+    vtkSMPTools::For(0, imageSize, cgafunc);
+    signal = raw.Get();
   } else {
     vtkNew<vtkMDHWSignalArray<double>> normalized;
-    signal = normalized.Get();
     InitializevtkMDHWSignalArray(*m_workspace, norm, offset, normalized.Get());
     visualDataSet->GetCellData()->SetScalars(normalized.GetPointer());
+    auto cga = visualDataSet->AllocateCellGhostArray();
+    CellGhostArrayWorker<vtkMDHWSignalArray<double>> cgafunc(normalized.Get(),
+                                                             cga);
+    vtkSMPTools::For(0, imageSize, cgafunc);
+    signal = normalized.Get();
   }
 
   signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-
-  auto cga = visualDataSet->AllocateCellGhostArray();
-  CellGhostArrayWorker cgafunc(signal, cga);
-  progress.eventRaised(0.0);
-  vtkSMPTools::For(0, imageSize, cgafunc);
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;

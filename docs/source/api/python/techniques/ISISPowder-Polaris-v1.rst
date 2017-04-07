@@ -26,10 +26,10 @@ must be present:
   offsets for that cycle
 
 The names of the .cal grouping file and masking file are set in the advanced
-configuration file. See: TODO link
+configuration file. See: :ref:`polaris_adv_config-powder-diffraction-ref`
 
 The label for the run being processed and the appropriate offset filename is
-read from the calibration mapping file: TODO link
+read from the calibration mapping file: :ref:`polaris_calibration_map-powder-diffraction-ref`
 
 .. _polaris_calibration_map-powder-diffraction-ref:
 
@@ -101,10 +101,6 @@ For background on script parameters and how they are evaluated see:
   in a cylindrical sample as defined in the advanced configuration file. It then applies
   these calibrations to the vanadium sample.
 
-  If set to true during focusing the vanadium with these corrections is loaded
-  and used, if false it will load a vanadium sample where these corrections have
-  not been applied.
-
 - `do_van_normalisation` - If set to True divides the sample by the calculated vanadium
   spline during the normalisation step.
 
@@ -128,12 +124,20 @@ For background on script parameters and how they are evaluated see:
 
 - `user_name` - Specifies the user name to use when saving out focused data.
 
+.. _polaris_adv_config-powder-diffraction-ref:
+
 Advanced Script Parameters
 --------------------------
 
 - `grouping_file_name` - The name of the .cal file containing grouping information
   for the detectors. This file must be located at the top of the calibration
   directory as noted here :ref:`polaris_calibration_folder-powder-diffraction-ref`
+
+- `focused_cropping_values` - Stores the TOF window to crop down to on a bank-by-bank
+  basis. This is one of the final steps applied to a focused workspace. The values
+  are stored as a list of tuples, with one tuple per bank and each containing
+  the minimum and maximum values in TOF. The window specified must be less than
+  both `vanadium_cropping_values` and `raw_data_tof_cropping`
 
 - `masking_file_name` - The name of the file containing Vanadium masking information.
   This file must be located at the top of the calibration directory as noted here:
@@ -145,12 +149,6 @@ Advanced Script Parameters
 
 - `spline_coefficient` - The coefficient to use whilst taking a b-spline of the
   Vanadium workspace during calibration
-
-- `tof_cropping_ranges` - Stores the TOF window to crop down to on a bank-by-bank
-  basis. This is one of the final steps applied to a focused workspace. The values
-  are stored as a list of tuples, with one tuple per bank and each containing
-  the minimum and maximum values in TOF. The window specified must be less than
-  both `vanadium_cropping_values` and `raw_data_tof_cropping`
 
 - `vanadium_cropping_values` - Stores the TOF window the vanadium workspace is
   cropped down to after focusing. This value is stored as a tuple of the minimum
