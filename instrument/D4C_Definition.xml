@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an
+    Instrument Definition File see http://www.mantidproject.org/IDF
+    -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd" name="D4C" valid-from="1900-01-31 23:59:59"
+valid-to="2100-01-31 23:59:59" last-modified="2017-02-27 17:13:17">
+  <!-- Author: vardanyan@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam.
+        the y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <!-- Source position -->
+  <component type="monochromator">
+    <location z="-2.61" />
+  </component>
+  <type name="monochromator" is="Source">
+    <properties />
+  </type>
+  <!-- Monitor position -->
+  <component type="monitor" idlist="monitors">
+    <location z="-0.71" name="monitor" />
+  </component>
+  <type name="monitor" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.005" y="-0.005" z="-0.005" />
+      <left-front-top-point x="-0.005" y="0.005" z="-0.005" />
+      <left-back-bottom-point x="-0.005" y="-0.005" z="0.005" />
+      <right-front-bottom-point x="0.005" y="-0.005" z="-0.005" />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+  <idlist idname="monitors">
+    <id val="1" />
+  </idlist>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <!-- Detector IDs -->
+  <idlist idname="detectors">
+    <id start="2" end="577" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detector" idlist="detectors">
+    <location name="detector" />
+  </component>
+  <!-- Detector Panels -->
+  <type name="detector">
+    <component type="panel">
+      <location name="panel_1" r="1.146" t="5.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_2" r="1.146" t="20.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_3" r="1.146" t="35.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_4" r="1.146" t="50.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_5" r="1.146" t="65.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_6" r="1.146" t="80.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_7" r="1.146" t="95.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_8" r="1.146" t="110.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+      <location name="panel_9" r="1.146" t="125.5" p="0.0">
+        <facing r="0.0" t="0.0" p="0.0" />
+      </location>
+    </component>
+  </type>
+  <!-- Standard Panel -->
+  <type name="panel">
+    <component type="cell">
+      <location name="cell_1" x="-0.07875" />
+      <location name="cell_2" x="-0.07625" />
+      <location name="cell_3" x="-0.07375" />
+      <location name="cell_4" x="-0.07125" />
+      <location name="cell_5" x="-0.06875" />
+      <location name="cell_6" x="-0.06625" />
+      <location name="cell_7" x="-0.06375" />
+      <location name="cell_8" x="-0.06125" />
+      <location name="cell_9" x="-0.05875" />
+      <location name="cell_10" x="-0.05625" />
+      <location name="cell_11" x="-0.05375" />
+      <location name="cell_12" x="-0.05125" />
+      <location name="cell_13" x="-0.04875" />
+      <location name="cell_14" x="-0.04625" />
+      <location name="cell_15" x="-0.04375" />
+      <location name="cell_16" x="-0.04125" />
+      <location name="cell_17" x="-0.03875" />
+      <location name="cell_18" x="-0.03625" />
+      <location name="cell_19" x="-0.03375" />
+      <location name="cell_20" x="-0.03125" />
+      <location name="cell_21" x="-0.02875" />
+      <location name="cell_22" x="-0.02625" />
+      <location name="cell_23" x="-0.02375" />
+      <location name="cell_24" x="-0.02125" />
+      <location name="cell_25" x="-0.01875" />
+      <location name="cell_26" x="-0.01625" />
+      <location name="cell_27" x="-0.01375" />
+      <location name="cell_28" x="-0.01125" />
+      <location name="cell_29" x="-0.00875" />
+      <location name="cell_30" x="-0.00625" />
+      <location name="cell_31" x="-0.00375" />
+      <location name="cell_32" x="-0.00125" />
+      <location name="cell_33" x="0.00125" />
+      <location name="cell_34" x="0.00375" />
+      <location name="cell_35" x="0.00625" />
+      <location name="cell_36" x="0.00875" />
+      <location name="cell_37" x="0.01125" />
+      <location name="cell_38" x="0.01375" />
+      <location name="cell_39" x="0.01625" />
+      <location name="cell_40" x="0.01875" />
+      <location name="cell_41" x="0.02125" />
+      <location name="cell_42" x="0.02375" />
+      <location name="cell_43" x="0.02625" />
+      <location name="cell_44" x="0.02875" />
+      <location name="cell_45" x="0.03125" />
+      <location name="cell_46" x="0.03375" />
+      <location name="cell_47" x="0.03625" />
+      <location name="cell_48" x="0.03875" />
+      <location name="cell_49" x="0.04125" />
+      <location name="cell_50" x="0.04375" />
+      <location name="cell_51" x="0.04625" />
+      <location name="cell_52" x="0.04875" />
+      <location name="cell_53" x="0.05125" />
+      <location name="cell_54" x="0.05375" />
+      <location name="cell_55" x="0.05625" />
+      <location name="cell_56" x="0.05875" />
+      <location name="cell_57" x="0.06125" />
+      <location name="cell_58" x="0.06375" />
+      <location name="cell_59" x="0.06625" />
+      <location name="cell_60" x="0.06875" />
+      <location name="cell_61" x="0.07125" />
+      <location name="cell_62" x="0.07375" />
+      <location name="cell_63" x="0.07625" />
+      <location name="cell_64" x="0.07875" />
+    </component>
+  </type>
+  <!-- Standard Cell -->
+  <type is="detector" name="cell">
+    <cuboid id="cell-shape">
+      <left-front-bottom-point x="-0.00125" y="-0.05" z="-0.015" />
+      <left-front-top-point x="-0.00125" y="0.05" z="-0.015" />
+      <left-back-bottom-point x="-0.00125" y="-0.05" z="0.015" />
+      <right-front-bottom-point x="0.00125" y="-0.05" z="-0.015" />
+    </cuboid>
+    <algebra val="cell-shape" />
+  </type>
+</instrument>

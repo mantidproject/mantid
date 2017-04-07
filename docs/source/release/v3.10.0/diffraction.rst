@@ -13,6 +13,11 @@ Crystal Improvements
 Engineering Diffraction
 -----------------------
 
+Powder Diffraction
+------------------
+
+- New instrument definition files are added for D1B, D4, and D20 powder/liquid diffractometers at ILL.
+
 Single Crystal Diffraction
 --------------------------
 
