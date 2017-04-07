@@ -114,11 +114,11 @@ public:
       TS_ASSERT_EQUALS(y, inputWS->y(0)[0])
     }
     for (const auto e : hist.e()) {
-      TS_ASSERT_EQUALS(e, std::sqrt(3 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 3)
+      TS_ASSERT_EQUALS(e, std::sqrt(4 * inputWS->e(0)[0] * inputWS->e(0)[0]) / 4)
     }
     const auto vertAxis = outputWS->getAxis(1);
     TS_ASSERT_EQUALS(vertAxis->getValue(0), 1.0)
-    TS_ASSERT_EQUALS(vertAxis->getValue(1), 3.5)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), 5.0)
   }
 
   void test_vertical_profile() {
