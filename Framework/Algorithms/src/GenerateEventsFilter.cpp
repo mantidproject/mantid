@@ -652,7 +652,6 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
 
   // Generate filter
   // std::vector<Kernel::SplittingInterval> splitters;
-  int wsindex = 0;
   makeFilterBySingleValue(minvalue, maxvalue,
                           static_cast<double>(timetolerance_ns) * 1.0E-9,
                           logboundary.compare("centre") == 0, filterincrease,
@@ -671,6 +670,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
       std::stringstream ss2;
       ss2 << "Log " << m_dblLog->name() << " From " << maxvalue << " To "
          << minvalue << "  Value-change-direction: decrease ";
+      row = m_filterInfoWS->appendRow();
       row << 1 << ss2.str();
 
   } else {
@@ -824,13 +824,14 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
     bool filterIncrease, bool filterDecrease, bool separateUpDown, DateAndTime startTime,
     Kernel::DateAndTime stopTime) {
 
-    raise RuntimeError('From here!')
   // Do nothing if the log is empty.
   if (m_dblLog->size() == 0) {
     g_log.warning() << "There is no entry in this property " << this->name()
                     << "\n";
     return;
   }
+  g_log.warning() << "Log size: " << m_dblLog->size() << "  Filter value between " << min << " and " << max << "; \t log direction: "
+                  << filterIncrease << " and " << filterDecrease << "\n";
 
   // Clear splitters in vector format
   m_vecSplitterGroup.clear();
@@ -838,31 +839,144 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
 
   // Initialize control parameters
   bool lastGood = false;
-  bool isGood = false;
-  ;
+  bool log_value_in_range = false;
+  int prev_log_change_direction = -2;
+  int curr_log_change_direction = -2;
+
   time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
-  int numgood = 0;
   DateAndTime lastTime, currT;
-  DateAndTime start, stop;
+  DateAndTime splitter_start_time, splitter_stop_time;
+  DateAndTime zerotime(0);
 
   size_t progslot = 0;
   string info;
 
+  // loop through the log
   for (int i = 0; i < m_dblLog->size(); i++) {
     lastTime = currT;
     // The new entry
     currT = m_dblLog->nthTime(i);
 
+    // check log value in range
+    log_value_in_range = isDblLogValueInRange(i, currT, min, max, startTime, stopTime, curr_log_change_direction);
+
+//    g_log.warning() << "entry " << i << ": " << log_value_in_range << ", " << curr_log_change_direction;
+
+    // update progress bar
+    size_t tmpslot = i * 90 / m_dblLog->size();
+    if (tmpslot > progslot) {
+      progslot = tmpslot;
+      double prog = static_cast<double>(progslot) / 100.0 + 0.1;
+      progress(prog);
+    }
+
+    // outside of range all the time
+    if (!log_value_in_range && !lastGood)
+    {
+        prev_log_change_direction = curr_log_change_direction;
+//        g_log.warning() << "\t\tskip" << "\n";
+        continue;
+    }
+
+    // find out direction
+    bool good_direction(false);
+    if (filterIncrease && curr_log_change_direction == 1)
+        good_direction = true;
+    else if (filterDecrease && curr_log_change_direction == -1)
+        good_direction = true;
+    // log value has direction changed if it is specified to separate up and down
+    bool change_direction(false);
+    if (separateUpDown && prev_log_change_direction != curr_log_change_direction)
+        change_direction = true;
+
+    // the last good is over
+    bool add_new_splitter(false);
+    bool start_new_splitter(false);
+    if (lastGood && !log_value_in_range)
+    {
+        // from in range to out of range
+        add_new_splitter = true;
+        lastGood = false;
+//        g_log.warning("situation 1\n");
+    }
+    else if (log_value_in_range && !good_direction)
+    {
+        // direction does not match requirement
+        add_new_splitter = true;
+        lastGood = false;
+//         g_log.warning("situation 2\n");
+    }
+    else if (log_value_in_range && change_direction)
+    {
+        // direction changed and it matters
+        add_new_splitter = true;
+        start_new_splitter = true;
+//         g_log.warning("situation 3\n");
+    }
+    else if (!lastGood && log_value_in_range)
+    {
+        // first one in the range
+        start_new_splitter = true;
+//         g_log.warning("situation 4\n");
+    }
+    else
+    {
+        // just as good as before. do nothing
+        ;
+//         g_log.warning("situation 5\n");
+    }
+
+    // add new splitter if a splitter has ever been initialized
+    if (add_new_splitter && splitter_start_time > zerotime)
+    {
+        // End of the good section
+        if (centre) {
+          splitter_stop_time = currT - tol;
+        } else {
+          splitter_stop_time = currT;
+        }
+
+        int wsindex = 0;
+        // in case that it is specified to have up and down separate.  then the rising one will go to ws-1
+        if (separateUpDown && prev_log_change_direction > 0)
+            wsindex = 1;
+        addNewTimeFilterSplitter(splitter_start_time, splitter_stop_time, wsindex, info);
+
+        // reset splitter start and stop time
+        splitter_start_time = zerotime;
+        splitter_stop_time = zerotime;
+    }
+
+    // start a new splitter (with starting value)
+    if (start_new_splitter)
+    {
+        // Start of a good section
+        if (centre)
+          splitter_start_time = currT - tol;
+        else
+          splitter_start_time = currT;
+    }
+
+    // update the loop variable
+    lastGood = log_value_in_range;
+    prev_log_change_direction = curr_log_change_direction;
+
+//    g_log.warning() << "\t\tstart new:" << start_new_splitter << ", close prev: " << add_new_splitter << "\n";
+
+    // reset the start and stop time by tolerance (of time) with specific definition
+
+
     // A good value?
-    isGood = identifyLogEntry(i, currT, lastGood, min, max, startTime, stopTime,
+    /*
+    log_value_in_range = identifyLogEntry(i, currT, lastGood, min, max, startTime, stopTime,
                               filterIncrease, filterDecrease);
-    if (isGood)
+    if (log_value_in_range)
       numgood++;
 
     // Log status (time/value/value changing direciton) is changed
-    if (isGood != lastGood) {
+    if (log_value_in_range != lastGood) {
       // We switched from bad to good or good to bad
-      if (isGood) {
+      if (log_value_in_range) {
         // Start of a good section
         if (centre)
           start = currT - tol;
@@ -881,7 +995,7 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
         // Reset the number of good ones, for next time
         numgood = 0;
       }
-      lastGood = isGood;
+      lastGood = log_value_in_range;
     }
 
     // Progress bar..
@@ -891,19 +1005,85 @@ void GenerateEventsFilter::makeFilterBySingleValue(double min, double max, doubl
       double prog = double(progslot) / 100.0 + 0.1;
       progress(prog);
     }
+    */
 
   } // ENDFOR
 
-  if (numgood > 0) {
+  if (splitter_start_time > zerotime) {
     // The log ended on "good" so we need to close it using the last time we
     // found
     if (centre)
-      stop = currT - tol;
+      splitter_stop_time = currT - tol;
     else
-      stop = currT;
-    addNewTimeFilterSplitter(start, stop, wsindex, info);
-    numgood = 0;
+      splitter_stop_time = currT;
+
+    int wsindex = 0;
+    if (separateUpDown && prev_log_change_direction > 0)
+        wsindex = 1;
+    addNewTimeFilterSplitter(splitter_start_time, splitter_stop_time, wsindex, info);
   }
+
+  return;
+}
+
+
+/** [Warning] if index is the last one and the last one is added arbitrarily, then it could be a problem
+ *            for value changing direction
+ * @brief GenerateEventsFilter::isDblLogValueInRange
+ * @param index
+ * @param currT
+ * @param minvalue
+ * @param maxvalue
+ * @param startT
+ * @param stopT
+ * @param value_change_direction
+ * @return
+ */
+bool GenerateEventsFilter::isDblLogValueInRange(const int &index, const Kernel::DateAndTime &currT,
+                                             const double &minvalue, const double &maxvalue,
+                                             const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT,
+                                             int &value_change_direction)
+{
+    // return if time is out of range
+    if (currT < startT || currT > stopT)
+    {
+        value_change_direction = -2;
+        return false;
+    }
+
+    bool is_in_range(false);
+
+    double val = m_dblLog->nthValue(index);
+
+    // Identify by time and value
+    is_in_range =
+            val >= minvalue && val <= maxvalue;
+    if (!is_in_range)
+    {
+        value_change_direction = -2;
+        g_log.error() << "out of range: " << minvalue << ", " << val << ", " << maxvalue << "\n";
+        return false;
+    }
+
+    // find out the change direction of the log value by comparing to next one because the log value is recorded as a step function
+    int numlogentries = m_dblLog->size();
+    double diff;
+    if (index < numlogentries - 1) {
+      // For a non-last log entry
+      diff = m_dblLog->nthValue(index + 1) - val;
+    } else {
+      // Last log entry: follow the last direction
+      diff = val - m_dblLog->nthValue(index - 1);
+    }
+
+    if (diff > 0)
+        value_change_direction = 1;
+    else if (diff < 0)
+        value_change_direction = -1;
+    else
+        value_change_direction = 0;
+
+    return true;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -920,14 +1100,16 @@ bool GenerateEventsFilter::identifyLogEntry(
     const double &minvalue, const double &maxvalue,
     const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT,
     const bool &filterIncrease, const bool &filterDecrease) {
+
+  // get n-th value
   double val = m_dblLog->nthValue(index);
 
   // Identify by time and value
-  bool isgood =
+  bool is_in_range =
       (val >= minvalue && val < maxvalue) && (currT >= startT && currT < stopT);
 
   // Consider direction: not both (i.e., not increase or not decrease)
-  if (isgood && (!filterIncrease || !filterDecrease)) {
+  if (is_in_range && (!filterIncrease || !filterDecrease)) {
     int numlogentries = m_dblLog->size();
     double diff;
     if (index < numlogentries - 1) {
@@ -939,16 +1121,16 @@ bool GenerateEventsFilter::identifyLogEntry(
     }
 
     if (diff > 0 && filterIncrease)
-      isgood = true;
+      is_in_range = true;
     else if (diff < 0 && filterDecrease)
-      isgood = true;
+      is_in_range = true;
     else if (diff == 0)
-      isgood = lastgood;
+      is_in_range = lastgood;
     else
-      isgood = false;
+      is_in_range = false;
   }
 
-  return isgood;
+  return is_in_range;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -1690,6 +1872,11 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
     m_vecSplitterTime.push_back(stoptime);
     // Group
     m_vecSplitterGroup.push_back(wsindex);
+
+//    for (size_t i = 0; i < m_vecSplitterTime.size() - 1; ++i)
+//        g_log.warning() << "spliter " << i << ": " << m_vecSplitterTime[i] << ", " << m_vecSplitterTime[i+1] << "  --> "
+//                        << m_vecSplitterGroup[i] << "\n";
+
   } else {
     // For regular Splitter
     Kernel::SplittingInterval spiv(starttime, stoptime, wsindex);

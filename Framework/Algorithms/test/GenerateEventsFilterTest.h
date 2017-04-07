@@ -105,7 +105,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test generation of splitters by time
    */
-  void test_genTime1Interval() {
+  void Ptest_genTime1Interval() {
     // 1. Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestWorkspace", eventWS);
@@ -161,7 +161,7 @@ public:
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
-  void test_genTimeMultipleInterval() {
+  void Ptest_genTimeMultipleInterval() {
     // Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
@@ -241,7 +241,7 @@ public:
    * (1) No time tolerance
    * (2) Just one region
    */
-  void test_genSimpleLogValueFilter() {
+  void Ptest_genSimpleLogValueFilter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
@@ -306,7 +306,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void test_genMultipleLogValuesFilter() {
+  void Ptest_genMultipleLogValuesFilter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
 
@@ -362,7 +362,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log
     */
-  void test_genFilterByIntegerLog() {
+  void Ptest_genFilterByIntegerLog() {
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
@@ -433,7 +433,7 @@ public:
   /** Test to generate a set of filters against an integer log by using the
    * single value mode
     */
-  void test_genFilterByIntegerLog2() {
+  void Ptest_genFilterByIntegerLog2() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventData2", eventWS);
@@ -506,16 +506,17 @@ public:
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2,
                                                                         true);
 
-    // Run star time
+    // define run start, stop and pulse time:  10 PULSES
     int64_t runstarttime_ns = 3000000000;
     int64_t runstoptime_ns = 3001000000;
     int64_t pulsetime_ns = 100000;
 
+    // runs start time
     Kernel::DateAndTime runstarttime(runstarttime_ns);
     eventws->mutableRun().addProperty("run_start",
                                       runstarttime.toISO8601String());
 
-    // Proton charge log
+    // generate log 1: proton charge
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         new Kernel::TimeSeriesProperty<double>("proton_charge");
     int64_t curtime_ns = runstarttime_ns;
@@ -525,10 +526,10 @@ public:
       curtime_ns += pulsetime_ns;
     }
     eventws->mutableRun().addProperty(protonchargelog, true);
-    std::cout << "Proton charge log from " << runstarttime_ns << " to "
-              << runstoptime_ns << "\n";
+//    std::cout << "Proton charge log from " << runstarttime_ns << " to "
+//              << runstoptime_ns << "\n";
 
-    // 4. Sine value log (value record 1/4 of pulse time.  it is FAST)
+    // generate a fast log: Sine value log (value record 1/4 of pulse time.
     Kernel::TimeSeriesProperty<double> *sinlog =
         new Kernel::TimeSeriesProperty<double>("FastSineLog");
     double period = static_cast<double>(pulsetime_ns);
@@ -538,11 +539,12 @@ public:
       double value =
           sin(M_PI * static_cast<double>(curtime_ns) / period * 0.25);
       sinlog->addValue(curtime, value);
+
       curtime_ns += pulsetime_ns / 4;
     }
     eventws->mutableRun().addProperty(sinlog, true);
 
-    // 5. Cosine value log (value record 4 pulse time.  it is SLOW)
+    // generate slow log: cosine value log (value record 4 pulse time.
     Kernel::TimeSeriesProperty<double> *coslog =
         new Kernel::TimeSeriesProperty<double>("SlowCosineLog");
     period = static_cast<double>(pulsetime_ns * 10);
@@ -555,8 +557,27 @@ public:
     }
     eventws->mutableRun().addProperty(coslog, true);
 
-    std::cout << "<----------- Number of events = "
-              << eventws->getNumberEvents() << "\n";
+    // generate a triangle log
+    Kernel::TimeSeriesProperty<double> *triangle_log = new Kernel::TimeSeriesProperty<double>("FieldLog");
+    int64_t period_i64 = pulsetime_ns * 2;
+    curtime_ns = runstarttime_ns;
+    double log_value = 1.5;
+    double delta_val = -0.5;
+    while (curtime_ns < runstoptime_ns)
+    {
+        Kernel::DateAndTime curr_time(curtime_ns);
+        triangle_log->addValue(curr_time, log_value);
+        std::cout << curr_time.totalNanoseconds() << "\t\t" << log_value << "\n";
+
+        if (curtime_ns % period_i64 == 0)
+            delta_val *= -1.;
+        log_value += delta_val;
+        curtime_ns += pulsetime_ns / 5;
+    }
+    std::cout << "Field log size = " << triangle_log->size() << "  ends with "
+              << triangle_log->lastTime() << ", " << triangle_log->lastValue() << "\n";
+    eventws->mutableRun().addProperty(triangle_log, true);
+
 
     return eventws;
   }
@@ -564,7 +585,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test generation of splitters by time for matrix splitter
    */
-  void test_genTime1IntervalMatrixSplitter() {
+  void Ptest_genTime1IntervalMatrixSplitter() {
     // Create input Workspace
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().add("TestWorkspace", eventWS);
@@ -620,7 +641,7 @@ public:
    * (1) Multiple time interval
    * (2) Default start time and stop time
    */
-  void test_genTimeMultipleIntervalMatrixSplitter() {
+  void Ptest_genTimeMultipleIntervalMatrixSplitter() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08",
@@ -704,10 +725,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void test_genMultipleLogValuesFilterMatrixSplitter() {
-    std::cout
-        << "\n==== Test Multiple Log Value Filter (Matrix Splitter) ====\n\n";
-
+  void Ptest_genMultipleLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
@@ -806,7 +824,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void test_genMultipleLogValuesFilterMatrixSplitterParallel() {
+  void Ptest_genMultipleLogValuesFilterMatrixSplitterParallel() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS04B", eventWS);
@@ -906,10 +924,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate filter by log values in 'FastLog' mode only 1 interval
    */
-  void test_genSingleleLogValuesFilterMatrixSplitter() {
-    std::cout << "\n==== Test Single Log Value Filter (Matrix Splitter) ====\n"
-              << "\n";
-
+  void Ptest_genSingleleLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
@@ -961,7 +976,7 @@ public:
    * (1) No time tolerance
    * (2) Just one
    */
-  void test_genMultipleIntLogValuesFilterMatrixSplitter() {
+  void Ptest_genMultipleIntLogValuesFilterMatrixSplitter() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
     AnalysisDataService::Instance().addOrReplace("TestEventWS09", eventWS);
@@ -1023,7 +1038,7 @@ public:
    * (1) Multiple time interval with various time interval lengths
    * (2) Default start time and stop time
    */
-  void test_genTimeVariousIntervalMatrixSplitter() {
+  void Ptest_genTimeVariousIntervalMatrixSplitter() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
     AnalysisDataService::Instance().addOrReplace("TestEventWorkspace08v",
@@ -1101,6 +1116,59 @@ public:
     AnalysisDataService::Instance().remove("TestEventWorkspace08v");
 
     return;
+  }
+
+  /** test single value log splitter with separate up/down
+   * @brief test_genSingleValueSplitterSeparateUpDown
+   */
+  void test_genSingleValueSplitterSeparateUpDown()
+  {
+      // Create input Workspace & initial setup
+      DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+      AnalysisDataService::Instance().addOrReplace("TestEventWorkspace20",
+                                                   eventWS);
+
+      // Init and set property
+      GenerateEventsFilter alg;
+      alg.initialize();
+
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("InputWorkspace", "TestEventWorkspace20"));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("OutputWorkspace", "Splitters20"));
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("InformationWorkspace", "InfoWS20"));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FastLog", true));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("LogName", "FieldLog"));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("FilterLogValueByChangingDirection", "Separate"));
+
+      // Running and get result
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+      TS_ASSERT(alg.isExecuted());
+
+      MatrixWorkspace_sptr splitter_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+                  AnalysisDataService::Instance().retrieve("Splitters20"));
+      TS_ASSERT(splitter_ws);
+
+      DataObjects::TableWorkspace_const_sptr info_table_ws =
+          boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+              AnalysisDataService::Instance().retrieve("InfoWS20"));
+      TS_ASSERT(info_table_ws);
+
+      // check splitters workspace size
+      TS_ASSERT_EQUALS(splitter_ws->readX(0).size(), 7);
+      double period = splitter_ws->histogram(0).readX()[1] - splitter_ws->histogram(0).readX()[0];
+      for (size_t i = 0; i < 4; ++i)
+      {
+          double this_period = splitter_ws->readX(0)[i+2] - splitter_ws->readX(0)[i+1];
+          TS_ASSERT_DELTA(this_period, period, 10);
+      }
+       // std::cout << splitter_ws->histogram(0).readX()[0];
+
+      TS_ASSERT_EQUALS(info_table_ws->rowCount(), 2);
+
+
   }
 
   //----------------------------------------------------------------------------------------------

@@ -165,6 +165,12 @@ private:
                         const Kernel::DateAndTime &stopT,
                         const bool &filterIncrease, const bool &filterDecrease);
 
+  bool isDblLogValueInRange(const int &index, const Kernel::DateAndTime &currT,
+                                               const double &minvalue, const double &maxvalue,
+                                               const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT,
+                                               int &value_change_direction);
+
+
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);
 
