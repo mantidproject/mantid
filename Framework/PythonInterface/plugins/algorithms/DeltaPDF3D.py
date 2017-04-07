@@ -211,6 +211,11 @@ class DeltaPDF3D(PythonAlgorithm):
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
 
+        # Copy experiment info
+        if inWS.getNumExperimentInfo() > 0:
+            outWS.addExperimentInfo(inWS.getExperimentInfo(0))
+            ol = outWS.getExperimentInfo(0).mutableSample().getOrientedLattice()
+
         progress.report()
 
         self.setProperty("OutputWorkspace", outWS)
