@@ -21,15 +21,15 @@ Usage
 
 .. testcode:: VesuvioPeakExample
 
-    VesuvioPeakPrediction(Model='Debye', Temperature=[300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+    vesuvio_debye_params = VesuvioPeakPrediction(Model='Debye', Temperature=[300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
 
-    VesuvioPeakPrediction(Model='Einstein', Temperature=[300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
+    vesuvio_einstein_params= VesuvioPeakPrediction(Model='Einstein', Temperature=[300], AtomicMass=63.5, Frequency=20, DebyeTemperature=347)
 
-    vp = mtd['vesuvio_debye_params']
+    vp = vesuvio_debye_params
     print('--------Debye--------')
     for c in vp.keys():
         print('%s: %f' %(c, vp.column(c)[0]))
-    vp = mtd['vesuvio_einstein_params']
+    vp = vesuvio_einstein_params
     print('\n--------Einstein--------')
     for c in vp.keys():
         print('%s: %f' %(c, vp.column(c)[0]))
