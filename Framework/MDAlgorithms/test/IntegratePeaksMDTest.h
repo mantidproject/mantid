@@ -366,8 +366,8 @@ public:
 
     double actualPeakRadius =
         std::stod(outWS->mutableRun().getProperty("PeakRadius")->value());
-    double actualBackgroundOutterRadius =
-        std::stod(outWS->mutableRun().getProperty("BackgroundOuterRadius"->value());
+    double actualBackgroundOutterRadius = std::stod(
+        outWS->mutableRun().getProperty("BackgroundOuterRadius")->value());
     double actualBackgroundInnerRadius =
         std::stod(outWS->mutableRun().getProperty("BackgroundInnerRadius")->value());
 
