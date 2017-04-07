@@ -279,6 +279,55 @@ public:
     TS_ASSERT_THROWS_ANYTHING(alg.execute())
     TS_ASSERT(!alg.isExecuted())
   }
+
+  void test_ignore_special_values() {
+    const size_t nHist = 13;
+    const size_t nBins = 23;
+    MatrixWorkspace_sptr inputWS = create2DWorkspace154(nHist, nBins);
+    inputWS->mutableY(2)[6] = std::numeric_limits<double>::quiet_NaN();
+    inputWS->mutableY(3)[13] = std::numeric_limits<double>::infinity();
+    const auto inputXMode = inputWS->histogram(0).xMode();
+
+    LineProfile alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Direction", "Horizontal"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Centre", 3.5))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("HalfWidth", 0.5))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Start", 0.0))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("End", static_cast<double>(nBins)))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreNans", true))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInfs", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    const auto hist = outputWS->histogram(0);
+    TS_ASSERT_EQUALS(hist.xMode(), inputXMode)
+    for (size_t i = 0; i < hist.x().size(); ++i) {
+      TS_ASSERT_EQUALS(hist.x()[i], i + 1)
+    }
+    for (const auto y : hist.y()) {
+      TS_ASSERT_EQUALS(y, inputWS->y(0)[0])
+    }
+    for (size_t i = 0; i < hist.e().size(); ++i) {
+      if (i == 6 || i == 13) {
+        TS_ASSERT_EQUALS(hist.e()[i], inputWS->e(0)[0])
+        continue;
+      }
+      TS_ASSERT_EQUALS(hist.e()[i], std::sqrt(2 * inputWS->e(0)[0] *inputWS->e(0)[0]) / 2)
+    }
+    const auto vertAxis = outputWS->getAxis(1);
+    TS_ASSERT_EQUALS(vertAxis->getValue(0), 3)
+    TS_ASSERT_EQUALS(vertAxis->getValue(1), 5)
+  }
 };
 
 
