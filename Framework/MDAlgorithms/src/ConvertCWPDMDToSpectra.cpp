@@ -117,8 +117,7 @@ void ConvertCWPDMDToSpectra::exec() {
       int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
                                 ->run()
                                 .getProperty("run_number")
-                                ->value()
-                                .c_str());
+                                ->value());
       // skip if run id is not a valid one
       if (runid < 0)
         continue;
@@ -128,8 +127,7 @@ void ConvertCWPDMDToSpectra::exec() {
         thislambda = std::stod(inputDataWS->getExperimentInfo(iexp)
                                    ->run()
                                    .getProperty(wavelengthpropertyname)
-                                   ->value()
-                                   .c_str());
+                                   ->value());
       else if (wavelength == EMPTY_DBL()) {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit
