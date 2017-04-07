@@ -1135,7 +1135,7 @@ const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // this is here to fill m_min and m_max with numbers that aren't nan
   miny = std::numeric_limits<double>::max();
-  maxy = -std::numeric_limits<double>::max();
+  maxy = std::numeric_limits<double>::lowest();
 
   if (ws) {
 
@@ -1145,7 +1145,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
       const auto &Y = ws->y(wi);
 
       local_min = std::numeric_limits<double>::max();
-      local_max = -std::numeric_limits<double>::max();
+      local_max = std::numeric_limits<double>::lowest();
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
@@ -1172,7 +1172,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // Make up some reasonable values if nothing was found
   if (miny == std::numeric_limits<double>::max())
     miny = 0;
-  if (maxy == -std::numeric_limits<double>::max())
+  if (maxy == std::numeric_limits<double>::lowest())
     maxy = miny + 1e6;
 
   if (maxy == miny) {
