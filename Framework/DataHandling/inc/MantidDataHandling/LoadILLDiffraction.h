@@ -4,6 +4,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace {
@@ -72,18 +73,20 @@ private:
   void init() override;
   void exec() override;
 
+  std::vector<Kernel::DateAndTime> getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
+  std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
 
-  void fillDataScanMetaData(const NeXus::NXDouble &) const;
+  void fillDataScanMetaData(const NeXus::NXDouble &);
   void fillMovingInstrumentScan(const NeXus::NXUInt &,const NeXus::NXDouble &) {}
   void fillStaticInstrumentScan(const NeXus::NXUInt &, const NeXus::NXDouble &,
                                 const NeXus::NXFloat &);
 
   void initWorkspace();
   void loadDataScan();
-  void loadMetadata();
-  void loadScannedVariables();
+  void loadMetaData();
+  void loadScanVars();
   void loadStaticInstrument();
   void moveTwoThetaZero(double);
   void resolveInstrument();
@@ -96,6 +99,7 @@ private:
   std::string m_instName; ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments
   std::string m_fileName; ///< file name to load
+  Kernel::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType; ///< NoScan, DetectorScan or OtherScan
 
   std::vector<ScannedVariables> m_scanVar; ///< holds the scan info

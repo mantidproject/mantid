@@ -6,6 +6,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <numeric>
 #include <boost/algorithm/string/predicate.hpp>
@@ -81,13 +83,13 @@ void LoadILLDiffraction::exec() {
 
   m_fileName = getPropertyValue("Filename");
 
-  loadScannedVariables();
+  loadScanVars();
   progress.report("Loaded the scanned variables");
 
   loadDataScan();
   progress.report("Loaded the detector scan data");
 
-  //loadMetadata();
+  loadMetaData();
   progress.report("Loaded the metadata");
 
   setProperty("OutputWorkspace", m_outWorkspace);
@@ -103,6 +105,9 @@ void LoadILLDiffraction::loadDataScan() {
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   m_instName = firstEntry.getString("instrument/name");
+
+  m_startTime = DateAndTime(
+      m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
   // read the detector data
   NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
@@ -128,13 +133,14 @@ void LoadILLDiffraction::loadDataScan() {
   NXFloat twoTheta0 = firstEntry.openNXFloat("instrument/2theta/value");
   twoTheta0.load();
 
+  // figure out the dimensions
   m_numberDetectorsRead = static_cast<size_t>(data.dim1());
   m_numberScanPoints = static_cast<size_t>(data.dim0());
 
+  // set which scanned variables are scanned, which should be the axis
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    int ii = static_cast<int>(i);
-    m_scanVar[i].setAxis(axis[ii]);
-    m_scanVar[i].setScanned(scanned[ii]);
+    m_scanVar[i].setAxis(axis[static_cast<int>(i)]);
+    m_scanVar[i].setScanned(scanned[static_cast<int>(i)]);
   }
 
   resolveScanType();
@@ -160,7 +166,7 @@ void LoadILLDiffraction::loadDataScan() {
 /**
 * Dumps the metadata from the whole file to SampleLogs
 */
-void LoadILLDiffraction::loadMetadata() {
+void LoadILLDiffraction::loadMetaData() {
 
   m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
 
@@ -216,7 +222,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
 /**
  * Loads the scanned_variables/variables_names block
  */
-void LoadILLDiffraction::loadScannedVariables() {
+void LoadILLDiffraction::loadScanVars() {
 
   H5File h5file(m_fileName, H5F_ACC_RDONLY);
 
@@ -242,40 +248,21 @@ void LoadILLDiffraction::loadScannedVariables() {
 }
 
 /**
- * Creates sample logs for the scanned variables
+ * Creates time series sample logs for the scanned variables
  * @param scan : scan data
  */
-void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) const {
-
-  std::map<std::string, std::string> logs;
-
+void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
+  auto absoluteTimes = getAbsoluteTimes(scan);
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].axis != 1 &&
         !boost::starts_with(m_scanVar[i].property, "Monitor")) {
-      std::string key = m_scanVar[i].name;
-      std::string value;
-      if (m_scanVar[i].scanned == 1 ||
-          boost::starts_with(m_scanVar[i].property, "Time") ||
-          boost::starts_with(m_scanVar[i].property, "TotalCount")) {
-        // keep the list
-        for (size_t j = 0; j < m_numberScanPoints; ++j) {
-          value +=
-              std::to_string(scan(static_cast<int>(i), static_cast<int>(j))) +
-              ",";
-        }
-        value = value.substr(0, value.size() - 1);
-      } else {
-        // average
-        double avg = std::accumulate(scan() + i * m_numberScanPoints,
-                                     scan() + (i + 1) * m_numberScanPoints, 0.);
-        value = std::to_string(avg / m_numberScanPoints);
+      auto property =
+          std::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
+      for (size_t j = 0; j < m_numberScanPoints; ++j) {
+        property->addValue(absoluteTimes[j], scan(static_cast<int>(i),static_cast<int>(j)));
       }
-      logs[key] = value;
+      m_outWorkspace->mutableRun().addLogData(std::move(property));
     }
-  }
-
-  for(const auto& item : logs) {
-      m_outWorkspace->mutableRun().addProperty(item.first, item.second);
   }
 }
 
@@ -315,6 +302,44 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
     }
   }
   return axis;
+}
+
+/**
+ * Returns the durations for each scan point
+ * @param scan : scan data
+ * @return vector of durations
+ */
+std::vector<double>
+LoadILLDiffraction::getDurations(const NXDouble &scan) const {
+  std::vector<double> timeDurations;
+  for (size_t i = 0; i < m_scanVar.size(); ++i) {
+    if (boost::starts_with(m_scanVar[i].property, "Time")) {
+      timeDurations.assign(scan() + m_numberScanPoints * i,
+                           scan() + m_numberScanPoints * (i + 1));
+      break;
+    }
+  }
+  return timeDurations;
+}
+
+/**
+ * Returns the vector of absolute times for each scan point
+ * @param scan : scan data
+ * @return vector of absolute times
+ */
+std::vector<DateAndTime>
+LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
+    std::vector<DateAndTime> times;
+    std::vector<double> durations = getDurations(scan);
+    DateAndTime time = m_startTime;
+    times.emplace_back(time);
+    size_t timeIndex = 1;
+    while (timeIndex < m_numberScanPoints) {
+        time += durations[timeIndex - 1] * 1E9;
+        times.emplace_back(time);
+        ++timeIndex;
+    }
+    return times;
 }
 
 /**
