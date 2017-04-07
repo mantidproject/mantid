@@ -1614,7 +1614,7 @@ void FunctionBrowser::fixParameter() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  if (prop->hasOption(globalOptionName) &&
+  if (prop->hasOption(globalOptionName) && getNumberOfDatasets() > 1 &&
       !prop->checkOption(globalOptionName)) {
     auto parName = getParameterName(prop);
     auto &localValues = m_localParameterValues[parName];
@@ -1704,7 +1704,7 @@ void FunctionBrowser::addTie() {
                                       QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
     addTieProperty(prop, tie);
-    if (prop->hasOption(globalOptionName) &&
+    if (prop->hasOption(globalOptionName) && getNumberOfDatasets() > 1 &&
         !prop->checkOption(globalOptionName)) {
       auto parName = getParameterName(prop);
       auto &localValues = m_localParameterValues[parName];
