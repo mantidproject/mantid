@@ -202,31 +202,38 @@ std::vector<std::vector<size_t>>
 translateInstructions(const std::string &instructions) {
   std::vector<std::vector<size_t>> outGroups;
 
-  // split into comma separated groups, each group potentially containing
-  // an operation (+-:) that produces even more groups.
-  std::vector<std::string> groups;
-  boost::split(groups, instructions, boost::is_any_of(","));
+  try {
+    // split into comma separated groups, each group potentially containing
+    // an operation (+-:) that produces even more groups.
+    std::vector<std::string> groups;
+    boost::split(groups, instructions, boost::is_any_of(","));
 
-  for (auto groupStr : groups) {
-    // remove leading/trailing whitespace
-    boost::trim(groupStr);
+    for (auto groupStr : groups) {
+      // remove leading/trailing whitespace
+      boost::trim(groupStr);
 
-    // Look for the various operators in the string. If one is found then
-    // do the necessary translation into groupings.
-    if (groupStr.find('+') != std::string::npos) {
-      // add a group with the given spectra
-      translateAdd(groupStr, outGroups);
-    } else if (groupStr.find('-') != std::string::npos) {
-      translateSumRange(groupStr, outGroups);
-    } else if (groupStr.find(':') != std::string::npos) {
-      translateRange(groupStr, outGroups);
-    } else if (!groupStr.empty()) {
-      // contains no instructions, just add this spectrum as a new group
-      // create group of size 1 with the spectrum in it
-      std::vector<size_t> newGroup(1, boost::lexical_cast<size_t>(groupStr));
-      // and add it to output
-      outGroups.push_back(newGroup);
+      // Look for the various operators in the string. If one is found then
+      // do the necessary translation into groupings.
+      if (groupStr.find('+') != std::string::npos) {
+        // add a group with the given spectra
+        translateAdd(groupStr, outGroups);
+      }
+      else if (groupStr.find('-') != std::string::npos) {
+        translateSumRange(groupStr, outGroups);
+      }
+      else if (groupStr.find(':') != std::string::npos) {
+        translateRange(groupStr, outGroups);
+      }
+      else if (!groupStr.empty()) {
+        // contains no instructions, just add this spectrum as a new group
+        // create group of size 1 with the spectrum in it
+        std::vector<size_t> newGroup(1, boost::lexical_cast<size_t>(groupStr));
+        // and add it to output
+        outGroups.push_back(newGroup);
+      }
     }
+  } catch (boost::bad_lexical_cast &ex) {
+    throw std::runtime_error("Invalid processing instructions: " + instructions);
   }
 
   return outGroups;

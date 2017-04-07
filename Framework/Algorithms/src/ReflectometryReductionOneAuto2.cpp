@@ -322,20 +322,25 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
   // vector of comopnents
   std::vector<std::string> detectors;
 
-  for (const auto wsIndex : wsIndices) {
+  try {
+    for (const auto wsIndex : wsIndices) {
 
-    size_t index = boost::lexical_cast<size_t>(wsIndex);
+      size_t index = boost::lexical_cast<size_t>(wsIndex);
 
-    auto detector = inputWS->getDetector(index);
-    auto parent = detector->getParent();
+      auto detector = inputWS->getDetector(index);
+      auto parent = detector->getParent();
 
-    if (parent) {
-      auto parentType = parent->type();
-      auto detectorName = (parentType == "Instrument") ? detector->getName()
-                                                       : parent->getName();
-      detectors.push_back(detectorName);
+      if (parent) {
+        auto parentType = parent->type();
+        auto detectorName = (parentType == "Instrument") ? detector->getName()
+          : parent->getName();
+        detectors.push_back(detectorName);
+      }
     }
+  } catch (boost::bad_lexical_cast &ex) {
+    throw std::runtime_error("Invalid processing instructions: " + instructions);
   }
+
   return detectors;
 }
 
