@@ -974,14 +974,47 @@ std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
   auto map = originWS->getSpectrumToWorkspaceIndexMap();
   std::stringstream result;
 
-  // Get the start and end of the range of detectors.
-  /// todo Add support for different GroupingPatterns rather than just a single
-  /// range?
-  const int hostIdxStart =
-      mapSpectrumIndexToWorkspace(map, spectrumMin(), hostWS);
-  const int hostIdxEnd =
-      mapSpectrumIndexToWorkspace(map, spectrumMax(), hostWS);
-  result << hostIdxStart << "-" << hostIdxEnd;
+  // Map the original indices to the host workspace
+  std::vector<size_t> hostDetectors;
+  for (auto i : m_detectors) {
+    const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
+    hostDetectors.push_back(hostIdx);
+  }
+
+  // Add each host index to the output string separated by '+' to indicate
+  // that all detectors in this group will be summed. We also check for
+  // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
+  bool contiguous = false;
+  size_t contiguousStart = 0;
+
+  for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
+    // Check if the next iterator is a contiguous increment from this one
+    auto &nextIt = it + 1;
+    if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
+      // If this is a start of a new contiguous region, remember the start index
+      if (!contiguous) {
+        contiguousStart = *it;
+        contiguous = true;
+      }
+      // Continue to find the end of the contiguous region
+      continue;
+    }
+
+    if (contiguous) {
+      // Output the contiguous range, then reset the flag
+      result << contiguousStart << "-" << *it;
+      contiguousStart = 0;
+      contiguous = false;
+    } else  {
+      // Just output the value
+      result << *it;
+    }
+
+    // Add a separator ready for the next value/range
+    if (nextIt != hostDetectors.end()) {
+      result << "+";
+    }
+  }
 
   return result.str();
 }
