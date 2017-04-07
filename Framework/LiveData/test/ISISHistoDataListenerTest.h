@@ -1,6 +1,7 @@
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
@@ -44,13 +45,13 @@ public:
     dae.setProperty("NPeriods", 1);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
+    Mantid::API::Algorithm props;
+    alg.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
         "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
-    props.setProperty("SpectraList", specs);
+    alg.setProperty("SpectraList", specs);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
         "TESTHISTOLISTENER", true, &props);
@@ -237,13 +238,13 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    API::Algorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
-    props.setProperty("PeriodList", periods);
+    alg.setProperty("PeriodList", periods);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
         "TESTHISTOLISTENER", true, &props);
@@ -288,15 +289,15 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    API::Algorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    props.declareProperty(
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
-    props.setProperty("PeriodList", "1,3");
+    alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
-    props.setProperty("SpectraList", "11-13");
+    alg.setProperty("SpectraList", "11-13");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
         "TESTHISTOLISTENER", true, &props);
@@ -345,15 +346,15 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    API::Algorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    props.declareProperty(
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
-    props.setProperty("PeriodList", "1,3");
+    alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
-    props.setProperty("SpectraList", "14-17");
+    alg.setProperty("SpectraList", "14-17");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
         "TESTHISTOLISTENER", true, &props);
@@ -382,13 +383,13 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    API::Algorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae
-    props.setProperty("PeriodList", periods);
+    alg.setProperty("PeriodList", periods);
 
     TS_ASSERT_THROWS(auto listener =
                          Mantid::API::LiveListenerFactory::Instance().create(
