@@ -258,7 +258,7 @@ double dotProduct(const DoubleFortranVector &v1,
 /// @param v :: The vector.
 /// @param n :: The number of elements to examine.
 double maxVal(const DoubleFortranVector &v, int n) {
-  double res = -std::numeric_limits<double>::max();
+  double res = std::numeric_limits<double>::lowest();
   for (int i = 1; i <= n; ++i) {
     auto val = v(i);
     if (val > res) {
