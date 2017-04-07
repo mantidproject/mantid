@@ -1667,14 +1667,14 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
          "errors, type = connect, "
          "window = window_to_use)";
   } else {
-   // clang-format off
-    s << "  w = plotSpectrum(source = ws_name,"
+    // clang-format off
+    s << "w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionDefault,"
-	 "error_bars = errors,"
+	     "error_bars = errors,"
          "type = connect,"
          "window = window_to_use)";
-   // clang-format on
+    // clang-format on
   }
   s << "  w.setName(ws_name + '-1')";
   s << "  w.setObjectName(ws_name)";
