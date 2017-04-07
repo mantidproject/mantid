@@ -386,12 +386,18 @@ std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
   return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global time-slicing options. Options are supplied by the main
-* presenter
-* @return :: Global time-slicing options
+/** Requests time-slicing values. Values are supplied by the main presenter
+* @return :: Time-slicing values
 */
-std::string ReflRunsTabPresenter::getTimeSlicingOptions() const {
-  return m_mainPresenter->getTimeSlicingOptions(m_view->getSelectedGroup());
+std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+}
+
+/** Requests time-slicing type. Type is supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingType() const {
+  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
 /**

@@ -44,8 +44,10 @@ public:
   virtual std::string getReductionOptions(int group) const = 0;
   /// Post-processing
   virtual std::string getStitchOptions(int group) const = 0;
-  /// Time-slicing
-  virtual std::string getTimeSlicingOptions(int group) const = 0;
+  /// Time-slicing values
+  virtual std::string getTimeSlicingValues(int group) const = 0;
+  /// Time-slicing type
+  virtual std::string getTimeSlicingType(int group) const = 0;
   /// Dialog/Prompt methods
   virtual std::string askUserString(const std::string &prompt,
                                     const std::string &title,

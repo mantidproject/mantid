@@ -33,8 +33,8 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL PartitionIndex
-    : public detail::IndexType<PartitionIndex, int> {
+class PartitionIndex : public detail::IndexType<PartitionIndex, int> {
+public:
   using detail::IndexType<PartitionIndex, int>::IndexType;
   using detail::IndexType<PartitionIndex, int>::operator=;
 };

@@ -65,6 +65,9 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs.size(); }
 
+/// Returns true if the beamline has scanning detectors.
+bool DetectorInfo::isScanning() const { return m_detectorInfo.isScanning(); }
+
 /// Returns true if the detector is a monitor.
 bool DetectorInfo::isMonitor(const size_t index) const {
   return m_detectorInfo.isMonitor(index);

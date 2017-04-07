@@ -63,6 +63,7 @@ public:
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < 6; i++) {
       Detector *d = new Detector("det", i, 0);
+      instr->add(d);
       instr->markAsDetector(d);
     }
     space2D->setInstrument(instr);
