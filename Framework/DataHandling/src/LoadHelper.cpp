@@ -205,17 +205,21 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
 
       NXstatus opengroup_status;
       NXstatus opendata_status;
+      NXstatus getinfo_status;
 
       if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) ==
           NX_OK) {
 
-        // Go down to one level
-        std::string p_nxname(
-            nxname); // current names can be useful for next level
-        std::string p_nxclass(nxclass);
+        if (!std::string(nxclass).empty()) {
 
-        recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
-                                        p_nxclass, level + 1);
+          // Go down to one level, if the group is known to nexus
+          std::string p_nxname(
+              nxname); // current names can be useful for next level
+          std::string p_nxclass(nxclass);
+
+          recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, p_nxname,
+                                          p_nxclass, level + 1);
+        }
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
@@ -229,10 +233,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                         << nxname << ")\n";
           /* nothing */
         } else { // create a property
-          int rank;
-          int dims[4];
+          int rank = 0;
+          int dims[4] = {0, 0, 0, 0};
           int type;
-          dims[0] = dims[1] = dims[2] = dims[3] = 0;
 
           std::string property_name =
               (parent_name.empty() ? nxname : parent_name + "." + nxname);
@@ -241,133 +244,167 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                         << property_name << '\n';
 
           // Get the value
-          NXgetinfo(nxfileID, &rank, dims, &type);
+          if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) ==
+              NX_OK) {
 
-          // Note, we choose to only build properties on small float arrays
-          // filter logic is below
-          bool build_small_float_array = false; // default
+            g_log.debug() << indent_str << "Rank of " << property_name << " is "
+                          << rank << "\n" << indent_str << "Dimensions are "
+                          << dims[0] << ", " << dims[1] << ", " << dims[2]
+                          << ", " << dims[3] << "\n";
 
-          if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-            if ((rank == 1) && (dims[0] <= 9)) {
-              build_small_float_array = true;
-            } else {
-              g_log.debug() << indent_str
-                            << "ignored multi dimension float data on "
-                            << property_name << '\n';
-            }
-          } else if (type != NX_CHAR) {
-            if ((rank != 1) || (dims[0] != 1) || (dims[1] != 1) ||
-                (dims[2] != 1) || (dims[3] != 1)) {
-              g_log.debug() << indent_str << "ignored multi dimension data on "
-                            << property_name << '\n';
-            }
-          }
-
-          void *dataBuffer;
-          NXmalloc(&dataBuffer, rank, dims, type);
-
-          if (NXgetdata(nxfileID, dataBuffer) != NX_OK) {
-            NXfree(&dataBuffer);
-            throw std::runtime_error("Cannot read data from NeXus file");
-          }
-
-          if (type == NX_CHAR) {
-            std::string property_value(
-                reinterpret_cast<const char *>(dataBuffer));
-            if (boost::algorithm::ends_with(property_name, "_time")) {
-              // That's a time value! Convert to Mantid standard
-              property_value = dateTimeInIsoFormat(property_value);
-            }
-            runDetails.addProperty(property_name, property_value);
-
-          } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) ||
-                     (type == NX_INT16) || (type == NX_INT32) ||
-                     (type == NX_UINT16)) {
-
-            // Look for "units"
-            NXstatus units_status;
-            char units_sbuf[NX_MAXNAMELEN];
-            int units_len = NX_MAXNAMELEN;
-            int units_type = NX_CHAR;
-
-            char unitsAttrName[] = "units";
-            units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
-                                     &units_len, &units_type);
-            if (units_status != NX_ERROR) {
-              g_log.debug() << indent_str << "[ " << property_name
-                            << " has unit " << units_sbuf << " ]\n";
-            }
+            // Note, we choose to only build properties on small float arrays
+            // filter logic is below
+            bool build_small_float_array = false; // default
+            bool read_property = true;
 
             if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
-              // Mantid numerical properties are double only.
-              double property_double_value = 0.0;
-
-              // Simple case, one value
-              if (dims[0] == 1) {
-                if (type == NX_FLOAT32) {
-                  property_double_value =
-                      *(reinterpret_cast<float *>(dataBuffer));
-                } else if (type == NX_FLOAT64) {
-                  property_double_value =
-                      *(reinterpret_cast<double *>(dataBuffer));
-                }
-                if (units_status != NX_ERROR)
-                  runDetails.addProperty(property_name, property_double_value,
-                                         std::string(units_sbuf));
-                else
-                  runDetails.addProperty(property_name, property_double_value);
-              } else if (build_small_float_array) {
-                // An array, converted to "name_index", with index < 10 (see
-                // test above)
-                for (int dim_index = 0; dim_index < dims[0]; dim_index++) {
-                  if (type == NX_FLOAT32) {
-                    property_double_value =
-                        (reinterpret_cast<float *>(dataBuffer))[dim_index];
-                  } else if (type == NX_FLOAT64) {
-                    property_double_value =
-                        (reinterpret_cast<double *>(dataBuffer))[dim_index];
-                  }
-                  std::string indexed_property_name = property_name +
-                                                      std::string("_") +
-                                                      std::to_string(dim_index);
-                  if (units_status != NX_ERROR)
-                    runDetails.addProperty(indexed_property_name,
-                                           property_double_value,
-                                           std::string(units_sbuf));
-                  else
-                    runDetails.addProperty(indexed_property_name,
-                                           property_double_value);
-                }
+              if ((rank == 1) && (dims[0] <= 9)) {
+                build_small_float_array = true;
+              } else {
+                g_log.debug() << indent_str
+                              << "ignored multi dimensional number "
+                                 "data with more than 10 elements "
+                              << property_name << '\n';
+                read_property = false;
               }
-
+            } else if (type != NX_CHAR) {
+              if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
+                  (dims[2] > 1) || (dims[3] > 1)) {
+                g_log.debug() << indent_str
+                              << "ignored non-scalar numeric data on "
+                              << property_name << '\n';
+                read_property = false;
+              }
             } else {
-              // int case
-              int property_int_value = 0;
-              if (type == NX_INT16) {
-                property_int_value =
-                    *(reinterpret_cast<short int *>(dataBuffer));
-              } else if (type == NX_INT32) {
-                property_int_value = *(reinterpret_cast<int *>(dataBuffer));
-              } else if (type == NX_UINT16) {
-                property_int_value =
-                    *(reinterpret_cast<short unsigned int *>(dataBuffer));
+              if ((rank > 1) || (dims[1] > 1) || (dims[2] > 1) ||
+                  (dims[3] > 1)) {
+                g_log.debug() << indent_str << "ignored string array data on "
+                              << property_name << '\n';
+                read_property = false;
+              }
+            }
+
+            if (read_property) {
+
+              void *dataBuffer;
+              NXmalloc(&dataBuffer, rank, dims, type);
+
+              if (NXgetdata(nxfileID, dataBuffer) == NX_OK) {
+
+                if (type == NX_CHAR) {
+                  std::string property_value(
+                      reinterpret_cast<const char *>(dataBuffer));
+                  if (boost::algorithm::ends_with(property_name, "_time")) {
+                    // That's a time value! Convert to Mantid standard
+                    property_value = dateTimeInIsoFormat(property_value);
+                  }
+                  runDetails.addProperty(property_name, property_value);
+
+                } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) ||
+                           (type == NX_INT16) || (type == NX_INT32) ||
+                           (type == NX_UINT16)) {
+
+                  // Look for "units"
+                  NXstatus units_status;
+                  char units_sbuf[NX_MAXNAMELEN];
+                  int units_len = NX_MAXNAMELEN;
+                  int units_type = NX_CHAR;
+
+                  char unitsAttrName[] = "units";
+                  units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
+                                           &units_len, &units_type);
+                  if (units_status != NX_ERROR) {
+                    g_log.debug() << indent_str << "[ " << property_name
+                                  << " has unit " << units_sbuf << " ]\n";
+                  }
+
+                  if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
+                    // Mantid numerical properties are double only.
+                    double property_double_value = 0.0;
+
+                    // Simple case, one value
+                    if (dims[0] == 1) {
+                      if (type == NX_FLOAT32) {
+                        property_double_value =
+                            *(reinterpret_cast<float *>(dataBuffer));
+                      } else if (type == NX_FLOAT64) {
+                        property_double_value =
+                            *(reinterpret_cast<double *>(dataBuffer));
+                      }
+                      if (units_status != NX_ERROR)
+                        runDetails.addProperty(property_name,
+                                               property_double_value,
+                                               std::string(units_sbuf));
+                      else
+                        runDetails.addProperty(property_name,
+                                               property_double_value);
+                    } else if (build_small_float_array) {
+                      // An array, converted to "name_index", with index < 10
+                      // (see
+                      // test above)
+                      for (int dim_index = 0; dim_index < dims[0];
+                           dim_index++) {
+                        if (type == NX_FLOAT32) {
+                          property_double_value = (reinterpret_cast<float *>(
+                              dataBuffer))[dim_index];
+                        } else if (type == NX_FLOAT64) {
+                          property_double_value = (reinterpret_cast<double *>(
+                              dataBuffer))[dim_index];
+                        }
+                        std::string indexed_property_name =
+                            property_name + std::string("_") +
+                            std::to_string(dim_index);
+                        if (units_status != NX_ERROR)
+                          runDetails.addProperty(indexed_property_name,
+                                                 property_double_value,
+                                                 std::string(units_sbuf));
+                        else
+                          runDetails.addProperty(indexed_property_name,
+                                                 property_double_value);
+                      }
+                    }
+
+                  } else {
+                    // int case
+                    int property_int_value = 0;
+                    if (type == NX_INT16) {
+                      property_int_value =
+                          *(reinterpret_cast<short int *>(dataBuffer));
+                    } else if (type == NX_INT32) {
+                      property_int_value =
+                          *(reinterpret_cast<int *>(dataBuffer));
+                    } else if (type == NX_UINT16) {
+                      property_int_value =
+                          *(reinterpret_cast<short unsigned int *>(dataBuffer));
+                    }
+
+                    if (units_status != NX_ERROR)
+                      runDetails.addProperty(property_name, property_int_value,
+                                             std::string(units_sbuf));
+                    else
+                      runDetails.addProperty(property_name, property_int_value);
+
+                  } // if (type==...
+
+                } else {
+                  g_log.debug() << indent_str << "unexpected data on "
+                                << property_name << '\n';
+                } // test on nxdata type
+
+              } else {
+                g_log.debug() << indent_str << "could not read the value of "
+                              << property_name << '\n';
               }
 
-              if (units_status != NX_ERROR)
-                runDetails.addProperty(property_name, property_int_value,
-                                       std::string(units_sbuf));
-              else
-                runDetails.addProperty(property_name, property_int_value);
+              NXfree(&dataBuffer);
+              dataBuffer = nullptr;
+            }
 
-            } // if (type==...
-
-          } else {
-            g_log.debug() << indent_str << "unexpected data on "
-                          << property_name << '\n';
-          } // test on nxdata type
-
-          NXfree(&dataBuffer);
-          dataBuffer = nullptr;
+          } // if NXgetinfo OK
+          else {
+            g_log.debug() << indent_str << "unexpected status ("
+                          << getinfo_status << ") on " << nxname << '\n';
+          }
 
         } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 
