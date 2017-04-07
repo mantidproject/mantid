@@ -20,12 +20,13 @@ using Mantid::HistogramData::Histogram;
 * if equal by workspace index.
 * @param lhs left hand comparee
 * @param rhs right hand comparee
-* @returns true if right hand comparee has greater log value than left hand comparee
+* @returns true if right hand comparee has greater log value than left hand
+* comparee
 */
-bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) 
-{ 
-  if (lhs.logVal == rhs.logVal) return (lhs.index < rhs.index);
-  return (lhs.logVal < rhs.logVal); 
+bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs) {
+  if (lhs.logVal == rhs.logVal)
+    return (lhs.index < rhs.index);
+  return (lhs.logVal < rhs.logVal);
 };
 
 /**

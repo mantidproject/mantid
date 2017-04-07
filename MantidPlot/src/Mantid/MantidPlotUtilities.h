@@ -7,7 +7,11 @@
 * These utilities assist with plotting in Mantid
 */
 // Structure to aid odering of plots
-typedef struct { double logVal; QString wsName; int index; } CurveSpec;
+typedef struct {
+  double logVal;
+  QString wsName;
+  int index;
+} CurveSpec;
 
 // Compare to sort according to log value
 bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs);
