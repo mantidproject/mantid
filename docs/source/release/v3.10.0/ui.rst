@@ -60,6 +60,7 @@ Bugs Resolved
 
 SliceViewer Improvements
 ------------------------
+- Fixed a bug where the rebin button was toggled when the user switch axes.
 
 VSI Improvments
 ---------------
