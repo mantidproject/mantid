@@ -565,63 +565,49 @@ void ReflectometryReductionOne2::findLambdaMinMax() {
 void ReflectometryReductionOne2::findDetectorsOfInterest() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
-  // Get the min and max spectrum indicies from the processing instructions, if
-  // given, or default to the overall min and max
-  size_t minDetectorIdx = 0;
-  size_t maxDetectorIdx = static_cast<int>(m_spectrumInfo->size()) - 1;
-  bool done = false;
-
-  if (!instructions.empty() &&
-      !std::all_of(instructions.begin(), instructions.end(), isspace)) {
-    try {
-      // The processing instructions should be in the format <start>-<end> or
-      // <a>+<b>+<c>... At the moment we only support a single range or set of
-      // values but not combinations of both.
-
-      /// todo Add support for the '+' operator in the GroupingPattern. Could
-      /// we also support ':' and ',' operators? These would result in more
-      /// than one row in the detector workspace.
-      std::vector<std::string> matches;
-
-      // Look for a single occurance of '-' (only support a single range for
-      // now)
-      boost::split(matches, instructions, boost::is_any_of("-"));
-
-      if (matches.size() == 2) {
-        minDetectorIdx = std::stoi(matches[0]);
-        if (matches.size() > 1) {
-          maxDetectorIdx = std::stoi(matches[1]);
-        } else {
-          maxDetectorIdx = minDetectorIdx;
-        }
-      } else {
-        // Look for '+'
-        boost::split(matches, instructions, boost::is_any_of("+"));
-        if (matches.size() > 0) {
-          for (auto match : matches) {
-            m_detectors.push_back(std::stoi(match));
-          }
-          done = true;
-        }
-      }
-
-      // Also set the reference detector index as the centre of the
-      // region of interest
-      m_twoThetaRDetectorIdx = 403;
-      //          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
-    } catch (std::exception &ex) {
-      std::ostringstream errMsg;
-      errMsg << "Error reading processing instructions '" << instructions
-             << "'; " << ex.what();
-      throw std::runtime_error(errMsg.str());
-    }
+  if (instructions.empty() ||
+    std::all_of(instructions.begin(), instructions.end(), isspace)) {
+    return;
   }
 
-  if (!done) {
-    // Add each detector index in the range to the list
-    for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
-      m_detectors.push_back(i);
+  try {
+    /// todo Add support for ':' and ',' operators for the processing
+    /// instructions. This will result in more than one input group and
+    /// therefore we need to set up more than one output group.
+
+    // Split on '+' to get each value or range to add to the list
+    std::vector<std::string> matches;
+    boost::split(matches, instructions, boost::is_any_of("+"));
+
+    for (auto &match : matches) {
+      // Check for a single occurance of '-', which indicates a range. We 
+      // should have two matches: start and end; or none, if this is a single value
+      std::vector<std::string> ranges;
+      boost::split(ranges, match, boost::is_any_of("-"));
+
+      if (ranges.size() == 2) {
+        const size_t minDetectorIdx = std::stoi(ranges[0]);
+        const size_t maxDetectorIdx = std::stoi(ranges[1]);
+        // Add each detector index in the range to the output
+        for (size_t i = minDetectorIdx; i <= maxDetectorIdx; ++i) {
+          m_detectors.push_back(i);
+        }
+      } else {
+        // Just add the single value
+        m_detectors.push_back(std::stoi(match));
+      }
     }
+
+    // Also set the reference detector index as the centre of the
+    // region of interest
+    /// todo Get correct centre pixel
+    m_twoThetaRDetectorIdx = 403;
+    //          minDetectorIdx + (maxDetectorIdx - minDetectorIdx) / 2;
+  } catch (std::exception &ex) {
+    std::ostringstream errMsg;
+    errMsg << "Error reading processing instructions '" << instructions
+            << "'; " << ex.what();
+    throw std::runtime_error(errMsg.str());
   }
 
   // Log the results
