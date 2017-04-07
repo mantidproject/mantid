@@ -15,7 +15,7 @@ API
 Algorithms
 ----------
 
-- Removed the optional flag `LocationParameters` from `ClearInstrumentParameters`.
+- Removed the optional flag ``LocationParameters`` from ``ClearInstrumentParameters``.
 
 New
 ###
@@ -44,8 +44,8 @@ Bug Fixes
 #########
 
 - Fixed two issues with absolute rotations that affected :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`. Previously, setting the absolute rotation of a component to ``R`` would result in its rotation being ``parent-rotation * R * inverse(relative-parent-rotation)``.
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow `EventWorkspace` as input
-- Fixed an issue where the log `proton_charge_by_period` was not loaded for `LoadEventNexus <algm-LoadEventNexus>`.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow ``EventWorkspace`` as input
+- Fixed an issue where the log ``proton_charge_by_period`` was not loaded for :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
 
 Deprecated
@@ -84,7 +84,7 @@ LiveData
 Python
 ------
 
-- For multiple output parameters, python algorithms now return a `namedtuple` instead of a tuple. Old scripts should still work,
+- For multiple output parameters, python algorithms now return a ``namedtuple`` instead of a ``tuple``. Old scripts should still work,
   but one can now do
 
   .. code-block:: python
@@ -102,7 +102,8 @@ Python
       3.0
       3.0
 
-- A `SpectraAxis` object can now be created from Python, in a similar way to the other Axis types:
+- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape. 
+- A ``SpectraAxis`` object can now be created from Python, in a similar way to the other Axis types:
 
   .. code-block:: python
 
