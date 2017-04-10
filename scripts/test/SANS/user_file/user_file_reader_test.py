@@ -98,8 +98,7 @@ class UserFileReaderTest(unittest.TestCase):
         if os.path.exists(user_file_path):
             os.remove(user_file_path)
 
-if __name__ == "__main__":
-    unittest.main()
+    @staticmethod
     def _sort_list(elements):
         if len(elements) == 1:
             return
