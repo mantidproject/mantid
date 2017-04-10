@@ -538,19 +538,24 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
   outFile.close();
 }
 
-namespace { // anonymous
-// return 0 if the attribute doesn't exist. This is to follow the
-// behavior of atof which always returns 0 if there is a problem.
-double attrToDouble(const Poco::XML::Element *pElem, const std::string &name) {
+double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
+                                                const std::string &name) {
   if (pElem->hasAttribute(name)) {
     const std::string value = pElem->getAttribute(name);
     if (!value.empty()) {
-      return std::stod(value);
+      try {
+        return std::stod(value);
+      } catch (std::invalid_argument &e) {
+        std::stringstream msg;
+        msg << "failed to convert \"" << value
+            << "\" to double for xml attribute \"" << name << "\"";
+        g_log.warning(msg.str());
+        return 0.;
+      }
     }
   }
   return 0.;
 }
-} // namespace anonymous
 
 //-----------------------------------------------------------------------------------------------------------------------
 /** Set location (position) of comp as specified in XML location element.
