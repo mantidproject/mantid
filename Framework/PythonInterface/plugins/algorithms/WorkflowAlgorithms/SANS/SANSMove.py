@@ -2,6 +2,7 @@
 
 """ SANSMove algorithm to move a workspace according to the instrument settings."""
 
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
                            FloatArrayProperty)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
@@ -39,7 +40,7 @@ def get_detector_for_component(move_info, component):
         selected_detector = detectors[DetectorType.to_string(DetectorType.LAB)]
     else:
         # Check if the component is part of the detector names
-        for _, detector in list(detectors.items()):
+        for _, detector in detectors.items():
             if detector.detector_name == component or detector.detector_name_short == component:
                 selected_detector = detector
     return selected_detector
@@ -83,6 +84,10 @@ class SANSMove(DataProcessorAlgorithm):
         # Components which are to be moved
         self.declareProperty('Component', '', direction=Direction.Input, doc='Component that should be moved.')
 
+        # If is a transmission workspace
+        self.declareProperty('IsTransmissionWorkspace', False, direction=Direction.Input,
+                             doc='If the input workspace is a transmission or direct workspace')
+
     def PyExec(self):
         # Read the state
         state_property_manager = self.getProperty("SANSState").value
@@ -105,12 +110,14 @@ class SANSMove(DataProcessorAlgorithm):
         # 3. Set to zero: Set the component to its zero position
         progress = Progress(self, start=0.0, end=1.0, nreports=2)
         selected_move_type = self._get_move_type()
+
         if selected_move_type is MoveType.ElementaryDisplacement:
             progress.report("Starting elementary displacement")
             mover.move_with_elementary_displacement(move_info, workspace, coordinates, full_component_name)
         elif selected_move_type is MoveType.InitialMove:
+            is_transmission_workspace = self.getProperty("IsTransmissionWorkspace").value
             progress.report("Starting initial move.")
-            mover.move_initial(move_info, workspace, coordinates, full_component_name)
+            mover.move_initial(move_info, workspace, coordinates, full_component_name, is_transmission_workspace)
         elif selected_move_type is MoveType.SetToZero:
             progress.report("Starting set to zero.")
             mover.set_to_zero(move_info, workspace, full_component_name)
