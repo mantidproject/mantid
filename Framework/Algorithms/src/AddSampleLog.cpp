@@ -62,9 +62,9 @@ void AddSampleLog::init() {
 
 
   // add optional workspace which contains the data of the TimeSeriesProperty
-  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
-                    "TimeSeriesWorkspace" "", Direction::Input, PropertyMode::Optional),
-                  "Optional workspace contain the ");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
+                    "TimeSeriesWorkspace", "", Direction::Input, PropertyMode::Optional),
+                  "Optional workspace contain the data");
   declareProperty("WorkspaceIndex", 0, "The workspace index of the TimeSeriesWorkspace to be imported.");
   declareProperty("AutoMetaData", false,
                   "If it is specified as true, then all the meta data information will be retrieved from the input workspace. It will be used with algorithm ExportTimeSeriesProperty.");
@@ -77,11 +77,11 @@ void AddSampleLog::init() {
 
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
-  Workspace_sptr ws1 = getProperty("Workspace");
-  ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
+  Workspace_sptr target_workspace = getProperty("Workspace");
+  ExperimentInfo_sptr expinfo_ws = boost::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
   // we're going to edit the workspaces run details so get a non-const reference
   // to it
-  Run &theRun = ws->mutableRun();
+  Run &theRun = expinfo_ws->mutableRun();
   // get the data that the user wants to add
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
@@ -101,6 +101,7 @@ void AddSampleLog::exec() {
     theRun.removeLogData(propName);
   }
 
+  // add string log value and return
   if (propType == stringLogOption) {
     theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
     theRun.getProperty(propName)->setUnits(propUnit);
@@ -111,9 +112,12 @@ void AddSampleLog::exec() {
   double dblVal;
   bool value_is_int = false;
 
-  if (propNumberType != autoTypeOption) {
+  // find out te property's data type
+  if (propNumberType != autoTypeOption && propNumberType != stringLogOption) {
+      // explicitly specified
     value_is_int = (propNumberType == intTypeOption);
-    if (value_is_int) {
+    // check input string can be converted to expected data
+    if (value_is_int && propType != numberSeriesLogOption) {
       if (!Strings::convert(propValue, intVal)) {
         throw std::invalid_argument("Error interpreting string '" + propValue +
                                     "' as NumberType Int.");
@@ -123,6 +127,7 @@ void AddSampleLog::exec() {
                                   "' as NumberType Double.");
     }
   } else {
+      // auto specified
     if (Strings::convert(propValue, intVal)) {
       value_is_int = true;
     } else if (!Strings::convert(propValue, dblVal)) {
@@ -160,24 +165,24 @@ void AddSampleLog::exec() {
   std::string data_ws_name = getPropertyValue("TimeSeriesWorkspace");
   if (data_ws_name.size() > 0)
   {
-    setTimeSeriesData(ws1, propName, value_is_int);
+    setTimeSeriesData(expinfo_ws, propName, value_is_int);
   }
 
   return;
 }
 
-void AddSampleLog::setTimeSeriesData(API::MatrixWorkspace_const_sptr outws, const std::string &property_name, bool value_is_int)
+void AddSampleLog::setTimeSeriesData(ExperimentInfo_sptr outws, const std::string &property_name, bool value_is_int)
 {
   // get input and
-  MatrixWorkspace_const_sptr data_ws = getProperty("TimeSeriesWorkspace");
+  MatrixWorkspace_sptr data_ws = getProperty("TimeSeriesWorkspace");
   int ws_index = getProperty("WorkspaceIndex");
-  if (ws_index < 0 || ws_index > data_ws->getNumberHistograms())
+  if (ws_index < 0 || ws_index > static_cast<int>(data_ws->getNumberHistograms()))
     throw std::runtime_error("Input workspace index is out of range");
 
   // get meta data
   bool epochtime(false);
   std::string timeunit;
-  getMetaData(epochtime, timeunit);
+  getMetaData(data_ws, epochtime, timeunit);
   bool is_second = timeunit.compare("Second") == 0;
 
   // convert the data in workspace to time series property value
@@ -229,6 +234,7 @@ std::vector<Kernel::DateAndTime> AddSampleLog::getTimes(API::MatrixWorkspace_con
 
 Kernel::DateAndTime AddSampleLog::getRunStart(API::MatrixWorkspace_const_sptr dataws)
 {
+    // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or proton_charge property!
   Kernel::DateAndTime runstart(0);
 
   return runstart;
@@ -268,7 +274,7 @@ void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws, bool &epo
   {
     // get the meta data from input
     epochtime = !getProperty("RelativeTime");
-    timeunit = getProperty("TimeUnit");
+    timeunit = getPropertyValue("TimeUnit");
   }
 
   return;

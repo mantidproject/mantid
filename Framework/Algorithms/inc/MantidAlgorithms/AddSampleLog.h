@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ExperimentInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -65,13 +66,13 @@ private:
   void exec() override;
 
   /// set the time series property's entries to the newly added TimeSeriesProperty
-  void setTimeSeriesData(API::MatrixWorkspace_const_sptr outws, const std::string &property_name, bool value_is_int);
+  void setTimeSeriesData(Mantid::API::ExperimentInfo_sptr outws, const std::string &property_name, bool value_is_int);
 
   /// get run start time
   Kernel::DateAndTime getRunStart(API::MatrixWorkspace_const_sptr dataws);
 
   /// get value vector of the integer TimeSeriesProperty entries
-  std::vector<double> getIntValues(API::MatrixWorkspace_const_sptr dataws, int workspace_index);
+  std::vector<int> getIntValues(API::MatrixWorkspace_const_sptr dataws, int workspace_index);
 
   /// get value vector of the double TimeSeriesProperty entries
   std::vector<double> getDblValues(API::MatrixWorkspace_const_sptr dataws, int workspace_index);
