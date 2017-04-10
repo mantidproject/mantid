@@ -6,11 +6,11 @@
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidParallel/ParallelRunner.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #ifdef MPI_EXPERIMENTAL
+#include "MantidParallel/ParallelRunner.h"
 #include <boost/mpi/environment.hpp>
 #endif
 
