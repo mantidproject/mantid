@@ -96,7 +96,7 @@ double getLambda(const HistogramX &xValues, const int idx) {
 Get the value of theta from the logs
 @param inputWs : the input workspace
 @return : theta found in the logs
-@throw: runtime_errror if 'stheta' was not found.
+@throw: runtime_error if 'stheta' was not found.
 */
 double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
 
@@ -701,6 +701,7 @@ void ReflectometryReductionOne2::findTheta0() {
   if (reductionType == "DivergentBeam") {
     // theta0 is at the angle at the centre of the detector. This is the
     // angle the detector has been rotated around and should be defined in
+    // the log as stheta. It can be overridden with the Theta0 property.
     Property *theta0Property = getProperty("Theta0");
     if (!theta0Property->isDefault()) {
       m_theta0 = getProperty("Theta0");
@@ -719,7 +720,8 @@ void ReflectometryReductionOne2::findTheta0() {
 * @return : the angle twoThetaR
 * @throws : if the angle could not be found
 */
-double ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
+double
+ReflectometryReductionOne2::twoThetaR(const std::vector<size_t> &detectors) {
   return getDetectorTwoTheta(m_spectrumInfo, twoThetaRDetectorIdx(detectors));
 }
 
@@ -745,8 +747,8 @@ ReflectometryReductionOne2::twoThetaMax(const std::vector<size_t> &detectors) {
 * Get the spectrum index which defines the twoThetaR reference angle
 * @return : the spectrum index
 */
-size_t
-ReflectometryReductionOne2::twoThetaRDetectorIdx(const std::vector<size_t> &detectors) {
+size_t ReflectometryReductionOne2::twoThetaRDetectorIdx(
+    const std::vector<size_t> &detectors) {
   // Get the mid-point of the area of interest
   return detectors.front() + (detectors.back() - detectors.front()) / 2;
 }
@@ -785,10 +787,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
   cropWorkspaceAlg->setProperty("InputWorkspace", detectorWS);
-  cropWorkspaceAlg->setProperty("StartWorkspaceIndex",
-                                static_cast<int>(twoThetaRDetectorIdx(detectors)));
-  cropWorkspaceAlg->setProperty("EndWorkspaceIndex",
-                                static_cast<int>(twoThetaRDetectorIdx(detectors)));
+  cropWorkspaceAlg->setProperty(
+      "StartWorkspaceIndex", static_cast<int>(twoThetaRDetectorIdx(detectors)));
+  cropWorkspaceAlg->setProperty(
+      "EndWorkspaceIndex", static_cast<int>(twoThetaRDetectorIdx(detectors)));
   cropWorkspaceAlg->execute();
   MatrixWorkspace_sptr ws = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
@@ -866,7 +868,8 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS,
 
     // Process each value in the spectrum
     for (int inputIdx = 0; inputIdx < inputY.size(); ++inputIdx) {
-      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam, detectors);
+      sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY, IvsLam,
+                         detectors);
     }
   }
 
