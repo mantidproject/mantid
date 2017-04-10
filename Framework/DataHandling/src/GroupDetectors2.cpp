@@ -1293,6 +1293,7 @@ translateInstructions(const std::string &instructions) {
 *
 * @param groups : A vector of gorups, each group being a vector of its 0-based
 * spectrum indices
+* @param : The spectra axis of the workspace
 * @param commands : A stringstream to be filled
 */
 void convertGroupsToMapFile(std::vector<std::vector<int>> groups,
