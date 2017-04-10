@@ -66,6 +66,9 @@ private:
   DataObjects::PeaksWorkspace_sptr createOutputs();
 
   void mergePeaks();
+    
+  /// Implement this method to normalize the intensity of each Pt.
+  void normalizePeaksIntensities();
 
   DataObjects::PeaksWorkspace_sptr
   createPeakworkspace(Kernel::V3D peakCenter, API::IMDEventWorkspace_sptr mdws);
