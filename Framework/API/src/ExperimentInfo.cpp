@@ -103,7 +103,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  *m_detectorInfo = *other->m_detectorInfo;
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -111,7 +110,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   //   not here since we just copy the experiment data).
   // - For cached groupings (for MDWorkspaces), grouping was not copied in the
   //   old implementation either.
-  *m_componentInfo = *other->m_componentInfo;
 }
 
 /** Clone this ExperimentInfo class into a new one

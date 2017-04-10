@@ -10,42 +10,22 @@
 namespace Mantid {
 namespace API {
 
-/**
- * Constructor
- * @param componentInfo : Beamline wrapped ComponentInfo
- * @param componentIds : l-value reference to ComponentIDs ordered by component
- * index
- */
-ComponentInfo::ComponentInfo(
-    const Mantid::Beamline::ComponentInfo &componentInfo,
-    const std::vector<Mantid::Geometry::IComponent *> &componentIds)
-    : m_componentInfo(componentInfo),
-      m_componentIds(
-          boost::make_shared<std::vector<Geometry::ComponentID>>(componentIds)),
-      m_compIDToIndex(boost::make_shared<
-          std::unordered_map<Geometry::IComponent *, size_t>>()) {
-  init();
-}
 
 /**
  * Constructor
  * @brief ComponentInfo::ComponentInfo
  * @param componentInfo
- * @param componentIds : r-value reference to ComponentIDs ordered by component
+ * @param componentIds : ComponentIDs ordered by component
  * index
  */
 ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
-    std::vector<Mantid::Geometry::IComponent *> &&componentIds)
+    std::vector<Mantid::Geometry::IComponent *> componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(
           std::move(componentIds))),
       m_compIDToIndex(boost::make_shared<
           std::unordered_map<Geometry::IComponent *, size_t>>()) {
-  init();
-}
-
-void ComponentInfo::init() {
   /*
    * Ideally we would check here that componentIds.size() ==
    * m_componentInfo.size().
