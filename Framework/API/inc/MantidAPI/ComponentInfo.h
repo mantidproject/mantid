@@ -57,8 +57,9 @@ private:
 
 public:
   ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
-                std::vector<Mantid::Geometry::IComponent *> &&componentIds);
+                const std::vector<Mantid::Geometry::IComponent *> componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
+  std::vector<Mantid::Geometry::IComponent *> componentIds() const;
   size_t size() const;
   Mantid::Kernel::V3D position(const size_t componentIndex) const;
   Mantid::Kernel::Quat rotation(const size_t componentIndex) const;

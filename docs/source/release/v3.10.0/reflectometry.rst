@@ -20,6 +20,12 @@ ConvertToReflectometryQ
 Reflectometry Reduction Interface
 ---------------------------------
 
+ISIS Reflectometry (Polref)
+###########################
+
+- Added two more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even and Uniform slicing.
+- For custom slicing (and new slicing options), workspace slices are now identified by an index (e.g. ws_slice_0) instead of a start/stop time.
+
 ISIS Reflectometry
 ##################
 

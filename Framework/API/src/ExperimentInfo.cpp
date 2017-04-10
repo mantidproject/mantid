@@ -71,6 +71,7 @@ ExperimentInfo::ExperimentInfo()
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::shared_ptr<Beamline::ComponentInfo>(nullptr)) {
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_parmap->setComponentInfo(m_componentInfo, std::vector<ComponentID>{});
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 }
@@ -102,7 +103,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  *m_detectorInfo = *other->m_detectorInfo;
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -198,11 +198,19 @@ boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo(
                                          &externalDetectorInfo,
                                          std::placeholders::_1),
                                pmap);
+  InfoComponentVisitor visitor(
+      detectorInfo.size(),
+      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
 
-  // Register everything via visitor
-  oldInstr.registerContents(visitor);
-  // Extract component ids. We need this for the ComponentInfo wrapper.
-  componentIds = visitor.componentIds();
+    if (instrument.isParametrized()) {
+      // Register everything via visitor
+      instrument.baseInstrument()->registerContents(visitor);
+    } else {
+      instrument.registerContents(visitor);
+    }
+
+    // Extract component ids. We need this for the ComponentInfo wrapper.
+    componentIds = visitor.componentIds();
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
       visitor.componentSortedDetectorIndices(),
@@ -312,6 +320,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
+  instrument->setComponentInfo(m_componentInfo, m_componentIds);
   return instrument;
 }
 
@@ -602,12 +611,16 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  for (const auto detID : detIDs) {
-    try {
-      const size_t detIndex = detectorInfo().indexOf(detID);
-      specDef.add(detIndex);
-    } catch (std::out_of_range &) {
-      // Silently strip bad detector IDs
+  // Wrap translation in check for detector count as an optimization of
+  // otherwise slow failures via exceptions.
+  if (detectorInfo().size() > 0) {
+    for (const auto detID : detIDs) {
+      try {
+        const size_t detIndex = detectorInfo().indexOf(detID);
+        specDef.add(detIndex);
+      } catch (std::out_of_range &) {
+        // Silently strip bad detector IDs
+      }
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));

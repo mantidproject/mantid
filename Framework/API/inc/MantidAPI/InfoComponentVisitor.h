@@ -71,6 +71,9 @@ private:
   /// Only Assemblies and other NON-detectors yield ranges
   std::vector<std::pair<size_t, size_t>> m_ranges;
 
+  /// Counter for dropped detectors
+  size_t m_droppedDetectors = 0;
+
   /// Positions
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
 
