@@ -29,8 +29,11 @@ using namespace DataObjects;
 using std::size_t;
 
 namespace { // anonymous namespace
-std::vector<std::vector<int>> translateInstructions(const std::string &instructions);
-void convertGroupsToMapFile(std::vector<std::vector<int>> groups, std::stringstream &commands);
+std::vector<std::vector<int>>
+translateInstructions(const std::string &instructions);
+void convertGroupsToMapFile(std::vector<std::vector<int>> groups,
+                            const SpectraAxis *axis,
+                            std::stringstream &commands);
 }
 
 // progress estimates
@@ -323,7 +326,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     auto groups = translateInstructions(instructions);
     // Fill commandsSS with the contents of a map file
     std::stringstream commandsSS;
-    convertGroupsToMapFile(groups, commandsSS);
+    convertGroupsToMapFile(groups, axis, commandsSS);
     // readFile expects the first line to have already been removed, so we do
     // that, even though we don't use it.
     std::string firstLine;
@@ -1296,12 +1299,13 @@ namespace { // anonymous namespace
   * @param commands : A stringstream to be filled
   */
   void convertGroupsToMapFile(std::vector<std::vector<int>> groups,
-    std::stringstream &commands) {
-    // The input gives the groups as a vector of a vector of ints. Turn 
-    //this into a string, just like the contents of a map file.
+                              const SpectraAxis *axis,
+                              std::stringstream &commands) {
+    // The input gives the groups as a vector of a vector of ints. Turn
+    // this into a string, just like the contents of a map file.
     commands << groups.size() << "\n";
     for (auto &group : groups) {
-      const int groupId = group[0] + 1;
+      const int groupId = axis->spectraNo(group[0]);
       const int groupSize = static_cast<int>(group.size());
 
       // Comment the output for readability
@@ -1312,10 +1316,12 @@ namespace { // anonymous namespace
       commands << groupSize << "\n";
 
       // Group members
-      // So far we've been using 0-indexed ids, but the mapfile syntax expects
-      // 1-indexed ids, so we add 1 to the spectra ids here.
-      for (size_t j = 0; j < group.size(); ++j)
-        commands << (j > 0 ? " " : "") << group[j] + 1;
+      // The input is in 0-indexed workspace ids, but the mapfile syntax expects
+      // spectrum ids
+      for (size_t j = 0; j < group.size(); ++j) {
+        commands << (j > 0 ? " " : "")
+                 << axis->spectraNo(group[j]);
+      }
       commands << "\n";
     }
   }
