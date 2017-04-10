@@ -415,13 +415,9 @@ void MantidWSIndexWidget::initSpectraBox() {
  * Set up Options boxes UI
  */
 void MantidWSIndexWidget::initOptionsBoxes() {
-  m_optionsBox = new QHBoxLayout;
+  m_optionsBox = new QVBoxLayout;
 
-  if (m_advanced) {
-    m_showErrorBars = new QCheckBox("Show Error Bars");
-    m_optionsBox->addWidget(m_showErrorBars);
-  }
-
+  m_plotOptionLabel = new QLabel(tr("Plot Type:"));
   if (m_waterfall || m_tiled) {
     m_plotOptions = new QComboBox();
     m_plotOptions->addItem(SIMPLE_PLOT);
@@ -437,7 +433,13 @@ void MantidWSIndexWidget::initOptionsBoxes() {
       connect(m_plotOptions, SIGNAL(currentIndexChanged(const QString &)), this,
               SLOT(onPlotOptionChanged(const QString &)));
     }
+    m_optionsBox->addWidget(m_plotOptionLabel);
     m_optionsBox->addWidget(m_plotOptions);
+  }
+
+  if (m_advanced) {
+    m_showErrorBars = new QCheckBox("Show Error Bars");
+    m_optionsBox->addWidget(m_showErrorBars);
   }
 
   m_outer->addItem(m_optionsBox);
