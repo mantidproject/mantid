@@ -636,7 +636,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
                                       ? globalOptions.at(columnName)
                                       : "";
       auto optionsMap = parseKeyValueString(options);
-      auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
+      auto runWS =
+          prepareRunWorkspace(preProcessValue, preprocessor, optionsMap);
       alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
