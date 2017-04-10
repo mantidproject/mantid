@@ -20,6 +20,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace {
 class FakeWorkspaceA : public WorkspaceTester {
 public:
   using WorkspaceTester::WorkspaceTester;
@@ -44,9 +45,9 @@ private:
   }
 };
 
-class NoParallelismAlgorithm : public Algorithm {
+class FakeAlgNoParallelism : public Algorithm {
 public:
-  const std::string name() const override { return "NoParallelismAlgorithm"; }
+  const std::string name() const override { return "FakeAlgNoParallelism"; }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
   const std::string summary() const override { return ""; }
@@ -59,10 +60,50 @@ public:
   void exec() override {}
 };
 
-class AlgorithmWithBad_getParallelExecutionMode : public Algorithm {
+class FakeAlgTestGetInputWorkspaceStorageModes : public Algorithm {
 public:
   const std::string name() const override {
-    return "AlgorithmWithBad_getParallelExecutionMode ";
+    return "FakeAlgTestGetInputWorkspaceStorageModes";
+  }
+  int version() const override { return 1; }
+  const std::string category() const override { return ""; }
+  const std::string summary() const override { return ""; }
+  void init() override {
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "Input1", "", Kernel::Direction::Input));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "Input2", "", Kernel::Direction::Input, PropertyMode::Optional));
+    declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
+        "Input3", "", Kernel::Direction::Input, PropertyMode::Optional));
+    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        "InOut1", "", Direction::InOut));
+    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        "InOut2", "", Direction::InOut, PropertyMode::Optional));
+    declareProperty(make_unique<WorkspaceProperty<Workspace>>(
+        "InOut3", "", Direction::InOut, PropertyMode::Optional));
+  }
+  void exec() override {}
+
+protected:
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override {
+    // The result of getInputWorkspaceStorageModes is passed to this virtual
+    // method, so we can test it here. Only initialized workspaces are part of
+    // the map.
+    TS_ASSERT_EQUALS(storageModes.size(), 4);
+    TS_ASSERT_EQUALS(storageModes.count("Input1"), 1);
+    TS_ASSERT_EQUALS(storageModes.count("Input2"), 1);
+    TS_ASSERT_EQUALS(storageModes.count("InOut1"), 1);
+    TS_ASSERT_EQUALS(storageModes.count("InOut2"), 1);
+    return Parallel::ExecutionMode::Identical;
+  }
+};
+
+class FakeAlgBadGetParallelExecutionMode : public Algorithm {
+public:
+  const std::string name() const override {
+    return "FakeAlgBadGetParallelExecutionMode ";
   }
   int version() const override { return 1; }
   const std::string category() const override { return ""; }
@@ -249,11 +290,11 @@ protected:
   }
 };
 
-void run_NoParallelismAlgorithm(const Parallel::Communicator &comm) {
+void runNoParallelism(const Parallel::Communicator &comm) {
   for (auto storageMode :
        {Parallel::StorageMode::Cloned, Parallel::StorageMode::Distributed,
         Parallel::StorageMode::MasterOnly}) {
-    NoParallelismAlgorithm alg;
+    FakeAlgNoParallelism alg;
     alg.setCommunicator(comm);
     auto in = boost::make_shared<WorkspaceTester>(storageMode);
     alg.initialize();
@@ -271,9 +312,26 @@ void run_NoParallelismAlgorithm(const Parallel::Communicator &comm) {
   }
 }
 
-void run_AlgorithmWithBad_getParallelExecutionMode(
-    const Parallel::Communicator &comm) {
-  AlgorithmWithBad_getParallelExecutionMode alg;
+void runTestGetInputWorkspaceStorageModes(const Parallel::Communicator &comm) {
+  FakeAlgTestGetInputWorkspaceStorageModes alg;
+  alg.setCommunicator(comm);
+  alg.initialize();
+  alg.setProperty("Input1", boost::make_shared<WorkspaceTester>());
+  alg.setProperty("Input2", boost::make_shared<WorkspaceTester>());
+  std::string wsName1("inout1" + std::to_string(comm.rank()));
+  std::string wsName2("inout2" + std::to_string(comm.rank()));
+  auto inout1 = boost::make_shared<WorkspaceTester>();
+  auto inout2 = boost::make_shared<WorkspaceTester>();
+  AnalysisDataService::Instance().addOrReplace(wsName1, inout1);
+  AnalysisDataService::Instance().addOrReplace(wsName2, inout2);
+  alg.setProperty("InOut1", wsName1);
+  alg.setProperty("InOut2", wsName2);
+  TS_ASSERT_THROWS_NOTHING(alg.execute());
+  TS_ASSERT(alg.isExecuted());
+}
+
+void runBadGetParallelExecutionMode(const Parallel::Communicator &comm) {
+  FakeAlgBadGetParallelExecutionMode alg;
   alg.setCommunicator(comm);
   alg.initialize();
   if (comm.size() == 1) {
@@ -461,6 +519,7 @@ void runChained(const Parallel::Communicator &comm) {
   auto ws2 = AnalysisDataService::Instance().retrieve(outName);
   TS_ASSERT_EQUALS(ws2->storageMode(), StorageMode::Distributed);
 }
+}
 
 class AlgorithmMPITest : public CxxTest::TestSuite {
 public:
@@ -474,18 +533,26 @@ public:
     AnalysisDataService::Instance();
   }
 
-  void testNoParallelismAlgorithm() {
-    run_NoParallelismAlgorithm(Parallel::Communicator{});
+  void testNoParallelism() {
+    runNoParallelism(Parallel::Communicator{});
 #ifdef MPI_EXPERIMENTAL
-    runParallel(run_NoParallelismAlgorithm);
+    runParallel(runNoParallelism);
 #endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 
-  void testAlgorithmWithBad_getParallelExecutionMode() {
-    run_AlgorithmWithBad_getParallelExecutionMode(Parallel::Communicator{});
+  void testGetInputWorkspaceStorageModes() {
+    runTestGetInputWorkspaceStorageModes(Parallel::Communicator{});
 #ifdef MPI_EXPERIMENTAL
-    runParallel(run_AlgorithmWithBad_getParallelExecutionMode);
+    runParallel(runTestGetInputWorkspaceStorageModes);
+#endif
+    Mantid::API::AnalysisDataService::Instance().clear();
+  }
+
+  void testBadGetParallelExecutionMode() {
+    runBadGetParallelExecutionMode(Parallel::Communicator{});
+#ifdef MPI_EXPERIMENTAL
+    runParallel(runBadGetParallelExecutionMode);
 #endif
     Mantid::API::AnalysisDataService::Instance().clear();
   }
