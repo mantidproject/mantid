@@ -116,7 +116,7 @@ class DeltaPDF3D(PythonAlgorithm):
         Z=np.linspace(dimZ.getMinimum(),dimZ.getMaximum(),dimZ.getNBins()+1)
         Xs, Ys, Zs = np.mgrid[(X[0]+X[1])/2:(X[-1]+X[-2])/2:dimX.getNBins()*1j,
                               (Y[0]+Y[1])/2:(Y[-1]+Y[-2])/2:dimY.getNBins()*1j,
-                              (Z[0]+Z[1])/2:(Y[-1]+Z[-2])/2:dimZ.getNBins()*1j]
+                              (Z[0]+Z[1])/2:(Z[-1]+Z[-2])/2:dimZ.getNBins()*1j]
 
         if self.getProperty("RemoveReflections").value:
             progress.report("Removing Reflections")
