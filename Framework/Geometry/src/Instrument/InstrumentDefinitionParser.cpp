@@ -545,7 +545,7 @@ double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
     if (!value.empty()) {
       try {
         return std::stod(value);
-      } catch (std::invalid_argument &e) {
+      } catch (std::invalid_argument &) {
         std::stringstream msg;
         msg << "failed to convert \"" << value
             << "\" to double for xml attribute \"" << name << "\"";
