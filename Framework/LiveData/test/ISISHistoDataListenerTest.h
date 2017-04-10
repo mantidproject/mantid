@@ -23,6 +23,23 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::LiveData;
 
+namespace {
+
+/**
+ * Fake Algorithm.
+ */
+class FakeAlgorithm : public Algorithm {
+public:
+  void exec() override { /*Do nothing*/
+  }
+  void init() override { /*Do nothing*/
+  }
+  const std::string name() const override { return "FakeAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return ""; }
+};
+}
+
 class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -45,7 +62,7 @@ public:
     dae.setProperty("NPeriods", 1);
     auto res = dae.executeAsync();
 
-    Mantid::API::Algorithm props;
+    FakeAlgorithm alg;
     alg.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
         "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
@@ -238,7 +255,7 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    API::Algorithm alg;
+    FakeAlgorithm alg;
     alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
@@ -289,7 +306,7 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    API::Algorithm alg;
+    FakeAlgorithm alg;
     alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
     alg.declareProperty(
@@ -346,7 +363,7 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    API::Algorithm alg;
+    FakeAlgorithm alg;
     alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
     alg.declareProperty(
@@ -383,7 +400,7 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    API::Algorithm alg;
+    FakeAlgorithm alg;
     alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
