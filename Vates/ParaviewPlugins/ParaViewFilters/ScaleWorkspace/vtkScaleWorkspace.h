@@ -9,9 +9,11 @@
 class VTK_EXPORT vtkScaleWorkspace : public vtkPointSetAlgorithm {
 public:
   static vtkScaleWorkspace *New();
-  vtkTypeMacro(vtkScaleWorkspace,
-               vtkPointSetAlgorithm) void PrintSelf(ostream &os,
-                                                    vtkIndent indent) override;
+  vtkScaleWorkspace(const vtkScaleWorkspace &) = delete;
+  void operator=(const vtkScaleWorkspace &) = delete;
+  vtkTypeMacro(vtkScaleWorkspace, vtkPointSetAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent) override;
+
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
   void SetZScaling(double zScaling);
@@ -28,8 +30,6 @@ protected:
   int FillInputPortInformation(int port, vtkInformation *info) override;
 
 private:
-  vtkScaleWorkspace(const vtkScaleWorkspace &);
-  void operator=(const vtkScaleWorkspace &);
   void updateMetaData(vtkPointSet *inputDataSet);
   double m_xScaling;
   double m_yScaling;

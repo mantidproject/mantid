@@ -41,6 +41,8 @@ class IMDDimensionComparitor {
 public:
   /// Constructor
   IMDDimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
+  IMDDimensionComparitor operator=(IMDDimensionComparitor &) = delete;
+  IMDDimensionComparitor(IMDDimensionComparitor &) = delete;
 
   /// Destructor
   ~IMDDimensionComparitor();
@@ -57,9 +59,7 @@ private:
   /// imd workspace shared ptr.
   Mantid::API::IMDWorkspace_sptr m_workspace;
 
-  IMDDimensionComparitor operator=(IMDDimensionComparitor &);
 
-  IMDDimensionComparitor(IMDDimensionComparitor &);
 };
 }
 }

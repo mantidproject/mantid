@@ -15,8 +15,10 @@ class vtkSplatterPlotFactory;
 class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm {
 public:
   static vtkSplatterPlot *New();
-  vtkTypeMacro(vtkSplatterPlot,
-               vtkUnstructuredGridAlgorithm) double getTime() const;
+  vtkSplatterPlot(const vtkSplatterPlot &) = delete;
+  void operator=(const vtkSplatterPlot &) = delete;
+  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm);
+  double getTime() const;
   void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);
@@ -43,8 +45,5 @@ private:
   std::string m_wsName;
   /// Time.
   double m_time;
-
-  vtkSplatterPlot(const vtkSplatterPlot &);
-  void operator=(const vtkSplatterPlot &);
 };
 #endif
