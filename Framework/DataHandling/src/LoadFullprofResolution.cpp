@@ -520,9 +520,9 @@ void LoadFullprofResolution::parseResolutionStrings(
         g_log.error(errmsg.str());
         throw runtime_error(errmsg.str());
       } else {
-        parammap["Sig2"] = parseDoubleValue(terms[1], "Sig2");
-        parammap["Sig1"] = parseDoubleValue(terms[2], "Sig1");
-        parammap["Sig0"] = parseDoubleValue(terms[3], "Sig0");
+        parammap["Sig2"] = sqrt(parseDoubleValue(terms[1], "Sig2"));
+        parammap["Sig1"] = sqrt(parseDoubleValue(terms[2], "Sig1"));
+        parammap["Sig0"] = sqrt(parseDoubleValue(terms[3], "Sig0"));
       }
     } // "SIGMA"
     else if (boost::starts_with(line, "GAMMA")) {
