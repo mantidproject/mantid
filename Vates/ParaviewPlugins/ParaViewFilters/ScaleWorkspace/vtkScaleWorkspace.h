@@ -11,9 +11,10 @@ public:
   static vtkScaleWorkspace *New();
   vtkScaleWorkspace(const vtkScaleWorkspace &) = delete;
   void operator=(const vtkScaleWorkspace &) = delete;
-  vtkTypeMacro(vtkScaleWorkspace, vtkPointSetAlgorithm);
+  // clang-format off
+  vtkTypeMacro(vtkScaleWorkspace, vtkPointSetAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;
-
+  // clang-format on
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
   void SetZScaling(double zScaling);

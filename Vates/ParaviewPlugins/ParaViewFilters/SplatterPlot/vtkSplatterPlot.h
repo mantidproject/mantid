@@ -17,8 +17,10 @@ public:
   static vtkSplatterPlot *New();
   vtkSplatterPlot(const vtkSplatterPlot &) = delete;
   void operator=(const vtkSplatterPlot &) = delete;
-  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm);
+  // clang-format off
+  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
   double getTime() const;
+  // clang-format on
   void PrintSelf(ostream &os, vtkIndent indent) override;
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);

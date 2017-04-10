@@ -36,8 +36,10 @@ public:
   static vtkSinglePeakMarkerSource *New();
   vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &);
   void operator=(const vtkSinglePeakMarkerSource &);
-  vtkTypeMacro(vtkSinglePeakMarkerSource, vtkPolyDataAlgorithm);
+  // clang-format off
+  vtkTypeMacro(vtkSinglePeakMarkerSource, vtkPolyDataAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;
+  // clang-format on
   void SetRadiusMarker(double radius);
   void SetPosition1(double position1);
   void SetPosition2(double position2);

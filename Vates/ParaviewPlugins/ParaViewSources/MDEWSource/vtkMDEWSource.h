@@ -49,9 +49,10 @@ public:
   static vtkMDEWSource *New();
   vtkMDEWSource(const vtkMDEWSource &) = delete;
   void operator=(const vtkMDEWSource &) = delete;
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm);
+  // clang-format off
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream &os, vtkIndent indent) override;
-
+  // clang-format on
   void SetWsName(const std::string &wsName);
   void SetDepth(int depth);
   void SetNormalization(int option);
