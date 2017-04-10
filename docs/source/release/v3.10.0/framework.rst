@@ -47,6 +47,7 @@ Bug Fixes
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` has been modified to allow ``EventWorkspace`` as input
 - Fixed an issue where the log ``proton_charge_by_period`` was not loaded for :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - Fixed an issue where :ref:`algm-MonteCarloAbsorption` would use the wavelengths from the first histogram of *InputWorkspace* only making the algorithm unusable for workspaces with varying bins.
+- Fixed an issue with the ``GroupingPattern`` property in :ref:`algm-GroupDetectors`, where incorrect spectra were being used if spectrum numbers are not 1-based indices.
 
 Deprecated
 ##########
