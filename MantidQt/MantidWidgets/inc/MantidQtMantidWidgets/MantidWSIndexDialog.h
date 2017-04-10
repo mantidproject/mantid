@@ -271,6 +271,7 @@ public:
   };
 
   /// The string "Workspace index"
+  static const QString WORKSPACE_NAME;
   static const QString WORKSPACE_INDEX;
   /// The string "Custom"
   static const QString CUSTOM;

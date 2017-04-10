@@ -17,6 +17,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 /// The string "Workspace index"
+const QString MantidWSIndexWidget::WORKSPACE_NAME = "Workspace name";
 const QString MantidWSIndexWidget::WORKSPACE_INDEX = "Workspace index";
 
 /// The string "Custom"
@@ -89,8 +90,9 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       userInputAdvanced.axisName = getAxisName();
     }
     userInputAdvanced.logName = getLogName();
-    if (userInputAdvanced.logName == WORKSPACE_INDEX) {
-      // We want default names in legend, if log is workspace index
+    if (userInputAdvanced.logName == WORKSPACE_NAME 
+      || userInputAdvanced.logName == WORKSPACE_INDEX) {
+      // We want default names in legend, if log is workspace name or index
       userInputAdvanced.logName = "";
     }
     userInputAdvanced.workspaceNames = m_wsNames;
@@ -491,6 +493,15 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
   m_logValues->clear();
   m_axisNameEdit->setEnabled(useLogNames);
+  if (useLogNames) {
+    // Make sure an appropriate name is shown for the default log option.
+    if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
+      m_logSelector->setItemText(0, WORKSPACE_INDEX);
+    }
+    else {
+      m_logSelector->setItemText(0, WORKSPACE_NAME);
+    }
+  }
 }
 
 /**
@@ -500,7 +511,7 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
 */
 void MantidWSIndexWidget::populateLogComboBox() {
   // First item should be "Workspace index"
-  m_logSelector->addItem(WORKSPACE_INDEX);
+  m_logSelector->addItem(WORKSPACE_NAME);
 
   // Create a table of all single-value numeric log names versus
   // how many workspaces they appear in
