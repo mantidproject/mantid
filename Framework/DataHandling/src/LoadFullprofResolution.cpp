@@ -632,12 +632,13 @@ double LoadFullprofResolution::parseDoubleValue(const std::string &value,
   if (!value.empty()) {
     try {
       return std::stod(value);
-    } catch (std::invalid_argument &) {
+    } catch (...) {
       std::stringstream msg;
       msg << "Failed to convert \"" << value << "\" to a double";
       if (!label.empty()) {
         msg << " for \"" << label << "\"";
       }
+      msg << " using 0. instead";
       g_log.warning(msg.str());
     }
   }

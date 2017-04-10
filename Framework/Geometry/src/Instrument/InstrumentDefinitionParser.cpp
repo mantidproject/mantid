@@ -545,10 +545,11 @@ double InstrumentDefinitionParser::attrToDouble(const Poco::XML::Element *pElem,
     if (!value.empty()) {
       try {
         return std::stod(value);
-      } catch (std::invalid_argument &) {
+      } catch (...) {
         std::stringstream msg;
         msg << "failed to convert \"" << value
-            << "\" to double for xml attribute \"" << name << "\"";
+            << "\" to double for xml attribute \"" << name
+            << "\" - using 0. instead";
         g_log.warning(msg.str());
         return 0.;
       }
