@@ -310,11 +310,11 @@ bool MantidWSIndexWidget::plotRequested() {
   bool acceptable = false;
   int npos = 0;
   QString wsText = m_wsField->lineEdit()->text();
-  QString spectraTest = m_spectraField->lineEdit()->text();
+  QString spectraText = m_spectraField->lineEdit()->text();
   QValidator::State wsState =
       m_wsField->lineEdit()->validator()->validate(wsText, npos);
   QValidator::State spectraState =
-      m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
+      m_spectraField->lineEdit()->validator()->validate(spectraText, npos);
   if (wsState == QValidator::Acceptable) {
     m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
     acceptable = true;
@@ -327,8 +327,13 @@ bool MantidWSIndexWidget::plotRequested() {
     QString error_message("Invalid input. It is not in the range available");
     if (!wsText.isEmpty())
       m_wsField->setError(error_message);
-    if (!spectraTest.isEmpty())
+    if (!spectraText.isEmpty())
       m_spectraField->setError(error_message);
+    if (wsText.isEmpty() && spectraText.isEmpty())
+    {
+      m_wsField->setError("Workspace indices or spectra numbers are needed");
+      m_spectraField->setError("Spectra numbers or workspace indices are needed");
+    }
   }
   return acceptable;
 }
