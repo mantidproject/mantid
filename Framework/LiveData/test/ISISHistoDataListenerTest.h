@@ -264,7 +264,7 @@ public:
     alg.setProperty("PeriodList", periods);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
