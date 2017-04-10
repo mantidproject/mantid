@@ -124,7 +124,7 @@ public:
     /*
      * Remember. We have 3 detectors. So component index 3 corresponds to
      * position
-     * index 0 since we don't input positions for detectors.
+     * index 0 since we don't input positions for detectors via ComponentInfo constructor.
      */
     TS_ASSERT(info.position(3).isApprox(compPositions->at(0)));
     TS_ASSERT(info.position(4).isApprox(compPositions->at(1)));
@@ -137,6 +137,66 @@ public:
     TS_ASSERT(info.rotation(0).isApprox(detRotations.at(0)));
     TS_ASSERT(info.rotation(1).isApprox(detRotations.at(1)));
     TS_ASSERT(info.rotation(2).isApprox(detRotations.at(2)));
+  }
+
+
+  void set_positions_rotations(){
+
+    /*
+           |
+     ------------
+     |
+     0
+    */
+
+    std::vector<Eigen::Vector3d> detPositions;
+    detPositions.emplace_back(1, 0, 0);
+    std::vector<Eigen::Quaterniond> detRotations;
+    detRotations.emplace_back(
+        Eigen::AngleAxisd(M_PI / 5, Eigen::Vector3d::UnitZ()));
+    auto detectorInfo =
+        boost::make_shared<DetectorInfo>(detPositions, detRotations);
+    std::vector<size_t> bankSortedDetectorIndices{0};
+
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 0));
+
+    auto compPositions = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    compPositions->emplace_back(2, 0, 0);
+
+    auto compRotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
+    compRotations->emplace_back(
+        Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
+
+    ComponentInfo info(bankSortedDetectorIndices, ranges, compPositions,
+                       compRotations, detectorInfo);
+
+    /*
+     * Remember. We have 1 detectors. So component index 1 corresponds to
+     * position
+     * index 0 since we don't input positions for detectors via ComponentInfo constructor.
+     */
+    TS_ASSERT(info.position(1).isApprox(compPositions->at(0)));
+    TS_ASSERT(info.rotation(1).isApprox(compRotations->at(0)));
+
+    TS_ASSERT(info.position(0).isApprox(detPositions.at(0)));
+    TS_ASSERT(info.rotation(0).isApprox(detRotations.at(0)));
+
+    Eigen::Vector3d newDetectorLocation{2,0,0};
+    Eigen::Quaterniond newDetectorRotation(Eigen::AngleAxisd(M_PI , Eigen::Vector3d::UnitZ()));
+    Eigen::Vector3d newComponentLocation{3,0,0};
+    Eigen::Quaterniond newComponentRotation(Eigen::AngleAxisd(M_PI/2 , Eigen::Vector3d::UnitZ()));
+
+    info.setPosition(0, newDetectorLocation);
+    info.setRotation(0, newDetectorRotation);
+    info.setPosition(1, newComponentLocation);
+    info.setRotation(1, newComponentRotation);
+
+    // Check that we get what we set
+    TS_ASSERT(info.position(0).isApprox(newDetectorLocation));
+    TS_ASSERT(info.rotation(0).isApprox(newDetectorRotation));
+    TS_ASSERT(info.position(1).isApprox(newComponentLocation));
+    TS_ASSERT(info.rotation(1).isApprox(newComponentRotation));
   }
 
   void test_detector_indexes() {

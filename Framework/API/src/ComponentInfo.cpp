@@ -19,7 +19,7 @@ namespace API {
  * index
  */
 ComponentInfo::ComponentInfo(
-    const Mantid::Beamline::ComponentInfo &componentInfo,
+    Mantid::Beamline::ComponentInfo &componentInfo,
     std::vector<Mantid::Geometry::IComponent *> componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(
@@ -53,7 +53,17 @@ Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
 }
 
 Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
-  return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
+    return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
+}
+
+void ComponentInfo::setPosition(const size_t componentIndex, const Kernel::V3D &position)
+{
+   m_componentInfo.setPosition(componentIndex, Kernel::toVector3d(position));
+}
+
+void ComponentInfo::setRotation(const size_t componentIndex, const Kernel::Quat &rotation)
+{
+   m_componentInfo.setRotation(componentIndex, Kernel::toQuaterniond(rotation));
 }
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
