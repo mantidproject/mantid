@@ -327,7 +327,7 @@ public:
     std::vector<DataProcessorPresenter *> tablePresenterVec;
     tablePresenterVec.push_back(&mockTablePresenter);
     ReflRunsTabPresenter presenter(&mockRunsTabView, &mockProgress,
-      tablePresenterVec);
+                                   tablePresenterVec);
     presenter.acceptMainPresenter(&mockMainPresenter);
 
     std::stringstream pythonSrc;
