@@ -81,9 +81,7 @@ std::string Workspace::getMemorySizeAsStr() const {
 }
 
 /// Returns the storage mode (used for MPI runs)
-Parallel::StorageMode Workspace::storageMode() const {
-  return m_storageMode;
-}
+Parallel::StorageMode Workspace::storageMode() const { return m_storageMode; }
 
 /// Sets the storage mode (used for MPI runs)
 void Workspace::setStorageMode(Parallel::StorageMode storageMode) {

@@ -125,7 +125,6 @@ private:
   /// children.
   virtual Workspace *doCloneEmpty() const = 0;
 
-
   friend class AnalysisDataServiceImpl;
 };
 

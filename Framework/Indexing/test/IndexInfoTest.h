@@ -43,7 +43,7 @@ void run_StorageMode_Distributed(const Parallel::Communicator &comm) {
 }
 
 void run_StorageMode_MasterOnly(const Parallel::Communicator &comm) {
-  if(comm.rank() == 0) {
+  if (comm.rank() == 0) {
     IndexInfo i(3, Parallel::StorageMode::MasterOnly, comm);
     TS_ASSERT_EQUALS(i.size(), 3);
     TS_ASSERT_EQUALS(i.globalSize(), 3);
