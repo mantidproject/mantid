@@ -136,7 +136,7 @@ MuonGroupAsymmetryCalculator::EstimateAsymmetry(const Workspace_sptr &inputWS,
 		// move to helper later as a function 
 		normEst = convertToVec(tmp);
 		ITableWorkspace_sptr table= WorkspaceFactory::Instance().createTable();
-			API::AnalysisDataService::Instance().addOrReplace("norm", table);
+			API::AnalysisDataService::Instance().addOrReplace("__norm__", table);
 			table->addColumn("double", "norm");
 			table->addColumn("int", "spectra");
 

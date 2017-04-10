@@ -437,11 +437,11 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 		if (!asymmAlg->isExecuted()) {
 			throw std::runtime_error("Asymmetry Calculation has failed.");
 		}
-		//record result -> move to a helper later as a function 
+		//record result 
 		auto tmp = asymmAlg->getPropertyValue("NormalizationConstant");
 		std::vector<double>normEst = convertToVec(tmp);
 		ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable();
-		AnalysisDataService::Instance().addOrReplace("norm", table);
+		AnalysisDataService::Instance().addOrReplace("__norm__", table);
 		table->addColumn("double", "norm");
 		table->addColumn("int", "spectra");
 
@@ -491,13 +491,13 @@ void MuonFitPropertyBrowser::TFAsymmFit(int maxIterations) {
 
 std::vector<double> readNormalization() {
 	std::vector<double> norm;
-	if(!AnalysisDataService::Instance().doesExist("norm") ){
+	if(!AnalysisDataService::Instance().doesExist("__norm__") ){
 		norm.push_back(22.423);
 	}
 	else {
 		Mantid::API::ITableWorkspace_sptr table =
 			boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-				Mantid::API::AnalysisDataService::Instance().retrieve("norm"));
+				Mantid::API::AnalysisDataService::Instance().retrieve("__norm__"));
 		auto colNorm = table->getColumn("norm");
 
 		for (int j = 0; j < table->rowCount(); j++)
