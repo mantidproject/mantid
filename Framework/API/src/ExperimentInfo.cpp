@@ -199,15 +199,15 @@ boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo(
                                          std::placeholders::_1),
                                pmap);
 
-    if (instrument.isParametrized()) {
-      // Register everything via visitor
-      instrument.baseInstrument()->registerContents(visitor);
-    } else {
-      instrument.registerContents(visitor);
-    }
+  if (instrument.isParametrized()) {
+    // Register everything via visitor
+    instrument.baseInstrument()->registerContents(visitor);
+  } else {
+    instrument.registerContents(visitor);
+  }
 
-    // Extract component ids. We need this for the ComponentInfo wrapper.
-    componentIds = visitor.componentIds();
+  // Extract component ids. We need this for the ComponentInfo wrapper.
+  componentIds = visitor.componentIds();
 
   return boost::make_shared<Mantid::Beamline::ComponentInfo>(
       visitor.componentSortedDetectorIndices(),

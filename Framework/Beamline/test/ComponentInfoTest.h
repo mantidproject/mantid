@@ -124,7 +124,8 @@ public:
     /*
      * Remember. We have 3 detectors. So component index 3 corresponds to
      * position
-     * index 0 since we don't input positions for detectors via ComponentInfo constructor.
+     * index 0 since we don't input positions for detectors via ComponentInfo
+     * constructor.
      */
     TS_ASSERT(info.position(3).isApprox(compPositions->at(0)));
     TS_ASSERT(info.position(4).isApprox(compPositions->at(1)));
@@ -139,8 +140,7 @@ public:
     TS_ASSERT(info.rotation(2).isApprox(detRotations.at(2)));
   }
 
-
-  void set_positions_rotations(){
+  void set_positions_rotations() {
 
     /*
            |
@@ -174,7 +174,8 @@ public:
     /*
      * Remember. We have 1 detectors. So component index 1 corresponds to
      * position
-     * index 0 since we don't input positions for detectors via ComponentInfo constructor.
+     * index 0 since we don't input positions for detectors via ComponentInfo
+     * constructor.
      */
     TS_ASSERT(info.position(1).isApprox(compPositions->at(0)));
     TS_ASSERT(info.rotation(1).isApprox(compRotations->at(0)));
@@ -182,10 +183,12 @@ public:
     TS_ASSERT(info.position(0).isApprox(detPositions.at(0)));
     TS_ASSERT(info.rotation(0).isApprox(detRotations.at(0)));
 
-    Eigen::Vector3d newDetectorLocation{2,0,0};
-    Eigen::Quaterniond newDetectorRotation(Eigen::AngleAxisd(M_PI , Eigen::Vector3d::UnitZ()));
-    Eigen::Vector3d newComponentLocation{3,0,0};
-    Eigen::Quaterniond newComponentRotation(Eigen::AngleAxisd(M_PI/2 , Eigen::Vector3d::UnitZ()));
+    Eigen::Vector3d newDetectorLocation{2, 0, 0};
+    Eigen::Quaterniond newDetectorRotation(
+        Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ()));
+    Eigen::Vector3d newComponentLocation{3, 0, 0};
+    Eigen::Quaterniond newComponentRotation(
+        Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
 
     info.setPosition(0, newDetectorLocation);
     info.setRotation(0, newDetectorRotation);

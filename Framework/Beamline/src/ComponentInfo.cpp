@@ -79,8 +79,8 @@ Eigen::Quaterniond ComponentInfo::rotation(const size_t componentIndex) const {
   return (*m_rotations)[rangesIndex];
 }
 
-void ComponentInfo::setPosition(const size_t componentIndex, const Eigen::Vector3d &position)
-{
+void ComponentInfo::setPosition(const size_t componentIndex,
+                                const Eigen::Vector3d &position) {
   if (isDetectorDomain(componentIndex)) {
     m_detectorInfo->setPosition(componentIndex, position);
   }
@@ -89,15 +89,17 @@ void ComponentInfo::setPosition(const size_t componentIndex, const Eigen::Vector
   m_positions.access()[rangesIndex] = position;
 }
 
-void ComponentInfo::setRotation(const size_t componentIndex, const Eigen::Quaterniond &rotation)
-{
+void ComponentInfo::setRotation(const size_t componentIndex,
+                                const Eigen::Quaterniond &rotation) {
 
   if (isDetectorDomain(componentIndex)) {
     m_detectorInfo->setRotation(componentIndex, rotation);
   }
   const auto rangesIndex =
       componentIndex - m_assemblySortedDetectorIndices->size();
-  m_rotations.access()[rangesIndex] = rotation; // TODO adjust position too. DetectorInfo doesn't seem to encapsulate this?
+  m_rotations.access()[rangesIndex] = rotation; // TODO adjust position too.
+                                                // DetectorInfo doesn't seem to
+                                                // encapsulate this?
 }
 
 } // namespace Beamline

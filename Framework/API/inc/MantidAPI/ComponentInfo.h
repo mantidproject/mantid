@@ -63,7 +63,8 @@ public:
   size_t size() const;
   Mantid::Kernel::V3D position(const size_t componentIndex) const;
   Mantid::Kernel::Quat rotation(const size_t componentIndex) const;
-  void setPosition(const size_t componentIndex, const Mantid::Kernel::V3D& position);
+  void setPosition(const size_t componentIndex,
+                   const Mantid::Kernel::V3D &position);
   void setRotation(const size_t componentIndex, const Kernel::Quat &rotation);
   size_t indexOf(Geometry::IComponent *id) const;
 };
