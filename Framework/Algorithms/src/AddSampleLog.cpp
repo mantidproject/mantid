@@ -75,6 +75,9 @@ void AddSampleLog::init() {
   declareProperty("RelativeTime", true, "If specified as True, then then the time stamps are relative to the run start time of the target workspace.");
 }
 
+/**
+ * @brief AddSampleLog::exec
+ */
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr target_workspace = getProperty("Workspace");
@@ -89,6 +92,7 @@ void AddSampleLog::exec() {
   std::string propType = getPropertyValue("LogType");
   std::string propNumberType = getPropertyValue("NumberType");
 
+  // check inputs
   if ((propNumberType != autoTypeOption) &&
       ((propType != numberLogOption) && (propType != numberSeriesLogOption))) {
     throw std::invalid_argument(
@@ -101,77 +105,139 @@ void AddSampleLog::exec() {
     theRun.removeLogData(propName);
   }
 
-  // add string log value and return
+  // add sample log!
   if (propType == stringLogOption) {
-    theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
-    theRun.getProperty(propName)->setUnits(propUnit);
-    return;
+     // add string log value and return
+    addStringLog(theRun,  propName, propValue, propUnit);
   }
+  else if (propType == numberSeriesLogOption)
+  {
+    // add a TimeSeriesProperty
+    addTimeSeriesProperty(theRun, propName, propValue, propUnit, propNumberType);
+  }
+  else
+  {
+    // add a single value property, integer or double
+    bool value_is_int(false);
+    if (propNumberType != autoTypeOption)
+    {
+      value_is_int = (propNumberType == intTypeOption);
+    }
+    else
+    {
+      int intVal;
+      if (Strings::convert(propValue, intVal)) {
+        value_is_int = true;
+    }
 
-  int intVal;
-  double dblVal;
-  bool value_is_int = false;
-
-  // find out te property's data type
-  if (propNumberType != autoTypeOption && propNumberType != stringLogOption) {
-      // explicitly specified
-    value_is_int = (propNumberType == intTypeOption);
-    // check input string can be converted to expected data
-    if (value_is_int && propType != numberSeriesLogOption) {
-      if (!Strings::convert(propValue, intVal)) {
+    // set value
+    if (value_is_int)
+    {
+      // convert to integer
+      int intVal;
+      bool convert_to_int = Strings::convert(propValue, intVal);
+      if (convert_to_int)
+        theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
+      else
         throw std::invalid_argument("Error interpreting string '" + propValue +
                                     "' as NumberType Int.");
-      }
-    } else if (!Strings::convert(propValue, dblVal)) {
-      throw std::invalid_argument("Error interpreting string '" + propValue +
-                                  "' as NumberType Double.");
     }
-  } else {
-      // auto specified
-    if (Strings::convert(propValue, intVal)) {
-      value_is_int = true;
-    } else if (!Strings::convert(propValue, dblVal)) {
-      throw std::invalid_argument("Error interpreting string '" + propValue +
-                                  "' as a number.");
-    }
-  }
-
-  if (propType == numberLogOption) {
-    if (value_is_int)
-      theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
     else
-      theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-  } else if (propType == numberSeriesLogOption) {
-    Kernel::DateAndTime startTime;
-    try {
-      startTime = theRun.startTime();
-    } catch (std::runtime_error &) {
-      // Swallow the error - startTime will just be 0
-    }
-
-    if (value_is_int) {
-      auto tsp = new TimeSeriesProperty<int>(propName);
-      tsp->addValue(startTime, intVal);
-      theRun.addLogData(tsp);
-    } else {
-      auto tsp = new TimeSeriesProperty<double>(propName);
-      tsp->addValue(startTime, dblVal);
-      theRun.addLogData(tsp);
+    {
+      // convert to double
+      double dblVal;
+      bool convert_to_dbl = Strings::convert(propValue, dblVal);
+      if (convert_to_dbl)
+        theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
+      else
+        throw std::invalid_argument("Error interpreting string '" + propValue +
+                                    "' as NumberType Double.");
     }
   }
-  theRun.getProperty(propName)->setUnits(propUnit);
-
-  // add the values to the added new TimeSeriesProperty
-  std::string data_ws_name = getPropertyValue("TimeSeriesWorkspace");
-  if (data_ws_name.size() > 0)
-  {
-    setTimeSeriesData(expinfo_ws, propName, value_is_int);
   }
 
   return;
 }
 
-void AddSampleLog::setTimeSeriesData(ExperimentInfo_sptr outws, const std::string &property_name, bool value_is_int)
+void AddSampleLog::addStringLog(Run &theRun, const std::string &propName, const std::string &propValue, const std::string &propUnit)
+{
+  theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
+  theRun.getProperty(propName)->setUnits(propUnit);
+  return;
+}
+
+// add a time series property
+void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_name, const std::string &prop_value, const std::string &prop_unit, const std::string &prop_number_type)
+{
+  // set up the number type right
+  bool is_int_series(false);
+  if (prop_number_type.compare(intTypeOption) == 0)
+  {
+    // integer type
+    is_int_series = true;
+  }
+  else if (prop_number_type.compare(autoTypeOption) == 0)
+  {
+   // auto type. by default
+    g_log.warning("For sample log in TimeSeriesProperty the default data type is double.");
+  }
+  else if (prop_number_type.compare(doubleTypeOption) != 0)
+  {
+    // unsupported type
+    g_log.error() << "TimeSeriesProperty with data type " << prop_number_type << " is not supported.\n" ;
+    throw std::runtime_error("Unsupported TimeSeriesProperty type.");
+  }
+
+  // check using workspace or some specified start value
+  std::string tsp_ws_name = getPropertyValue("TimeSeriesWorkspace");
+  bool use_ws = tsp_ws_name.size() > 0;
+  bool use_single_value = prop_value.size() > 0;
+  if (use_ws && use_single_value)
+  {
+    throw std::runtime_error("Both TimeSeries workspace and sing value are specified.  It is not allowed.");
+  }
+  else if (!use_ws && !use_single_value)
+  {
+    throw std::runtime_error("Neither TimeSeries workspace or sing value are specified.  It is not allowed.");
+  }
+
+  // create workspace
+  // get run start
+  Kernel::DateAndTime startTime = getRunStart(run_obj);
+
+  // initialze the TimeSeriesProperty and add unit
+  if (is_int_series) {
+    auto tsp = new TimeSeriesProperty<int>(prop_name);
+    if (use_single_value)
+    {
+      int intVal;
+      if (Strings::convert(prop_value, intVal))
+      {
+          tsp->addValue(startTime, intVal);
+          run_obj.addLogData(tsp);
+      }
+    }
+  } else {
+    auto tsp = new TimeSeriesProperty<double>(prop_name);
+    if (use_single_value)
+    {
+      double dblVal;
+      if (Strings::convert(prop_value, dblVal))
+      {
+        tsp->addValue(startTime, dblVal);
+        run_obj.addLogData(tsp);
+      }
+    }
+  }
+  // add unit
+  run_obj.getProperty(prop_name)->setUnits(prop_unit);
+
+  if (use_ws)
+    setTimeSeriesData(run_obj, prop_name, is_int_series);
+
+}
+
+void AddSampleLog::setTimeSeriesData(Run &run_obj, const std::string &property_name, bool value_is_int)
 {
   // get input and
   MatrixWorkspace_sptr data_ws = getProperty("TimeSeriesWorkspace");
@@ -186,18 +252,18 @@ void AddSampleLog::setTimeSeriesData(ExperimentInfo_sptr outws, const std::strin
   bool is_second = timeunit.compare("Second") == 0;
 
   // convert the data in workspace to time series property value
-  std::vector<DateAndTime> time_vec = getTimes(data_ws, ws_index, epochtime, is_second);
+  std::vector<DateAndTime> time_vec = getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
   if (value_is_int)
   {
     // integer property
-    TimeSeriesProperty<int> * int_prop = dynamic_cast<TimeSeriesProperty<int> *>(outws->run().getProperty(property_name));
+    TimeSeriesProperty<int> * int_prop = dynamic_cast<TimeSeriesProperty<int> *>(run_obj.getProperty(property_name));
     std::vector<int> value_vec = getIntValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   }
   else
   {
     // double property
-    TimeSeriesProperty<double> * int_prop = dynamic_cast<TimeSeriesProperty<double> *>(outws->run().getProperty(property_name));
+    TimeSeriesProperty<double> * int_prop = dynamic_cast<TimeSeriesProperty<double> *>(run_obj.getProperty(property_name));
     std::vector<double> value_vec = getDblValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   }
@@ -205,14 +271,14 @@ void AddSampleLog::setTimeSeriesData(ExperimentInfo_sptr outws, const std::strin
   return;
 }
 
-std::vector<Kernel::DateAndTime> AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index, bool is_epoch, bool is_second)
+std::vector<Kernel::DateAndTime> AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index, bool is_epoch, bool is_second, API::Run &run_obj)
 {
   // get run start time
   int64_t timeshift(0);
   if (!is_epoch)
   {
     // get the run start time
-    Kernel::DateAndTime run_start_time = getRunStart(dataws);
+    Kernel::DateAndTime run_start_time = getRunStart(run_obj);
     timeshift = run_start_time.totalNanoseconds();
   }
 
@@ -232,10 +298,15 @@ std::vector<Kernel::DateAndTime> AddSampleLog::getTimes(API::MatrixWorkspace_con
   return timevec;
 }
 
-Kernel::DateAndTime AddSampleLog::getRunStart(API::MatrixWorkspace_const_sptr dataws)
+Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj)
 {
     // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or proton_charge property!
   Kernel::DateAndTime runstart(0);
+  try {
+    runstart = run_obj.startTime();
+  } catch (std::runtime_error &) {
+    // Swallow the error - startTime will just be 0
+  }
 
   return runstart;
 }
