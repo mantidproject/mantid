@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 import os
@@ -9,7 +10,7 @@ from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, ba
                                              mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                              position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
                                              fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId)
+                                             monitor_spectrum, PrintId, q_rebin_values)
 from user_file_test_helper import create_user_file, sample_user_file
 
 
@@ -28,8 +29,7 @@ class UserFileReaderTest(unittest.TestCase):
         # Assert
         expected_values = {LimitsId.wavelength: [simple_range(start=1.5, stop=12.5, step=0.125,
                                                               step_type=RangeStepType.Lin)],
-                           LimitsId.q: [complex_range(.001, .001, .0126, .08, .2, step_type1=RangeStepType.Lin,
-                                        step_type2=RangeStepType.Log)],
+                           LimitsId.q: [q_rebin_values(min=.001, max=.2, rebin_string="0.001,0.001,0.0126,-0.08,0.2")],
                            LimitsId.qxy: [simple_range(0, 0.05, 0.001, RangeStepType.Lin)],
                            BackId.single_monitors: [back_single_monitor_entry(1, 35000, 65000),
                                                     back_single_monitor_entry(2, 85000, 98000)],
@@ -65,7 +65,7 @@ class UserFileReaderTest(unittest.TestCase):
                            MaskId.clear_detector_mask: [True],
                            MaskId.clear_time_mask: [True],
                            LimitsId.radius: [range_entry(12, 15)],
-                           TransId.spec_shift: [-70.0],
+                           TransId.spec_shift: [-70.],
                            PrintId.print_line: ["for changer"],
                            BackId.all_monitors: [range_entry(start=3500, stop=4500)],
                            FitId.monitor_times: [range_entry(start=1000, stop=2000)],
@@ -103,7 +103,6 @@ class UserFileReaderTest(unittest.TestCase):
     def _sort_list(elements):
         if len(elements) == 1:
             return
-
         if isinstance(elements[0], single_entry_with_detector):
             UserFileReaderTest._sort(elements, lambda x: x.entry)
         elif isinstance(elements[0], simple_range):
