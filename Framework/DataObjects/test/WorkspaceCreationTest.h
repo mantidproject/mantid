@@ -8,6 +8,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -315,8 +317,8 @@ public:
   }
 
   void test_create_partitioned() {
-    IndexInfo indices({1, 2, 3, 4, 5}, IndexInfo::StorageMode::Distributed,
-                      IndexInfo::Communicator{2, 0});
+    IndexInfo indices({1, 2, 3, 4, 5}, Parallel::StorageMode::Distributed,
+                      Parallel::Communicator{2, 0});
     indices.setSpectrumDefinitions(
         std::vector<SpectrumDefinition>(indices.size()));
     const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2, 4}));
@@ -330,8 +332,8 @@ public:
   }
 
   void test_create_partitioned_with_instrument() {
-    IndexInfo i({1, 2, 3, 4}, IndexInfo::StorageMode::Distributed,
-                IndexInfo::Communicator{2, 0});
+    IndexInfo i({1, 2, 3, 4}, Parallel::StorageMode::Distributed,
+                Parallel::Communicator{2, 0});
     // should a nullptr spectrum definitions vector indicate building default
     // defs?
     // - same length -> build
@@ -351,8 +353,8 @@ public:
     // Sibling of MatrixWorkspace::test_indexInfo_legacy_compatibility().
     // Setting spectrum numbers via legacy interface should fail for partitioned
     // workspace.
-    IndexInfo indices({1, 2, 3}, IndexInfo::StorageMode::Distributed,
-                      IndexInfo::Communicator{2, 0});
+    IndexInfo indices({1, 2, 3}, Parallel::StorageMode::Distributed,
+                      Parallel::Communicator{2, 0});
     indices.setSpectrumDefinitions(
         std::vector<SpectrumDefinition>(indices.size()));
     const auto ws = create<Workspace2D>(indices, Histogram(BinEdges{1, 2}));
