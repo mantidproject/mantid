@@ -326,7 +326,8 @@ if ( ENABLE_CPACK )
                            "python-matplotlib,"
                            "python-scipy,"
                            "libtbb2,"
-                           "librdkafka,"
+                           "librdkafka1,"
+                           "librdkafka++1,"
                            "libpocofoundation${POCO_SOLIB_VERSION},libpocoutil${POCO_SOLIB_VERSION},libpoconet${POCO_SOLIB_VERSION},libpoconetssl${POCO_SOLIB_VERSION},libpococrypto${POCO_SOLIB_VERSION},libpocoxml${POCO_SOLIB_VERSION},"
                            "python-pycifrw (>= 4.2.1),"
                            "python-yaml")
