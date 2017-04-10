@@ -248,6 +248,7 @@ public:
   const Beamline::ComponentInfo &componentInfo() const;
 
   size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const ComponentID componentId) const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setComponentInfo(
@@ -255,6 +256,9 @@ public:
       std::vector<Geometry::ComponentID> componentIds);
   const std::vector<Geometry::ComponentID> &componentIds() const;
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
+
+  /// Add a component to the instrument
+  virtual int add(IComponent *component) override;
 
 private:
   /// Save information about a set of detectors to Nexus
@@ -271,6 +275,12 @@ private:
   /// Map which holds detector-IDs and pointers to detector components, and
   /// monitor flags.
   std::vector<std::tuple<detid_t, IDetector_const_sptr, bool>> m_detectorCache;
+
+  /// Mappings to obtain component index
+  mutable std::vector<Geometry::ComponentID> m_componentCache;
+
+  /// Flag for component cache invalidation
+  mutable bool m_componentCacheGood = false;
 
   /// Purpose to hold copy of source component. For now assumed to be just one
   /// component

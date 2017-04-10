@@ -188,7 +188,7 @@ void checkDetectorInfoSize(const Instrument &instr,
 }
 
 boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo(
-    const Instrument &oldInstr, const API::DetectorInfo &externalDetectorInfo,
+    const Instrument &instrument, const API::DetectorInfo &externalDetectorInfo,
     boost::shared_ptr<Beamline::DetectorInfo> internalDetectorInfo,
     std::vector<Geometry::ComponentID> &componentIds,
     Mantid::Geometry::ParameterMap &pmap) {
@@ -198,9 +198,6 @@ boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo(
                                          &externalDetectorInfo,
                                          std::placeholders::_1),
                                pmap);
-  InfoComponentVisitor visitor(
-      detectorInfo.size(),
-      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
 
     if (instrument.isParametrized()) {
       // Register everything via visitor

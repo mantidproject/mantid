@@ -657,6 +657,34 @@ public:
                      V3D(scalex * pitch, scaley * pitch, 5.0));
   }
 
+  void test_component_index() {
+
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        Mantid::Kernel::V3D(0, 0, 0),
+        /*source pos*/
+        Mantid::Kernel::V3D(10, 0, 0),
+        /*sample pos*/
+        Mantid::Kernel::V3D(20, 0, 0));
+
+    auto comp = instrument->getChild(0);
+    TS_ASSERT_EQUALS(0, instrument->componentIndex(comp->getComponentID()));
+    comp = instrument->getChild(1);
+    TS_ASSERT_EQUALS(1, instrument->componentIndex(comp->getComponentID()));
+    comp = instrument->getChild(2);
+    TS_ASSERT_EQUALS(2, instrument->componentIndex(comp->getComponentID()));
+
+    ObjComponent *extraComp = new ObjComponent("extra_component");
+    TSM_ASSERT_THROWS("Component has not been added. Should throw",
+                      instrument->componentIndex(extraComp->getComponentID()),
+                      std::runtime_error &);
+
+    // Now lets add it.
+    instrument->add(extraComp);
+
+    comp = instrument->getChild(3);
+    TS_ASSERT_EQUALS(3, instrument->componentIndex(comp->getComponentID()));
+  }
+
 private:
   Instrument_sptr createInstrumentWithSource() {
     using Mantid::Kernel::V3D;

@@ -250,9 +250,10 @@ public:
 
     // Create the visitor. Note any access to the indexOf lambda will throw for
     // detectors.
+    ParameterMap pmap;
     InfoComponentVisitor visitor(1, [](const Mantid::detid_t) -> size_t {
       throw std::out_of_range("");
-    });
+    }, pmap);
 
     // Visit everything
     visitee->registerContents(visitor);
@@ -287,9 +288,10 @@ public:
   }
 
   void test_process_rectangular_instrument() {
+    ParameterMap pmap;
     InfoComponentVisitor visitor(
         m_nPixels * m_nPixels,
-        [](const Mantid::detid_t id) { return static_cast<size_t>(id); });
+        [](const Mantid::detid_t id) { return static_cast<size_t>(id); }, pmap);
     m_instrument->registerContents(visitor);
     TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
   }

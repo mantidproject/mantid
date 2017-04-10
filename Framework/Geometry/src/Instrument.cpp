@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/CacheComponentVisitor.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -1296,6 +1297,29 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
   return std::distance(baseInstr.m_detectorCache.cbegin(), it);
 }
 
+/**
+ * @brief Instrument::componentIndex
+ * Note that this index can be used with ComponentInfo. Throw std::runtime_error
+ * if the ComponentID does not exist.
+ * @param componentId : ComponentID to find the index for.
+ * @return the Component index associated with this Component.
+ */
+size_t Instrument::componentIndex(const ComponentID componentId) const {
+  if (!m_componentCacheGood) {
+    CacheComponentVisitor visitor;
+    this->registerContents(visitor);
+    m_componentCache = visitor.componentIds();
+    m_componentCacheGood = true;
+  }
+  auto it = std::find(m_componentCache.cbegin(), m_componentCache.cend(),
+                      componentId);
+  if (it == m_componentCache.end()) {
+    throw std::runtime_error("ComponentID does not identify a Component that "
+                             "is not part of the instrument");
+  }
+  return std::distance(m_componentCache.cbegin(), it);
+}
+
 /// Returns a legacy ParameterMap, containing information that is now stored in
 /// DetectorInfo (masking, positions, rotations).
 boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
@@ -1366,6 +1390,12 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
       pmap->addQuat(det->getComponentID(), ParameterMap::rot(), toQuat(relRot));
   }
   return pmap;
+}
+
+int Instrument::add(IComponent *component) {
+  // invalidate cache
+  m_componentCacheGood = false;
+  return CompAssembly::add(component);
 }
 
 namespace Conversion {
