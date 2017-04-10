@@ -10,7 +10,6 @@
 namespace Mantid {
 namespace API {
 
-
 /**
  * Constructor
  * @brief ComponentInfo::ComponentInfo
