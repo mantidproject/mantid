@@ -1,7 +1,8 @@
 #include "MantidAPI/ExperimentInfo.h"
-
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/InfoComponentVisitor.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -9,8 +10,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -18,6 +23,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 
@@ -49,6 +55,7 @@ using namespace Mantid::Kernel;
 using namespace Poco::XML;
 
 namespace Mantid {
+
 namespace API {
 namespace {
 /// static logger object
@@ -61,7 +68,8 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()) {
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
@@ -179,6 +187,25 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
+boost::shared_ptr<Beamline::ComponentInfo>
+makeComponentInfo(const Instrument &oldInstr,
+                  const API::DetectorInfo &detectorInfo,
+                  std::vector<Geometry::ComponentID> &componentIds) {
+
+  InfoComponentVisitor visitor(
+      detectorInfo.size(),
+      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
+
+  // Register everything via visitor
+  oldInstr.registerContents(visitor);
+  // Extract component ids. We need this for the ComponentInfo wrapper.
+  componentIds = visitor.componentIds();
+
+  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+      visitor.assemblySortedDetectorIndices(),
+      visitor.componentDetectorRanges());
+}
+
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
                                          const IDetector &det) {
   pmap.clearParametersByName(ParameterMap::pos(), &det);
@@ -236,7 +263,6 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   }
 }
 }
-
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
@@ -258,6 +284,12 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
+
+  std::vector<Geometry::ComponentID> componentIds;
+  m_componentInfo =
+      makeComponentInfo(*sptr_instrument, detectorInfo(), componentIds);
+  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      *m_componentInfo, std::move(componentIds));
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -566,12 +598,16 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  for (const auto detID : detIDs) {
-    try {
-      const size_t detIndex = detectorInfo().indexOf(detID);
-      specDef.add(detIndex);
-    } catch (std::out_of_range &) {
-      // Silently strip bad detector IDs
+  // Wrap translation in check for detector count as an optimization of
+  // otherwise slow failures via exceptions.
+  if (detectorInfo().size() > 0) {
+    for (const auto detID : detIDs) {
+      try {
+        const size_t detIndex = detectorInfo().indexOf(detID);
+        specDef.add(detIndex);
+      } catch (std::out_of_range &) {
+        // Silently strip bad detector IDs
+      }
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
@@ -1188,6 +1224,10 @@ SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
       static_cast<const ExperimentInfo &>(*this).spectrumInfo());
 }
 
+const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfoWrapper;
+}
+
 /// Sets the SpectrumDefinition for all spectra.
 void ExperimentInfo::setSpectrumDefinitions(
     Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
@@ -1643,8 +1683,8 @@ void ExperimentInfo::populateIfNotLoaded() const {
   // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {

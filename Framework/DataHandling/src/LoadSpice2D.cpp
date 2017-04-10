@@ -315,7 +315,8 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
   // iterate every detector in the xml file
   for (const auto &detector : detectors) {
-    std::string detectorXpath = dataXpath + "/" + detector;
+    std::string detectorXpath =
+        std::string(dataXpath).append("/").append(detector);
     // type : INT32[192,256]
     std::map<std::string, std::string> attributes =
         m_xmlHandler.get_attributes_from_tag(detectorXpath);

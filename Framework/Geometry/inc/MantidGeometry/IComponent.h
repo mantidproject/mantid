@@ -187,6 +187,7 @@ public:
   virtual void printSelf(std::ostream &) const = 0;
   //! Returns true if the Component is parametrized (has a parameter map)
   virtual bool isParametrized() const = 0;
+  virtual void registerContents(class ComponentVisitor &component) const = 0;
 };
 
 /// Typedef of a shared pointer to a IComponent

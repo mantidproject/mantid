@@ -22,6 +22,7 @@
 #include "MantidQtMantidWidgets/ProgressPresenter.h"
 #include "MantidQtMantidWidgets/ProgressableView.h"
 
+#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
@@ -592,6 +593,13 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   if (!m_preprocessMap.empty())
     globalOptions = m_mainPresenter->getPreprocessingOptions();
 
+  // Pre-processing values and their associated properties
+  auto preProcessValMap = m_mainPresenter->getPreprocessingValues();
+  auto preProcessPropMap = m_mainPresenter->getPreprocessingProperties();
+
+  // Properties not to be used in processing
+  std::set<std::string> restrictedProps;
+
   // Loop over all columns in the whitelist except 'Options'
   for (int i = 0; i < m_columns - 1; i++) {
 
@@ -600,28 +608,39 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
     // The column's name
     auto columnName = m_whitelist.colNameFromColIndex(i);
 
+    // The value for which preprocessing can be conducted on
+    std::string preProcessValue;
+
+    if (preProcessValMap.count(columnName) &&
+        !preProcessValMap[columnName].empty()) {
+      preProcessValue = preProcessValMap[columnName];
+    } else if (!data.at(i).empty()) {
+      preProcessValue = data.at(i);
+    } else {
+      continue;
+    }
+
     if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
-      const std::string runStr = data.at(i);
-
-      if (!runStr.empty()) {
-
-        auto preprocessor = m_preprocessMap.at(columnName);
-
-        // Global pre-processing options for this algorithm as a string
-        const std::string options = globalOptions.count(columnName) > 0
-                                        ? globalOptions.at(columnName)
-                                        : "";
-        auto optionsMap = parseKeyValueString(options);
-        auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
-        alg->setProperty(propertyName, runWS->getName());
+      // We do not want the associated properties to be set again in
+      // processing
+      for (auto &prop : preProcessPropMap[columnName]) {
+        restrictedProps.insert(prop);
       }
+
+      auto preprocessor = m_preprocessMap.at(columnName);
+
+      // Global pre-processing options for this algorithm as a string
+      const std::string options = globalOptions.count(columnName) > 0
+                                      ? globalOptions.at(columnName)
+                                      : "";
+      auto optionsMap = parseKeyValueString(options);
+      auto runWS = prepareRunWorkspace(runStr, preprocessor, optionsMap);
+      alg->setProperty(propertyName, runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data.at(i);
-      if (!propertyValue.empty())
-        alg->setPropertyValue(propertyName, propertyValue);
+      alg->setPropertyValue(propertyName, preProcessValue);
     }
   }
 
@@ -632,7 +651,8 @@ GenericDataProcessorPresenter::reduceRow(const std::vector<std::string> &data) {
   auto optionsMap = parseKeyValueString(options);
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      alg->setProperty(kvp->first, kvp->second);
+      if (restrictedProps.find(kvp->first) == restrictedProps.end())
+        alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
@@ -737,9 +757,20 @@ void GenericDataProcessorPresenter::groupRows() {
 }
 
 /**
+Expand all groups
+*/
+void GenericDataProcessorPresenter::expandAll() { m_view->expandAll(); }
+
+/**
+Collapse all groups
+*/
+void GenericDataProcessorPresenter::collapseAll() { m_view->collapseAll(); }
+
+/**
 Used by the view to tell the presenter something has changed
 */
 void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
+
   switch (flag) {
   case DataProcessorPresenter::SaveAsFlag:
     saveTableAs();
@@ -803,6 +834,12 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     break;
   case DataProcessorPresenter::PlotGroupFlag:
     plotGroup();
+    break;
+  case DataProcessorPresenter::ExpandAllGroupsFlag:
+    expandAll();
+    break;
+  case DataProcessorPresenter::CollapseAllGroupsFlag:
+    collapseAll();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -915,8 +952,9 @@ void GenericDataProcessorPresenter::importTable() {
   // result will hold the name of the output workspace
   // otherwise this should be an empty string.
   QString outputWorkspaceName = QString::fromStdString(result);
-  auto toOpen = outputWorkspaceName.trimmed().toStdString();
-  m_view->setModel(toOpen);
+  std::string toOpen = outputWorkspaceName.trimmed().toStdString();
+  if (!toOpen.empty())
+    m_view->setModel(toOpen);
 }
 
 /**
