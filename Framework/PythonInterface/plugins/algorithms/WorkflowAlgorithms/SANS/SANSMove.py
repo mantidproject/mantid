@@ -40,7 +40,7 @@ def get_detector_for_component(move_info, component):
         selected_detector = detectors[DetectorType.to_string(DetectorType.LAB)]
     else:
         # Check if the component is part of the detector names
-        for _, detector in detectors.items():
+        for _, detector in list(detectors.items()):
             if detector.detector_name == component or detector.detector_name_short == component:
                 selected_detector = detector
     return selected_detector
@@ -69,7 +69,7 @@ class SANSMove(DataProcessorAlgorithm):
                              doc='The sample scatter workspace. This workspace does not contain monitors.')
 
         # Move Type
-        move_types = StringListValidator(self._make_move_type_map().keys())
+        move_types = StringListValidator(list(self._make_move_type_map().keys()))
         self.declareProperty('MoveType', 'ElementaryDisplacement', validator=move_types, direction=Direction.Input,
                              doc='The type of movement. This can be: '
                                  '1) InitialMove for freshly workspaces, '

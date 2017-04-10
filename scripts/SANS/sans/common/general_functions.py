@@ -114,7 +114,7 @@ def create_managed_non_child_algorithm(name, **kwargs):
     alg.initialize()
     alg.setChild(False)
     alg.setRethrows(True)
-    for key, value in kwargs.items():
+    for key, value in list(kwargs.items()):
         alg.setProperty(key, value)
     return alg
 
@@ -131,7 +131,7 @@ def create_child_algorithm(parent_alg, name, **kwargs):
     if parent_alg:
         alg = parent_alg.createChildAlgorithm(name)
         alg.setRethrows(True)
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             alg.setProperty(key, value)
     else:
         alg = create_unmanaged_algorithm(name, **kwargs)
@@ -154,7 +154,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
-    if not alg.has_key("InputWorkspace") or not alg.has_key("OutputWorkspace"):
+    if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:
         raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and"
                            " an OutputWorkspace property.".format(alg.name()))
 
@@ -369,7 +369,7 @@ def parse_event_slice_setting(string_to_parse):
         elements.append(stop)
 
         # We generate ranges with [[element[0], element[1]], [element[1], element[2]], ...]
-        ranges = zip(elements[:-1], elements[1:])
+        ranges = list(zip(elements[:-1], elements[1:]))
         return [[e1, e2] for e1, e2 in ranges]
 
     def _extract_full_range(line, range_marker_pattern):

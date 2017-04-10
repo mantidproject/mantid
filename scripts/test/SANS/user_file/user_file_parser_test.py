@@ -20,8 +20,8 @@ from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, ba
 # --- Free Helper Functions for Testing ---------------------------
 # -----------------------------------------------------------------
 def assert_valid_result(result, expected, assert_true):
-    keys_result = result.keys()
-    keys_expected = expected.keys()
+    keys_result = list(result.keys())
+    keys_expected = list(expected.keys())
     assert_true(len(keys_expected) == len(keys_result))
     for key in keys_result:
         assert_true(key in keys_expected)

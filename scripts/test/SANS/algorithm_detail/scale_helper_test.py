@@ -73,7 +73,7 @@ class ScaleHelperTest(unittest.TestCase):
         expected_volume = thickness * math.pi * math.pow(width, 2) / 4.0
         expected_value = 0.3 / expected_volume
         data_y = output_workspace.dataY(0)
-        self.assertEquals(data_y[0], expected_value)
+        self.assertEqual(data_y[0], expected_value)
 
     def test_that_divide_uses_settings_from_state_if_they_are_set(self):
         # Arrange
@@ -108,7 +108,7 @@ class ScaleHelperTest(unittest.TestCase):
         expected_volume = thickness * math.pi * math.pow(width, 2) / 4.0
         expected_value = 0.3 / expected_volume
         data_y = output_workspace.dataY(0)
-        self.assertEquals(data_y[0], expected_value)
+        self.assertEqual(data_y[0], expected_value)
 
     def test_that_correct_scale_strategy_is_selected_for_non_loq_isis_instrument(self):
         # Arrange
@@ -167,7 +167,7 @@ class ScaleHelperTest(unittest.TestCase):
         # Assert
         expected_value = 0.3 * 2.4 / math.pi * 100.
         data_y = output_workspace.dataY(0)
-        self.assertEquals(data_y[0], expected_value)
+        self.assertEqual(data_y[0], expected_value)
 
 
 if __name__ == '__main__':

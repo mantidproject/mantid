@@ -1,14 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 import math
 from abc import (ABCMeta, abstractmethod)
+from six import (with_metaclass)
 from sans.common.enums import (SANSInstrument, SampleShape, convert_int_to_shape, DataType)
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 
 
-class DivideByVolume(object):
-    __metaclass__ = ABCMeta
-
+class DivideByVolume(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(DivideByVolume, self).__init__()
 
@@ -94,8 +93,7 @@ class DivideByVolumeFactory(object):
         return divider
 
 
-class MultiplyByAbsoluteScale(object):
-    __metaclass__ = ABCMeta
+class MultiplyByAbsoluteScale(with_meta(ABCMeta, object)):
     DEFAULT_SCALING = 100.0
 
     def __init__(self):

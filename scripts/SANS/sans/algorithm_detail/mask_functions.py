@@ -65,12 +65,12 @@ def get_geometry_information(ipf_path, detector_type):
 
     found_items = get_named_elements_from_ipf_file(ipf_path, search_items, int)
     # Some items might not have been found, it they are not in the dictionary, then add an empty list
-    not_found_items = [item for item in search_items if item not in found_items.keys()]
+    not_found_items = [item for item in search_items if item not in list(found_items.keys())]
     for not_found_item in not_found_items:
         found_items.update({not_found_item: []})
 
     # The old code assumed that we have an iterable value, which is not normally true, hence make it iterable
-    for key, value in found_items.items():
+    for key, value in list(found_items.items()):
         if not isinstance(value, Sequence):
             found_items[key] = [value]
 

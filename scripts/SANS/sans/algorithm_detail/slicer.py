@@ -2,6 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
+from six import (with_metaclass)
 from mantid.dataobjects import Workspace2D
 
 from sans.common.general_functions import (get_charge_and_time, create_unmanaged_algorithm)
@@ -55,9 +56,7 @@ def get_scaled_workspace(workspace, factor):
     return multiply_alg.getProperty("OutputWorkspace").value
 
 
-class Slicer(object):
-    __metaclass__ = ABCMeta
-
+class Slicer(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(Slicer, self).__init__()
 
@@ -67,8 +66,6 @@ class Slicer(object):
 
 
 class NullSlicer(Slicer):
-    __metaclass__ = ABCMeta
-
     def __init__(self):
         super(NullSlicer, self).__init__()
 
@@ -78,8 +75,6 @@ class NullSlicer(Slicer):
 
 
 class ISISSlicer(Slicer):
-    __metaclass__ = ABCMeta
-
     def __init__(self, data_type):
         super(ISISSlicer, self).__init__()
         self._data_type = data_type
@@ -94,8 +89,8 @@ class ISISSlicer(Slicer):
             return workspace, 1.0
 
         if len(start_time) > 1 or len(end_time) > 1:
-            raise("Slicer: There seem to be too many start or end values for slicing present. Can have only 1 "
-                  "but found {0} and {1} for the start and end time, respectively.".format(start_time, end_time))
+            raise "Slicer: There seem to be too many start or end values for slicing present. Can have only 1 "
+                  "but found {0} and {1} for the start and end time, respectively."
 
         start_time = start_time[0]
         end_time = end_time[0]
