@@ -16,26 +16,26 @@ using namespace Mantid::Algorithms;
 
 class AddSampleLogTest : public CxxTest::TestSuite {
 public:
-  void Ptest_Workspace2D() {
+  void test_Workspace2D() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
-  void Ptest_EventWorkspace() {
+  void test_EventWorkspace() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
-  void Ptest_CanOverwrite() {
+  void test_CanOverwrite() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
     ExecuteAlgorithm(ws, "My Name", "String", "My New Value", 0.0);
   }
 
-  void Ptest_Number() {
+  void test_Number() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name N1", "Number", "1.234", 1.234);
@@ -45,13 +45,13 @@ public:
     ExecuteAlgorithm(ws, "My Name N4", "Number", "963", 963);
   }
 
-  void Ptest_BadNumber() {
+  void test_BadNumber() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name BN", "Number", "OneTwoThreeFour", 0.0, true);
   }
 
-  void Xtest_BadNumberSeries() {
+  void test_BadNumberSeries() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "FiveSixSeven", 0.0, true);
@@ -62,16 +62,16 @@ public:
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
                                         DateAndTime("2013-12-18T13:42:00"));
-    // ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
-  //  ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
+     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
+     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "-1", -1.);
-//    ExecuteAlgorithm(ws, "Another Name NS1", "Number Series", "0", 0.);
-//    ExecuteAlgorithm(ws, "Another Name NS2", "Number Series", "123456789",
-//                     123456789.);
+    ExecuteAlgorithm(ws, "Another Name NS1", "Number Series", "0", 0.);
+    ExecuteAlgorithm(ws, "Another Name NS2", "Number Series", "123456789",
+                     123456789.);
   }
 
-  void Ptest_Units() {
+  void test_Units() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
@@ -84,7 +84,7 @@ public:
                      "stringUnit");
   }
 
-  void Ptest_number_type() {
+  void test_number_type() {
     MatrixWorkspace_sptr ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
