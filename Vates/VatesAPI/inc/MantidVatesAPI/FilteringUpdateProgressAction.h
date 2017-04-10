@@ -52,8 +52,6 @@ public:
   ~FilterUpdateProgressAction() {}
 
 private:
-
-
   Filter *m_filter;
 
   /// Message associated with the progress action

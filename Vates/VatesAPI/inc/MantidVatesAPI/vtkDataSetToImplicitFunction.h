@@ -50,6 +50,7 @@ public:
   static Mantid::Geometry::MDImplicitFunction *exec(vtkDataSet *dataSet);
   Mantid::Geometry::MDImplicitFunction *execute();
   ~vtkDataSetToImplicitFunction();
+
 private:
   vtkDataSet *m_dataset;
 };
