@@ -42,6 +42,9 @@ void ExportTimeSeriesLog::init() {
           "OutputWorkspace", "Dummy", Direction::Output),
       "Name of the workspace containing the log events in Export. ");
 
+  declareProperty("CalculateFirstDerivative", false,
+                  "If specified then the first derivative of exported data will be calcualted and put to spectrum 1.");
+
   declareProperty("LogName", "", "Log's name to filter events.");
 
   std::vector<std::string> units{"Seconds", "Nano Seconds"};
@@ -71,6 +74,13 @@ void ExportTimeSeriesLog::init() {
   declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
                                             "is EventWorkspace.  Otherwise, it "
                                             "is Workspace2D.");
+
+  // smoothing data
+  declareProperty("SmoothData", false, "If specified, then the data to export is smoothed by specified smoothing algorithm.");
+  std::vector<std::string> smooth_option{"SmoothData", "SmoothNeighbour"};
+  declareProperty("SmoothAlgorithm", "SmoothData", boost::make_shared<Kernel::StringListValidator>(smooth_option),
+                  "Mantid algorithm is used to smooth the exported TimeSeriesProperty.");
+
 }
 
 /** Main execution
@@ -88,9 +98,25 @@ void ExportTimeSeriesLog::exec() {
   int numberoutputentries = getProperty("NumberEntriesExport");
   bool outputeventworkspace = getProperty("IsEventWorkspace");
 
+  bool tosmooth = getProperty("SmoothData");
+  std::string smoothalgorithm = getProperty("SmoothAlgorithm");
+
+  bool cal1stderiv = getProperty("CalculateFirstDerivative");
+
   // Call the main
   exportLog(logname, time_unit, start_time, stop_time, exportEpochTime,
-            outputeventworkspace, numberoutputentries);
+            outputeventworkspace, numberoutputentries, cal1stderiv);
+
+  // smooth data
+  if (tosmooth)
+    smoothOutputData(smoothalgorithm);
+
+  // calcualte first derivative
+  if (cal1stderiv)
+    calculateFirstDerivative();
+
+  // set up the sample log values for meta information
+  setupMetaData(logname, time_unit, exportEpochTime, smoothed);
 
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);

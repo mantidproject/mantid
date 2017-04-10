@@ -2,6 +2,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -58,6 +59,20 @@ void AddSampleLog::init() {
                   boost::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
+
+
+  // add optional workspace which contains the data of the TimeSeriesProperty
+  declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(
+                    "TimeSeriesWorkspace" "", Direction::Input, PropertyMode::Optional),
+                  "Optional workspace contain the ");
+  declareProperty("WorkspaceIndex", 0, "The workspace index of the TimeSeriesWorkspace to be imported.");
+  declareProperty("AutoMetaData", false,
+                  "If it is specified as true, then all the meta data information will be retrieved from the input workspace. It will be used with algorithm ExportTimeSeriesProperty.");
+
+  std::vector<std::string> time_units{"Second", "Nanosecond"};
+  declareProperty("TimeUnit", "Second",  boost::make_shared<Kernel::StringListValidator>(time_units),
+                  "The unit of the time of the input workspace");
+  declareProperty("RelativeTime", true, "If specified as True, then then the time stamps are relative to the run start time of the target workspace.");
 }
 
 void AddSampleLog::exec() {
@@ -140,6 +155,123 @@ void AddSampleLog::exec() {
     }
   }
   theRun.getProperty(propName)->setUnits(propUnit);
+
+  // add the values to the added new TimeSeriesProperty
+  std::string data_ws_name = getPropertyValue("TimeSeriesWorkspace");
+  if (data_ws_name.size() > 0)
+  {
+    setTimeSeriesData(ws1, propName, value_is_int);
+  }
+
+  return;
+}
+
+void AddSampleLog::setTimeSeriesData(API::MatrixWorkspace_const_sptr outws, const std::string &property_name, bool value_is_int)
+{
+  // get input and
+  MatrixWorkspace_const_sptr data_ws = getProperty("TimeSeriesWorkspace");
+  int ws_index = getProperty("WorkspaceIndex");
+  if (ws_index < 0 || ws_index > data_ws->getNumberHistograms())
+    throw std::runtime_error("Input workspace index is out of range");
+
+  // get meta data
+  bool epochtime(false);
+  std::string timeunit;
+  getMetaData(epochtime, timeunit);
+  bool is_second = timeunit.compare("Second") == 0;
+
+  // convert the data in workspace to time series property value
+  std::vector<DateAndTime> time_vec = getTimes(data_ws, ws_index, epochtime, is_second);
+  if (value_is_int)
+  {
+    // integer property
+    TimeSeriesProperty<int> * int_prop = dynamic_cast<TimeSeriesProperty<int> *>(outws->run().getProperty(property_name));
+    std::vector<int> value_vec = getIntValues(data_ws, ws_index);
+    int_prop->addValues(time_vec, value_vec);
+  }
+  else
+  {
+    // double property
+    TimeSeriesProperty<double> * int_prop = dynamic_cast<TimeSeriesProperty<double> *>(outws->run().getProperty(property_name));
+    std::vector<double> value_vec = getDblValues(data_ws, ws_index);
+    int_prop->addValues(time_vec, value_vec);
+  }
+
+  return;
+}
+
+std::vector<Kernel::DateAndTime> AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws, int workspace_index, bool is_epoch, bool is_second)
+{
+  // get run start time
+  int64_t timeshift(0);
+  if (!is_epoch)
+  {
+    // get the run start time
+    Kernel::DateAndTime run_start_time = getRunStart(dataws);
+    timeshift = run_start_time.totalNanoseconds();
+  }
+
+  // set up the time vector
+  std::vector<Kernel::DateAndTime> timevec;
+  size_t vecsize = dataws->readX(workspace_index).size();
+  for (size_t i = 0; i < vecsize; ++i)
+  {
+    double timedbl = dataws->readX(workspace_index)[i];
+    if (is_second)
+      timedbl *= 1.E9;
+    int64_t entry_i64 = static_cast<int64_t>(timedbl);
+    Kernel::DateAndTime entry(timeshift + entry_i64);
+    timevec.push_back(entry);
+  }
+
+  return timevec;
+}
+
+Kernel::DateAndTime AddSampleLog::getRunStart(API::MatrixWorkspace_const_sptr dataws)
+{
+  Kernel::DateAndTime runstart(0);
+
+  return runstart;
+}
+
+std::vector<double> AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws, int workspace_index)
+{
+  std::vector<double> valuevec;
+  size_t vecsize = dataws->readY(workspace_index).size();
+  for (size_t i = 0; i < vecsize; ++i)
+    valuevec.push_back(dataws->readY(workspace_index)[i]);
+
+  return valuevec;
+}
+
+std::vector<int> AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws, int workspace_index)
+{
+  std::vector<int> valuevec;
+  size_t vecsize = dataws->readY(workspace_index).size();
+  for (size_t i = 0; i < vecsize; ++i)
+    valuevec.push_back(static_cast<int>(dataws->readY(workspace_index)[i]));
+
+  return valuevec;
+}
+
+void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws, bool &epochtime, std::string &timeunit)
+{
+  bool auto_meta = getProperty("AutoMetaData");
+  if (auto_meta)
+  {
+    // get the meta data from the input workspace
+    std::string epochtimestr = dataws->run().getProperty("IsEpochTime")->value();
+    epochtime = epochtimestr.compare("true") == 0;
+    timeunit = dataws->run().getProperty("TimeUnit")->value();
+  }
+  else
+  {
+    // get the meta data from input
+    epochtime = !getProperty("RelativeTime");
+    timeunit = getProperty("TimeUnit");
+  }
+
+  return;
 }
 
 } // namespace Algorithms
