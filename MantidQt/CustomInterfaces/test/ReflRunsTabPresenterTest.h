@@ -14,7 +14,9 @@
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
+namespace {
 ACTION(ICATRuntimeException) { throw std::runtime_error(""); }
+}
 
 //=====================================================================================
 // Functional tests
