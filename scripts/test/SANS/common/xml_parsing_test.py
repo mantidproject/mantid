@@ -64,16 +64,16 @@ class XMLParsingTest(unittest.TestCase):
 
     def test_that_get_valid_to_date_from_idf_string(self):
         # Arrange
-        idf_string = '<?xml version="1.0" encoding="UTF-8" ?>' \
-                     '<!-- For help on the notation used to specify an Instrument Definition File ' \
-                     'see http://www.mantidproject.org/IDF -->' \
-                     '<instrument xmlns="http://www.mantidproject.org/IDF/1.0" ' \
-                     '            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' \
-                     '            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
-                     '            name="PEARL" valid-from   ="1900-01-31 23:59:59" ' \
-                     '            valid-to     ="2011-05-01 23:59:50" ' \
-                     '            last-modified="2008-09-17 05:00:00">' \
-                     '</instrument>'
+        idf_string = u'<?xml version="1.0" encoding="UTF-8" ?>' \
+                     u'<!-- For help on the notation used to specify an Instrument Definition File ' \
+                     u'see http://www.mantidproject.org/IDF -->' \
+                     u'<instrument xmlns="http://www.mantidproject.org/IDF/1.0" ' \
+                     u'            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' \
+                     u'            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" ' \
+                     u'            name="PEARL" valid-from   ="1900-01-31 23:59:59" ' \
+                     u'            valid-to     ="2011-05-01 23:59:50" ' \
+                     u'            last-modified="2008-09-17 05:00:00">' \
+                     u'</instrument>'
 
         # Act
         extracted_time = get_valid_to_time_from_idf_string(idf_string)
