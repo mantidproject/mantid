@@ -48,7 +48,7 @@ public:
     // which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
     createTestWorkspace(inputWS, 0);
-    createTestWorkspace(offsetWS, 0);
+    createTestWorkspace(offsetWS, 1);
   }
 
   ~GroupDetectors2Test() override {
