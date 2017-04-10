@@ -71,7 +71,7 @@ public:
     alg.setProperty("SpectraList", specs);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -317,7 +317,7 @@ public:
     alg.setProperty("SpectraList", "11-13");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -374,7 +374,7 @@ public:
     alg.setProperty("SpectraList", "14-17");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -410,7 +410,7 @@ public:
 
     TS_ASSERT_THROWS(auto listener =
                          Mantid::API::LiveListenerFactory::Instance().create(
-                             "TESTHISTOLISTENER", true, &props),
+                             "TESTHISTOLISTENER", true, &alg),
                      std::invalid_argument);
 
     dae.cancel();
