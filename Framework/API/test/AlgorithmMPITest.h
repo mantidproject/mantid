@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidParallel/Communicator.h"
 #ifdef MPI_EXPERIMENTAL
 #include "MantidParallel/ParallelRunner.h"
 #endif
