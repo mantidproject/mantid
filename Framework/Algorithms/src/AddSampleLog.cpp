@@ -128,6 +128,7 @@ void AddSampleLog::exec() {
       int intVal;
       if (Strings::convert(propValue, intVal)) {
         value_is_int = true;
+      }
     }
 
     // set value
@@ -136,24 +137,28 @@ void AddSampleLog::exec() {
       // convert to integer
       int intVal;
       bool convert_to_int = Strings::convert(propValue, intVal);
-      if (convert_to_int)
-        theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
-      else
-        throw std::invalid_argument("Error interpreting string '" + propValue +
-                                    "' as NumberType Int.");
+      if (!convert_to_int)
+      {
+         // spit out error message and set to default value
+         g_log.error() << "Error interpreting string '" << propValue << "' as NumberType Int.";
+         throw std::runtime_error("Invalie integer input");
+         // intVal = 0;
+      }
+      theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
     }
     else
     {
       // convert to double
       double dblVal;
       bool convert_to_dbl = Strings::convert(propValue, dblVal);
-      if (convert_to_dbl)
-        theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-      else
-        throw std::invalid_argument("Error interpreting string '" + propValue +
-                                    "' as NumberType Double.");
+      if (!convert_to_dbl)
+      {
+          g_log.error() << "Error interpreting string '" << propValue << "' as NumberType Double.";
+          throw std::runtime_error("Invalid double input.");
+          // dblVal = 0.;
+      }
+      theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
     }
-  }
   }
 
   return;
@@ -214,9 +219,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
       if (Strings::convert(prop_value, intVal))
       {
           tsp->addValue(startTime, intVal);
-          run_obj.addLogData(tsp);
       }
     }
+    run_obj.addLogData(tsp);
   } else {
     auto tsp = new TimeSeriesProperty<double>(prop_name);
     if (use_single_value)
@@ -225,9 +230,10 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
       if (Strings::convert(prop_value, dblVal))
       {
         tsp->addValue(startTime, dblVal);
-        run_obj.addLogData(tsp);
+
       }
     }
+    run_obj.addLogData(tsp);
   }
   // add unit
   run_obj.getProperty(prop_name)->setUnits(prop_unit);
