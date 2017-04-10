@@ -333,12 +333,13 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
       if (parent) {
         auto parentType = parent->type();
         auto detectorName = (parentType == "Instrument") ? detector->getName()
-          : parent->getName();
+                                                         : parent->getName();
         detectors.push_back(detectorName);
       }
     }
   } catch (boost::bad_lexical_cast &ex) {
-    throw std::runtime_error("Invalid processing instructions: " + instructions);
+    throw std::runtime_error("Invalid processing instructions: " +
+                             instructions);
   }
 
   return detectors;
