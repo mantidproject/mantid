@@ -2162,7 +2162,7 @@ class IgnoredParser(object):
             does_pattern_match(self._mid_hab_pattern, line) or does_pattern_match(self._sp_pattern, line) or
             does_pattern_match(self._notab_pattern, line) or does_pattern_match(self._yc_pattern, line) or
             does_pattern_match(self._mask_pattern, line) or does_pattern_match(self._habeff_pattern, line) or
-            does_pattern_match(self._habpath_pattern, line) or does_pattern_match(self._back_mon_pattern, line)):
+            does_pattern_match(self._habpath_pattern, line) or does_pattern_match(self._back_mon_pattern, line)):  # noqa
             ignore = True
         return ignore
 

@@ -198,7 +198,7 @@ class SANSLoadTest(unittest.TestCase):
             load_alg.setProperty("BeamCoordinates", beam_coordinates)
 
         if output_workspace_names:
-            for name, value in list(output_workspace_names.items()):
+            for name, value in output_workspace_names.items():
                 load_alg.setProperty(name, value)
 
         # Act

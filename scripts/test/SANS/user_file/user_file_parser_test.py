@@ -25,6 +25,10 @@ def assert_valid_result(result, expected, assert_true):
     assert_true(len(keys_expected) == len(keys_result))
     for key in keys_result:
         assert_true(key in keys_expected)
+        if result[key] != expected[key]:
+            print("=================================")
+            print(result[key])
+            print(expected[key])
         assert_true(result[key] == expected[key])
 
 

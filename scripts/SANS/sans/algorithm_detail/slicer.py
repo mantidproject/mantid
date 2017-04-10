@@ -2,7 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
-from six import (with_metaclass)
+from six import with_metaclass
 from mantid.dataobjects import Workspace2D
 
 from sans.common.general_functions import (get_charge_and_time, create_unmanaged_algorithm)
@@ -90,7 +90,8 @@ class ISISSlicer(Slicer):
 
         if len(start_time) > 1 or len(end_time) > 1:
             raise RuntimeError("Slicer: There seem to be too many start or end values for slicing present. "
-                               "Can have only 1 but found {0} and {1} for the start and end time, respectively.")
+                               "Can have only 1 but found {0} and {1} for the start and end time,"
+                               " respectively.".format(len(start_time), len(end_time)))
 
         start_time = start_time[0]
         end_time = end_time[0]

@@ -102,7 +102,6 @@ class UserFileReaderTest(unittest.TestCase):
     def _sort_list(elements):
         if len(elements) == 1:
             return
-
         if isinstance(elements[0], single_entry_with_detector):
             UserFileReaderTest._sort(elements, lambda x: x.entry)
         elif isinstance(elements[0], simple_range):

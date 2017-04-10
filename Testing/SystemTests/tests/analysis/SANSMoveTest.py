@@ -161,11 +161,11 @@ class SANSMoveTest(unittest.TestCase):
             position = component.getPos()
             position_base = base_component.getPos()
             for index in range(0, 3):
-                self.assertAlmostEqual(position[index], position_base[index], delta=1e-4)
+                self.assertAlmostEquals(position[index], position_base[index], delta=1e-4)
             rotation = component.getRotation()
             rotation_base = base_component.getRotation()
             for index in range(0, 4):
-                self.assertAlmostEqual(rotation[index], rotation_base[index], delta=1e-4)
+                self.assertAlmostEquals(rotation[index], rotation_base[index], delta=1e-4)
 
     def _run_move(self, state, workspace, move_type, beam_coordinates=None, component=None):
         move_alg = AlgorithmManager.createUnmanaged("SANSMove")

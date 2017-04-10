@@ -53,6 +53,24 @@ ALTERNATIVE_SANS2D_NAME = "SAN"
 DEFINITION = "Definition"
 PARAMETERS = "Parameters"
 
+# Geometry
+SAMPLE = "sample"
+WIDTH = "width"
+HEIGHT = "height"
+THICKNESS = "thickness"
+SHAPE = 'shape'
+CYLINDER = "CYLINDER"
+FLAT_PLATE = "FLAT PLATE"
+DISC = "DISC"
+GEOM_HEIGHT = 'geom_height'
+GEOM_WIDTH = 'geom_width'
+GEOM_THICKNESS = 'geom_thickness'
+GEOM_ID = 'geom_id'
+E_HEIGHT = 'e_height'
+E_WIDTH = 'e_width'
+E_THICK = 'e_thick'
+E_GEOM = 'e_geom'
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
@@ -364,21 +382,21 @@ def get_geometry_information_isis_nexus(file_name):
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
-        sample = top_level['sample']
-        height = float(sample['height'][0])
-        width = float(sample['width'][0])
-        thickness = float(sample['thickness'][0])
-        shape_as_string = sample['shape'][0].upper()
-
-        if shape_as_string == "CYLINDER":
+        sample = top_level[SAMPLE]
+        height = float(sample[HEIGHT][0])
+        width = float(sample[WIDTH][0])
+        thickness = float(sample[THICKNESS][0])
+        shape_as_string = sample[SHAPE][0].upper().decode("utf-8")
+        if shape_as_string == CYLINDER:
             shape = SampleShape.CylinderAxisUp
-        elif shape_as_string == "FLAT PLATE":
+        elif shape_as_string == FLAT_PLATE:
             shape = SampleShape.Cuboid
-        elif shape_as_string == "DISC":
+        elif shape_as_string == DISC:
             shape = SampleShape.CylinderAxisAlong
         else:
             shape = None
     return height, width, thickness, shape
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for Added data
@@ -554,11 +572,11 @@ def get_geometry_information_isis_added_nexus(file_name):
         # Open first entry
         keys = list(h5_file.keys())
         top_level = h5_file[keys[0]]
-        sample = top_level['sample']
-        height = float(sample['geom_height'][0])
-        width = float(sample['geom_width'][0])
-        thickness = float(sample['geom_thickness'][0])
-        shape_id = int(sample['geom_id'][0])
+        sample = top_level[SAMPLE]
+        height = float(sample[GEOM_HEIGHT][0])
+        width = float(sample[GEOM_WIDTH][0])
+        thickness = float(sample[GEOM_THICKNESS][0])
+        shape_id = int(sample[GEOM_ID][0])
         shape = convert_to_shape(shape_id)
     return height, width, thickness, shape
 
@@ -701,10 +719,10 @@ def get_geometry_information_raw(file_name):
     sample_parameters = alg_info.getProperty("SampleParameterTable").value
     keys = sample_parameters.getColumnNames()
 
-    height_id = "e_height"
-    width_id = "e_width"
-    thickness_id = "e_thick"
-    shape_id = "e_geom"
+    height_id = E_HEIGHT
+    width_id = E_WIDTH
+    thickness_id = E_THICK
+    shape_id = E_GEOM
 
     height = sample_parameters.column(keys.index(height_id))[0]
     width = sample_parameters.column(keys.index(width_id))[0]

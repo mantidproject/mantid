@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-
+from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
-
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (SANSInstrument, DetectorType)
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -320,7 +319,7 @@ def mask_beam_stop(mask_info, workspace, instrument):
 # Masker classes
 # ------------------------------------------------------------------
 
-class Masker(with_metaclass(ABCMeta,object)):
+class Masker(with_metaclass(ABCMeta, object)):
     def __init__(self):
         super(Masker, self).__init__()
 
