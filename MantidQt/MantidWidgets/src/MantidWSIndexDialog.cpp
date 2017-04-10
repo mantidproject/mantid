@@ -90,8 +90,8 @@ MantidWSIndexWidget::UserInput MantidWSIndexWidget::getSelections() {
       userInputAdvanced.axisName = getAxisName();
     }
     userInputAdvanced.logName = getLogName();
-    if (userInputAdvanced.logName == WORKSPACE_NAME 
-      || userInputAdvanced.logName == WORKSPACE_INDEX) {
+    if (userInputAdvanced.logName == WORKSPACE_NAME ||
+        userInputAdvanced.logName == WORKSPACE_INDEX) {
       // We want default names in legend, if log is workspace name or index
       userInputAdvanced.logName = "";
     }
@@ -329,10 +329,10 @@ bool MantidWSIndexWidget::plotRequested() {
       m_wsField->setError(error_message);
     if (!spectraText.isEmpty())
       m_spectraField->setError(error_message);
-    if (wsText.isEmpty() && spectraText.isEmpty())
-    {
+    if (wsText.isEmpty() && spectraText.isEmpty()) {
       m_wsField->setError("Workspace indices or spectra numbers are needed");
-      m_spectraField->setError("Spectra numbers or workspace indices are needed");
+      m_spectraField->setError(
+          "Spectra numbers or workspace indices are needed");
     }
   }
   return acceptable;
@@ -500,10 +500,10 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_axisNameEdit->setEnabled(useLogNames);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
-    if (m_plotOptions->currentText() == SURFACE_PLOT || m_plotOptions->currentText() == CONTOUR_PLOT) {
+    if (m_plotOptions->currentText() == SURFACE_PLOT ||
+        m_plotOptions->currentText() == CONTOUR_PLOT) {
       m_logSelector->setItemText(0, WORKSPACE_INDEX);
-    }
-    else {
+    } else {
       m_logSelector->setItemText(0, WORKSPACE_NAME);
     }
   }
