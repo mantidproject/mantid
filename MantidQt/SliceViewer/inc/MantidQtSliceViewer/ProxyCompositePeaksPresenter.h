@@ -16,7 +16,7 @@ Proxy wrapper of the CompositePeaksPresenter. Allows the CompositePeaksPresenter
 to
 be used in situations where diluted power, via a restricted API is required.
 ----------------------------------------------------------*/
-class DLLExport ProxyCompositePeaksPresenter : public QObject,
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER ProxyCompositePeaksPresenter : public QObject,
                                                public UpdateableOnDemand {
 public:
   ProxyCompositePeaksPresenter(

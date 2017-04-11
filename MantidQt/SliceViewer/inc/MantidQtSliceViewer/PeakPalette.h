@@ -1,7 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_PEAKPALETTE_H
 #define MANTID_SLICEVIEWER_PEAKPALETTE_H
 
-#include "MantidKernel/System.h"
+#include "DllOption.h"
 #include "MantidQtSliceViewer/PeakViewColor.h"
 #include <algorithm>
 #include <sstream>
@@ -12,7 +12,7 @@
 namespace MantidQt {
 namespace SliceViewer {
 
-template <typename C> class DLLExport PeakPalette {
+template <typename C> class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPalette {
 public:
   PeakPalette();
   PeakPalette(const PeakPalette &other);

@@ -30,7 +30,7 @@ Composite implmentation of the Peaks presenter. Holds 0 - N nested
 PeaksPresenters.
 Note that it's default behaviour is identical to that of the NullPeaksPresenter.
 ----------------------------------------------------------*/
-class DLLExport CompositePeaksPresenter : public PeaksPresenter,
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER CompositePeaksPresenter : public PeaksPresenter,
                                           public UpdateableOnDemand,
                                           public ZoomableOnDemand {
 public:
