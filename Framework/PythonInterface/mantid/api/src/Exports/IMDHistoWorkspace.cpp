@@ -180,13 +180,14 @@ void setErrorSquaredArray(IMDHistoWorkspace &self,
 /**
  * Set the signal at a specific index in the workspace
  */
-void setSignalAt(IMDHistoWorkspace &self, const size_t index, const double value) {
-    if (index >= self.getNPoints())
-        throw std::invalid_argument("setSignalAt: The index is greater than the number of bins in the workspace");
+void setSignalAt(IMDHistoWorkspace &self, const size_t index,
+                 const double value) {
+  if (index >= self.getNPoints())
+    throw std::invalid_argument("setSignalAt: The index is greater than the "
+                                "number of bins in the workspace");
 
-    self.setSignalAt(index, value);
+  self.setSignalAt(index, value);
 }
-
 }
 
 void export_IMDHistoWorkspace() {
