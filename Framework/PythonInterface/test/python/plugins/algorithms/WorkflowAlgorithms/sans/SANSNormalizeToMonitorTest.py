@@ -104,7 +104,7 @@ class SANSNormalizeToMonitorTest(unittest.TestCase):
 
         # Now set specified monitors to specified values
         if data is not None:
-            for key, value in data.items():
+            for key, value in list(data.items()):
                 data_y = rebinned.dataY(key)
                 for index in range(len(data_y)):
                     data_y[index] = value[index]

@@ -107,7 +107,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
         self.assertTrue(100 in masked_det_ids)
         self.assertTrue(102 in masked_det_ids)
         self.assertTrue(104 in masked_det_ids)
-        self.assertEquals(len(masked_det_ids), 3)
+        self.assertEqual(len(masked_det_ids), 3)
 
         # Clean up
         DeleteWorkspace(test_workspace_for_masked_det_ids)

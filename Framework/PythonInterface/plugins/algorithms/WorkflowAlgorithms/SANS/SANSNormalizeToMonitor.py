@@ -152,8 +152,8 @@ class SANSNormalizeToMonitor(DataProcessorAlgorithm):
         background_tof_monitor_start = normalize_to_monitor_state.background_TOF_monitor_start
         background_tof_monitor_stop = normalize_to_monitor_state.background_TOF_monitor_stop
 
-        if incident_monitor_spectrum_as_string in background_tof_monitor_start.keys() and \
-           incident_monitor_spectrum_as_string in background_tof_monitor_stop.keys():
+        if incident_monitor_spectrum_as_string in list(background_tof_monitor_start.keys()) and \
+           incident_monitor_spectrum_as_string in list(background_tof_monitor_stop.keys()):
             start_tof = background_tof_monitor_start[incident_monitor_spectrum_as_string]
             stop_tof = background_tof_monitor_stop[incident_monitor_spectrum_as_string]
         else:
