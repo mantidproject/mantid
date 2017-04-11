@@ -11,7 +11,7 @@ Description
 
 This algorithm provides a transmission workspace for subsequent wavelength correction in :ref:`algm-Q1D` or  :ref:`algm-Qxy`.
 The settings of the algorithm are provided by the state object. The user provides a *TransmissionWorkspace*,
-*DirectWorkspace* and the data type which is to be used, ie *Sample* or *Can*. The *OuputWorkspace* is a fitted
+*DirectWorkspace* and the data type which is to be used, ie *Sample* or *Can*. The *OutputWorkspace* is a fitted
 workspace, but the unfitted data set is available via *UnfittedData*.
 
 Currently the mask mechanism is implemented for **SANS2D**, **LOQ** and **LARMOR**.
@@ -37,7 +37,7 @@ The elements are:
 +---------------------------------+----------------+-------------------------------------+--------------------+--------+
 | transmission_monitor            | Integer        | The transmission monitor            | No                 | None   |
 +---------------------------------+----------------+-------------------------------------+--------------------+--------+
-| default_incident_monitor        | Integer        | The default incident monitor        | No                 | None   |
+| default_incident_monitor        | Integer        | The default incident monitor        | auto setup         | auto   |
 +---------------------------------+----------------+-------------------------------------+--------------------+--------+
 | incident_monitor                | Integer        | The incident monitor                | No                 | None   |
 +---------------------------------+----------------+-------------------------------------+--------------------+--------+
@@ -89,6 +89,7 @@ There is a fit state for the sample and the can which contains the following set
 
 Note that the prompt peak settings are automatically set up for **LOQ**
 
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 
 .. categories::
