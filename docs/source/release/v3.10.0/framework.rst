@@ -111,6 +111,7 @@ Python
      # Create a new axis reference
      s_axis = SpectraAxis.create(ws1)
 
+- Fixed a bug on MDHistogramWorkspaces where passing an index larger than the size of the dimensions of the workspace to ``setSignalAt`` would crash Mantid.
 
 Python Algorithms
 #################
