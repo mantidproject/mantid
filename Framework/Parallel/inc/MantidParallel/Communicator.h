@@ -18,10 +18,15 @@ class environment;
 }
 }
 
+#ifdef MPI_EXPERIMENTAL
+namespace ParallelTestHelpers {
+class ParallelRunner;
+}
+#endif
+
 namespace Mantid {
 namespace Parallel {
 #ifdef MPI_EXPERIMENTAL
-class ParallelRunner;
 extern boost::mpi::environment environment;
 #endif
 
@@ -76,7 +81,7 @@ private:
   int m_rank{0};
 
   // For accessing constructor with threading backend.
-  friend class ParallelRunner;
+  friend class ParallelTestHelpers::ParallelRunner;
 #endif
 };
 

@@ -5,10 +5,11 @@
 
 #include "MantidParallel/Communicator.h"
 #ifdef MPI_EXPERIMENTAL
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #endif
 
 using namespace Mantid::Parallel;
+using namespace ParallelTestHelpers;
 
 #ifdef MPI_EXPERIMENTAL
 namespace {

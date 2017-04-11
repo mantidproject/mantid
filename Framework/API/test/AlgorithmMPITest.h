@@ -15,11 +15,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidParallel/Communicator.h"
 #ifdef MPI_EXPERIMENTAL
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #endif
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace ParallelTestHelpers;
 
 namespace {
 class FakeWorkspaceA : public WorkspaceTester {

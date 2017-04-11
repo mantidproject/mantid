@@ -1,10 +1,11 @@
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidParallel/ThreadingBackend.h"
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Parallel {
+using namespace Mantid::Parallel;
+
+namespace ParallelTestHelpers {
 
 ParallelRunner::ParallelRunner() {
   Communicator comm;
@@ -36,5 +37,4 @@ int ParallelRunner::size() const {
   return comm.size();
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace ParallelTestHelpers

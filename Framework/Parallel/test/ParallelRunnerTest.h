@@ -3,12 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidParallel/ParallelRunner.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 
 #include <mutex>
 #include <vector>
 
 using namespace Mantid::Parallel;
+using ParallelTestHelpers::ParallelRunner;
 
 namespace {
 void check_size(const Communicator &comm, const int expected) {

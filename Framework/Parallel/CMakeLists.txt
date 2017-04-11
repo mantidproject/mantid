@@ -1,12 +1,10 @@
 if ( MPI_EXPERIMENTAL )
   set ( MPI_SRC_FILES
-    src/ParallelRunner.cpp
     src/Request.cpp
     src/ThreadingBackend.cpp
     )
 
   set ( MPI_INC_FILES
-    inc/MantidParallel/ParallelRunner.h
     inc/MantidParallel/Request.h
     inc/MantidParallel/ThreadingBackend.h
     )
