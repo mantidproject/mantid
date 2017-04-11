@@ -644,10 +644,12 @@ void FunctionBrowser::addAttributeAndParameterProperties(
       double value = fun->getParameter(i);
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
-      if (fun->isFixed(i)) {
+      if (!fun->isActive(i)) {
         auto tie = fun->getTie(i);
         if (tie) {
           addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
+        } else {
+          addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
         }
       }
       auto c = fun->getConstraint(i);
@@ -916,8 +918,7 @@ QtProperty *FunctionBrowser::getFunctionProperty(const QString &index) const {
  * @param prop :: Parent parameter property
  * @param tie :: A tie string
  */
-FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
-                                                           QString tie) {
+void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   if (!prop) {
     throw std::runtime_error("FunctionBrowser: null property pointer");
   }
@@ -927,7 +928,7 @@ FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
   ap.parent = NULL;
 
   if (!isParameter(prop))
-    return ap;
+    return;
 
   Mantid::API::Expression expr;
   expr.parse(tie.toStdString());
@@ -960,6 +961,7 @@ FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
   ap = addProperty(prop, tieProp);
+  tieProp->setEnabled(false);
   m_tieManager->blockSignals(false);
 
   ATie atie;
@@ -967,7 +969,18 @@ FunctionBrowser::AProperty FunctionBrowser::addTieProperty(QtProperty *prop,
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
-  return ap;
+  if (prop->hasOption(globalOptionName)) {
+    if (getNumberOfDatasets() > 1 && !prop->checkOption(globalOptionName)) {
+      auto parName = getParameterName(prop);
+      auto &localValues = m_localParameterValues[parName];
+      if (m_currentDataset >= localValues.size()) {
+        initLocalParameter(parName);
+      }
+      localValues[m_currentDataset].tie = tie;
+    } else if (getNumberOfDatasets() == 0) {
+      prop->setOption(globalOptionName, true);
+    }
+  }
 }
 
 /**
@@ -1614,22 +1627,8 @@ void FunctionBrowser::fixParameter() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  if (prop->hasOption(globalOptionName) && getNumberOfDatasets() > 1 &&
-      !prop->checkOption(globalOptionName)) {
-    auto parName = getParameterName(prop);
-    auto &localValues = m_localParameterValues[parName];
-    if (m_currentDataset >= localValues.size()) {
-      initLocalParameter(parName);
-    }
-    localValues[m_currentDataset].fixed = true;
-  }
   QString tie = QString::number(getParameter(prop));
-  m_tieManager->blockSignals(true);
-  auto ap = addTieProperty(prop, tie);
-  if (ap.prop) {
-    ap.prop->setEnabled(false);
-  }
-  m_tieManager->blockSignals(false);
+  addTieProperty(prop, tie);
 }
 
 /// Get a tie property attached to a parameter property
@@ -1704,15 +1703,6 @@ void FunctionBrowser::addTie() {
                                       QLineEdit::Normal, "", &ok);
   if (ok && !tie.isEmpty()) {
     addTieProperty(prop, tie);
-    if (prop->hasOption(globalOptionName) && getNumberOfDatasets() > 1 &&
-        !prop->checkOption(globalOptionName)) {
-      auto parName = getParameterName(prop);
-      auto &localValues = m_localParameterValues[parName];
-      if (m_currentDataset >= localValues.size()) {
-        initLocalParameter(parName);
-      }
-      localValues[m_currentDataset].tie = tie;
-    }
   }
 }
 
@@ -2177,15 +2167,11 @@ void FunctionBrowser::updateLocalTie(const QString &parName) {
   }
   auto &localParam = m_localParameterValues[parName][m_currentDataset];
   if (localParam.fixed) {
-    auto ap = addTieProperty(
+    addTieProperty(
         prop, QString::number(
                   m_localParameterValues[parName][m_currentDataset].value));
-    if (ap.prop) {
-      ap.prop->setEnabled(false);
-    }
   } else if (!localParam.tie.isEmpty()) {
-    auto ap = addTieProperty(prop, localParam.tie);
-    (void)ap;
+    addTieProperty(prop, localParam.tie);
   }
 }
 
