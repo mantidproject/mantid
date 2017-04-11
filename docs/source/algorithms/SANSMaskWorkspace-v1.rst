@@ -100,7 +100,7 @@ The detectors dictionary above maps to a mask state object for the individual de
 | block_horizontal_start      | List of Integer | A list of start spectra for the      | No         | 0.0           |
 |                             |                 | horizontal part of block masks       |            |               |
 +-----------------------------+-----------------+--------------------------------------+------------+---------------+
-| block_horizontal_stop       | List of Integer |  A list of stop spectra for the      | No         | 0.0           |
+| block_horizontal_stop       | List of Integer | A list of stop spectra for the       | No         | 0.0           |
 |                             |                 | horizontal part of block masks       |            |               |
 +-----------------------------+-----------------+--------------------------------------+------------+---------------+
 | block_vertical_start        | List of Integer | A list of start spectra for the      | No         | 0.0           |
