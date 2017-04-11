@@ -23,7 +23,9 @@ const std::string FindEPP::name() const { return "FindEPP"; }
 int FindEPP::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string FindEPP::category() const { return "Workflow\\MLZ\\TOFTOF;Utility"; }
+const std::string FindEPP::category() const {
+  return "Workflow\\MLZ\\TOFTOF;Utility";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string FindEPP::summary() const {
