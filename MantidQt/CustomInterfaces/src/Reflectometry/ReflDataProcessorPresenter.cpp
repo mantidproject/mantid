@@ -650,8 +650,13 @@ bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
         bool isEventWS =
             AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
                 outName) != NULL;
-        if (findEventWS == isEventWS)
+        if (findEventWS == isEventWS) {
           foundInputWorkspaces.push_back(outName);
+        } else if (isEventWS) { // monitors must be loaded
+          std::string monName = outName + "_monitors";
+          if (AnalysisDataService::Instance().doesExist(monName) == false)
+            foundInputWorkspaces.push_back(outName);
+        }
       }
     }
   }
