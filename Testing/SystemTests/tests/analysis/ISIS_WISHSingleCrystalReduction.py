@@ -6,7 +6,7 @@ import numpy as np
 
 class WISHSingleCrystalPeakPredictionTest(stresstesting.MantidStressTest):
     """
-    At the time of writing WISH users rely quite heavily on the PredictPeaks 
+    At the time of writing WISH users rely quite heavily on the PredictPeaks
     algorithm. As WISH has tubes rather than rectangular detectors sometimes
     peaks fall between the gaps in the tubes.
 
@@ -34,17 +34,17 @@ class WISHSingleCrystalPeakPredictionTest(stresstesting.MantidStressTest):
 
         SetUB(ws, UB=UB)
 
-        self._peaks = PredictPeaks(ws, WavelengthMin=0.1, WavelengthMax=100, 
+        self._peaks = PredictPeaks(ws, WavelengthMin=0.1, WavelengthMax=100,
                                    OutputWorkspace='peaks')
         # We specifically want to check peak -5 -1 -7 exists, so filter for it
         self._filtered = FilterPeaks(self._peaks, "h^2+k^2+l^2", 75, '=',
-                                    OutputWorkspace='filtered')
+                                     OutputWorkspace='filtered')
 
     def validate(self):
         self.assertEqual(self._peaks.rowCount(), 510)
         self.assertEqual(self._filtered.rowCount(), 6)
-        peak = self._filtered.row(2) 
-        
+        peak = self._filtered.row(2)
+
         # This is an example of a peak that is known to fall between the gaps
         # in WISH tubes. Specifically check this one is predicted to exist
         # because past bugs have been found in the ray tracing
