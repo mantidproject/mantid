@@ -592,7 +592,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       MDEW_MDEVENT_3);
 
   for (const auto &thisWorkspace : vec_ws2d) {
-    short unsigned int runnumber = static_cast<short unsigned int>(
+    uint16_t runnumber = static_cast<uint16_t>(
         std::stoi(thisWorkspace->run().getProperty("run_number")->value()));
 
     detid_t detindex = 0;

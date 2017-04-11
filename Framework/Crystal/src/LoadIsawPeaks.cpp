@@ -259,7 +259,7 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 
   Inti = std::stod(getWord(in, false), nullptr);
   SigI = std::stod(getWord(in, false), nullptr);
-  static_cast<void>(std::stoi(getWord(in, false))); // iReflag
+  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);

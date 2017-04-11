@@ -514,7 +514,7 @@ std::map<int, signal_t> IntegratePeaksCWSD::getMonitorCounts() {
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string mon_str = expinfo->run().getProperty("monitor")->value();
-    signal_t monitor = static_cast<signal_t>(std::stoi(mon_str));
+    signal_t monitor = static_cast<signal_t>(std::stod(mon_str));
     run_monitor_map.insert(std::make_pair(run_number, monitor));
     g_log.information() << "From MD workspace add run " << run_number
                         << ", monitor = " << monitor << "\n";
@@ -542,7 +542,7 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     // FIXME - HACK FOE HB3A
     run_number = run_number % 1000;
     std::string duration_str = expinfo->run().getProperty("duration")->value();
-    double duration = static_cast<double>(std::stod(duration_str));
+    double duration = std::stod(duration_str);
     run_time_map.insert(std::make_pair(run_number, duration));
     g_log.information() << "MD workspace exp info " << iexpinfo << ": run "
                         << run_number << ", measuring time = " << duration
