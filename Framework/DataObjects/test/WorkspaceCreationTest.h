@@ -93,8 +93,6 @@ public:
   static void destroySuite(WorkspaceCreationTest *suite) { delete suite; }
 
   WorkspaceCreationTest() {
-    // Calls MPI_Init, if applicable.
-    Mantid::API::FrameworkManager::Instance();
     // 1 bank, 2x2 pixels, IDs 4,5,6,7
     m_instrument =
         ComponentCreationHelper::createTestInstrumentRectangular(1, 2);

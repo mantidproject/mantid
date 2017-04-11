@@ -7,10 +7,6 @@
 #include <boost/mpi/environment.hpp>
 #endif
 
-#ifdef MPI_EXPERIMENTAL
-#include <boost/mpi/environment.hpp>
-#endif
-
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -132,9 +128,6 @@ private:
   boost::mpi::environment m_mpi_environment;
   int argc = 0;
   char **argv;
-#endif
-#ifdef MPI_EXPERIMENTAL
-  boost::mpi::environment m_mpi_environment;
 #endif
 };
 

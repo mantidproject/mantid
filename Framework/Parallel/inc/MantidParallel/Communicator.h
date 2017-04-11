@@ -12,10 +12,17 @@
 #include <boost/mpi/communicator.hpp>
 #endif
 
+namespace boost {
+namespace mpi {
+class environment;
+}
+}
+
 namespace Mantid {
 namespace Parallel {
 #ifdef MPI_EXPERIMENTAL
 class ParallelRunner;
+extern boost::mpi::environment environment;
 #endif
 
 /** Wrapper for boost::mpi::communicator. For non-MPI builds an equivalent

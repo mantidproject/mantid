@@ -66,9 +66,6 @@ public:
   static void destroySuite(TableWorkspacePropertyTest *suite) { delete suite; }
 
   TableWorkspacePropertyTest() {
-    // Calls MPI_Init if applicable, for running algorithms in MPI builds.
-    Mantid::API::FrameworkManager::Instance();
-
     t.reset(new TableWorkspace(10));
     t->addColumn("str", "Name");
     t->addColumn("int", "Nunber");

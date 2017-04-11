@@ -529,10 +529,7 @@ public:
   static AlgorithmMPITest *createSuite() { return new AlgorithmMPITest(); }
   static void destroySuite(AlgorithmMPITest *suite) { delete suite; }
 
-  AlgorithmMPITest() {
-    Mantid::API::FrameworkManager::Instance();
-    AnalysisDataService::Instance();
-  }
+  AlgorithmMPITest() { AnalysisDataService::Instance(); }
 
   void testNoParallelism() {
     runNoParallelism(Parallel::Communicator{});

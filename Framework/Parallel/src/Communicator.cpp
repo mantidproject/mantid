@@ -1,7 +1,15 @@
 #include "MantidParallel/Communicator.h"
 
+#ifdef MPI_EXPERIMENTAL
+#include <boost/mpi/environment.hpp>
+#endif
+
 namespace Mantid {
 namespace Parallel {
+
+#ifdef MPI_EXPERIMENTAL
+boost::mpi::environment environment;
+#endif
 
 #ifdef MPI_EXPERIMENTAL
 Communicator::Communicator(const boost::mpi::communicator &comm)
