@@ -502,7 +502,8 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
   m_logValues->clear();
-  m_axisNameEdit->setEnabled(useLogNames);
+  m_axisNameEdit->setEnabled(m_plotOptions->currentText() == SURFACE_PLOT ||
+                             m_plotOptions->currentText() == CONTOUR_PLOT);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
     if (m_plotOptions->currentText() == SURFACE_PLOT ||
