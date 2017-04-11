@@ -459,11 +459,15 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   // Get the length of largest projection onto x,y,z
   auto projectionLengths = getProjectionLengths(directions, radii);
 
+  // The zoom-out factor ensures that the sphere can be viewed
+  // in its entirety in full-screen or default mode.
+  const double zoomOutFactor = 2.;
+
   // Corners
-  const double leftValue = originEllipsoid.X() - projectionLengths[0];
-  const double rightValue = originEllipsoid.X() + projectionLengths[0];
-  const double bottomValue = originEllipsoid.Y() - projectionLengths[1];
-  const double topValue = originEllipsoid.Y() + projectionLengths[1];
+  const double leftValue = originEllipsoid.X() - zoomOutFactor*projectionLengths[0];
+  const double rightValue = originEllipsoid.X() + zoomOutFactor*projectionLengths[0];
+  const double bottomValue = originEllipsoid.Y() - zoomOutFactor*projectionLengths[1];
+  const double topValue = originEllipsoid.Y() + zoomOutFactor*projectionLengths[1];
 
   using namespace MantidQt::SliceViewer;
 
