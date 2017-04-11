@@ -8,7 +8,7 @@ from sans.common.general_functions import (get_ranges_for_rebin_setting, get_ran
 from sans.user_file.user_file_reader import UserFileReader
 from sans.user_file.user_file_common import (DetectorId, BackId, LimitsId,
                                              simple_range, complex_range, MaskId,
-                                             range_entry_with_detector, SampleId, SetId,
+                                             rebin_string_values, SampleId, SetId,
                                              TransId, TubeCalibrationFileId, QResolutionId, FitId,
                                              MonId, GravityId,
                                              OtherId)

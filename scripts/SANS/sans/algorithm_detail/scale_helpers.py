@@ -84,8 +84,7 @@ class DivideByVolumeFactory(object):
         data = state.data
         instrument = data.instrument
 
-        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or\
-                             instrument is SANSInstrument.LOQ  #noqa
+        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ  # noqa
         if is_isis_instrument:
             divider = DivideByVolumeISIS()
         else:
