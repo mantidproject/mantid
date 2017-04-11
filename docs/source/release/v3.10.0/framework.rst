@@ -104,7 +104,7 @@ Python
       3.0
       3.0
 
-- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape.
+- :class:`mantid.geometry.Object` has a new method ``volume()`` which calculates the volume of the shape.
 - A ``SpectraAxis`` object can now be created from Python, in a similar way to the other Axis types:
 
   .. code-block:: python
@@ -118,7 +118,9 @@ Python
 Python Algorithms
 #################
 
-|
+- :class:`mantid.api.DataProcessorAlgorithm` now have a new method
+  ``copyProperties()`` which allow them to copy properties (with
+  defaults, validators, and documentation) from other algorithms.
 
 Full list of
 `Framework <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.10%22+is%3Amerged+label%3A%22Component%3A+Framework%22>`__
