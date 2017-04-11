@@ -86,7 +86,7 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
   case Performance: {
     createAlg.setPropertyValue("Function", "User Defined");
     createAlg.setPropertyValue("UserDefinedFunction",
-                               "name=LinearBackground,A0=0.3,A1=0.01;"
+                               "name=LinearBackground,A0=0.3,A1=0.001;"
                                "name=Gaussian,"
                                "PeakCentre=6000, Height=5, Sigma=75");
     createAlg.setProperty("XMin", 4005.75);
