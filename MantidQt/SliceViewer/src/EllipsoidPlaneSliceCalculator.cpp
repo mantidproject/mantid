@@ -464,10 +464,14 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   const double zoomOutFactor = 2.;
 
   // Corners
-  const double leftValue = originEllipsoid.X() - zoomOutFactor*projectionLengths[0];
-  const double rightValue = originEllipsoid.X() + zoomOutFactor*projectionLengths[0];
-  const double bottomValue = originEllipsoid.Y() - zoomOutFactor*projectionLengths[1];
-  const double topValue = originEllipsoid.Y() + zoomOutFactor*projectionLengths[1];
+  const double leftValue =
+      originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
+  const double rightValue =
+      originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
+  const double bottomValue =
+      originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
+  const double topValue =
+      originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
 
   using namespace MantidQt::SliceViewer;
 

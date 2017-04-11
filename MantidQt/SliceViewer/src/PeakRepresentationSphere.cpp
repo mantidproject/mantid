@@ -96,10 +96,10 @@ PeakBoundingBox PeakRepresentationSphere::getBoundingBox() const {
   // The zoom-out factor ensures that the sphere can be viewed
   // in its entirety in full-screen or default mode.
   const double zoomOutFactor = 2.;
-  Left left(m_origin.X() - zoomOutFactor*m_backgroundOuterRadius);
-  Bottom bottom(m_origin.Y() - zoomOutFactor*m_backgroundOuterRadius);
-  Right right(m_origin.X() + zoomOutFactor*m_backgroundOuterRadius);
-  Top top(m_origin.Y() + zoomOutFactor*m_backgroundOuterRadius);
+  Left left(m_origin.X() - zoomOutFactor * m_backgroundOuterRadius);
+  Bottom bottom(m_origin.Y() - zoomOutFactor * m_backgroundOuterRadius);
+  Right right(m_origin.X() + zoomOutFactor * m_backgroundOuterRadius);
+  Top top(m_origin.Y() + zoomOutFactor * m_backgroundOuterRadius);
   SlicePoint slicePoint(m_origin.Z());
 
   return PeakBoundingBox(left, right, top, bottom, slicePoint);
