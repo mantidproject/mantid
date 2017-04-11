@@ -24,7 +24,7 @@ There are several types of masking which are currently supported:
 
 
 Relevant SANSState entries for SANSMaskWorkspace
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The required information for the mask operation is retrieved from a state object. The state for masking is a composite of 
 general settings and detector specific settings (see below).
@@ -78,40 +78,50 @@ The elements of the general mask state are:
 
 The detectors dictionary above maps to a mask state object for the individual detectors :
 
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| Entry                       | Type            | Description                                                    | Mandatory  | Default value |
-+=============================+=================+================================================================+============+===============+
-| single_vertical_strip_mask  | List of Integer | A list of vertical strip masks                                 | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| range_vertical_strip_start  | List of Integer | A list of start spectra for vertical strip mask ranges         | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| range_vertical_strip_stop   | List of Integer | A list of stop spectra for vertical strip mask ranges          | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| single_horizontal_strip_mask| List of Integer | A list of horizontal strip masks                               | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| range_horizontal_strip_start| List of Integer | A list of start spectra for horizontal strip mask ranges       | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| range_horizontal_strip_stop | List of Integer | A list of stop spectra for horizontal strip mask ranges        | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_horizontal_start      | List of Integer | A list of start spectra for the horizontal part of block masks | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_horizontal_stop       | List of Integer |  A list of stop spectra for the horizontal part of block masks | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_vertical_start        | List of Integer | A list of start spectra for the vertical part of block masks   | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_vertical_stop         | List of Integer | A list of stop spectra for the vertical part of block masks    | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_cross_horizontal      | List of Integer | A list of spectra for the horizontal part of cross block masks | No         | 0.0           |
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
-| block_cross_vertical        | List of Integer | A list of spectra for the vertical part of cross block masks   | No         | 0.0           |-
-+-----------------------------+-----------------+----------------------------------------------------------------+------------+---------------+
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| Entry                       | Type            | Description                          | Mandatory  | Default value |
++=============================+=================+======================================+============+===============+
+| single_vertical_strip_mask  | List of Integer | A list of vertical strip masks       | No         | 0.0           |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| range_vertical_strip_start  | List of Integer | A list of start spectra for vertical | No         | 0.0           |
+|                             |                 | strip mask ranges                    |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| range_vertical_strip_stop   | List of Integer | A list of stop spectra for vertical  | No         | 0.0           |
+|                             |                 | strip mask ranges                    |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| single_horizontal_strip_mask| List of Integer | A list of horizontal strip masks     | No         | 0.0           |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| range_horizontal_strip_start| List of Integer | A list of start spectra for          | No         | 0.0           |
+|                             |                 | horizontal strip mask ranges         |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| range_horizontal_strip_stop | List of Integer | A list of stop spectra for           | No         | 0.0           |
+|                             |                 | horizontal strip mask ranges         |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_horizontal_start      | List of Integer | A list of start spectra for the      | No         | 0.0           |
+|                             |                 | horizontal part of block masks       |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_horizontal_stop       | List of Integer |  A list of stop spectra for the      | No         | 0.0           |
+|                             |                 | horizontal part of block masks       |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_vertical_start        | List of Integer | A list of start spectra for the      | No         | 0.0           |
+|                             |                 | vertical part of block masks         |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_vertical_stop         | List of Integer | A list of stop spectra for the       | No         | 0.0           |
+|                             |                 | vertical part of block masks         |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_cross_horizontal      | List of Integer | A list of spectra for the horizontal | No         | 0.0           |
+|                             |                 | part of cross block masks            |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
+| block_cross_vertical        | List of Integer | A list of spectra for the vertical   | No         | 0.0           |
+|                             |                 | part of cross block masks            |            |               |
++-----------------------------+-----------------+--------------------------------------+------------+---------------+
 
 
 Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.
 
 
 Mask options for the detector: *LAB*, *HAB*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The *LAB* (low angle bank) setting selects the first detector of the instrument.
 
