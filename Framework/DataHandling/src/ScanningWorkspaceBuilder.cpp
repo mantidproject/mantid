@@ -12,7 +12,8 @@ namespace DataHandling {
 ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
                                                    size_t nTimeIndexes,
                                                    size_t nBins)
-    : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins) {}
+    : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
+      m_indexInfo({}, {}) {}
 
 void ScanningWorkspaceBuilder::setInstrument(
     boost::shared_ptr<const Geometry::Instrument> instrument) {
@@ -79,7 +80,8 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotation is in the X-Z plane. This corresponds to the common case of moving
  *detectors to increase angular coverage.
  *
- * @param instrumentAngles a vector of angles, the size matching the number of time indexes
+ * @param instrumentAngles a vector of angles, the size matching the number of
+ *time indexes
  */
 void ScanningWorkspaceBuilder::setInstrumentAngles(
     std::vector<double> &instrumentAngles) {
@@ -92,7 +94,14 @@ void ScanningWorkspaceBuilder::setInstrumentAngles(
   m_instrumentAngles = instrumentAngles;
 }
 
-MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
+void ScanningWorkspaceBuilder::setIndexingType(IndexingType indexingType) {
+  if (m_indexingType != IndexingType::DEFAULT)
+    throw std::logic_error("Indexing type has been set already.");
+
+  m_indexingType = indexingType;
+}
+
+MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   validateInputs();
 
   auto outputWorkspace = WorkspaceFactory::Instance().create(
@@ -120,9 +129,19 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
   if (!m_rotations.empty())
     buildRotations(outputDetectorInfo);
 
-  if (!m_instrumentAngles.empty()) {
+  if (!m_instrumentAngles.empty())
     buildInstrumentAngles(outputDetectorInfo);
+
+  switch (m_indexingType) {
+  case IndexingType::DEFAULT:
+  case IndexingType::TIME_ORIENTED:
+    createTimeOrientedIndexInfo(outputDetectorInfo);
+    break;
+  case IndexingType::DETECTOR_ORIENTED:
+    createDetectorOrientedIndexInfo(outputDetectorInfo);
   }
+
+  outputWorkspace->setIndexInfo(m_indexInfo);
 
   return outputWorkspace;
 }
@@ -157,6 +176,42 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
       outputDetectorInfo.setRotation({i, j}, rotation);
     }
   }
+}
+
+void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
+    const DetectorInfo &detectorInfo) {
+  const auto &detectorIDs = detectorInfo.detectorIDs();
+
+  std::vector<specnum_t> spectra;
+  std::vector<std::vector<detid_t>> detectorID;
+
+  for (size_t i = 0; i < m_nDetectors; ++i) {
+    for (size_t j = 0; j < m_nTimeIndexes; ++j) {
+      spectra.push_back(int(j + i * m_nTimeIndexes + 1));
+      std::vector<detid_t> detectors = {detectorIDs[i]};
+      detectorID.push_back(detectors);
+    }
+  }
+
+  m_indexInfo = Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
+}
+
+void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
+    const DetectorInfo &detectorInfo) {
+  const auto &detectorIDs = detectorInfo.detectorIDs();
+
+  std::vector<specnum_t> spectra;
+  std::vector<std::vector<detid_t>> detectorID;
+
+  for (size_t i = 0; i < m_nTimeIndexes; ++i) {
+    for (size_t j = 0; j < m_nDetectors; ++j) {
+      spectra.push_back(int(j + i * m_nDetectors + 1));
+      std::vector<detid_t> detectors = {detectorIDs[j]};
+      detectorID.push_back(detectors);
+    }
+  }
+
+  m_indexInfo = Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
 }
 
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(

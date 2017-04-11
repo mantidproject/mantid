@@ -42,7 +42,7 @@ public:
                             const std::logic_error &e, std::string(e.what()),
                             "There are not enough detectors in the instrument "
                             "for the number of detectors set in the scanning "
-                            "workspace builder.");
+                            "workspace builder.")
   }
 
   void test_create_scanning_workspace_with_correct_time_ranges() {
@@ -64,10 +64,10 @@ public:
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
-    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(0, timeDurations));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(0, timeDurations))
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
     const auto &detectorInfo = ws->detectorInfo();
 
@@ -81,20 +81,20 @@ public:
                             std::string(e.what()),
                             "Can not build workspace - instrument has not been "
                             "set. Please call setInstrument() before "
-                            "building.");
+                            "building.")
   }
 
   void test_create_scanning_workspace_fails_if_no_time_ranges_set() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
 
     TS_ASSERT_THROWS_EQUALS(builder.buildWorkspace(), const std::logic_error &e,
                             std::string(e.what()),
                             "Can not build workspace - time ranges have not "
                             "been set. Please call setTimeRanges() before "
-                            "building.");
+                            "building.")
   }
 
   void
@@ -105,11 +105,11 @@ public:
         {0, 1}, {1, 2}};
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
     TS_ASSERT_THROWS_EQUALS(builder.setTimeRanges(timeRangesWrongSize),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of start time, end time pairs supplied "
-                            "does not match the number of time indexes.");
+                            "does not match the number of time indexes.")
   }
 
   void
@@ -119,23 +119,23 @@ public:
     std::vector<double> timeDurationsWrongSize = {0, 1e-9};
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
     TS_ASSERT_THROWS_EQUALS(builder.setTimeRanges(0, timeDurationsWrongSize),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of time durations supplied does not match "
-                            "the number of time indexes.");
+                            "the number of time indexes.")
   }
 
   void test_creating_workspace_with_positions() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
-    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
     initalisePositions(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions));
+    TS_ASSERT_THROWS_NOTHING(builder.setPositions(positions))
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
     const auto &detectorInfo = ws->detectorInfo();
 
@@ -153,7 +153,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         builder.setPositions(positions), const std::logic_error &e,
         std::string(e.what()),
-        "Number of positions supplied does not match the number of detectors.");
+        "Number of positions supplied does not match the number of detectors.")
   }
 
   void test_creating_workspace_with_positions_with_too_many_time_indexes() {
@@ -162,19 +162,19 @@ public:
     TS_ASSERT_THROWS_EQUALS(builder.setPositions(positions),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of positions supplied does not match the "
-                            "number of time indexes.");
+                            "number of time indexes.")
   }
 
   void test_creating_workspace_with_rotations() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
-    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
     initaliseRotations(nDetectors, nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations));
+    TS_ASSERT_THROWS_NOTHING(builder.setRotations(rotations))
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
     const auto &detectorInfo = ws->detectorInfo();
 
@@ -193,7 +193,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         builder.setRotations(rotations), const std::logic_error &e,
         std::string(e.what()),
-        "Number of rotations supplied does not match the number of detectors.");
+        "Number of rotations supplied does not match the number of detectors.")
   }
 
   void test_creating_workspace_with_rotations_with_too_many_time_indexes() {
@@ -202,19 +202,19 @@ public:
     TS_ASSERT_THROWS_EQUALS(builder.setRotations(rotations),
                             const std::logic_error &e, std::string(e.what()),
                             "Number of rotations supplied does not match the "
-                            "number of time indexes.");
+                            "number of time indexes.")
   }
 
   void test_creating_workspace_with_instrument_angles() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
-    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument))
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges))
     initialiseInstrumentAngles(nTimeIndexes);
-    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles));
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrumentAngles(instrumentAngles))
     MatrixWorkspace_const_sptr ws;
-    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace())
 
     const auto &detectorInfo = ws->detectorInfo();
 
@@ -277,6 +277,53 @@ public:
                             const std::logic_error &e, std::string(e.what()),
                             "Can not set instrument angles, as positions "
                             "and/or rotations have already been set.")
+  }
+
+  void test_creating_workspace_with_default_index_info() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    const auto &indexInfo = ws->indexInfo();
+    for (size_t i = 0; i < indexInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i / nTimeIndexes + 1);
+    }
+  }
+
+  void test_creating_workspace_with_default_detector_oriented_index_info() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setIndexingType(
+        ScanningWorkspaceBuilder::IndexingType::DETECTOR_ORIENTED))
+    MatrixWorkspace_const_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
+
+    const auto &indexInfo = ws->indexInfo();
+    for (size_t i = 0; i < indexInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i % nDetectors + 1)
+    }
+  }
+
+  void test_setting_indexing_type_twice_throws_and_error() {
+    const auto &instrument = createSimpleInstrument(nDetectors, nBins);
+
+    auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
+    TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
+    TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setIndexingType(
+        ScanningWorkspaceBuilder::IndexingType::DETECTOR_ORIENTED))
+    TS_ASSERT_THROWS_EQUALS(
+        builder.setIndexingType(
+            ScanningWorkspaceBuilder::IndexingType::TIME_ORIENTED),
+        const std::logic_error &e, std::string(e.what()),
+        "Indexing type has been set already.")
   }
 
 private:

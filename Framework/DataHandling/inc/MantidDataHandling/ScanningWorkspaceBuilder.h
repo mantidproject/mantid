@@ -3,6 +3,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
@@ -38,6 +39,8 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL ScanningWorkspaceBuilder {
 
 public:
+  enum class IndexingType { DEFAULT, TIME_ORIENTED, DETECTOR_ORIENTED };
+
   ScanningWorkspaceBuilder(size_t nDetectors, size_t nTimeIndexes,
                            size_t nBins);
 
@@ -50,7 +53,9 @@ public:
   void setRotations(std::vector<std::vector<Kernel::Quat>> &rotations);
   void setInstrumentAngles(std::vector<double> &instrumentAngles);
 
-  API::MatrixWorkspace_sptr buildWorkspace() const;
+  void setIndexingType(IndexingType indexingType);
+
+  API::MatrixWorkspace_sptr buildWorkspace();
 
 private:
   size_t m_nDetectors;
@@ -63,9 +68,15 @@ private:
   std::vector<std::vector<Kernel::Quat>> m_rotations;
   std::vector<double> m_instrumentAngles;
 
+  Indexing::IndexInfo m_indexInfo;
+  IndexingType m_indexingType;
+
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
+
+  void createTimeOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
+  void createDetectorOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
 
   void verifyTimeIndexSize(size_t timeIndexSize,
                            const std::string &description) const;
