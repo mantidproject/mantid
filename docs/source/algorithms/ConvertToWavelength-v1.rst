@@ -26,7 +26,7 @@ Usage
 
     print("There should be 4 values and got {}.".format(len(converted.dataX(0))))
 
-.. testcleanup:: ExRelativeChangeTimeZero
+.. testcleanup:: ExConvertToWavelength
 
    DeleteWorkspace('ws')
    DeleteWorkspace('converted')
