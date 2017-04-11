@@ -12,7 +12,7 @@ def get_run_dictionary(run_number_string, file_path):
         run_number_string = run_number_list[0]
 
     config_file = open_yaml_file_as_dictionary(file_path)
-    yaml_sanity.calibration_file_sanity_check(config_file)
+    yaml_sanity.calibration_file_sanity_check(config_file, file_path)
     run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number_string)
 
     if not run_key:
@@ -49,10 +49,15 @@ def _find_dictionary_key(dict_to_search, run_number):
         if is_run_range_key_unbounded(key):  # Have an unbounded run don't generate numbers
             split_key = str(key).split('-')
             lower_key_bound = int(split_key[-2])
-            if run_number > lower_key_bound:
+            if run_number >= lower_key_bound:
                 return key
         else:
-            generated_runs = common.generate_run_numbers(run_number_string=key)
+            try:
+                generated_runs = common.generate_run_numbers(run_number_string=key)
+            except RuntimeError:
+                raise ValueError("Could not parse '" + str(key) + "'\n"
+                                 "This should be a range of runs in this cycle in the mapping file."
+                                 " Please check your indentation if this should be within a cycle.")
             if run_number in generated_runs:
                 return key
 

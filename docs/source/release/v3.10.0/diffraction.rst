@@ -20,6 +20,8 @@ Powder Diffraction
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` Now supports supplying an a second ``.cal`` file for the ``GroupingFilename``.
 - Bugfix in :ref:`SNAPReduce <algm-SNAPReduce>` with loading previous normalizations
 - :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now supports splitters in format of ``MatrixWorkspace`` and general ``TableWorkspace``.
+- A new NOMAD instrument definition file with corrected values.
+- :ref:`algm-PDCalibration <algm-PDCalibration>` is better at giving out physically meaningful results. It will no longer create calibrations that will convert time-of-flight to negative or imaginary d-spacing.
 
 Single Crystal Diffraction
 --------------------------

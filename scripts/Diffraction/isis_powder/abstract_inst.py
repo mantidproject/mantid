@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
-from isis_powder.routines import calibrate, focus, common_enums
+from isis_powder.routines import calibrate, focus, common, common_enums, common_output
 
 
 # This class provides common hooks for instruments to override
@@ -14,12 +14,13 @@ from isis_powder.routines import calibrate, focus, common_enums
 # private method for the scripts
 
 class AbstractInst(object):
-    def __init__(self, user_name=None, calibration_dir=None, output_dir=None):
+    def __init__(self, user_name, calibration_dir, output_dir, inst_prefix):
         # ----- Properties common to ALL instruments -------- #
         if user_name is None:
             raise ValueError("A user name must be specified")
         self._user_name = user_name
         self._calibration_dir = calibration_dir
+        self._inst_prefix = inst_prefix
         self._output_dir = output_dir
 
     @property
@@ -34,18 +35,15 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, vanadium_runs, empty_runs,
-                         do_absorb_corrections=True, gen_absorb_correction=False):
+    def _create_vanadium(self, run_details, do_absorb_corrections=True):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
-        :param vanadium_runs: The vanadium run or run in range (depending on instrument) to process
-        :param empty_runs: The empty run to process
+        :param run_details: The run details for the run to process
         :param do_absorb_corrections: Set to true if absorption corrections should be applied
-        :param gen_absorb_correction: Set to true if absorption corrections should be recalculated
         :return: d_spacing focused vanadium group
         """
-        return calibrate.create_van(instrument=self, van=vanadium_runs, empty=empty_runs,
-                                    absorb=do_absorb_corrections, gen_absorb=gen_absorb_correction)
+        return calibrate.create_van(instrument=self, run_details=run_details,
+                                    absorb=do_absorb_corrections)
 
     def _focus(self, run_number_string, do_van_normalisation):
         """
@@ -96,7 +94,7 @@ class AbstractInst(object):
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
 
     # Optional overrides
-    def _apply_absorb_corrections(self, run_details, van_ws, gen_absorb=False):
+    def _apply_absorb_corrections(self, run_details, van_ws):
         """
         Generates vanadium absorption corrections to compensate for the container
         :param van_ws: A reference vanadium workspace to match the binning of or correct
@@ -148,6 +146,21 @@ class AbstractInst(object):
         """
         return van_ws_to_crop
 
+    def _get_sample_empty(self):
+        """
+        Returns the sample empty number to subtract. If one is not specified it returns None
+        :return: Sample empty run number(s), else None
+        """
+        return None
+
+    def _get_unit_to_keep(self):
+        """
+        Returns the unit to keep once focusing has completed. E.g. a setting of
+        TOF would keep TOF units and remove d_spacing units
+        :return: Unit to keep, if one isn't specified none
+        """
+        return None
+
     def _generate_auto_vanadium_calibration(self, run_details):
         """
         Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
@@ -165,7 +178,7 @@ class AbstractInst(object):
         by default for instruments who do not with to specify it
         :return: The current input batching type from the InputBatchingEnum
         """
-        return common_enums.InputBatchingEnum.Summed
+        return common_enums.INPUT_BATCHING.Summed
 
     def _get_monitor_spectra_index(self, run_number):
         """
@@ -177,12 +190,14 @@ class AbstractInst(object):
 
     def _normalise_ws_current(self, ws_to_correct, run_details=None):
         """
-        Normalises the workspace by the beam current at the time it was taken
+        Normalises the workspace by the beam current at the time it was taken using
+        normalise by current unless the instrument overrides it with its own custom
+        method of normalising by current.
         :param ws_to_correct: The workspace to normalise the current of
         :param run_details: The run details associated to the run
         :return: The normalised workspace
         """
-        return None
+        return common.run_normalise_by_current(ws_to_correct)
 
     def _output_focused_ws(self, processed_spectra, run_details, output_mode=None):
         """
@@ -192,7 +207,15 @@ class AbstractInst(object):
         :param output_mode: Optional - Sets additional saving/grouping behaviour depending on the instrument
         :return: d-spacing group of the processed output workspaces
         """
-        return None
+        d_spacing_group, tof_group = common_output.split_into_tof_d_spacing_groups(run_details=run_details,
+                                                                                   processed_spectra=processed_spectra)
+        output_paths = self._generate_out_file_paths(run_details=run_details)
+
+        common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
+                                        output_paths=output_paths, inst_prefix=self._inst_prefix,
+                                        run_number_string=run_details.user_input_run_number)
+
+        return d_spacing_group, tof_group
 
     # Steps applicable to all instruments
 

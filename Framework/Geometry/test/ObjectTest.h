@@ -1,6 +1,23 @@
 #ifndef MANTID_TESTOBJECT__
 #define MANTID_TESTOBJECT__
 
+#include "MantidGeometry/Objects/Object.h"
+
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Math/Algebra.h"
+#include "MantidGeometry/Surfaces/SurfaceFactory.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <ostream>
@@ -11,22 +28,9 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/make_shared.hpp"
 
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/Sphere.h"
-#include "MantidGeometry/Surfaces/Plane.h"
-#include "MantidGeometry/Math/Algebra.h"
-#include "MantidGeometry/Surfaces/SurfaceFactory.h"
-#include "MantidGeometry/Objects/Rules.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-
 #include <gmock/gmock.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
 
 using namespace Mantid;
 using namespace Geometry;
@@ -859,6 +863,99 @@ public:
                     expected, satol);
   }
 
+  void testExactVolumeCuboid() {
+    using namespace Poco::XML;
+    const double width = 1.23;
+    const double height = 4.98;
+    const double thickness = 8.14;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testCuboid");
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "cuboid-shape", width, height, thickness, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "cuboid-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cuboidVolume = width * height * thickness;
+    TS_ASSERT_DELTA(cuboid->volume(), cuboidVolume, 1e-6)
+  }
+
+  void testExactVolumeSphere() {
+    using namespace Poco::XML;
+    const double radius = 99.9;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testSphere");
+    AutoPtr<Element> shapeElement =
+        createSphereTypeElement("sphere-shape", radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "sphere-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double sphereVolume = 4.0 / 3.0 * M_PI * radius * radius * radius;
+    TS_ASSERT_DELTA(cuboid->volume(), sphereVolume, 1e-6)
+  }
+
+  void testExactVolumeCylinder() {
+    using namespace Poco::XML;
+    const double radius = 0.99;
+    const double height = 88;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testCylinder");
+    AutoPtr<Element> shapeElement = createCylinderTypeElement(
+        "cylinder-shape", height, radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "cylinder-shape");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cylinderVolume = height * M_PI * radius * radius;
+    TS_ASSERT_DELTA(cuboid->volume(), cylinderVolume, 1e-6)
+  }
+
+  void testMonteCarloVolume() {
+    // We use a cuboid with spherical void here.
+    using namespace Poco::XML;
+    const double width = 71.99;
+    const double height = 11.87;
+    const double thickness = 74.1;
+    AutoPtr<Document> shapeDescription = new Document;
+    AutoPtr<Element> typeElement = shapeDescription->createElement("type");
+    typeElement->setAttribute("name", "testShape");
+    AutoPtr<Element> shapeElement = createCuboidTypeElement(
+        "solid-cuboid", width, height, thickness, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    const double radius = 0.47 * std::min(std::min(width, height), thickness);
+    shapeElement =
+        createSphereTypeElement("void-sphere", radius, shapeDescription);
+    typeElement->appendChild(shapeElement);
+    AutoPtr<Element> algebraElement =
+        shapeDescription->createElement("algebra");
+    algebraElement->setAttribute("val", "solid-cuboid (# void-sphere)");
+    typeElement->appendChild(algebraElement);
+    ShapeFactory shapeFactory;
+    auto cuboid = shapeFactory.createShape(typeElement);
+    const double cuboidVolume = width * height * thickness;
+    const double sphereVolume = 4.0 / 3.0 * M_PI * radius * radius * radius;
+    const double correctVolume = cuboidVolume - sphereVolume;
+    TS_ASSERT_DELTA(cuboid->volume(), correctVolume, 1e-3 * correctVolume)
+  }
+
+  void testVolumeThrowsWhenBoundingBoxIsInvalid() {
+    Object shape("This text gives an invalid Object.");
+    TS_ASSERT_THROWS(shape.volume(), std::runtime_error);
+  }
+
   void testGetBoundingBoxForCylinder()
   /**
   Test bounding box for a object capped cylinder
@@ -1339,6 +1436,80 @@ private:
     retVal->setObject(68, ObjHex);
     retVal->populate(HexSurMap);
     return retVal;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCuboidTypeElement(const std::string &id, const double width,
+                          const double height, const double thickness,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("cuboid");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element =
+        document->createElement("left-front-bottom-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("left-front-top-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("left-back-bottom-point");
+    element->setAttribute("x", std::to_string(-width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(-thickness / 2));
+    shapeElement->appendChild(element);
+    element = document->createElement("right-front-bottom-point");
+    element->setAttribute("x", std::to_string(width / 2));
+    element->setAttribute("y", std::to_string(-height / 2));
+    element->setAttribute("z", std::to_string(thickness / 2));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createSphereTypeElement(const std::string &id, const double radius,
+                          Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("sphere");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre");
+    element->setAttribute("x", "0.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    return shapeElement;
+  }
+
+  static Poco::XML::AutoPtr<Poco::XML::Element>
+  createCylinderTypeElement(const std::string &id, const double height,
+                            const double radius,
+                            Poco::XML::AutoPtr<Poco::XML::Document> &document) {
+    using namespace Poco::XML;
+    AutoPtr<Element> shapeElement = document->createElement("cylinder");
+    shapeElement->setAttribute("id", id);
+    AutoPtr<Element> element = document->createElement("centre-of-bottom-base");
+    element->setAttribute("x", std::to_string(-height / 2));
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("axis");
+    element->setAttribute("x", "1.0");
+    element->setAttribute("y", "0.0");
+    element->setAttribute("z", "0.0");
+    shapeElement->appendChild(element);
+    element = document->createElement("radius");
+    element->setAttribute("val", std::to_string(radius));
+    shapeElement->appendChild(element);
+    element = document->createElement("height");
+    element->setAttribute("val", std::to_string(height));
+    shapeElement->appendChild(element);
+    return shapeElement;
   }
 };
 

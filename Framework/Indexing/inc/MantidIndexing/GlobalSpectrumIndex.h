@@ -34,8 +34,9 @@ namespace Indexing {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_INDEXING_DLL GlobalSpectrumIndex
+class GlobalSpectrumIndex
     : public detail::IndexType<GlobalSpectrumIndex, size_t> {
+public:
   using detail::IndexType<GlobalSpectrumIndex, size_t>::IndexType;
   using detail::IndexType<GlobalSpectrumIndex, size_t>::operator=;
 };

@@ -55,6 +55,6 @@ std::string vtkDataSetToWsName::execute() {
 }
 
 /// Destructor.
-vtkDataSetToWsName::~vtkDataSetToWsName() {}
+vtkDataSetToWsName::~vtkDataSetToWsName() = default;
 }
 }

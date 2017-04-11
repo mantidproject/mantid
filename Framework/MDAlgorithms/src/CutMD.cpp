@@ -446,7 +446,9 @@ void CutMD::exec() {
         vecStr = boost::algorithm::join(vec, ", ");
       }
 
-      const std::string value = label + ", " + unit + ", " + vecStr;
+      const std::string value =
+          std::string(label).append(", ").append(unit).append(", ").append(
+              vecStr);
       cutAlg->setProperty("BasisVector" + std::to_string(i), value);
     }
 

@@ -60,6 +60,10 @@ public:
       m_data.emplace(it, index);
   }
 
+  bool operator==(const SpectrumDefinition &other) const {
+    return m_data == other.m_data;
+  }
+
 private:
   std::vector<std::pair<size_t, size_t>> m_data;
 

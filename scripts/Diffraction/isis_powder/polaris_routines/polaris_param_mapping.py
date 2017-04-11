@@ -1,21 +1,27 @@
 from __future__ import (absolute_import, division, print_function)
 
-#                 Maps friendly user name -> script name
-attr_mapping = [("calibration_directory",       "calibration_dir"),
-                ("calibration_mapping_file",    "cal_mapping_file"),
-                ("chopper_on",                  "chopper_on"),
-                ("config_file",                 "config_file"),
-                ("do_absorb_corrections",       "do_absorb_corrections"),
-                ("do_van_normalisation",        "do_van_normalisation"),
-                ("grouping_file_name",          "grouping_file_name"),
-                ("input_mode",                  "input_mode"),
-                ("masking_file_name",           "masking_file_name"),
-                ("multiple_scattering",         "multiple_scattering"),
-                ("raw_data_cropping_values",    "raw_data_crop_values"),
-                ("run_in_range",                "run_in_range"),
-                ("run_number",                  "run_number"),
-                ("spline_coefficient",          "spline_coeff"),
-                ("tof_cropping_ranges",         "tof_cropping_values"),
-                ("output_directory",            "output_dir"),
-                ("user_name",                   "user_name"),
-                ("vanadium_cropping_values",    "van_crop_values")]
+from isis_powder.routines.ParamMapEntry import ParamMapEntry
+from isis_powder.routines.common_enums import INPUT_BATCHING
+
+#                 Maps friendly user name (ext_name) -> script name (int_name)
+attr_mapping = \
+    [
+     ParamMapEntry(ext_name="calibration_directory",    int_name="calibration_dir"),
+     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_file"),
+     ParamMapEntry(ext_name="chopper_on",               int_name="chopper_on"),
+     ParamMapEntry(ext_name="config_file",              int_name="config_file"),
+     ParamMapEntry(ext_name="do_absorb_corrections",    int_name="do_absorb_corrections"),
+     ParamMapEntry(ext_name="do_van_normalisation",     int_name="do_van_normalisation"),
+     ParamMapEntry(ext_name="focused_cropping_values",  int_name="focused_cropping_values"),
+     ParamMapEntry(ext_name="grouping_file_name",       int_name="grouping_file_name"),
+     ParamMapEntry(ext_name="input_mode", int_name="input_mode", enum_class=INPUT_BATCHING),
+     ParamMapEntry(ext_name="masking_file_name",        int_name="masking_file_name"),
+     ParamMapEntry(ext_name="multiple_scattering",      int_name="multiple_scattering"),
+     ParamMapEntry(ext_name="raw_data_cropping_values", int_name="raw_data_crop_values"),
+     ParamMapEntry(ext_name="run_in_range",             int_name="run_in_range"),
+     ParamMapEntry(ext_name="run_number",               int_name="run_number"),
+     ParamMapEntry(ext_name="spline_coefficient",       int_name="spline_coeff"),
+     ParamMapEntry(ext_name="output_directory",         int_name="output_dir"),
+     ParamMapEntry(ext_name="user_name",                int_name="user_name"),
+     ParamMapEntry(ext_name="vanadium_cropping_values", int_name="van_crop_values")
+    ]
