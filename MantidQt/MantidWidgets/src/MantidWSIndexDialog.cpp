@@ -446,6 +446,7 @@ void MantidWSIndexWidget::initOptionsBoxes() {
 }
 
 void MantidWSIndexWidget::initLogs() {
+  m_logOptionsGroup = new QGroupBox(tr("Log Options"));
   m_logBox = new QVBoxLayout;
 
   m_logLabel = new QLabel(tr("Log value to plot against:"));
@@ -470,7 +471,9 @@ void MantidWSIndexWidget::initLogs() {
   m_logValues->setEnabled(false);
   m_axisNameEdit->setEnabled(false);
 
-  m_outer->addItem(m_logBox);
+  m_logOptionsGroup->setLayout(m_logBox);
+
+  m_outer->addWidget(m_logOptionsGroup);
 
   connect(m_logSelector, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(onLogSelected(const QString &)));

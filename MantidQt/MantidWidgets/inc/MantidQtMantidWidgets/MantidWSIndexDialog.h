@@ -14,6 +14,7 @@
 #include <QList>
 #include <QMap>
 #include <QString>
+#include <QGroupBox>
 #include <QVBoxLayout>
 #include <QValidator>
 
@@ -383,6 +384,7 @@ private:
   QLabel *m_wsMessage, *m_spectraMessage, *m_orMessage, *m_plotOptionLabel,
       *m_logLabel, *m_customLogLabel, *m_axisLabel;
   QLineEditWithErrorMark *m_wsField, *m_spectraField;
+  QGroupBox *m_logOptionsGroup;
   QVBoxLayout *m_outer, *m_wsBox, *m_spectraBox, *m_logBox, *m_optionsBox;
   QComboBox *m_plotOptions, *m_logSelector;
   QCheckBox *m_showErrorBars;
