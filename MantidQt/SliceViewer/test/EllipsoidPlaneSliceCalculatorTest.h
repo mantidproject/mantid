@@ -427,10 +427,22 @@ public:
         directions, radii, origin);
 
     // Assert
-    const double expectedLeft = origin[0] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0];
-    const double expectedRight = origin[0] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] ;
-    const double expectedTop = origin[1] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1];
-    const double expectedBottom = origin[1] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1];
+    const double expectedLeft =
+        origin[0] -
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[0];
+    const double expectedRight =
+        origin[0] +
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[0];
+    const double expectedTop =
+        origin[1] +
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[1];
+    const double expectedBottom =
+        origin[1] -
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[1];
     const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;
@@ -462,10 +474,22 @@ public:
         directions, radii, origin);
 
     // Assert
-    const double expectedLeft = origin[0] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] * std::cos(angleIn);
-    const double expectedRight = origin[0] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] * std::cos(angleIn);
-    const double expectedTop = origin[1] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1] * std::cos(angleIn);
-    const double expectedBottom = origin[1] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1] * std::cos(angleIn);
+    const double expectedLeft =
+        origin[0] -
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[0] * std::cos(angleIn);
+    const double expectedRight =
+        origin[0] +
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[0] * std::cos(angleIn);
+    const double expectedTop =
+        origin[1] +
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[1] * std::cos(angleIn);
+    const double expectedBottom =
+        origin[1] -
+        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
+            radii[1] * std::cos(angleIn);
     const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;

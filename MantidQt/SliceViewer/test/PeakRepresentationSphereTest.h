@@ -183,10 +183,18 @@ public:
     const auto boundingBox = peak.getBoundingBox();
 
     // Assert
-    const double expectedLeft(origin.X() - PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedBottom(origin.Y() - PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedRight(origin.X() + PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedTop(origin.Y() + PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
+    const double expectedLeft(origin.X() -
+                              PeakRepresentationSphere::zoomOutFactor *
+                                  outerBackgroundRadius);
+    const double expectedBottom(origin.Y() -
+                                PeakRepresentationSphere::zoomOutFactor *
+                                    outerBackgroundRadius);
+    const double expectedRight(origin.X() +
+                               PeakRepresentationSphere::zoomOutFactor *
+                                   outerBackgroundRadius);
+    const double expectedTop(origin.Y() +
+                             PeakRepresentationSphere::zoomOutFactor *
+                                 outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
@@ -220,10 +228,18 @@ public:
     auto boundingBox = peak.getBoundingBox();
 
     // Assert
-    const double expectedLeft(origin.X() - PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedBottom(origin.Y() - PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedRight(origin.X() + PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
-    const double expectedTop(origin.Y() + PeakRepresentationSphere::zoomOutFactor * outerBackgroundRadius);
+    const double expectedLeft(origin.X() -
+                              PeakRepresentationSphere::zoomOutFactor *
+                                  outerBackgroundRadius);
+    const double expectedBottom(origin.Y() -
+                                PeakRepresentationSphere::zoomOutFactor *
+                                    outerBackgroundRadius);
+    const double expectedRight(origin.X() +
+                               PeakRepresentationSphere::zoomOutFactor *
+                                   outerBackgroundRadius);
+    const double expectedTop(origin.Y() +
+                             PeakRepresentationSphere::zoomOutFactor *
+                                 outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());

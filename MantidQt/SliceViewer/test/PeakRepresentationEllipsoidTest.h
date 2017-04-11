@@ -128,9 +128,11 @@ public:
     // Looking at background radius, hence + 2
     auto zoomOutFactor = peak.getZoomOutFactor();
     const double expectedLeft(0 - zoomOutFactor * (std::cos(angle) * (r1 + 2)));
-    const double expectedRight(0 + zoomOutFactor * (std::cos(angle) * (r1 + 2)));
+    const double expectedRight(0 +
+                               zoomOutFactor * (std::cos(angle) * (r1 + 2)));
 
-    const double expectedBottom(0 - zoomOutFactor * (std::cos(angle) * (r2 + 2)));
+    const double expectedBottom(0 -
+                                zoomOutFactor * (std::cos(angle) * (r2 + 2)));
     const double expectedTop(0 + zoomOutFactor * (std::cos(angle) * (r2 + 2)));
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
@@ -157,11 +159,15 @@ public:
     // Assert
     // Looking at background radius, hence + 2
     auto zoomOutFactor = peak.getZoomOutFactor();
-    const double expectedLeft(0 - zoomOutFactor * (std::cos(angle) * (r1 + 2)) + originX);
-    const double expectedRight(0 + zoomOutFactor * (std::cos(angle) * (r1 + 2)) + originX);
+    const double expectedLeft(0 - zoomOutFactor * (std::cos(angle) * (r1 + 2)) +
+                              originX);
+    const double expectedRight(
+        0 + zoomOutFactor * (std::cos(angle) * (r1 + 2)) + originX);
 
-    const double expectedBottom(0 - zoomOutFactor * (std::cos(angle) * (r2 + 2)) + originY);
-    const double expectedTop(0 + zoomOutFactor * (std::cos(angle) * (r2 + 2)) + originY);
+    const double expectedBottom(
+        0 - zoomOutFactor * (std::cos(angle) * (r2 + 2)) + originY);
+    const double expectedTop(0 + zoomOutFactor * (std::cos(angle) * (r2 + 2)) +
+                             originY);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
