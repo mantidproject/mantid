@@ -359,11 +359,13 @@ void ReflSettingsPresenter::getExpDefaults() {
   if (!cPp.empty())
     defaults[5] = cPp[0];
 
-  defaults[6] = boost::lexical_cast<std::string>(
-      inst->getNumberParameter("TransRunStartOverlap")[0]);
+  if (m_currentInstrumentName != "SURF" && m_currentInstrumentName != "CRISP") {
+    defaults[6] = boost::lexical_cast<std::string>(
+        inst->getNumberParameter("TransRunStartOverlap")[0]);
 
-  defaults[7] = boost::lexical_cast<std::string>(
-      inst->getNumberParameter("TransRunEndOverlap")[0]);
+    defaults[7] = boost::lexical_cast<std::string>(
+        inst->getNumberParameter("TransRunEndOverlap")[0]);
+  }
 
   m_view->setExpDefaults(defaults);
 }
