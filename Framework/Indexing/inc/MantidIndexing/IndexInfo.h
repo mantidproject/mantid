@@ -2,7 +2,6 @@
 #define MANTID_INDEXING_INDEXINFO_H_
 
 #include "MantidIndexing/DllConfig.h"
-#include "MantidIndexing/DetectorID.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -42,15 +41,6 @@ class SpectrumNumberTranslator;
   Client code that treats each spectrum on its own can thus be written without
   concern or knowledge about the underlying partitioning of the data.
 
-  Note that currently IndexInfo also carries information about grouping in terms
-  of detector IDs. This mechanism has been added for supporting the current
-  legacy in Mantid: Grouping is stored in terms of detector IDs in ISpectrum (in
-  addition to the new way of storing grouping with the class SpectrumDefinition
-  in terms of indices). We also store detector IDs such that grouping
-  information can be transferred to another workspace, without the need for a
-  costly (and potentially impossible, since invalid IDs are allowed) rebuild of
-  the sets of detector IDs that need to be part of ISpectrum.
-
 
   @author Simon Heybrock
   @date 2016
@@ -78,20 +68,32 @@ class SpectrumNumberTranslator;
 */
 class MANTID_INDEXING_DLL IndexInfo {
 public:
-  explicit IndexInfo(const size_t globalSize);
-  IndexInfo(std::vector<SpectrumNumber> &&spectrumNumbers,
-            std::vector<std::vector<DetectorID>> &&detectorIDs);
+  // StorageMode and Communicator are temporary helpers provided here for
+  // testing that will be removed (or rather replaced) once we have proper MPI
+  // support.
+  enum class StorageMode { Cloned, Distributed, MasterOnly };
+  struct Communicator {
+    int size;
+    int rank;
+  };
+
+  explicit IndexInfo(const size_t globalSize,
+                     const StorageMode storageMode = StorageMode::Cloned,
+                     const Communicator &communicator = Communicator{1, 0});
+  explicit IndexInfo(std::vector<SpectrumNumber> spectrumNumbers,
+                     const StorageMode storageMode = StorageMode::Cloned,
+                     const Communicator &communicator = Communicator{1, 0});
 
   size_t size() const;
+  size_t globalSize() const;
 
   SpectrumNumber spectrumNumber(const size_t index) const;
-  const std::vector<DetectorID> &detectorIDs(const size_t index) const;
 
   void setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers);
   void setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max);
-  void setDetectorIDs(const std::vector<DetectorID> &detectorIDs);
-  void setDetectorIDs(std::vector<std::vector<DetectorID>> &&detectorIDs);
 
+  void
+  setSpectrumDefinitions(std::vector<SpectrumDefinition> spectrumDefinitions);
   void setSpectrumDefinitions(
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
@@ -106,10 +108,15 @@ public:
   SpectrumIndexSet
   makeIndexSet(const std::vector<GlobalSpectrumIndex> &globalIndices) const;
 
+  bool isOnThisPartition(GlobalSpectrumIndex globalIndex) const;
+
 private:
-  void makeSpectrumNumberTranslator() const;
-  Kernel::cow_ptr<std::vector<SpectrumNumber>> m_spectrumNumbers;
-  Kernel::cow_ptr<std::vector<std::vector<DetectorID>>> m_detectorIDs;
+  void makeSpectrumNumberTranslator(
+      std::vector<SpectrumNumber> &&spectrumNumbers) const;
+
+  StorageMode m_storageMode;
+  Communicator m_communicator;
+
   Kernel::cow_ptr<std::vector<SpectrumDefinition>> m_spectrumDefinitions{
       nullptr};
   mutable Kernel::cow_ptr<SpectrumNumberTranslator> m_spectrumNumberTranslator{

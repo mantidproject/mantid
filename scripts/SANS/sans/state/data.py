@@ -5,10 +5,10 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 
-from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter,
+from sans.state.state_base import (StateBase, StringParameter, PositiveIntegerParameter, BoolParameter,
                                    ClassTypeParameter, rename_descriptor_names)
 from sans.common.enums import (SANSInstrument, SANSFacility)
-from sans.common.constants import ALL_PERIODS
+import sans.common.constants
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.automatic_setters import automatic_setters
@@ -19,7 +19,7 @@ from sans.state.automatic_setters import automatic_setters
 # ----------------------------------------------------------------------------------------------------------------------
 @rename_descriptor_names
 class StateData(StateBase):
-    ALL_PERIODS = ALL_PERIODS
+    ALL_PERIODS = sans.common.constants.ALL_PERIODS
     sample_scatter = StringParameter()
     sample_scatter_period = PositiveIntegerParameter()
     sample_transmission = StringParameter()
@@ -37,7 +37,10 @@ class StateData(StateBase):
     calibration = StringParameter()
 
     sample_scatter_run_number = PositiveIntegerParameter()
+    sample_scatter_is_multi_period = BoolParameter()
     instrument = ClassTypeParameter(SANSInstrument)
+    idf_file_path = StringParameter()
+    ipf_file_path = StringParameter()
 
     def __init__(self):
         super(StateData, self).__init__()
@@ -109,6 +112,9 @@ def set_information_from_file(data_info):
     run_number = file_information.get_run_number()
     data_info.instrument = instrument
     data_info.sample_scatter_run_number = run_number
+    data_info.sample_scatter_is_multi_period = file_information.get_number_of_periods() > 1
+    data_info.idf_file_path = file_information.get_idf_file_path()
+    data_info.ipf_file_path = file_information.get_ipf_file_path()
 
 
 class StateDataBuilder(object):

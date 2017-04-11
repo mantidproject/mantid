@@ -137,7 +137,7 @@ void SaveFocusedXYE::exec() {
 
     if ((!split) && out) // Assign only one file
     {
-      const std::string file(filename + '.' + ext);
+      const std::string file(std::string(filename).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);
@@ -147,7 +147,8 @@ void SaveFocusedXYE::exec() {
                       // filename-i.ext
     {
       number << "-" << i + startingbank;
-      const std::string file(filename + number.str() + "." + ext);
+      const std::string file(
+          std::string(filename).append(number.str()).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);

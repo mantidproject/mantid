@@ -251,8 +251,12 @@ void MantidMatrixCurve::draw(QPainter *p, const QwtScaleMap &xMap,
 void MantidMatrixCurve::itemChanged() {
   QwtWorkspaceSpectrumData *d =
       dynamic_cast<QwtWorkspaceSpectrumData *>(&data());
-  if (d)
-    d->m_binCentres = (style() != Steps);
+  if (d && d->m_isHistogram) {
+    if (style() == Steps)
+      d->m_binCentres = false;
+    else
+      d->m_binCentres = true;
+  }
   PlotCurve::itemChanged();
 }
 
@@ -366,15 +370,15 @@ bool MantidMatrixCurve::isDistribution() const {
 }
 
 bool MantidMatrixCurve::isHistogramData() const {
-  if (dynamic_cast<const QwtWorkspaceSpectrumData *>(&data())) {
-    return true;
+  if (auto *d = dynamic_cast<const QwtWorkspaceSpectrumData *>(&data())) {
+    return d->isHistogram();
   } else
     return false;
 }
 
 bool MantidMatrixCurve::isNormalizable() const {
   if (auto *d = dynamic_cast<const QwtWorkspaceSpectrumData *>(&data())) {
-    return !d->dataIsNormalized();
+    return d->isHistogram() && !d->dataIsNormalized();
   } else
     return false;
 }

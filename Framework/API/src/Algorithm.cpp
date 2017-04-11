@@ -1332,10 +1332,12 @@ bool Algorithm::processGroups() {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
         std::string outName;
-        if (m_groupsHaveSimilarNames)
-          outName = inName + "_" + Strings::toString(entry + 1);
-        else
-          outName = outputBaseName + "_" + inName;
+        if (m_groupsHaveSimilarNames) {
+          outName.append(inName).append("_").append(
+              Strings::toString(entry + 1));
+        } else {
+          outName.append(outputBaseName).append("_").append(inName);
+        }
 
         auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
                                       m_inputWorkspaceProps.end(),

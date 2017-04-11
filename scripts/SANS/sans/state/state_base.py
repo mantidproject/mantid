@@ -215,6 +215,17 @@ class FloatWithNoneParameter(TypedParameter):
                                                                                str(value), type(value)))
 
 
+class StringWithNoneParameter(TypedParameter):
+    def __init__(self):
+        super(StringWithNoneParameter, self).__init__(str)
+
+    def _type_check(self, value):
+        if not isinstance(value, self.parameter_type) and value is not None:
+            raise TypeError("Trying to set {0} which expects a value of type {1}."
+                            " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
+                                                                               str(value), type(value)))
+
+
 class PositiveFloatWithNoneParameter(TypedParameter):
     def __init__(self):
         super(PositiveFloatWithNoneParameter, self).__init__(float, is_positive_or_none)
