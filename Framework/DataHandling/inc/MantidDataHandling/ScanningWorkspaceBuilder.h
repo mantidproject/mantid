@@ -68,15 +68,16 @@ private:
   std::vector<std::vector<Kernel::Quat>> m_rotations;
   std::vector<double> m_instrumentAngles;
 
-  Indexing::IndexInfo m_indexInfo;
   IndexingType m_indexingType;
 
   void buildPositions(API::DetectorInfo &outputDetectorInfo) const;
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
 
-  void createTimeOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
-  void createDetectorOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
+  Indexing::IndexInfo
+  createTimeOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
+  Indexing::IndexInfo
+  createDetectorOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
 
   void verifyTimeIndexSize(size_t timeIndexSize,
                            const std::string &description) const;

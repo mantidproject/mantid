@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Indexing;
 
 namespace Mantid {
 namespace DataHandling {
@@ -13,7 +14,7 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(size_t nDetectors,
                                                    size_t nTimeIndexes,
                                                    size_t nBins)
     : m_nDetectors(nDetectors), m_nTimeIndexes(nTimeIndexes), m_nBins(nBins),
-      m_indexInfo({}, {}) {}
+      m_indexingType(IndexingType::DEFAULT) {}
 
 void ScanningWorkspaceBuilder::setInstrument(
     boost::shared_ptr<const Geometry::Instrument> instrument) {
@@ -132,16 +133,18 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   if (!m_instrumentAngles.empty())
     buildInstrumentAngles(outputDetectorInfo);
 
+  IndexInfo indexInfo = IndexInfo({}, {});
+
   switch (m_indexingType) {
   case IndexingType::DEFAULT:
   case IndexingType::TIME_ORIENTED:
-    createTimeOrientedIndexInfo(outputDetectorInfo);
+    indexInfo = createTimeOrientedIndexInfo(outputDetectorInfo);
     break;
   case IndexingType::DETECTOR_ORIENTED:
-    createDetectorOrientedIndexInfo(outputDetectorInfo);
+    indexInfo = createDetectorOrientedIndexInfo(outputDetectorInfo);
   }
 
-  outputWorkspace->setIndexInfo(m_indexInfo);
+  outputWorkspace->setIndexInfo(indexInfo);
 
   return outputWorkspace;
 }
@@ -178,7 +181,7 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
   }
 }
 
-void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
+IndexInfo ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
     const DetectorInfo &detectorInfo) {
   const auto &detectorIDs = detectorInfo.detectorIDs();
 
@@ -193,10 +196,10 @@ void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
     }
   }
 
-  m_indexInfo = Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
+  return Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
 }
 
-void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
+IndexInfo ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
     const DetectorInfo &detectorInfo) {
   const auto &detectorIDs = detectorInfo.detectorIDs();
 
@@ -211,7 +214,7 @@ void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
     }
   }
 
-  m_indexInfo = Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
+  return Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
 }
 
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(
