@@ -146,7 +146,12 @@ public:
     for (size_t row = 0; row < 2; ++row) {
       TS_ASSERT_EQUALS(outputWS->cell<std::string>(row, 8), "success");
       TS_ASSERT_DELTA(outputWS->cell<double>(row, 1), 6005.25, m_delta);
-      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3249, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 2), 8.817, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 3), 89.3248, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 4), 7.2306, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 5), 4.8384, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 6), 0.6161, m_delta);
+      TS_ASSERT_DELTA(outputWS->cell<double>(row, 7), 0.1643, m_delta);
     }
   }
 
