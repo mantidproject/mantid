@@ -44,7 +44,8 @@ void ExportTimeSeriesLog::init() {
       "Name of the workspace containing the log events in Export. ");
 
   declareProperty("CalculateFirstDerivative", false,
-                  "If specified then the first derivative of exported data will be calcualted and put to spectrum 1.");
+                  "If specified then the first derivative of exported data "
+                  "will be calcualted and put to spectrum 1.");
 
   declareProperty("LogName", "", "Log's name to filter events.");
 
@@ -77,11 +78,14 @@ void ExportTimeSeriesLog::init() {
                                             "is Workspace2D.");
 
   // smoothing data
-  declareProperty("SmoothData", false, "If specified, then the data to export is smoothed by specified smoothing algorithm.");
+  declareProperty("SmoothData", false, "If specified, then the data to export "
+                                       "is smoothed by specified smoothing "
+                                       "algorithm.");
   std::vector<std::string> smooth_option{"SmoothData", "SmoothNeighbour"};
-  declareProperty("SmoothAlgorithm", "SmoothData", boost::make_shared<Kernel::StringListValidator>(smooth_option),
-                  "Mantid algorithm is used to smooth the exported TimeSeriesProperty.");
-
+  declareProperty(
+      "SmoothAlgorithm", "SmoothData",
+      boost::make_shared<Kernel::StringListValidator>(smooth_option),
+      "Mantid algorithm is used to smooth the exported TimeSeriesProperty.");
 }
 
 /** Main execution
@@ -218,7 +222,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
   } else {
     size_t nspec(1);
     if (cal_first_deriv)
-        nspec = 2;
+      nspec = 2;
     setupWorkspace2D(i_start, i_stop, numentries, times, values, exportepoch,
                      timeunitfactor, nspec);
   }
@@ -255,7 +259,8 @@ void ExportTimeSeriesLog::setupWorkspace2D(
 
   // Create 2D workspace
   m_outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", nspec, outsize, outsize));
+      WorkspaceFactory::Instance().create("Workspace2D", nspec, outsize,
+                                          outsize));
   if (!m_outWS)
     throw runtime_error(
         "Unable to create a Workspace2D casted to MatrixWorkspace.");
@@ -406,71 +411,67 @@ bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
   return true;
 }
 
-void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws)
-{
-    if (is_event_ws)
-    {
-        g_log.error("It is not supported to calculate first derivative if the output is an EventWorkspace.");
-        return;
-    }
-
-    // calcualte output
-    size_t datasize = m_outWS->mutableX(1).size();
-    auto vecX = m_outWS->mutableX(0);
-    auto vecY = m_outWS->mutableY(0);
-    auto &derivX = m_outWS->mutableX(1);
-    auto &derivY = m_outWS->mutableY(1);
-    if (vecY.size() != datasize)
-        throw std::runtime_error("Output workspace 2D is not supposed to have different size of X and Y.");
-
-    std::stringstream errmsg_ss;
-    for (size_t i = 1; i < datasize-1; ++i)
-    {
-        // set up X
-        derivX[i] = vecX[i];
-        // set up Y
-        double dx = vecX[i + 1] - vecX[i];
-        if (dx <= 0)
-        {
-            errmsg_ss << "Entry " << i << ": " << vecX[i] << " >= " << vecX[i+1] << "\n";
-            derivY[i] = 1.;
-        }
-        else
-        {
-            derivY[i] = (vecY[i+1] - vecY[i]) / dx;
-        }
-    }
-
-    // last value
-    derivX[datasize-1] = vecX[datasize-1];
-    derivY.back() = 0.;
-
-    // error message
-    std::string errmsg = errmsg_ss.str();
-    if (errmsg.size() > 0)
-        g_log.error(errmsg);
-
+void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
+  if (is_event_ws) {
+    g_log.error("It is not supported to calculate first derivative if the "
+                "output is an EventWorkspace.");
     return;
+  }
+
+  // calcualte output
+  size_t datasize = m_outWS->mutableX(1).size();
+  auto vecX = m_outWS->mutableX(0);
+  auto vecY = m_outWS->mutableY(0);
+  auto &derivX = m_outWS->mutableX(1);
+  auto &derivY = m_outWS->mutableY(1);
+  if (vecY.size() != datasize)
+    throw std::runtime_error("Output workspace 2D is not supposed to have "
+                             "different size of X and Y.");
+
+  std::stringstream errmsg_ss;
+  for (size_t i = 1; i < datasize - 1; ++i) {
+    // set up X
+    derivX[i] = vecX[i];
+    // set up Y
+    double dx = vecX[i + 1] - vecX[i];
+    if (dx <= 0) {
+      errmsg_ss << "Entry " << i << ": " << vecX[i] << " >= " << vecX[i + 1]
+                << "\n";
+      derivY[i] = 1.;
+    } else {
+      derivY[i] = (vecY[i + 1] - vecY[i]) / dx;
+    }
+  }
+
+  // last value
+  derivX[datasize - 1] = vecX[datasize - 1];
+  derivY.back() = 0.;
+
+  // error message
+  std::string errmsg = errmsg_ss.str();
+  if (errmsg.size() > 0)
+    g_log.error(errmsg);
+
+  return;
 }
 
-void ExportTimeSeriesLog::smoothOutputData(const std::string &smooth_alg)
-{
+void ExportTimeSeriesLog::smoothOutputData(const std::string &smooth_alg) {
 
-
-    return;
+  return;
 }
 
-void ExportTimeSeriesLog::setupMetaData(const std::string &log_name, const std::string &time_unit, const bool &export_epoch, const bool &smoothed)
-{
+void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
+                                        const std::string &time_unit,
+                                        const bool &export_epoch,
+                                        const bool &smoothed) {
 
-    m_outWS->mutableRun().addProperty("SampleLogName", log_name, true);
-    m_outWS->mutableRun().addProperty("TimeUnit", time_unit, true);
+  m_outWS->mutableRun().addProperty("SampleLogName", log_name, true);
+  m_outWS->mutableRun().addProperty("TimeUnit", time_unit, true);
 
-    std::string is_epoch("0");
-    if (export_epoch)
-        is_epoch = "1";
-    m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch , true);
-
+  std::string is_epoch("0");
+  if (export_epoch)
+    is_epoch = "1";
+  m_outWS->mutableRun().addProperty("IsEpochTime", is_epoch, true);
 }
 
 } // namespace Mantid

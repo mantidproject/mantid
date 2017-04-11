@@ -91,7 +91,8 @@ private:
 
   void smoothOutputData(const std::string &smooth_alg);
 
-  void setupMetaData(const std::string &log_name, const std::string &time_unit, const bool &export_epoch, const bool &smoothed);
+  void setupMetaData(const std::string &log_name, const std::string &time_unit,
+                     const bool &export_epoch, const bool &smoothed);
 };
 
 } // namespace Algorithms

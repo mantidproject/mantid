@@ -62,8 +62,8 @@ public:
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
                                         DateAndTime("2013-12-18T13:42:00"));
-     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
-     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
+    ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
+    ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "-1", -1.);
     ExecuteAlgorithm(ws, "Another Name NS1", "Number Series", "0", 0.);
