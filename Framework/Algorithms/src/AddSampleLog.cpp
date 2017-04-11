@@ -157,12 +157,24 @@ void AddSampleLog::exec() {
         // dblVal = 0.;
       }
       theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
+      g_log.warning() << "added property " << propName << " with value " << dblVal << "\n";
     }
+
+    // add unit
+    theRun.getProperty(propName)->setUnits(propUnit);
+
   }
 
   return;
 }
 
+/** Add a sample log (property) with value as string
+ * @brief AddSampleLog::addStringLog
+ * @param theRun
+ * @param propName
+ * @param propValue
+ * @param propUnit
+ */
 void AddSampleLog::addStringLog(Run &theRun, const std::string &propName,
                                 const std::string &propValue,
                                 const std::string &propUnit) {
@@ -171,7 +183,14 @@ void AddSampleLog::addStringLog(Run &theRun, const std::string &propName,
   return;
 }
 
-// add a time series property
+/** Add a sample log as a TimeSeriesProperty
+ * @brief AddSampleLog::addTimeSeriesProperty
+ * @param run_obj
+ * @param prop_name
+ * @param prop_value
+ * @param prop_unit
+ * @param prop_number_type
+ */
 void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
                                          const std::string &prop_name,
                                          const std::string &prop_value,
@@ -217,6 +236,10 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       if (Strings::convert(prop_value, intVal)) {
         tsp->addValue(startTime, intVal);
       }
+      else
+      {
+        throw std::invalid_argument("Input value cannot be converted to an integer value.");
+      }
     }
     run_obj.addLogData(tsp);
   } else {
@@ -225,6 +248,10 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       double dblVal;
       if (Strings::convert(prop_value, dblVal)) {
         tsp->addValue(startTime, dblVal);
+      }
+      else
+      {
+        throw std::invalid_argument("Input value cannot be converted to a double number.");
       }
     }
     run_obj.addLogData(tsp);
@@ -236,6 +263,12 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
     setTimeSeriesData(run_obj, prop_name, is_int_series);
 }
 
+/** Set value of a TimeSeriesProperty from input workspace
+ * @brief AddSampleLog::setTimeSeriesData
+ * @param run_obj
+ * @param property_name
+ * @param value_is_int
+ */
 void AddSampleLog::setTimeSeriesData(Run &run_obj,
                                      const std::string &property_name,
                                      bool value_is_int) {
@@ -273,6 +306,15 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
   return;
 }
 
+/** Get the time vector for the TimeSeriesProperty to which the entries is to set
+ * @brief AddSampleLog::getTimes
+ * @param dataws
+ * @param workspace_index
+ * @param is_epoch
+ * @param is_second
+ * @param run_obj
+ * @return
+ */
 std::vector<Kernel::DateAndTime>
 AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
                        int workspace_index, bool is_epoch, bool is_second,
@@ -300,6 +342,11 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
   return timevec;
 }
 
+/** Get run start time from the target workspace to add the property
+ * @brief AddSampleLog::getRunStart
+ * @param run_obj
+ * @return
+ */
 Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   // TODO/ISSUE/NOW - data ws should be the target workspace with run_start or
   // proton_charge property!
@@ -313,6 +360,12 @@ Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   return runstart;
 }
 
+/** Get the values (in double) of the TimeSeriesProperty's entries from input workspace
+ * @brief AddSampleLog::getDblValues
+ * @param dataws
+ * @param workspace_index
+ * @return
+ */
 std::vector<double>
 AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
                            int workspace_index) {
@@ -324,6 +377,12 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
   return valuevec;
 }
 
+/** Get the values (in integer) of the TimeSeriesProperty's entries from input workspace
+ * @brief AddSampleLog::getIntValues
+ * @param dataws
+ * @param workspace_index
+ * @return
+ */
 std::vector<int>
 AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
                            int workspace_index) {
@@ -335,6 +394,12 @@ AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
   return valuevec;
 }
 
+/** Get Meta data from input data workspace's properties
+ * @brief AddSampleLog::getMetaData
+ * @param dataws
+ * @param epochtime
+ * @param timeunit
+ */
 void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws,
                                bool &epochtime, std::string &timeunit) {
   bool auto_meta = getProperty("AutoMetaData");

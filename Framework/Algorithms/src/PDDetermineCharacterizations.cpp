@@ -285,7 +285,7 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
       } else {
         std::stringstream msg;
         msg << "When looking at " << name
-            << " log encountered unknown units for " << label << ":" << units;
+            << " log encountered unknown units '" << units << "' for " << label << ":" << units;
         g_log.warning(msg.str());
       }
     }

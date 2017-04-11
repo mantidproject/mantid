@@ -126,12 +126,7 @@ void ExportTimeSeriesLog::exec() {
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);
 }
-/*
- *  * @param logname ::
-  * @param numentries ::
-  * @param outputeventws ::
- * true.
- */
+
 /** Export part of designated log to an file in column format and a output file
  * @brief ExportTimeSeriesLog::exportLog
  * @param logname ::  name of log to export
@@ -141,6 +136,7 @@ void ExportTimeSeriesLog::exec() {
  * @param exportepoch :: flag to output time as epoch time/absolute time
  * @param outputeventws :: boolean.  output workspace is event workspace if
  * @param numentries :: number of log entries to export
+ * @param cal_first_deriv :: flag to calcualte the first derivative
  */
 void ExportTimeSeriesLog::exportLog(const std::string &logname,
                                     const std::string timeunit,
@@ -237,6 +233,7 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
  * @param values :: vector of log value in double
  * @param epochtime :: flag to output time in epoch time/absolute time
  * @param timeunitfactor :: conversion factor for various unit of time for
+ * @param nspec :: number of spectra of the workspace to create
  * output
  */
 void ExportTimeSeriesLog::setupWorkspace2D(
