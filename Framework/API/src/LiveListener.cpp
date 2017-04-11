@@ -22,11 +22,10 @@ void LiveListener::setSpectra(const std::vector<specnum_t> &specList) {
 
 /**
  * Default behaviour updates property values on Listener
- * from those on calling algorithm.
+ * using those on calling algorithm.
  */
 void LiveListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
-  ;
 }
 
 } // namespace API
