@@ -47,3 +47,6 @@ Output:
 .. categories::
 
 .. sourcelink::
+	:filename: FindEPP
+	:cpp: None
+	:h: None
