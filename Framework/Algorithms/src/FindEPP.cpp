@@ -54,7 +54,8 @@ void FindEPP::exec() {
       "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
       "Height",     "HeightError",     "chiSq"};
 
-  m_outWS->addColumn("size_t", "WorkspaceIndex");
+  m_outWS->addColumn("int", "WorkspaceIndex");
+  m_outWS->getColumn(0)->setPlotType(1);
   for (const auto &column : columns) {
     m_outWS->addColumn("double", column);
   }
@@ -91,22 +92,26 @@ void FindEPP::fitGaussian(size_t index) {
   const double height = *maxIt;
   size_t maxIndex = static_cast<size_t>(std::distance(y.begin(), maxIt));
 
-  m_outWS->cell<size_t>(index, 0) = index;
+  m_outWS->cell<int>(index, 0) = static_cast<int>(index);
 
   if (height > 0) {
     size_t leftHalf = maxIndex, rightHalf = x.size() - maxIndex - 1;
     for (auto it = maxIt; it != y.end(); ++it) {
       if (*it < 0.5 * height) {
-        rightHalf = it - maxIt;
+        rightHalf = it - maxIt - 1;
         break;
       }
     }
     for (auto it = maxIt; it != y.begin(); --it) {
       if (*it < 0.5 * height) {
-        leftHalf = maxIt - it;
+        leftHalf = maxIt - it - 1;
         break;
       }
     }
+
+    g_log.debug() << "Peak in spectrum #" << index
+                  << " has last bins above 0.5*max at " << leftHalf << "\t"
+                  << rightHalf << "\n";
 
     if (rightHalf + leftHalf > 3) {
 
@@ -119,6 +124,9 @@ void FindEPP::fitGaussian(size_t index) {
       std::stringstream function;
       function << "name=Gaussian,PeakCentre=";
       function << center << ",Height=" << height << ",Sigma=" << sigma;
+
+      g_log.debug() << "Fitting spectrum #" << index
+                    << " with: " << function.str() << "\n";
 
       IAlgorithm_sptr fitAlg = createChildAlgorithm("Fit", 0., 0., false);
       fitAlg->setProperty("Function", function.str());
@@ -133,28 +141,39 @@ void FindEPP::fitGaussian(size_t index) {
       const std::string status = fitAlg->getProperty("OutputStatus");
       ITableWorkspace_sptr fitResult = fitAlg->getProperty("OutputParameters");
 
-      m_outWS->cell<double>(index, 1) = fitResult->cell<double>(1, 1);
-      m_outWS->cell<double>(index, 2) = fitResult->cell<double>(1, 2);
-      m_outWS->cell<double>(index, 3) = fitResult->cell<double>(2, 1);
-      m_outWS->cell<double>(index, 4) = fitResult->cell<double>(2, 2);
-      m_outWS->cell<double>(index, 5) = fitResult->cell<double>(0, 1);
-      m_outWS->cell<double>(index, 6) = fitResult->cell<double>(0, 2);
-      m_outWS->cell<double>(index, 7) = fitResult->cell<double>(3, 1);
-      m_outWS->cell<std::string>(index, 8) = status;
+      if (status == "success") {
+        m_outWS->cell<double>(index, 1) = fitResult->cell<double>(1, 1);
+        m_outWS->cell<double>(index, 2) = fitResult->cell<double>(1, 2);
+        m_outWS->cell<double>(index, 3) = fitResult->cell<double>(2, 1);
+        m_outWS->cell<double>(index, 4) = fitResult->cell<double>(2, 2);
+        m_outWS->cell<double>(index, 5) = fitResult->cell<double>(0, 1);
+        m_outWS->cell<double>(index, 6) = fitResult->cell<double>(0, 2);
+        m_outWS->cell<double>(index, 7) = fitResult->cell<double>(3, 1);
+        m_outWS->cell<std::string>(index, 8) = status;
+      } else {
+        g_log.debug() << "Fit failed in spectrum #" << index
+                      << ". \nReason :" << status
+                      << ". \nSetting the maximum.\n";
+        m_outWS->cell<std::string>(index, 8) = "fitFailed";
+        m_outWS->cell<double>(index, 1) = x[maxIndex];
+        m_outWS->cell<double>(index, 2) = 0.;
+        m_outWS->cell<double>(index, 5) = height;
+        m_outWS->cell<double>(index, 6) = e[maxIndex];
+      }
 
     } else {
-      g_log.warning() << "Found <=3 bins above half maximum in spectrum #"
-                      << index << ". Not fitting.\n";
+      g_log.information() << "Found <=3 bins above half maximum in spectrum #"
+                          << index << ". Not fitting.\n";
+      m_outWS->cell<std::string>(index, 8) = "narrowPeak";
       m_outWS->cell<double>(index, 1) = x[maxIndex];
       m_outWS->cell<double>(index, 2) = 0.;
       m_outWS->cell<double>(index, 5) = height;
       m_outWS->cell<double>(index, 6) = e[maxIndex];
-      m_outWS->cell<std::string>(index, 8) = "NarrowPeak";
     }
   } else {
-    g_log.warning() << "Negative maximum in spectrum #" << index
-                    << ". Skipping.\n";
-    m_outWS->cell<std::string>(index, 8) = "NegativeMaximum";
+    g_log.notice() << "Negative maximum in spectrum #" << index
+                   << ". Skipping.\n";
+    m_outWS->cell<std::string>(index, 8) = "negativeMaximum";
   }
   m_progress->report();
 }
