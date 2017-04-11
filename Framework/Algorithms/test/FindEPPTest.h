@@ -97,7 +97,6 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
     createAlg.setProperty("Random", true);
     break;
   }
-
   }
 
   createAlg.execute();
