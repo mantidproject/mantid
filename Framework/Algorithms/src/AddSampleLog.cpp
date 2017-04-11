@@ -157,12 +157,12 @@ void AddSampleLog::exec() {
         // dblVal = 0.;
       }
       theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-      g_log.warning() << "added property " << propName << " with value " << dblVal << "\n";
+      g_log.warning() << "added property " << propName << " with value "
+                      << dblVal << "\n";
     }
 
     // add unit
     theRun.getProperty(propName)->setUnits(propUnit);
-
   }
 
   return;
@@ -235,10 +235,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       int intVal;
       if (Strings::convert(prop_value, intVal)) {
         tsp->addValue(startTime, intVal);
-      }
-      else
-      {
-        throw std::invalid_argument("Input value cannot be converted to an integer value.");
+      } else {
+        throw std::invalid_argument(
+            "Input value cannot be converted to an integer value.");
       }
     }
     run_obj.addLogData(tsp);
@@ -248,10 +247,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
       double dblVal;
       if (Strings::convert(prop_value, dblVal)) {
         tsp->addValue(startTime, dblVal);
-      }
-      else
-      {
-        throw std::invalid_argument("Input value cannot be converted to a double number.");
+      } else {
+        throw std::invalid_argument(
+            "Input value cannot be converted to a double number.");
       }
     }
     run_obj.addLogData(tsp);
@@ -306,7 +304,8 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
   return;
 }
 
-/** Get the time vector for the TimeSeriesProperty to which the entries is to set
+/** Get the time vector for the TimeSeriesProperty to which the entries is to
+ * set
  * @brief AddSampleLog::getTimes
  * @param dataws
  * @param workspace_index
@@ -360,7 +359,8 @@ Kernel::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
   return runstart;
 }
 
-/** Get the values (in double) of the TimeSeriesProperty's entries from input workspace
+/** Get the values (in double) of the TimeSeriesProperty's entries from input
+ * workspace
  * @brief AddSampleLog::getDblValues
  * @param dataws
  * @param workspace_index
@@ -377,7 +377,8 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
   return valuevec;
 }
 
-/** Get the values (in integer) of the TimeSeriesProperty's entries from input workspace
+/** Get the values (in integer) of the TimeSeriesProperty's entries from input
+ * workspace
  * @brief AddSampleLog::getIntValues
  * @param dataws
  * @param workspace_index
