@@ -21,6 +21,7 @@ New
 ###
 
 - :ref:`DeleteWorkspaces <algm-DeleteWorkspaces>` will delete a list of workspaces.
+- :ref:`FindEPP-v2 <algm-FindEPP-v2>` reimplements the :ref:`FindEPP-v1 <algm-FindEPP-v1>` in C++, providing an order of magnitude gain in execution time for large workspaces.
 
 Improved
 ########
