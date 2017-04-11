@@ -45,6 +45,8 @@ void Partitioner::checkValid(const PartitionIndex index) const {
 }
 
 bool Partitioner::isMonitor(const GlobalSpectrumIndex index) const {
+  if (m_monitorStrategy == MonitorStrategy::TreatAsNormalSpectrum)
+    return false;
   return std::find(m_monitors.begin(), m_monitors.end(), index) !=
          m_monitors.end();
 }

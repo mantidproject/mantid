@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "ILiveListenerTest.h"
+#include "LiveListenerTest.h"
 #include <Poco/Path.h>
 
 using namespace Mantid;
@@ -21,7 +21,7 @@ public:
 
   LiveListenerFactoryTest() : factory(LiveListenerFactory::Instance()) {
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    factory.subscribe<MockILiveListener>("MockILiveListener");
+    factory.subscribe<MockLiveListener>("MockLiveListener");
   }
 
   void setUp() override {
@@ -42,9 +42,9 @@ public:
   void test_create() {
     // Check that we can successfully create a registered class
     boost::shared_ptr<ILiveListener> l;
-    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockILiveListener", false))
+    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockLiveListener", false))
     // Check it's really the right class
-    TS_ASSERT(boost::dynamic_pointer_cast<MockILiveListener>(l))
+    TS_ASSERT(boost::dynamic_pointer_cast<MockLiveListener>(l))
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),

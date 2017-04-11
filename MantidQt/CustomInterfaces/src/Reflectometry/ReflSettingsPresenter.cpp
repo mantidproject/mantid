@@ -205,9 +205,14 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
       options.push_back("EndOverlap=" + endOv);
 
     // Add transmission runs
-    auto transRuns = this->getTransmissionRuns();
-    if (!transRuns.empty())
-      options.push_back(transRuns);
+    auto transRuns = this->getTransmissionRuns(true);
+    if (!transRuns.empty()) {
+      std::vector<std::string> splitRuns;
+      boost::split(splitRuns, transRuns, boost::is_any_of(","));
+      options.push_back("FirstTransmissionRun=TRANS_" + splitRuns[0]);
+      if (splitRuns.size() > 1)
+        options.push_back("SecondTransmissionRun=TRANS_" + splitRuns[1]);
+    }
   }
 
   if (m_view->instrumentSettingsEnabled()) {
@@ -272,9 +277,10 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 *ADS. Returns a string with transmission runs so that they are considered in the
 *reduction
 *
+* @param loadRuns :: If true, will try to load transmission runs as well
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
-std::string ReflSettingsPresenter::getTransmissionRuns() const {
+std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   auto runs = m_view->getTransmissionRuns();
   if (runs.empty())
@@ -288,22 +294,20 @@ std::string ReflSettingsPresenter::getTransmissionRuns() const {
                                 "transmission runs separated by ',' "
                                 "are allowed.");
 
-  for (const auto &run : transRuns) {
-    if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
-      continue;
-    // Load transmission runs and put them in the ADS
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadISISNexus");
-    alg->setProperty("Filename", run);
-    alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-    alg->execute();
+  if (loadRuns) {
+    for (const auto &run : transRuns) {
+      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
+        continue;
+      // Load transmission runs and put them in the ADS
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
+      alg->setProperty("Filename", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->execute();
+    }
   }
 
-  // Return them as options for reduction
-  std::string options = "FirstTransmissionRun=TRANS_" + transRuns[0];
-  if (transRuns.size() > 1)
-    options += ",SecondTransmissionRun=TRANS_" + transRuns[1];
-
-  return options;
+  return runs;
 }
 
 /** Returns global options for 'Stitch1DMany'

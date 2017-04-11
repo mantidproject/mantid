@@ -2,6 +2,8 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
+#include "MantidBeamline/ComponentInfo.h"
+#include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
@@ -1162,6 +1164,41 @@ const Beamline::DetectorInfo &ParameterMap::detectorInfo() const {
   return *m_detectorInfo;
 }
 
+/**
+ * @brief ParameterMap::hasComponentInfo
+ * @return True if a ComponentInfo is stored.
+ */
+bool ParameterMap::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
+}
+
+/**
+ * @brief ParameterMap::componentInfo
+ * @return A const ref to the ComponentInfo if stored. Throws a
+ * std::runtime_error
+ * exception otherwise.
+ */
+const Beamline::ComponentInfo &ParameterMap::componentInfo() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
+
+/**
+ * @brief ParameterMap::componentIds
+ * @return const ref to vector of component ids. Throws a std::runtime_error if
+ * the ComponentInfo has not been set.
+ */
+const std::vector<Geometry::ComponentID> &ParameterMap::componentIds() const {
+  // Component ids do not make sense without a ComponentInfo
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "Cannot return component ids when ComponentInfo is NULL");
+  }
+  return m_componentIds;
+}
+
 /// Only for use by Detector. Returns a detector index for a detector ID.
 size_t ParameterMap::detectorIndex(const detid_t detID) const {
   return m_instrument->detectorIndex(detID);
@@ -1171,6 +1208,14 @@ size_t ParameterMap::detectorIndex(const detid_t detID) const {
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
+}
+
+/// Only for use by ExperimentInfo. Sets the pointer to the ComponentInfo.
+void ParameterMap::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+    std::vector<Geometry::ComponentID> componentIds) {
+  m_componentInfo = std::move(componentInfo);
+  m_componentIds = std::move(componentIds);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.

@@ -16,23 +16,23 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
-#include "MantidLiveData/SNSLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/SNSLiveEventDataListener.h"
 
 // Includes for parsing the XML device descriptions
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/NodeList.h>
 
 #include <Poco/Net/NetException.h>
-#include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketStream.h>
+#include <Poco/Net/StreamSocket.h>
 #include <Poco/Timestamp.h>
 
-#include <Poco/Thread.h>
 #include <Poco/Runnable.h>
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -73,7 +73,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
-    : ILiveListener(), ADARA::Parser(), m_socket()
+    : LiveListener(), ADARA::Parser(), m_socket()
 // ADARA::Parser() will accept values for buffer size and max packet size,
 // but the defaults will work fine
 {
