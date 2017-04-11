@@ -37,8 +37,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 template <typename Workspace_Type>
 class DLLExport ADSWorkspaceProvider : public WorkspaceProvider {
 public:
-  ADSWorkspaceProvider();
-  ~ADSWorkspaceProvider() override;
+  ADSWorkspaceProvider() = default;
+  ADSWorkspaceProvider &operator=(const ADSWorkspaceProvider &) = delete;
+  ADSWorkspaceProvider(const ADSWorkspaceProvider &) = delete;
 
   //-------WorkspaceProivder Implementations ------------
   bool canProvideWorkspace(std::string wsName) const override;
@@ -46,8 +47,6 @@ public:
   void disposeWorkspace(std::string wsName) const override;
 
 private:
-  ADSWorkspaceProvider &operator=(const ADSWorkspaceProvider &);
-  ADSWorkspaceProvider(const ADSWorkspaceProvider &);
 };
 }
 }
