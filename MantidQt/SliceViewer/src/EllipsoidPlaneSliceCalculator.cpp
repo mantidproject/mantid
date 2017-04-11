@@ -225,6 +225,10 @@ bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
 namespace Mantid {
 namespace SliceViewer {
 
+
+const double EllipsoidPlaneSliceCalculator::zoomOutFactor = 2.;
+
+
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
     Mantid::Kernel::V3D originEllipsoid, double zPlane) const {
@@ -459,21 +463,17 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   // Get the length of largest projection onto x,y,z
   auto projectionLengths = getProjectionLengths(directions, radii);
 
-  // The zoom-out factor ensures that the sphere can be viewed
-  // in its entirety in full-screen or default mode.
-  const double zoomOutFactor = 2.;
+  using namespace MantidQt::SliceViewer;
 
   // Corners
   const double leftValue =
-      originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
+      originEllipsoid.X() - EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[0];
   const double rightValue =
-      originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
+      originEllipsoid.X() + EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[0];
   const double bottomValue =
-      originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
+      originEllipsoid.Y() - EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[1];
   const double topValue =
-      originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
-
-  using namespace MantidQt::SliceViewer;
+      originEllipsoid.Y() + EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[1];
 
   Left left(leftValue);
   Right right(rightValue);

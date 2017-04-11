@@ -57,6 +57,8 @@ public:
                     std::vector<double> radii,
                     Mantid::Kernel::V3D originEllipsoid, double zPlane) const;
 
+  static const double zoomOutFactor;
+
 private:
   SliceEllipseInfo
   getSolutionForEllipsoid(const Kernel::Matrix<double> &m, double zPlane,

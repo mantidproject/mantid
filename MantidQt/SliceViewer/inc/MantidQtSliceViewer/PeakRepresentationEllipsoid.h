@@ -60,6 +60,8 @@ public:
   void showBackgroundRadius(const bool show) override;
 
   static const double zeroRadius;
+  /// Get the zoom out factor
+  double getZoomOutFactor() const;
 
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(

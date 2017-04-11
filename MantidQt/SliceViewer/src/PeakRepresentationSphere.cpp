@@ -7,6 +7,9 @@
 namespace MantidQt {
 namespace SliceViewer {
 
+const double PeakRepresentationSphere::zoomOutFactor = 2.;
+
+
 PeakRepresentationSphere::PeakRepresentationSphere(
     const Mantid::Kernel::V3D &origin, const double &peakRadius,
     const double &backgroundInnerRadius, const double &backgroundOuterRadius)
@@ -93,13 +96,11 @@ void PeakRepresentationSphere::showBackgroundRadius(const bool show) {
  */
 PeakBoundingBox PeakRepresentationSphere::getBoundingBox() const {
   using Mantid::Kernel::V2D;
-  // The zoom-out factor ensures that the sphere can be viewed
-  // in its entirety in full-screen or default mode.
-  const double zoomOutFactor = 2.;
-  Left left(m_origin.X() - zoomOutFactor * m_backgroundOuterRadius);
-  Bottom bottom(m_origin.Y() - zoomOutFactor * m_backgroundOuterRadius);
-  Right right(m_origin.X() + zoomOutFactor * m_backgroundOuterRadius);
-  Top top(m_origin.Y() + zoomOutFactor * m_backgroundOuterRadius);
+
+  Left left(m_origin.X() - PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
+  Bottom bottom(m_origin.Y() - PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
+  Right right(m_origin.X() + PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
+  Top top(m_origin.Y() + PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
   SlicePoint slicePoint(m_origin.Z());
 
   return PeakBoundingBox(left, right, top, bottom, slicePoint);

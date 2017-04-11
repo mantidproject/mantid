@@ -55,6 +55,12 @@ public:
   /// Show the background radius
   void showBackgroundRadius(const bool show) override;
 
+  /**
+   * The zoom-out factor ensures that the sphere can be viewed
+   * in its entirety in full-screen or default mode.
+   **/
+  static const double zoomOutFactor;
+
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
       PeakRepresentationViewInformation viewInformation) override;

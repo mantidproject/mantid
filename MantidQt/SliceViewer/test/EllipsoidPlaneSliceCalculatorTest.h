@@ -427,11 +427,11 @@ public:
         directions, radii, origin);
 
     // Assert
-    const double expectedLeft = -1.0;
-    const double expectedRight = 3.0;
-    const double expectedTop = 3.5;
-    const double expectedBottom = 0.5;
-    const double expectedSlicePoint = -1.0;
+    const double expectedLeft = origin[0] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0];
+    const double expectedRight = origin[0] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] ;
+    const double expectedTop = origin[1] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1];
+    const double expectedBottom = origin[1] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1];
+    const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;
     TSM_ASSERT_DELTA("Left should be at -1.0.", expectedLeft,
@@ -462,10 +462,10 @@ public:
         directions, radii, origin);
 
     // Assert
-    const double expectedLeft = -radii[0] * std::cos(angleIn) + origin[0];
-    const double expectedRight = radii[0] * std::cos(angleIn) + origin[0];
-    const double expectedTop = radii[1] * std::cos(angleIn) + origin[1];
-    const double expectedBottom = -radii[1] * std::cos(angleIn) + origin[1];
+    const double expectedLeft = origin[0] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] * std::cos(angleIn);
+    const double expectedRight = origin[0] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[0] * std::cos(angleIn);
+    const double expectedTop = origin[1] + Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1] * std::cos(angleIn);
+    const double expectedBottom = origin[1] - Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor * radii[1] * std::cos(angleIn);
     const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;
