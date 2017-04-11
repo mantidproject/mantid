@@ -2,7 +2,7 @@
 
 """ SANSConvertToWavelength converts to wavelength units """
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, StringListValidator, Property, PropertyManagerProperty)
+from mantid.kernel import (Direction, PropertyManagerProperty)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import (create_unmanaged_algorithm, append_to_sans_file_tag,

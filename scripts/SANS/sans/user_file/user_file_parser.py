@@ -13,8 +13,7 @@ from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, ba
                                              mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
                                              position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
                                              fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, rebin_string_values, det_fit_range,
-                                             q_rebin_values)
+                                             monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
 # -----------------------------------------------------------------
@@ -614,7 +613,7 @@ class LimitParser(UserFileComponentParser):
             rebin_values = simple_pattern[LimitsId.events_binning]
             prefix = -1. if rebin_values.step_type is RangeStepType.Log else 1.
             binning_string = str(rebin_values.start) + "," + str(prefix*rebin_values.step) + "," + \
-                             str(rebin_values.stop)
+                             str(rebin_values.stop)  # noqa
         else:
             rebin_values = extract_float_list(event_binning)
             binning_string = ",".join([str(val) for val in rebin_values])

@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import math
 from abc import (ABCMeta, abstractmethod)
 from six import (with_metaclass)
-from sans.common.enums import (SANSInstrument, SampleShape, convert_int_to_shape, DataType)
+from sans.common.enums import (SANSInstrument, SampleShape)
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
 
@@ -21,7 +21,7 @@ class NullDivideByVolume(DivideByVolume):
         super(NullDivideByVolume, self).__init__()
 
     def divide_by_volume(self, workspace, scale_info):
-        _ = scale_info
+        _ = scale_info  # noqa
         return workspace
 
 
@@ -85,7 +85,7 @@ class DivideByVolumeFactory(object):
         instrument = data.instrument
 
         is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or\
-                             instrument is SANSInstrument.LOQ
+                             instrument is SANSInstrument.LOQ  #noqa
         if is_isis_instrument:
             divider = DivideByVolumeISIS()
         else:
@@ -93,7 +93,7 @@ class DivideByVolumeFactory(object):
         return divider
 
 
-class MultiplyByAbsoluteScale(with_meta(ABCMeta, object)):
+class MultiplyByAbsoluteScale(with_metaclass(ABCMeta, object)):
     DEFAULT_SCALING = 100.0
 
     def __init__(self):
@@ -152,7 +152,7 @@ class MultiplyByAbsoluteScaleFactory(object):
         instrument = data.instrument
 
         is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or \
-                             SANSInstrument.LOQ
+                             SANSInstrument.LOQ  # noqa
         if instrument is SANSInstrument.LOQ:
             multiplier = MultiplyByAbsoluteScaleLOQ()
         elif is_isis_instrument:

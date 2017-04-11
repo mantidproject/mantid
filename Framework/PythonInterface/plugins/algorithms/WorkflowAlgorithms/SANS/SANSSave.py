@@ -90,7 +90,7 @@ class SANSSave(DataProcessorAlgorithm):
         is_first_axis_numeric = axis1.isNumeric()
         if not is_first_axis_numeric and number_of_histograms > 1:
             errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all "
-                                                          "axes need to be numeric."})
+                                             "axes need to be numeric."})
 
         # Make sure that at least one file format is selected
         file_formats = self._get_file_formats()

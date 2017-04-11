@@ -3,13 +3,11 @@
 """ Multiplies a SANS workspace by an absolute scale and divides it by the sample volume. """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator,
-                           FloatArrayProperty)
+from mantid.kernel import (Direction, PropertyManagerProperty)
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.algorithm_detail.scale_helpers import (DivideByVolumeFactory, MultiplyByAbsoluteScaleFactory)
-from sans.common.enums import (DataType)
 from sans.common.general_functions import (append_to_sans_file_tag)
 
 

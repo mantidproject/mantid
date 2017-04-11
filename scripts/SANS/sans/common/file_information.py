@@ -10,7 +10,6 @@ from mantid.api import FileFinder
 from mantid.kernel import (DateAndTime, ConfigService)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
-from sans.common.xml_parsing import get_valid_to_time_from_idf_string
 from sans.common.constants import (SANS2D, LARMOR, LOQ)
 from six import with_metaclass
 
@@ -425,7 +424,7 @@ def get_date_and_run_number_added_nexus(file_name):
     return start_time_value, run_number_value
 
 
-def get_added_nexus_information(file_name):
+def get_added_nexus_information(file_name):  # noqa
     """
     Get information if is added data and the number of periods.
 
@@ -446,7 +445,7 @@ def get_added_nexus_information(file_name):
         return "event_workspace" in list(entry.keys())
 
     def get_workspace_name(entry):
-        return entry["workspace_name"][0]
+        return entry["workspace_name"][0].decode("utf-8")
 
     def has_same_number_of_entries(workspace_names, monitor_workspace_names):
         return len(workspace_names) == len(monitor_workspace_names)
@@ -485,7 +484,7 @@ def get_added_nexus_information(file_name):
         #    random_name-add_monitors_added_event_data_4.s
         if (has_same_number_of_entries(workspace_names, monitor_workspace_names) and
             has_added_tag(workspace_names, monitor_workspace_names) and
-            entries_match(workspace_names, monitor_workspace_names)):
+            entries_match(workspace_names, monitor_workspace_names)):  # noqa
             is_added_file_event = True
             num_periods = len(workspace_names)
         else:

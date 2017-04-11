@@ -49,7 +49,7 @@ import os
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService)
 from sans.common.file_information import (SANSFileInformationFactory, FileType, get_extension_for_file_type,
-                                              find_full_file_path)
+                                          find_full_file_path)
 from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITOR_SUFFIX, CALIBRATION_WORKSPACE_TAG,
                                    SANS_FILE_TAG, OUTPUT_WORKSPACE_GROUP, OUTPUT_MONITOR_WORKSPACE,
                                    OUTPUT_MONITOR_WORKSPACE_GROUP)
@@ -113,7 +113,7 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return  ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
+    return ((to_check is SANSDataType.SampleTransmission) or (to_check is SANSDataType.SampleDirect) or
             (to_check is SANSDataType.CanTransmission) or (to_check is SANSDataType.CanDirect))
 
 
@@ -435,7 +435,7 @@ def loader_for_added_isis_nexus(file_information, is_transmission, period, paren
     :param parent_alg: a handle to the parent algorithm
     :return: the name of the load algorithm and the selected load options
     """
-    _ = is_transmission
+    _ = is_transmission  # noqa
     loader_name = "LoadNexusProcessed"
     loader_options = {"Filename": file_information.get_file_name(),
                       "OutputWorkspace": EMPTY_NAME,
