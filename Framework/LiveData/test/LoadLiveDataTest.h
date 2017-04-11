@@ -154,33 +154,6 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  /** Make the test listener send out a "reset" signal. */
-  void test_dataReset() {
-    // Will reset after the 2nd call to extract data
-    ConfigService::Instance().setString("testdatalistener.reset_after", "2");
-    EventWorkspace_sptr ws1, ws2, ws3;
-
-    // Manually make the listener so I can pass the same one to the algo
-    ILiveListener_sptr listener =
-        LiveListenerFactory::Instance().create("TestDataListener", true);
-    listener->start();
-
-    // First go creates the fake ws
-    ws1 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws1->getNumberEvents(), 200);
-    ws2 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws2->getNumberEvents(), 400);
-    TSM_ASSERT("Workspace being added stayed the same pointer", ws1 == ws2);
-
-    // This next time, it should reset
-    ws3 = doExec<EventWorkspace>("Add", "", "", "", "", true, listener);
-    TS_ASSERT_EQUALS(ws3->getNumberEvents(), 200);
-    TSM_ASSERT("Accumulation workspace changed!", ws3 != ws1);
-
-    TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
-  }
-
-  //--------------------------------------------------------------------------------------------
   void test_add_DontPreserveEvents() {
     Workspace2D_sptr ws1, ws2;
 

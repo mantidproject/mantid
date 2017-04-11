@@ -354,7 +354,7 @@ public:
 
   void generateCountsHistogramPulseTime(
       const double &xMin, const double &xMax, MantidVec &Y,
-      const double TofMin = -std::numeric_limits<double>::max(),
+      const double TofMin = std::numeric_limits<double>::lowest(),
       const double TofMax = std::numeric_limits<double>::max()) const;
 
 protected:
