@@ -969,17 +969,14 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
   atie.tieProp = tieProp;
   m_ties.insert(funProp, atie);
 
-  if (prop->hasOption(globalOptionName)) {
-    if (getNumberOfDatasets() > 1 && !prop->checkOption(globalOptionName)) {
-      auto parName = getParameterName(prop);
-      auto &localValues = m_localParameterValues[parName];
-      if (m_currentDataset >= localValues.size()) {
-        initLocalParameter(parName);
-      }
-      localValues[m_currentDataset].tie = tie;
-    } else if (getNumberOfDatasets() == 0) {
-      prop->setOption(globalOptionName, true);
+  if (prop->hasOption(globalOptionName) &&
+      !prop->checkOption(globalOptionName)) {
+    auto parName = getParameterName(prop);
+    auto &localValues = m_localParameterValues[parName];
+    if (m_currentDataset >= localValues.size()) {
+      initLocalParameter(parName);
     }
+    localValues[m_currentDataset].tie = tie;
   }
 }
 
@@ -1983,10 +1980,24 @@ void FunctionBrowser::setLocalParameterValue(const QString &parName, int i,
  * @param parName :: Name of parametere to init.
  */
 void FunctionBrowser::initLocalParameter(const QString &parName) const {
-  double value = getParameter(parName);
-  QVector<LocalParameterData> values(getNumberOfDatasets(),
-                                     LocalParameterData(value));
-  m_localParameterValues[parName] = values;
+  auto nData = getNumberOfDatasets();
+  if (nData == 0) {
+    nData = 1;
+  }
+  auto oldValues = m_localParameterValues.find(parName);
+  if (oldValues != m_localParameterValues.end() && !oldValues->isEmpty()) {
+    auto nOldData = oldValues->size();
+    if (nOldData > nData) {
+      oldValues->erase(oldValues->begin() + nData, oldValues->end());
+    } else if (nOldData < nData) {
+      oldValues->insert(oldValues->end(), nData - nOldData, oldValues->back());
+    }
+  } else {
+    double value = getParameter(parName);
+    QVector<LocalParameterData> values(nData,
+                                       LocalParameterData(value));
+    m_localParameterValues[parName] = values;
+  }
 }
 
 /// Make sure that the parameter is initialized
@@ -2044,16 +2055,6 @@ void FunctionBrowser::removeDatasets(QList<int> indices) {
 /// Add local parameters for additional datasets.
 /// @param n :: Number of datasets added.
 void FunctionBrowser::addDatasets(int n) {
-  if (m_numberOfDatasets == 0) {
-    setNumberOfDatasets(n);
-    return;
-  }
-  for (auto par = m_localParameterValues.begin();
-       par != m_localParameterValues.end(); ++par) {
-    auto &values = par.value();
-    double value = values.back().value;
-    values.insert(values.end(), n, LocalParameterData(value));
-  }
   setNumberOfDatasets(m_numberOfDatasets + n);
 }
 
