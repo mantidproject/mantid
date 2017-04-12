@@ -509,6 +509,9 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
     if (m_plotOptions->currentText() == SURFACE_PLOT ||
         m_plotOptions->currentText() == CONTOUR_PLOT) {
       m_logSelector->setItemText(0, WORKSPACE_INDEX);
+      if (m_axisNameEdit->text() == WORKSPACE_NAME) {
+        m_axisNameEdit->setText(WORKSPACE_INDEX);
+      }
     } else {
       m_logSelector->setItemText(0, WORKSPACE_NAME);
     }
