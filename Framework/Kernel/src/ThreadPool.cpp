@@ -3,8 +3,11 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <sstream>
+#ifndef _OPENMP
 #include <Poco/Environment.h>
+#endif
 
 namespace Mantid {
 namespace Kernel {
@@ -49,17 +52,23 @@ ThreadPool::~ThreadPool() {
 
 //--------------------------------------------------------------------------------
 /** Return the number of physical cores available on the system.
- * NOTE: Uses Poco::Environment::processorCount() to find the number.
+ * NOTE: Uses OPENMP or Poco::Environment::processorCount() to find the number.
  * @return how many cores are present.
  */
 size_t ThreadPool::getNumPhysicalCores() {
+#ifdef _OPENMP
+  int physicalCores = PARALLEL_GET_MAX_THREADS;
+#else
+  int physicalCores = Poco::Environment::processorCount();
+#endif
+
   int maxCores(0);
   int retVal = Kernel::ConfigService::Instance().getValue(
       "MultiThreaded.MaxCores", maxCores);
   if (retVal > 0 && maxCores > 0)
-    return maxCores;
+    return std::min(maxCores, physicalCores);
   else
-    return Poco::Environment::processorCount();
+    return physicalCores;
 }
 
 //--------------------------------------------------------------------------------
