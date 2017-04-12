@@ -114,22 +114,20 @@ void ConvertCWPDMDToSpectra::exec() {
 
     uint16_t numexpinfo = inputDataWS->getNumExperimentInfo();
     for (uint16_t iexp = 0; iexp < numexpinfo; ++iexp) {
-      int runid = atoi(inputDataWS->getExperimentInfo(iexp)
-                           ->run()
-                           .getProperty("run_number")
-                           ->value()
-                           .c_str());
+      int runid = std::stoi(inputDataWS->getExperimentInfo(iexp)
+                                ->run()
+                                .getProperty("run_number")
+                                ->value());
       // skip if run id is not a valid one
       if (runid < 0)
         continue;
       double thislambda = wavelength;
       if (inputDataWS->getExperimentInfo(iexp)->run().hasProperty(
               wavelengthpropertyname))
-        thislambda = atof(inputDataWS->getExperimentInfo(iexp)
-                              ->run()
-                              .getProperty(wavelengthpropertyname)
-                              ->value()
-                              .c_str());
+        thislambda = std::stod(inputDataWS->getExperimentInfo(iexp)
+                                   ->run()
+                                   .getProperty(wavelengthpropertyname)
+                                   ->value());
       else if (wavelength == EMPTY_DBL()) {
         std::stringstream errss;
         errss << "In order to convert unit to " << outputunit

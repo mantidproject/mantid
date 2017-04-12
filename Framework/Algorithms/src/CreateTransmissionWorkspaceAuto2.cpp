@@ -72,36 +72,25 @@ void CreateTransmissionWorkspaceAuto2::init() {
  */
 void CreateTransmissionWorkspaceAuto2::exec() {
 
-  // Transmission runs
+  IAlgorithm_sptr alg = createChildAlgorithm("CreateTransmissionWorkspace");
+  alg->initialize();
+
+  // First transmission run
   MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
-  MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+
+  // Transmission properties
+  populateTransmissionProperties(alg);
 
   // Instrument
   auto instrument = firstWS->getInstrument();
 
-  IAlgorithm_sptr alg = createChildAlgorithm("CreateTransmissionWorkspace");
-  alg->initialize();
-
-  // Mandatory properties
-
-  alg->setProperty("FirstTransmissionRun", firstWS);
-
+  // Other mandatory properties
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
   double wavMax = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
-
-  // Optional properties
-
-  // Second transmission run and stitching params
-  if (secondWS) {
-    alg->setProperty("SecondTransmissionRun", secondWS);
-    alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    alg->setPropertyValue("Params", getPropertyValue("Params"));
-  }
 
   // Monitor properties
   populateMonitorProperties(alg, instrument);
