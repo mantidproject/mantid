@@ -147,7 +147,7 @@ class DeltaPDF3D(PythonAlgorithm):
                                 z_min=np.searchsorted(Z,l-width[2])
                                 z_max=np.searchsorted(Z,l+width[2])
                                 signal[x_min:x_max,y_min:y_max,z_min:z_max]=np.nan
-                            else:
+                            else:  # sphere
                                 signal[(Xs-h)**2/width[0]**2 + (Ys-k)**2/width[1]**2 + (Zs-l)**2/width[2]**2 < 1]=np.nan
 
         if self.getProperty("CutSphere").value:
@@ -188,26 +188,14 @@ class DeltaPDF3D(PythonAlgorithm):
 
         signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal,axes=fft_axes),axes=fft_axes),axes=fft_axes).real
 
-        # Calculate new extents for fft space
-        extents=''
-        for d in range(inWS.getNumDims()):
-            dim = inWS.getDimension(d)
-            if dim.getNBins() == 1:
-                fft_dim = 1./(dim.getMaximum()-dim.getMinimum())
-                extents+=str(-fft_dim/2.)+','+str(fft_dim/2.)+','
-            else:
-                fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
-                extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
-        extents=extents[:-1]
-
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
-        createWS_alg.setProperty("SignalInput",signal)
-        createWS_alg.setProperty("ErrorInput",signal**2)
-        createWS_alg.setProperty("Dimensionality",3)
-        createWS_alg.setProperty("Extents",extents)
-        createWS_alg.setProperty("NumberOfBins",signal.shape)
-        createWS_alg.setProperty("Names",'x,y,z')
-        createWS_alg.setProperty("Units",'a,b,c')
+        createWS_alg.setProperty("SignalInput", signal)
+        createWS_alg.setProperty("ErrorInput", signal**2)
+        createWS_alg.setProperty("Dimensionality", 3)
+        createWS_alg.setProperty("Extents", self._calc_new_extents(inWS))
+        createWS_alg.setProperty("NumberOfBins", signal.shape)
+        createWS_alg.setProperty("Names", 'x,y,z')
+        createWS_alg.setProperty("Units", 'a,b,c')
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
 
@@ -229,6 +217,19 @@ class DeltaPDF3D(PythonAlgorithm):
         except ValueError:
             logger.debug('Using astropy.convolution.convolve for convolution')
             return convolve(signal, G3D)
+
+    def _calc_new_extents(self, inWS):
+        # Calculate new extents for fft space
+        extents=''
+        for d in range(inWS.getNumDims()):
+            dim = inWS.getDimension(d)
+            if dim.getNBins() == 1:
+                fft_dim = 1./(dim.getMaximum()-dim.getMinimum())
+                extents+=str(-fft_dim/2.)+','+str(fft_dim/2.)+','
+            else:
+                fft_dim=np.fft.fftshift(np.fft.fftfreq(dim.getNBins(), (dim.getMaximum()-dim.getMinimum())/dim.getNBins()))
+                extents+=str(fft_dim[0])+','+str(fft_dim[-1])+','
+        return extents[:-1]
 
 
 AlgorithmFactory.subscribe(DeltaPDF3D)
