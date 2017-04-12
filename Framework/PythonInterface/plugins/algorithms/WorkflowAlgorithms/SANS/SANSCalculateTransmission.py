@@ -2,9 +2,8 @@
 
 """ SANSCalculateTransmission algorithm calculates the transmission correction of a SANS workspace."""
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, StringArrayProperty, StringListValidator, Property,
-                           PropertyManagerProperty, FloatBoundedValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress)
+from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import (RangeStepType, RebinType, FitType, DataType)
@@ -66,10 +65,8 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         # 1. Get relevant spectra
         detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_workspace,
                                                                            incident_monitor_spectrum_number)
-        detector_ids_roi, \
-        detector_id_transmission_monitor, \
-        detector_id_default_transmission_monitor = self._get_detector_ids_for_transmission_calculation(
-                                                                  transmission_workspace, calculate_transmission_state)
+        detector_ids_roi, detector_id_transmission_monitor, detector_id_default_transmission_monitor = \
+            self._get_detector_ids_for_transmission_calculation(transmission_workspace, calculate_transmission_state)
         all_detector_ids = [detector_id_incident_monitor]
 
         if len(detector_ids_roi) > 0:
@@ -317,8 +314,8 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
         """
         # We perform only a prompt peak correction if the start and stop values of the bins we want to remove,
         # were explicitly set. Some instruments require it, others don't.
-        if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and\
-                        prompt_peak_correction_max is not None:
+        if prompt_peak_correction_enabled and prompt_peak_correction_min is not None and \
+                        prompt_peak_correction_max is not None:  # noqa
             remove_name = "RemoveBins"
             remove_options = {"InputWorkspace": workspace,
                               "XMin": prompt_peak_correction_min,

@@ -5,11 +5,10 @@
 """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, IntBoundedValidator, FloatBoundedValidator, StringListValidator, Property,
-                           PropertyManagerProperty, CompositeValidator)
+from mantid.kernel import (Direction, StringListValidator, PropertyManagerProperty, CompositeValidator)
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        FileProperty, FileAction, Progress, WorkspaceUnitValidator)
+                        WorkspaceUnitValidator)
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.enums import (RangeStepType, DetectorType)
@@ -201,7 +200,7 @@ class SANSCreateWavelengthAndPixelAdjustment(DataProcessorAlgorithm):
         wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high
         wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
         wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type \
-                                       is RangeStepType.Log else 1.0
+                                       is RangeStepType.Log else 1.0  # noqa
 
         # Create a rebin string from the wavelength information
         wavelength_step *= wavelength_step_type

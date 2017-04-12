@@ -5,9 +5,9 @@
 """
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, Property, PropertyManagerProperty, StringListValidator, CompositeValidator)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
-                        WorkspaceUnitValidator, SpectraAxisValidator)
+from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, CompositeValidator)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+                        WorkspaceUnitValidator)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, DetectorType)
