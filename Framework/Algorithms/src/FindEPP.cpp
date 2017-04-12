@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/FindEPP.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 #include <sstream>
@@ -184,7 +185,7 @@ void FindEPP::initWorkspace() {
   m_outWS->addColumn("str", "FitStatus");
 
   const size_t numberSpectra = m_inWS->getNumberHistograms();
-  m_progress = std::make_unique<Progress>(this, 0, 1, numberSpectra);
+  m_progress = make_unique<Progress>(this, 0, 1, numberSpectra);
 
   for (size_t i = 0; i < numberSpectra; ++i) {
     m_outWS->appendRow();
