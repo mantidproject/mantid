@@ -5,7 +5,7 @@ from mantid.api import AnalysisDataService
 from sans.common.general_functions import (create_managed_non_child_algorithm, create_unmanaged_algorithm,
                                            get_output_name, get_base_name_from_multi_period_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ISISReductionMode)
-from sans.common.constants import (EMPTY_NAME, TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
+from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
                                    LAB_CAN_SUFFIX, LAB_CAN_COUNT_SUFFIX, LAB_CAN_NORM_SUFFIX,
                                    HAB_CAN_SUFFIX, HAB_CAN_COUNT_SUFFIX, HAB_CAN_NORM_SUFFIX,
                                    REDUCED_HAB_AND_LAB_WORKSPACE_FOR_MERGED_REDUCTION,
@@ -474,7 +474,7 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     data_info = state.data
     sample_scatter_period = data_info.sample_scatter_period
     requires_new_period_selection = len(workspaces[SANSDataType.SampleScatter]) > 1 \
-                                    and sample_scatter_period == ALL_PERIODS
+                                    and sample_scatter_period == ALL_PERIODS  # noqa
 
     is_multi_period = len(workspaces[SANSDataType.SampleScatter]) > 1
 
