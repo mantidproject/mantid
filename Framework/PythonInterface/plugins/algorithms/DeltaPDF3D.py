@@ -33,7 +33,7 @@ class DeltaPDF3D(PythonAlgorithm):
                              "Output Workspace")
         self.declareProperty("RemoveReflections", True, "Remove reflections")
         condition = EnabledWhenProperty("RemoveReflections", PropertyCriterion.IsDefault)
-        self.declareProperty("Shape", "sphere", doc="Shape to cut out reflections",
+        self.declareProperty("Shape", "cube", doc="Shape to cut out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
         self.setPropertySettings("Shape", condition)
         val_min_zero = FloatArrayBoundedValidator()
@@ -207,14 +207,13 @@ class DeltaPDF3D(PythonAlgorithm):
         createWS_alg.setProperty("Extents",extents)
         createWS_alg.setProperty("NumberOfBins",signal.shape)
         createWS_alg.setProperty("Names",'x,y,z')
-        createWS_alg.setProperty("Units",'A,A,A')
+        createWS_alg.setProperty("Units",'a,b,c')
         createWS_alg.execute()
         outWS = createWS_alg.getProperty("OutputWorkspace").value
 
-        # Copy experiment info
+        # Copy first experiment info
         if inWS.getNumExperimentInfo() > 0:
             outWS.addExperimentInfo(inWS.getExperimentInfo(0))
-            ol = outWS.getExperimentInfo(0).mutableSample().getOrientedLattice()
 
         progress.report()
 
