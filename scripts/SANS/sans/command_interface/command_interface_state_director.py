@@ -148,7 +148,7 @@ class CommandInterfaceStateDirector(object):
         self._set_data_element(data_builder.set_sample_transmission, data_builder.set_sample_transmission_period,
                                DataCommandId.sample_transmission, data_commands)
         self._set_data_element(data_builder.set_sample_direct, data_builder.set_sample_direct_period,
-                               DataCommandId.sample_direct, data_commands) 
+                               DataCommandId.sample_direct, data_commands)
         self._set_data_element(data_builder.set_can_scatter, data_builder.set_can_scatter_period,
                                DataCommandId.can_scatter, data_commands)
         self._set_data_element(data_builder.set_can_transmission, data_builder.set_can_transmission_period,
