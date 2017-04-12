@@ -144,9 +144,9 @@ translateInstructions(const std::string &instructions) {
  * Translate the PerformIndexOperations processing instructions from a vector
  * into a format usable by GroupDetectors.
  *
- * @param groups : A vector of gorups, each group being a vector of its 0-based
+ * @param groups : A vector of groups, each group being a vector of its 0-based
  * spectrum indices
- * @param : The spectra axis of the workspace
+ * @param axis : The spectra axis of the workspace
  * @param commands : A stringstream to be filled
  */
 void convertGroupsToMapFile(std::vector<std::vector<int>> groups,
