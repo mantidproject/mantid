@@ -35,12 +35,12 @@ def determineChunking(filename, chunkSize):
 
     return strategy
 
-class AlignAndFocusFromFiles(DataProcessorAlgorithm):
+class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
         return "Diffraction\\Reduction"
 
     def name(self):
-        return "AlignAndFocusFromFiles"
+        return "AlignAndFocusPowderFromFiles"
 
     def summary(self):
         """
@@ -136,6 +136,8 @@ class AlignAndFocusFromFiles(DataProcessorAlgorithm):
                     Plus(LHSWorkspace=wkspname, RHSWorkspace=chunkname, OutputWorkspace=wkspname,
                          ClearRHSWorkspace=kwargs['PreserveEvents'])
                     DeleteWorkspace(Workspace=chunkname)
+                    if kwargs['PreserveEvents']:
+                        CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
             # end of inner loop
 
             # accumulate runs
@@ -145,12 +147,12 @@ class AlignAndFocusFromFiles(DataProcessorAlgorithm):
             else:
                 Plus(LHSWorkspace=finalname, RHSWorkspace=wkspname, OutputWorkspace=finalname,
                      ClearRHSWorkspace=kwargs['PreserveEvents'])
+                DeleteWorkspace(Workspace=wkspname)
                 if kwargs['PreserveEvents']:
                     CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
-                DeleteWorkspace(Workspace=wkspname)
 
         # set the output workspace
         self.setProperty('OutputWorkspace', mtd[finalname])
 
 # Register algorithm with Mantid.
-AlgorithmFactory.subscribe(AlignAndFocusFromFiles)
+AlgorithmFactory.subscribe(AlignAndFocusPowderFromFiles)
