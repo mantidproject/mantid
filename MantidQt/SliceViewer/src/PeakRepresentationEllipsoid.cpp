@@ -332,7 +332,7 @@ void PeakRepresentationEllipsoid::doDraw(
 }
 
 double PeakRepresentationEllipsoid::getZoomOutFactor() const {
-  return Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor;
+  return m_calculator->getZoomOutFactor();
 }
 }
 }

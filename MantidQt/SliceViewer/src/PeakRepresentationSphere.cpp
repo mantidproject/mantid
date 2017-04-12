@@ -1,13 +1,11 @@
 #include "MantidQtSliceViewer/PeakRepresentationSphere.h"
-#include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidKernel/V2D.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 
 #include <QPainter>
 
 namespace MantidQt {
 namespace SliceViewer {
-
-const double PeakRepresentationSphere::zoomOutFactor = 2.;
 
 PeakRepresentationSphere::PeakRepresentationSphere(
     const Mantid::Kernel::V3D &origin, const double &peakRadius,
@@ -85,7 +83,7 @@ void PeakRepresentationSphere::movePosition(
 /**
  * Setter for showing/hiding the background radius.
  * @param show: Flag indicating what to do.
-*/
+ */
 void PeakRepresentationSphere::showBackgroundRadius(const bool show) {
   m_showBackgroundRadius = show;
 }
@@ -96,16 +94,12 @@ void PeakRepresentationSphere::showBackgroundRadius(const bool show) {
 PeakBoundingBox PeakRepresentationSphere::getBoundingBox() const {
   using Mantid::Kernel::V2D;
 
-  Left left(m_origin.X() -
-            PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
-  Bottom bottom(m_origin.Y() -
-                PeakRepresentationSphere::zoomOutFactor *
-                    m_backgroundOuterRadius);
-  Right right(m_origin.X() +
-              PeakRepresentationSphere::zoomOutFactor *
-                  m_backgroundOuterRadius);
-  Top top(m_origin.Y() +
-          PeakRepresentationSphere::zoomOutFactor * m_backgroundOuterRadius);
+  auto zoomOutFactor = getZoomOutFactor();
+
+  Left left(m_origin.X() - zoomOutFactor * m_backgroundOuterRadius);
+  Bottom bottom(m_origin.Y() - zoomOutFactor * m_backgroundOuterRadius);
+  Right right(m_origin.X() + zoomOutFactor * m_backgroundOuterRadius);
+  Top top(m_origin.Y() + zoomOutFactor * m_backgroundOuterRadius);
   SlicePoint slicePoint(m_origin.Z());
 
   return PeakBoundingBox(left, right, top, bottom, slicePoint);
@@ -205,6 +199,10 @@ void PeakRepresentationSphere::doDraw(
     painter.fillPath(backgroundRadiusFill, backgroundColor.colorSphere);
   }
   painter.end();
+}
+
+double PeakRepresentationSphere::getZoomOutFactor() const {
+  return zoomOutFactor;
 }
 }
 }

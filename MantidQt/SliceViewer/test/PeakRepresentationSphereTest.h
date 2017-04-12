@@ -1,9 +1,9 @@
 #ifndef SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 #define SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PeakRepresentationSphere.h"
 #include "MockObjects.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::SliceViewer;
 using namespace testing;
@@ -183,18 +183,15 @@ public:
     const auto boundingBox = peak.getBoundingBox();
 
     // Assert
+    auto zoomOutFactor = peak.getZoomOutFactor();
     const double expectedLeft(origin.X() -
-                              PeakRepresentationSphere::zoomOutFactor *
-                                  outerBackgroundRadius);
+                              zoomOutFactor * outerBackgroundRadius);
     const double expectedBottom(origin.Y() -
-                                PeakRepresentationSphere::zoomOutFactor *
-                                    outerBackgroundRadius);
+                                zoomOutFactor * outerBackgroundRadius);
     const double expectedRight(origin.X() +
-                               PeakRepresentationSphere::zoomOutFactor *
-                                   outerBackgroundRadius);
+                               zoomOutFactor * outerBackgroundRadius);
     const double expectedTop(origin.Y() +
-                             PeakRepresentationSphere::zoomOutFactor *
-                                 outerBackgroundRadius);
+                             zoomOutFactor * outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
@@ -228,18 +225,15 @@ public:
     auto boundingBox = peak.getBoundingBox();
 
     // Assert
+    auto zoomOutFactor = peak.getZoomOutFactor();
     const double expectedLeft(origin.X() -
-                              PeakRepresentationSphere::zoomOutFactor *
-                                  outerBackgroundRadius);
+                              zoomOutFactor * outerBackgroundRadius);
     const double expectedBottom(origin.Y() -
-                                PeakRepresentationSphere::zoomOutFactor *
-                                    outerBackgroundRadius);
+                                zoomOutFactor * outerBackgroundRadius);
     const double expectedRight(origin.X() +
-                               PeakRepresentationSphere::zoomOutFactor *
-                                   outerBackgroundRadius);
+                               zoomOutFactor * outerBackgroundRadius);
     const double expectedTop(origin.Y() +
-                             PeakRepresentationSphere::zoomOutFactor *
-                                 outerBackgroundRadius);
+                             zoomOutFactor * outerBackgroundRadius);
 
     TS_ASSERT_EQUALS(expectedLeft, boundingBox.left());
     TS_ASSERT_EQUALS(expectedRight, boundingBox.right());
@@ -265,7 +259,7 @@ public:
         for (int z = 0; z < sizeInAxis; ++z) {
           Mantid::Kernel::V3D peakOrigin(x, y, z);
           m_peaks.push_back(boost::make_shared<
-              PeakRepresentationSphereExposeProtectedWrapper>(
+                            PeakRepresentationSphereExposeProtectedWrapper>(
               peakOrigin, radius, innerBackgroundRadius,
               outerBackgroundRadius));
         }

@@ -1,13 +1,13 @@
 #ifndef SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
 #define SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
-#include <unordered_map>
+#include "MantidKernel/V3D.h"
+#include "MantidQtSliceViewer/EllipsoidPlaneSliceCalculator.h"
 #include <algorithm>
+#include <cxxtest/TestSuite.h>
 #include <math.h>
+#include <unordered_map>
 
 namespace {
 bool radiusIsInListOfRadii(double radius, const std::vector<double> &radii) {
@@ -50,8 +50,8 @@ public:
 
     // Assert
 
-    std::vector<std::pair<int, int>> indices = {
-        {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
+    std::vector<std::pair<int, int>> indices = {{0, 1}, {0, 2}, {1, 0},
+                                                {1, 2}, {2, 0}, {2, 1}};
 
     for (const auto &index : indices) {
       TSM_ASSERT("Non-diagonal element should be zero",
@@ -427,22 +427,12 @@ public:
         directions, radii, origin);
 
     // Assert
-    const double expectedLeft =
-        origin[0] -
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[0];
-    const double expectedRight =
-        origin[0] +
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[0];
-    const double expectedTop =
-        origin[1] +
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[1];
-    const double expectedBottom =
-        origin[1] -
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[1];
+    Mantid::SliceViewer::EllipsoidPlaneSliceCalculator calc;
+    const auto zoomOutFactor = calc.getZoomOutFactor();
+    const double expectedLeft = origin[0] - zoomOutFactor * radii[0];
+    const double expectedRight = origin[0] + zoomOutFactor * radii[0];
+    const double expectedTop = origin[1] + zoomOutFactor * radii[1];
+    const double expectedBottom = origin[1] - zoomOutFactor * radii[1];
     const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;
@@ -474,22 +464,16 @@ public:
         directions, radii, origin);
 
     // Assert
+    Mantid::SliceViewer::EllipsoidPlaneSliceCalculator calc;
+    const auto zoomOutFactor = calc.getZoomOutFactor();
     const double expectedLeft =
-        origin[0] -
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[0] * std::cos(angleIn);
+        origin[0] - zoomOutFactor * radii[0] * std::cos(angleIn);
     const double expectedRight =
-        origin[0] +
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[0] * std::cos(angleIn);
+        origin[0] + zoomOutFactor * radii[0] * std::cos(angleIn);
     const double expectedTop =
-        origin[1] +
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[1] * std::cos(angleIn);
+        origin[1] + zoomOutFactor * radii[1] * std::cos(angleIn);
     const double expectedBottom =
-        origin[1] -
-        Mantid::SliceViewer::EllipsoidPlaneSliceCalculator::zoomOutFactor *
-            radii[1] * std::cos(angleIn);
+        origin[1] - zoomOutFactor * radii[1] * std::cos(angleIn);
     const double expectedSlicePoint = origin[2];
 
     const double delta = 1e-5;

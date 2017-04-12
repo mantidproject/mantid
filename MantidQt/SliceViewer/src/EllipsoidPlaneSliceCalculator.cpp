@@ -225,7 +225,6 @@ bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
 namespace Mantid {
 namespace SliceViewer {
 
-const double EllipsoidPlaneSliceCalculator::zoomOutFactor = 2.;
 
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
@@ -464,18 +463,16 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   using namespace MantidQt::SliceViewer;
 
   // Corners
+  EllipsoidPlaneSliceCalculator calc;
+  auto zoomOutFactor = calc.getZoomOutFactor();
   const double leftValue =
-      originEllipsoid.X() -
-      EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[0];
+      originEllipsoid.X() - zoomOutFactor * projectionLengths[0];
   const double rightValue =
-      originEllipsoid.X() +
-      EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[0];
+      originEllipsoid.X() + zoomOutFactor * projectionLengths[0];
   const double bottomValue =
-      originEllipsoid.Y() -
-      EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[1];
+      originEllipsoid.Y() - zoomOutFactor * projectionLengths[1];
   const double topValue =
-      originEllipsoid.Y() +
-      EllipsoidPlaneSliceCalculator::zoomOutFactor * projectionLengths[1];
+      originEllipsoid.Y() + zoomOutFactor * projectionLengths[1];
 
   Left left(leftValue);
   Right right(rightValue);
@@ -484,6 +481,10 @@ MantidQt::SliceViewer::PeakBoundingBox getPeakBoundingBoxForEllipsoid(
   SlicePoint slicePoint(originEllipsoid.Z());
 
   return PeakBoundingBox(left, right, top, bottom, slicePoint);
+}
+
+double EllipsoidPlaneSliceCalculator::getZoomOutFactor() const {
+  return m_zoomOutFactor;
 }
 }
 }

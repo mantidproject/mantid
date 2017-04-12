@@ -60,7 +60,7 @@ public:
    * The zoom-out factor ensures that the sphere can be viewed
    * in its entirety in full-screen or default mode.
    **/
-  static const double zoomOutFactor;
+  double getZoomOutFactor() const;
 
 protected:
   std::shared_ptr<PeakPrimitives> getDrawingInformation(
@@ -103,6 +103,8 @@ private:
   optional_double m_backgroundInnerRadiusAtDistance;
   /// Outer radius at distance.
   optional_double m_backgroundOuterRadiusAtDistance;
+  /// Zoom out factor
+  const double zoomOutFactor = 2.;
 };
 }
 }

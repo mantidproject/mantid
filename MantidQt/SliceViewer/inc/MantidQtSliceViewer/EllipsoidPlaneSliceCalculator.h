@@ -56,9 +56,7 @@ public:
   getSlicePlaneInfo(std::vector<Mantid::Kernel::V3D> directions,
                     std::vector<double> radii,
                     Mantid::Kernel::V3D originEllipsoid, double zPlane) const;
-
-  static const double zoomOutFactor;
-
+  double getZoomOutFactor() const;
 private:
   SliceEllipseInfo
   getSolutionForEllipsoid(const Kernel::Matrix<double> &m, double zPlane,
@@ -66,6 +64,7 @@ private:
 
   bool checkIfIsEllipse(const Kernel::Matrix<double> &m) const;
   bool checkIfIsCircle(const Kernel::Matrix<double> &m) const;
+  const double m_zoomOutFactor = 2.;
 };
 }
 }
