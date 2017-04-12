@@ -89,8 +89,6 @@ private:
 
   void calculateFirstDerivative(bool is_event_ws);
 
-  void smoothOutputData(const std::string &smooth_alg);
-
   void setupMetaData(const std::string &log_name, const std::string &time_unit,
                      const bool &export_epoch);
 };

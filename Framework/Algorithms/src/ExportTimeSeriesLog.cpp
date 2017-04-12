@@ -442,7 +442,6 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
  * @param log_name
  * @param time_unit
  * @param export_epoch
- * @param smoothed
  */
 void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
                                         const std::string &time_unit,
