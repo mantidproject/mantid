@@ -160,7 +160,7 @@ public:
 
     int64_t t0ns = newlog->nthTime(0).totalNanoseconds();
     int64_t t1ns = newlog->nthTime(1).totalNanoseconds();
-    TS_ASSERT_EQUALS(t1ns - t0ns, static_cast<int64_t>(1.E9));
+    TS_ASSERT_EQUALS(t1ns - t0ns, static_cast<int64_t>(1.E8));
   }
 
   template <typename T>
