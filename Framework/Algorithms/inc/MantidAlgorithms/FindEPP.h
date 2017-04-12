@@ -9,8 +9,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** FindEPP : Performs Gaussian fit of all spectra to find the elastic peak
- position.
+/** Performs Gaussian fits over each spectrum to find the Elastic Peak
+ Position (EPP).
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -43,7 +43,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  void fitGaussian(size_t);
+  void fitGaussian(int64_t);
+  void initWorkspace();
 
   Mantid::API::MatrixWorkspace_sptr m_inWS;
   Mantid::API::ITableWorkspace_sptr m_outWS;
