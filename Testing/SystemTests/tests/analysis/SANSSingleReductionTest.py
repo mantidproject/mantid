@@ -4,11 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 
-import mantid
+import mantid  # noqa
 from mantid.api import AlgorithmManager
 from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
 from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality, RangeStepType, FitModeForMerge)
+from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 
@@ -52,7 +52,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         can_direct_workspace = load_alg.getProperty("CanDirectWorkspace").value
 
         return sample_scatter, sample_scatter_monitor_workspace, transmission_workspace, direct_workspace, \
-               can_scatter_workspace, can_scatter_monitor_workspace, can_transmission_workspace, can_direct_workspace
+               can_scatter_workspace, can_scatter_monitor_workspace, can_transmission_workspace, can_direct_workspace  # noqa
 
     def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
                               can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
@@ -155,8 +155,8 @@ class SANSSingleReductionTest(unittest.TestCase):
         state = user_file_director.construct()
 
         # Load the sample workspaces
-        sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
-        can_transmission, can_direct = self._load_workspace(state)
+        sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
+        can_transmission, can_direct = self._load_workspace(state)  # noqa
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
@@ -208,7 +208,7 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
-        can_transmission, can_direct = self._load_workspace(state)
+        can_transmission, can_direct = self._load_workspace(state)  # noqa
 
         # Act
         output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
@@ -262,7 +262,7 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, \
-        can, can_monitor, can_transmission, can_direct = self._load_workspace(state)
+        can, can_monitor, can_transmission, can_direct = self._load_workspace(state)  # noqa
 
         # Act
         output_settings = {"OutputWorkspaceMerged": EMPTY_NAME}
@@ -324,7 +324,7 @@ class SANSSingleReductionTest(unittest.TestCase):
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
-        can_transmission, can_direct = self._load_workspace(state)
+        can_transmission, can_direct = self._load_workspace(state)  # noqa
 
         # Act
         output_settings = {"OutputWorkspaceLAB": EMPTY_NAME}
