@@ -41,6 +41,7 @@ ISIS Reflectometry
   - Ctrl+X copies the selected row(s) to the clipboard and deletes them.
 
 - A brief description about the columns in the table can be now accessed by using the *What's this* tool (last tool in the toolbar) and clicking on the column headers.
+- Fixed a bug in which the `IvsQ_binned` output workspaces were stitched instead of `IvsQ` workspaces.
 
 ISIS Reflectometry (Old)
 ########################
