@@ -13,7 +13,7 @@ from sans.command_interface.command_interface_state_director import (CommandInte
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import (find_sans_file, find_full_file_path)
-from sans.common.enums import (RebinType, DetectorType, FitType, RangeStepType, ReductionDimensionality,
+from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDimensionality,
                                ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
@@ -71,7 +71,6 @@ def deprecated(obj):
                   "or classes."
 
 
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Unnecessary commands
 # ----------------------------------------------------------------------------------------------------------------------
@@ -94,7 +93,6 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     config['default.instrument'] = 'LOQ'
 
 
-
 def LARMOR(idf_path = None):
     config['default.instrument'] = 'LARMOR'
 
@@ -104,8 +102,8 @@ def LARMOR(idf_path = None):
 # ----------------------------------------------------------------------------------------------------------------------
 @deprecated
 def _SetWavelengthRange(start, end):
-    _ = start
-    _ = end
+    _ = start  # noqa
+    _ = end  # noqa
     pass
 
 
@@ -128,17 +126,17 @@ def TransWorkspace(sample, can=None):
         @param sample the workspace to use for the sample
         @param can calculated transmission for the can
     """
-    _, _ = sample, can
+    _, _ = sample, can  # noqa
     raise NotImplementedError("The TransWorkspace command is not implemented in SANS v2.")
 
 
 def createColetteScript(inputdata, format, reduced, centreit, plotresults, csvfile='', savepath=''):
-    _, _, _, _, _, _, _ = inputdata, format, reduced, centreit, plotresults, csvfile, savepath
+    _, _, _, _, _, _, _ = inputdata, format, reduced, centreit, plotresults, csvfile, savepath  # noqa
     raise NotImplementedError("The creatColleteScript command is not implemented in SANS v2.")
 
 
 def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,  find_direction=None):
-    _, _, _, _, _, _, _ = rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction
+    _, _, _, _, _, _, _ = rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction  # noqa
     raise NotImplementedError("The FindBeamCentre command is not implemented in SANS v2.")
 
 
@@ -153,7 +151,7 @@ def AssignSample(sample_run, reload=True, period=ALL_PERIODS):
     @param reload: must be set to True
     @param period: the period (entry) number to load, default is the first period
     """
-    _ = reload
+    _ = reload  # noqa
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period = int(period)
     period = ALL_PERIODS if period == -1 else period
@@ -181,7 +179,7 @@ def AssignCan(can_run, reload=True, period=ALL_PERIODS):
     @param reload: must be set to True
     @param period: the period (entry) number to load, default is the first period
     """
-    _ = reload
+    _ = reload  # noqa
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period = int(period)
     period = ALL_PERIODS if period == -1 else period
@@ -212,7 +210,7 @@ def TransmissionSample(sample, direct, reload=True,
     @param period_t: the entry number of the transmission run (default single entry file)
     @param period_d: the entry number of the direct run (default single entry file)
     """
-    _ = reload
+    _ = reload  # noqa
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period_t = int(period_t)
     period_d = int(period_d)
@@ -242,7 +240,7 @@ def TransmissionCan(can, direct, reload=True, period_t=-1, period_d=-1):
     @param period_t: the entry number of the transmission run (default single entry file)
     @param period_d: the entry number of the direct run (default single entry file)
     """
-    _ = reload
+    _ = reload  # noqa
     # First of all the default for all periods used to be -1. If we encounter this then set periods to ALL_PERIODS
     period_t = int(period_t)
     period_d = int(period_d)
@@ -573,7 +571,7 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
     @param quiet: if True then no message will be logged.
     @param reducer: legacy parameter
     """
-    _ = reducer
+    _ = reducer  # noqa
     rmin = float(rmin)
     rmax = float(rmax)
     if not quiet:
@@ -916,7 +914,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         director.remove_last_scatter_sample()
 
         if (BatchReductionEntry.SampleTransmission in list(parsed_batch_entry.keys()) and
-            BatchReductionEntry.SampleDirect in list(parsed_batch_entry.keys())):
+            BatchReductionEntry.SampleDirect in list(parsed_batch_entry.keys())):  # noqa
             director.remove_last_sample_transmission_and_direct()
 
         if BatchReductionEntry.CanScatter in list(parsed_batch_entry.keys()):

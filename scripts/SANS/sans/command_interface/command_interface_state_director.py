@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from sans.common.enums import (serializable_enum, ReductionDimensionality, DetectorType, DataType)
+from sans.common.enums import (serializable_enum, DataType)
 from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
 from sans.state.data import get_data_builder
 from sans.user_file.user_file_parser import (UserFileParser)
@@ -12,6 +12,7 @@ from sans.user_file.user_file_common import (MonId, monitor_spectrum, OtherId, S
 # ----------------------------------------------------------------------------------------------------------------------
 # Commands
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 # ------------------
 # IDs for commands. We use here serializable_enum since enum is not available in the current Python configuration.
@@ -147,8 +148,7 @@ class CommandInterfaceStateDirector(object):
         self._set_data_element(data_builder.set_sample_transmission, data_builder.set_sample_transmission_period,
                                DataCommandId.sample_transmission, data_commands)
         self._set_data_element(data_builder.set_sample_direct, data_builder.set_sample_direct_period,
-                               DataCommandId.sample_direct, data_commands)
-        
+                               DataCommandId.sample_direct, data_commands) 
         self._set_data_element(data_builder.set_can_scatter, data_builder.set_can_scatter_period,
                                DataCommandId.can_scatter, data_commands)
         self._set_data_element(data_builder.set_can_transmission, data_builder.set_can_transmission_period,
@@ -357,12 +357,12 @@ class CommandInterfaceStateDirector(object):
             self._processed_state_settings = {}
 
     def _process_clean(self, command):
-        _ = command
+        _ = command  # noqa
         raise RuntimeError("Trying the process a Clean command. The clean command should have removed itself and "
                            "all previous commands. If it is still here, then this is a bug")
 
     def _process_reduction_dimensionality(self, command):
-        _ = command
+        _ = command  # noqa
         reduction_dimensionality = command.values[0]
         new_state_entries = {OtherId.reduction_dimensionality: reduction_dimensionality}
         self.add_to_processed_state_settings(new_state_entries)
