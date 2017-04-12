@@ -383,7 +383,7 @@ void LoadVulcanCalFile::processOffsets(
       boost::split(terms, pname, boost::is_any_of("("));
       vector<string> terms2;
       boost::split(terms2, terms[0], boost::is_any_of("bank"));
-      int bank = atoi(terms2.back().c_str());
+      int bank = std::stoi(terms2.back());
       set_bankID.insert(bank);
 
       map_verify.emplace(pid, make_pair(true, bank));
