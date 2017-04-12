@@ -566,6 +566,7 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
     }
 
     if (minvalue > maxvalue) {
+      // bad case, minimum value is larger than maximum value
       stringstream errmsg;
       errmsg << "Fatal Error: Input minimum log value " << minvalue
              << " is larger than maximum log value " << maxvalue;
@@ -720,6 +721,7 @@ void GenerateEventsFilter::processMultipleValueFilters(
   size_t index = 0;
 
   double curvalue = minvalue;
+  g_log.notice("[DB Flag 1]");
   while (curvalue - valuetolerance < maxvalue) {
     indexwsindexmap.emplace(index, wsindex);
 
@@ -731,17 +733,23 @@ void GenerateEventsFilter::processMultipleValueFilters(
 
     // Workgroup information
     std::stringstream ss;
-    ss << "Log " << m_dblLog->name() << " From " << lowbound << " To "
-       << upbound << "  Value-change-direction ";
+    ss << "Log." << m_dblLog->name() << ".From_" << lowbound << "_To_"
+       << upbound << "_Value-change-direction:";
     if (filterincrease && filterdecrease) {
-      ss << " both ";
+      ss << "both ";
     } else if (filterincrease) {
-      ss << " increase";
+      ss << "increase";
     } else {
-      ss << " decrease";
+      ss << "decrease";
     };
     API::TableRow newrow = m_filterInfoWS->appendRow();
+    g_log.notice() << "[DB] Info " << ss.str() << "\n";
     newrow << wsindex << ss.str();
+
+    size_t rowcount = m_filterInfoWS->rowCount();
+    g_log.warning() << "Row " << rowcount - 1 << ": ";
+    std::string info_str =  m_filterInfoWS->cell<std::string>(rowcount-1, 1);
+    g_log.warning() << info_str << "\n";
 
     curvalue += valueinterval;
     wsindex++;
