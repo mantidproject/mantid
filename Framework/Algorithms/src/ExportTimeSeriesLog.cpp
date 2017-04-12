@@ -76,16 +76,6 @@ void ExportTimeSeriesLog::init() {
   declareProperty("IsEventWorkspace", true, "If set to true, output workspace "
                                             "is EventWorkspace.  Otherwise, it "
                                             "is Workspace2D.");
-
-  // smoothing data
-  declareProperty("SmoothData", false, "If specified, then the data to export "
-                                       "is smoothed by specified smoothing "
-                                       "algorithm.");
-  std::vector<std::string> smooth_option{"SmoothData", "SmoothNeighbour"};
-  declareProperty(
-      "SmoothAlgorithm", "SmoothData",
-      boost::make_shared<Kernel::StringListValidator>(smooth_option),
-      "Mantid algorithm is used to smooth the exported TimeSeriesProperty.");
 }
 
 /** Main execution
@@ -103,25 +93,18 @@ void ExportTimeSeriesLog::exec() {
   int numberoutputentries = getProperty("NumberEntriesExport");
   bool outputeventworkspace = getProperty("IsEventWorkspace");
 
-  bool tosmooth = getProperty("SmoothData");
-  std::string smoothalgorithm = getProperty("SmoothAlgorithm");
-
   bool cal1stderiv = getProperty("CalculateFirstDerivative");
 
   // Call the main
   exportLog(logname, time_unit, start_time, stop_time, exportEpochTime,
             outputeventworkspace, numberoutputentries, cal1stderiv);
 
-  // smooth data
-  if (tosmooth)
-    smoothOutputData(smoothalgorithm);
-
   // calcualte first derivative
   if (cal1stderiv)
     calculateFirstDerivative(outputeventworkspace);
 
   // set up the sample log values for meta information
-  setupMetaData(logname, time_unit, exportEpochTime, tosmooth);
+  setupMetaData(logname, time_unit, exportEpochTime);
 
   // 3. Output
   setProperty("OutputWorkspace", m_outWS);
@@ -452,15 +435,17 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
   return;
 }
 
-void ExportTimeSeriesLog::smoothOutputData(const std::string &smooth_alg) {
-
-  return;
-}
-
+/** Set up the meta data such as sample log name, unit of time, whether the time is epoch to
+ *   the output workspace
+ * @brief ExportTimeSeriesLog::setupMetaData
+ * @param log_name
+ * @param time_unit
+ * @param export_epoch
+ * @param smoothed
+ */
 void ExportTimeSeriesLog::setupMetaData(const std::string &log_name,
                                         const std::string &time_unit,
-                                        const bool &export_epoch,
-                                        const bool &smoothed) {
+                                        const bool &export_epoch) {
 
   m_outWS->mutableRun().addProperty("SampleLogName", log_name, true);
   m_outWS->mutableRun().addProperty("TimeUnit", time_unit, true);
