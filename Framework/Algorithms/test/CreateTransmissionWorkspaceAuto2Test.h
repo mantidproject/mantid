@@ -94,6 +94,10 @@ public:
         workspaceHistory.getAlgorithmHistory(0)->getChildAlgorithmHistory(0);
     auto vecPropertyHistories = workerAlgHistory->getProperties();
 
+    const double startOverlap =
+        findPropertyValue<double>(vecPropertyHistories, "StartOverlap");
+    const double endOverlap =
+        findPropertyValue<double>(vecPropertyHistories, "EndOverlap");
     const double wavelengthMin =
         findPropertyValue<double>(vecPropertyHistories, "WavelengthMin");
     const double wavelengthMax =
@@ -115,6 +119,10 @@ public:
                  boost::is_any_of(":"));
 
     auto inst = m_dataWS->getInstrument();
+    TS_ASSERT_EQUALS(inst->getNumberParameter("TransRunStartOverlap").at(0),
+                     startOverlap);
+    TS_ASSERT_EQUALS(inst->getNumberParameter("TransRunEndOverlap").at(0),
+                     endOverlap);
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMin").at(0),
                      wavelengthMin);
     TS_ASSERT_EQUALS(inst->getNumberParameter("LambdaMax").at(0),

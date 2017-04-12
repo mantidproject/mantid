@@ -36,7 +36,14 @@ public:
     // Visit everything
     visitee->registerContents(visitor);
 
-    TSM_ASSERT_EQUALS("Should have registered 4 components", visitor.size(), 4);
+    size_t expectedSize = 0;
+    ++expectedSize; // source
+    ++expectedSize; // sample
+    ++expectedSize; // Detector
+    ++expectedSize; // instrument
+
+    TSM_ASSERT_EQUALS("Should have registered 4 components", visitor.size(),
+                      expectedSize);
   }
 
   void test_visitor_detector_indexes_check() {
@@ -129,6 +136,66 @@ public:
     TS_ASSERT_EQUALS(ranges[2].first, 0);
     TS_ASSERT_EQUALS(ranges[2].second, 1);
   }
+
+  void test_visitor_drops_detectors_without_id() {
+    /*
+     We have to go via DetectorInfo::indexOf to get the index of a detector.
+     if this throws because the detector has an invalid id, we are forced to
+     drop it.
+
+     Some IDFs i.e. SNAP have montiors with detector ids <  0.
+    */
+
+    // Create a very basic instrument to visit
+    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
+                                           V3D(10, 0, 0) /*sample pos*/
+                                           ,
+                                           V3D(11, 0, 0) /*detector position*/);
+
+    // Create the visitor. Note any access to the indexOf lambda will throw for
+    // detectors.
+    InfoComponentVisitor visitor(1, [](const Mantid::detid_t) -> size_t {
+      throw std::out_of_range("");
+    });
+
+    // Visit everything
+    visitee->registerContents(visitor);
+
+    size_t expectedSize = 0;
+    ++expectedSize; // source
+    ++expectedSize; // sample
+    ++expectedSize; // instrument
+    // Note no detector counted
+    TS_ASSERT_EQUALS(visitor.size(), expectedSize);
+  }
 };
 
+class InfoComponentVisitorTestPerformance : public CxxTest::TestSuite {
+private:
+  const int m_nPixels = 1000;
+  boost::shared_ptr<Mantid::Geometry::Instrument> m_instrument;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InfoComponentVisitorTestPerformance *createSuite() {
+    return new InfoComponentVisitorTestPerformance();
+  }
+  static void destroySuite(InfoComponentVisitorTestPerformance *suite) {
+    delete suite;
+  }
+
+  InfoComponentVisitorTestPerformance() {
+    m_instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, m_nPixels, 1 /*sample-bank distance*/);
+  }
+
+  void test_process_rectangular_instrument() {
+    InfoComponentVisitor visitor(
+        m_nPixels * m_nPixels,
+        [](const Mantid::detid_t id) { return static_cast<size_t>(id); });
+    m_instrument->registerContents(visitor);
+    TS_ASSERT(visitor.size() >= size_t(m_nPixels * m_nPixels));
+  }
+};
 #endif /* MANTID_API_INFOCOMPONENTVISITORTEST_H_ */

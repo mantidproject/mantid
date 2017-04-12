@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/RectangularDetectorPixel.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -50,7 +51,8 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
       m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame),
-      m_detectorInfo(instr->m_detectorInfo) {
+      m_detectorInfo(instr->m_detectorInfo),
+      m_componentInfo(instr->m_componentInfo) {
   m_map_nonconst->setInstrument(m_instr.get());
 }
 
@@ -69,7 +71,10 @@ Instrument::Instrument(const Instrument &instr)
       m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo),
       m_referenceFrame(instr.m_referenceFrame),
-      m_detectorInfo(instr.m_detectorInfo) {
+      m_detectorInfo(instr.m_detectorInfo),
+      m_componentInfo(instr.m_componentInfo)
+
+{
   // Now we need to fill the detector, source and sample caches with pointers
   // into the new instrument
   std::vector<IComponent_const_sptr> children;
@@ -1233,10 +1238,55 @@ const Beamline::DetectorInfo &Instrument::detectorInfo() const {
   return *m_detectorInfo;
 }
 
+/**
+ * @brief Instrument::hasComponentInfo
+ * @return True only if a ComponentInfo has been set
+ */
+bool Instrument::hasComponentInfo() const {
+  return static_cast<bool>(m_componentInfo);
+}
+
+/**
+ * @brief Instrument::componentInfo
+ * @return const ref to a ComponentInfo. Throws a std::runtime_error if
+ * not set.
+ */
+const Beamline::ComponentInfo &Instrument::componentInfo() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error("Cannot return reference to NULL ComponentInfo");
+  }
+  return *m_componentInfo;
+}
+
+/**
+ * @brief Instrument::componentIds
+ * @return const ref to a vector of ComponentIds. Throws a std::runtime_error if
+ * Component Info not set.
+ */
+const std::vector<Geometry::ComponentID> &Instrument::componentIds() const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "Cannot return component ids with a NULL ComponentInfo");
+  }
+  return m_componentIds;
+}
+
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
   m_detectorInfo = std::move(detectorInfo);
+}
+
+/**
+ * @brief Instrument::setComponentInfo
+ * @param componentInfo : ComponentInfo to store
+ * @param componentIds : ComponentIds to store
+ */
+void Instrument::setComponentInfo(
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
+    std::vector<Geometry::ComponentID> componentIds) {
+  m_componentInfo = std::move(componentInfo);
+  m_componentIds = std::move(componentIds);
 }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
