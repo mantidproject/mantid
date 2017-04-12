@@ -55,8 +55,6 @@ class DeltaPDF3D(PythonAlgorithm):
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
-        self.declareProperty(IntArrayProperty("FFTaxes", [Property.EMPTY_INT]),
-                             "Axes which to perform FFT over. Empty will do all.")
 
     def validateInputs(self):
         issues = dict()
@@ -182,11 +180,7 @@ class DeltaPDF3D(PythonAlgorithm):
         signal[np.isnan(signal)]=0
         signal[np.isinf(signal)]=0
 
-        fft_axes = self.getProperty("FFTaxes").value
-        if fft_axes[0] == Property.EMPTY_INT:
-            fft_axes=None
-
-        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal,axes=fft_axes),axes=fft_axes),axes=fft_axes).real
+        signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal))).real
 
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", signal)
