@@ -435,7 +435,8 @@ void ExportTimeSeriesLog::calculateFirstDerivative(bool is_event_ws) {
   return;
 }
 
-/** Set up the meta data such as sample log name, unit of time, whether the time is epoch to
+/** Set up the meta data such as sample log name, unit of time, whether the time
+ * is epoch to
  *   the output workspace
  * @brief ExportTimeSeriesLog::setupMetaData
  * @param log_name

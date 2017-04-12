@@ -107,23 +107,22 @@ public:
   /** Test to add a sample log with values specified by a MatrixWorkspace
    * @brief test_matrix_workspace
    */
-  void test_matrix_workspace()
-  {
+  void test_matrix_workspace() {
     // create the workspace to add sample log to
     MatrixWorkspace_sptr target_ws =
         WorkspaceCreationHelper::create2DWorkspace(10, 10);
 
-    // create workspace with time series property's value. which has 2 spectra and 10 values
+    // create workspace with time series property's value. which has 2 spectra
+    // and 10 values
     MatrixWorkspace_sptr ts_ws =
         WorkspaceCreationHelper::create2DWorkspace(2, 10);
 
-    for (size_t i = 0; i < 10; ++i)
-    {
+    for (size_t i = 0; i < 10; ++i) {
       // for X
       for (size_t ws_index = 0; ws_index < 2; ++ws_index)
         ts_ws->mutableX(ws_index)[i] = static_cast<double>(i) * 0.1;
       // for Y
-      ts_ws->mutableY(1)[i] = 3. * static_cast<double>(i*i) + 0.5;
+      ts_ws->mutableY(1)[i] = 3. * static_cast<double>(i * i) + 0.5;
     }
 
     // add the workspace to the ADS
@@ -152,7 +151,9 @@ public:
 
     // check result
     TS_ASSERT(target_ws->run().hasProperty("NewLog"));
-    TimeSeriesProperty<double> *newlog = dynamic_cast<TimeSeriesProperty<double> *>(target_ws->run().getProperty("NewLog"));
+    TimeSeriesProperty<double> *newlog =
+        dynamic_cast<TimeSeriesProperty<double> *>(
+            target_ws->run().getProperty("NewLog"));
     TS_ASSERT(newlog);
     TS_ASSERT_EQUALS(newlog->size(), 10);
     TS_ASSERT_DELTA(newlog->nthValue(1), 3.5, 0.0001);
@@ -160,8 +161,6 @@ public:
     int64_t t0ns = newlog->nthTime(0).totalNanoseconds();
     int64_t t1ns = newlog->nthTime(1).totalNanoseconds();
     TS_ASSERT_EQUALS(t1ns - t0ns, static_cast<int64_t>(1.E9));
-
-
   }
 
   template <typename T>
