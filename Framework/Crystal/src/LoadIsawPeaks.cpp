@@ -240,26 +240,26 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (s.compare("3") != 0)
     throw std::runtime_error("Empty peak line encountered.");
 
-  seqNum = atoi(getWord(in, false).c_str());
+  seqNum = std::stoi(getWord(in, false));
 
-  h = strtod(getWord(in, false).c_str(), nullptr);
-  k = strtod(getWord(in, false).c_str(), nullptr);
-  l = strtod(getWord(in, false).c_str(), nullptr);
+  h = std::stod(getWord(in, false), nullptr);
+  k = std::stod(getWord(in, false), nullptr);
+  l = std::stod(getWord(in, false), nullptr);
 
-  col = strtod(getWord(in, false).c_str(), nullptr);
-  row = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // chan
-  strtod(getWord(in, false).c_str(), nullptr); // L2
-  strtod(getWord(in, false).c_str(), nullptr); // ScatAng
+  col = std::stod(getWord(in, false), nullptr);
+  row = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // chan
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // L2
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // ScatAng
 
-  strtod(getWord(in, false).c_str(), nullptr); // Az
-  wl = strtod(getWord(in, false).c_str(), nullptr);
-  strtod(getWord(in, false).c_str(), nullptr); // D
-  IPK = strtod(getWord(in, false).c_str(), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // Az
+  wl = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stod(getWord(in, false), nullptr)); // D
+  IPK = std::stod(getWord(in, false), nullptr);
 
-  Inti = strtod(getWord(in, false).c_str(), nullptr);
-  SigI = strtod(getWord(in, false).c_str(), nullptr);
-  static_cast<void>(atoi(getWord(in, false).c_str())); // iReflag
+  Inti = std::stod(getWord(in, false), nullptr);
+  SigI = std::stod(getWord(in, false), nullptr);
+  UNUSED_ARG(std::stoi(getWord(in, false))); // iReflag
 
   // Finish the line and get the first word of next line
   readToEndOfLine(in, true);
@@ -352,13 +352,13 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
   if (s.compare(std::string("1")) != 0)
     return s;
 
-  run = atoi(getWord(in, false).c_str());
-  detName = atoi(getWord(in, false).c_str());
-  chi = strtod(getWord(in, false).c_str(), nullptr);
-  phi = strtod(getWord(in, false).c_str(), nullptr);
+  run = std::stoi(getWord(in, false));
+  detName = std::stoi(getWord(in, false));
+  chi = std::stod(getWord(in, false), nullptr);
+  phi = std::stod(getWord(in, false), nullptr);
 
-  omega = strtod(getWord(in, false).c_str(), nullptr);
-  monCount = strtod(getWord(in, false).c_str(), nullptr);
+  omega = std::stod(getWord(in, false), nullptr);
+  monCount = std::stod(getWord(in, false), nullptr);
   readToEndOfLine(in, true);
 
   return getWord(in, false);

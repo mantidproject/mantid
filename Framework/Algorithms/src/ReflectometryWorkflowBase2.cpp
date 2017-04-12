@@ -431,6 +431,14 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
 void ReflectometryWorkflowBase2::populateMonitorProperties(
     IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
 
+  const auto startOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "StartOverlap", instrument, "TransRunStartOverlap");
+  if (startOverlap.is_initialized())
+    alg->setProperty("StartOverlap", startOverlap.get());
+  const auto endOverlap = checkForOptionalInstrumentDefault<double>(
+      this, "EndOverlap", instrument, "TransRunEndOverlap");
+  if (endOverlap.is_initialized())
+    alg->setProperty("EndOverlap", endOverlap.get());
   const auto monitorIndex = checkForOptionalInstrumentDefault<int>(
       this, "I0MonitorIndex", instrument, "I0MonitorIndex");
   if (monitorIndex.is_initialized())
@@ -512,6 +520,32 @@ std::string ReflectometryWorkflowBase2::populateProcessingInstructions(
     alg->setProperty("ProcessingInstructions", instructions);
     return instructions;
   }
+}
+
+/** Set transmission properties
+*
+* @param alg :: The algorithm to populate parameters for
+* @return Boolean, whether or not any transmission runs were found
+*/
+bool ReflectometryWorkflowBase2::populateTransmissionProperties(
+    IAlgorithm_sptr alg) const {
+
+  bool transRunsExist = false;
+
+  MatrixWorkspace_sptr firstWS = getProperty("FirstTransmissionRun");
+  if (firstWS) {
+    transRunsExist = true;
+    alg->setProperty("FirstTransmissionRun", firstWS);
+    MatrixWorkspace_sptr secondWS = getProperty("SecondTransmissionRun");
+    if (secondWS) {
+      alg->setProperty("SecondTransmissionRun", secondWS);
+      alg->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+      alg->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+      alg->setPropertyValue("Params", getPropertyValue("Params"));
+    }
+  }
+
+  return transRunsExist;
 }
 
 } // namespace Algorithms

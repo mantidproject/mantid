@@ -31,19 +31,17 @@ std::string FitParameter::getConstraint() const {
   double max = 0;
   if (m_constraintMin.compare("")) {
     if (foundMinPercentage != std::string::npos)
-      min =
-          atof(m_constraintMin.substr(0, m_constraintMin.size() - 1).c_str()) *
-          m_value * 0.01;
+      min = std::stod(m_constraintMin.substr(0, m_constraintMin.size() - 1)) *
+            m_value * 0.01;
     else
-      min = atof(m_constraintMin.c_str());
+      min = std::stod(m_constraintMin);
   }
   if (m_constraintMax.compare("")) {
     if (foundMaxPercentage != std::string::npos)
-      max =
-          atof(m_constraintMax.substr(0, m_constraintMax.size() - 1).c_str()) *
-          m_value * 0.01;
+      max = std::stod(m_constraintMax.substr(0, m_constraintMax.size() - 1)) *
+            m_value * 0.01;
     else
-      max = atof(m_constraintMax.c_str());
+      max = std::stod(m_constraintMax);
   }
 
   if (m_constraintMin.compare("") && m_constraintMax.compare("")) {
