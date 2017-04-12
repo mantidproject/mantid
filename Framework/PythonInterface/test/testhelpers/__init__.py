@@ -8,6 +8,9 @@ from six import iteritems
 # Define all mantid exported classes first
 import mantid
 
+#Add workspace creation namespace
+from . import WorkspaceCreationHelper
+
 # Define some pure-Python functions to add to the mix
 
 
