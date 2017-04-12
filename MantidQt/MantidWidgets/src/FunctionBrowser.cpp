@@ -1994,8 +1994,7 @@ void FunctionBrowser::initLocalParameter(const QString &parName) const {
     }
   } else {
     double value = getParameter(parName);
-    QVector<LocalParameterData> values(nData,
-                                       LocalParameterData(value));
+    QVector<LocalParameterData> values(nData, LocalParameterData(value));
     m_localParameterValues[parName] = values;
   }
 }
