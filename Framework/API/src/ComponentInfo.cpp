@@ -31,7 +31,7 @@ ComponentInfo::ComponentInfo(
    * Currently that check would break too much in Mantid.
    */
   const auto infoSize = m_componentInfo.size();
-  m_compIDToIndex.reserve(infoSize);
+  m_compIDToIndex->reserve(infoSize);
   for (size_t i = 0; i < infoSize; ++i) {
     (*m_compIDToIndex)[(*m_componentIds)[i]] = i;
   }
