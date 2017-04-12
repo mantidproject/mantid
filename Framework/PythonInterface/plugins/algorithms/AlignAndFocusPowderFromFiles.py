@@ -137,7 +137,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                          ClearRHSWorkspace=kwargs['PreserveEvents'])
                     DeleteWorkspace(Workspace=chunkname)
                     if kwargs['PreserveEvents']:
-                        CompressEvents(InputWorkspace=finalname, OutputWorkspace=finalname)
+                        CompressEvents(InputWorkspace=wkspname, OutputWorkspace=wkspname)
             # end of inner loop
 
             # accumulate runs
