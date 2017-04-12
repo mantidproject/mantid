@@ -315,7 +315,7 @@ def get_workspaces_from_load_algorithm(load_alg, workspace_to_count, workspace_n
     :return: a map of SANSDataType vs list of workspaces (to handle multi-period data)
     """
     workspace_output = {}
-    for workspace_type, workspace_name in workspace_name_dict.items():
+    for workspace_type, workspace_name in list(workspace_name_dict.items()):
         count_id = workspace_to_count[workspace_type]
         number_of_workspaces = load_alg.getProperty(count_id).value
         workspaces = []
@@ -481,13 +481,13 @@ def create_initial_reduction_packages(state, workspaces, monitors):
     for index in range(0, len(workspaces[SANSDataType.SampleScatter])):
         workspaces_for_package = {}
         # For each workspace type, i.e sample scatter, can transmission, etc. find the correct workspace
-        for workspace_type, workspace_list in workspaces.items():
+        for workspace_type, workspace_list in list(workspaces.items()):
             workspace = get_workspace_for_index(index, workspace_list)
             workspaces_for_package.update({workspace_type: workspace})
 
         # For each monitor type, find the correct workspace
         monitors_for_package = {}
-        for workspace_type, workspace_list in monitors.items():
+        for workspace_type, workspace_list in list(monitors.items()):
             workspace = get_workspace_for_index(index, workspace_list)
             monitors_for_package.update({workspace_type: workspace})
         state_copy = deepcopy(state)
@@ -584,13 +584,13 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
 
     # Set the input workspaces
     workspaces = reduction_package.workspaces
-    for workspace_type, workspace in workspaces.items():
+    for workspace_type, workspace in list(workspaces.items()):
         if workspace is not None:
             reduction_alg.setProperty(workspace_to_name[workspace_type], workspace)
 
     # Set the monitors
     monitors = reduction_package.monitors
-    for workspace_type, monitor in monitors.items():
+    for workspace_type, monitor in list(monitors.items()):
         if monitor is not None:
             reduction_alg.setProperty(workspace_to_monitor[workspace_type], monitor)
 
@@ -790,11 +790,11 @@ def delete_optimization_workspaces(reduction_packages):
 
     for reduction_package in reduction_packages:
         # Delete loaded workspaces
-        workspaces_to_delete = reduction_package.workspaces.values()
+        workspaces_to_delete = list(reduction_package.workspaces.values())
         _delete_workspaces(delete_alg, workspaces_to_delete)
 
         # Delete loaded monitors
-        monitors_to_delete = reduction_package.monitors.values()
+        monitors_to_delete = list(reduction_package.monitors.values())
         _delete_workspaces(delete_alg, monitors_to_delete)
 
         # Delete can optimizations
