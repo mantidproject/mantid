@@ -31,7 +31,8 @@ namespace SliceViewer {
   <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid : public PeakRepresentation {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakRepresentationEllipsoid
+    : public PeakRepresentation {
 public:
   PeakRepresentationEllipsoid(
       const Mantid::Kernel::V3D &origin, const std::vector<double> peakRadii,

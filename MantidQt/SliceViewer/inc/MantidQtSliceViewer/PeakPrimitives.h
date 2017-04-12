@@ -17,7 +17,8 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitives {
   int peakLineWidth;
 };
 
-struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesCross : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesCross
+    : public PeakPrimitives {
   PeakPrimitivesCross(Mantid::Kernel::V3D peakOrigin,
                       double peakOpacityAtDistance, int peakLineWidth,
                       int peakHalfCrossWidth, int peakHalfCrossHeight)
@@ -28,7 +29,8 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesCross : public PeakPrimitiv
   int peakHalfCrossHeight;
 };
 
-struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitiveCircle : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitiveCircle
+    : public PeakPrimitives {
   PeakPrimitiveCircle(Mantid::Kernel::V3D peakOrigin,
                       double peakOpacityAtDistance, int peakLineWidth,
                       double peakInnerRadiusX, double peakInnerRadiusY,
@@ -50,7 +52,8 @@ struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitiveCircle : public PeakPrimitiv
   double backgroundInnerRadiusY;
 };
 
-struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesEllipse : public PeakPrimitives {
+struct EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakPrimitivesEllipse
+    : public PeakPrimitives {
   PeakPrimitivesEllipse(Mantid::Kernel::V3D peakOrigin,
                         double peakOpacityAtDistance, int peakLineWidth,
                         double peakInnerRadiusMajorAxis,
