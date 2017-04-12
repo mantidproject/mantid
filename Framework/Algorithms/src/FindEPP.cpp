@@ -101,7 +101,7 @@ void FindEPP::fitGaussian(int64_t index) {
                   << " has last bins above 0.5*max at " << leftHalf << "\t"
                   << rightHalf << "\n";
 
-    if (rightHalf + leftHalf >= 3) {
+    if (rightHalf + leftHalf >= 2) {
 
       double fwhm = x[maxIndex + rightHalf] - x[maxIndex - leftHalf];
       double sigma = fwhm / (2. * sqrt(2. * log(2.)));

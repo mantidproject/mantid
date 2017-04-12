@@ -44,7 +44,7 @@ MatrixWorkspace_sptr _create_test_workspace(WorkspaceType type) {
         WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);
     for (size_t bin = 0; bin < nBins; ++bin) {
       result->mutableY(0)[bin] = -1.;
-      result->mutableX(0)[bin] = bin;
+      result->mutableX(0)[bin] = double(bin);
     }
     return result;
   }
