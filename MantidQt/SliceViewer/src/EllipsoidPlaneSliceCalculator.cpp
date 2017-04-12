@@ -225,7 +225,6 @@ bool isBetweenEndpoints(double endpoint1, double endpoint2, double z) {
 namespace Mantid {
 namespace SliceViewer {
 
-
 SliceEllipseInfo EllipsoidPlaneSliceCalculator::getSlicePlaneInfo(
     std::vector<Mantid::Kernel::V3D> directions, std::vector<double> radii,
     Mantid::Kernel::V3D originEllipsoid, double zPlane) const {

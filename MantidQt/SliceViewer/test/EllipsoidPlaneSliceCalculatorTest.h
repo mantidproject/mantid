@@ -50,8 +50,8 @@ public:
 
     // Assert
 
-    std::vector<std::pair<int, int>> indices = {{0, 1}, {0, 2}, {1, 0},
-                                                {1, 2}, {2, 0}, {2, 1}};
+    std::vector<std::pair<int, int>> indices = {
+        {0, 1}, {0, 2}, {1, 0}, {1, 2}, {2, 0}, {2, 1}};
 
     for (const auto &index : indices) {
       TSM_ASSERT("Non-diagonal element should be zero",
