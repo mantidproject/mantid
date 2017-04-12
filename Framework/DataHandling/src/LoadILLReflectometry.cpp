@@ -14,7 +14,6 @@
 
 #include "MantidAPI/WorkspaceFactory.h"
 //#include "MantidDataObjects/WorkspaceCreation.h"
-//#include "MantidNexus/NexusClasses.h"
 
 // unit
 /// Convert an angle from degree to radiant
@@ -81,7 +80,8 @@
   g_log.information(StringConcat(myString, e.what()).append("\n"))
 // get a double value from sample logs of the (output) workspace
 /// Get a double value from the workspace to be loaded (SampleLogs) for
-/// \myString
+/// \myString. Throws error message "Unknown property search object". Possible
+/// check via ws->run().hasProperty(myString).
 #define getDouble(myString)                                                    \
   m_localWorkspace->run().getPropertyValueAsType<double>(myString)
 
@@ -123,7 +123,7 @@ void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", std::string(),
                                                     FileProperty::Load, ".nxs",
                                                     Direction::Input),
-                  "File path of the data file to load");
+                  "File path of the data file (Nexus) to load");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
@@ -153,11 +153,14 @@ void LoadILLReflectometry::init() {
   declareProperty("ScatteringType", "incoherent",
                   boost::make_shared<StringListValidator>(scattering),
                   "Scattering type used to calculate the scattering angle");
+  setPropertySettings("ScatteringType",
+                      Kernel::make_unique<EnabledWhenProperty>(
+                          "BraggAngleIs", IS_NOT_EQUAL_TO, "user defined"));
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", std::string(),
                                                     FileProperty::OptionalLoad,
                                                     ".nxs", Direction::Input),
-                  "File path of the direct beam file to load");
+                  "File path of the direct beam file (Nexus) to load");
   setPropertySettings("DirectBeam",
                       Kernel::make_unique<EnabledWhenProperty>(
                           "BraggAngleIs", IS_EQUAL_TO, "detector angle"));
@@ -201,10 +204,10 @@ void LoadILLReflectometry::exec() {
   NXEntry firstEntry{root.openFirstEntry()};
   // load Monitor details: n. monitors x monitor contents
   std::vector<std::vector<int>> monitorsData{loadMonitors(firstEntry)};
-  // load Data details (number of tubes, channels, etc)
-  loadDataDetails(firstEntry);
   // set instrument specific names of Nexus file entries
   initNames(firstEntry);
+  // load Data details (number of tubes, channels, etc)
+  loadDataDetails(firstEntry);
   // initialise workspace
   initWorkspace(monitorsData);
   // load the instrument from the IDF if it exists
@@ -365,7 +368,14 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   nChannels.load();
   m_numberOfHistograms = nChannels[0];
 
-  NXFloat pixelWidth = entry.openNXFloat("instrument/PSD/mppx");
+  std::string widthName{};
+  if (m_instrumentName == "D17")
+    widthName = "mppx";
+  else if (m_instrumentName == "Figaro")
+    widthName = "mppy";
+
+  NXFloat pixelWidth =
+      entry.openNXFloat(StringConcat("instrument/PSD/", widthName));
   pixelWidth.load();
   m_pixelWidth = static_cast<double>(pixelWidth[0]) inMeter;
 
@@ -655,6 +665,7 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
     // Counts y(m_numberOfHistograms, LinearGenerator(0, 1));
     // CountStandardDeviations e(m_numberOfHistograms, LinearGenerator(0, 1));
     // create<Workspace2D>(1, Histogram(x, y, e));
+    // auto oneSpectrum = create<Workspace2D>(2, Histogram(Points(1)));
     for (size_t i = 0; i < (m_numberOfHistograms); ++i) {
       auto Y = beamWS->y(i);
       oneSpectrum->mutableY(0)[i] = std::accumulate(Y.begin(), Y.end(), 0);
@@ -730,6 +741,19 @@ double LoadILLReflectometry::computeBraggAngle() {
       throw std::runtime_error(
           std::string(incidentAngle).append(" is not defined in Nexus file"));
   }
+  /* uncommented since validation needed. This cannot be found in cosmos
+  // set offset angle
+  if (!(incidentAngle == "user defined")) {
+    double sampleAngle = getDouble("san.value");
+    double detectorAngle = getDouble(m_detectorAngleName);
+    debugLog("sample angle ", sampleAngle);
+    debugLog("detector angle ", detectorAngle);
+    m_offsetAngle = detectorAngle / 2. * sampleAngle;
+    debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to "
+                            "the scattering angle) ",
+                            m_offsetAngle);
+  }
+  */
   // user angle and sample angle behave equivalently for D17
   const std::string scatteringType = getProperty("ScatteringType");
   double angleBragg{angle};
@@ -766,7 +790,6 @@ double LoadILLReflectometry::computeBraggAngle() {
 /// Utility to place detector in space, according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
-  double detectorAngle = getDouble(m_detectorAngleName);
   double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
   m_detectorDistanceValue = dist inMeter;
   if (m_instrumentName == "Figaro")
@@ -775,24 +798,16 @@ void LoadILLReflectometry::placeDetector() {
   double theta = computeBraggAngle();
   double twotheta_rad = (2. * theta)inRad;
   // incident theta angle for calling the algorithm ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty("stheta",
-                                             double(twotheta_rad / 2.));
+  m_localWorkspace->mutableRun().addProperty(
+      "stheta", double((twotheta_rad + m_offsetAngle inRad) / 2.));
   const std::string componentName = "bank";
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
   V3D newpos(m_detectorDistanceValue * sin(twotheta_rad), pos.Y(),
              m_detectorDistanceValue * cos(twotheta_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
-  // offset angle
-  double sampleAngle = getDouble("san.value");
-  debugLog("sample angle ", sampleAngle);
-  debugLog("detector angle ", detectorAngle);
-  double offsetAngle = detectorAngle / 2. * sampleAngle;
-  debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to "
-                          "the scattering angle) ",
-                          offsetAngle);
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
-  const Quat rotation(2. * theta + offsetAngle, axis);
+  const Quat rotation(2. * theta + m_offsetAngle, axis);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 } // namespace DataHandling

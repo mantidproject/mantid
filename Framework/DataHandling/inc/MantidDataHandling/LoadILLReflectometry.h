@@ -89,6 +89,7 @@ private:
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
   double m_BraggAngleDirectBeam{0.0};
+  double m_offsetAngle{0.0};
   std::string m_detectorDistance{std::string()};
   std::string m_detectorAngleName{std::string()};
   std::string m_offsetName{std::string()};

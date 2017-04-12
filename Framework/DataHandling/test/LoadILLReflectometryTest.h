@@ -83,8 +83,10 @@ public:
     getWorkspaceFor(output, m_d17File, outWSName);
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Wavelength");
     // Test x values, minimum and maximum, first detector
-    TS_ASSERT_EQUALS(output->x(2)[0], -0.23365761888763453);
-    TS_ASSERT_EQUALS(output->x(2)[1000], 30.778616441233407);
+    TS_ASSERT_EQUALS(output->x(2)[0],
+                     -0.23376651299335527); // with offset: -0.23365761888763453
+    TS_ASSERT_EQUALS(output->x(2)[1000],
+                     30.792960548344681); // with offset: 30.778616441233407
     AnalysisDataService::Instance().clear();
   }
 
@@ -191,7 +193,7 @@ public:
   }
 
   // user defined input angle treated like sample angle, test angle 30.0 degrees
-  //void testCoherentScatteringUserAngleFigaro() {
+  // void testCoherentScatteringUserAngleFigaro() {
   //  testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
   //                      m_figaroFile);
   //}
