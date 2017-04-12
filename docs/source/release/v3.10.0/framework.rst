@@ -39,6 +39,7 @@ Improved
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
 - :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
+- Improved verification of IDFs
 
 Bug Fixes
 #########
@@ -102,7 +103,7 @@ Python
       3.0
       3.0
 
-- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape. 
+- ``mantid.geometry.Object`` has a new method ``volume()`` which calculates the volume of the shape.
 - A ``SpectraAxis`` object can now be created from Python, in a similar way to the other Axis types:
 
   .. code-block:: python
