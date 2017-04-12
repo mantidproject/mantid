@@ -170,25 +170,25 @@ void FindEPP::fitGaussian(int64_t index) {
  */
 void FindEPP::initWorkspace() {
 
-    m_outWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    const std::vector<std::string> columns = {
-        "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
-        "Height",     "HeightError",     "chiSq"};
+  const std::vector<std::string> columns = {
+      "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",
+      "Height",     "HeightError",     "chiSq"};
 
-    m_outWS->addColumn("int", "WorkspaceIndex");
-    m_outWS->getColumn(0)->setPlotType(1);
-    for (const auto &column : columns) {
-      m_outWS->addColumn("double", column);
-    }
-    m_outWS->addColumn("str", "FitStatus");
+  m_outWS->addColumn("int", "WorkspaceIndex");
+  m_outWS->getColumn(0)->setPlotType(1);
+  for (const auto &column : columns) {
+    m_outWS->addColumn("double", column);
+  }
+  m_outWS->addColumn("str", "FitStatus");
 
-    const size_t numberSpectra = m_inWS->getNumberHistograms();
-    m_progress = std::make_unique<Progress>(this, 0, 1, numberSpectra);
+  const size_t numberSpectra = m_inWS->getNumberHistograms();
+  m_progress = std::make_unique<Progress>(this, 0, 1, numberSpectra);
 
-    for (size_t i = 0; i < numberSpectra; ++i) {
-      m_outWS->appendRow();
-    }
+  for (size_t i = 0; i < numberSpectra; ++i) {
+    m_outWS->appendRow();
+  }
 }
 
 } // namespace Algorithms
