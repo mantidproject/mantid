@@ -77,7 +77,7 @@ class QResolutionCalculatorTest(unittest.TestCase):
         mock_state.data.instrument = SANSInstrument.LARMOR
         convert_to_q = MockContainer()
         convert_to_q.use_q_resolution = use_q_resolution
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             setattr(convert_to_q, key, value)
         mock_state.convert_to_q = convert_to_q
         return mock_state
