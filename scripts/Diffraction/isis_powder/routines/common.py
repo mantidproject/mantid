@@ -2,7 +2,24 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
-from isis_powder.routines.common_enums import InputBatchingEnum
+from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
+
+
+def cal_map_dictionary_key_helper(dictionary, key, append_to_error_message=None):
+    """
+    Provides a light wrapper around the dictionary key helper which provides a generic error
+    message stating the following key could not be found in the calibration mapping file. As
+    several instruments will use this message it makes sense to localise it to common. If a
+    message is passed in append_to_error_message it will append that to the end of the generic
+    error message in its own line when an exception is raised.
+    :param dictionary: The dictionary to search in for the key
+    :param key: The key to search for
+    :param append_to_error_message: (Optional) The message to append to the end of the error message
+    :return: The found key if it exists
+    """
+    err_message = "The field '" + str(key) + "' is required within the calibration file but was not found."
+    err_message += '\n' + str(append_to_error_message) if append_to_error_message else ''
+    return dictionary_key_helper(dictionary=dictionary, key=key, throws=True, exception_msg=err_message)
 
 
 def crop_banks_in_tof(bank_list, crop_values_list):
@@ -15,7 +32,11 @@ def crop_banks_in_tof(bank_list, crop_values_list):
     :return: A list of cropped workspaces
     """
     if not isinstance(crop_values_list, list):
-        raise ValueError("The cropping values were not in a list type")
+        if isinstance(bank_list, list):
+            raise ValueError("The cropping values were not in a list type")
+        else:
+            raise RuntimeError("Attempting to use list based cropping on a single workspace not in a list")
+
     if len(bank_list) != len(crop_values_list):
         raise RuntimeError("The number of TOF cropping values does not match the number of banks for this instrument")
 
@@ -86,20 +107,6 @@ def extract_ws_spectra(ws_to_split):
     return spectra_bank_list
 
 
-def extract_and_crop_spectra(focused_ws, instrument):
-    """
-    Extracts the individual spectra from a focused workspace (see extract_ws_spectra) then applies
-    the user specified cropping. This is the smallest cropping window for use on focused data that
-    is applied on a bank by bank basis. It then returns the extracted and cropped workspaces as a list.
-    :param focused_ws: The focused workspace to extract and crop the spectra of
-    :param instrument: The instrument object associated to this workspace
-    :return: The extracted and cropped workspaces as a list
-    """
-    ws_spectra = extract_ws_spectra(ws_to_split=focused_ws)
-    ws_spectra = instrument._crop_banks_to_user_tof(ws_spectra)
-    return ws_spectra
-
-
 def generate_run_numbers(run_number_string):
     """
     Generates a list of run numbers as a list from the input. This input can be either a string or int type
@@ -109,14 +116,47 @@ def generate_run_numbers(run_number_string):
     :return: A list of run numbers generated from the string
     """
     # Check its not a single run
-    if isinstance(run_number_string, int) or run_number_string.isdigit():
-        return [int(run_number_string)]  # Cast into a list and return
+    if isinstance(run_number_string, int):
+        # Cast into a list and return
+        return [run_number_string]
+    elif isinstance(run_number_string, str) and run_number_string.isdigit():
+        # We can let Python handle the conversion in this case
+        return [int(run_number_string)]
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
     run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
     run_list = _run_number_generator(processed_string=run_boundaries)
     return run_list
+
+
+def generate_splined_name(vanadium_string, *args):
+    """
+    Generates a unique splined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    out_name = "VanSplined" + '_' + str(vanadium_string)
+    for value in args:
+        out_name += '_' + str(value)
+
+    out_name += ".nxs"
+    return out_name
+
+
+def get_first_run_number(run_number_string):
+    """
+    Takes a run number string and returns the first user specified run from that string
+    :param run_number_string: The string to parse to find the first user rnu
+    :return: The first run for the user input of runs
+    """
+    run_numbers = generate_run_numbers(run_number_string=run_number_string)
+    return run_numbers[0]
 
 
 def get_monitor_ws(ws_to_process, run_number_string, instrument):
@@ -134,6 +174,33 @@ def get_monitor_ws(ws_to_process, run_number_string, instrument):
     monitor_spectra = instrument._get_monitor_spectra_index(number_list[0])
     load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
     return load_monitor_ws
+
+
+def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
+    """
+    Takes variables to the output workspaces in d-spacing and TOF and removes one
+    of them depending on what the user has selected as their unit to keep.
+    If a workspace has been deleted it additionally deletes the variable.
+    If a unit they want to keep has not been specified it does nothing.
+    :param d_spacing_group: The output workspace group in dSpacing
+    :param tof_group: The output workspace group in TOF
+    :param unit_to_keep: The unit to keep from the WorkspaceUnits enum
+    :return: None
+    """
+    if not unit_to_keep:
+        # If they do not specify which unit to keep don't do anything
+        return
+
+    if unit_to_keep == WORKSPACE_UNITS.d_spacing:
+        remove_intermediate_workspace(tof_group)
+        del tof_group
+
+    elif unit_to_keep == WORKSPACE_UNITS.tof:
+        remove_intermediate_workspace(d_spacing_group)
+        del d_spacing_group
+
+    else:
+        raise ValueError("The user specified unit to keep is unknown")
 
 
 def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None):
@@ -154,7 +221,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
 
-    if input_batching.lower() == InputBatchingEnum.Summed.lower() and len(raw_ws_list) > 1:
+    if input_batching.lower() == INPUT_BATCHING.Summed.lower() and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
         remove_intermediate_workspace(raw_ws_list)
         raw_ws_list = [summed_ws]
@@ -180,7 +247,33 @@ def remove_intermediate_workspace(workspaces):
         mantid.DeleteWorkspace(workspaces)
 
 
-def spline_vanadium_for_focusing(focused_vanadium_spectra, num_splines):
+def run_normalise_by_current(ws):
+    """
+    Runs the Normalise By Current algorithm on the input workspace
+    :param ws: The workspace to run normalise by current on
+    :return: The current normalised workspace
+    """
+    ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws)
+    return ws
+
+
+def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
+    """
+    Returns a splined vanadium workspace from the focused vanadium bank list.
+    This runs both StripVanadiumPeaks and SplineBackgrounds on the input
+    workspace list and returns a list of the stripped and splined workspaces
+    :param focused_vanadium_spectra: The vanadium workspaces to process
+    :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
+    :return: The splined vanadium workspace
+    """
+    stripped_ws_list = _strip_vanadium_peaks(workspaces_to_strip=focused_vanadium_spectra)
+    splined_workspaces = spline_workspaces(stripped_ws_list, num_splines=spline_coefficient)
+
+    remove_intermediate_workspace(stripped_ws_list)
+    return splined_workspaces
+
+
+def spline_workspaces(focused_vanadium_spectra, num_splines):
     """
     Splines a list of workspaces in TOF and returns the splines in new workspaces in a
     list of said splined workspaces. The input workspaces should have any Bragg peaks
@@ -212,7 +305,7 @@ def subtract_sample_empty(ws_to_correct, empty_sample_ws_string, instrument):
     """
     if empty_sample_ws_string:
         empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=InputBatchingEnum.Summed)
+                                                       input_batching=INPUT_BATCHING.Summed)
         mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
         remove_intermediate_workspace(empty_sample)
 
@@ -298,6 +391,14 @@ def _load_list_of_files(run_numbers_list, instrument):
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
     return read_ws_list
+
+
+def _strip_vanadium_peaks(workspaces_to_strip):
+    out_list = []
+    for i, ws in enumerate(workspaces_to_strip):
+        out_name = ws.getName() + "_splined-" + str(i+1)
+        out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
+    return out_list
 
 
 def _sum_ws_range(ws_list):

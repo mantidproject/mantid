@@ -71,6 +71,7 @@ ExperimentInfo::ExperimentInfo()
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
       m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_parmap->setComponentInfo(m_componentInfo, std::vector<ComponentID>{});
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 }
@@ -102,7 +103,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  *m_detectorInfo = *other->m_detectorInfo;
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -188,22 +188,33 @@ void checkDetectorInfoSize(const Instrument &instr,
 }
 
 boost::shared_ptr<Beamline::ComponentInfo>
-makeComponentInfo(const Instrument &oldInstr,
+makeComponentInfo(const Instrument &instrument,
                   const API::DetectorInfo &detectorInfo,
                   std::vector<Geometry::ComponentID> &componentIds) {
 
-  InfoComponentVisitor visitor(
-      detectorInfo.size(),
-      std::bind(&DetectorInfo::indexOf, &detectorInfo, std::placeholders::_1));
+  if (instrument.hasComponentInfo()) {
+    const auto &componentInfo = instrument.componentInfo();
+    componentIds = instrument.componentIds();
+    return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
+  } else {
+    InfoComponentVisitor visitor(
+        detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
+                                       std::placeholders::_1));
 
-  // Register everything via visitor
-  oldInstr.registerContents(visitor);
-  // Extract component ids. We need this for the ComponentInfo wrapper.
-  componentIds = visitor.componentIds();
+    if (instrument.isParametrized()) {
+      // Register everything via visitor
+      instrument.baseInstrument()->registerContents(visitor);
+    } else {
+      instrument.registerContents(visitor);
+    }
 
-  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-      visitor.assemblySortedDetectorIndices(),
-      visitor.componentDetectorRanges());
+    // Extract component ids. We need this for the ComponentInfo wrapper.
+    componentIds = visitor.componentIds();
+
+    return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+        visitor.assemblySortedDetectorIndices(),
+        visitor.componentDetectorRanges());
+  }
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
@@ -285,11 +296,10 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
-  std::vector<Geometry::ComponentID> componentIds;
-  m_componentInfo =
-      makeComponentInfo(*sptr_instrument, detectorInfo(), componentIds);
-  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
-      *m_componentInfo, std::move(componentIds));
+  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), m_componentIds);
+  m_parmap->setComponentInfo(m_componentInfo, m_componentIds);
+  m_componentInfoWrapper =
+      Kernel::make_unique<ComponentInfo>(*m_componentInfo, m_componentIds);
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -308,6 +318,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
+  instrument->setComponentInfo(m_componentInfo, m_componentIds);
   return instrument;
 }
 

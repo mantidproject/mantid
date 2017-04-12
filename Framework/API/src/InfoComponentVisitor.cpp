@@ -63,8 +63,17 @@ void InfoComponentVisitor::registerGenericComponent(
  */
 void InfoComponentVisitor::registerDetector(const IDetector &detector) {
 
-  const auto detectorIndex =
-      m_detectorIdToIndexMapperFunction(detector.getID());
+  size_t detectorIndex = 0;
+  try {
+    detectorIndex = m_detectorIdToIndexMapperFunction(detector.getID());
+  } catch (std::out_of_range &) {
+    /*
+     Do not register a detector with an invalid id. if we can't determine
+     the index, we cannot register it in the right place!
+    */
+    ++m_droppedDetectors;
+    return;
+  }
 
   /* Unfortunately Mantid supports having detectors attached to an
    * instrument that have an an invalid or duplicate detector id.
@@ -124,7 +133,9 @@ InfoComponentVisitor::componentIds() const {
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InfoComponentVisitor::size() const { return m_componentIds.size(); }
+size_t InfoComponentVisitor::size() const {
+  return m_componentIds.size() - m_droppedDetectors;
+}
 
 } // namespace API
 } // namespace Mantid

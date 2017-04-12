@@ -964,4 +964,48 @@ private:
   }
 };
 
+class ExperimentInfoTestPerformance : public CxxTest::TestSuite {
+private:
+  boost::shared_ptr<Mantid::Geometry::Instrument> m_bareInstrument;
+  boost::shared_ptr<const Mantid::Geometry::Instrument> m_provisionedInstrument;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ExperimentInfoTestPerformance *createSuite() {
+    return new ExperimentInfoTestPerformance();
+  }
+  static void destroySuite(ExperimentInfoTestPerformance *suite) {
+    delete suite;
+  }
+
+  ExperimentInfoTestPerformance() {
+
+    const int nPixels = 1000;
+    m_bareInstrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*n banks*/, nPixels, 1 /*sample-bank distance*/);
+
+    ExperimentInfo tmp;
+    tmp.setInstrument(m_bareInstrument);
+    m_provisionedInstrument = tmp.getInstrument();
+  }
+
+  void
+  test_setInstrument_when_instrument_lacks_detectorInfo_and_componentInfo() {
+    /*
+     * This is similar to what will happen during LoadEmptyInstrument
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_bareInstrument);
+  }
+  void test_setInstrument_when_new_instrument_is_fully_provisioned() {
+    /*
+     * This should be the case for any workspaces after they have initially had
+     * an instrument
+     * set upon them via setInstrument.
+     */
+    ExperimentInfo expInfo;
+    expInfo.setInstrument(m_provisionedInstrument);
+  }
+};
 #endif /* MANTID_API_EXPERIMENTINFOTEST_H_ */
