@@ -275,7 +275,7 @@ public:
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < static_cast<int>(ws->getNumberHistograms()); i++) {
       EventList &el = ws->getSpectrum(i);
-      for (int j = 0; j < 20; j++) {
+      for (int j = 0; j < 2; j++) {
         el.addEventQuickly(TofEvent(double(j) * 1e-3));
       }
     }
