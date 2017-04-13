@@ -111,6 +111,8 @@ Python
      # Create a new axis reference
      s_axis = SpectraAxis.create(ws1)
 
+- ``CrystalStructure``, ``UnitCell``, ``PointGroup``, and ``SpaceGroup`` all have better console printing
+
 
 Python Algorithms
 #################
