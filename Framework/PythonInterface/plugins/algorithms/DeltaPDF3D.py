@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, IMDHistoWorkspaceProperty, PropertyMode, WorkspaceProperty, Progress
 from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion, Property, StringListValidator, FloatArrayBoundedValidator,
-                           FloatArrayProperty, FloatBoundedValidator, IntArrayProperty)
+                           FloatArrayProperty, FloatBoundedValidator)
 from mantid.geometry import SpaceGroupFactory
 from mantid import logger
 import numpy as np
@@ -31,7 +31,8 @@ class DeltaPDF3D(PythonAlgorithm):
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
                              "Output Workspace")
-        self.declareProperty("RemoveReflections", True, "Remove reflections")
+
+        self.declareProperty("RemoveReflections", True, "Remove HKL reflections")
         condition = EnabledWhenProperty("RemoveReflections", PropertyCriterion.IsDefault)
         self.declareProperty("Shape", "cube", doc="Shape to cut out reflections",
                              validator=StringListValidator(['sphere', 'cube']))
@@ -42,19 +43,36 @@ class DeltaPDF3D(PythonAlgorithm):
                              "Width of sphere/cube to remove reflections, in (HKL)")
         self.setPropertySettings("Width", condition)
         self.declareProperty("SpaceGroup", "",
-                             doc="Space group for reflection removal, either Full name or number. If empty all HKL's will be removed.")
+                             doc="Space group for reflection removal, either full name or number. If empty all HKL's will be removed.")
         self.setPropertySettings("SpaceGroup", condition)
+
         self.declareProperty("CutSphere", False, "Limit min/max q values. Can help with edge effects.")
         condition = EnabledWhenProperty("CutSphere", PropertyCriterion.IsNotDefault)
         self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero), "Min Sphere")
         self.setPropertySettings("SphereMin", condition)
         self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero), "Max Sphere")
         self.setPropertySettings("SphereMax", condition)
+
         self.declareProperty("Convolution", True, "Apply convolution to fill in removed reflections")
         condition = EnabledWhenProperty("Convolution", PropertyCriterion.IsDefault)
         self.declareProperty("ConvolutionWidth", 2.0, validator=FloatBoundedValidator(0.),
                              doc="Width of gaussian convolution in pixels")
         self.setPropertySettings("ConvolutionWidth", condition)
+
+        # Reflections
+        self.setPropertyGroup("RemoveReflections","Reflection Removal")
+        self.setPropertyGroup("Shape","Reflection Removal")
+        self.setPropertyGroup("Width","Reflection Removal")
+        self.setPropertyGroup("SpaceGroup","Reflection Removal")
+
+        # Sphere
+        self.setPropertyGroup("CutSphere","Cutting to a sphere")
+        self.setPropertyGroup("SphereMin","Cutting to a sphere")
+        self.setPropertyGroup("SphereMax","Cutting to a sphere")
+
+        # Convolution
+        self.setPropertyGroup("Convolution","Convolution")
+        self.setPropertyGroup("ConvolutionWidth","Convolution")
 
     def validateInputs(self):
         issues = dict()
