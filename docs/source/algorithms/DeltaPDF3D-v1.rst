@@ -61,7 +61,8 @@ dominated by the Bragg peaks and will just be a 3D-PDF instead.
 
 .. testcode:: fft1
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft',RemoveReflections=False,Convolution=False)
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft',
+              RemoveReflections=False,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft'].signalAt(2226))
 
@@ -92,7 +93,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. testcode:: fft2
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',RemoveReflections=True,Width=0.2,Convolution=False)
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft2',IntermediateWorkspace='int2',
+              RemoveReflections=True,Width=0.2,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft2'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft2'].signalAt(2226))
 
@@ -112,11 +114,12 @@ The IntermediateWorkspace shows the changes to the input workspace.
 .. |int2| image:: /images/DeltaPDF3D_int2.png
    :width: 100%
 
-**Removing Reflections and cutting to sphere**
+**Removing Reflections and crop to sphere**
 
 .. testcode:: fft3
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',RemoveReflections=True,Width=0.2,CutSphere=True,SphereMax=3,Convolution=False)
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft3',IntermediateWorkspace='int3',
+              RemoveReflections=True,Width=0.2,CropSphere=True,SphereMax=3,Convolution=False)
    print "The value at [1,0,0] is " + str(mtd['fft3'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft3'].signalAt(2226))
 
@@ -125,11 +128,11 @@ The IntermediateWorkspace shows the changes to the input workspace.
    The value at [1,0,0] is -510.901314412
    The value at [0,1,0] is 483.25284719
 
-+--------------------------------------------------------------------+--------------------------------------------------------------------+
-| Intermediate workspace after reflections removed and cut to sphere | Resulting 3D-ΔPDF                                                  |
-+--------------------------------------------------------------------+--------------------------------------------------------------------+
-| |int3|                                                             | |fft3|                                                             |
-+--------------------------------------------------------------------+--------------------------------------------------------------------+
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
+| |int3|                                                              | |fft3|                                                              |
++---------------------------------------------------------------------+---------------------------------------------------------------------+
 
 .. |fft3| image:: /images/DeltaPDF3D_fft3.png
    :width: 100%
@@ -140,7 +143,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. code-block:: python
 
-   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4',RemoveReflections=True,Width=0.2,CutSphere=True,SphereMax=3,Convolution=True)
+   DeltaPDF3D(InputWorkspace='DeltaPDF3D_MDH',OutputWorkspace='fft4',IntermediateWorkspace='int4'
+              RemoveReflections=True,Width=0.2,CropSphere=True,SphereMax=3,Convolution=True)
    print "The value at [1,0,0] is " + str(mtd['fft4'].signalAt(1866))
    print "The value at [0,1,0] is " + str(mtd['fft4'].signalAt(2226))
 

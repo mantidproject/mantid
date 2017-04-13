@@ -46,8 +46,8 @@ class DeltaPDF3D(PythonAlgorithm):
                              doc="Space group for reflection removal, either full name or number. If empty all HKL's will be removed.")
         self.setPropertySettings("SpaceGroup", condition)
 
-        self.declareProperty("CutSphere", False, "Limit min/max q values. Can help with edge effects.")
-        condition = EnabledWhenProperty("CutSphere", PropertyCriterion.IsNotDefault)
+        self.declareProperty("CropSphere", False, "Limit min/max q values. Can help with edge effects.")
+        condition = EnabledWhenProperty("CropSphere", PropertyCriterion.IsNotDefault)
         self.declareProperty(FloatArrayProperty("SphereMin", [Property.EMPTY_DBL], validator=val_min_zero), "Min Sphere")
         self.setPropertySettings("SphereMin", condition)
         self.declareProperty(FloatArrayProperty("SphereMax", [Property.EMPTY_DBL], validator=val_min_zero), "Max Sphere")
@@ -66,9 +66,9 @@ class DeltaPDF3D(PythonAlgorithm):
         self.setPropertyGroup("SpaceGroup","Reflection Removal")
 
         # Sphere
-        self.setPropertyGroup("CutSphere","Cutting to a sphere")
-        self.setPropertyGroup("SphereMin","Cutting to a sphere")
-        self.setPropertyGroup("SphereMax","Cutting to a sphere")
+        self.setPropertyGroup("CropSphere","Cropping to a sphere")
+        self.setPropertyGroup("SphereMin","Cropping to a sphere")
+        self.setPropertyGroup("SphereMax","Cropping to a sphere")
 
         # Convolution
         self.setPropertyGroup("Convolution","Convolution")
@@ -166,8 +166,8 @@ class DeltaPDF3D(PythonAlgorithm):
                             else:  # sphere
                                 signal[(Xs-h)**2/width[0]**2 + (Ys-k)**2/width[1]**2 + (Zs-l)**2/width[2]**2 < 1]=np.nan
 
-        if self.getProperty("CutSphere").value:
-            progress.report("Cutting to sphere")
+        if self.getProperty("CropSphere").value:
+            progress.report("Cropping to sphere")
             sphereMin = self.getProperty("SphereMin").value
             if sphereMin[0] < Property.EMPTY_DBL:
                 if len(sphereMin)==1:
