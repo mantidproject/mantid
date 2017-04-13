@@ -132,21 +132,15 @@ KafkaEventStreamDecoder::~KafkaEventStreamDecoder() { stopCapture(); }
  */
 void KafkaEventStreamDecoder::startCapture(bool startNow) {
 
-  // If we are not starting now, then we want to start at offsets corresponding
-  // to the start of the run
+  // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     auto runStream = m_broker->subscribe(m_runInfoTopic);
     std::string rawMsgBuffer;
-    runStream->consumeMessage(&rawMsgBuffer);
-    if (rawMsgBuffer.empty()) {
-      throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
-                               "Empty message received from run info "
-                               "topic. Unable to continue");
-    }
-    auto runMsg = ISISStream::GetRunInfo(
-        reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-    auto eventOffset = runMsg->stream_offset();
-    m_eventStream = m_broker->subscribe(m_eventTopic, eventOffset);
+    auto runStartData = getRunStartMessage(rawMsgBuffer);
+
+    auto startTimeMilliseconds =
+        runStartData.startTime * 1000; // seconds to milliseconds
+    m_eventStream = m_broker->subscribe(m_eventTopic, startTimeMilliseconds);
   } else {
     m_eventStream = m_broker->subscribe(m_eventTopic);
   }
@@ -352,6 +346,30 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   g_log.debug("Event capture finished");
 }
 
+KafkaEventStreamDecoder::RunStartStruct
+KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
+  getRunInfoMessage(rawMsgBuffer);
+  auto runMsg =
+      GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+  if (runMsg->info_type_type() != InfoTypes_RunStart) {
+    // We want a runStart message, try the next one
+    getRunInfoMessage(rawMsgBuffer);
+    runMsg =
+        GetRunInfo(reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
+    if (runMsg->info_type_type() != InfoTypes_RunStart) {
+      throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
+                               "Could not find a run start message"
+                               "in the run info topic. Unable to continue");
+    }
+  }
+  auto runStartData = static_cast<const RunStart *>(runMsg->info_type());
+  KafkaEventStreamDecoder::RunStartStruct runStart = {
+      runStartData->inst_name()->str(), runStartData->run_number(),
+      runStartData->start_time(),
+      static_cast<size_t>(runStartData->n_periods())};
+  return runStart;
+}
+
 /**
  * Pull information from the run & detector-spectrum stream and initialize
  * the internal EventWorkspace buffer + other cached information such as run
@@ -377,7 +395,8 @@ void KafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer
@@ -386,32 +405,24 @@ void KafkaEventStreamDecoder::initLocalCaches() {
       spDetMsg->det()->data(), nudet);
 
   // Load run metadata
-  m_runStream->consumeMessage(&rawMsgBuffer);
-  if (rawMsgBuffer.empty()) {
-    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
-                             "Empty message received from run info "
-                             "topic. Unable to continue");
-  }
-  auto runMsg = ISISStream::GetRunInfo(
-      reinterpret_cast<const uint8_t *>(rawMsgBuffer.c_str()));
-
-  // Load the instrument if possibly but continue if we can't
-  auto instName = runMsg->inst_name();
-  if (instName && instName->size() > 0)
-    loadInstrument(instName->c_str(), eventBuffer);
+  auto runStartData = getRunStartMessage(rawMsgBuffer);
+  // Load the instrument if possible but continue if we can't
+  auto instName = runStartData.instrumentName;
+  if (instName.size() > 0)
+    loadInstrument(instName, eventBuffer);
   else
     g_log.warning(
         "Empty instrument name received. Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
-  auto runStartTime = static_cast<time_t>(runMsg->start_time());
+  auto runStartTime = static_cast<time_t>(runStartData.startTime);
   char timeString[32];
   strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
   m_runStart.setFromISO8601(timeString, false);
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
-  m_runNumber = runMsg->run_number();
+  m_runNumber = runStartData.runNumber;
   mutableRun.addProperty(RUN_NUMBER_PROPERTY, std::to_string(m_runNumber));
   // Create the proton charge property
   mutableRun.addProperty(
@@ -421,7 +432,7 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   m_specToIdx = eventBuffer->getSpectrumToWorkspaceIndexMap();
 
   // Buffers for each period
-  const size_t nperiods(static_cast<size_t>(runMsg->n_periods()));
+  const size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
     throw std::runtime_error(
         "KafkaEventStreamDecoder - Message has n_periods==0. This is "
@@ -433,6 +444,19 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   for (size_t i = 1; i < nperiods; ++i) {
     // A clone should be cheap here as there are no events yet
     m_localEvents[i] = eventBuffer->clone();
+  }
+}
+
+/**
+ * Try to get a runInfo message from Kafka, throw error if it fails
+ * @param rawMsgBuffer : string to use as message buffer
+ */
+void KafkaEventStreamDecoder::getRunInfoMessage(std::string &rawMsgBuffer) {
+  m_runStream->consumeMessage(&rawMsgBuffer);
+  if (rawMsgBuffer.empty()) {
+    throw std::runtime_error("KafkaEventStreamDecoder::initLocalCaches() - "
+                             "Empty message received from run info "
+                             "topic. Unable to continue");
   }
 }
 

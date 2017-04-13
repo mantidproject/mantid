@@ -73,6 +73,12 @@ public:
   ///@}
 
 private:
+  struct RunStartStruct {
+    std::string instrumentName;
+    int runNumber;
+    uint64_t startTime;
+    size_t nPeriods;
+  };
   void captureImpl() noexcept;
   void captureImplExcept();
 
@@ -85,6 +91,8 @@ private:
   createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent);
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
+  void getRunInfoMessage(std::string &rawMsgBuffer);
+  RunStartStruct getRunStartMessage(std::string &rawMsgBuffer);
 
   API::Workspace_sptr extractDataImpl();
 
