@@ -51,14 +51,13 @@ Mantid::Geometry::Group_sptr getSiteSymmetryGroup(SpaceGroup &self,
   return group;
 }
 
-std::string __repr__implementation(const SpaceGroup& self) {
-    std::stringstream ss;
-    ss << "SpaceGroupFactory.createSpaceGroup(\"";
-    ss << self.hmSymbol();
-    ss << "\")";
-    return ss.str();
+std::string __repr__implementation(const SpaceGroup &self) {
+  std::stringstream ss;
+  ss << "SpaceGroupFactory.createSpaceGroup(\"";
+  ss << self.hmSymbol();
+  ss << "\")";
+  return ss.str();
 }
-
 }
 
 void export_SpaceGroup() {

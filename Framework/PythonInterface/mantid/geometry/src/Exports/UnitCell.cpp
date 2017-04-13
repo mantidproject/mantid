@@ -29,37 +29,35 @@ void recalculateFromGstar(UnitCell &self, object values) {
 }
 
 /// Export for python's special __str__ method
-std::string __str__implementation(const UnitCell& self) {
-    std::stringstream ss;
-    ss << "UnitCell with lattice parameters:";
-    ss << " a = " << self.a();
-    ss << " b = " << self.b();
-    ss << " c = " << self.c();
+std::string __str__implementation(const UnitCell &self) {
+  std::stringstream ss;
+  ss << "UnitCell with lattice parameters:";
+  ss << " a = " << self.a();
+  ss << " b = " << self.b();
+  ss << " c = " << self.c();
 
-    ss << " alpha = " << self.alpha();
-    ss << " beta = " << self.beta();
-    ss << " gamma = " << self.gamma();
+  ss << " alpha = " << self.alpha();
+  ss << " beta = " << self.beta();
+  ss << " gamma = " << self.gamma();
 
-    return ss.str();
+  return ss.str();
 }
 
 /// Export for python's special __repr__ method
-std::string __repr__implementation(const UnitCell& self) {
-    std::stringstream ss;
-    ss << "UnitCell(";
-    ss << self.a() << ", ";
-    ss << self.b() << ", ";
-    ss << self.c() << ", ";
+std::string __repr__implementation(const UnitCell &self) {
+  std::stringstream ss;
+  ss << "UnitCell(";
+  ss << self.a() << ", ";
+  ss << self.b() << ", ";
+  ss << self.c() << ", ";
 
-    ss << self.alpha() << ", ";
-    ss << self.beta() << ", ";
-    ss << self.gamma();
-    ss << ")";
-    
-    return ss.str();
+  ss << self.alpha() << ", ";
+  ss << self.beta() << ", ";
+  ss << self.gamma();
+  ss << ")";
+
+  return ss.str();
 }
-
-
 }
 
 void export_UnitCell() {

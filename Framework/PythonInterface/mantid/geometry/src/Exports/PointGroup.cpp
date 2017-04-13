@@ -44,13 +44,12 @@ Mantid::Kernel::V3D getReflectionFamily(PointGroup &self, const object &hkl) {
 }
 
 std::string __repr__implementation(const PointGroup &self) {
-    std::stringstream ss;
-    ss << "PointGroupFactory.createPointGroup(\"";
-    ss << self.getSymbol();
-    ss << "\")";
-    return ss.str();
+  std::stringstream ss;
+  ss << "PointGroupFactory.createPointGroup(\"";
+  ss << self.getSymbol();
+  ss << "\")";
+  return ss.str();
 }
-
 }
 
 void export_PointGroup() {

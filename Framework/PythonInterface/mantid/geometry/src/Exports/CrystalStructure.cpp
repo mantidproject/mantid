@@ -28,52 +28,51 @@ std::vector<std::string> getScatterers(const CrystalStructure &self) {
   return scattererStrings;
 }
 
-std::string __str__implementation(const CrystalStructure& self) {
-    std::stringstream ss;
-    ss << "Crystal structure with:\n";
-    ss << "Unit cell:";
+std::string __str__implementation(const CrystalStructure &self) {
+  std::stringstream ss;
+  ss << "Crystal structure with:\n";
+  ss << "Unit cell:";
 
-    const auto cell = self.cell();
-    ss << " a = " << cell.a();
-    ss << " b = " << cell.b();
-    ss << " c = " << cell.c();
+  const auto cell = self.cell();
+  ss << " a = " << cell.a();
+  ss << " b = " << cell.b();
+  ss << " c = " << cell.c();
 
-    ss << " alpha = " << cell.alpha();
-    ss << " beta = " << cell.beta();
-    ss << " gamma = " << cell.gamma();
+  ss << " alpha = " << cell.alpha();
+  ss << " beta = " << cell.beta();
+  ss << " gamma = " << cell.gamma();
 
-    ss << "\n";
+  ss << "\n";
 
-    ss << "Centering: " << self.centering()->getName() << "\n";
-    ss << "Space Group: " << self.spaceGroup()->hmSymbol() << "\n";
-    ss << "Scatterers: " << boost::algorithm::join(getScatterers(self), ", ");
+  ss << "Centering: " << self.centering()->getName() << "\n";
+  ss << "Space Group: " << self.spaceGroup()->hmSymbol() << "\n";
+  ss << "Scatterers: " << boost::algorithm::join(getScatterers(self), ", ");
 
-    return ss.str();
+  return ss.str();
 }
 
-std::string __repr__implementation(const CrystalStructure& self) {
-    std::stringstream ss;
-    ss << "CrystalStructure(\"";
+std::string __repr__implementation(const CrystalStructure &self) {
+  std::stringstream ss;
+  ss << "CrystalStructure(\"";
 
-    const auto cell = self.cell();
+  const auto cell = self.cell();
 
-    ss << cell.a() << " ";
-    ss << cell.b() << " ";
-    ss << cell.c() << " ";
+  ss << cell.a() << " ";
+  ss << cell.b() << " ";
+  ss << cell.c() << " ";
 
-    ss << cell.alpha() << " ";
-    ss << cell.beta() << " ";
-    ss << cell.gamma();
-    ss << "\", ";
+  ss << cell.alpha() << " ";
+  ss << cell.beta() << " ";
+  ss << cell.gamma();
+  ss << "\", ";
 
-    ss << "\"" << self.spaceGroup()->hmSymbol() << "\", ";
-    ss << "\"" << boost::algorithm::join(getScatterers(self), "; ") << "\"";
+  ss << "\"" << self.spaceGroup()->hmSymbol() << "\", ";
+  ss << "\"" << boost::algorithm::join(getScatterers(self), "; ") << "\"";
 
-    ss << ")";
+  ss << ")";
 
-    return ss.str();
+  return ss.str();
 }
-
 }
 
 void export_CrystalStructure() {
