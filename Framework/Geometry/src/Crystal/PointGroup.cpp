@@ -322,7 +322,7 @@ operator()(const PointGroup::CrystalSystem &lhs,
 
 /// Returns a streamed representation of the PointGroup object
 std::ostream &operator<<(std::ostream& stream, const PointGroup& self) {
-    stream << "Point group with\n"
+    stream << "Point group with:\n"
            << "Lattice system: " 
            << getLatticeSystemAsString(self.latticeSystem()) << "\n"
            << "Crystal system: "

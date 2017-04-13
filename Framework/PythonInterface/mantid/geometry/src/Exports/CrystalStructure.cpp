@@ -46,7 +46,7 @@ std::string __str__implementation(const CrystalStructure& self) {
 
     ss << "Centering: " << self.centering()->getName() << "\n";
     ss << "Space Group: " << self.spaceGroup()->hmSymbol() << "\n";
-    ss << "Scatters: " << boost::algorithm::join(getScatterers(self), ", ");
+    ss << "Scatterers: " << boost::algorithm::join(getScatterers(self), ", ");
 
     return ss.str();
 }

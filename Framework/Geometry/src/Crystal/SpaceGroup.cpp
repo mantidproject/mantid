@@ -110,7 +110,7 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
 
 
 std::ostream& operator<<(std::ostream& stream, const SpaceGroup& self) {
-    stream << "Space group with Hermann–Mauguin symbol: " << self.hmSymbol();
+    stream << "Space group with Hermann-Mauguin symbol: " << self.hmSymbol();
     return stream;
 }
 

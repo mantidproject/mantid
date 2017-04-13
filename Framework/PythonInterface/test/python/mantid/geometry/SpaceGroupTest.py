@@ -144,7 +144,7 @@ class SpaceGroupTest(unittest.TestCase):
     def test_to_string(self):
         spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
 
-        expected_str = "Space group with Hermann\xe2\x80\x93Mauguin symbol: "\
+        expected_str = "Space group with Hermann-Mauguin symbol: "\
                        "F -4 3 c"
         expected_repr = "SpaceGroupFactory.createSpaceGroup(\"F -4 3 c\")"
 
@@ -153,7 +153,6 @@ class SpaceGroupTest(unittest.TestCase):
 
         newSpaceGroup = eval(spaceGroup.__repr__())
         self.assertEqual(spaceGroup.getHMSymbol(), newSpaceGroup.getHMSymbol())
-
 
     def checkWyckoffPositions(self, spaceGroup, wyckoffs):
         for wp in wyckoffs:

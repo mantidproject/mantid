@@ -63,7 +63,7 @@ class CrystalStructureTest(unittest.TestCase):
         expected_str = "Crystal structure with:\nUnit cell: a = 5.43 b = 5.42 "\
                        "c = 5.41 alpha = 90 beta = 90 gamma = 90\n"\
                        "Centering: All-face centred\nSpace Group: F d -3 m\n"\
-                       "Scatters: Al 1/3 0.454 1/12 1 0.01, "\
+                       "Scatterers: Al 1/3 0.454 1/12 1 0.01, "\
                        "Si 0.1 0.2 0.3 0.99 0.1"
 
         expected_repr = "CrystalStructure(\"5.43 5.42 5.41 90 90 90\", "\
@@ -75,7 +75,6 @@ class CrystalStructureTest(unittest.TestCase):
 
         newStructure = eval(structure.__repr__())
         self.assertEqual(structure.getUnitCell().a(), newStructure.getUnitCell().a())
-
 
 
 if __name__ == '__main__':
