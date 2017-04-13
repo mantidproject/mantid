@@ -74,6 +74,8 @@ private:
   bool checkMaskedCache(
       int row) const; // check the masked cache and add to it if neccessary
 
+  bool checkMaskedBinCache(int row, int bin) const;
+
   const Mantid::API::MatrixWorkspace *m_workspace;
   int m_startRow;     ///< starting workspace index to display
   int m_endRow;       ///< ending workspace index to display
@@ -89,6 +91,7 @@ private:
   mutable QHash<int, bool> m_monCache; // monitor flag cache
   QColor m_mask_color; // Masked Detector Specific background color
   mutable QHash<int, bool> m_maskCache; // masked flag cache
+  mutable QHash<int, QHash<int, bool>> m_maskBinCache; // cache for masked bins
 };
 
 #endif
