@@ -1,5 +1,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/Timer.h"
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -25,6 +26,10 @@ ProgressBase::ProgressBase(double start, double end, int64_t numSteps)
     : m_start(start), m_end(end), m_ifirst(0), m_numSteps(numSteps),
       m_notifyStep(1), m_notifyStepPct(1), m_step(1), m_i(0),
       m_last_reported(-1), m_timeElapsed(new Timer), m_notifyStepPrecision(0) {
+  if (start < 0. || start >= 1.)
+    throw std::invalid_argument("Value of start must be between zero and one");
+  if (start > end || end > 1.)
+    throw std::invalid_argument("Value of end must be between zero and one");
   this->setNumSteps(numSteps);
   m_last_reported = -m_notifyStep;
   m_timeElapsed->reset();
@@ -150,6 +155,10 @@ void ProgressBase::setNumSteps(int64_t nsteps) {
  * @param end :: Ending progress
  */
 void ProgressBase::resetNumSteps(int64_t nsteps, double start, double end) {
+  if (start < 0. || start >= 1.)
+    throw std::invalid_argument("Value of start must be between zero and one");
+  if (start > end || end > 1.)
+    throw std::invalid_argument("Value of end must be between zero and one");
   m_start = start;
   m_end = end;
   m_i = 0;
