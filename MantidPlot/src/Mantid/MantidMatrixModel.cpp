@@ -340,18 +340,8 @@ bool MantidMatrixModel::checkMaskedBinCache(int row, int bin) const {
     bool isMaskedBin = false;
     size_t wsIndex = static_cast<size_t>(row);
     size_t binIndex = static_cast<size_t>(bin);
-    if (m_maskBinCache.contains(row)) {
-      if (m_maskBinCache[row].contains(bin)) {
-        isMaskedBin = true;
-      } else {
-        if (m_workspace->hasMaskedBins(wsIndex)) {
-          const auto &maskedBins = m_workspace->maskedBins(wsIndex);
-          if (maskedBins.find(binIndex) != maskedBins.end()) {
-            isMaskedBin = true;
-            m_maskBinCache[row].insert(bin);
-          }
-        }
-      }
+    if (m_maskBinCache.contains(row) && m_maskBinCache[row].contains(bin)) {
+      isMaskedBin = true;
     } else {
       if (m_workspace->hasMaskedBins(wsIndex)) {
         const auto &maskedBins = m_workspace->maskedBins(wsIndex);
