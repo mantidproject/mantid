@@ -8,6 +8,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 
@@ -289,12 +290,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
 
     const auto &indexInfo = ws->indexInfo();
-    for (size_t i = 0; i < indexInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i / nTimeIndexes + 1);
+    const auto &spectrumDefinitions = *(indexInfo.spectrumDefinitions());
+    for (size_t i = 0; i < nDetectors; ++i) {
+      for (size_t j = 0; j < nTimeIndexes; ++j) {
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nTimeIndexes + j].size(), 1)
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nTimeIndexes + j][0].first, i)
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nTimeIndexes + j][0].second, j)
+      }
+      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i + 1);
     }
   }
 
-  void test_creating_workspace_with_default_detector_oriented_index_info() {
+  void test_creating_workspace_with_detector_oriented_index_info() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
@@ -306,8 +313,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
 
     const auto &indexInfo = ws->indexInfo();
-    for (size_t i = 0; i < indexInfo.size(); ++i) {
-      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i % nDetectors + 1)
+    const auto &spectrumDefinitions = *(indexInfo.spectrumDefinitions());
+    for (size_t i = 0; i < nTimeIndexes; ++i) {
+      for (size_t j = 0; j < nDetectors; ++j) {
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nDetectors + j].size(), 1)
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nDetectors + j][0].first, j)
+        TS_ASSERT_EQUALS(spectrumDefinitions[i * nDetectors + j][0].second, i)
+      }
+      TS_ASSERT_EQUALS(indexInfo.detectorIDs(i)[0], i + 1);
     }
   }
 

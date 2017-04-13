@@ -74,10 +74,8 @@ private:
   void buildRotations(API::DetectorInfo &outputDetectorInfo) const;
   void buildInstrumentAngles(API::DetectorInfo &outputDetectorInfo) const;
 
-  Indexing::IndexInfo
-  createTimeOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
-  Indexing::IndexInfo
-  createDetectorOrientedIndexInfo(const API::DetectorInfo &detectorInfo);
+  void createTimeOrientedIndexInfo(API::MatrixWorkspace_sptr &ws);
+  void createDetectorOrientedIndexInfo(API::MatrixWorkspace_sptr &ws);
 
   void verifyTimeIndexSize(size_t timeIndexSize,
                            const std::string &description) const;

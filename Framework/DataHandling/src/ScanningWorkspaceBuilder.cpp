@@ -3,6 +3,7 @@
 #include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Indexing;
@@ -133,18 +134,15 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
   if (!m_instrumentAngles.empty())
     buildInstrumentAngles(outputDetectorInfo);
 
-  IndexInfo indexInfo = IndexInfo({}, {});
-
   switch (m_indexingType) {
   case IndexingType::DEFAULT:
   case IndexingType::TIME_ORIENTED:
-    indexInfo = createTimeOrientedIndexInfo(outputDetectorInfo);
+    createTimeOrientedIndexInfo(outputWorkspace);
     break;
   case IndexingType::DETECTOR_ORIENTED:
-    indexInfo = createDetectorOrientedIndexInfo(outputDetectorInfo);
+    createDetectorOrientedIndexInfo(outputWorkspace);
+    break;
   }
-
-  outputWorkspace->setIndexInfo(indexInfo);
 
   return outputWorkspace;
 }
@@ -181,40 +179,38 @@ void ScanningWorkspaceBuilder::buildInstrumentAngles(
   }
 }
 
-IndexInfo ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
-    const DetectorInfo &detectorInfo) {
-  const auto &detectorIDs = detectorInfo.detectorIDs();
+void ScanningWorkspaceBuilder::createTimeOrientedIndexInfo(
+    MatrixWorkspace_sptr &ws) {
+  auto indexInfo = ws->indexInfo();
+  auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
+      m_nDetectors * m_nTimeIndexes);
 
-  std::vector<specnum_t> spectra;
-  std::vector<std::vector<detid_t>> detectorID;
-
-  for (size_t i = 0; i < m_nDetectors; ++i) {
-    for (size_t j = 0; j < m_nTimeIndexes; ++j) {
-      spectra.push_back(int(j + i * m_nTimeIndexes + 1));
-      std::vector<detid_t> detectors = {detectorIDs[i]};
-      detectorID.push_back(detectors);
+  for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
+    for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
+      spectrumDefinitions.access()[detIndex * m_nTimeIndexes + timeIndex].add(
+          detIndex, timeIndex);
     }
   }
 
-  return Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
+  indexInfo.setSpectrumDefinitions(spectrumDefinitions);
+  ws->setIndexInfo(indexInfo);
 }
 
-IndexInfo ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
-    const DetectorInfo &detectorInfo) {
-  const auto &detectorIDs = detectorInfo.detectorIDs();
+void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
+    MatrixWorkspace_sptr &ws) {
+  auto indexInfo = ws->indexInfo();
+  auto spectrumDefinitions = Kernel::make_cow<std::vector<SpectrumDefinition>>(
+      m_nDetectors * m_nTimeIndexes);
 
-  std::vector<specnum_t> spectra;
-  std::vector<std::vector<detid_t>> detectorID;
-
-  for (size_t i = 0; i < m_nTimeIndexes; ++i) {
-    for (size_t j = 0; j < m_nDetectors; ++j) {
-      spectra.push_back(int(j + i * m_nDetectors + 1));
-      std::vector<detid_t> detectors = {detectorIDs[j]};
-      detectorID.push_back(detectors);
+  for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
+    for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
+      spectrumDefinitions.access()[timeIndex * m_nDetectors + detIndex]
+          .add(detIndex, timeIndex);
     }
   }
 
-  return Indexing::IndexInfo(std::move(spectra), std::move(detectorID));
+  indexInfo.setSpectrumDefinitions(spectrumDefinitions);
+  ws->setIndexInfo(indexInfo);
 }
 
 void ScanningWorkspaceBuilder::verifyTimeIndexSize(
