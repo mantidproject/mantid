@@ -336,9 +336,9 @@ API::ITableWorkspace_sptr LoadSpiceAscii::createDataWS(
     for (size_t icol = 0; icol < numcols; ++icol) {
       std::string item = datalist[irow][icol];
       if (icol == ipt)
-        newrow << atoi(item.c_str());
+        newrow << std::stoi(item);
       else
-        newrow << atof(item.c_str());
+        newrow << std::stod(item);
     }
   }
 
@@ -394,10 +394,10 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
         std::vector<std::string> terms;
         boost::iter_split(terms, strvalue,
                           boost::algorithm::first_finder("+/-"));
-        value = atof(terms[0].c_str());
-        error = atof(terms[1].c_str());
+        value = std::stod(terms[0]);
+        error = std::stod(terms[1]);
       } else {
-        value = atof(strvalue.c_str());
+        value = std::stod(strvalue);
         error = 0;
       }
 
@@ -411,7 +411,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
     } else if (std::binary_search(intlognamelist.begin(), intlognamelist.end(),
                                   title)) {
       // It is an integer log
-      addProperty<int>(infows, title, atoi(strvalue.c_str()));
+      addProperty<int>(infows, title, std::stoi(strvalue));
     } else if (!ignoreunlisted ||
                std::binary_search(strlognamelist.begin(), strlognamelist.end(),
                                   title)) {
@@ -560,7 +560,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
 
     std::vector<std::string> terms2;
     boost::split(terms2, terms[0], boost::is_any_of(":"));
-    int hour = atoi(terms[0].c_str());
+    int hour = std::stoi(terms[0]);
     if (hour < 12 && pm)
       hour += 12;
 
