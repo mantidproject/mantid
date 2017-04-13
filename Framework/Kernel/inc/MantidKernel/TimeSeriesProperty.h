@@ -267,8 +267,12 @@ public:
   TimeInterval nthInterval(int n) const;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
   TYPE nthValue(int n) const;
+  /// Returns n-th value regardless of filter
+  TYPE getValue(size_t) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
   Kernel::DateAndTime nthTime(int n) const;
+  /// Returns n-th time
+  Kernel::DateAndTime getTime(size_t n) const;
 
   /// Divide the property into  allowed and disallowed time intervals according
   /// to \a filter.

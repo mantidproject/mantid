@@ -1678,6 +1678,33 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
   return value;
 }
 
+//-----------------------------------------------------------------------------------------------
+/** Returns n-th value regardless filter or etc
+ *  The algorithm is migrated from mthInterval()
+ *  @param n :: index
+ *  @return Value
+ */
+template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getValue(size_t n) const {
+  TYPE value;
+
+  // throw if property is empty
+  if (m_values.empty()) {
+    const std::string error("nthValue(): TimeSeriesProperty '" + name() +
+                            "' is empty");
+    g_log.debug(error);
+    throw std::runtime_error(error);
+  }
+
+  // sort the property if it is not sorted
+  sortIfNecessary();
+
+  if (n >= m_values.size())
+    throw std::runtime_error("index is out of boundary.");
+  value = m_values[n].value();
+
+  return value;
+}
+
 /** Returns n-th time, or the last time if fewer than n entries.
  *  Special cases: There is no special cases
  *  @param n :: index
@@ -1698,6 +1725,28 @@ Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
     n = static_cast<int>(m_values.size()) - 1;
 
   return m_values[static_cast<size_t>(n)].time();
+}
+
+/** Returns n-th time, or the last time if fewer than n entries.
+ *  Special cases: There is no special cases
+ *  @param n :: index
+ *  @return DateAndTime
+ */
+template <typename TYPE>
+Kernel::DateAndTime TimeSeriesProperty<TYPE>::getTime(size_t n) const {
+  sortIfNecessary();
+
+  if (m_values.empty()) {
+    const std::string error("nthTime(): TimeSeriesProperty '" + name() +
+                            "' is empty");
+    g_log.debug(error);
+    throw std::runtime_error(error);
+  }
+
+  if (n < 0 || n >= m_values.size())
+    n = m_values.size() - 1;
+
+  return m_values[n].time();
 }
 
 /* Divide the property into  allowed and disallowed time intervals according to
@@ -1935,12 +1984,12 @@ std::string TimeSeriesProperty<TYPE>::toString() const {
 //-------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------
-/*
- * Sort vector mP and set the flag. Only sorts if the values are not already
+/** sort vector mP and set the flag. Only sorts if the values are not already
  * sorted.
  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
+  // if flag is not set, check whether the property is sorted or not
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNKNOWN) {
     bool sorted = is_sorted(m_values.begin(), m_values.end());
     if (sorted)
@@ -1949,12 +1998,15 @@ void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
       m_propSortedFlag = TimeSeriesSortStatus::TSUNSORTED;
   }
 
+  // if the property is really  not sorted, then sort it
   if (m_propSortedFlag == TimeSeriesSortStatus::TSUNSORTED) {
     g_log.information(
         "TimeSeriesProperty is not sorted.  Sorting is operated on it. ");
     std::stable_sort(m_values.begin(), m_values.end());
     m_propSortedFlag = TimeSeriesSortStatus::TSSORTED;
   }
+
+  return;
 }
 
 /** Find the index of the entry of time t in the mP vector (sorted)
