@@ -53,16 +53,16 @@ double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
 *
 * @return : the lambda range
 */
-double getLambdaRange(const HistogramX &xValues, const int idx) {
+double getLambdaRange(const HistogramX &xValues, const int xIdx) {
   // The lambda range is the bin width from the given index to the next.
-  if (idx + 1 >= xValues.size()) {
+  if (xIdx + 1 >= xValues.size()) {
     std::ostringstream errMsg;
-    errMsg << "Error accessing X values out of range (index=" << idx + 1
+    errMsg << "Error accessing X values out of range (index=" << xIdx + 1
            << ", size=" << xValues.size();
     throw std::runtime_error(errMsg.str());
   }
 
-  double result = xValues[idx + 1] - xValues[idx];
+  double result = xValues[xIdx + 1] - xValues[xIdx];
   return result;
 }
 
@@ -71,7 +71,8 @@ double getLambdaRange(const HistogramX &xValues, const int idx) {
 *
 * @return : the lambda range
 */
-double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx) {
+double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx,
+                      const int xIdx) {
   return getLambdaRange(ws->x(spectrumIdx), static_cast<int>(spectrumIdx));
 }
 
@@ -80,16 +81,16 @@ double getLambdaRange(MatrixWorkspace_const_sptr ws, const size_t spectrumIdx) {
 *
 * @return : the lambda range
 */
-double getLambda(const HistogramX &xValues, const int idx) {
-  if (idx >= xValues.size()) {
+double getLambda(const HistogramX &xValues, const int xIdx) {
+  if (xIdx >= xValues.size()) {
     std::ostringstream errMsg;
-    errMsg << "Error accessing X values out of range (index=" << idx
+    errMsg << "Error accessing X values out of range (index=" << xIdx
            << ", size=" << xValues.size();
     throw std::runtime_error(errMsg.str());
   }
 
   // The centre of the bin is the lower bin edge plus half the width
-  return xValues[idx] + getLambdaRange(xValues, idx) / 2.0;
+  return xValues[xIdx] + getLambdaRange(xValues, xIdx) / 2.0;
 }
 
 /*
@@ -800,16 +801,19 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   double dummy = 0.0;
   const int numBins = static_cast<int>(detectorWS->blocksize());
 
-  const double bLambdaMax = getLambdaRange(detectorWS, spectrumMax(detectors));
-  const double bTwoThetaMin =
-      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMin(detectors));
-  getProjectedLambdaRange(lambdaMax(), twoThetaMin(detectors), bLambdaMax,
+  // bLambda is the lambda bin size at the twoThetaMin detector
+  auto spIdx = spectrumMin(detectors);
+  auto xValues = detectorWS->x(spIdx);
+  double bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
+  const double bTwoThetaMin = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
+  getProjectedLambdaRange(lambdaMax(), twoThetaMin(detectors), bLambda,
                           bTwoThetaMin, lambdaVMin, dummy, detectors);
 
-  const double bLambdaMin = getLambdaRange(detectorWS, spectrumMin(detectors));
-  const double bTwoThetaMax =
-      getDetectorTwoThetaRange(m_spectrumInfo, spectrumMax(detectors));
-  getProjectedLambdaRange(lambdaMin(), twoThetaMax(detectors), bLambdaMin,
+  spIdx = spectrumMax(detectors);
+  xValues = detectorWS->x(spIdx);
+  bLambda = (xValues[xValues.size() - 1] - xValues[0]) / xValues.size();
+  const double bTwoThetaMax = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
+  getProjectedLambdaRange(lambdaMin(), twoThetaMax(detectors), bLambda,
                           bTwoThetaMax, dummy, lambdaVMax, detectors);
 
   if (lambdaVMin > lambdaVMax) {
