@@ -342,7 +342,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         elif ws_event_data is None:
             raise RuntimeError("No input data was specified")
         return ws_event_data
-    
+
     def calculate_scattering_angle(self, ws_event_data):
         """
             Compute the scattering angle
