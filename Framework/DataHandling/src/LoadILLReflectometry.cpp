@@ -132,26 +132,26 @@ void LoadILLReflectometry::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", std::string(),
                                                     FileProperty::Load, ".nxs",
                                                     Direction::Input),
-                  "File path of the data file (Nexus) to load");
+                  "Name of the Nexus file to load");
 
   declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                       "OutputWorkspace", std::string(), Direction::Output),
-                  "The name to use for the output workspace");
+                  "Name of the output workspace");
 
   const std::vector<std::string> angle{"sample angle", "detector angle",
                                        "user defined"};
-  declareProperty("BraggAngleIs", "sample angle",
+  declareProperty("InputAngle", "sample angle",
                   boost::make_shared<StringListValidator>(angle),
-                  "Optional angle for calculating the scattering angle.\n");
+                  "Optional angle for calculating the Bragg angle.\n");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(1.0);
   declareProperty(
       "BraggAngle", EMPTY_DBL(), positiveDouble,
-      "User defined angle in degrees for computing the scattering angle");
+      "User defined Bragg angle");
   setPropertySettings("BraggAngle",
                       Kernel::make_unique<EnabledWhenProperty>(
-                          "BraggAngleIs", IS_EQUAL_TO, "user defined"));
+                          "InputAngle", IS_EQUAL_TO, "user defined"));
 
   const std::vector<std::string> availableUnits{"Wavelength", "TimeOfFlight"};
   declareProperty("XUnit", "Wavelength",
@@ -161,18 +161,18 @@ void LoadILLReflectometry::init() {
   const std::vector<std::string> scattering{"coherent", "incoherent"};
   declareProperty("ScatteringType", "incoherent",
                   boost::make_shared<StringListValidator>(scattering),
-                  "Scattering type used to calculate the scattering angle");
+                  "Scattering type used to calculate the Bragg angle");
   setPropertySettings("ScatteringType",
                       Kernel::make_unique<EnabledWhenProperty>(
-                          "BraggAngleIs", IS_NOT_EQUAL_TO, "user defined"));
+                          "InputAngle", IS_NOT_EQUAL_TO, "user defined"));
 
   declareProperty(Kernel::make_unique<FileProperty>("DirectBeam", std::string(),
                                                     FileProperty::OptionalLoad,
                                                     ".nxs", Direction::Input),
-                  "File path of the direct beam file (Nexus) to load");
+                  "Name of the direct beam Nexus file to load");
   setPropertySettings("DirectBeam",
                       Kernel::make_unique<EnabledWhenProperty>(
-                          "BraggAngleIs", IS_EQUAL_TO, "detector angle"));
+                          "InputAngle", IS_EQUAL_TO, "detector angle"));
 }
 
 /**
@@ -188,7 +188,7 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
     result["Filename"] = "Instrument not supported.";
   // check user defined angle
   const double angleUserDefined{getProperty("BraggAngle")};
-  const std::string angleOption{getPropertyValue("BraggAngleIs")};
+  const std::string angleOption{getPropertyValue("InputAngle")};
   if ((angleOption == "user defined") && (angleUserDefined == EMPTY_DBL()))
     result["BraggAngle"] =
         "User defined BraggAngle option requires an input value";
@@ -202,7 +202,7 @@ std::map<std::string, std::string> LoadILLReflectometry::validateInputs() {
   if ((angleOption != "user defined") && (angleUserDefined != EMPTY_DBL()))
     result["BraggAngle"] = "No input value required";
   if (directBeam.empty() && (angleOption == "detector angle"))
-    result["BraggAngleIs"] = "DirectBeam input required";
+    result["InputAngle"] = "DirectBeam input required";
   return result;
 }
 
@@ -527,13 +527,11 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
       progress.report();
     }
     // write data
-    size_t spec = 0;
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       int *data_p = &data(0, static_cast<int>(j), 0);
       const Counts counts(data_p, data_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
+      m_localWorkspace->setHistogram((j + nb_monitors), binEdges,
                                      std::move(counts));
-      ++spec;
       progress.report();
     }
   } else
@@ -616,12 +614,10 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
     // write data
     if (!xVals.empty()) {
       HistogramData::BinEdges binEdges(xVals);
-      size_t spec = 0;
       for (size_t j = 0; j < m_numberOfHistograms; ++j) {
         int *data_p = &data(0, static_cast<int>(j), 0);
         const Counts counts(data_p, data_p + m_numberOfChannels);
-        beamWS->setHistogram(spec, binEdges, std::move(counts));
-        ++spec;
+        beamWS->setHistogram(j, binEdges, std::move(counts));
       }
     }
   } else
@@ -710,7 +706,7 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
 /// Compute Bragg angle
 double LoadILLReflectometry::computeBraggAngle() {
   // compute bragg angle called angleBragg in the following
-  const std::string inputAngle = getPropertyValue("BraggAngleIs");
+  const std::string inputAngle = getPropertyValue("InputAngle");
   std::string incidentAngle{std::string()};
   if (inputAngle == "sample angle" || inputAngle == "detector angle") {
     inputAngle == "sample angle" ? incidentAngle = "san.value"

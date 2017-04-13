@@ -44,7 +44,7 @@ public:
   const std::string category() const override { return "DataHandling\\Nexus"; }
   /// Algorithm's summary. @see Algorithm::summary
   const std::string summary() const override {
-    return "Loads an ILL reflectometry nexus file (instrument D17 or "
+    return "Loads an ILL reflectometry Nexus file (instrument D17 or "
            "Figaro).";
   }
   /// Cross-check properties with each other @see IAlgorithm::validateInputs

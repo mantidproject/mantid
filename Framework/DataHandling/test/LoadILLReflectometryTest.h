@@ -73,8 +73,8 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void testInputBraggAngleIsD17() {
-    loadSpecificThrows(m_d17File, outWSName, "BraggAngleIs", "user defined");
+  void testInputInputAngleD17() {
+    loadSpecificThrows(m_d17File, outWSName, "InputAngle", "user defined");
   }
 
   void testWavelengthD17() {
@@ -101,7 +101,7 @@ public:
   }
 
   void test2ThetaD17() {
-    // default BraggAngleIs = "sample angle"
+    // default InputAngle = "sample angle"
     MatrixWorkspace_sptr output;
     getWorkspaceFor(output, m_d17File, outWSName);
     // Compare angles in rad
@@ -289,7 +289,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", file));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("OutputWorkspace", outWSName));
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("BraggAngleIs", angle));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("InputAngle", angle));
     TS_ASSERT_THROWS_NOTHING(
         loader.setPropertyValue("ScatteringType", scatteringType));
     if (angle == "detector angle") {
