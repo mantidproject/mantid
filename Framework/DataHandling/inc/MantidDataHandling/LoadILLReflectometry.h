@@ -66,7 +66,7 @@ private:
   void loadData(NeXus::NXEntry &entry,
                 std::vector<std::vector<int> > &monitorsData,
                 std::vector<double> xVals);
-  void loadNexusEntriesIntoProperties(NeXus::NXEntry &entry, NeXus::NXRoot &root);
+  void loadNexusEntriesIntoProperties();
   std::vector<int> loadSingleMonitor(NeXus::NXEntry &entry,
                                      std::string monitor_data);
   std::vector<std::vector<int>> loadMonitors(NeXus::NXEntry &entry);

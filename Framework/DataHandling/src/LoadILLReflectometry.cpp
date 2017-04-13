@@ -7,13 +7,22 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Quat.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LinearGenerator.h"
+
+using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::LinearGenerator;
+using Mantid::DataObjects::create;
+using Mantid::DataObjects::Workspace2D;
 
 // unit
 /// Convert an angle from degree to radiant
@@ -213,7 +222,7 @@ void LoadILLReflectometry::exec() {
   // load the instrument from the IDF if it exists
   loadInstrument();
   // get properties
-  loadNexusEntriesIntoProperties(firstEntry, root);
+  loadNexusEntriesIntoProperties();
   // load data into the workspace
   loadData(firstEntry, monitorsData, getXValues());
   root.close();
@@ -271,7 +280,7 @@ void LoadILLReflectometry::initNames(NeXus::NXEntry &entry) {
     // m_wavelength = getFloat("wavelength");
   } else if (m_instrumentName == "Figaro") {
     m_detectorDistance = "DTR";
-    m_detectorAngleName = "VirtualAxis.dan_actual_angle";
+    m_detectorAngleName = "VirtualAxis.DAN_actual_angle";
     m_offsetFrom = "CollAngle";
     m_offsetName = "openOffset";
     m_pixelCentre = double(m_numberOfHistograms) / 2.0;
@@ -513,19 +522,17 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
     HistogramData::BinEdges binEdges(xVals);
     for (size_t im = 0; im < nb_monitors; im++) {
       int *monitor_p = monitorsData[im].data();
-      const HistogramData::Counts histoCounts(monitor_p,
-                                              monitor_p + m_numberOfChannels);
-      m_localWorkspace->setHistogram(im, binEdges, std::move(histoCounts));
+      const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
+      m_localWorkspace->setHistogram(im, binEdges, std::move(counts));
       progress.report();
     }
     // write data
     size_t spec = 0;
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       int *data_p = &data(0, static_cast<int>(j), 0);
-      const HistogramData::Counts histoCounts(data_p,
-                                              data_p + m_numberOfChannels);
+      const Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram((spec + nb_monitors), binEdges,
-                                     std::move(histoCounts));
+                                     std::move(counts));
       ++spec;
       progress.report();
     }
@@ -537,26 +544,8 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
  * Use the LoadHelper utility to load most of the nexus entries into workspace
  * log properties
  */
-void LoadILLReflectometry::loadNexusEntriesIntoProperties(NeXus::NXEntry &entry,
-                                                          NeXus::NXRoot &root) {
+void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   g_log.debug("Building properties...");
-  /*
-  // "Open" the file with the C++ interface
-  ::NeXus::File *file = new ::NeXus::File(root.m_fileID);
-  std::string parameterStr;
-  file->openPath(entry.path());
-  try {
-    // load logs, sample, and instrument
-    m_localWorkspace->loadExperimentInfoNexus(getPropertyValue("Filename"),
-                                              file, parameterStr);
-  } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    g_log.information("Error loading experiment info of nxs file");
-  }
-  // Parameter map parsing
-  //progress(progressStart + 0.11 * progressRange,
-  //         "Reading the parameter maps...");
-  m_localWorkspace->readParameterMap(parameterStr);
-  */
   // Open NeXus file
   const std::string filename{getPropertyValue("Filename")};
   NXhandle nxfileID;
@@ -630,9 +619,8 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
       size_t spec = 0;
       for (size_t j = 0; j < m_numberOfHistograms; ++j) {
         int *data_p = &data(0, static_cast<int>(j), 0);
-        const HistogramData::Counts histoCounts(data_p,
-                                                data_p + m_numberOfChannels);
-        beamWS->setHistogram(spec, binEdges, std::move(histoCounts));
+        const Counts counts(data_p, data_p + m_numberOfChannels);
+        beamWS->setHistogram(spec, binEdges, std::move(counts));
         ++spec;
       }
     }
@@ -658,34 +646,33 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
   if ((beam == "DirectBeam") || (beam == "Filename")) {
     MatrixWorkspace_sptr beamWS;
     loadBeam(beamWS, beam, angleDirectBeam);
-    // create new MatrixWorkspace containing point data (one spectrum only)
-    MatrixWorkspace_sptr oneSpectrum = WorkspaceFactory::Instance().create(
-        "Workspace2D", 1, m_numberOfHistograms, m_numberOfHistograms);
-    // Points x(m_numberOfHistograms, LinearGenerator(0, 1));
-    // Counts y(m_numberOfHistograms, LinearGenerator(0, 1));
-    // CountStandardDeviations e(m_numberOfHistograms, LinearGenerator(0, 1));
-    // create<Workspace2D>(1, Histogram(x, y, e));
-    // auto oneSpectrum = create<Workspace2D>(2, Histogram(Points(1)));
+    // create new MatrixWorkspace containing (single spectrum only)
+    // MatrixWorkspace_sptr singleSpectrum =
+    // WorkspaceFactory::Instance().create(
+    //  "Workspace2D", 1, m_numberOfHistograms, m_numberOfHistograms);
+    Points x(m_numberOfHistograms, LinearGenerator(0, 1));
+    auto singleSpectrum = create<Workspace2D>(1, Histogram(x));
+    MatrixWorkspace_sptr spectrum{std::move(singleSpectrum)};
     for (size_t i = 0; i < (m_numberOfHistograms); ++i) {
       auto Y = beamWS->y(i);
-      oneSpectrum->mutableY(0)[i] = std::accumulate(Y.begin(), Y.end(), 0);
+      spectrum->mutableY(0)[i] = std::accumulate(Y.begin(), Y.end(), 0);
     }
-    auto spectrum = oneSpectrum->y(0);
     // check sum of detector counts
     if ((beam == "Filename") &&
-        getDouble("PSD.detsum") != std::accumulate(oneSpectrum->y(0).begin(),
-                                                   oneSpectrum->y(0).end(), 0))
+        getDouble("PSD.detsum") !=
+            std::accumulate(spectrum->y(0).begin(), spectrum->y(0).end(), 0))
       g_log.error("Error after integrating and transposing beam\n");
     // determine initial height: maximum value
-    auto maxValueIt = std::max_element(spectrum.begin(), spectrum.end());
+    auto maxValueIt =
+        std::max_element(spectrum->y(0).begin(), spectrum->y(0).end());
     double height = *maxValueIt;
     // determine initial centre: index of the maximum value
-    size_t maxIndex = std::distance(spectrum.begin(), maxValueIt);
+    size_t maxIndex = std::distance(spectrum->y(0).begin(), maxValueIt);
     centre[1] = static_cast<double>(maxIndex);
     debugLog2("Peak maximum position of ", beam, centre[1]);
     // determine sigma
-    auto minFwhmIt = iterator(maxValueIt, spectrum.begin(), height);
-    auto maxFwhmIt = iterator(maxValueIt, spectrum.end(), height);
+    auto minFwhmIt = iterator(maxValueIt, spectrum->y(0).begin(), height);
+    auto maxFwhmIt = iterator(maxValueIt, spectrum->y(0).end(), height);
     double fwhm =
         0.5 * static_cast<double>(std::distance(minFwhmIt, maxFwhmIt) + 1);
     debugLog2("Initial fwhm (fixed window at half maximum) ", beam, fwhm);
@@ -703,13 +690,13 @@ LoadILLReflectometry::fitReflectometryPeak(const std::string beam,
     fitGaussian->setProperty(
         "Function",
         boost::dynamic_pointer_cast<API::IFunction>(initialGaussian));
-    fitGaussian->setProperty("InputWorkspace", oneSpectrum);
+    fitGaussian->setProperty("InputWorkspace", spectrum);
     bool success = fitGaussian->execute();
     if (!success)
       g_log.warning("Fit not successful, take initial values\n");
     else {
       // get fitted values back
-      centre[0] = initialGaussian->centre() - 1; // correction required!
+      centre[0] = initialGaussian->centre();
       double sigma = initialGaussian->fwhm();
       debugLog("Sigma: ", sigma);
     }
@@ -759,29 +746,26 @@ double LoadILLReflectometry::computeBraggAngle() {
   double angleBragg{angle};
   // the reflected beam
   std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
+  // Figaro theta sign informs about reflection down (1.0) or up (-1.0)
+  double down{1.0}, sign{-down}; // default value for D17
+  if (m_instrumentName == "Figaro") {
+    down = getDouble("theta");
+    down > 0. ? down = 1. : down = -1.;
+    sign = -down;
+  }
   if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
       (scatteringType == "coherent")) {
-    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], -1.0);
-    // angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], 1.0); // ref
-    // down Figaro
+    angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], -down);
   } else if (inputAngle == "detector angle") {
     // DirectBeam is abvailable and we can read from its NeXus file
     std::vector<double> peakPosDB =
         fitReflectometryPeak("DirectBeam", incidentAngle);
-    double angleCentre = ((angle - m_BraggAngleDirectBeam) / 2.)inRad;
+    double angleCentre = sign * ((angle - m_BraggAngleDirectBeam) / 2.)inRad;
     debugLogWithUnitDegrees("Centre angle ", angleCentre inDeg);
-    // if refdown figaro down = -1.0, else down = 1.0
-    float down{1.0};
     if (scatteringType == "incoherent")
-      angleBragg = eq1(down * angleCentre, peakPosDB[0], peakPosRB[0],
-                       -1.0); // refdown figaro
-    // angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], 1.0);// no
-    // refdown figaro
+      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], sign);
     else if (scatteringType == "coherent")
-      angleBragg = eq1(down * angleCentre, peakPosDB[0], peakPosRB[1] + 0.5,
-                       -1.0); // refdown figaro
-    // angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, 1.0);//no
-    // refdown figaro
+      angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[1] + 0.5, sign);
   }
   debugLogWithUnitDegrees("Bragg angle ", angleBragg);
   return angleBragg;

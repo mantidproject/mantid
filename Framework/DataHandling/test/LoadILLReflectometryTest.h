@@ -124,7 +124,8 @@ public:
 
   void testCoherentScatteringSampleAngleD17() {
     testScatteringAngle(0.013869106584602529, "sample angle", "coherent",
-                        m_d17File);
+                        m_d17File); // using WorkspaceFactory, now with create
+                                    // 0.013869106563677843
   }
 
   void testIncoherentScatteringDetectorAngleD17() {
@@ -135,10 +136,12 @@ public:
   void testCoherentScatteringDetectorAngleD17() {
     // small value due to centre angle is zero
     testScatteringAngle(-7.116595751588406e-06, "detector angle", "coherent",
-                        m_d17File);
+                        m_d17File); // using WorkspaceFactory, now with create
+                                    // -7.116574826901076e-06
   }
 
-  // user defined input angle only needs to be converted to radiant
+  // user defined input angle of 30.0 degree only needs to be converted to
+  // radiant
   void testIncoherentScatteringUserAngleD17() {
     testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
                         m_d17File);
@@ -171,32 +174,29 @@ public:
                         m_figaroFile);
   }
 
-  // void testCoherentScatteringSampleAngleFigaro() {
-  //  testScatteringAngle(xx, "sample angle", "coherent",
-  //                      m_figaroFile);
-  //}
+  void testCoherentScatteringSampleAngleFigaro() {
+    testScatteringAngle(1.0, "sample angle", "coherent", m_figaroFile);
+  }
 
-  // void testIncoherentScatteringDetectorAngleFigaro() {
-  //  testScatteringAngle(0.0, "detector angle", "incoherent", m_figaroFile);
-  //  // center angle 0
-  //}
+  void testIncoherentScatteringDetectorAngleFigaro() {
+    testScatteringAngle(0.0, "detector angle", "incoherent", m_figaroFile);
+  }
 
-  // void testCoherentScatteringDetectorAngleFigaro() {
-  //  testScatteringAngle(xx, "detector angle", "coherent",
-  //                      m_figaroFile);
-  //}
+  void testCoherentScatteringDetectorAngleFigaro() {
+    testScatteringAngle(1.0, "detector angle", "coherent", m_figaroFile);
+  }
 
-  // user defined input angle treated like sample angle, test angle 30.0 degrees
+  // user defined input angle of 30.0 degree only needs to be converted to
+  // radiant
   void testIncoherentScatteringUserAngleFigaro() {
     testScatteringAngle(30.0 * M_PI / 180., "user defined", "incoherent",
                         m_figaroFile);
   }
 
-  // user defined input angle treated like sample angle, test angle 30.0 degrees
-  // void testCoherentScatteringUserAngleFigaro() {
-  //  testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
-  //                      m_figaroFile);
-  //}
+  void testCoherentScatteringUserAngleFigaro() {
+    testScatteringAngle(30.0 * M_PI / 180., "user defined", "coherent",
+                        m_figaroFile);
+  }
 
   // helpers
 
