@@ -14,5 +14,11 @@ if (COVERALLS)
   endforeach(loop_var)
 endif()
 
+# Add the target for this directory
+add_library ( Types ${INC_FILES} )
+# Set the name of the generated library
+set_target_properties ( Types PROPERTIES OUTPUT_NAME MantidTypes
+        COMPILE_DEFINITIONS IN_MANTID_TYPES LINKER_LANGUAGE CXX )
+
 # Add the unit tests directory
 add_subdirectory ( test )

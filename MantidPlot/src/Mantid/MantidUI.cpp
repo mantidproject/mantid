@@ -50,6 +50,7 @@
 #include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -57,6 +58,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -1232,6 +1234,9 @@ Table *MantidUI::createDetectorTable(
   // check if efixed value is available
   bool calcQ(true);
 
+  // check if we have a scanning workspace
+  bool isScanning = ws->detectorInfo().isScanning();
+
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
@@ -1251,6 +1256,8 @@ Table *MantidUI::createDetectorTable(
   colNames << "Index"
            << "Spectrum No"
            << "Detector ID(s)";
+  if (isScanning)
+    colNames << "Time Index";
   if (include_data) {
     colNames << "Data Value"
              << "Data Error";
@@ -1366,6 +1373,16 @@ Table *MantidUI::createDetectorTable(
       }
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
+      if (isScanning) {
+        auto timeIndexes = QString("");
+
+        for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
+          timeIndexes += QString::number(def.second) + ",";
+        }
+        detIds.chop(1); // Drop last comma
+
+        colValues << QVariant(timeIndexes);
+      }
       // Y/E
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
