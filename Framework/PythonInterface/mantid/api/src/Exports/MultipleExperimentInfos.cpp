@@ -14,8 +14,7 @@ void export_MultipleExperimentInfos() {
                MultipleExperimentInfos::getExperimentInfo,
            (arg("self"), arg("run_index")),
            "Return the experiment info at the given index.")
-      .def("addExperimentInfo",
-           &MultipleExperimentInfos::addExperimentInfo,
+      .def("addExperimentInfo", &MultipleExperimentInfos::addExperimentInfo,
            (arg("self"), arg("ExperimentalInfo")),
            "Add a new ExperimentInfo to this MDWorkspace")
       .def("getNumExperimentInfo",
