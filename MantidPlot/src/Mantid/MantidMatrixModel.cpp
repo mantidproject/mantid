@@ -295,7 +295,8 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
       const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
       isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
-      if (isMon) m_monCache.insert(row);
+      if (isMon)
+        m_monCache.insert(row);
     }
     return isMon;
   } else {
@@ -318,7 +319,8 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
       const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
       isMasked = specInfo.hasDetectors(wsIndex) && specInfo.isMasked(wsIndex);
-      if (isMasked) m_maskCache.insert(row);
+      if (isMasked)
+        m_maskCache.insert(row);
     }
     return isMasked;
   } else {

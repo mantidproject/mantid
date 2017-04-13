@@ -89,9 +89,9 @@ private:
   char m_format; //  Format of numbers returned by data(): 'f' - fixed, 'e' -
                  //  scientific.
   int m_prec;    //  Number precision
-  QColor m_mon_color;                  // Monitor Specific background color
-  mutable QSet<int> m_monCache; // monitor flag cache
-  QColor m_mask_color; // Masked Detector Specific background color
+  QColor m_mon_color;            // Monitor Specific background color
+  mutable QSet<int> m_monCache;  // monitor flag cache
+  QColor m_mask_color;           // Masked Detector Specific background color
   mutable QSet<int> m_maskCache; // masked flag cache
   mutable QHash<int, QSet<int>> m_maskBinCache; // cache for masked bins
 };
