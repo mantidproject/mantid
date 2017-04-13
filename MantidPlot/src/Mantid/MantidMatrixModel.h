@@ -3,10 +3,12 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <QColor>
-#include <QObject>
 #include <QAbstractTableModel>
+#include <QColor>
 #include <QLocale>
+#include <QObject>
+#include <QSet>
+
 /**
 MantidMatrixModel is an implementation of QAbstractTableModel which is an
 interface between the data (workspace) and the widget displaying it
@@ -88,10 +90,10 @@ private:
                  //  scientific.
   int m_prec;    //  Number precision
   QColor m_mon_color;                  // Monitor Specific background color
-  mutable QHash<int, bool> m_monCache; // monitor flag cache
+  mutable QSet<int> m_monCache; // monitor flag cache
   QColor m_mask_color; // Masked Detector Specific background color
-  mutable QHash<int, bool> m_maskCache; // masked flag cache
-  mutable QHash<int, QHash<int, bool>> m_maskBinCache; // cache for masked bins
+  mutable QSet<int> m_maskCache; // masked flag cache
+  mutable QHash<int, QSet<int>> m_maskBinCache; // cache for masked bins
 };
 
 #endif

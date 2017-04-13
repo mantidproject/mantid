@@ -290,12 +290,12 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
   if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
     bool isMon = false;
     if (m_monCache.contains(row)) {
-      isMon = m_monCache.value(row);
+      isMon = true;
     } else {
       const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
       isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
-      m_monCache.insert(row, isMon);
+      if (isMon) m_monCache.insert(row);
     }
     return isMon;
   } else {
@@ -313,12 +313,12 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
   if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
     bool isMasked = false;
     if (m_maskCache.contains(row)) {
-      isMasked = m_maskCache.value(row);
+      isMasked = true;
     } else {
       const auto &specInfo = m_workspace->spectrumInfo();
       size_t wsIndex = static_cast<size_t>(row);
       isMasked = specInfo.hasDetectors(wsIndex) && specInfo.isMasked(wsIndex);
-      m_maskCache.insert(row, isMasked);
+      if (isMasked) m_maskCache.insert(row);
     }
     return isMasked;
   } else {
@@ -334,20 +334,20 @@ it, otherwise it looks it up and adds it to the cache for quick lookup
 */
 bool MantidMatrixModel::checkMaskedBinCache(int row, int bin) const {
   row += m_startRow; // correctly offset the row
-  if (m_workspace->axes() > 1 && m_workspace->getAxis(1)->isSpectra()) {
+  if (m_workspace->axes() > 1) {
     bool isMaskedBin = false;
     size_t wsIndex = static_cast<size_t>(row);
     size_t binIndex = static_cast<size_t>(bin);
     if (m_maskBinCache.contains(row)) {
       if (m_maskBinCache[row].contains(bin)) {
-        isMaskedBin = m_maskBinCache[row].value(bin);
+        isMaskedBin = true;
       } else {
         if (m_workspace->hasMaskedBins(wsIndex)) {
           const auto &maskedBins = m_workspace->maskedBins(wsIndex);
           if (maskedBins.find(binIndex) != maskedBins.end()) {
             isMaskedBin = true;
+            m_maskBinCache[row].insert(bin);
           }
-          m_maskBinCache[row].insert(bin, isMaskedBin);
         }
       }
     } else {
@@ -355,8 +355,8 @@ bool MantidMatrixModel::checkMaskedBinCache(int row, int bin) const {
         const auto &maskedBins = m_workspace->maskedBins(wsIndex);
         if (maskedBins.find(binIndex) != maskedBins.end()) {
           isMaskedBin = true;
+          m_maskBinCache[row].insert(bin);
         }
-        m_maskBinCache[row].insert(bin, isMaskedBin);
       }
     }
     return isMaskedBin;
