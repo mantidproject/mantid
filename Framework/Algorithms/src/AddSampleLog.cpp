@@ -119,9 +119,13 @@ void AddSampleLog::exec() {
     addStringLog(theRun, propName, propValue, propUnit);
   } else if (propType == numberSeriesLogOption) {
     // add a TimeSeriesProperty
+    // TODO: Need to re-define the behavior on the default propNumberType for Series.
+    //       If propValue is given, then use this value to determine whether the type is 
+    //       integer or double; Otherwise, the series should be double
     addTimeSeriesProperty(theRun, propName, propValue, propUnit,
                           propNumberType);
   } else {
+    // TODO: Refactor this section to a method!
     // add a single value property, integer or double
     bool value_is_int(false);
     if (propNumberType != autoTypeOption) {
