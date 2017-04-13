@@ -149,7 +149,8 @@ void GenerateEventsFilter::init() {
 
   declareProperty("LogValueTolerance", EMPTY_DBL(),
                   "Tolerance of the log value to be included in filter.  It is "
-                  "used in the case to filter by multiple values.");
+                  "used in the case to filter by multiple values."
+                  "Default value is the half of log value interval (ISIS convention).");
   setPropertySettings(
       "LogValueTolerance",
       Kernel::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
@@ -689,8 +690,118 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   }
 }
 
+void GenerateEventsFilter::setupFilterByLogParameters(double &min_value, double &value_step, double &max_value,
+                                                      double &value_tolerance)
+{
+  // log value interval and thus the log value tolerance
+  value_step = getProperty("LogValueInterval");
+  if (isEmpty(value_step))
+  {
+    // single value case
+    value_step = max_value - min_value + 1.E-9;
+    value_tolerance = 0.;
+  }
+  else
+  {
+    // multiple value case
+    if (value_step <= 0)
+      throw std::invalid_argument("log value step must be positive.");
+
+    // log value tolerance
+    value_tolerance = this->getProperty("LogValueTolerance");
+    // value tolerance: by default it is half of the value interval
+    if (value_tolerance == EMPTY_DBL())
+      value_tolerance = 0.5 * value_step;
+    else if (value_tolerance < 0.0)
+      throw std::runtime_error("LogValueTolerance cannot be less than zero.");
+  }
+
+  return;
+}
+
+void GenerateEventsFilter::createMultiLogValueTargets(double min_value, double value_step, double max_value,
+                                                      double value_tolerance)
+{
+  // check inputs
+  if (value_step <= 0)
+    throw std::invalid_argument("Value step must be larger than 0.");
+  if (min_value >= max_value)
+    throw std::invalid_argument("Minium value must be smaller than maximum value.");
+
+  // step up the vectors for log values
+  std::vector<double> log_value_ranges;
+  min_value -= value_tolerance;
+  max_value -= value_tolerance;
+
+  double curr_value = min_value;
+  while (curr_value < max_value)
+  {
+    log_value_ranges.push_back(curr_value);
+  }
+  log_value_ranges.push_back(max_value);
+
+  return;
+}
+
+void GenerateEventsFilter::makeDblLogSplitters(const std::vector<double> &log_value_ranges,
+                                               const Kernel::DateAndTime &filter_start_time,
+                                               const Kernel::DateAndTime &filter_stop_time,
+                                               const bool &ignore_change_direction)
+{
+  std::vector<Kernel::DateAndTime> time_vector;
+  std::vector<int> target_vector;
+
+  // loop through the log
+  int prev_target = EMPTY_INT();
+  int curr_target = EMPTY_INT();
+  double curr_min = EMPTY_DBL();
+  double curr_max = EMPTY_DBL();
+  Kernel::DateAndTime curr_time(0);
+
+  size_t log_size = m_dblLog->size();
+  for (size_t i_entry = 0; i_entry < log_size-1; ++i_entry)
+  {
+    curr_time = m_dblLog->getTime(i_entry);
+    if (curr_time < filter_start_time || curr_time > filter_stop_time)
+      curr_target = -1;
+    else
+    {
+      double curr_log_value = m_dblLog->nthValue(i_entry);
+      if (curr_min <= curr_log_value && curr_log_value < curr_max)
+        curr_target = prev_target;
+      else
+        curr_target = searchValueInVector(log_value_ranges, curr_log_value, curr_min, curr_max);
+    }
+
+    // log value changing direction
+    if (!ignore_change_direction && i_entry < log_size - 1)
+    {
+      bool value_rise = m_dblLog->nthTime(i_entry + 1) > m_dblLog->nthTime(i_entry);
+      if (!value_rise)
+        curr_target = -1 * abs(curr_target);
+    }
+
+    // process the new log: 2 conditions
+    // 1. value changes; 2. if value change direction is considered and it changes, which is reflected by sign of target
+    if (curr_target != prev_target)
+    {
+      // it must be a start of new splitter
+      time_vector.push_back(curr_time);
+      target_vector.push_back(curr_target);
+    }
+
+    // update loop variables
+    prev_target = curr_target;
+  } // END-FOR
+
+  // close the vector as the run end
+  time_vector.push_back(m_runEndTime);
+
+  return;
+}
+
 //----------------------------------------------------------------------------------------------
-/** Generate filters from multiple values
+/** Define event filters with multiple value range
   * @param minvalue :: minimum value of the allowed log value;
   * @param valueinterval :: step of the log value for a series of filter
   * @param maxvalue :: maximum value of the allowed log value;
@@ -698,6 +809,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
  * be included;
   * @param filterdecrease :: if true, log value in the decreasing curve should
  * be included;
+ *  @param separateupdown :: if true, then the increasing and decreasing value will go to different workspaces
  */
 void GenerateEventsFilter::processMultipleValueFilters(
     double minvalue, double valueinterval, double maxvalue, bool filterincrease,
@@ -708,6 +820,7 @@ void GenerateEventsFilter::processMultipleValueFilters(
         "Multiple values filter must have LogValueInterval larger than ZERO.");
   double valuetolerance = this->getProperty("LogValueTolerance");
 
+  // value tolerance: by default it is half of the value interval
   if (valuetolerance == EMPTY_DBL())
     valuetolerance = 0.5 * valueinterval;
   else if (valuetolerance < 0.0)
@@ -721,7 +834,7 @@ void GenerateEventsFilter::processMultipleValueFilters(
   size_t index = 0;
 
   double curvalue = minvalue;
-  g_log.notice("[DB Flag 1]");
+  // single direction or both direction
   while (curvalue - valuetolerance < maxvalue) {
     indexwsindexmap.emplace(index, wsindex);
 
@@ -1808,6 +1921,23 @@ size_t GenerateEventsFilter::searchValue(const std::vector<double> &sorteddata,
     if (index == sorteddata.size())
       return outrange;
   }
+
+  return index;
+}
+
+/**
+ * @brief GenerateEventsFilter::searchValueInVector
+ * @param sorted_vector
+ * @param value
+ * @param lower_bound
+ * @param upper_bound
+ * @return
+ */
+int GenerateEventsFilter::searchValueInVector(const std::vector<double> &sorted_vector,
+                                              const double value, double &lower_bound, double &upper_bound)
+{
+  size_t index = static_cast<size_t>(
+        std::lower_bound(sorted_vector.begin(), sorted_vector.end(), value) - sorted_vector.begin());
 
   return index;
 }

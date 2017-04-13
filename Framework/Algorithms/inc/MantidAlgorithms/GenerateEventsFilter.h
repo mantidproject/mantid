@@ -170,7 +170,14 @@ private:
                                                const Kernel::DateAndTime &startT, const Kernel::DateAndTime &stopT,
                                                int &value_change_direction);
 
+  void setupFilterByLogParameters(double &min_value, double &value_step, double &max_value,
+                                  double &value_tolerance);
+  void createMultiLogValueTargets(double min_value, double value_step, double max_value,
+                                  double value_tolerance);
+  void makeDblLogSplitters(const std::vector<double> &log_value_ranges, const Kernel::DateAndTime &filter_start_time, const Kernel::DateAndTime &filter_stop_time, const bool &ignore_change_direction);
 
+  int searchValueInVector(const std::vector<double> &sorted_vector,
+                          const double value, double &lower_bound, double &upper_bound);
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);
 
@@ -214,6 +221,8 @@ private:
 
   std::vector<std::vector<Kernel::DateAndTime>> m_vecSplitterTimeSet;
   std::vector<std::vector<int>> m_vecGroupIndexSet;
+
+  // special variables for splitting workspace with upper and down
 };
 
 } // namespace Algorithms
