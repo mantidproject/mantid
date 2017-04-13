@@ -48,6 +48,7 @@ public:
 
   virtual void subscribe() override;
   virtual void subscribe(int64_t offset) override;
+  virtual void subscribeAtTime(int64_t time) override;
   virtual void consumeMessage(std::string *payload) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
@@ -64,9 +65,10 @@ private:
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
                               int64_t confOffset) const;
 
-  void subscribeAtOffset(int64_t offset) const;
+  void subscribeAtOffset(int64_t offset);
   void checkTopicExists() const;
   void createConsumer();
+  std::vector<RdKafka::TopicPartition *> getTopicPartitions();
 };
 
 } // namespace LiveData

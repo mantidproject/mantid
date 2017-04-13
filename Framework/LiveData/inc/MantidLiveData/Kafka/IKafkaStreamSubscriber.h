@@ -36,6 +36,7 @@ public:
   virtual ~IKafkaStreamSubscriber() = default;
   virtual void subscribe() = 0;
   virtual void subscribe(int64_t offset) = 0;
+  virtual void subscribeAtTime(int64_t time) = 0;
   virtual void consumeMessage(std::string *message) = 0;
 };
 

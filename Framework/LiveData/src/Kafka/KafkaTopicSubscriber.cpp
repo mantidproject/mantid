@@ -118,7 +118,46 @@ void KafkaTopicSubscriber::subscribe(int64_t offset) {
 }
 
 /**
- * Create the KafkaConsumer for requried configuration
+ * Get list of partitions on configured topic
+ * @return list of TopicPartitions
+ */
+std::vector<RdKafka::TopicPartition *>
+KafkaTopicSubscriber::getTopicPartitions() {
+  std::vector<RdKafka::TopicPartition *> partitions;
+  subscribe();
+  auto error = m_consumer->assignment(partitions);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to get "
+                             "TopicPartition information from Kafka brokers.");
+  }
+  m_consumer->unsubscribe();
+  return partitions;
+}
+
+/**
+ * Setup the connection to the broker for the configured topic
+ * at a specified time
+ * @param time (milliseconds since 1 Jan 1970) at which to start listening on
+ * topic
+ */
+void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
+  // Get list of TopicPartitions for the topic
+  auto partitions = getTopicPartitions();
+  for (auto partition : partitions) {
+    partition->set_offset(time);
+  }
+  // Convert the timestamps to partition offsets
+  auto error = m_consumer->offsetsForTimes(partitions, 2000);
+  if (error != RdKafka::ERR_NO_ERROR) {
+    throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
+                             "partition offsets for specified start time.");
+  }
+  error = m_consumer->assign(partitions);
+  reportSuccessOrFailure(error, 0);
+}
+
+/**
+ * Create the KafkaConsumer for required configuration
  */
 void KafkaTopicSubscriber::createConsumer() {
   // Create configurations
@@ -164,23 +203,36 @@ void KafkaTopicSubscriber::checkTopicExists() const {
 /**
  * Subscribe to a topic at the required offset using rdkafka::assign()
  */
-void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) const {
+void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
+
+  if (endsWith(m_topicName, EVENT_TOPIC_SUFFIX)) {
+    subscribeAtTime(offset);
+    return;
+  }
+
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
-  const int partition = 0;
-  auto topicPartition = RdKafka::TopicPartition::create(m_topicName, partition);
+  const int partitionId = 0;
+  auto topicPartition =
+      RdKafka::TopicPartition::create(m_topicName, partitionId);
   // Offset of message to start at
   int64_t confOffset;
 
   if (offset == IGNORE_OFFSET) {
     int64_t lowOffset, highOffset = 0;
     // This gets the lowest and highest offsets available on the brokers
-    m_consumer->query_watermark_offsets(m_topicName, partition, &lowOffset,
+    m_consumer->query_watermark_offsets(m_topicName, partitionId, &lowOffset,
                                         &highOffset, -1);
 
-    if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX) ||
-        endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
-      // For these topics get the last message available
+    if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX)) {
+      // For this topic get the last message available
       confOffset = highOffset - 1;
+    } else if (endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
+      // We need the last runStart message, so get the last 2 messages
+      // in case the last one is a runStop message
+      confOffset = highOffset - 2;
+      // unless there is only one message on the topic
+      if (confOffset == -1)
+        confOffset = 0;
     } else {
       // For other topics start at the next available message
       confOffset = highOffset;
@@ -190,7 +242,6 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) const {
   }
   topicPartition->set_offset(confOffset);
   error = m_consumer->assign({topicPartition});
-
   reportSuccessOrFailure(error, confOffset);
 }
 
@@ -205,7 +256,8 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
   if (confOffset < 0) {
     std::ostringstream os;
     os << "No messages are yet available on the Kafka brokers for this "
-          "topic: '" << m_topicName << "'";
+          "topic: '"
+       << m_topicName << "'";
     throw std::runtime_error(os.str());
   }
   if (error) {
