@@ -1565,6 +1565,13 @@ public:
     fit.setProperty("InputWorkspace", ws);
     fit.setPropertyValue("StartX", "30");
     fit.setPropertyValue("EndX", "100");
+    // from the fitfunctions documentation:
+    // In general when fitting a single peak it is not recommended to refine
+    // both Alpha0 and Alpha1 at the same time since these two parameters will
+    // effectively be 100% correlated because the wavelength over a single peak
+    // is likely effectively constant. All parameters are constrained to be
+    // non-negative.
+    fit.setProperty("Ties", "Alpha0=1.6666");
     TS_ASSERT_THROWS_NOTHING(fit.execute());
     TS_ASSERT(fit.isExecuted());
 
@@ -1575,7 +1582,6 @@ public:
     IFunction_sptr out = fit.getProperty("Function");
     // test that all parameters are non-negative
     TS_ASSERT_DELTA(out->getParameter("I"), 3101.7067, 1.0);
-    TS_ASSERT_DELTA(out->getParameter("Alpha0"), 1.6666, 0.004);
     TS_ASSERT_DELTA(out->getParameter("Alpha1"), 1.4276, 0.005);
     TS_ASSERT_DELTA(out->getParameter("Beta0"), 31.9007, 0.02);
     TS_ASSERT_DELTA(out->getParameter("Kappa"), 46.0238, 0.004);
