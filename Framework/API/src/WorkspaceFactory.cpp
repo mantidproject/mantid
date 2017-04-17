@@ -86,9 +86,10 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * @param differentSize :: A flag to indicate if the two workspace will be
  *different sizes
  */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize, const bool noproperty) const {
+void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
+                                                MatrixWorkspace &child,
+                                                const bool differentSize,
+                                                const bool noproperty) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
   child.setInstrument(parent.getInstrument()); // This call also copies the

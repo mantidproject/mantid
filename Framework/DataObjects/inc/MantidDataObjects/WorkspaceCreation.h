@@ -136,7 +136,7 @@ createConcreteHelper();
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws, const bool noproperty=false);
+                     API::MatrixWorkspace &ws, const bool noproperty = false);
 }
 
 template <class T, class P, class IndexArg, class HistArg,
