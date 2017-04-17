@@ -215,8 +215,9 @@ template <class T, class P,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create_nolog(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
+  const bool no_property = true;
   auto ws =
-      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)), no_property);
   for (size_t i = 0; i < numHistograms; ++i) {
     ws->setSharedX(i, parent.sharedX(i));
   }
