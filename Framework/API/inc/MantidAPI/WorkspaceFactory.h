@@ -80,7 +80,7 @@ public:
 
   void initializeFromParent(const MatrixWorkspace &parent,
                             MatrixWorkspace &child,
-                            const bool differentSize) const;
+                            const bool differentSize, const bool noproperty=false) const;
   /// Create a ITableWorkspace
   boost::shared_ptr<ITableWorkspace>
   createTable(const std::string &className = "TableWorkspace") const;

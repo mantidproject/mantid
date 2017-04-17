@@ -136,7 +136,7 @@ createConcreteHelper();
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws);
+                     API::MatrixWorkspace &ws, const bool noproperty=false);
 }
 
 template <class T, class P, class IndexArg, class HistArg,
@@ -201,6 +201,19 @@ template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
 std::unique_ptr<T> create(const P &parent) {
+  const auto numHistograms = parent.getNumberHistograms();
+  auto ws =
+      create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
+  for (size_t i = 0; i < numHistograms; ++i) {
+    ws->setSharedX(i, parent.sharedX(i));
+  }
+  return ws;
+}
+
+template <class T, class P,
+          typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
+                                                  P>::value>::type * = nullptr>
+std::unique_ptr<T> create_nolog(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
   auto ws =
       create<T>(parent, numHistograms, detail::stripData(parent.histogram(0)));
