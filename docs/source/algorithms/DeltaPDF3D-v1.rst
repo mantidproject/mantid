@@ -46,8 +46,8 @@ Usage
          FakeMDEventData(DeltaPDF3D_MDE, PeakParams='100,'+str(h)+','+str(k)+',0,0.1', RandomSeed='1337')
    # Add addiontal peaks on [0.5,0.5,0.5] type positions
    # This would correspond to negative substitutional correlations
-   for h in range(-3,4):
-      for k in [-2.5,-1.5,-0.5,0.5,1.5,2.5]:
+   for h in [-2.5,-1.5,-0.5,0.5,1.5,2.5]:
+      for k in range(-3,4):
          FakeMDEventData(DeltaPDF3D_MDE, PeakParams='20,'+str(h)+','+str(k)+',0,0.1', RandomSeed='13337')
    # Create MHHistoWorkspace
    BinMD(InputWorkspace='DeltaPDF3D_MDE', AlignedDim0='[H,0,0],-3.05,3.05,61', AlignedDim1='[0,K,0],-3.05,3.05,61',
@@ -68,8 +68,8 @@ dominated by the Bragg peaks and will just be a 3D-PDF instead.
 
 .. testoutput:: fft1
 
-   The value at [1,0,0] is 3387.04136293
-   The value at [0,1,0] is 4897.9271258
+   The value at [1,0,0] is 3456.56897081
+   The value at [0,1,0] is 4903.71129384
 
 The results 3D-ΔPDF workspace looks like
 
@@ -100,8 +100,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. testoutput:: fft2
 
-   The value at [1,0,0] is -747.667269337
-   The value at [0,1,0] is 702.398706081
+   The value at [1,0,0] is -738.959448904
+   The value at [0,1,0] is 769.002661571
 
 +--------------------------------------------------+--------------------------------------------------+
 | Intermediate workspace after reflections removed | Resulting 3D-ΔPDF                                |
@@ -125,8 +125,8 @@ The IntermediateWorkspace shows the changes to the input workspace.
 
 .. testoutput:: fft3
 
-   The value at [1,0,0] is -510.901314412
-   The value at [0,1,0] is 483.25284719
+   The value at [1,0,0] is -477.173658361
+   The value at [0,1,0] is 501.081754175
 
 +---------------------------------------------------------------------+---------------------------------------------------------------------+
 | Intermediate workspace after reflections removed and crop to sphere | Resulting 3D-ΔPDF                                                   |

@@ -199,13 +199,17 @@ class DeltaPDF3D(PythonAlgorithm):
         signal[np.isinf(signal)]=0
 
         signal=np.fft.fftshift(np.fft.fftn(np.fft.ifftshift(signal))).real
+        number_of_bins = signal.shape
+
+        # CreateMDHistoWorkspace expects Fortan `column-major` ordering
+        signal = signal.flatten('F')
 
         createWS_alg = self.createChildAlgorithm("CreateMDHistoWorkspace", enableLogging=False)
         createWS_alg.setProperty("SignalInput", signal)
         createWS_alg.setProperty("ErrorInput", signal**2)
         createWS_alg.setProperty("Dimensionality", 3)
         createWS_alg.setProperty("Extents", self._calc_new_extents(inWS))
-        createWS_alg.setProperty("NumberOfBins", signal.shape)
+        createWS_alg.setProperty("NumberOfBins", number_of_bins)
         createWS_alg.setProperty("Names", 'x,y,z')
         createWS_alg.setProperty("Units", 'a,b,c')
         createWS_alg.execute()
