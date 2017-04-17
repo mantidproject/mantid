@@ -85,6 +85,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * @param child :: the child workspace
  * @param differentSize :: A flag to indicate if the two workspace will be
  *different sizes
+ * @param noproperty :: A flag for not cloning Run object
  */
 void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
                                                 MatrixWorkspace &child,
