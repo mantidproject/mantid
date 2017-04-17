@@ -150,7 +150,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
+        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA','EXED']
         self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -312,7 +312,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         d=dict()
         self.instrument=text
         d['instrument']=str(self.instrument)
-        if self.instrument=="HYSPEC":
+        if self.instrument in ["HYSPEC", "EXED"]:
             self.labelS2.show()
             self.editS2.show()
         else:

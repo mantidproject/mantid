@@ -179,6 +179,12 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument", RewriteSpectraMap=True, InstrumentName="HYSPEC")
+            if self.masterDict['instrument']=='EXED':
+                mantid.simpleapi.RotateInstrumentComponent(Workspace="__temp_instrument",
+                                                           ComponentName='Tank',
+                                                           Y=1,
+                                                           Angle=str(self.masterDict['S2']),
+                                                           RelativeRotation=False) 
             #masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip())>0:
                 try:
