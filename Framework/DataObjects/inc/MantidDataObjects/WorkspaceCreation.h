@@ -143,7 +143,8 @@ template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
 std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
-                          const HistArg &histArg) {
+                          const HistArg &histArg,
+                          const bool &no_property = false) {
   // Figure out (dynamic) target type:
   // - Type is same as parent if T is base of parent
   // - If T is not base of parent, conversion may occur. Currently only
@@ -170,7 +171,7 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent(parent, *ws);
+  detail::initializeFromParent(parent, *ws, no_property);
   return ws;
 }
 
