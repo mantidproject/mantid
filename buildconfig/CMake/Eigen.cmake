@@ -22,6 +22,6 @@ else()
   execute_process(COMMAND ${CMAKE_COMMAND} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
 
-  find_package(Eigen3 3.2 REQUIRED PATHS ${CMAKE_BINARY_DIR}/eigen-src)
+  set(EIGEN3_INCLUDE_DIR "${CMAKE_BINARY_DIR}/eigen-src" CACHE PATH "Eigen include directory")
   ## Include the source directory.
 endif()
