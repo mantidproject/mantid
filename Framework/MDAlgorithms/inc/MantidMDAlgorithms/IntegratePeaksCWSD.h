@@ -66,7 +66,7 @@ private:
   DataObjects::PeaksWorkspace_sptr createOutputs();
 
   void mergePeaks();
-    
+
   /// Implement this method to normalize the intensity of each Pt.
   void normalizePeaksIntensities();
 

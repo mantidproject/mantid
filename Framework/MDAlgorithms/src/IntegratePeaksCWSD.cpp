@@ -106,7 +106,8 @@ void IntegratePeaksCWSD::exec() {
   if (m_doMergePeak)
     mergePeaks();
   else
-    normalizePeaksIntensities();	// TODO/FIXME/NOW - Implement this method to normalize the intensity of each Pt.
+    normalizePeaksIntensities(); // TODO/FIXME/NOW - Implement this method to
+                                 // normalize the intensity of each Pt.
 
   // Output
   DataObjects::PeaksWorkspace_sptr outws =
@@ -548,8 +549,7 @@ std::map<int, double> IntegratePeaksCWSD::getMeasureTime() {
     double duration = static_cast<double>(atof(duration_str.c_str()));
     run_time_map.insert(std::make_pair(run_number, duration));
     g_log.warning() << "MD workspace exp info " << iexpinfo << ": run "
-                        << run_number << ", measuring time = " << duration
-                        << "\n";
+                    << run_number << ", measuring time = " << duration << "\n";
   }
 
   return run_time_map;
@@ -576,10 +576,9 @@ void IntegratePeaksCWSD::getPeakInformation() {
   }
 }
 
-
 /** Normalize the peak's intensities per Pt. to either time or monitor counts
  */
-void IntegratePeaksCSWD::normalizePeaksIntensities(){
+void IntegratePeaksCSWD::normalizePeaksIntensities() {
 
   // sum over all runs
   // std::map<int, signal_t>::iterator mon_iter;
@@ -598,18 +597,15 @@ void IntegratePeaksCSWD::normalizePeaksIntensities(){
   // set the merged intensity to each peak
   std::map<int, double>::iterator count_iter;
   for (count_iter = m_runPeakCountsMap.begin();
-       count_iter != m_runPeakCountsMap.end(); ++count_iter)
-  {
+       count_iter != m_runPeakCountsMap.end(); ++count_iter) {
     int run_number_i = count_iter->first;
-    std::map<int, signal_t>::iterator mon_iter = m_runNormMap.find(run_number_i);
-    if (mon_iter != m_runNormMap.end())
-    {
-    	signal_t monitor_i = mon_iter->second;
-    	count_iter->second /= monitor_i;
+    std::map<int, signal_t>::iterator mon_iter =
+        m_runNormMap.find(run_number_i);
+    if (mon_iter != m_runNormMap.end()) {
+      signal_t monitor_i = mon_iter->second;
+      count_iter->second /= monitor_i;
     }
   }
-
-
 }
 
 } // namespace Mantid
