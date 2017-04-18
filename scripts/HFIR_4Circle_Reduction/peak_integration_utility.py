@@ -590,9 +590,6 @@ def integrate_single_scan_peak(merged_scan_workspace_name, integrated_peak_ws_na
     elif normalization == 'monitor':
         norm_by_mon = True
 
-
-    print '[DB...BAT] Normalized by time: {0}'.format(norm_by_time)
-
     # integrate peak of a scan
     mantidsimple.IntegratePeaksCWSD(InputWorkspace=merged_scan_workspace_name,
                                     OutputWorkspace=integrated_peak_ws_name,
