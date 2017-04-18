@@ -79,7 +79,17 @@ const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::string topic)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicName(topic) {}
+      m_topicNames({topic}) {}
+
+/**
+ * Construct a topic subscriber
+ * @param broker The host:port address of the broker
+ * @param topic Name of the topic
+ */
+KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
+                                           std::vector<std::string> topics)
+    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
+      m_topicNames(topics) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {
@@ -97,9 +107,11 @@ KafkaTopicSubscriber::~KafkaTopicSubscriber() {
 }
 
 /**
- * @return The name of the topic subscription
+ * @return The names of the topics subscription
  */
-const std::string KafkaTopicSubscriber::topic() const { return m_topicName; }
+std::vector<std::string> KafkaTopicSubscriber::topic() const {
+  return m_topicNames;
+}
 
 /**
  * Setup the connection to the broker for the configured topic
@@ -113,7 +125,7 @@ void KafkaTopicSubscriber::subscribe() { subscribe(IGNORE_OFFSET); }
  */
 void KafkaTopicSubscriber::subscribe(int64_t offset) {
   createConsumer();
-  checkTopicExists();
+  checkTopicsExist();
   subscribeAtOffset(offset);
 }
 
@@ -178,7 +190,7 @@ void KafkaTopicSubscriber::createConsumer() {
 /**
  * Check that the topic we want to subscribe to exists on the Kafka brokers
  */
-void KafkaTopicSubscriber::checkTopicExists() const {
+void KafkaTopicSubscriber::checkTopicsExist() const {
   Metadata *metadataRawPtr(nullptr);
   // API requires address of a pointer to the struct but compiler won't allow
   // &metadata.get() as it is an rvalue
@@ -189,14 +201,15 @@ void KafkaTopicSubscriber::checkTopicExists() const {
     throw std::runtime_error("Failed to query metadata from broker");
   }
   auto topics = metadata->topics();
-  auto iter = std::find_if(topics->cbegin(), topics->cend(),
-                           [this](const TopicMetadata *tpc) {
-                             return tpc->topic() == this->m_topicName;
-                           });
-  if (iter == topics->cend()) {
-    std::ostringstream os;
-    os << "Failed to find topic '" << m_topicName << "' on broker";
-    throw std::runtime_error(os.str());
+  for (const auto &topicName : m_topicNames) {
+    auto iter = std::find_if(
+        topics->cbegin(), topics->cend(),
+        [this](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
+    if (iter == topics->cend()) {
+      std::ostringstream os;
+      os << "Failed to find topic '" << topicName << "' on broker";
+      throw std::runtime_error(os.str());
+    }
   }
 }
 
@@ -205,43 +218,49 @@ void KafkaTopicSubscriber::checkTopicExists() const {
  */
 void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
 
-  if (endsWith(m_topicName, EVENT_TOPIC_SUFFIX)) {
-    subscribeAtTime(offset);
-    return;
-  }
-
-  RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
-  const int partitionId = 0;
-  auto topicPartition =
-      RdKafka::TopicPartition::create(m_topicName, partitionId);
   // Offset of message to start at
-  int64_t confOffset;
+  int64_t confOffset = -1;
+  RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
+  std::vector<RdKafka::TopicPartition *> topicPartitions;
 
-  if (offset == IGNORE_OFFSET) {
-    int64_t lowOffset, highOffset = 0;
-    // This gets the lowest and highest offsets available on the brokers
-    m_consumer->query_watermark_offsets(m_topicName, partitionId, &lowOffset,
-                                        &highOffset, -1);
+  for (const auto &topicName : m_topicNames) {
 
-    if (endsWith(m_topicName, DET_SPEC_TOPIC_SUFFIX)) {
-      // For this topic get the last message available
-      confOffset = highOffset - 1;
-    } else if (endsWith(m_topicName, RUN_TOPIC_SUFFIX)) {
-      // We need the last runStart message, so get the last 2 messages
-      // in case the last one is a runStop message
-      confOffset = highOffset - 2;
-      // unless there is only one message on the topic
-      if (confOffset == -1)
-        confOffset = 0;
-    } else {
-      // For other topics start at the next available message
-      confOffset = highOffset;
+    if (endsWith(topicName, EVENT_TOPIC_SUFFIX)) {
+      subscribeAtTime(offset);
+      return;
     }
-  } else {
-    confOffset = offset;
+
+    const int partitionId = 0;
+    auto topicPartition =
+        RdKafka::TopicPartition::create(topicName, partitionId);
+
+    if (offset == IGNORE_OFFSET) {
+      int64_t lowOffset, highOffset = 0;
+      // This gets the lowest and highest offsets available on the brokers
+      m_consumer->query_watermark_offsets(topicName, partitionId, &lowOffset,
+                                          &highOffset, -1);
+
+      if (endsWith(topicName, DET_SPEC_TOPIC_SUFFIX)) {
+        // For this topic get the last message available
+        confOffset = highOffset - 1;
+      } else if (endsWith(topicName, RUN_TOPIC_SUFFIX)) {
+        // We need the last runStart message, so get the last 2 messages
+        // in case the last one is a runStop message
+        confOffset = highOffset - 2;
+        // unless there is only one message on the topic
+        if (confOffset == -1)
+          confOffset = 0;
+      } else {
+        // For other topics start at the next available message
+        confOffset = highOffset;
+      }
+    } else {
+      confOffset = offset;
+    }
+    topicPartition->set_offset(confOffset);
+    topicPartitions.push_back(topicPartition);
   }
-  topicPartition->set_offset(confOffset);
-  error = m_consumer->assign({topicPartition});
+  error = m_consumer->assign(topicPartitions);
   reportSuccessOrFailure(error, confOffset);
 }
 
@@ -255,9 +274,12 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
     const RdKafka::ErrorCode &error, int64_t confOffset) const {
   if (confOffset < 0) {
     std::ostringstream os;
-    os << "No messages are yet available on the Kafka brokers for this "
-          "topic: '"
-       << m_topicName << "'";
+    os << "No messages are yet available on the Kafka brokers for one "
+          "or more of these topics: '";
+    for (const auto &topicName : m_topicNames) {
+      os << topicName << ", ";
+    }
+    os << "'";
     throw std::runtime_error(os.str());
   }
   if (error) {
@@ -265,8 +287,11 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
     os << "Failed to subscribe to topic: '" << err2str(error) << "'";
     throw std::runtime_error(os.str());
   }
-  LOGGER().debug() << "Successfully subscribed to topic '" << m_topicName
-                   << "'\n";
+  LOGGER().debug() << "Successfully subscribed to topics '";
+  for (const auto &topicName : m_topicNames) {
+    LOGGER().debug() << topicName << ", ";
+  }
+  LOGGER().debug() << "'\n";
 }
 
 /**
