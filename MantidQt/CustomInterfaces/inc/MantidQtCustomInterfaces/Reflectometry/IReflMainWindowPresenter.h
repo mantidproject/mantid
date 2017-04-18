@@ -39,6 +39,7 @@ public:
   /// Destructor
   virtual ~IReflMainWindowPresenter(){};
   /// Pre-processing
+  virtual std::string getTransmissionRuns(int group) const = 0;
   virtual std::string getTransmissionOptions(int group) const = 0;
   /// Processing
   virtual std::string getReductionOptions(int group) const = 0;

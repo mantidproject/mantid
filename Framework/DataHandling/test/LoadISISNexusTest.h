@@ -58,7 +58,7 @@ private:
     // Check that the logs also contain a current_period property.
     Property *current_period_log = fetchCurrentPeriodLog(workspace);
     TS_ASSERT_EQUALS(expectedPeriodNumber,
-                     atoi(current_period_log->value().c_str()));
+                     std::stoi(current_period_log->value()));
 
     // Check time series properties have been filtered by period
     p = NULL;
@@ -503,7 +503,7 @@ public:
     PropertyWithValue<double> *totalChargeProperty =
         dynamic_cast<PropertyWithValue<double> *>(
             run.getLogData("gd_prtn_chrg"));
-    double totalCharge = atof(totalChargeProperty->value().c_str());
+    double totalCharge = std::stod(totalChargeProperty->value());
     TSM_ASSERT_DELTA("Something is badly wrong if the sum across the periods "
                      "does not correspond to the total charge.",
                      totalCharge, chargeSum, 0.000001);

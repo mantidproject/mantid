@@ -51,7 +51,7 @@ FilterEvents::FilterEvents()
       m_useSplittersWorkspace(false), m_useArbTableSplitters(false),
       m_targetWorkspaceIndexSet(), m_splitters(), m_outputWorkspacesMap(),
       m_wsNames(), m_detTofOffsets(), m_detTofFactors(),
-      m_FilterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
+      m_filterByPulseTime(false), m_informationWS(), m_hasInfoWS(),
       m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
       m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
       m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
@@ -161,7 +161,7 @@ void FilterEvents::exec() {
   processAlgorithmProperties();
 
   // Examine workspace for detectors
-  examineEventWS();
+  examineAndSortEventWS();
 
   // Parse splitters
   m_progress = 0.0;
@@ -286,7 +286,7 @@ void FilterEvents::processAlgorithmProperties() {
     m_hasInfoWS = true;
 
   m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
-  m_FilterByPulseTime = this->getProperty("FilterByPulseTime");
+  m_filterByPulseTime = this->getProperty("FilterByPulseTime");
 
   m_toGroupWS = this->getProperty("GroupWorkspaces");
 
@@ -371,10 +371,12 @@ void FilterEvents::processAlgorithmProperties() {
  * Warning message will be written out
  * @brief FilterEvents::examineEventWS
  */
-void FilterEvents::examineEventWS() {
+void FilterEvents::examineAndSortEventWS() {
+  // get event workspace information
   size_t numhist = m_eventWS->getNumberHistograms();
   m_vecSkip.resize(numhist, false);
 
+  // check whether any detector is skipped
   if (m_specSkipType == EventFilterSkipNoDetTOFCorr &&
       m_tofCorrType == NoneCorrect) {
     // No TOF correction and skip spectrum only if TOF correction is required
@@ -416,6 +418,16 @@ void FilterEvents::examineEventWS() {
     }
 
   } // END-IF-ELSE
+
+  // sort events
+  DataObjects::EventSortType sortType = DataObjects::TOF_SORT;
+  if (m_filterByPulseTime)
+    sortType = DataObjects::PULSETIME_SORT;
+  else
+    sortType = DataObjects::PULSETIMETOF_SORT;
+
+  // This runs the SortEvents algorithm in parallel
+  m_eventWS->sortAll(sortType, nullptr);
 
   return;
 }
@@ -558,6 +570,89 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
 }
 
 //----------------------------------------------------------------------------------------------
+/**
+ * @brief FilterEvents::processMatrixSplitterWorkspace
+ * Purpose:
+ *   Convert the splitters in MatrixWorkspace to m_vecSplitterTime and
+ * m_vecSplitterGroup
+ * Requirements:
+ *   m_matrixSplitterWS has valid value
+ *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
+ * Guarantees
+ *  - Splitters stored in m_matrixSpliterWS are transformed to
+ *    "m_vecSplitterTime" and "m_vecSplitterGroup", whose sizes differ by 1.
+ *  - Y values are mapped to integer group index stored in "m_vecSplitterGroup".
+ *    The mapping is recorded in "m_yIndexMap" and "m_wsGroupdYMap"
+ *    "m_maxTargetIndex" is used to register the maximum group index
+ *    Negative Y is defined as "undefined"
+ * Note: there is NO undefined split region here, while any NEGATIVE Y value is
+ * defined as "undefined splitter"
+ */
+void FilterEvents::processMatrixSplitterWorkspace() {
+  // Check input workspace validity
+  assert(m_matrixSplitterWS);
+
+  auto X = m_matrixSplitterWS->binEdges(0);
+  auto &Y = m_matrixSplitterWS->y(0);
+  size_t sizex = X.size();
+  size_t sizey = Y.size();
+
+  // Assign vectors for time comparison
+  m_vecSplitterTime.assign(X.size(), 0);
+  m_vecSplitterGroup.assign(Y.size(), -1);
+
+  // Transform vector
+  for (size_t i = 0; i < sizex; ++i) {
+    m_vecSplitterTime[i] = static_cast<int64_t>(X[i] * 1.E9);
+  }
+  // shift the splitters' time if user specifis that the input times are
+  // relative
+  if (m_isSplittersRelativeTime) {
+    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
+    for (size_t i = 0; i < sizex; ++i)
+      m_vecSplitterTime[i] += time_shift_ns;
+  }
+
+  // process the group
+  uint32_t max_target_index = 1;
+
+  for (size_t i = 0; i < sizey; ++i) {
+
+    int y_index = static_cast<int>(Y[i]);
+
+    // try to find Y[i] in m_yIndexMap
+    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
+    if (mapiter == m_yIndexMap.end()) {
+      // new
+      // default to 0 as undefined slot.
+      uint32_t int_target = UNDEFINED_SPLITTING_TARGET;
+      //  if well-defined, then use the current
+      if (y_index >= 0) {
+        int_target = max_target_index;
+        ++max_target_index;
+      }
+
+      // un-defined or un-filtered
+      m_vecSplitterGroup[i] = int_target;
+
+      // add to maps and etc.
+      m_yIndexMap.emplace(y_index, int_target);
+      m_wsGroupdYMap.emplace(int_target, y_index);
+      m_targetWorkspaceIndexSet.insert(int_target);
+    } else {
+      // this target Y-index has been registered previously
+      uint32_t target_index = mapiter->second;
+      m_vecSplitterGroup[i] = target_index;
+    }
+  }
+
+  // register the max target integer
+  m_maxTargetIndex = max_target_index - 1;
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
 /** process the input splitters given by a TableWorkspace
  * The method will transfer the start/stop time to "m_vecSplitterTime"
  * and map the splitting target (in string) to "m_vecSplitterGroup".
@@ -582,14 +677,16 @@ void FilterEvents::processTableSplittersWorkspace() {
   bool found_undefined_splitter = false;
 
   // get the run start time
-  int64_t filter_shift_time = m_runStartTime.totalNanoseconds();
+  int64_t filter_shift_time(0);
+  if (m_isSplittersRelativeTime)
+    filter_shift_time = m_runStartTime.totalNanoseconds();
 
   int max_target_index = 1;
 
   // convert TableWorkspace's values to vectors
   size_t num_rows = m_splitterTableWorkspace->rowCount();
   for (size_t irow = 0; irow < num_rows; ++irow) {
-    // get start and stop time
+    // get start and stop time in second
     double start_time = m_splitterTableWorkspace->cell_cast<double>(irow, 0);
     double stop_time = m_splitterTableWorkspace->cell_cast<double>(irow, 1);
     std::string target = m_splitterTableWorkspace->cell<std::string>(irow, 2);
@@ -658,88 +755,6 @@ void FilterEvents::processTableSplittersWorkspace() {
     m_wsGroupIndexTargetMap.emplace(0, "undefined");
     m_targetWorkspaceIndexSet.insert(0);
   }
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/**
- * @brief FilterEvents::processMatrixSplitterWorkspace
- * Purpose:
- *   Convert the splitters in MatrixWorkspace to m_vecSplitterTime and
- * m_vecSplitterGroup
- * Requirements:
- *   m_matrixSplitterWS has valid value
- *   vecX's size must be one larger than and that of vecY of m_matrixSplitterWS
- * Guarantees
- *  - Splitters stored in m_matrixSpliterWS are transformed to
- *    "m_vecSplitterTime" and "m_vecSplitterGroup", whose sizes differ by 1.
- *  - Y values are mapped to integer group index stored in "m_vecSplitterGroup".
- *    The mapping is recorded in "m_yIndexMap" and "m_wsGroupdYMap"
- *    "m_maxTargetIndex" is used to register the maximum group index
- *    Negative Y is defined as "undefined"
- * Note: there is NO undefined split region here, while any NEGATIVE Y value is
- * defined as "undefined splitter"
- */
-void FilterEvents::processMatrixSplitterWorkspace() {
-  // Check input workspace validity
-  assert(m_matrixSplitterWS);
-
-  auto X = m_matrixSplitterWS->binEdges(0);
-  auto &Y = m_matrixSplitterWS->y(0);
-  size_t sizex = X.size();
-  size_t sizey = Y.size();
-
-  // Assign vectors for time comparison
-  m_vecSplitterTime.assign(X.size(), 0);
-  m_vecSplitterGroup.assign(Y.size(), -1);
-
-  // Transform vector
-  for (size_t i = 0; i < sizex; ++i) {
-    m_vecSplitterTime[i] = static_cast<int64_t>(X[i]);
-  }
-  // shift the splitters' time if applied
-  if (m_isSplittersRelativeTime) {
-    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
-    for (size_t i = 0; i < sizex; ++i)
-      m_vecSplitterTime[i] += time_shift_ns;
-  }
-
-  // process the group
-  uint32_t max_target_index = 1;
-
-  for (size_t i = 0; i < sizey; ++i) {
-
-    int y_index = static_cast<int>(Y[i]);
-
-    // try to find Y[i] in m_yIndexMap
-    std::map<int, uint32_t>::iterator mapiter = m_yIndexMap.find(y_index);
-    if (mapiter == m_yIndexMap.end()) {
-      // new
-      // default to 0 as undefined slot.
-      uint32_t int_target = UNDEFINED_SPLITTING_TARGET;
-      //  if well-defined, then use the current
-      if (y_index >= 0) {
-        int_target = max_target_index;
-        ++max_target_index;
-      }
-
-      // un-defined or un-filtered
-      m_vecSplitterGroup[i] = int_target;
-
-      // add to maps and etc.
-      m_yIndexMap.emplace(y_index, int_target);
-      m_wsGroupdYMap.emplace(int_target, y_index);
-      m_targetWorkspaceIndexSet.insert(int_target);
-    } else {
-      // this target Y-index has been registered previously
-      uint32_t target_index = mapiter->second;
-      m_vecSplitterGroup[i] = target_index;
-    }
-  }
-
-  // register the max target integer
-  m_maxTargetIndex = max_target_index - 1;
 
   return;
 }
@@ -1273,13 +1288,12 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
           outputs.emplace(index, &output_el);
         }
       }
-
       // Get a holder on input workspace's event list of this spectrum
       const DataObjects::EventList &input_el = m_eventWS->getSpectrum(iws);
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      if (m_FilterByPulseTime) {
+      if (m_filterByPulseTime) {
         input_el.splitByPulseTime(m_splitters, outputs);
       } else if (m_tofCorrType != NoneCorrect) {
         input_el.splitByFullTime(m_splitters, outputs, true,
@@ -1356,9 +1370,23 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
                     "input/source EventWorkspace = " << numberOfSpectra
                  << ".\n";
 
+  if (m_filterByPulseTime) {
+    size_t num_proton_charges =
+        m_eventWS->run().getProperty("proton_charge")->size();
+    if (num_proton_charges < m_vecSplitterTime.size())
+      throw runtime_error("It is not a good practice to split fast event by "
+                          "pulse time when there are more splitters than pulse "
+                          "times.");
+    else
+      g_log.warning("User should understand the inaccurancy to filter events "
+                    "by pulse time.");
+  }
+
+  /*
   for (size_t i = 0; i < m_vecSplitterGroup.size(); ++i)
     std::cout << "splitter " << i << ": " << m_vecSplitterTime[i] << ", "
               << m_vecSplitterGroup[i] << "\n";
+  */
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws) {
@@ -1386,10 +1414,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Perform the filtering (using the splitting function and just one
       // output)
       std::string logmessage;
-      if (m_FilterByPulseTime) {
-        throw runtime_error(
-            "It is not a good practice to split fast event by pulse time. ");
-      } else if (m_tofCorrType != NoneCorrect) {
+      if (m_tofCorrType != NoneCorrect) {
         logmessage = input_el.splitByFullTimeMatrixSplitter(
             m_vecSplitterTime, m_vecSplitterGroup, outputs, true,
             m_detTofFactors[iws], m_detTofOffsets[iws]);
@@ -1456,9 +1481,10 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
         std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
         wsiter = m_outputWorkspacesMap.find(tindex);
         if (wsiter == m_outputWorkspacesMap.end()) {
-          g_log.error() << "Workspace target (" << tindex
-                        << ") does not have workspace associated."
-                        << "\n";
+          ;
+          //  g_log.error() << "Workspace target (" << tindex
+          //          << ") does not have workspace associated."
+          //        << "\n";
         } else {
           DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
           ws_i->mutableRun().addProperty(output_vector[tindex], true);
