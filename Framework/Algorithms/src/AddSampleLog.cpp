@@ -125,49 +125,102 @@ void AddSampleLog::exec() {
     addTimeSeriesProperty(theRun, propName, propValue, propUnit,
                           propNumberType);
   } else {
-    // TODO: Refactor this section to a method!
-    // add a single value property, integer or double
-    bool value_is_int(false);
-    if (propNumberType != autoTypeOption) {
-      value_is_int = (propNumberType == intTypeOption);
-    } else {
-      int intVal;
-      if (Strings::convert(propValue, intVal)) {
-        value_is_int = true;
-      }
-    }
 
-    // set value
-    if (value_is_int) {
-      // convert to integer
-      int intVal;
-      bool convert_to_int = Strings::convert(propValue, intVal);
-      if (!convert_to_int) {
-        // spit out error message and set to default value
-        g_log.error() << "Error interpreting string '" << propValue
-                      << "' as NumberType Int.";
-        throw std::runtime_error("Invalie integer input");
-        // intVal = 0;
-      }
-      theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
-    } else {
-      // convert to double
-      double dblVal;
-      bool convert_to_dbl = Strings::convert(propValue, dblVal);
-      if (!convert_to_dbl) {
-        g_log.error() << "Error interpreting string '" << propValue
-                      << "' as NumberType Double.";
-        throw std::runtime_error("Invalid double input.");
-        // dblVal = 0.;
-      }
-      theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-      g_log.warning() << "added property " << propName << " with value "
-                      << dblVal << "\n";
-    }
+//    // TODO: Refactor this section to a method!
+//    // add a single value property, integer or double
+//    bool value_is_int(false);
+//    if (propNumberType != autoTypeOption) {
+//      value_is_int = (propNumberType == intTypeOption);
+//    } else {
+//      int intVal;
+//      if (Strings::convert(propValue, intVal)) {
+//        value_is_int = true;
+//      }
+//    }
 
-    // add unit
-    theRun.getProperty(propName)->setUnits(propUnit);
+//    // set value
+//    if (value_is_int) {
+//      // convert to integer
+//      int intVal;
+//      bool convert_to_int = Strings::convert(propValue, intVal);
+//      if (!convert_to_int) {
+//        // spit out error message and set to default value
+//        g_log.error() << "Error interpreting string '" << propValue
+//                      << "' as NumberType Int.";
+//        throw std::runtime_error("Invalie integer input");
+//        // intVal = 0;
+//      }
+//      theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
+//    } else {
+//      // convert to double
+//      double dblVal;
+//      bool convert_to_dbl = Strings::convert(propValue, dblVal);
+//      if (!convert_to_dbl) {
+//        g_log.error() << "Error interpreting string '" << propValue
+//                      << "' as NumberType Double.";
+//        throw std::runtime_error("Invalid double input.");
+//        // dblVal = 0.;
+//      }
+//      theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
+//      g_log.warning() << "added property " << propName << " with value "
+//                      << dblVal << "\n";
+//    }
+
+//    // add unit
+//    theRun.getProperty(propName)->setUnits(propUnit);
+    addSingleValueProperty(theRun, propName, propValue, propUnit, propNumberType);
   }
+
+  return;
+}
+
+void AddSampleLog::addSingleValueProperty(Run &theRun, const std::string &propName,
+                                          const std::string &propValue,
+                                          const std::string &propUnit,
+                                          const std::string &propNumberType)
+{
+  // TODO: Refactor this section to a method!
+  // add a single value property, integer or double
+  bool value_is_int(false);
+  if (propNumberType != autoTypeOption) {
+    value_is_int = (propNumberType == intTypeOption);
+  } else {
+    int intVal;
+    if (Strings::convert(propValue, intVal)) {
+      value_is_int = true;
+    }
+  }
+
+  // set value
+  if (value_is_int) {
+    // convert to integer
+    int intVal;
+    bool convert_to_int = Strings::convert(propValue, intVal);
+    if (!convert_to_int) {
+      // spit out error message and set to default value
+      g_log.error() << "Error interpreting string '" << propValue
+                    << "' as NumberType Int.";
+      throw std::runtime_error("Invalie integer input");
+      // intVal = 0;
+    }
+    theRun.addLogData(new PropertyWithValue<int>(propName, intVal));
+  } else {
+    // convert to double
+    double dblVal;
+    bool convert_to_dbl = Strings::convert(propValue, dblVal);
+    if (!convert_to_dbl) {
+      g_log.error() << "Error interpreting string '" << propValue
+                    << "' as NumberType Double.";
+      throw std::runtime_error("Invalid double input.");
+      // dblVal = 0.;
+    }
+    theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
+    g_log.warning() << "added property " << propName << " with value "
+                    << dblVal << "\n";
+  }
+
+  // add unit
+  theRun.getProperty(propName)->setUnits(propUnit);
 
   return;
 }
