@@ -497,9 +497,10 @@ def NoSaveIq():
         del ReductionSingleton().reduction_properties["ProcessInfo"]
 
 
-def IQxQy(nbins=100):
+def IQxQy(nbins=100, log_binning=False):
     ReductionSingleton().reduction_properties["Do2DReduction"] = True
     ReductionSingleton().reduction_properties["IQ2DNumberOfBins"] = nbins
+    ReductionSingleton().reduction_properties["IQxQyLogBinning"] = log_binning
 
 
 def NoIQxQy():
