@@ -74,11 +74,10 @@ private:
                              const std::string &prop_unit,
                              const std::string &prop_number_type);
 
-
   void addSingleValueProperty(API::Run &theRun, const std::string &propName,
-                                            const std::string &propValue,
-                                            const std::string &propUnit,
-                                            const std::string &propNumberType);
+                              const std::string &propValue,
+                              const std::string &propUnit,
+                              const std::string &propNumberType);
 
   /// set the time series property's entries to the newly added
   /// TimeSeriesProperty

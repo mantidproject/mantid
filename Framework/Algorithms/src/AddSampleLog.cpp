@@ -119,19 +119,21 @@ void AddSampleLog::exec() {
     addStringLog(theRun, propName, propValue, propUnit);
   } else if (propType == numberSeriesLogOption) {
     // add a TimeSeriesProperty
-    // TODO: Need to re-define the behavior on the default propNumberType for Series.
-    //       If propValue is given, then use this value to determine whether the type is 
+    // TODO: Need to re-define the behavior on the default propNumberType for
+    // Series.
+    //       If propValue is given, then use this value to determine whether the
+    //       type is
     //       integer or double; Otherwise, the series should be double
     addTimeSeriesProperty(theRun, propName, propValue, propUnit,
                           propNumberType);
   } else {
     // add a single value property
-    addSingleValueProperty(theRun, propName, propValue, propUnit, propNumberType);
+    addSingleValueProperty(theRun, propName, propValue, propUnit,
+                           propNumberType);
   }
 
   return;
 }
-
 
 /** Add a single value property
  * @brief AddSampleLog::addSingleValueProperty
@@ -141,11 +143,11 @@ void AddSampleLog::exec() {
  * @param propUnit
  * @param propNumberType
  */
-void AddSampleLog::addSingleValueProperty(Run &theRun, const std::string &propName,
+void AddSampleLog::addSingleValueProperty(Run &theRun,
+                                          const std::string &propName,
                                           const std::string &propValue,
                                           const std::string &propUnit,
-                                          const std::string &propNumberType)
-{
+                                          const std::string &propNumberType) {
   // add a single value property, integer or double
   bool value_is_int(false);
   if (propNumberType != autoTypeOption) {
@@ -181,8 +183,8 @@ void AddSampleLog::addSingleValueProperty(Run &theRun, const std::string &propNa
       // dblVal = 0.;
     }
     theRun.addLogData(new PropertyWithValue<double>(propName, dblVal));
-    g_log.warning() << "added property " << propName << " with value "
-                    << dblVal << "\n";
+    g_log.warning() << "added property " << propName << " with value " << dblVal
+                    << "\n";
   }
 
   // add unit
@@ -227,10 +229,10 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
   } else if (prop_number_type.compare(autoTypeOption) == 0) {
     // auto type. by default
     if (prop_value.size() == 0)
-      g_log.warning("For sample log in TimeSeriesProperty and values are given by MarixWorkspace, the default data type "
+      g_log.warning("For sample log in TimeSeriesProperty and values are given "
+                    "by MarixWorkspace, the default data type "
                     "is double.");
-    else
-    {
+    else {
       // find out the time series data type by prop_value. integer or double
       int intVal;
       if (Strings::convert(prop_value, intVal)) {
