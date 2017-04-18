@@ -5,13 +5,16 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
+- Geometry for ``INTER`` has a small correction for the value of one of the attributes that was being intepreted as zero.
+
 Algorithms
 ----------
 
 - :ref:`algm-SpecularReflectionPositionCorrect` - fixed a bug where entering
   an invalid detector or sample name would cause a segmentation fault.
-- The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``DetectorCorrectionType``, 
+- The :ref:`algm-SpecularReflectionPositionCorrect` algorithm has a new property, ``DetectorCorrectionType``,
   which specifies whether detector positions should be corrected by a vertical  shift (default) or by a rotation around the sample position.
+- :ref:`algm-ReflectometryReductionOneAuto-v2` and :ref:`algm-CreateTransmissionWorkspaceAuto-v2` attempts to populate properties `StartOverlap` and `EndOverlap` with values from the IDF.
 
 ConvertToReflectometryQ
 -----------------------
@@ -19,12 +22,6 @@ ConvertToReflectometryQ
 
 Reflectometry Reduction Interface
 ---------------------------------
-
-ISIS Reflectometry (Polref)
-###########################
-
-- Added two more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even and Uniform slicing.
-- For custom slicing (and new slicing options), workspace slices are now identified by an index (e.g. ws_slice_0) instead of a start/stop time.
 
 ISIS Reflectometry
 ##################
@@ -41,6 +38,9 @@ ISIS Reflectometry
   - Ctrl+X copies the selected row(s) to the clipboard and deletes them.
 
 - A brief description about the columns in the table can be now accessed by using the *What's this* tool (last tool in the toolbar) and clicking on the column headers.
+- Added two more time slicing options in the 'Event Handling' tab for analysing event data - Uniform Even and Uniform slicing.
+- For custom slicing (and new slicing options), workspace slices are now identified by an index (e.g. ws_slice_0) instead of a start/stop time.
+- The 'Get Defaults` button for 'Experiment Settings' in the 'Settings' tab now populates `StartOverlap` and `EndOverlap` text boxes with values from the IDF.
 
 ISIS Reflectometry (Old)
 ########################

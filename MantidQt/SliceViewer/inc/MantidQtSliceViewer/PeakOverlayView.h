@@ -1,7 +1,6 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
@@ -38,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PeakOverlayView {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayView {
 public:
   /// Set the position of the slice point.
   virtual void setSlicePoint(const double &, const std::vector<bool> &) = 0;
