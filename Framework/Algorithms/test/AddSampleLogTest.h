@@ -65,10 +65,10 @@ public:
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
-    ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "-1", -1.);
-    ExecuteAlgorithm(ws, "Another Name NS1", "Number Series", "0", 0.);
+    ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "-1", -1);
+    ExecuteAlgorithm(ws, "Another Name NS1", "Number Series", "0", 0);
     ExecuteAlgorithm(ws, "Another Name NS2", "Number Series", "123456789",
-                     123456789.);
+                     123456789);
   }
 
   void test_Units() {
