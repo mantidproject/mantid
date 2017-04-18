@@ -1311,32 +1311,9 @@ Table *MantidUI::createDetectorTable(
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      QString detIds("");
-      const auto &ids = spectrum.getDetectorIDs();
-      size_t ndets = ids.size();
-      auto iter = ids.begin();
-      auto itEnd = ids.end();
-      if (ndets > DET_TABLE_NDETS_GROUP) {
-        detIds = QString("%1,%2...(%3 more)...%4,%5");
-        // post-fix increments and returns last value
-        // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
-        // to result
-        // in an undefined order in which the iterator is dereference and
-        // incremented leading
-        // to the first two items being backward on some systems
-        const Mantid::detid_t first(*iter++), second(*iter++);
-        detIds =
-            detIds.arg(first).arg(second).arg(ndets - 4); // First two + n extra
-        auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so
-                                     // no operator-()
-        const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
-        detIds = detIds.arg(lastm1).arg(last);
-      } else {
-        for (; iter != itEnd; ++iter) {
-          detIds += QString::number(*iter) + ",";
-        }
-        detIds.chop(1); // Drop last comma
-      }
+      const auto &ids =
+          dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      QString detIds = createTruncatedList(ids);
 
       // Geometry
       if (!spectrumInfo.hasDetectors(wsIndex))
@@ -1374,13 +1351,12 @@ Table *MantidUI::createDetectorTable(
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
       if (isScanning) {
-        auto timeIndexes = QString("");
-
+        std::set<int> timeIndexSet;
         for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
-          timeIndexes += QString::number(def.second) + ",";
+          timeIndexSet.insert(int(def.second));
         }
-        detIds.chop(1); // Drop last comma
 
+        QString timeIndexes = createTruncatedList(timeIndexSet);
         colValues << QVariant(timeIndexes);
       }
       // Y/E
@@ -1470,6 +1446,36 @@ MantidUI::createDetectorTable(const QString &wsName,
   t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
+}
+
+QString MantidUI::createTruncatedList(const std::set<int> &elements) {
+  QString qString("");
+  size_t ndets = elements.size();
+  auto iter = elements.begin();
+  auto itEnd = elements.end();
+  if (ndets > DET_TABLE_NDETS_GROUP) {
+    qString = QString("%1,%2...(%3 more)...%4,%5");
+    // post-fix increments and returns last value
+    // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
+    // to result
+    // in an undefined order in which the iterator is dereference and
+    // incremented leading
+    // to the first two items being backward on some systems
+    const Mantid::detid_t first(*iter++), second(*iter++);
+    qString =
+        qString.arg(first).arg(second).arg(ndets - 4); // First two + n extra
+    auto revIter = elements.rbegin(); // Set iterators are unidirectional ... so
+                                 // no operator-()
+    const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
+    qString = qString.arg(lastm1).arg(last);
+  } else {
+    for (; iter != itEnd; ++iter) {
+      qString += QString::number(*iter) + ",";
+    }
+    qString.chop(1); // Drop last comma
+  }
+
+  return qString;
 }
 
 /**
