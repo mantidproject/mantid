@@ -28,31 +28,31 @@ Usage
     vp = vesuvio_debye_params
     print('--------Debye--------')
     for c in vp.keys():
-        print('%s: %f' %(c, vp.column(c)[0]))
+        print('%s: %.4f' %(c, vp.column(c)[0]))
     vp = vesuvio_einstein_params
     print('\n--------Einstein--------')
     for c in vp.keys():
-        print('%s: %f' %(c, vp.column(c)[0]))
+        print('%s: %.4f' %(c, vp.column(c)[0]))
 
 **Output:**
 
 .. testoutput:: VesuvioPeakExample
 
     --------Debye--------
-    Temperature(K): 300.000000
-    Atomic Mass(AMU): 63.500000
-    Debye Temp(K): 347.000000
-    Kinetic Energy(mEV): 41.204617
-    RMS Momentum(A-1): 20.427128
-    RMS Displacement(A): 0.076896
+    Temperature(K): 300.0000
+    Atomic Mass(AMU): 63.5000
+    Debye Temp(K): 347.0000
+    Kinetic Energy(mEV): 41.2028
+    RMS Momentum(A-1): 20.4267
+    RMS Displacement(A): 0.0769
 
     --------Einstein--------
-    Temperature(K): 300.000000
-    Atomic Mass(AMU): 63.500000
-    Frequency(mEV): 20.000000
-    Kinetic Energy(mEV): 13.564904
-    Effective Temp(K): 314.814301
-    RMS Momentum(A): 20.390684
+    Temperature(K): 300.0000
+    Atomic Mass(AMU): 63.5000
+    Frequency(mEV): 20.0000
+    Kinetic Energy(mEV): 13.5644
+    Effective Temp(K): 314.8156
+    RMS Momentum(A): 20.3903
 
 .. testcleanup:: VesuvioPeakExample
 
