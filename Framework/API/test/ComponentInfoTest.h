@@ -31,8 +31,8 @@ public:
     Mantid::Geometry::ObjComponent comp2("component2");
     ComponentInfo info(
         internalInfo,
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>{&comp1,
-                                                                       &comp2});
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2}));
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
@@ -49,8 +49,8 @@ public:
 
     ComponentInfo info(
         internalInfo,
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>{&comp1,
-                                                                       &comp2});
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2}));
     TS_ASSERT_EQUALS(info.indexOf(comp1.getComponentID()), 0);
     TS_ASSERT_EQUALS(info.indexOf(comp2.getComponentID()), 1);
   }
@@ -79,9 +79,10 @@ public:
 
     ComponentInfo info(
         internalInfo,
-        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>{
-            &fakeComposite1, &fakeComposite2, &fakeDetector1, &fakeDetector2,
-            &fakeDetector3});
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{
+                &fakeComposite1, &fakeComposite2, &fakeDetector1,
+                &fakeDetector2, &fakeDetector3}));
     TS_ASSERT_EQUALS(info.detectorIndices(3 /*component index*/),
                      std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(info.detectorIndices(4 /*component index*/),
