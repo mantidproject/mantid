@@ -245,7 +245,7 @@ void LoadPDFgetNFile::parseDataLine(string line) {
       // FIXME:  Need to discuss with Peter about how to treat NaN value
       tempvalue = 0.0;
     } else {
-      tempvalue = atof(temps.c_str());
+      tempvalue = std::stod(temps);
     }
 
     mData[i].push_back(tempvalue);

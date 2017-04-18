@@ -34,9 +34,12 @@
 class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm {
 public:
   static vtkSinglePeakMarkerSource *New();
-  vtkTypeMacro(vtkSinglePeakMarkerSource,
-               vtkPolyDataAlgorithm) void PrintSelf(ostream &os,
-                                                    vtkIndent indent) override;
+  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &);
+  void operator=(const vtkSinglePeakMarkerSource &);
+  // clang-format off
+  vtkTypeMacro(vtkSinglePeakMarkerSource, vtkPolyDataAlgorithm)
+  void PrintSelf(ostream &os, vtkIndent indent) override;
+  // clang-format on
   void SetRadiusMarker(double radius);
   void SetPosition1(double position1);
   void SetPosition2(double position2);
@@ -56,8 +59,5 @@ private:
   double m_position2;
   double m_position3;
   double m_radius;
-
-  vtkSinglePeakMarkerSource(const vtkSinglePeakMarkerSource &);
-  void operator=(const vtkSinglePeakMarkerSource &);
 };
 #endif

@@ -236,8 +236,8 @@ public:
 
       if (transformedSymbol != hmSymbol && !symbolExists) {
         subscribeUsingGenerator<TransformationSpaceGroupGenerator>(
-            number, transformedSymbol, hmSymbol + "|" + transformation);
-
+            number, transformedSymbol,
+            std::string(hmSymbol).append("|").append(transformation));
         transformedSpaceGroupSymbols.push_back(transformedSymbol);
       }
     }

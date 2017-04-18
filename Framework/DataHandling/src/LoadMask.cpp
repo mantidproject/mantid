@@ -96,7 +96,7 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
     // a) Find '-':
     boost::trim(rawstring);
     bool containDash(true);
-    if (rawstring.find_first_of("-") == std::string::npos) {
+    if (rawstring.find_first_of('-') == std::string::npos) {
       containDash = false;
     }
 

@@ -4,6 +4,7 @@ import mantid
 
 from sans.common.file_information import (SANSFileInformationFactory, SANSFileInformation, FileType,
                                           SANSInstrument, get_instrument_paths_for_sans_file)
+from sans.common.enums import SampleShape
 from mantid.kernel import DateAndTime
 
 
@@ -25,6 +26,10 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_run_number() == 22024)
         self.assertFalse(file_information.is_event_mode())
         self.assertFalse(file_information.is_added_data())
+        self.assertTrue(file_information.get_width() == 8.0)
+        self.assertTrue(file_information.get_height() == 8.0)
+        self.assertTrue(file_information.get_thickness() == 1.0)
+        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
 
     def test_that_can_extract_information_from_file_for_LOQ_single_period_and_raw_format(self):
         # Arrange
@@ -42,6 +47,10 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_type() == FileType.ISISRaw)
         self.assertTrue(file_information.get_run_number() == 48094)
         self.assertFalse(file_information.is_added_data())
+        self.assertTrue(file_information.get_width() == 8.0)
+        self.assertTrue(file_information.get_height() == 8.0)
+        self.assertTrue(file_information.get_thickness() == 1.0)
+        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
 
     def test_that_can_extract_information_from_file_for_SANS2D_multi_period_event_and_nexus_format(self):
         # Arrange
@@ -60,11 +69,15 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_run_number() == 3368)
         self.assertTrue(file_information.is_event_mode())
         self.assertFalse(file_information.is_added_data())
+        self.assertTrue(file_information.get_width() == 8.0)
+        self.assertTrue(file_information.get_height() == 8.0)
+        self.assertTrue(file_information.get_thickness() == 2.0)
+        self.assertTrue(file_information.get_shape() is SampleShape.Cuboid)
 
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
         # The file is a single period, histogram-based and added
-        file_name = "SANS2D00022024-add"
+        file_name = "AddedHistogram-add"
         factory = SANSFileInformationFactory()
 
         # Act
@@ -78,11 +91,15 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_run_number() == 22024)
         self.assertFalse(file_information.is_event_mode())
         self.assertTrue(file_information.is_added_data())
+        self.assertTrue(file_information.get_width() == 8.0)
+        self.assertTrue(file_information.get_height() == 8.0)
+        self.assertTrue(file_information.get_thickness() == 1.0)
+        self.assertTrue(file_information.get_shape() is SampleShape.CylinderAxisAlong)
 
     def test_that_can_extract_information_for_LARMOR_added_event_data_and_multi_period_and_nexus_format(self):
         # Arrange
         # The file is a single period, histogram-based and added
-        file_name = "LARMOR00013065-add"
+        file_name = "AddedEvent-add"
         factory = SANSFileInformationFactory()
 
         # Act
@@ -96,6 +113,10 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertTrue(file_information.get_run_number() == 13065)
         self.assertTrue(file_information.is_event_mode())
         self.assertTrue(file_information.is_added_data())
+        self.assertTrue(file_information.get_width() == 6.0)
+        self.assertTrue(file_information.get_height() == 8.0)
+        self.assertTrue(file_information.get_thickness() == 1.0)
+        self.assertTrue(file_information.get_shape() is SampleShape.Cuboid)
 
 
 class SANSFileInformationGeneralFunctionsTest(unittest.TestCase):

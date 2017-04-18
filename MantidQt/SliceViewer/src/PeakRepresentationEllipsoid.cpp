@@ -330,5 +330,9 @@ void PeakRepresentationEllipsoid::doDraw(
   }
   painter.end();
 }
+
+double PeakRepresentationEllipsoid::getZoomOutFactor() const {
+  return m_calculator->getZoomOutFactor();
+}
 }
 }

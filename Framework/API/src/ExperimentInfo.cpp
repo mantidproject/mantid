@@ -1,7 +1,8 @@
 #include "MantidAPI/ExperimentInfo.h"
-
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ComponentInfo.h"
 #include "MantidAPI/DetectorInfo.h"
+#include "MantidAPI/InfoComponentVisitor.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
@@ -9,8 +10,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -18,6 +23,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 
+#include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/SpectrumInfo.h"
 
@@ -49,6 +55,7 @@ using namespace Mantid::Kernel;
 using namespace Poco::XML;
 
 namespace Mantid {
+
 namespace API {
 namespace {
 /// static logger object
@@ -61,8 +68,12 @@ ExperimentInfo::ExperimentInfo()
     : m_moderatorModel(), m_choppers(), m_sample(new Sample()),
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
-      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()) {
+      m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_parmap->setComponentInfo(m_componentInfo, std::vector<ComponentID>{});
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, getInstrument(), m_parmap.get());
 }
 
 /**
@@ -92,7 +103,6 @@ void ExperimentInfo::copyExperimentInfoFrom(const ExperimentInfo *other) {
   for (const auto &chopper : other->m_choppers) {
     m_choppers.push_back(chopper->clone());
   }
-  *m_detectorInfo = *other->m_detectorInfo;
   // We do not copy Beamline::SpectrumInfo (which contains detector grouping
   // information) for now:
   // - For MatrixWorkspace, grouping information is still stored in ISpectrum
@@ -177,6 +187,36 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
+boost::shared_ptr<Beamline::ComponentInfo>
+makeComponentInfo(const Instrument &instrument,
+                  const API::DetectorInfo &detectorInfo,
+                  std::vector<Geometry::ComponentID> &componentIds) {
+
+  if (instrument.hasComponentInfo()) {
+    const auto &componentInfo = instrument.componentInfo();
+    componentIds = instrument.componentIds();
+    return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
+  } else {
+    InfoComponentVisitor visitor(
+        detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
+                                       std::placeholders::_1));
+
+    if (instrument.isParametrized()) {
+      // Register everything via visitor
+      instrument.baseInstrument()->registerContents(visitor);
+    } else {
+      instrument.registerContents(visitor);
+    }
+
+    // Extract component ids. We need this for the ComponentInfo wrapper.
+    componentIds = visitor.componentIds();
+
+    return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+        visitor.assemblySortedDetectorIndices(),
+        visitor.componentDetectorRanges());
+  }
+}
+
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
                                          const IDetector &det) {
   pmap.clearParametersByName(ParameterMap::pos(), &det);
@@ -234,13 +274,11 @@ makeDetectorInfo(const Instrument &oldInstr, const Instrument &newInstr) {
   }
 }
 }
-
 /** Set the instrument
 * @param instr :: Shared pointer to an instrument.
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
-  m_detectorInfoWrapper = nullptr;
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     // We take a *copy* of the ParameterMap since we are modifying it by setting
@@ -255,6 +293,13 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       sptr_instrument, m_parmap);
   m_detectorInfo = makeDetectorInfo(*parInstrument, *instr);
   m_parmap->setDetectorInfo(m_detectorInfo);
+  m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
+      *m_detectorInfo, getInstrument(), m_parmap.get());
+
+  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), m_componentIds);
+  m_parmap->setComponentInfo(m_componentInfo, m_componentIds);
+  m_componentInfoWrapper =
+      Kernel::make_unique<ComponentInfo>(*m_componentInfo, m_componentIds);
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -273,6 +318,7 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
+  instrument->setComponentInfo(m_componentInfo, m_componentIds);
   return instrument;
 }
 
@@ -563,12 +609,16 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  for (const auto detID : detIDs) {
-    try {
-      const size_t detIndex = detectorInfo().indexOf(detID);
-      specDef.add(detIndex);
-    } catch (std::out_of_range &) {
-      // Silently strip bad detector IDs
+  // Wrap translation in check for detector count as an optimization of
+  // otherwise slow failures via exceptions.
+  if (detectorInfo().size() > 0) {
+    for (const auto detID : detIDs) {
+      try {
+        const size_t detIndex = detectorInfo().indexOf(detID);
+        specDef.add(detIndex);
+      } catch (std::out_of_range &) {
+        // Silently strip bad detector IDs
+      }
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
@@ -1115,17 +1165,11 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
 
 /** Return a const reference to the DetectorInfo object.
  *
- * Any modifications of the instrument or instrument parameters will invalidate
+ * Setting a new instrument via ExperimentInfo::setInstrument will invalidate
  * this reference.
  */
 const DetectorInfo &ExperimentInfo::detectorInfo() const {
   populateIfNotLoaded();
-  if (!m_detectorInfoWrapper) {
-    std::lock_guard<std::mutex> lock{m_detectorInfoMutex};
-    if (!m_detectorInfoWrapper)
-      m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
-          *m_detectorInfo, getInstrument(), m_parmap.get());
-  }
   return *m_detectorInfoWrapper;
 }
 
@@ -1189,6 +1233,10 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
 SpectrumInfo &ExperimentInfo::mutableSpectrumInfo() {
   return const_cast<SpectrumInfo &>(
       static_cast<const ExperimentInfo &>(*this).spectrumInfo());
+}
+
+const API::ComponentInfo &ExperimentInfo::componentInfo() const {
+  return *m_componentInfoWrapper;
 }
 
 /// Sets the SpectrumDefinition for all spectra.
@@ -1515,7 +1563,7 @@ void ExperimentInfo::readParameterMap(const std::string &parameterStr) {
     // prev_name = comp_name;
     const Geometry::IComponent *comp = nullptr;
     if (comp_name.find("detID:") != std::string::npos) {
-      int detID = atoi(comp_name.substr(6).c_str());
+      int detID = std::stoi(comp_name.substr(6));
       comp = instr->getDetector(detID).get();
       if (!comp) {
         g_log.warning() << "Cannot find detector " << detID << '\n';
@@ -1646,8 +1694,8 @@ void ExperimentInfo::populateIfNotLoaded() const {
   // (FileBackedExperimentInfo) to load content from files upon access.
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid
 
 namespace Mantid {
 namespace Kernel {
