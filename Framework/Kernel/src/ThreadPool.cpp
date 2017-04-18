@@ -6,10 +6,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <sstream>
 // needed on windows and any place missing openmp
-#ifdef _WIN32
-#include <Poco/Environment.h>
-#endif
-#ifndef _OPENMP
+#if defined(_WIN32) || !defined(_OPENMP)
 #include <Poco/Environment.h>
 #endif
 
@@ -61,12 +58,10 @@ ThreadPool::~ThreadPool() {
  */
 size_t ThreadPool::getNumPhysicalCores() {
 // windows hangs with openmp for some reason
-#ifdef _WIN32
+#if defined(_WIN32) || !defined(_OPENMP)
   int physicalCores = Poco::Environment::processorCount();
-#elif _OPENMP
-  int physicalCores = PARALLEL_GET_MAX_THREADS;
 #else
-  int physicalCores = Poco::Environment::processorCount();
+  int physicalCores = PARALLEL_GET_MAX_THREADS;
 #endif
 
   int maxCores(0);
