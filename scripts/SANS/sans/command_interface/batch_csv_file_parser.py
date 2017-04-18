@@ -43,7 +43,7 @@ class BatchCsvParser(object):
 
         parsed_rows = []
 
-        with open(self._batch_file_name, 'rb') as csvfile:
+        with open(self._batch_file_name, 'r') as csvfile:
             batch_reader = reader(csvfile, delimiter=",")
             row_number = 0
             for row in batch_reader:
@@ -99,7 +99,7 @@ class BatchCsvParser(object):
 
         # Ensure that the transmission data for the sample is specified either completely or not at all.
         has_sample_transmission = BatchReductionEntry.SampleTransmission in output and \
-                                  output[BatchReductionEntry.SampleTransmission]
+                                  output[BatchReductionEntry.SampleTransmission]  # noqa
         has_sample_direct_beam = BatchReductionEntry.SampleDirect in output and output[BatchReductionEntry.SampleDirect]
 
         if (not has_sample_transmission and has_sample_direct_beam) or \
@@ -109,7 +109,7 @@ class BatchCsvParser(object):
 
         # Ensure that the transmission data for the can is specified either completely or not at all.
         has_can_transmission = BatchReductionEntry.CanTransmission in output and \
-                               output[BatchReductionEntry.CanTransmission]
+                               output[BatchReductionEntry.CanTransmission]  # noqa
         has_can_direct_beam = BatchReductionEntry.CanDirect in output and output[BatchReductionEntry.CanDirect]
 
         if (not has_can_transmission and has_can_direct_beam) or \
