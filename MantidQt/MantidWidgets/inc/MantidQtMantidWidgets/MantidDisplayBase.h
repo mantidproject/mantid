@@ -131,7 +131,7 @@ public:
   virtual void showAlgorithmHistory() = 0;
 
   virtual MantidWSIndexDialog *
-  createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
+  createWorkspaceIndexDialog(int flags, const QStringList & wsNames, bool showWaterfall,
                              bool showPlotAll, bool showTiledOpt,
                              bool isAdvanced = false) = 0;
 

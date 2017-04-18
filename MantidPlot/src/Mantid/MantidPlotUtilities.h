@@ -6,12 +6,12 @@
 /**
 * These utilities assist with plotting in Mantid
 */
-// Structure to aid odering of plots
-typedef struct {
+// Structure to aid ordering of plots
+struct CurveSpec {
   double logVal;
   QString wsName;
   int index;
-} CurveSpec;
+};
 
 // Compare to sort according to log value
 bool byLogValue(const CurveSpec &lhs, const CurveSpec &rhs);

@@ -42,7 +42,7 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot of Group";
  * @param isAdvanced :: true if advanced plotting has been selected
  */
 MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
-                                         QList<QString> &wsNames,
+                                         const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showTiledOption,
                                          const bool isAdvanced)
@@ -694,7 +694,7 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
-                                         QList<QString> &wsNames,
+                                         const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,
                                          const bool showTiledOption,

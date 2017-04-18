@@ -286,7 +286,7 @@ public:
   /// with a
   /// list of the names of workspaces to be plotted.
   MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
-                      QList<QString> &wsNames,
+                      const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showTiledOption = false,
                       const bool isAdvanced = false);
@@ -404,7 +404,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWSIndexDialog : public QDialog {
 public:
   /// Constructor - has a list of the names of workspaces to be plotted.
   MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
-                      QList<QString> &wsNames,
+                      const QList<QString> &wsNames,
                       const bool showWaterfallOption = false,
                       const bool showPlotAll = true,
                       const bool showTiledOption = false,

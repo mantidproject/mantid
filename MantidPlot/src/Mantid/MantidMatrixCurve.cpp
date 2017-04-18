@@ -282,7 +282,7 @@ void MantidMatrixCurve::itemChanged() {
  * @param ws :: Pointer to workspace
  */
 QString MantidMatrixCurve::createCurveName(
-    const QString prefix,
+    const QString & prefix,
     const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws) {
   QString name = "";
 

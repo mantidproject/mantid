@@ -213,7 +213,7 @@ public:
 
   // Create dialog box for what to plot and how
   MantidQt::MantidWidgets::MantidWSIndexDialog *
-  createWorkspaceIndexDialog(int flags, QStringList wsNames, bool showWaterfall,
+  createWorkspaceIndexDialog(int flags, const QStringList & wsNames, bool showWaterfall,
                              bool showPlotAll, bool showTiledOpt,
                              bool isAdvanced) override;
 

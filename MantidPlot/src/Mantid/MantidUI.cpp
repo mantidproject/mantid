@@ -3118,7 +3118,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
 
     try {
       if (!log.isEmpty()) { // Get log value from workspace
-        if (customLogValues.size() > 0) {
+        if (!customLogValues.empty() ) {
           curveSpec.logVal = getSingleWorkspaceLogValue(i++, customLogValues);
         } else {
           MatrixWorkspace_const_sptr workspace =
@@ -4006,7 +4006,7 @@ void MantidUI::updateRecentFilesList(const QString &fname) {
  * @returns :: New dialog
  */
 MantidWSIndexDialog *
-MantidUI::createWorkspaceIndexDialog(int flags, QStringList wsNames,
+MantidUI::createWorkspaceIndexDialog(int flags, const QStringList & wsNames,
                                      bool showWaterfall, bool showPlotAll,
                                      bool showTiledOpt, bool isAdvanced) {
   return new MantidWSIndexDialog(m_appWindow, static_cast<Qt::WFlags>(flags),

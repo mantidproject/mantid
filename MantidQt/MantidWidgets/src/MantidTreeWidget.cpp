@@ -197,7 +197,7 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
         m_ads.retrieve(wsName.toStdString()));
     if (groupWs) {
       const auto childWsNames = groupWs->getNames();
-      for (auto childWsName : childWsNames) {
+      for (const auto & childWsName : childWsNames) {
         if (selectedWsNameSet.find(QString::fromStdString(childWsName)) ==
             selectedWsNameSet.end()) {
           selectedWsNameSet.insert(QString::fromStdString(childWsName));
