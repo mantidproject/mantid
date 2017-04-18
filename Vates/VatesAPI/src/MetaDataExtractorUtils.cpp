@@ -36,7 +36,7 @@ std::string MetaDataExtractorUtils::extractInstrument(
   auto histoWorkspace =
       dynamic_cast<const Mantid::API::IMDHistoWorkspace *>(workspace);
 
-  std::string instrument = "";
+  std::string instrument;
 
   // Check which workspace is currently used and that it contains at least one
   // instrument.
