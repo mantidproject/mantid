@@ -8,6 +8,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 
+#include <boost/make_shared.hpp>
+
 using Mantid::API::ComponentInfo;
 
 class ComponentInfoTest : public CxxTest::TestSuite {
