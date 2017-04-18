@@ -280,12 +280,14 @@ public:
                             "and/or rotations have already been set.")
   }
 
-  void test_creating_workspace_with_default_index_info() {
+  void test_creating_workspace_with_time_oriented_index_info() {
     const auto &instrument = createSimpleInstrument(nDetectors, nBins);
 
     auto builder = ScanningWorkspaceBuilder(nDetectors, nTimeIndexes, nBins);
     TS_ASSERT_THROWS_NOTHING(builder.setInstrument(instrument));
     TS_ASSERT_THROWS_NOTHING(builder.setTimeRanges(timeRanges));
+    TS_ASSERT_THROWS_NOTHING(builder.setIndexingType(
+        ScanningWorkspaceBuilder::IndexingType::TIME_ORIENTED))
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = builder.buildWorkspace());
 
@@ -299,7 +301,7 @@ public:
         TS_ASSERT_EQUALS(spectrumDefinitions[index][0].first, i)
         TS_ASSERT_EQUALS(spectrumDefinitions[index][0].second, j)
         TS_ASSERT_EQUALS(detectorIDs[spectrumDefinitions[index][0].first],
-                         j + 1)
+                         i + 1)
       }
     }
   }

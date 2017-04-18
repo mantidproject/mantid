@@ -136,6 +136,9 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() {
 
   switch (m_indexingType) {
   case IndexingType::DEFAULT:
+    outputWorkspace->setIndexInfo(
+        Indexing::IndexInfo(m_nDetectors * m_nTimeIndexes));
+    break;
   case IndexingType::TIME_ORIENTED:
     createTimeOrientedIndexInfo(outputWorkspace);
     break;
@@ -204,8 +207,8 @@ void ScanningWorkspaceBuilder::createDetectorOrientedIndexInfo(
 
   for (size_t timeIndex = 0; timeIndex < m_nTimeIndexes; ++timeIndex) {
     for (size_t detIndex = 0; detIndex < m_nDetectors; ++detIndex) {
-      spectrumDefinitions.access()[timeIndex * m_nDetectors + detIndex]
-          .add(detIndex, timeIndex);
+      spectrumDefinitions.access()[timeIndex * m_nDetectors + detIndex].add(
+          detIndex, timeIndex);
     }
   }
 
