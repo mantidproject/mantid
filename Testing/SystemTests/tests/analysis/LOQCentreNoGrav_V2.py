@@ -1,11 +1,10 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (LOQ, Set1D, Detector, MaskFile, Gravity, AssignSample,
                                                          TransmissionSample, AssignCan, TransmissionCan,
-                                                         FindBeamCentre, WavRangeReduction, DefaultTrans, SetCentre,
+                                                         WavRangeReduction, DefaultTrans, SetCentre,
                                                          UseCompatibilityMode)
 
 # The Find beam centre command has not been implemented yet in SANS2 hence we cannot run this test correctly

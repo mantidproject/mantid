@@ -2,7 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.kernel import config
-from mantid.api import FileFinder, AnalysisDataService
+from mantid.api import FileFinder
 from sans.command_interface.ISISCommandInterface import (UseCompatibilityMode, LOQ, MaskFile, BatchReduce)
 
 MASKFILE = FileFinder.getFullPath('MaskLOQData.txt')

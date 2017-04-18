@@ -1,13 +1,12 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
+import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          UseCompatibilityMode, AssignSample, WavRangeReduction)
 
 
 class SANS2DFrontNoGravTest_V2(stresstesting.MantidStressTest):
-
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()

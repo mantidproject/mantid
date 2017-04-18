@@ -11,7 +11,7 @@ from mantid.api import (FileFinder)
 from mantid.simpleapi import RenameWorkspace
 from sans.command_interface.ISISCommandInterface import (BatchReduce, SANS2D, MaskFile, AssignSample, AssignCan,
                                                          TransmissionSample, TransmissionCan, WavRangeReduction,
-                                                         UseCompatibilityMode, Set1D)
+                                                         UseCompatibilityMode)
 
 MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
 BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')

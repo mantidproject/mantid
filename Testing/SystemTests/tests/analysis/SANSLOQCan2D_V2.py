@@ -2,7 +2,7 @@
 
 from __future__ import (absolute_import, division, print_function)
 import stresstesting
-from mantid.simpleapi import *
+import mantid  # noqa
 from sans.command_interface.ISISCommandInterface import (LOQ, Set2D, Detector, MaskFile, SetDetectorOffsets, Gravity,
                                                          AssignSample, AssignCan, WavRangeReduction,
                                                          UseCompatibilityMode)

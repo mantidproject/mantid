@@ -5,7 +5,7 @@ One test has been removed from the port since it uses the ReductionSingleton.
 """
 
 from __future__ import (absolute_import, division, print_function)
-import mantid
+import mantid  # noqa
 import stresstesting
 import os
 from mantid.api import AnalysisDataService

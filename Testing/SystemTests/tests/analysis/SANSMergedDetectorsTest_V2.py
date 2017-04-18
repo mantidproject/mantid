@@ -15,7 +15,7 @@ class SANSMergedDetectorsTest_V2(stresstesting.MantidStressTest):
 
     def runTest(self):
         # Select instrument and user file
-        #UseCompatibilityMode()
+        UseCompatibilityMode()
         SANS2DTUBES()
         MaskFile(file_name='USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt')
 
