@@ -43,7 +43,7 @@ class BatchCsvParser(object):
 
         parsed_rows = []
 
-        with open(self._batch_file_name, 'rb') as csvfile:
+        with open(self._batch_file_name, 'r') as csvfile:
             batch_reader = reader(csvfile, delimiter=",")
             row_number = 0
             for row in batch_reader:
