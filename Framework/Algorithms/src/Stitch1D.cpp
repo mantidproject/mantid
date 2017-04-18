@@ -417,11 +417,11 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
   int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
-  for (int i = 0; i < ws_size; ++i) {
+  for (int64_t i = 0; i < ws_size; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
-      auto e = ws->e(i);
+      auto e = ws->e(static_cast<size_t>(i));
       auto it = std::find_if(e.begin(), e.end(), isNonzero);
       if (it != e.end()) {
         PARALLEL_CRITICAL(has_non_zero) {
