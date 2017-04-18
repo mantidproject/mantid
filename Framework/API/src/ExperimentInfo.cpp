@@ -69,9 +69,10 @@ ExperimentInfo::ExperimentInfo()
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
+      m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
-  m_parmap->setComponentInfo(m_componentInfo, std::vector<ComponentID>{});
+  m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 }
@@ -187,15 +188,15 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-boost::shared_ptr<Beamline::ComponentInfo>
+std::pair<std::unique_ptr<Beamline::ComponentInfo>,
+          boost::shared_ptr<const std::vector<Geometry::ComponentID>>>
 makeComponentInfo(const Instrument &instrument,
-                  const API::DetectorInfo &detectorInfo,
-                  std::vector<Geometry::ComponentID> &componentIds) {
-
+                  const API::DetectorInfo &detectorInfo) {
   if (instrument.hasComponentInfo()) {
     const auto &componentInfo = instrument.componentInfo();
-    componentIds = instrument.componentIds();
-    return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
+    const auto &componentIds = instrument.componentIds();
+    return {Kernel::make_unique<Beamline::ComponentInfo>(componentInfo),
+            componentIds};
   } else {
     InfoComponentVisitor visitor(
         detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
@@ -209,11 +210,14 @@ makeComponentInfo(const Instrument &instrument,
     }
 
     // Extract component ids. We need this for the ComponentInfo wrapper.
-    componentIds = visitor.componentIds();
+    auto componentIds =
+        boost::make_shared<const std::vector<Geometry::ComponentID>>(
+            visitor.componentIds());
 
-    return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-        visitor.assemblySortedDetectorIndices(),
-        visitor.componentDetectorRanges());
+    return {Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
+                visitor.assemblySortedDetectorIndices(),
+                visitor.componentDetectorRanges()),
+            componentIds};
   }
 }
 
@@ -296,8 +300,9 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
-  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), m_componentIds);
-  m_parmap->setComponentInfo(m_componentInfo, m_componentIds);
+  std::tie(m_componentInfo, m_componentIds) =
+      makeComponentInfo(*instr, detectorInfo());
+  m_parmap->setComponentInfo(m_componentInfo);
   m_componentInfoWrapper =
       Kernel::make_unique<ComponentInfo>(*m_componentInfo, m_componentIds);
   // Detector IDs that were previously dropped because they were not part of the
