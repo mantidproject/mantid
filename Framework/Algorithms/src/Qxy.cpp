@@ -10,11 +10,11 @@
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/Run.h"
 
 #include <algorithm>
 #include <cmath>
@@ -354,14 +354,16 @@ void Qxy::exec() {
 }
 
 /**
-Same as scipy:
-# Example: Qmin = 0.1 ; Qmax=1; 10 bins
-In [4]: np.logspace(np.log10(0.1), np.log10(1), 10, base=10)
-Out[4]:
-array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
+ * This function calculates a logarithm binning
+ * It gives the same result as scipy:
+ * # Example: Qmin = 0.1 ; Qmax=1; 10 bins
+   In [4]: np.logspace(np.log10(0.1), np.log10(1), 10, base=10)
+   Out[4]:
+   array([ 0.1       ,  0.12915497,  0.16681005,  0.21544347,  0.27825594,
         0.35938137,  0.46415888,  0.59948425,  0.77426368,  1.        ])
-Same here returns:
-0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
+
+ * Same input in this function here returns:
+   0.1 0.129155 0.16681 0.215443 0.278256 0.359381 0.464159 0.599484 0.774264 1
 */
 std::vector<double> Qxy::logBinning(double min, double max, int num) {
   if (min < 0 || max < 0)
@@ -376,6 +378,23 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
     outBins[i] = pow(10, min + i * binWidth);
   }
   return outBins;
+}
+
+double Qxy::getQminFromWs(
+		const API::MatrixWorkspace_const_sptr& inputWorkspace) {
+	// get qmin from the run properties
+	double qmin = 0;
+	const API::Run& run = inputWorkspace->run();
+	if (run.hasProperty("qmin")) {
+		Kernel::Property* prop = run.getProperty("Qmin");
+		qmin = boost::lexical_cast<double, std::string>(prop->value());
+	} else {
+		g_log.warning() << "Could not retrieve Qmin from run object. "
+				<< "Using min=" << qmin << ".\n";
+	}
+	g_log.notice() << "QxQy: Using logarithm binning with qmin=" << qmin
+			<< ".\n";
+	return qmin;
 }
 
 /** Creates the output workspace, setting the X vector to the bins boundaries in
@@ -394,8 +413,11 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   HistogramData::BinEdges axis;
   double startVal;
   if (log_binning) {
+
+	  // get qmin from the run properties
+		double qmin = getQminFromWs(inputWorkspace);
     std::vector<double> totalBinning;
-    std::vector<double> positiveBinning = logBinning(0, max, nBins);
+    std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));
@@ -434,10 +456,20 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   Axis *verticalAxis = new BinEdgeAxis(nBins);
   outputWorkspace->replaceAxis(1, verticalAxis);
 
-  for (int i = 0; i < nBins; ++i) {
-    const double currentVal = startVal + i * delta;
-    // Set the Y value on the axis
-    verticalAxis->setValue(i, currentVal);
+  if (log_binning) {
+    for (int i = 0; i < nBins; ++i) {
+          const double currentVal = axis[i];
+          // Set the Y value on the axis
+          verticalAxis->setValue(i, currentVal);
+        }
+
+  }
+  else {
+    for (int i = 0; i < nBins; ++i) {
+      const double currentVal = startVal + i * delta;
+      // Set the Y value on the axis
+      verticalAxis->setValue(i, currentVal);
+    }
   }
 
   // Fill the X vectors in the output workspace
