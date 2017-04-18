@@ -98,7 +98,7 @@ void GetDetectorOffsets::exec() {
 
   m_dideal = getProperty("DIdeal");
 
-  size_t nspec = inputW->getNumberHistograms();
+  int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
   auto outputW = boost::make_shared<OffsetsWorkspace>(inputW->getInstrument());
   // Create the output MaskWorkspace
@@ -111,10 +111,10 @@ void GetDetectorOffsets::exec() {
   Progress prog(this, 0, 1.0, nspec);
   auto &spectrumInfo = maskWS->mutableSpectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputW))
-  for (size_t wi = 0; wi < nspec; ++wi) {
+  for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERUPT_REGION
     // Fit the peak
-    double offset = fitSpectra(static_cast<int64_t>(wi), isAbsolute);
+    double offset = fitSpectra(wi, isAbsolute);
     double mask = 0.0;
     if (std::abs(offset) > m_maxOffset) {
       offset = 0.0;

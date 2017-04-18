@@ -421,7 +421,7 @@ bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
-      auto e = ws->e(static_cast<size_t>(i));
+      auto e = ws->e(i);
       auto it = std::find_if(e.begin(), e.end(), isNonzero);
       if (it != e.end()) {
         PARALLEL_CRITICAL(has_non_zero) {
