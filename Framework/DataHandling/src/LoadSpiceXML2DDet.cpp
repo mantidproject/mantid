@@ -280,8 +280,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
   if (!outws->run().hasProperty("2theta") &&
       outws->run().hasProperty("_2theta")) {
     // Set up 2theta if it is not set up yet
-    double logvalue =
-        atof(outws->run().getProperty("_2theta")->value().c_str());
+    double logvalue = std::stod(outws->run().getProperty("_2theta")->value());
     TimeSeriesProperty<double> *newlogproperty =
         new TimeSeriesProperty<double>("2theta");
     newlogproperty->addValue(anytime, logvalue);
@@ -534,7 +533,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 
         // scan per column
         for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
-          double counts = atof(veccounts[j_row].c_str());
+          double counts = std::stod(veccounts[j_row]);
           size_t rowIndex, columnIndex;
 
           if (loadinstrument) {
@@ -573,13 +572,13 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
       const std::string nodename = xmlnode.getName();
       const std::string nodevalue = xmlnode.getValue();
       if (xmlnode.isDouble()) {
-        double dvalue = atof(nodevalue.c_str());
+        double dvalue = std::stod(nodevalue);
         outws->mutableRun().addProperty(
             new PropertyWithValue<double>(nodename, dvalue));
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()
                       << " (double) value = " << dvalue << "\n";
       } else if (xmlnode.isInteger()) {
-        int ivalue = atoi(nodevalue.c_str());
+        int ivalue = std::stoi(nodevalue);
         outws->mutableRun().addProperty(
             new PropertyWithValue<int>(nodename, ivalue));
         g_log.debug() << "Log name / xml node : " << xmlnode.getName()
@@ -649,10 +648,10 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspaceVersion2(
       const std::string nodename = xmlnode.getName();
       const std::string nodevalue = xmlnode.getValue();
       if (xmlnode.isDouble()) {
-        double dvalue = atof(nodevalue.c_str());
+        double dvalue = std::stod(nodevalue);
         dbl_log_map.emplace(nodename, dvalue);
       } else if (xmlnode.isInteger()) {
-        int ivalue = atoi(nodevalue.c_str());
+        int ivalue = std::stoi(nodevalue);
         int_log_map.emplace(nodename, ivalue);
       } else {
         if (nodename.compare("start_time") == 0) {
@@ -787,7 +786,7 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
 
     // scan per column
     for (size_t j_row = 0; j_row < veccounts.size(); ++j_row) {
-      double counts = atof(veccounts[j_row].c_str());
+      double counts = std::stod(veccounts[j_row]);
       size_t rowIndex, columnIndex;
 
       if (loadinstrument) {
@@ -899,7 +898,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
     } else if (!ts) {
       g_log.warning("Log _m1 is not TimeSeriesProperty.  Treat it as a single "
                     "value property.");
-      double m1pos = atof(dataws->run().getProperty("_m1")->value().c_str());
+      double m1pos = std::stod(dataws->run().getProperty("_m1")->value());
       if (fabs(m1pos - (-25.870000)) < 0.2) {
         wavelength = 1.003;
         haswavelength = true;
