@@ -296,7 +296,7 @@ QString MantidSurfaceContourPlotGenerator::getXAxisTitle(
 bool MantidSurfaceContourPlotGenerator::groupContentsHaveSameX(
     const std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
     const size_t index) {
-  if (workspaces.empty() ) {
+  if (workspaces.empty()) {
     return false;
   }
 
