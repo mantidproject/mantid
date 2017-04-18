@@ -1684,7 +1684,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
  *  @param n :: index
  *  @return Value
  */
-template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::getValue(size_t n) const {
+template <typename TYPE>
+TYPE TimeSeriesProperty<TYPE>::getValue(size_t n) const {
   TYPE value;
 
   // throw if property is empty
