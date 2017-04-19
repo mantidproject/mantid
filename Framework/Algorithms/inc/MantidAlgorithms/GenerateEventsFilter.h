@@ -180,7 +180,8 @@ private:
                            const bool &ignore_change_direction);
 
   int searchValueInVector(const std::vector<double> &sorted_vector,
-                          const double value, double &lower_bound, double &upper_bound);
+                          const double value, double &lower_bound,
+                          double &upper_bound);
   /// Determine the chaning direction of log value
   int determineChangingDirection(int startindex);
 

@@ -771,12 +771,14 @@ void GenerateEventsFilter::makeDblLogSplitters(
       double curr_log_value = m_dblLog->getValue(i_entry);
       if (curr_min <= curr_log_value && curr_log_value < curr_max)
         curr_target = prev_target;
-      else
-      {
-        // in case (1) current minimum and maximum of log-value-slicer range are not set up
-        //         (2) current time series log value's entry is out of previous log value's
+      else {
+        // in case (1) current minimum and maximum of log-value-slicer range are
+        // not set up
+        //         (2) current time series log value's entry is out of previous
+        //         log value's
         // find the current target
-        curr_target = searchValueInVector(log_value_ranges, curr_log_value, curr_min, curr_max);
+        curr_target = searchValueInVector(log_value_ranges, curr_log_value,
+                                          curr_min, curr_max);
         // reset the current slicer-log-value range
       }
     }
@@ -1942,8 +1944,10 @@ size_t GenerateEventsFilter::searchValue(const std::vector<double> &sorteddata,
  * @brief GenerateEventsFilter::searchValueInVector
  * @param sorted_vector
  * @param value
- * @param lower_bound :: (output) the lower bound of the segment that the value is in
- * @param upper_bound :: (output) the upper bound of the segment that the value is in
+ * @param lower_bound :: (output) the lower bound of the segment that the value
+ * is in
+ * @param upper_bound :: (output) the upper bound of the segment that the value
+ * is in
  * @return
  */
 int GenerateEventsFilter::searchValueInVector(
@@ -1953,23 +1957,17 @@ int GenerateEventsFilter::searchValueInVector(
       std::lower_bound(sorted_vector.begin(), sorted_vector.end(), value) -
       sorted_vector.begin());
 
-  if (index == 0)
-  {
+  if (index == 0) {
     // value is out of left range
     lower_bound = EMPTY_DBL();
-  }
-  else
-  {
-    lower_bound = sorted_vector[index-1];
+  } else {
+    lower_bound = sorted_vector[index - 1];
   }
 
-  if (index < sorted_vector.size())
-  {
+  if (index < sorted_vector.size()) {
     // value is in the range
     upper_bound = sorted_vector[index];
-  }
-  else
-  {
+  } else {
     // value is out of range from the right end
     upper_bound = EMPTY_DBL();
   }
