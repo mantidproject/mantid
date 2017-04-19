@@ -16,6 +16,12 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 
+namespace Mantid {
+namespace Algorithms {
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ReflectometryReductionOne2)
+
 // unnamed namespace
 namespace {
 /** Get the twoTheta angle for the centre of the detector associated with the
@@ -237,13 +243,118 @@ translateInstructions(const std::string &instructions) {
 
   return outGroups;
 }
+
+/**
+* Map a spectrum index from the given map to the given workspace
+* @param map : the original spectrum number to index map
+* @param mapIdx : the index to look up in the map
+* @param destWS : the destination workspace
+*/
+int mapSpectrumIndexToWorkspace(
+  const spec2index_map &map, const size_t mapIdx,
+  MatrixWorkspace_const_sptr destWS) {
+
+  // Get the spectrum numbers for these indices
+  auto it = std::find_if(map.begin(), map.end(),
+    [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
+
+  if (it == map.end()) {
+    std::ostringstream errMsg;
+    errMsg << "Workspace index " << mapIdx << " not found in run workspace ";
+    throw std::runtime_error(errMsg.str());
+  }
+  specnum_t specId = it->first;
+
+  // Get the workspace index in the destination workspace
+  int wsIdx = static_cast<int>(destWS->getIndexFromSpectrumNumber(specId));
+
+  return wsIdx;
 }
 
-namespace Mantid {
-namespace Algorithms {
+/**
+* Translate all the workspace indexes in an origin workspace into workspace
+* indexes of a host end-point workspace. This is done using spectrum numbers as
+* the intermediate.
+*
+* @param originWS : Origin workspace, which provides the original workspace
+* index to spectrum number mapping.
+* @param hostWS : Workspace onto which the resulting workspace indexes will be
+* hosted
+* @throws :: If the specId are not found to exist on the host end-point
+*workspace.
+* @return :: Remapped workspace indexes applicable for the host workspace,
+*as comma separated string.
+*/
+std::string createProcessingCommandsFromDetectorWS(
+  MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
+  const std::vector<std::vector<size_t>> &detectors) {
+  auto map = originWS->getSpectrumToWorkspaceIndexMap();
+  std::stringstream result;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ReflectometryReductionOne2)
+  // Map the original indices to the host workspace
+  std::vector<std::vector<size_t>> hostGroups;
+  for (auto group : detectors) {
+    std::vector<size_t> hostDetectors;
+    for (auto i : group) {
+      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
+      hostDetectors.push_back(hostIdx);
+    }
+    hostGroups.push_back(hostDetectors);
+  }
+
+  // Add each group to the output, separated by ','
+  /// @todo Add support to separate contiguous groups by ':' to avoid having
+  /// long lists in the processing instructions
+  for (auto &groupIt = hostGroups.begin(); groupIt != hostGroups.end();
+    ++groupIt) {
+    const auto &hostDetectors = *groupIt;
+
+    // Add each detector index to the output string separated by '+' to indicate
+    // that all detectors in this group will be summed. We also check for
+    // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
+    bool contiguous = false;
+    size_t contiguousStart = 0;
+
+    for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
+      // Check if the next iterator is a contiguous increment from this one
+      auto &nextIt = it + 1;
+      if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
+        // If this is a start of a new contiguous region, remember the start
+        // index
+        if (!contiguous) {
+          contiguousStart = *it;
+          contiguous = true;
+        }
+        // Continue to find the end of the contiguous region
+        continue;
+      }
+
+      if (contiguous) {
+        // Output the contiguous range, then reset the flag
+        result << contiguousStart << "-" << *it;
+        contiguousStart = 0;
+        contiguous = false;
+      }
+      else {
+        // Just output the value
+        result << *it;
+      }
+
+      // Add a separator ready for the next value/range
+      if (nextIt != hostDetectors.end()) {
+        result << "+";
+      }
+    }
+
+    if (groupIt + 1 != hostGroups.end()) {
+      result << ",";
+    }
+  }
+
+  return result.str();
+}
+} // unnamed namespace
+
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -556,7 +667,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
       // because the detectorWS may already have been reduced and may not
       // contain the original spectra.
       transmissionCommands =
-          createProcessingCommandsFromDetectorWS(m_runWS, transmissionWS);
+          createProcessingCommandsFromDetectorWS(m_runWS, transmissionWS, m_detectors);
     }
 
     MatrixWorkspace_sptr secondTransmissionWS =
@@ -1039,114 +1150,6 @@ void ReflectometryReductionOne2::verifySpectrumMaps(
       g_log.warning(message);
     }
   }
-}
-
-/**
-* Translate all the workspace indexes in an origin workspace into workspace
-* indexes of a host end-point workspace. This is done using spectrum numbers as
-* the intermediate.
-*
-* @param originWS : Origin workspace, which provides the original workspace
-* index to spectrum number mapping.
-* @param hostWS : Workspace onto which the resulting workspace indexes will be
-* hosted
-* @throws :: If the specId are not found to exist on the host end-point
-*workspace.
-* @return :: Remapped workspace indexes applicable for the host workspace,
-*as comma separated string.
-*/
-std::string ReflectometryReductionOne2::createProcessingCommandsFromDetectorWS(
-    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS) {
-  auto map = originWS->getSpectrumToWorkspaceIndexMap();
-  std::stringstream result;
-
-  // Map the original indices to the host workspace
-  std::vector<std::vector<size_t>> hostGroups;
-  for (auto group : m_detectors) {
-    std::vector<size_t> hostDetectors;
-    for (auto i : group) {
-      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
-      hostDetectors.push_back(hostIdx);
-    }
-    hostGroups.push_back(hostDetectors);
-  }
-
-  // Add each group to the output, separated by ','
-  /// @todo Add support to separate contiguous groups by ':' to avoid having
-  /// long lists in the processing instructions
-  for (auto &groupIt = hostGroups.begin(); groupIt != hostGroups.end();
-       ++groupIt) {
-    const auto &hostDetectors = *groupIt;
-
-    // Add each detector index to the output string separated by '+' to indicate
-    // that all detectors in this group will be summed. We also check for
-    // contiguous ranges so we output e.g. 3-5 instead of 3+4+5
-    bool contiguous = false;
-    size_t contiguousStart = 0;
-
-    for (auto &it = hostDetectors.begin(); it != hostDetectors.end(); ++it) {
-      // Check if the next iterator is a contiguous increment from this one
-      auto &nextIt = it + 1;
-      if (nextIt != hostDetectors.end() && *nextIt == *it + 1) {
-        // If this is a start of a new contiguous region, remember the start
-        // index
-        if (!contiguous) {
-          contiguousStart = *it;
-          contiguous = true;
-        }
-        // Continue to find the end of the contiguous region
-        continue;
-      }
-
-      if (contiguous) {
-        // Output the contiguous range, then reset the flag
-        result << contiguousStart << "-" << *it;
-        contiguousStart = 0;
-        contiguous = false;
-      } else {
-        // Just output the value
-        result << *it;
-      }
-
-      // Add a separator ready for the next value/range
-      if (nextIt != hostDetectors.end()) {
-        result << "+";
-      }
-    }
-
-    if (groupIt + 1 != hostGroups.end()) {
-      result << ",";
-    }
-  }
-
-  return result.str();
-}
-
-/**
-* Map a spectrum index from the given map to the given workspace
-* @param map : the original spectrum number to index map
-* @param mapIdx : the index to look up in the map
-* @param destWS : the destination workspace
-*/
-int ReflectometryReductionOne2::mapSpectrumIndexToWorkspace(
-    const spec2index_map &map, const size_t mapIdx,
-    MatrixWorkspace_const_sptr destWS) {
-
-  // Get the spectrum numbers for these indices
-  auto it = std::find_if(map.begin(), map.end(),
-                         [mapIdx](auto wsIt) { return wsIt.second == mapIdx; });
-
-  if (it == map.end()) {
-    std::ostringstream errMsg;
-    errMsg << "Workspace index " << mapIdx << " not found in run workspace ";
-    throw std::runtime_error(errMsg.str());
-  }
-  specnum_t specId = it->first;
-
-  // Get the workspace index in the destination workspace
-  int wsIdx = static_cast<int>(destWS->getIndexFromSpectrumNumber(specId));
-
-  return wsIdx;
 }
 } // namespace Algorithms
 } // namespace Mantid

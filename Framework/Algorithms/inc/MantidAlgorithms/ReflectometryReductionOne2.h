@@ -121,12 +121,6 @@ private:
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,
                           const bool severe);
-  std::string createProcessingCommandsFromDetectorWS(
-      API::MatrixWorkspace_const_sptr originWS,
-      API::MatrixWorkspace_const_sptr hostWS);
-  int mapSpectrumIndexToWorkspace(const spec2index_map &map,
-                                  const size_t mapIdx,
-                                  API::MatrixWorkspace_const_sptr destWS);
 
   // Find and cache constants
   void initRun();
