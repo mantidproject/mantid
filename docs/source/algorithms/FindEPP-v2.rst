@@ -21,7 +21,7 @@ As a result, `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ wit
 Last column will contain the status of peak finding as follows:
 
 * **success** : If the fit succeeded, the row is populated with the corresponding values obtained by the fit.
-* **fitFailed** : If the fit failed (for whatever reason). In this case the *PeakCentre* will be populated with the maximum's position. A debug message will be logged with a detailed failure message from the fit algorithm. *PeakCentre* is filled with the maximum.
+* **fitFailed** : If the fit failed (for whatever reason). A debug message will be logged with a detailed failure message from the fit algorithm. *PeakCentre* is filled with the maximum.
 * **narrowPeak** : If there are `<3` bins around the maximum, that have `>0.5*MAX`. An information is logged, fit is not tried. *PeakCentre* is filled with the maximum.
 * **negativeMaximum** : If the maximum of the spectrum is not positive. A message will be logged in notice channel. Fit is not attempted.
 
