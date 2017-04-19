@@ -895,20 +895,20 @@ void ReflectometryReductionOne2::sumInQProcessValue(
     const HistogramX &inputX, const HistogramY &inputY,
     MatrixWorkspace_sptr IvsLam, const std::vector<size_t> &detectors) {
 
+  // Check whether there are any counts (if not, nothing to share)
+  const double inputCounts = inputY[inputIdx];
+  if (inputCounts <= 0.0 || std::isnan(inputCounts) || std::isinf(inputCounts)) {
+    return;
+  }
   // Get the bin width and the bin centre
   const double bLambda = getLambdaRange(inputX, inputIdx);
   const double lambda = getLambda(inputX, inputIdx);
-  // Skip if outside area of interest
-  if (lambda < lambdaMin() || lambda > lambdaMax()) {
-    return;
-  }
   // Project these coordinates onto the virtual-lambda output (at twoThetaR)
   double lambdaMin = 0.0;
   double lambdaMax = 0.0;
   getProjectedLambdaRange(lambda, twoTheta, bLambda, bTwoTheta, lambdaMin,
                           lambdaMax, detectors);
   // Share the input counts into the output array
-  const double inputCounts = inputY[inputIdx];
   sumInQShareCounts(inputCounts, bLambda, lambdaMin, lambdaMax, IvsLam);
 }
 
