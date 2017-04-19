@@ -287,11 +287,6 @@ void KafkaEventStreamDecoder::captureImplExcept() {
           static_cast<const ISISData *>(eventMsg->facility_specific_data());
 
       std::lock_guard<std::mutex> lock(m_mutex);
-      if (ISISMsg->period_number() < 0)
-        throw std::runtime_error(
-            "KafkaEventStreamDecoder::captureImplExcept() - "
-            "Negative period number in event message. Producer error, unable "
-            "to continue");
       auto &periodBuffer =
           *m_localEvents[static_cast<size_t>(ISISMsg->period_number())];
       auto &mutableRunInfo = periodBuffer.mutableRun();

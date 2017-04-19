@@ -49,7 +49,6 @@ public:
 
   virtual void subscribe() override;
   virtual void subscribe(int64_t offset) override;
-  virtual void subscribeAtTime(int64_t time) override;
   virtual void consumeMessage(std::string *payload) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
@@ -64,6 +63,7 @@ private:
   std::vector<std::string> m_topicNames;
   subscribeAtOption m_subscribeOption = subscribeAtOption::OFFSET;
 
+  void subscribeAtTime(int64_t time);
   void reportSuccessOrFailure(const RdKafka::ErrorCode &error,
                               int64_t confOffset) const;
 

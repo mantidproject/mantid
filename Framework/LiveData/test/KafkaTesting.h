@@ -59,7 +59,6 @@ class FakeExceptionThrowingStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     buffer->clear();
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
@@ -74,7 +73,6 @@ class FakeEmptyStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override { buffer->clear(); }
 };
 
@@ -88,7 +86,6 @@ public:
       : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -127,7 +124,6 @@ public:
   FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -165,7 +161,6 @@ class FakeISISSpDetStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
