@@ -4,10 +4,12 @@ import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
-from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService)
+from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService, IEventWorkspace)
 from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
                            BoolTimeSeriesProperty,StringTimeSeriesProperty,
                            StringPropertyWithValue, V3D, Quat)
+from mantid.dataobjects import Workspace2D
+
 import SANSUtility as su
 import re
 import random
@@ -26,13 +28,14 @@ TEST_STRING_MON2 = TEST_STRING_MON + '_2'
 TEST_STRING_DATA3 = TEST_STRING_DATA + '_3'
 TEST_STRING_MON3 = TEST_STRING_MON + '_3'
 
+
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
 
-def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = False):
-    number_of_times = 10
+
+def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear=False, number_of_times=10):
     for i in range(0, number_of_times):
         if make_linear:
             val = float(i)
@@ -42,6 +45,7 @@ def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = 
         date +=  int(i*1e9)
         date += int(extra_time_shift*1e9)
         AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
+
 
 def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False, log_names= None, make_linear = False):
      # Create the event workspace
@@ -62,19 +66,23 @@ def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_
             addSampleLogEntry(name, ws, start_time, extra_time_shift, make_linear)
     return ws
 
-def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
+
+def provide_event_ws_custom(name, start_time, extra_time_shift=0.0, proton_charge=True, proton_charge_empty=False):
     return provide_event_ws_with_entries(name=name, start_time=start_time,
-                                         number_events = 100, extra_time_shift = extra_time_shift,
+                                         number_events=100, extra_time_shift = extra_time_shift,
                                          proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
 
+
 def provide_event_ws(name, start_time, extra_time_shift):
-    return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = True)
+    return provide_event_ws_custom(name = name, start_time=start_time, extra_time_shift = extra_time_shift,  proton_charge=True)
+
 
 def provide_event_ws_wo_proton_charge(name, start_time, extra_time_shift):
-    return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = False)
+    return provide_event_ws_custom(name = name, start_time=start_time, extra_time_shift = extra_time_shift,  proton_charge=False)
+
 
 def provide_histo_workspace_with_one_spectrum(ws_name, x_start, x_end, bin_width):
-    CreateSampleWorkspace(OutputWorkspace = ws_name,
+    CreateSampleWorkspace(OutputWorkspace=ws_name,
                           NumBanks=1,
                           BankPixelWidth=1,
                           XMin=x_start,
@@ -1671,6 +1679,115 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         args = ["SANS2D", "jsdlkfsldkfj", "test", workspace]
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
         AnalysisDataService.remove("ws")
+
+
+class TestMonitorSlicing(unittest.TestCase):
+    class MockReducer:
+        class MockEvent2Hist:
+            def __init__(self):
+                pass
+
+        def __init__(self):
+            self.settings = {}
+            self.event2hist = TestMonitorSlicing.MockReducer.MockEvent2Hist()
+            self.min_limit = -1.
+            self.max_limit = -1.
+            self._is_can = False
+
+        def is_can(self):
+            return self._is_can
+
+        def getCurrSliceLimit(self):
+            return self.min_limit, self.max_limit
+
+    @staticmethod
+    def get_mock_reducer(scale=1., min_limit=-1., max_limit=-1., settings=None, is_can=False):
+        reducer = TestMonitorSlicing.MockReducer()
+        # Mocking out the .event2hist.scale
+        reducer.event2hist.scale = scale
+
+        # Mocking out getCurrSliceLimit
+        reducer.min_limit = min_limit
+        reducer.max_limit = max_limit
+
+        # Mocking is_can
+        reducer._is_can = is_can
+
+        # Mocking out settings["events.binning"]
+        if settings is None:
+            settings = {}
+        reducer.settings = settings
+        return reducer
+
+    @staticmethod
+    def _create_event_workspace():
+        ws = CreateSampleWorkspace(WorkspaceType='Event', Function='Flat background', NumBanks=0,
+                                   NumMonitors=4, BankPixelWidth=0, Random=False)
+        return ws
+
+    @staticmethod
+    def _create_histogram_workspace():
+        ws = CreateSampleWorkspace(WorkspaceType='Histogram', Function='Flat background', NumBanks=0,
+                                   NumMonitors=4, BankPixelWidth=0, Random=True)
+        return ws
+
+    @staticmethod
+    def _clean_up():
+        for element in AnalysisDataService.getObjectNames():
+            if AnalysisDataService.doesExist(element):
+                AnalysisDataService.remove(element)
+
+    def test_that_can_get_scaled_monitor_when_histogram(self):
+        histo_monitor = self._create_histogram_workspace()
+        original_entry = histo_monitor.dataY(0)[0]
+        scale_factor = 0.5
+        reducer = self.get_mock_reducer(scale=scale_factor)
+        sliced_monitor = su.get_sliced_monitor(reducer=reducer, monitor=histo_monitor, do_scale=True)
+        new_entry = sliced_monitor.dataY(0)[0]
+
+        self.assertAlmostEqual(original_entry*scale_factor, new_entry, places=7)
+        self._clean_up()
+
+    def test_that_can_get_sliced_monitor_when_event(self):
+        event_monitor = self._create_event_workspace()
+        start_time = "2010-01-01T00:00:00"
+        addSampleLogEntry('proton_charge', event_monitor, start_time=start_time, extra_time_shift=0.0,
+                          number_of_times=30)
+        self.assertTrue(isinstance(event_monitor, IEventWorkspace))
+        reducer = self.get_mock_reducer(min_limit=0., max_limit=1000., settings={"events.binning": "0,200,20000"})
+        sliced_monitor = su.get_sliced_monitor(reducer=reducer, monitor=event_monitor, do_scale=True)
+        self.assertTrue(isinstance(sliced_monitor, Workspace2D))
+        self.assertAlmostEqual(sliced_monitor.dataY(0)[0], 0.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(1)[0], 4.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(2)[0], 3.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(3)[0], 3.0, places=7)
+        self._clean_up()
+
+    def test_that_raises_when_no_binning_has_been_specified(self):
+        event_monitor = self._create_event_workspace()
+        start_time = "2010-01-01T00:00:00"
+        addSampleLogEntry('proton_charge', event_monitor, start_time=start_time, extra_time_shift=0.0,
+                          number_of_times=30)
+        self.assertTrue(isinstance(event_monitor, IEventWorkspace))
+        reducer = self.get_mock_reducer()
+        kwargs = {"reducer":reducer, "monitor": event_monitor, "do_scale": True}
+        self.assertRaises(RuntimeError, su.get_sliced_monitor, **kwargs)
+        self._clean_up()
+
+    def test_that_take_entire_workspace_if_no_time_slices_have_been_specified(self):
+        event_monitor = self._create_event_workspace()
+        start_time = "2010-01-01T00:00:00"
+        addSampleLogEntry('proton_charge', event_monitor, start_time=start_time, extra_time_shift=0.0,
+                          number_of_times=30)
+        self.assertTrue(isinstance(event_monitor, IEventWorkspace))
+        reducer = self.get_mock_reducer(settings={"events.binning": "0,200,20000"})
+        sliced_monitor = su.get_sliced_monitor(reducer=reducer, monitor=event_monitor, do_scale=True)
+        self.assertTrue(isinstance(sliced_monitor, Workspace2D))
+        self.assertAlmostEqual(sliced_monitor.dataY(0)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(1)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(2)[0], 10.0, places=7)
+        self.assertAlmostEqual(sliced_monitor.dataY(3)[0], 10.0, places=7)
+        self._clean_up()
 
 
 if __name__ == "__main__":

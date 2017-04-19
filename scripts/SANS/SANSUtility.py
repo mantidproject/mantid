@@ -427,7 +427,7 @@ def get_sliced_monitor(reducer, monitor, do_scale=True):
         RenameWorkspace(mtd[sliced_ws_name], OutputWorkspace=original_monitor_name)
         return mtd[original_monitor_name]
     else:
-        if reducer.event2hist.scale != 1 and do_scale:
+        if reducer.event2hist.scale != 1. and do_scale:
             monitor *= reducer.event2hist.scale
         return monitor
 
