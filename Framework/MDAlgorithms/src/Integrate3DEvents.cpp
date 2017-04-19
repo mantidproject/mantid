@@ -1,10 +1,13 @@
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
+
 #include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
+#include <tuple>
+#include <numeric>
 
 extern "C" {
 #include <cstdio>
@@ -68,6 +71,158 @@ void Integrate3DEvents::addEvents(
     addEvent(event_q, hkl_integ);
   }
 }
+
+std::pair<boost::shared_ptr<const Geometry::PeakShape>, double> Integrate3DEvents::integrateStrongPeak(const IntegrationParameters& params,
+  double &inti, double &sigi) {
+
+    double shell_inti, shell_sigi;
+    std::vector<double> sigmas;
+
+    auto shapeShell = ellipseIntegrateEvents(
+          params.E1Vectors, params.peakCenter, params.specifySize, params.backgroundInnerRadius,
+          params.backgroundInnerRadius, params.backgroundOuterRadius, sigmas, shell_inti, shell_sigi);
+
+    auto shapeCore = ellipseIntegrateEvents(
+          params.E1Vectors, params.peakCenter, params.specifySize, params.peakRadius,
+          params.backgroundInnerRadius, params.backgroundOuterRadius, sigmas, inti, sigi);
+
+    return std::make_pair(shapeCore, inti / shell_inti);
+}
+
+ boost::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape, double frac, V3D center, double &inti, double &sigi) {
+
+   inti = 0.0; // default values, in case something
+   sigi = 0.0; // is wrong with the peak.
+
+   auto result = getEvents(center);
+   if(!result)
+     return boost::make_shared<NoShape>();
+
+   const auto& events = result.get();
+
+   const auto& directions = shape->directions();
+   const auto& abcBackgroundInnerRadii = shape->abcRadiiBackgroundInner();
+   const auto& abcBackgroundOuterRadii = shape->abcRadiiBackgroundOuter();
+   const auto& abcRadii = shape->abcRadii();
+
+   auto rValues = abcRadii;
+   const auto isPeakOnDetector = correctForDetectorEdges(rValues, params.E1Vectors, center, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii);
+
+   if(!isPeakOnDetector)
+     return shape;
+
+   double r1 = rValues[0], r2 = rValues[1], r3 = rValues[2];
+
+   // integrate
+   double backgrd = numInEllipsoidBkg(
+                           events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+   double peak_w_back = numInEllipsoid(events, directions, abcRadii);
+   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
+
+   inti = peak_w_back - ratio * backgrd;
+   sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+
+   // correct for fractional intensity
+   inti = inti / frac;
+   // TODO:
+   // - Correct sigi
+   // - Correct Peak shape
+
+   return shape;
+ }
+
+ double Integrate3DEvents::estimateSignalToNoiseRatio(const IntegrationParameters& params, const V3D& center) {
+
+   auto result = getEvents(center);
+   if(!result)
+     return .0;
+
+   const auto& events = result.get();
+
+   DblMatrix cov_matrix(3, 3);
+   makeCovarianceMatrix(events, cov_matrix, m_radius);
+
+   std::vector<V3D> eigen_vectors;
+   getEigenVectors(cov_matrix, eigen_vectors);
+
+   double r1 = 3;
+   double r2 = 3;
+   double r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background
+   // shell volume equal to the peak region volume.
+
+
+  std::vector<double> sigmas;
+  for (int i = 0; i < 3; i++) {
+    sigmas.push_back(stdDev(events, eigen_vectors[i], params.regionRadius));
+  }
+
+   std::vector<double> regionRadii;
+   std::vector<double> peakRadii;
+   for (int i = 0; i < 3; i++) {
+     regionRadii.push_back(r3*sigmas[i]);
+     peakRadii.push_back(r1*sigmas[i]);
+   }
+
+//   double backgrd = numInEllipsoidBkg(events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+   double region_inti = numInEllipsoid(events, eigen_vectors, regionRadii);
+   double peak_inti = numInEllipsoid(events, eigen_vectors, peakRadii);
+
+   region_inti = region_inti / (regionRadii[0]*regionRadii[1]*regionRadii[2]*M_PI*4./3.);
+   peak_inti = peak_inti / (peakRadii[0]*peakRadii[1]*peakRadii[2]*M_PI*4./3.);
+   return peak_inti / std::max(1.0, region_inti);
+ }
+
+
+ boost::optional<const std::vector<std::pair<double, V3D>>&> Integrate3DEvents::getEvents(const V3D& peak_q) {
+   const auto hkl_key = getHklKey(peak_q);
+
+   if (hkl_key == 0)
+     return boost::optional<const std::vector<std::pair<double, V3D>>&>();
+
+   const auto pos = m_event_lists.find(hkl_key);
+   using EventListType = const decltype(pos->second)&;
+
+   if (m_event_lists.end() == pos)
+     return boost::optional<EventListType>();
+
+   if (pos->second.size() < 3) // if there are not enough events
+     return boost::optional<EventListType>();
+
+  return boost::make_optional<EventListType>(pos->second);
+ }
+
+
+  bool Integrate3DEvents::correctForDetectorEdges(std::vector<double>& radii, const std::vector<V3D>& E1Vecs,
+                                                  const V3D& peak_q,
+                                                  const std::vector<double>& axesRadii,
+                                                  const std::vector<double>& bkgInnerRadii, const std::vector<double>& bkgOuterRadii) {
+   double& r1 = radii[0], r2 = radii[1], r3 = radii[2];
+   if (!E1Vecs.empty()) {
+     double h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
+     // scaled from area of circle minus segment when r normalized to 1
+     double m3 = std::sqrt(
+                             1.0 -
+                             (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) /
+                             M_PI);
+     double h1 = 1.0 - detectorQ(E1Vecs, peak_q, axesRadii);
+     // Do not use peak if edge of detector is inside integration radius
+     if (h1 > 0.0)
+       return false;
+
+     r3 *= m3;
+     if (r2 != r1) {
+       double h2 = 1.0 - detectorQ(E1Vecs, peak_q, bkgInnerRadii);
+       // scaled from area of circle minus segment when r normalized to 1
+       double m2 = std::sqrt(
+                               1.0 -
+                               (std::acos(1.0 - h2) - (1.0 - h2) * std::sqrt(2.0 * h2 - h2 * h2)) /
+                               M_PI);
+       r2 *= m2;
+     }
+   }
+
+   return true;
+  }
 
 /**
  * Integrate the events around the specified peak Q-vector.  The principal
@@ -582,7 +737,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  */
 double Integrate3DEvents::detectorQ(std::vector<Kernel::V3D> E1Vec,
                                     const Mantid::Kernel::V3D QLabFrame,
-                                    std::vector<double> &r) {
+                                    const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame -

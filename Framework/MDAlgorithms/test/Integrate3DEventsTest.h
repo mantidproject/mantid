@@ -6,6 +6,8 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 
 #include <cxxtest/TestSuite.h>
+#include <iostream>
+#include <random>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -120,6 +122,106 @@ public:
           back_inner_radius, back_outer_radius, new_sigma, inti, sigi);
       TS_ASSERT_DELTA(inti, inti_some[i], 0.1);
       TS_ASSERT_DELTA(sigi, sigi_some[i], 0.01);
+    }
+  }
+
+  void test_integrateWithStrongPeak() {
+    // synthesize two peaks
+    V3D peak_1(20, 0, 0);
+    V3D peak_2(0, 20, 0);
+    std::vector<std::pair<double, V3D>> peak_q_list{{1., peak_1}, {1., peak_2}};
+
+    // synthesize a UB-inverse to map
+    DblMatrix UBinv(3, 3, false); // Q to h,k,l
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .2, 0));
+    UBinv.setRow(2, V3D(0, 0, .25));
+
+    std::vector<std::pair<double, V3D>> event_Qs;
+    generatePeak(event_Qs, peak_1, 1, 10000, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 1, 100, 1);   // weak peak
+
+    IntegrationParameters params(peak_1, 1.2, 0.1, 0.2, true);
+
+    // Create integraton region + events & UB
+    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    integrator.addEvents(event_Qs, false);
+
+    double strong_inti, strong_sigi;
+    auto result = integrator.integrateStrongPeak(params, strong_inti, strong_sigi);
+    const auto shape = boost::dynamic_pointer_cast<const PeakShapeEllipsoid>(result.first);
+    const auto frac = result.second;
+
+    TS_ASSERT_DELTA(frac, 0.2948, 0.0001);
+    TS_ASSERT_DELTA(strong_inti, 2616.18, 0.01);
+
+    double inti, sigi;
+    std::vector<double> sigmas;
+
+    integrator.integrateWeakPeak(params, shape, frac, peak_2, inti, sigi);
+
+    TS_ASSERT_DELTA(inti, 78.0140, 0.001);
+  }
+
+  void test_estimateSignalToNoiseRatio() {
+    // synthesize two peaks
+    V3D peak_1(20, 0, 0);
+    V3D peak_2(0, 20, 0);
+    std::vector<std::pair<double, V3D>> peak_q_list{{1., peak_1}, {1., peak_2}};
+
+    // synthesize a UB-inverse to map
+    DblMatrix UBinv(3, 3, false); // Q to h,k,l
+    UBinv.setRow(0, V3D(.1, 0, 0));
+    UBinv.setRow(1, V3D(0, .2, 0));
+    UBinv.setRow(2, V3D(0, 0, .25));
+
+    std::vector<std::pair<double, V3D>> event_Qs;
+    generatePeak(event_Qs, peak_1, 1, 10000, 1); // strong peak
+    generatePeak(event_Qs, peak_2, 1, 10, 1);   // weak peak
+    generateNoise(event_Qs, -40, 40, 10000);
+
+    IntegrationParameters params(peak_1, 1.2, 0.1, 0.2, true);
+
+    // Create integraton region + events & UB
+    Integrate3DEvents integrator(peak_q_list, UBinv, params.regionRadius);
+    integrator.addEvents(event_Qs, false);
+
+    const auto ratio1 = integrator.estimateSignalToNoiseRatio(params, peak_1);
+    const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
+
+    TS_ASSERT_DELTA(ratio1, 1.9679, 0.0001);
+    TS_ASSERT_DELTA(ratio2, 0.0842, 0.0001);
+  }
+
+  /** Generate a symmetric Gaussian peak
+    *
+    * @param event_Qs :: vector of event Qs
+    * @param center :: location of the center of the peak
+    * @param sigma :: standard deviation of the peak
+    * @param numSamples :: number of samples to draw
+    * @param seed :: the seed to the pseudo-random number generator
+    */
+   void generatePeak(std::vector<std::pair<double, V3D>>& event_Qs, V3D center, double sigma = 5, size_t numSamples = 1000, int seed = 1) {
+
+    std::mt19937 gen;
+    std::normal_distribution<> d(0,sigma);
+    gen.seed(seed);
+
+    for (size_t i = 0; i < numSamples; ++i) {
+      V3D offset(d(gen), d(gen), d(gen));
+      event_Qs.push_back(std::make_pair(1., center+offset));
+    }
+  }
+
+   void generateNoise(std::vector<std::pair<double, V3D>>& event_Qs, double lower, double upper, size_t numSamples = 1000, int seed = 1) {
+
+    std::mt19937 gen;
+    std::uniform_real_distribution<> d(lower,upper);
+    gen.seed(seed);
+
+    for (size_t i = 0; i < numSamples; ++i) {
+      V3D point(d(gen), d(gen), d(gen));
+      event_Qs.push_back(std::make_pair(1., point));
     }
   }
 };

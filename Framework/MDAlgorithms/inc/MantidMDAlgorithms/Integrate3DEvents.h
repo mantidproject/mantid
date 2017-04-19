@@ -4,6 +4,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <unordered_map>
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 
@@ -15,6 +17,28 @@ namespace DataObjects {
 class PeakShapeEllipsoid;
 }
 namespace MDAlgorithms {
+
+struct IntegrationParameters {
+  IntegrationParameters(Kernel::V3D center, double radius, double backgroundWidth, double regionPadding, bool specifySize = true) {
+    const auto coreVolumeFactor = 1.0;
+    const auto shellVolumeFactor = std::pow(4.0, (2./3.));
+
+    this->peakCenter = center;
+    this->peakRadius = radius * coreVolumeFactor;
+    this->backgroundInnerRadius = radius * shellVolumeFactor;
+    this->backgroundOuterRadius = this->backgroundInnerRadius + backgroundWidth;
+    this->regionRadius = this->backgroundOuterRadius + regionPadding;
+    this->specifySize = specifySize;
+  }
+
+  std::vector<Kernel::V3D> E1Vectors;
+  Kernel::V3D peakCenter;
+  double backgroundInnerRadius;
+  double backgroundOuterRadius;
+  double regionRadius;
+  double peakRadius;
+  bool specifySize;
+};
 
 /**
     @class Integrate3DEvents
@@ -76,7 +100,25 @@ public:
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
 
+  /// Find the net integrated intensity of a peak, using ellipsoidal volumes
+  std::pair<boost::shared_ptr<const Mantid::Geometry::PeakShape>, double> integrateStrongPeak(
+      const IntegrationParameters& params, double &inti, double &sigi);
+
+
+  boost::shared_ptr<const Geometry::PeakShape> integrateWeakPeak(
+      const IntegrationParameters &params, Mantid::DataObjects::PeakShapeEllipsoid_const_sptr shape,
+      double frac, Mantid::Kernel::V3D center, double &inti, double &sigi);
+
+  double estimateSignalToNoiseRatio(const IntegrationParameters &params, const Mantid::Kernel::V3D &center);
 private:
+  /// Get a list of events for a given Q
+  boost::optional<const std::vector<std::pair<double, Mantid::Kernel::V3D>>&> getEvents(const Mantid::Kernel::V3D& peak_q);
+
+  bool correctForDetectorEdges(std::vector<double> &radii, const std::vector<Mantid::Kernel::V3D> &E1Vecs, const Mantid::Kernel::V3D &peak_q,
+                               const std::vector<double> &axesRadii,
+                               const std::vector<double> &bkgInnerRadii, const std::vector<double> &bkgOuterRadii);
+
+
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
   static double numInEllipsoid(
       std::vector<std::pair<double, Mantid::Kernel::V3D>> const &events,
@@ -123,7 +165,7 @@ private:
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
   double detectorQ(std::vector<Kernel::V3D> E1Vec,
-                   const Mantid::Kernel::V3D QLabFrame, std::vector<double> &r);
+                   const Mantid::Kernel::V3D QLabFrame, const std::vector<double> &r);
   // Private data members
   PeakQMap m_peak_qs;         // hashtable with peak Q-vectors
   EventListMap m_event_lists; // hashtable with lists of events for each peak
