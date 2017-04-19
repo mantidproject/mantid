@@ -65,8 +65,7 @@ EnabledWhenProperty::EnabledWhenProperty(
 }
 
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
-    : IPropertySettings(),
-      m_propertyDetails{other.m_propertyDetails},
+    : IPropertySettings(), m_propertyDetails{other.m_propertyDetails},
       m_comparisonDetails{other.m_comparisonDetails} {}
 
 /**
