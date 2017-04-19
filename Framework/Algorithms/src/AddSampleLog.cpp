@@ -163,7 +163,7 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
   if (value_is_int) {
     // convert to integer
     int intVal;
-    bool convert_to_int = Strings::convert(propValue, intVal);
+    bool convert_to_int = static_cast<bool>(Strings::convert(propValue, intVal));
     if (!convert_to_int) {
       // spit out error message and set to default value
       g_log.error() << "Error interpreting string '" << propValue
@@ -175,7 +175,7 @@ void AddSampleLog::addSingleValueProperty(Run &theRun,
   } else {
     // convert to double
     double dblVal;
-    bool convert_to_dbl = Strings::convert(propValue, dblVal);
+    bool convert_to_dbl = static_cast<bool>(Strings::convert(propValue, dblVal));
     if (!convert_to_dbl) {
       g_log.error() << "Error interpreting string '" << propValue
                     << "' as NumberType Double.";
