@@ -503,6 +503,10 @@ void ReflectometryReductionOne2::exec() {
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr result = m_runWS;
 
+  // Currently only support a single input range of detectors
+  /// todo Generalise this to support multiple ranges
+  const auto &detectors = m_detectors[0];
+
   if (summingInQ()) {
     // Convert to lambda
     if (m_convertUnits) {
@@ -516,7 +520,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     }
     // Do the summation in Q
     if (m_sum) {
-      result = sumInQ(result, m_detectors[0]);
+      result = sumInQ(result, detectors);
     }
   } else {
     // Do the summation in lambda
