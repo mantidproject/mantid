@@ -77,7 +77,7 @@ class SpaceGroupBuilder(object):
     def _getCleanSpaceGroupSymbol(self, rawSpaceGroupSymbol):
         # Remove :1 and :H from the symbol. Those are not required at the moment because they are the default.
         # Also substitute 'R' and 'Z' endings used by ICSD to indicate alternative origin choice or settings
-        mappings = {':[1H]':'', ':[1h]':'', ' S$':'', ' H$':'', ' Z$':' :2', ' R$':' :r'}
+        mappings = {':[1Hh]':'', ' S$':'', ' H$':'', ' Z$':' :2', ' R$':' :r'}
         for k, v in mappings.items():
             rawSpaceGroupSymbol = re.sub(k, v, rawSpaceGroupSymbol)
         return rawSpaceGroupSymbol.strip()
