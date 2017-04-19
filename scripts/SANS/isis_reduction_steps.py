@@ -211,7 +211,6 @@ class LoadRun(object):
                 # Reload the outWs, it has changed from a group workspace to an event workspace
                 outWs = mtd[workspace]
 
-
             # Handle simple EventWorkspace data
             if not added_event_data_flag:
                 if isinstance(outWs, IEventWorkspace):
@@ -2174,7 +2173,7 @@ class TransmissionCalc(ReductionStep):
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
 
         # Get the sliced version of the transmission/direct workspace
-        _ = get_sliced_monitor(reducer, mtd[tmpWS], do_scale=False)
+        _ = get_sliced_monitor(reducer, mtd[tmpWS], do_scale=False)  # noqa
 
         # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
         if reducer.unwrap_monitors:
