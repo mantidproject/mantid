@@ -26,7 +26,8 @@ SpectraAxisValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
   try {
     axis = value->getAxis(m_axisNumber);
   } catch (Kernel::Exception::IndexError) {
-    return "No axis at index " + std::to_string(m_axisNumber) + " available in the workspace";
+    return "No axis at index " + std::to_string(m_axisNumber) +
+           " available in the workspace";
   }
 
   if (axis->isSpectra())

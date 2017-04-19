@@ -125,8 +125,9 @@ public:
 protected:
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     m_spec = numspec;
-    m_vec.resize(m_spec, SpectrumTester(HistogramData::getHistogramXMode(j, k),
-                                    HistogramData::Histogram::YMode::Counts));
+    m_vec.resize(m_spec,
+                 SpectrumTester(HistogramData::getHistogramXMode(j, k),
+                                HistogramData::Histogram::YMode::Counts));
     for (size_t i = 0; i < m_spec; i++) {
       m_vec[i].setMatrixWorkspace(this, i);
       m_vec[i].dataX().resize(j, 1.0);
@@ -151,7 +152,8 @@ protected:
     return new AxeslessWorkspaceTester(*this);
   }
   AxeslessWorkspaceTester *doCloneEmpty() const override {
-    throw std::runtime_error("Cloning of AxeslessWorkspaceTester is not implemented.");
+    throw std::runtime_error(
+        "Cloning of AxeslessWorkspaceTester is not implemented.");
   }
 
 private:

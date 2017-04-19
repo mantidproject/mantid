@@ -37,7 +37,7 @@ public:
 
   void test_axesless_workspace() {
     auto ws = boost::make_shared<AxeslessWorkspaceTester>();
-    ws->initialize(2, 11 ,10);
+    ws->initialize(2, 11, 10);
     NumericAxisValidator validator;
     std::string s;
     TS_ASSERT_THROWS_NOTHING(s = validator.isValid(ws))
