@@ -1,4 +1,5 @@
 #include "MantidAPI/LiveListener.h"
+#include "MantidAPI/IAlgorithm.h"
 
 namespace Mantid {
 namespace API {
@@ -17,6 +18,14 @@ bool LiveListener::dataReset() {
  */
 void LiveListener::setSpectra(const std::vector<specnum_t> &specList) {
   UNUSED_ARG(specList);
+}
+
+/**
+ * Default behaviour updates property values on Listener
+ * using those on calling algorithm.
+ */
+void LiveListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
+  this->updatePropertyValues(callingAlgorithm);
 }
 
 } // namespace API

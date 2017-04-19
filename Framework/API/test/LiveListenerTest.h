@@ -1,6 +1,7 @@
 #ifndef LIVELISTENER_TEST_H_
 #define LIVELISTENER_TEST_H_
 
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListener.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
@@ -23,6 +24,7 @@ public:
   MOCK_METHOD0(isConnected, bool());
   MOCK_METHOD0(runStatus, RunStatus());
   MOCK_CONST_METHOD0(runNumber, int());
+  MOCK_METHOD1(setAlgorithm, void(const Mantid::API::IAlgorithm &));
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
 

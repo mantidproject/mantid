@@ -45,19 +45,25 @@ ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
 */
 void ReflDataProcessorPresenter::process() {
 
+  // Get selected runs
+  const auto items = m_manager->selectedData(true);
+
   // If uniform slicing is empty process normally, delegating to
   // GenericDataProcessorPresenter
   std::string timeSlicingValues = m_mainPresenter->getTimeSlicingValues();
   if (timeSlicingValues.empty()) {
-    GenericDataProcessorPresenter::process();
+    // Check if any input event workspaces still exist in ADS
+    if (proceedIfWSTypeInADS(items, true))
+      GenericDataProcessorPresenter::process();
     return;
   }
 
+  // Check if any input non-event workspaces exist in ADS
+  if (!proceedIfWSTypeInADS(items, false))
+    return;
+
   // Get time slicing type
   std::string timeSlicingType = m_mainPresenter->getTimeSlicingType();
-
-  // Get selected runs
-  const auto items = m_manager->selectedData(true);
 
   // Progress report
   int progress = 0;
@@ -363,38 +369,78 @@ void ReflDataProcessorPresenter::parseCustom(const std::string &timeSlicing,
 }
 
 /** Loads an event workspace and puts it into the ADS
-*
-* @param runNo :: the run number as a string
-* @return :: True if algorithm was executed. False otherwise
-*/
+ *
+ * @param runNo :: the run number as a string
+ * @return :: True if algorithm was executed. False otherwise
+ */
 bool ReflDataProcessorPresenter::loadEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
+  bool runFound;
+  std::string outName;
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
 
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadEventNexus");
-  algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
-  algLoadRun->setProperty("LoadMonitors", true);
-  algLoadRun->execute();
-  return algLoadRun->isExecuted();
+  outName = findRunInADS(runNo, prefix, runFound);
+  if (!runFound ||
+      AnalysisDataService::Instance().doesExist(outName + "_monitors") ==
+          false ||
+      AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(outName) ==
+          NULL) {
+    // Monitors must be loaded first and workspace must be an event workspace
+    loadRun(runNo, instrument, prefix, "LoadEventNexus", runFound);
+  }
+
+  return runFound;
 }
 
 /** Loads a non-event workspace and puts it into the ADS
-*
-* @param runNo :: the run number as a string
-*/
+ *
+ * @param runNo :: the run number as a string
+ */
 void ReflDataProcessorPresenter::loadNonEventRun(const std::string &runNo) {
 
-  std::string runName = "TOF_" + runNo;
+  bool runFound; // unused but required
+  std::string prefix = "TOF_";
+  std::string instrument = m_view->getProcessInstrument();
 
-  IAlgorithm_sptr algLoadRun =
-      AlgorithmManager::Instance().create("LoadISISNexus");
+  findRunInADS(runNo, prefix, runFound);
+  if (!runFound)
+    loadRun(runNo, instrument, prefix, m_loader, runFound);
+}
+
+/** Tries loading a run from disk
+ *
+ * @param run : The name of the run
+ * @param instrument : The instrument the run belongs to
+ * @param prefix : The prefix to be prepended to the run number
+ * @param loader : The algorithm used for loading runs
+ * @param runFound : Whether or not the run was actually found
+ * @returns string name of the run
+ */
+std::string ReflDataProcessorPresenter::loadRun(const std::string &run,
+                                                const std::string &instrument,
+                                                const std::string &prefix,
+                                                const std::string &loader,
+                                                bool &runFound) {
+
+  runFound = true;
+  const std::string fileName = instrument + run;
+  const std::string outputName = prefix + run;
+
+  IAlgorithm_sptr algLoadRun = AlgorithmManager::Instance().create(loader);
   algLoadRun->initialize();
-  algLoadRun->setProperty("Filename", m_view->getProcessInstrument() + runNo);
-  algLoadRun->setProperty("OutputWorkspace", runName);
+  algLoadRun->setProperty("Filename", fileName);
+  algLoadRun->setProperty("OutputWorkspace", outputName);
+  if (loader == "LoadEventNexus")
+    algLoadRun->setProperty("LoadMonitors", true);
   algLoadRun->execute();
+  if (!algLoadRun->isExecuted()) {
+    // Run not loaded from disk
+    runFound = false;
+    return "";
+  }
+
+  return outputName;
 }
 
 /** Takes a slice from a run and puts the 'sliced' workspace into the ADS
@@ -578,6 +624,63 @@ void ReflDataProcessorPresenter::plotGroup() {
         "Error plotting groups.");
 
   plotWorkspaces(workspaces);
+}
+
+/** Asks user if they wish to proceed if the AnalysisDataService contains input
+ * workspaces of a specific type
+ *
+ * @param data :: The data selected in the table
+ * @param findEventWS :: Whether or not we are searching for event workspaces
+ * @return :: Boolean - true if user wishes to proceed, false if not
+ */
+bool ReflDataProcessorPresenter::proceedIfWSTypeInADS(const TreeData &data,
+                                                      const bool findEventWS) {
+
+  std::vector<std::string> foundInputWorkspaces;
+
+  for (const auto &item : data) {
+    const auto group = item.second;
+
+    for (const auto &row : group) {
+      bool runFound = false;
+      std::string runNo = row.second.at(0);
+      std::string outName = findRunInADS(runNo, "TOF_", runFound);
+
+      if (runFound) {
+        bool isEventWS =
+            AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(
+                outName) != NULL;
+        if (findEventWS == isEventWS) {
+          foundInputWorkspaces.push_back(outName);
+        } else if (isEventWS) { // monitors must be loaded
+          std::string monName = outName + "_monitors";
+          if (AnalysisDataService::Instance().doesExist(monName) == false)
+            foundInputWorkspaces.push_back(outName);
+        }
+      }
+    }
+  }
+
+  if (foundInputWorkspaces.size() > 0) {
+    // Input workspaces of type found, ask user if they wish to process
+    std::string foundStr = boost::algorithm::join(foundInputWorkspaces, "\n");
+    bool process = m_mainPresenter->askUserYesNo(
+        "Processing selected rows will replace the following workspaces:\n\n" +
+            foundStr + "\n\nDo you wish to continue?",
+        "Process selected rows?");
+
+    if (process) {
+      // Remove all found workspaces
+      for (auto &wsName : foundInputWorkspaces) {
+        AnalysisDataService::Instance().remove(wsName);
+      }
+    }
+
+    return process;
+  }
+
+  // No input workspaces of type found, proceed with reduction automatically
+  return true;
 }
 
 /** Add entry for the number of slices for a row in a group
