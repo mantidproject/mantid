@@ -72,7 +72,7 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
-    auto runStream =
+    m_runStream =
         m_broker->subscribe({m_runInfoTopic}, subscribeAtOption::LASTTWO);
     std::string rawMsgBuffer;
     auto runStartData = getRunStartMessage(rawMsgBuffer);
