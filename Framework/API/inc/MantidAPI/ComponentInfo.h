@@ -59,6 +59,7 @@ private:
   mutable std::atomic<bool> m_initIndexMapping;
   /// Control access to component id mappings
   mutable std::mutex m_mutex;
+
 public:
   ComponentInfo(
       const Mantid::Beamline::ComponentInfo &componentInfo,
