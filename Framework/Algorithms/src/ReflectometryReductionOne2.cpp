@@ -250,9 +250,8 @@ translateInstructions(const std::string &instructions) {
 * @param mapIdx : the index to look up in the map
 * @param destWS : the destination workspace
 */
-int mapSpectrumIndexToWorkspace(
-  const spec2index_map &map, const size_t mapIdx,
-  MatrixWorkspace_const_sptr destWS) {
+int mapSpectrumIndexToWorkspace(const spec2index_map &map, const size_t mapIdx,
+                                MatrixWorkspace_const_sptr destWS) {
 
   // Get the spectrum numbers for these indices
   auto it = std::find_if(map.begin(), map.end(),
@@ -272,6 +271,35 @@ int mapSpectrumIndexToWorkspace(
 }
 
 /**
+* @param originWS : Origin workspace, which provides the original workspace
+* index to spectrum number mapping.
+* @param hostWS : Workspace onto which the resulting workspace indexes will be
+* hosted
+* @throws :: If the specId are not found to exist on the host end-point
+*workspace.
+* @return :: Remapped workspace indexes applicable for the host workspace,
+*as a vector of groups of vectors of spectrum indices
+*/
+std::vector<std::vector<size_t>> mapSpectrumIndicesToWorkspace(
+  MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
+    const std::vector<std::vector<size_t>> &detectors) {
+
+  auto map = originWS->getSpectrumToWorkspaceIndexMap();
+  std::vector<std::vector<size_t>> hostGroups;
+
+  for (auto group : detectors) {
+    std::vector<size_t> hostDetectors;
+    for (auto i : group) {
+      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
+      hostDetectors.push_back(hostIdx);
+    }
+    hostGroups.push_back(hostDetectors);
+  }
+
+  return hostGroups;
+}
+
+/**
 * Translate all the workspace indexes in an origin workspace into workspace
 * indexes of a host end-point workspace. This is done using spectrum numbers as
 * the intermediate.
@@ -286,27 +314,20 @@ int mapSpectrumIndexToWorkspace(
 *as comma separated string.
 */
 std::string createProcessingCommandsFromDetectorWS(
-  MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
-  const std::vector<std::vector<size_t>> &detectors) {
-  auto map = originWS->getSpectrumToWorkspaceIndexMap();
+    MatrixWorkspace_const_sptr originWS, MatrixWorkspace_const_sptr hostWS,
+    const std::vector<std::vector<size_t>> &detectors) {
+
   std::stringstream result;
 
   // Map the original indices to the host workspace
-  std::vector<std::vector<size_t>> hostGroups;
-  for (auto group : detectors) {
-    std::vector<size_t> hostDetectors;
-    for (auto i : group) {
-      const int hostIdx = mapSpectrumIndexToWorkspace(map, i, hostWS);
-      hostDetectors.push_back(hostIdx);
-    }
-    hostGroups.push_back(hostDetectors);
-  }
+  std::vector<std::vector<size_t>> hostGroups =
+      mapSpectrumIndicesToWorkspace(originWS, hostWS, detectors);
 
   // Add each group to the output, separated by ','
   /// @todo Add support to separate contiguous groups by ':' to avoid having
   /// long lists in the processing instructions
   for (auto &groupIt = hostGroups.begin(); groupIt != hostGroups.end();
-    ++groupIt) {
+       ++groupIt) {
     const auto &hostDetectors = *groupIt;
 
     // Add each detector index to the output string separated by '+' to indicate
@@ -334,8 +355,7 @@ std::string createProcessingCommandsFromDetectorWS(
         result << contiguousStart << "-" << *it;
         contiguousStart = 0;
         contiguous = false;
-      }
-      else {
+      } else {
         // Just output the value
         result << *it;
       }
