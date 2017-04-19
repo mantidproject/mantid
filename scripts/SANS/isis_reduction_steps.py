@@ -25,7 +25,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
                          can_load_as_event_workspace, is_convertible_to_float, correct_q_resolution_for_can,
-                         is_valid_user_file_extension, ADD_TAG)
+                         is_valid_user_file_extension, ADD_TAG, get_sliced_monitor)
 import DarkRunCorrection as DarkCorr
 
 import SANSUserFileParser as UserFileParser
@@ -118,11 +118,11 @@ class LoadRun(object):
 
     wksp_name = property(get_wksp_name, None, None, None)
 
-    def _load_transmission(self, inst=None, is_can=False, extra_options=None):
+    def _load_transmission(self, inst=None, is_can=False, extra_options=None, load_monitors_as_events=False):
         if extra_options is None:
             extra_options = dict()
         if '.raw' in self._data_file or '.RAW' in self._data_file:
-            self._load(inst, is_can, extra_options)
+            self._load(inst, is_can, extra_options, load_monitors_as_events=False)
             return
 
         # the intention of the code below is a good idea. Hence the reason why
@@ -134,7 +134,7 @@ class LoadRun(object):
         # change the code below which is not commented out can be deleted and
         # the code commented out can be uncomment and modified as necessary
 
-        self._load(inst, is_can, extra_options)
+        self._load(inst, is_can, extra_options, load_monitors_as_events=load_monitors_as_events)
 
         workspace = self._get_workspace_name()
         if workspace in mtd:
@@ -157,12 +157,27 @@ class LoadRun(object):
                     # except:
                     # self._load(inst, is_can, extra_options)
 
-    def _load(self, inst=None, is_can=False, extra_options=None):
+    def _load_event_workspace_with_monitors_as_event(self, extra_options):
+        """
+        Since LoadNexusMonitors does not work with event-based monitors we need
+        to load the data and the monitors together
+
+        @param extra_options: a dictionary with extra options
+        """
+        extra_options['LoadMonitors'] = True
+        extra_options['MonitorsAsEvents'] = True
+        extra_options['LoadEventMonitors'] = True
+        extra_options['LoadHistoMonitors'] = True
+        output_load_returns = Load(self._data_file, **extra_options)
+        return output_load_returns.OutputWorkspace
+
+    def _load(self, inst=None, is_can=False, extra_options=None, load_monitors_as_events=False):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
             @param iscan: set this to True for can runs
             @param extra_options: arguments to pass on to the Load Algorithm.
+            @param load_monitors_as_events: if the monitors are to be loaded as event data.
             @return: number of periods in the workspace
         """
         if extra_options is None:
@@ -176,41 +191,47 @@ class LoadRun(object):
 
         extra_options['OutputWorkspace'] = workspace
 
-        outWs = Load(self._data_file, **extra_options)
-
+        # During loading we distinguish between
+        # data sets where we explicitly want to load the monitors as events
+        # and all other configurations.
         appendix = "_monitors"
-
-        # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
-        # we can also have a group workspace which is associated with period data, which don't want to deal with here.
-        added_event_data_flag = False
-        if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
-            extract_child_ws_for_added_eventdata(outWs, appendix)
-            added_event_data_flag = True
-            # Reload the outWs, it has changed from a group workspace to an event workspace
-            outWs = mtd[workspace]
-
         monitor_ws_name = workspace + appendix
 
-        # Handle simple EventWorkspace data
-        if not added_event_data_flag:
-            if isinstance(outWs, IEventWorkspace):
-                try:
-                    LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
-                except ValueError as details:
-                    sanslog.warning('The file does not contain monitors. \n' +
-                                    'The normalization might behave differently than you expect.\n'
-                                    ' Further details: ' + str(details) + '\n')
-            else:
-                if monitor_ws_name in mtd:
-                    DeleteWorkspace(monitor_ws_name)
+        if load_monitors_as_events:
+            outWs = self._load_event_workspace_with_monitors_as_event(extra_options)
+        else:
+            outWs = Load(self._data_file, **extra_options)
 
-        # Handle Multi-period Event data
-        if not added_event_data_flag:
-            if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
-                pass
-            elif isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
-                load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file,
-                                                         monitor_appendix=appendix)
+            # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
+            # we can also have a group workspace which is associated with period data, which don't want to deal with here.
+            added_event_data_flag = False
+            if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
+                extract_child_ws_for_added_eventdata(outWs, appendix)
+                added_event_data_flag = True
+                # Reload the outWs, it has changed from a group workspace to an event workspace
+                outWs = mtd[workspace]
+
+
+            # Handle simple EventWorkspace data
+            if not added_event_data_flag:
+                if isinstance(outWs, IEventWorkspace):
+                    try:
+                        LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+                    except ValueError as details:
+                        sanslog.warning('The file does not contain monitors. \n' +
+                                        'The normalization might behave differently than you expect.\n'
+                                        ' Further details: ' + str(details) + '\n')
+                else:
+                    if monitor_ws_name in mtd:
+                        DeleteWorkspace(monitor_ws_name)
+
+            # Handle Multi-period Event data
+            if not added_event_data_flag:
+                if isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
+                    pass
+                elif isinstance(outWs, WorkspaceGroup) and len(outWs) > 0 and isinstance(outWs[0], IEventWorkspace):
+                    load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file,
+                                                             monitor_appendix=appendix)
 
         loader_name = ''
         try:
@@ -331,14 +352,16 @@ class LoadRun(object):
 
         try:
             if self._is_trans and reducer.instrument.name() != 'LOQ':
-                # Unfortunatelly, LOQ in transmission acquire 3 monitors the 3 monitor usually
+                # Unfortunately LOQ in transmission acquire 3 monitors the 3 monitor usually
                 # is the first spectrum for detector. This causes the following method to fail
                 # when it tries to load only monitors. Hence, we are forced to skip this method
                 # for LOQ. ticket #8559
-                self._load_transmission(reducer.instrument, extra_options=spectrum_limits)
+                self._load_transmission(reducer.instrument, extra_options=spectrum_limits,
+                                        load_monitors_as_events=reducer.load_monitors_as_events)
             else:
                 # the spectrum_limits is not the default only for transmission data
-                self._load(reducer.instrument, extra_options=spectrum_limits)
+                self._load(reducer.instrument, extra_options=spectrum_limits,
+                           load_monitors_as_events=reducer.load_monitors_as_events)
         except RuntimeError as details:
             sanslog.warning(str(details))
             self._wksp_name = ''
@@ -1909,6 +1932,10 @@ class CropDetBank(ReductionStep):
             monitor_ws = reducer.get_sample().get_monitor()
             monitor_name = monitor_ws.name()
 
+            if isinstance(monitor_ws, IEventWorkspace):
+                raise RuntimeError("The dark run subtraction cannot handle monitor event workspaces yet. "
+                                   "Please contact a developer.")
+
             # Run the subtraction
             was_event_workspace = reducer.is_based_on_event()
             scatter_ws, monitor_ws = reducer.dark_run_subtraction.execute(scatter_ws, monitor_ws,
@@ -1945,9 +1972,9 @@ class NormalizeToMonitor(ReductionStep):
             normalization_spectrum = reducer.instrument.get_incident_mon()
 
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
-
         self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum - 1)
+        mon = get_sliced_monitor(reducer, mon)
 
         # Unwrap the monitors of the scatter workspace
         if reducer.unwrap_monitors:
@@ -1955,9 +1982,6 @@ class NormalizeToMonitor(ReductionStep):
             temp_mon = UnwrapMonitorsInTOF(InputWorkspace=mon, WavelengthMin=wavelength_min, WavelengthMax=wavelength_max)
             DeleteWorkspace(mon)
             mon = temp_mon
-
-        if reducer.event2hist.scale != 1:
-            mon *= reducer.event2hist.scale
 
         if str(mon) != self.output_wksp:
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
@@ -2148,6 +2172,9 @@ class TransmissionCalc(ReductionStep):
         # that we have to exclude unused spectra as the interpolation runs into
         # problems if we don't.
         extract_spectra(mtd[inputWS], trans_det_ids, tmpWS)
+
+        # Get the sliced version of the transmission/direct workspace
+        _ = get_sliced_monitor(reducer, mtd[tmpWS], do_scale=False)
 
         # If the transmission and direct workspaces require an unwrapping of the monitors then do it here
         if reducer.unwrap_monitors:

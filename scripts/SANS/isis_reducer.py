@@ -387,6 +387,9 @@ class ISISReducer(Reducer):
         # Unwrap monitors
         self._unwrap_monitors = False
 
+        # Load monitors as event
+        self.load_monitors_as_events = True
+
     def set_instrument(self, configuration):
         """
             Sets the instrument and put in the default beam center (usually the
@@ -989,3 +992,11 @@ class ISISReducer(Reducer):
         self._unwrap_monitors = value
 
     unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)
+
+    def get_load_monitors_as_events(self):
+        return self.load_monitors_as_events
+
+    def set_load_monitors_as_events(self, value):
+        self.load_monitors_as_events = value
+
+    load_monitors_as_event = property(get_load_monitors_as_events, set_load_monitors_as_events, None, None)
