@@ -26,7 +26,7 @@ namespace {
 double getDetectorTwoTheta(const SpectrumInfo *spectrumInfo,
                            const size_t spectrumIdx) {
   double twoTheta = spectrumInfo->signedTwoTheta(spectrumIdx);
-  return twoTheta * 180 / M_PI;
+  return twoTheta * 180.0 / M_PI;
 }
 
 /** Get the twoTheta angle range for the top/bottom of the detector associated
@@ -1018,7 +1018,7 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 }
 
 /**
-Check whether theif spectrum maps for the given workspaces are the same.
+Check whether the spectrum maps for the given workspaces are the same.
 
 @param ws1 : First workspace to compare
 @param ws2 : Second workspace to compare against
