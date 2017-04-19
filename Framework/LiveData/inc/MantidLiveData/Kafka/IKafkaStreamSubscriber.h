@@ -7,6 +7,8 @@
 namespace Mantid {
 namespace LiveData {
 
+enum class subscribeAtOption { OFFSET, LATEST, LASTONE, LASTTWO, TIME };
+
 /**
   Interface for classes that subscribe to Kafka streams.
 

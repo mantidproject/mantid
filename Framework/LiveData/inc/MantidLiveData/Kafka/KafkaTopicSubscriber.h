@@ -52,8 +52,6 @@ public:
   virtual void subscribeAtTime(int64_t time) override;
   virtual void consumeMessage(std::string *payload) override;
 
-  enum class subscribeAtOption{OFFSET, LATEST, LASTONE, LASTTWO, TIME};
-
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
   static const std::string DET_SPEC_TOPIC_SUFFIX;
