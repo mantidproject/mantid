@@ -754,9 +754,12 @@ void GenerateEventsFilter::makeDblLogSplitters(
   // loop through the log
   int prev_target = EMPTY_INT();
   int curr_target = EMPTY_INT();
+  // current log value range of
   double curr_min = EMPTY_DBL();
   double curr_max = EMPTY_DBL();
   Kernel::DateAndTime curr_time(0);
+
+  // FIXME - How are current minimum or current maximum's job here?
 
   size_t log_size = m_dblLog->size();
   for (size_t i_entry = 0; i_entry < log_size - 1; ++i_entry) {
@@ -764,18 +767,24 @@ void GenerateEventsFilter::makeDblLogSplitters(
     if (curr_time < filter_start_time || curr_time > filter_stop_time)
       curr_target = -1;
     else {
-      double curr_log_value = m_dblLog->nthValue(i_entry);
+      // current time is within filter start and stop time
+      double curr_log_value = m_dblLog->getValue(i_entry);
       if (curr_min <= curr_log_value && curr_log_value < curr_max)
         curr_target = prev_target;
       else
-        curr_target = searchValueInVector(log_value_ranges, curr_log_value,
-                                          curr_min, curr_max);
+      {
+        // in case (1) current minimum and maximum of log-value-slicer range are not set up
+        //         (2) current time series log value's entry is out of previous log value's
+        // find the current target
+        curr_target = searchValueInVector(log_value_ranges, curr_log_value, curr_min, curr_max);
+        // reset the current slicer-log-value range
+      }
     }
 
     // log value changing direction
     if (!ignore_change_direction && i_entry < log_size - 1) {
       bool value_rise =
-          m_dblLog->nthTime(i_entry + 1) > m_dblLog->nthTime(i_entry);
+          m_dblLog->getTime(i_entry + 1) > m_dblLog->getTime(i_entry);
       if (!value_rise)
         curr_target = -1 * abs(curr_target);
     }
@@ -814,6 +823,11 @@ void GenerateEventsFilter::makeDblLogSplitters(
 void GenerateEventsFilter::processMultipleValueFilters(
     double minvalue, double valueinterval, double maxvalue, bool filterincrease,
     bool filterdecrease, bool separateupdown) {
+
+  // TODO/NEXT/FIXME - How to add separateupdown to multiple value log
+  if (separateupdown)
+    g_log.warning("Option separate-updown has not been implemented yet.");
+
   // Read more input
   if (valueinterval <= 0)
     throw std::invalid_argument(
@@ -1923,12 +1937,13 @@ size_t GenerateEventsFilter::searchValue(const std::vector<double> &sorteddata,
   return index;
 }
 
-/**
+//------------------------------------------------------------------------
+/** search value in a vector
  * @brief GenerateEventsFilter::searchValueInVector
  * @param sorted_vector
  * @param value
- * @param lower_bound
- * @param upper_bound
+ * @param lower_bound :: (output) the lower bound of the segment that the value is in
+ * @param upper_bound :: (output) the upper bound of the segment that the value is in
  * @return
  */
 int GenerateEventsFilter::searchValueInVector(
@@ -1938,7 +1953,28 @@ int GenerateEventsFilter::searchValueInVector(
       std::lower_bound(sorted_vector.begin(), sorted_vector.end(), value) -
       sorted_vector.begin());
 
-  return index;
+  if (index == 0)
+  {
+    // value is out of left range
+    lower_bound = EMPTY_DBL();
+  }
+  else
+  {
+    lower_bound = sorted_vector[index-1];
+  }
+
+  if (index < sorted_vector.size())
+  {
+    // value is in the range
+    upper_bound = sorted_vector[index];
+  }
+  else
+  {
+    // value is out of range from the right end
+    upper_bound = EMPTY_DBL();
+  }
+
+  return static_cast<int>(index);
 }
 
 //----------------------------------------------------------------------------------------------
