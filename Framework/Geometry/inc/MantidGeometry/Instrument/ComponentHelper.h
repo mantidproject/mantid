@@ -64,11 +64,6 @@ MANTID_GEOMETRY_DLL void rotateComponent(const IComponent &comp,
                                          const TransformType rotType);
 
 MANTID_GEOMETRY_DLL Geometry::Instrument_sptr
-createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
-                        const Mantid::Kernel::V3D &samplePos,
-                        const Mantid::Kernel::V3D &detectorPos);
-
-MANTID_GEOMETRY_DLL Geometry::Instrument_sptr
 createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
                         const std::vector<Kernel::V3D> &vecdetpos,
                         const std::vector<detid_t> &vecdetid);

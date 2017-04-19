@@ -1,6 +1,7 @@
 #include "MantidAPI/ComponentInfo.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
+#include "MantidKernel/EigenConversionHelpers.h"
 #include <boost/make_shared.hpp>
 #include <exception>
 #include <string>
@@ -18,7 +19,7 @@ namespace API {
  * index
  */
 ComponentInfo::ComponentInfo(
-    const Mantid::Beamline::ComponentInfo &componentInfo,
+    Mantid::Beamline::ComponentInfo &componentInfo,
     std::vector<Mantid::Geometry::IComponent *> componentIds)
     : m_componentInfo(componentInfo),
       m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(
@@ -46,6 +47,24 @@ std::vector<Geometry::IComponent *> ComponentInfo::componentIds() const {
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
+
+Kernel::V3D ComponentInfo::position(const size_t componentIndex) const {
+  return Kernel::toV3D(m_componentInfo.position(componentIndex));
+}
+
+Kernel::Quat ComponentInfo::rotation(const size_t componentIndex) const {
+  return Kernel::toQuat(m_componentInfo.rotation(componentIndex));
+}
+
+void ComponentInfo::setPosition(const size_t componentIndex,
+                                const Kernel::V3D &position) {
+  m_componentInfo.setPosition(componentIndex, Kernel::toVector3d(position));
+}
+
+void ComponentInfo::setRotation(const size_t componentIndex,
+                                const Kernel::Quat &rotation) {
+  m_componentInfo.setRotation(componentIndex, Kernel::toQuaterniond(rotation));
+}
 
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const {
   return m_compIDToIndex->at(id);

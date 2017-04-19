@@ -69,7 +69,7 @@ ExperimentInfo::ExperimentInfo()
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
+      m_componentInfo(boost::shared_ptr<Beamline::ComponentInfo>(nullptr)) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_parmap->setComponentInfo(m_componentInfo, std::vector<ComponentID>{});
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
@@ -187,34 +187,32 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-boost::shared_ptr<Beamline::ComponentInfo>
-makeComponentInfo(const Instrument &instrument,
-                  const API::DetectorInfo &detectorInfo,
-                  std::vector<Geometry::ComponentID> &componentIds) {
+boost::shared_ptr<Beamline::ComponentInfo> makeComponentInfo(
+    const Instrument &instrument, const API::DetectorInfo &externalDetectorInfo,
+    boost::shared_ptr<Beamline::DetectorInfo> internalDetectorInfo,
+    std::vector<Geometry::ComponentID> &componentIds,
+    Mantid::Geometry::ParameterMap &pmap) {
 
-  if (instrument.hasComponentInfo()) {
-    const auto &componentInfo = instrument.componentInfo();
-    componentIds = instrument.componentIds();
-    return boost::make_shared<Beamline::ComponentInfo>(componentInfo);
+  InfoComponentVisitor visitor(externalDetectorInfo.size(),
+                               std::bind(&DetectorInfo::indexOf,
+                                         &externalDetectorInfo,
+                                         std::placeholders::_1),
+                               pmap);
+
+  if (instrument.isParametrized()) {
+    // Register everything via visitor
+    instrument.baseInstrument()->registerContents(visitor);
   } else {
-    InfoComponentVisitor visitor(
-        detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
-                                       std::placeholders::_1));
-
-    if (instrument.isParametrized()) {
-      // Register everything via visitor
-      instrument.baseInstrument()->registerContents(visitor);
-    } else {
-      instrument.registerContents(visitor);
-    }
-
-    // Extract component ids. We need this for the ComponentInfo wrapper.
-    componentIds = visitor.componentIds();
-
-    return boost::make_shared<Mantid::Beamline::ComponentInfo>(
-        visitor.assemblySortedDetectorIndices(),
-        visitor.componentDetectorRanges());
+    instrument.registerContents(visitor);
   }
+
+  // Extract component ids. We need this for the ComponentInfo wrapper.
+  componentIds = visitor.componentIds();
+
+  return boost::make_shared<Mantid::Beamline::ComponentInfo>(
+      visitor.componentSortedDetectorIndices(),
+      visitor.componentDetectorRanges(), visitor.positions(),
+      visitor.rotations(), internalDetectorInfo);
 }
 
 void clearPositionAndRotationsParameters(ParameterMap &pmap,
@@ -296,10 +294,11 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
-  m_componentInfo = makeComponentInfo(*instr, detectorInfo(), m_componentIds);
-  m_parmap->setComponentInfo(m_componentInfo, m_componentIds);
-  m_componentInfoWrapper =
-      Kernel::make_unique<ComponentInfo>(*m_componentInfo, m_componentIds);
+  std::vector<Geometry::ComponentID> componentIds;
+  m_componentInfo = makeComponentInfo(*sptr_instrument, detectorInfo(),
+                                      m_detectorInfo, componentIds, *m_parmap);
+  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      *m_componentInfo, std::move(componentIds));
   // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have

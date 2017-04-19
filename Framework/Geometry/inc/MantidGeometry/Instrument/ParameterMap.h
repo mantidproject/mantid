@@ -350,6 +350,7 @@ public:
   bool hasComponentInfo() const;
   const Beamline::ComponentInfo &componentInfo() const;
   size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);

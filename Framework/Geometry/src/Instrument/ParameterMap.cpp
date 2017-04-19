@@ -1204,6 +1204,10 @@ size_t ParameterMap::detectorIndex(const detid_t detID) const {
   return m_instrument->detectorIndex(detID);
 }
 
+size_t ParameterMap::componentIndex(const ComponentID componentId) const {
+  return m_instrument->componentIndex(componentId);
+}
+
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void ParameterMap::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {

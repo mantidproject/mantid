@@ -3,17 +3,24 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include <boost/shared_ptr.hpp>
 #include <cstddef>
+#include <Eigen/Geometry>
+#include <functional>
 #include <utility>
 #include <vector>
-#include <functional>
 
 namespace Mantid {
 using detid_t = int32_t;
+namespace Beamline {
+class ComponentInfo;
+}
+
 namespace Geometry {
 class IComponent;
 class ICompAssembly;
 class IDetector;
+class ParameterMap;
 }
 
 namespace API {
@@ -67,9 +74,19 @@ private:
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 
+  /// Positions
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> m_positions;
+
+  /// Rotations
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> m_rotations;
+
+  /// Parameter map to purge.
+  Mantid::Geometry::ParameterMap &m_pmap;
+
 public:
   InfoComponentVisitor(const size_t nDetectors,
-                       std::function<size_t(Mantid::detid_t)> mapperFunc);
+                       std::function<size_t(Mantid::detid_t)> mapperFunc,
+                       Geometry::ParameterMap &pmap);
 
   virtual void registerComponentAssembly(
       const Mantid::Geometry::ICompAssembly &assembly) override;
@@ -81,9 +98,13 @@ public:
 
   const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
 
+  const std::vector<size_t> &componentSortedDetectorIndices() const;
+
   const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
 
-  const std::vector<size_t> &assemblySortedDetectorIndices() const;
+  boost::shared_ptr<std::vector<Eigen::Vector3d>> positions() const;
+
+  boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations() const;
 
   size_t size() const;
 };

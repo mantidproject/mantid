@@ -2,6 +2,8 @@
 #define MANTID_API_COMPONENTINFO_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -46,7 +48,7 @@ namespace API {
 class MANTID_API_DLL ComponentInfo {
 private:
   /// Reference to the actual ComponentInfo object (non-wrapping part).
-  const Beamline::ComponentInfo &m_componentInfo;
+  Beamline::ComponentInfo &m_componentInfo;
   /// Collection of component ids
   boost::shared_ptr<std::vector<Mantid::Geometry::IComponent *>> m_componentIds;
   /// Map of component ids to indexes
@@ -54,11 +56,16 @@ private:
       m_compIDToIndex;
 
 public:
-  ComponentInfo(const Mantid::Beamline::ComponentInfo &componentInfo,
+  ComponentInfo(Mantid::Beamline::ComponentInfo &componentInfo,
                 const std::vector<Mantid::Geometry::IComponent *> componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
   std::vector<Mantid::Geometry::IComponent *> componentIds() const;
   size_t size() const;
+  Mantid::Kernel::V3D position(const size_t componentIndex) const;
+  Mantid::Kernel::Quat rotation(const size_t componentIndex) const;
+  void setPosition(const size_t componentIndex,
+                   const Mantid::Kernel::V3D &position);
+  void setRotation(const size_t componentIndex, const Kernel::Quat &rotation);
   size_t indexOf(Geometry::IComponent *id) const;
 };
 
