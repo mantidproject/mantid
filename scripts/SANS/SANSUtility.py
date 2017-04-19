@@ -384,6 +384,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
         scaled_monitor = monitor * (part_c/tot_c)
 
     hist = fromEvent2Histogram(sliced_ws, scaled_monitor, binning)
+    DeleteWorkspace(Workspace=scaled_monitor)
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
