@@ -7,7 +7,15 @@
 namespace Mantid {
 namespace LiveData {
 
-enum class subscribeAtOption { OFFSET, LATEST, LASTONE, LASTTWO, TIME };
+enum class subscribeAtOption {
+  OFFSET,  // Specify an offset to join at when calling subscribe(), topic must
+           // have a single partition
+  LATEST,  // Get only messages which the broker receives after the consumer
+           // subscribes
+  LASTONE, // Get the last message, topic must have a single partition
+  LASTTWO, // Get the last two messages, topic must have a single partition
+  TIME     // Specify a time to join at when calling subscribe()
+};
 
 /**
   Interface for classes that subscribe to Kafka streams.
