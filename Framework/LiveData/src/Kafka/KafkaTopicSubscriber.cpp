@@ -118,6 +118,7 @@ std::vector<RdKafka::TopicPartition *>
 KafkaTopicSubscriber::getTopicPartitions() {
   std::vector<RdKafka::TopicPartition *> partitions;
   subscribe();
+  m_consumer->subscribe(m_topicNames);
   auto error = m_consumer->assignment(partitions);
   if (error != RdKafka::ERR_NO_ERROR) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to get "
@@ -145,6 +146,9 @@ void KafkaTopicSubscriber::subscribeAtTime(int64_t time) {
     throw std::runtime_error("In KafkaTopicSubscriber failed to lookup "
                              "partition offsets for specified start time.");
   }
+  LOGGER().debug() << "Attempting to subscribe to " << partitions.size()
+                   << " partitions in KafkaTopicSubscriber::subscribeAtTime()"
+                   << std::endl;
   error = m_consumer->assign(partitions);
   reportSuccessOrFailure(error, 0);
 }
@@ -205,13 +209,12 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
   RdKafka::ErrorCode error = RdKafka::ERR_NO_ERROR;
   std::vector<RdKafka::TopicPartition *> topicPartitions;
 
+  if (m_subscribeOption == subscribeAtOption::TIME) {
+    subscribeAtTime(offset);
+    return;
+  }
+
   for (const auto &topicName : m_topicNames) {
-
-    if (m_subscribeOption == subscribeAtOption::TIME) {
-      subscribeAtTime(offset);
-      return;
-    }
-
     const int partitionId = 0;
     auto topicPartition =
         RdKafka::TopicPartition::create(topicName, partitionId);
@@ -244,6 +247,9 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
     topicPartition->set_offset(confOffset);
     topicPartitions.push_back(topicPartition);
   }
+  LOGGER().debug() << "Attempting to subscribe to " << topicPartitions.size()
+                   << " partitions in KafkaTopicSubscriber::subscribeAtOffset()"
+                   << std::endl;
   error = m_consumer->assign(topicPartitions);
   reportSuccessOrFailure(error, confOffset);
 }

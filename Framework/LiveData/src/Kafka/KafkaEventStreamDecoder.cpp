@@ -82,8 +82,8 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
         m_broker->subscribe({m_eventTopic, m_runInfoTopic},
                             startTimeMilliseconds, subscribeAtOption::TIME);
   } else {
-    m_eventStream =
-        m_broker->subscribe({m_eventTopic}, subscribeAtOption::LATEST);
+    m_eventStream = m_broker->subscribe({m_eventTopic, m_runInfoTopic},
+                                        subscribeAtOption::LATEST);
   }
 
   // Get last two messages in run topic to ensure we get a runStart message
