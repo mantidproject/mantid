@@ -2443,7 +2443,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
 
   if (!entriesAreValid(RUN)) {
     return;
-  }  
+  }
 
   QString py_code;
 
@@ -5143,10 +5143,10 @@ void SANSRunWindow::setLoadingOfMonitorsAsEventIfRequired() {
   // Check if the monitor is to be treated as event mode data
   auto doLoadMonitorAsEvent = m_uiForm.monitor_as_event_checkbox->isChecked();
   QString monitorAsEvent = doLoadMonitorAsEvent ? "True" : "False";
-  QString loadMonitorAsEvent = "i.set_monitor_as_event(" +monitorAsEvent + ")\n";
+  QString loadMonitorAsEvent =
+      "i.set_monitor_as_event(" + monitorAsEvent + ")\n";
   runPythonCode(loadMonitorAsEvent, false);
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
