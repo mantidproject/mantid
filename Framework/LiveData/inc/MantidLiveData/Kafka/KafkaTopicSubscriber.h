@@ -41,8 +41,10 @@ namespace LiveData {
 */
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic, int subscribeOption);
-  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics, int subscribeOption);
+  KafkaTopicSubscriber(std::string broker, std::string topic,
+                       subscribeAtOption subscribeOption);
+  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
+                       subscribeAtOption subscribeOption);
   ~KafkaTopicSubscriber();
 
   std::vector<std::string> topic() const;

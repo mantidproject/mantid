@@ -78,10 +78,9 @@ const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::string topic,
-                                           int subscribeOption)
+                                           subscribeAtOption subscribeOption)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames({topic}),
-      m_subscribeOption(static_cast<subscribeAtOption>(subscribeOption)) {}
+      m_topicNames({topic}), m_subscribeOption(subscribeOption) {}
 
 /**
  * Construct a topic subscriber
@@ -90,10 +89,9 @@ KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::vector<std::string> topics,
-                                           int subscribeOption)
+                                           subscribeAtOption subscribeOption)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames(topics),
-      m_subscribeOption(static_cast<subscribeAtOption>(subscribeOption)) {}
+      m_topicNames(topics), m_subscribeOption(subscribeOption) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {

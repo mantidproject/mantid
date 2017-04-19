@@ -19,7 +19,8 @@ KafkaBroker::KafkaBroker(std::string address)
  * @return A new IKafkaStreamSubscriber object
  */
 std::unique_ptr<IKafkaStreamSubscriber>
-KafkaBroker::subscribe(const std::string &topic, int subscribeOption) const {
+KafkaBroker::subscribe(const std::string &topic,
+                       subscribeAtOption subscribeOption) const {
   auto subscriber = Kernel::make_unique<KafkaTopicSubscriber>(m_address, topic,
                                                               subscribeOption);
   subscriber->subscribe();
@@ -28,7 +29,7 @@ KafkaBroker::subscribe(const std::string &topic, int subscribeOption) const {
 
 std::unique_ptr<IKafkaStreamSubscriber>
 KafkaBroker::subscribe(const std::string &topic, int64_t offset,
-                       int subscribeOption) const {
+                       subscribeAtOption subscribeOption) const {
   auto subscriber = Kernel::make_unique<KafkaTopicSubscriber>(m_address, topic,
                                                               subscribeOption);
   subscriber->subscribe(offset);
