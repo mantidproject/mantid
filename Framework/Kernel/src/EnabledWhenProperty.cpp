@@ -18,8 +18,8 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const ePropertyCriterion when,
                                          const std::string &value)
     : IPropertySettings() {
-  m_propertyDetails =
-	  std::make_shared<PropertyDetails>(PropertyDetails{ otherPropName, when, value });
+  m_propertyDetails = std::make_shared<PropertyDetails>(
+      PropertyDetails{otherPropName, when, value});
 }
 
 /** Multiple conditions constructor - takes two enable when property
@@ -57,7 +57,7 @@ EnabledWhenProperty::EnabledWhenProperty(
     std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
     eLogicOperator logicOperator)
     : IPropertySettings() {
-	// Initialise with POD compatible syntax
+  // Initialise with POD compatible syntax
   m_comparisonDetails =
       std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
           ComparisonDetails<EnabledWhenProperty>{
