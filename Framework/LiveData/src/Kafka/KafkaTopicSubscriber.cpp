@@ -48,16 +48,6 @@ std::unique_ptr<Conf> createTopicConfiguration(Conf *globalConf) {
   globalConf->set("default_topic_conf", conf.get(), errorMsg);
   return conf;
 }
-
-bool endsWith(std::string const &fullString, std::string const &ending) {
-  if (fullString.length() >= ending.length()) {
-    return (0 ==
-            fullString.compare(fullString.length() - ending.length(),
-                               ending.length(), ending));
-  } else {
-    return false;
-  }
-}
 }
 
 namespace Mantid {
@@ -74,18 +64,7 @@ const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
 /**
  * Construct a topic subscriber
  * @param broker The host:port address of the broker
- * @param topic Name of the topic
- */
-KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
-                                           std::string topic,
-                                           subscribeAtOption subscribeOption)
-    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames({topic}), m_subscribeOption(subscribeOption) {}
-
-/**
- * Construct a topic subscriber
- * @param broker The host:port address of the broker
- * @param topic Name of the topic
+ * @param topics Name of the topics
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::vector<std::string> topics,
@@ -204,9 +183,10 @@ void KafkaTopicSubscriber::checkTopicsExist() const {
   }
   auto topics = metadata->topics();
   for (const auto &topicName : m_topicNames) {
-    auto iter = std::find_if(
-        topics->cbegin(), topics->cend(),
-        [this](const TopicMetadata *tpc) { return tpc->topic() == topicName; });
+    auto iter = std::find_if(topics->cbegin(), topics->cend(),
+                             [topicName](const TopicMetadata *tpc) {
+                               return tpc->topic() == topicName;
+                             });
     if (iter == topics->cend()) {
       std::ostringstream os;
       os << "Failed to find topic '" << topicName << "' on broker";
