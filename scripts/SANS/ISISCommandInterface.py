@@ -1820,6 +1820,16 @@ def get_current_idf_path_in_reducer():
     return idf_path_reducer
 
 
+def set_monitor_as_event(load_monitors_as_events=False):
+    ReductionSingleton().load_monitors_as_events = load_monitors_as_events
+
+
+def get_monitor_as_event():
+    load_monitors_as_events = ReductionSingleton().load_monitors_as_events
+    print(str(load_monitors_as_events))
+    return load_monitors_as_events
+
+
 ##################### Accesor functions for BackgroundCorrection
 def set_background_correction(run_number, is_time_based, is_mon, is_mean, mon_numbers=None):
     '''

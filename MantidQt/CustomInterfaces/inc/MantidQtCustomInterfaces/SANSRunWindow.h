@@ -227,6 +227,9 @@ private:
   QString saveBatchGrid(const QString &filename = "");
   /// Check that the workspace can have the zero errors removed
   bool isValidWsForRemovingZeroErrors(QString &originalWorkspaceName);
+  /// Set the monitor as event
+  void setLoadingOfMonitorsAsEventIfRequired();
+
   //@}
 public slots:
   /// apply mask

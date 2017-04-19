@@ -2039,6 +2039,9 @@ bool SANSRunWindow::handleLoadButtonClick() {
     return false;
   }
 
+  // Set the handling of event monitors
+  setLoadingOfMonitorsAsEventIfRequired();
+
   QString error;
   // set the detector just before loading so to correctly move the instrument
   runReduceScriptFunction("\ni.ReductionSingleton().instrument.setDetector('" +
@@ -2440,7 +2443,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
 
   if (!entriesAreValid(RUN)) {
     return;
-  }
+  }  
 
   QString py_code;
 
@@ -2455,6 +2458,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString &typeStr) {
                        "reduction code, please check installation.");
     return;
   }
+
+  // Set the handling of event monitors
+  setLoadingOfMonitorsAsEventIfRequired();
 
   const static QString PYTHON_SEP("C++handleReduceButtonClickC++");
 
@@ -5132,6 +5138,15 @@ void SANSRunWindow::onUpdateGeometryRequest() {
   emit sendGeometryInformation(geometryName, sampleHeight, sampleWidth,
                                sampleThickness);
 }
+
+void SANSRunWindow::setLoadingOfMonitorsAsEventIfRequired() {
+  // Check if the monitor is to be treated as event mode data
+  auto doLoadMonitorAsEvent = m_uiForm.monitor_as_event_checkbox->isChecked();
+  QString monitorAsEvent = doLoadMonitorAsEvent ? "True" : "False";
+  QString loadMonitorAsEvent = "i.set_monitor_as_event(" +monitorAsEvent + ")\n";
+  runPythonCode(loadMonitorAsEvent, false);
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -388,7 +388,7 @@ class ISISReducer(Reducer):
         self._unwrap_monitors = False
 
         # Load monitors as event
-        self.load_monitors_as_events = True
+        self.load_monitors_as_events = False
 
     def set_instrument(self, configuration):
         """

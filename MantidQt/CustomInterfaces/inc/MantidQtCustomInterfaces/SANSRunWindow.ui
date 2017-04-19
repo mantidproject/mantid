@@ -730,7 +730,7 @@
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QCheckBox" name="checkBox">
+              <widget class="QCheckBox" name="monitor_as_event_checkbox">
                <property name="text">
                 <string>Monitors 
 as event</string>
