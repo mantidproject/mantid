@@ -96,12 +96,12 @@ public:
   /// Constructs a EnabledWhenProperty object which takes ownership of two
   /// already constructed EnabledWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
-  EnabledWhenProperty(std::unique_ptr<EnabledWhenProperty> &&conditionOne,
-                      std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
+  EnabledWhenProperty(std::shared_ptr<EnabledWhenProperty> &&conditionOne,
+                      std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
                       eLogicOperator logicOperator);
 
-  /// Copy constructor for EnabledWhenProperty
-  EnabledWhenProperty(const EnabledWhenProperty &original);
+  /// Copy constructor
+  EnabledWhenProperty(const EnabledWhenProperty &other);
 
   /// Checks two EnabledWhenProperty objects match the logic operator
   /// specified and returns the result of both of them
@@ -126,12 +126,6 @@ public:
 protected:
   /// Struct which holds associated property details for comparison
   struct PropertyDetails {
-    /// Constructor
-    // Have to include this for make_unique to be able to forward arguments
-    PropertyDetails(const std::string &otherPropName,
-                    const ePropertyCriterion criterion,
-                    const std::string &value)
-        : otherPropName(otherPropName), criterion(criterion), value(value) {}
     /// Name of the OTHER property that we will check.
     const std::string otherPropName;
     /// Criterion to evaluate
@@ -143,33 +137,27 @@ protected:
 
   /// Struct which holds details for comparison between
   /// two EnabledWhenPropertyObjects
-  struct ComparisonDetails {
-    /// Constructor
-    ComparisonDetails(std::unique_ptr<EnabledWhenProperty> conditionOne,
-                      std::unique_ptr<EnabledWhenProperty> conditionTwo,
-                      eLogicOperator logicOperator)
-        : conditionOne(std::move(conditionOne)),
-          conditionTwo(std::move(conditionTwo)), logicOperator(logicOperator) {}
-
-    /// Copy constructor
-    ComparisonDetails(const ComparisonDetails &original)
-        : conditionOne{new EnabledWhenProperty{*original.conditionOne}},
-          conditionTwo{new EnabledWhenProperty{*original.conditionTwo}},
-          logicOperator{original.logicOperator} {}
-
-    std::unique_ptr<EnabledWhenProperty> conditionOne;
-    std::unique_ptr<EnabledWhenProperty> conditionTwo;
+  template <typename WhenPropType> struct ComparisonDetails {
+    std::shared_ptr<WhenPropType> conditionOne;
+    std::shared_ptr<WhenPropType> conditionTwo;
     const eLogicOperator logicOperator;
   };
+
+  /// Protected Constructor for derived classes to skip setting up
+  /// the comparator in the base class as they will handle it
+  EnabledWhenProperty() = default;
 
   /// Checks the algorithm and property are both valid and attempts
   /// to get the value associated with the property
   std::string getPropertyValue(const IPropertyManager *algo) const;
 
   /// Holds the various details used within the comparison
-  std::unique_ptr<PropertyDetails> m_propertyDetails = nullptr;
+  std::shared_ptr<PropertyDetails> m_propertyDetails = nullptr;
+
+private:
   /// Holds an object containing details of multiple comparisons
-  std::unique_ptr<ComparisonDetails> m_comparisonDetails = nullptr;
+  std::shared_ptr<ComparisonDetails<EnabledWhenProperty>> m_comparisonDetails =
+      nullptr;
 };
 
 } // namespace Kernel

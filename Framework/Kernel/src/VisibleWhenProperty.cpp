@@ -28,17 +28,15 @@ VisibleWhenProperty::VisibleWhenProperty(
     const VisibleWhenProperty &conditionOne,
     const VisibleWhenProperty &conditionTwo, eLogicOperator logicOperator)
     : // For the python interface to be able to easily copy objects in
-      // Make a deep copy and turn into a unique pointer and forward on
+      // Make a deep copy and turn into a shared pointer and forward on
       VisibleWhenProperty(
-          std::move(Kernel::make_unique<VisibleWhenProperty>(conditionOne)),
-          std::move(Kernel::make_unique<VisibleWhenProperty>(conditionTwo)),
+          std::move(std::make_shared<VisibleWhenProperty>(conditionOne)),
+          std::move(std::make_shared<VisibleWhenProperty>(conditionTwo)),
           logicOperator) {}
 
-/** Multiple conditions constructor - takes two unique pointers to
+/** Multiple conditions constructor - takes two shared pointers to
 * VisibleWhenProperty objects and returns the product of them
 * with the specified logic operator.
-* Note: With Unique pointers you will need to use std::move
-* to transfer ownership of those objects to this one.
 *
 * @param conditionOne :: First VisibleWhenProperty object to use
 * @param conditionTwo :: Second VisibleWhenProperty object to use
@@ -47,11 +45,14 @@ VisibleWhenProperty::VisibleWhenProperty(
 *
 */
 VisibleWhenProperty::VisibleWhenProperty(
-    std::unique_ptr<VisibleWhenProperty> &&conditionOne,
-    std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
+    std::shared_ptr<VisibleWhenProperty> &&conditionOne,
+    std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
     eLogicOperator logicOperator)
-    : EnabledWhenProperty(std::move(conditionOne), std::move(conditionTwo),
-                          logicOperator) {}
+    : m_comparisonDetails{
+          std::make_shared<ComparisonDetails<VisibleWhenProperty>>(
+              ComparisonDetails<VisibleWhenProperty>{std::move(conditionOne),
+                                                     std::move(conditionTwo),
+                                                     logicOperator})} {}
 
 /**
 * Checks if the user specified combination of visible criterion

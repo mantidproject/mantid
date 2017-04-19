@@ -1,5 +1,4 @@
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 #include <exception>
@@ -20,7 +19,7 @@ EnabledWhenProperty::EnabledWhenProperty(const std::string &otherPropName,
                                          const std::string &value)
     : IPropertySettings() {
   m_propertyDetails =
-      Kernel::make_unique<PropertyDetails>(otherPropName, when, value);
+	  std::make_shared<PropertyDetails>(PropertyDetails{ otherPropName, when, value });
 }
 
 /** Multiple conditions constructor - takes two enable when property
@@ -37,17 +36,15 @@ EnabledWhenProperty::EnabledWhenProperty(
     const EnabledWhenProperty &conditionTwo, eLogicOperator logicOperator)
     : // This method allows the Python interface to easily construct these
       // objects
-      // Copy the object then forward onto our unique pointer constructor
+      // Copy the object then forward onto our move constructor
       EnabledWhenProperty(
-          std::move(Kernel::make_unique<EnabledWhenProperty>(conditionOne)),
-          std::move(Kernel::make_unique<EnabledWhenProperty>(conditionTwo)),
+          std::move(std::make_shared<EnabledWhenProperty>(conditionOne)),
+          std::move(std::make_shared<EnabledWhenProperty>(conditionTwo)),
           logicOperator) {}
 
-/** Multiple conditions constructor - takes two unique pointers to
+/** Multiple conditions constructor - takes two shared pointers to
 * EnabledWhenProperty objects and returns the product of them
 * with the specified logic operator.
-* Note: With Unique pointers you will need to use std::move
-* to transfer ownership of those objects to this one.
 *
 * @param conditionOne :: First EnabledWhenProperty object to use
 * @param conditionTwo :: Second EnabledWhenProperty object to use
@@ -56,33 +53,20 @@ EnabledWhenProperty::EnabledWhenProperty(
 *
 */
 EnabledWhenProperty::EnabledWhenProperty(
-    std::unique_ptr<EnabledWhenProperty> &&conditionOne,
-    std::unique_ptr<EnabledWhenProperty> &&conditionTwo,
+    std::shared_ptr<EnabledWhenProperty> &&conditionOne,
+    std::shared_ptr<EnabledWhenProperty> &&conditionTwo,
     eLogicOperator logicOperator)
     : IPropertySettings() {
-  m_comparisonDetails = Kernel::make_unique<ComparisonDetails>(
-      std::move(conditionOne), std::move(conditionTwo), logicOperator);
+	// Initialise with POD compatible syntax
+  m_comparisonDetails =
+      std::make_shared<ComparisonDetails<EnabledWhenProperty>>(
+          ComparisonDetails<EnabledWhenProperty>{
+              std::move(conditionOne), std::move(conditionTwo), logicOperator});
 }
 
-/**
-  * Copy constructor for EnabledWhenProperty
-  *
-  * @param original :: Object to deep copy
-  * @return :: EnabledWhenProperty object
-  */
-EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &original)
-    : IPropertySettings() {
-  // This can be triggered several times during Mantid startup so leave
-  // this check as a debug assertion
-  assert(original.m_comparisonDetails || original.m_propertyDetails);
-  if (original.m_comparisonDetails) {
-    m_comparisonDetails =
-        make_unique<ComparisonDetails>(*original.m_comparisonDetails);
-  } else {
-    m_propertyDetails =
-        make_unique<PropertyDetails>(*original.m_propertyDetails);
-  }
-}
+EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
+    : m_comparisonDetails{other.m_comparisonDetails},
+      m_propertyDetails{other.m_propertyDetails} {}
 
 /**
 * Checks if the user specified combination of enabled criterion

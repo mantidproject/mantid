@@ -48,14 +48,9 @@ public:
   /// Constructs a VisibleWhenProperty object which takes ownership of two
   /// already constructed VisibleWhenProperty objects and returns the result
   /// of both of them with the specified logic operator
-  VisibleWhenProperty(std::unique_ptr<VisibleWhenProperty> &&conditionOne,
-                      std::unique_ptr<VisibleWhenProperty> &&conditionTwo,
+  VisibleWhenProperty(std::shared_ptr<VisibleWhenProperty> &&conditionOne,
+                      std::shared_ptr<VisibleWhenProperty> &&conditionTwo,
                       eLogicOperator logicOperator);
-
-  /// Default copy constructor
-  // Ensure we get default copy constructor as the base class
-  // handles it for us
-  VisibleWhenProperty(const VisibleWhenProperty &) = default;
 
   /// Checks two VisisbleWhenProperty objects to determine the
   /// result of both of them
@@ -70,6 +65,11 @@ public:
 
   /// Make a copy of the present type of validator
   IPropertySettings *clone() override;
+
+private:
+  /// Hold a copy of any existing VisibleWhenPropertyObjects
+  std::shared_ptr<ComparisonDetails<VisibleWhenProperty>> m_comparisonDetails =
+      nullptr;
 };
 
 } // namespace Kernel
