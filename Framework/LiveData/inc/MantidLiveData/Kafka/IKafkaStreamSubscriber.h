@@ -14,7 +14,7 @@ enum class subscribeAtOption {
            // subscribes
   LASTONE, // Get the last message, topic must have a single partition
   LASTTWO, // Get the last two messages, topic must have a single partition
-  TIME     // Specify a time to join at when calling subscribe()
+  TIME
 };
 
 /**

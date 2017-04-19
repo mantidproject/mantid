@@ -4,12 +4,14 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
+#include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)
-#include "Kafka/private/Schema/det_spec_mapping_schema_generated.h"
-#include "Kafka/private/Schema/event_schema_generated.h"
-#include "Kafka/private/Schema/run_info_schema_generated.h"
+#include "Kafka/private/Schema/ba57_run_info_generated.h"
+#include "Kafka/private/Schema/df12_det_spec_map_generated.h"
+#include "Kafka/private/Schema/ev42_events_generated.h"
+#include "Kafka/private/Schema/is84_isis_events_generated.h"
 GCC_DIAG_ON(conversion)
 
 #include <ctime>
@@ -28,18 +30,23 @@ public:
   GCC_DIAG_OFF_SUGGEST_OVERRIDE
   // GMock cannot mock non-copyable return types so we resort to a small
   // adapter method. Users have to use EXPECT_CALL(subscribe_) instead
-  MOCK_CONST_METHOD1(subscribe_,
-                     IKafkaStreamSubscriber_ptr(const std::string &));
-  IKafkaStreamSubscriber_uptr subscribe(const std::string &s) const override {
+  MOCK_CONST_METHOD2(subscribe_, IKafkaStreamSubscriber_ptr(
+                                     std::vector<std::string>,
+                                     Mantid::LiveData::subscribeAtOption));
+  IKafkaStreamSubscriber_uptr
+  subscribe(std::vector<std::string> s,
+            Mantid::LiveData::subscribeAtOption option) const override {
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
-        this->subscribe_(s));
+        this->subscribe_(s, option));
   }
-  MOCK_CONST_METHOD2(subscribe_,
-                     IKafkaStreamSubscriber_ptr(const std::string &, int64_t));
-  IKafkaStreamSubscriber_uptr subscribe(const std::string &s,
-                                        int64_t offset) const override {
+  MOCK_CONST_METHOD3(subscribe_, IKafkaStreamSubscriber_ptr(
+                                     std::vector<std::string>, int64_t,
+                                     Mantid::LiveData::subscribeAtOption));
+  IKafkaStreamSubscriber_uptr
+  subscribe(std::vector<std::string> s, int64_t offset,
+            Mantid::LiveData::subscribeAtOption option) const override {
     return std::unique_ptr<Mantid::LiveData::IKafkaStreamSubscriber>(
-        this->subscribe_(s, offset));
+        this->subscribe_(s, offset, option));
   }
   GCC_DIAG_ON_SUGGEST_OVERRIDE
 };
@@ -52,6 +59,7 @@ class FakeExceptionThrowingStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     buffer->clear();
     throw std::runtime_error("FakeExceptionThrowingStreamSubscriber");
@@ -66,6 +74,7 @@ class FakeEmptyStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override { buffer->clear(); }
 };
 
@@ -79,36 +88,23 @@ public:
       : m_nperiods(nperiods), m_nextPeriod(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
     flatbuffers::FlatBufferBuilder builder;
-    std::vector<int32_t> spec = {5, 4, 3, 2, 1, 2};
-    std::vector<float> tof = {11000, 10000, 9000, 8000, 7000, 6000};
-    auto messageNEvents = ISISStream::CreateNEvents(
-        builder, builder.CreateVector(tof), builder.CreateVector(spec));
+    std::vector<uint32_t> spec = {5, 4, 3, 2, 1, 2};
+    std::vector<uint32_t> tof = {11000, 10000, 9000, 8000, 7000, 6000};
 
-    int32_t frameNumber(2);
-    float frameTime(1.f), protonCharge(0.5f);
-    bool endOfFrame(false), endOfRun(false);
+    uint64_t frameTime = 1;
+    float protonCharge(0.5f);
 
-    // Sample environment event
-    std::vector<flatbuffers::Offset<ISISStream::SEEvent>> sEEventsVector;
-    auto sEValue = ISISStream::CreateDoubleValue(builder, 42.0);
-    auto nameOffset = builder.CreateString("SampleLog1");
-    auto sEEventOffset = ISISStream::CreateSEEvent(
-        builder, nameOffset, 2.0, ISISStream::SEValue_DoubleValue,
-        sEValue.Union());
-    sEEventsVector.push_back(sEEventOffset);
-
-    auto messageSEEvents = builder.CreateVector(sEEventsVector);
-
-    auto messageFramePart = ISISStream::CreateFramePart(
-        builder, frameNumber, frameTime, ISISStream::RunState_RUNNING,
-        protonCharge, m_nextPeriod, endOfFrame, endOfRun, messageNEvents,
-        messageSEEvents);
-    auto messageFlatbuf = ISISStream::CreateEventMessage(
-        builder, ISISStream::MessageTypes_FramePart, messageFramePart.Union());
+    auto messageFlatbuf = CreateEventMessage(
+        builder, builder.CreateString("KafkaTesting"), 0, frameTime,
+        builder.CreateVector(tof), builder.CreateVector(spec),
+        FacilityData_ISISData,
+        CreateISISData(builder, m_nextPeriod, RunState_RUNNING, protonCharge)
+            .Union());
     builder.Finish(messageFlatbuf);
 
     // Copy to provided buffer
@@ -131,6 +127,7 @@ public:
   FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -141,9 +138,11 @@ public:
 
     // Serialize data with flatbuffers
     flatbuffers::FlatBufferBuilder builder;
-    auto runInfo = ISISStream::CreateRunInfo(builder, startTime, m_runNumber,
-                                             builder.CreateString(m_instName),
-                                             m_streamOffset, m_nperiods);
+    auto runInfo = CreateRunInfo(
+        builder, InfoTypes_RunStart,
+        CreateRunStart(builder, startTime, m_runNumber,
+                       builder.CreateString(m_instName), m_nperiods)
+            .Union());
     builder.Finish(runInfo);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -166,6 +165,7 @@ class FakeISISSpDetStreamSubscriber
 public:
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
+  void subscribeAtTime(int64_t time) override { UNUSED_ARG(time) }
   void consumeMessage(std::string *buffer) override {
     assert(buffer);
 
@@ -173,7 +173,7 @@ public:
     flatbuffers::FlatBufferBuilder builder;
     auto specVector = builder.CreateVector(m_spec);
     auto detIdsVector = builder.CreateVector(m_detid);
-    auto spdet = ISISStream::CreateSpectraDetectorMapping(
+    auto spdet = CreateSpectraDetectorMapping(
         builder, specVector, detIdsVector, static_cast<int32_t>(m_spec.size()));
     builder.Finish(spdet);
     // Copy to provided buffer
