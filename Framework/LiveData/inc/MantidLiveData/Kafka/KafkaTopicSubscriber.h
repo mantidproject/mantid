@@ -41,8 +41,8 @@ namespace LiveData {
 */
 class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
-  KafkaTopicSubscriber(std::string broker, std::string topic);
-  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics);
+  KafkaTopicSubscriber(std::string broker, std::string topic, int subscribeOption);
+  KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics, int subscribeOption);
   ~KafkaTopicSubscriber();
 
   std::vector<std::string> topic() const;
@@ -52,6 +52,8 @@ public:
   virtual void subscribeAtTime(int64_t time) override;
   virtual void consumeMessage(std::string *payload) override;
 
+  enum class subscribeAtOption{OFFSET, LATEST, LASTONE, LASTTWO, TIME};
+
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;
   static const std::string DET_SPEC_TOPIC_SUFFIX;
@@ -59,6 +61,7 @@ public:
   static const int64_t IGNORE_OFFSET = -1;
 
 private:
+  subscribeAtOption m_subscribeOption = subscribeAtOption::OFFSET;
   std::unique_ptr<RdKafka::KafkaConsumer> m_consumer;
   std::string m_brokerAddr;
   std::vector<std::string> m_topicNames;

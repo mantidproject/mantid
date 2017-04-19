@@ -77,9 +77,11 @@ const std::string KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX = "_detSpecMap";
  * @param topic Name of the topic
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
-                                           std::string topic)
+                                           std::string topic,
+                                           int subscribeOption)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames({topic}) {}
+      m_topicNames({topic}),
+      m_subscribeOption(static_cast<subscribeAtOption>(subscribeOption)) {}
 
 /**
  * Construct a topic subscriber
@@ -87,9 +89,11 @@ KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
  * @param topic Name of the topic
  */
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
-                                           std::vector<std::string> topics)
+                                           std::vector<std::string> topics,
+                                           int subscribeOption)
     : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames(topics) {}
+      m_topicNames(topics),
+      m_subscribeOption(static_cast<subscribeAtOption>(subscribeOption)) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {
@@ -225,7 +229,7 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
 
   for (const auto &topicName : m_topicNames) {
 
-    if (endsWith(topicName, EVENT_TOPIC_SUFFIX)) {
+    if (m_subscribeOption == subscribeAtOption::TIME) {
       subscribeAtTime(offset);
       return;
     }
@@ -233,30 +237,32 @@ void KafkaTopicSubscriber::subscribeAtOffset(int64_t offset) {
     const int partitionId = 0;
     auto topicPartition =
         RdKafka::TopicPartition::create(topicName, partitionId);
+    int64_t lowOffset, highOffset = 0;
+    // This gets the lowest and highest offsets available on the brokers
+    m_consumer->query_watermark_offsets(topicName, partitionId, &lowOffset,
+                                        &highOffset, -1);
 
-    if (offset == IGNORE_OFFSET) {
-      int64_t lowOffset, highOffset = 0;
-      // This gets the lowest and highest offsets available on the brokers
-      m_consumer->query_watermark_offsets(topicName, partitionId, &lowOffset,
-                                          &highOffset, -1);
-
-      if (endsWith(topicName, DET_SPEC_TOPIC_SUFFIX)) {
-        // For this topic get the last message available
-        confOffset = highOffset - 1;
-      } else if (endsWith(topicName, RUN_TOPIC_SUFFIX)) {
-        // We need the last runStart message, so get the last 2 messages
-        // in case the last one is a runStop message
-        confOffset = highOffset - 2;
-        // unless there is only one message on the topic
-        if (confOffset == -1)
-          confOffset = 0;
-      } else {
-        // For other topics start at the next available message
-        confOffset = highOffset;
-      }
-    } else {
+    switch (m_subscribeOption) {
+    case subscribeAtOption::LATEST:
+      confOffset = highOffset;
+      break;
+    case subscribeAtOption::LASTONE:
+      confOffset = highOffset - 1;
+      break;
+    case subscribeAtOption::LASTTWO:
+      confOffset = highOffset - 2;
+      // unless there is only one message on the topic
+      if (confOffset == -1)
+        confOffset = 0;
+      break;
+    case subscribeAtOption::OFFSET:
       confOffset = offset;
+      break;
+    default:
+      throw std::runtime_error("Unexpected subscribe option in "
+                               "KafkaTopicSubscriber::subscribeAtOffset");
     }
+
     topicPartition->set_offset(confOffset);
     topicPartitions.push_back(topicPartition);
   }
@@ -300,7 +306,8 @@ void KafkaTopicSubscriber::reportSuccessOrFailure(
  *   - kafka indicates anything other than a timeout or end of partition error
  * A timeout or EOF are not treated as exceptional so that the client may keep
  * polling without having to catch all errors.
- * @param payload Output parameter filled with message payload. This is cleared
+ * @param payload Output parameter filled with message payload. This is
+ * cleared
  * on entry into the method
  */
 void KafkaTopicSubscriber::consumeMessage(std::string *payload) {

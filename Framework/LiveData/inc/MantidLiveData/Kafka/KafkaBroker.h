@@ -35,9 +35,9 @@ public:
   KafkaBroker(std::string address);
 
   std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(const std::string &topic) const override;
+  subscribe(const std::string &topic, int subscribeOption) const override;
   std::unique_ptr<IKafkaStreamSubscriber>
-  subscribe(const std::string &topic, int64_t offset) const override;
+  subscribe(const std::string &topic, int64_t offset, int subscribeOption) const override;
 
 private:
   std::string m_address;
