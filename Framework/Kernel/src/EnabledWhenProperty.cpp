@@ -65,8 +65,9 @@ EnabledWhenProperty::EnabledWhenProperty(
 }
 
 EnabledWhenProperty::EnabledWhenProperty(const EnabledWhenProperty &other)
-    : m_comparisonDetails{other.m_comparisonDetails},
-      m_propertyDetails{other.m_propertyDetails} {}
+    : IPropertySettings(),
+      m_propertyDetails{other.m_propertyDetails},
+      m_comparisonDetails{other.m_comparisonDetails} {}
 
 /**
 * Checks if the user specified combination of enabled criterion
