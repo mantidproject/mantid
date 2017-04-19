@@ -561,8 +561,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
 }
 
 /**
-* Normalize by monitors (only if I0MonitorIndex, MonitorBackgroundWavelengthMin
-* and MonitorBackgroundWavelengthMax have been given)
+* Normalize by monitors (only if I0MonitorIndex has been given)
 *
 * @param detectorWS :: the detector workspace to normalise, in lambda
 * @param runWS :: the original run workspace in TOF
@@ -575,12 +574,14 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   Property *backgroundMinProperty =
       getProperty("MonitorBackgroundWavelengthMin");
   Property *backgroundMaxProperty =
-      getProperty("MonitorBackgroundWavelengthMin");
-  if (!monProperty->isDefault() && !backgroundMinProperty->isDefault() &&
-      !backgroundMaxProperty->isDefault()) {
+      getProperty("MonitorBackgroundWavelengthMax");
+  if (!monProperty->isDefault()) {
+    const bool background = !backgroundMinProperty->isDefault() &&
+                            !backgroundMaxProperty->isDefault();
     const bool integratedMonitors =
         getProperty("NormalizeByIntegratedMonitors");
-    const auto monitorWS = makeMonitorWS(m_runWS, integratedMonitors);
+    const auto monitorWS =
+        makeMonitorWS(m_runWS, integratedMonitors, background);
     if (!integratedMonitors)
       detectorWS = rebinDetectorsToMonitors(detectorWS, monitorWS);
     IvsLam = divide(detectorWS, monitorWS);
@@ -706,10 +707,16 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setPropertyValue("I0MonitorIndex", getPropertyValue("I0MonitorIndex"));
     alg->setPropertyValue("WavelengthMin", getPropertyValue("WavelengthMin"));
     alg->setPropertyValue("WavelengthMax", getPropertyValue("WavelengthMax"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMin",
-                          getPropertyValue("MonitorBackgroundWavelengthMin"));
-    alg->setPropertyValue("MonitorBackgroundWavelengthMax",
-                          getPropertyValue("MonitorBackgroundWavelengthMax"));
+    Property *backgroundMin = getProperty("MonitorBackgroundWavelengthMin");
+    if (!backgroundMin->isDefault()) {
+      alg->setPropertyValue("MonitorBackgroundWavelengthMin",
+        getPropertyValue("MonitorBackgroundWavelengthMin"));
+    }
+    Property *backgroundMax = getProperty("MonitorBackgroundWavelengthMax");
+    if (!backgroundMax->isDefault()) {
+      alg->setPropertyValue("MonitorBackgroundWavelengthMax",
+        getPropertyValue("MonitorBackgroundWavelengthMax"));
+    }
     alg->setPropertyValue("MonitorIntegrationWavelengthMin",
                           getPropertyValue("MonitorIntegrationWavelengthMin"));
     alg->setPropertyValue("MonitorIntegrationWavelengthMax",
