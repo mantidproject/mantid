@@ -39,11 +39,13 @@ Improved
 - :ref:`algm-FindEPP` does not output the two extra workspaces from the :ref:`algm-Fit` anymore.
 - :ref:`ApplyDetailedBalance <algm-ApplyDetailedBalance>`: User can select the dynamic susceptibility versus energy or frequency.
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
+- Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
 - Improved verification of IDFs
 - :ref:`AddSampleLog <algm-AddSampleLog>` now can optionionally take a MatrixWorkspace for the time and value of the newly-added TimeSeriesProperty sample log.
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now can export the first derivative of the sample log as an opotion.
 - :ref:`ExportTimeSeriesLog <algm-ExportTimeSeriesLog>` now add information of exported log to the output work, which
   :ref:`AddSampleLog <algm-AddSampleLog>` can retrieve automatically.
+- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [msdn](https://msdn.microsoft.com/en-us/library/yw6c0z19.aspx) and [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 
 Bug Fixes
 #########
