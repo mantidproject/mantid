@@ -1272,6 +1272,15 @@ Instrument::componentIds() const {
   return m_componentIds;
 }
 
+boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> Instrument::componentIdToIndexMap () const {
+  if (!hasComponentInfo()) {
+    throw std::runtime_error(
+        "Cannot return component index map with a NULL ComponentInfo");
+  }
+  return m_componentIdToIndexMap;
+
+}
+
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
 void Instrument::setDetectorInfo(
     boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo) {
@@ -1279,15 +1288,21 @@ void Instrument::setDetectorInfo(
 }
 
 /**
- * @brief Instrument::setComponentInfo
+ * Gets called when an Instrument is associated with an ExperimentInfo
+ *  
  * @param componentInfo : ComponentInfo to store
  * @param componentIds : ComponentIds to store
+ * @param componentIdToIndexMap : Comp ID to index map to store.
  */
 void Instrument::setComponentInfo(
     boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds, 
+boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> componentIdToIndexMap) 
+{
+  
   m_componentInfo = std::move(componentInfo);
   m_componentIds = std::move(componentIds);
+  m_componentIdToIndexMap = std::move(componentIdToIndexMap);
 }
 
 /// Returns the index for a detector ID. Used for accessing DetectorInfo.
