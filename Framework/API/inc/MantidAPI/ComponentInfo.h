@@ -59,10 +59,21 @@ public:
       const Mantid::Beamline::ComponentInfo &componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds);
+
+  ComponentInfo(
+      const Mantid::Beamline::ComponentInfo &componentInfo,
+      boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+          componentIds,
+  boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
+  compIdToIndexMap);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
   const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
+  boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
+  compIdToIndexMapping() const;
+  bool operator==(const ComponentInfo& other) const;
+  bool operator!=(const ComponentInfo& other) const;
 };
 
 } // namespace API

@@ -36,6 +36,32 @@ public:
     TS_ASSERT_EQUALS(info.size(), 2);
   }
 
+  void test_equality() {
+
+    std::vector<size_t> detectorIndices{}; // No detectors in this example
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 0)); // One component with no detectors
+    ranges.push_back(
+        std::make_pair(0, 0)); // Another component with no detectors
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
+    Mantid::Geometry::ObjComponent comp1("component1");
+    Mantid::Geometry::ObjComponent comp2("component2");
+  
+    ComponentInfo a(
+        internalInfo,
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp2}));
+    auto b = a; // Copy construct. As far as we care, A & B are same.
+    TS_ASSERT_EQUALS(a, b);
+  
+    // Different component id. As far as we care, A & C are NOT same.
+    Mantid::Geometry::ObjComponent comp3("component3");
+    ComponentInfo c(internalInfo,
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1, &comp3}));
+    TS_ASSERT_DIFFERS(a, c);
+  }
+
   void test_indexOf() {
 
     std::vector<size_t> detectorIndices{}; // No detectors in this example
@@ -87,6 +113,39 @@ public:
                      std::vector<size_t>({0, 2, 1}));
     TS_ASSERT_EQUALS(info.detectorIndices(4 /*component index*/),
                      std::vector<size_t>({1}));
+  }
+
+  void test_map_constructed_component_info() {
+
+    /*
+     Detectors marked with their indices
+           |
+     ------------
+     |         | 1
+    -------
+    | 0  | 2
+    */
+
+    std::vector<size_t> detectorIndices{0, 2, 1};
+    std::vector<std::pair<size_t, size_t>> ranges;
+    ranges.push_back(std::make_pair(0, 3));
+    ranges.push_back(std::make_pair(2, 3));
+    Mantid::Beamline::ComponentInfo internalInfo(detectorIndices, ranges);
+    Mantid::Geometry::ObjComponent fakeComposite1("fakeComp1");
+    Mantid::Geometry::ObjComponent fakeComposite2("fakeComp2");
+    Mantid::Geometry::ObjComponent fakeDetector1("fakeDetector1");
+    Mantid::Geometry::ObjComponent fakeDetector2("fakeDetector2");
+    Mantid::Geometry::ObjComponent fakeDetector3("fakeDetector3");
+
+    auto componentIds =  boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{
+                &fakeComposite1, &fakeComposite2, &fakeDetector1,
+                &fakeDetector2, &fakeDetector3});
+
+    ComponentInfo info1(internalInfo, componentIds);
+
+    ComponentInfo info2(internalInfo, componentIds, info1.compIdToIndexMapping());
+    TS_ASSERT_EQUALS(info1, info2);
   }
 };
 
