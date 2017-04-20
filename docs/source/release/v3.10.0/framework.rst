@@ -41,6 +41,7 @@ Improved
 - :ref:`MergeRuns <algm-MergeRuns>` now has a sum option and more control over failure when binning is different or sample logs do not match.
 - Made it possible for LiveListeners to read properties from the calling Algorithm. This gives greater flexiblity for authors of LiveListener plugins.
 - Improved verification of IDFs
+- ``ThreadPool`` now respects the value of ``OMP_NUM_THREADS`` environment variable (documented in [msdn](https://msdn.microsoft.com/en-us/library/yw6c0z19.aspx) and [gcc](https://gcc.gnu.org/onlinedocs/libgomp/OMP_005fNUM_005fTHREADS.html))
 
 Bug Fixes
 #########

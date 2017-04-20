@@ -19,10 +19,9 @@ namespace API {
  */
 ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
-    std::vector<Mantid::Geometry::IComponent *> componentIds)
-    : m_componentInfo(componentInfo),
-      m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>(
-          std::move(componentIds))),
+    boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+        componentIds)
+    : m_componentInfo(componentInfo), m_componentIds(std::move(componentIds)),
       m_compIDToIndex(boost::make_shared<
           std::unordered_map<Geometry::IComponent *, size_t>>()) {
   /*
@@ -41,7 +40,7 @@ ComponentInfo::detectorIndices(size_t componentIndex) const {
   return m_componentInfo.detectorIndices(componentIndex);
 }
 
-std::vector<Geometry::IComponent *> ComponentInfo::componentIds() const {
+const std::vector<Geometry::IComponent *> &ComponentInfo::componentIds() const {
   return *m_componentIds;
 }
 
