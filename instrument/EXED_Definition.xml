@@ -329,19 +329,19 @@ last-modified="2017-04-20 14:58:37">
 </component>
 </type>
 <type name="tube0_913">
-<component type="pixel">
+<component type="pixel_s">
 <locations y="0.004565" y-end="0.9084" n-elements="100" name="det">
 <facing x="0" y="0" z="0"/>
 </locations>
 </component></type>
 <type name="tube2">
-<component type="pixel">
+<component type="pixel_l1">
 <locations y="0.01" y-end="1.99" n-elements="100" name="det">
 <facing x="0" y="0" z="0"/>
 </locations>
 </component></type>
 <type name="tube2_4">
-<component type="pixel">
+<component type="pixel_l2">
 <locations y="0.012" y-end="2.388" n-elements="100" name="det">
 <facing x="0" y="0" z="0"/>
 </locations>
@@ -356,16 +356,40 @@ last-modified="2017-04-20 14:58:37">
 </cylinder>
 <algebra val="some-shape" />
 </type>
-
-<type name="pixel" is="detector">
-<cylinder id="cyl-approx">
-<centre-of-bottom-base x="0" y="0" z="0" />
-<axis x="0" y="0.2" z="0" />
-<radius val="0.004" />
-<height val="0.01" />
-</cylinder>
-<algebra val="cyl-approx" />
+<!--Pixel for short tube -->
+<type name="pixel_s" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.004" />
+    <height val="0.01" />
+  </cylinder>
+  <algebra val="cyl-approx" />
 </type>
+<!--Pixel for first long tube -->
+<type name="pixel_l1" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.0095" />
+    <height val="0.02" />
+  </cylinder>
+  <algebra val="cyl-approx" />
+</type>
+
+<!--Pixel for second long tube -->
+<type name="pixel_l2" is="detector">
+  <cylinder id="cyl-approx">
+    <centre-of-bottom-base x="0" y="0" z="0" />
+    <axis x="0" y="0.2" z="0" />
+    <radius val="0.0095" />
+    <height val="0.024" />
+  </cylinder>
+  <algebra val="cyl-approx" />
+</type>
+
+
+
 <!-- detector id lists -->
 <idlist idname="panel02">
 <id start="401001" end="401100" />
