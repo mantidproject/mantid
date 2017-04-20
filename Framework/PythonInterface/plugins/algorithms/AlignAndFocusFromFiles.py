@@ -1,8 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, MatrixWorkspaceProperty, FileAction, FileProperty, MultipleFileProperty, Progress, PropertyMode
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, \
+    MatrixWorkspaceProperty, FileAction, FileProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction
-from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
+from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, \
+    DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, \
+    LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -17,6 +20,7 @@ PROPS_FOR_ALIGN = ["CalFileName", "GroupFilename", "GroupingWorkspace",
                    "CropWavelengthMin", "CropWavelengthMax",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
+
 
 def determineChunking(filename, chunkSize):
     chunks = DetermineChunking(Filename=filename, MaxChunkSize=chunkSize, OutputWorkspace='chunks')
@@ -34,6 +38,7 @@ def determineChunking(filename, chunkSize):
     DeleteWorkspace(Workspace='chunks')
 
     return strategy
+
 
 class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
     def category(self):
