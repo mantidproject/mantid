@@ -36,7 +36,7 @@ The workspace in *InputWorkspace* should be loaded using the :ref:`DirectILLColl
 Diagnostics reporting
 #####################
 
-The optional *OutputDiagnosticsReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has three columns:
+The optional *OutputReportWorkspace* property returns a table workspace summarizing the diagnostics. The table has three columns:
 
 #. 'WorkspaceIndex'
 #. 'ElasticIntensity': Holds the value of integrated elastic peaks used for the diagnostics.
