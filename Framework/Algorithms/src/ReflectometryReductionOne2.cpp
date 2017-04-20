@@ -476,23 +476,29 @@ void ReflectometryReductionOne2::initRun() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
-  m_convertUnits = true;
-  m_normalise = true;
-  m_sum = true;
-
-  if (xUnitID == "Wavelength") {
-    // Assume already reduced (converted, normalised and summed)
-    m_convertUnits = false;
-    m_normalise = false;
-    m_sum = false;
-  }
-
   findDetectorsOfInterest();
 
   if (summingInQ()) {
     // These values are only required for summation in Q
     findLambdaMinMax();
     findTheta0();
+  }
+
+  m_convertUnits = true;
+  m_normalise = true;
+  m_sum = true;
+
+  if (xUnitID == "Wavelength") {
+    // Already converted converted to wavelength
+    m_convertUnits = false;
+    // Assume it's also already normalised
+    m_normalise = false;
+    // Assume summation is already done if the number of histograms in the input
+    // is the same as the number of detector groups (which will define the
+    // number of histograms in the output)
+    if (m_runWS->getNumberHistograms() == m_detectors.size()) {
+      m_sum = false;
+    }
   }
 }
 
@@ -523,11 +529,14 @@ void ReflectometryReductionOne2::exec() {
 MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
   MatrixWorkspace_sptr result = m_runWS;
 
-  // Currently only support a single input range of detectors
-  /// todo Generalise this to support multiple ranges
-  const auto &detectors = m_detectors[0];
-
   if (summingInQ()) {
+    // Currently only support a single input range of detectors
+    /// todo Generalise this to support multiple ranges
+    if (m_detectors.size() > 1) {
+      throw std::runtime_error(
+        "Only a single range is supported for summing in Q");
+    }
+    const auto &detectors = m_detectors[0];
     // Convert to lambda
     if (m_convertUnits) {
       result = convertToWavelength(result);
@@ -825,11 +834,9 @@ void ReflectometryReductionOne2::findDetectorsOfInterest() {
   std::string instructions = getPropertyValue("ProcessingInstructions");
 
   m_detectors = translateInstructions(instructions);
+
   if (m_detectors.size() == 0) {
     throw std::runtime_error("Invalid processing instructions");
-  } else if (m_detectors.size() > 1 && summingInQ()) {
-    throw std::runtime_error(
-        "Only a single range is supported for summing in Q");
   }
 }
 
