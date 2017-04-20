@@ -13,6 +13,10 @@ from mantid.simpleapi import (ClearMaskFlag, CloneWorkspace, CreateEmptyTableWor
 import numpy
 
 
+_PLOT_TYPE_X = 1
+_PLOT_TYPE_Y = 2
+
+
 class _DiagnosticsSettings:
     """A class to hold settings for MedianDetectorTest."""
 
@@ -25,27 +29,45 @@ class _DiagnosticsSettings:
 
 def _addBkgDiagnosticsToReport(reportWS, bkgWS, diagnosticsWS):
     """Add background diagnostics information to a report workspace."""
+    BKG_COLUMN = 'FlatBkg'
+    DIAGNOSED_COLUMN = 'BkgDiagnosed'
+    existingColumnNames = reportWS.getColumnNames()
+    if BKG_COLUMN not in existingColumnNames:
+        reportWS.addColumn('double', BKG_COLUMN, _PLOT_TYPE_Y)
+    if DIAGNOSED_COLUMN not in existingColumnNames:
+        reportWS.addColumn('double', DIAGNOSED_COLUMN, _PLOT_TYPE_Y)
     for i in range(bkgWS.getNumberHistograms()):
         bkg = bkgWS.readY(i)[0]
-        reportWS.setCell('FlatBkg', i, bkg)
-        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(diagnosticsWS.readY(i)[0])
-        reportWS.setCell('Diagnosed', i, diagnosed)
+        reportWS.setCell(BKG_COLUMN, i, bkg)
+        diagnosed = int(diagnosticsWS.readY(i)[0])
+        reportWS.setCell(DIAGNOSED_COLUMN, i, diagnosed)
 
 
 def _addElasticPeakDiagnosticsToReport(reportWS, peakIntensityWS, diagnosticsWS):
     """Add elastic peak diagnostics information to a report workspace."""
+    INTENSITY_COLUMN = 'ElasticIntensity'
+    DIAGNOSED_COLUMN = 'IntensityDiagnosed'
+    existingColumnNames = reportWS.getColumnNames()
+    if INTENSITY_COLUMN not in existingColumnNames:
+        reportWS.addColumn('double', INTENSITY_COLUMN, _PLOT_TYPE_Y)
+    if DIAGNOSED_COLUMN not in existingColumnNames:
+        reportWS.addColumn('double', DIAGNOSED_COLUMN, _PLOT_TYPE_Y)
     for i in range(peakIntensityWS.getNumberHistograms()):
         intensity = peakIntensityWS.readY(i)[0]
-        reportWS.setCell('ElasticIntensity', i, intensity)
-        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(diagnosticsWS.readY(i)[0])
-        reportWS.setCell('Diagnosed', i, diagnosed)
+        reportWS.setCell(INTENSITY_COLUMN, i, intensity)
+        diagnosed = int(diagnosticsWS.readY(i)[0])
+        reportWS.setCell(DIAGNOSED_COLUMN, i, diagnosed)
 
 
 def _addUserMaskToReport(reportWS, maskWS):
     """Add user mask information to a report workspace."""
+    MASKED_COLUMN = 'UserMask'
+    existingColumnNames = reportWS.getColumnNames()
+    if MASKED_COLUMN not in existingColumnNames:
+        reportWS.addColumn('double', MASKED_COLUMN, _PLOT_TYPE_Y)
     for i in range(maskWS.getNumberHistograms()):
-        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(maskWS.readY(i)[0])
-        reportWS.setCell('Diagnosed', i, diagnosed)
+        diagnosed = int(maskWS.readY(i)[0])
+        reportWS.setCell(MASKED_COLUMN, i, diagnosed)
 
 
 def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging):
@@ -68,8 +90,6 @@ def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging
 
 def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLogging):
     """Return a table workspace for detector diagnostics reporting."""
-    PLOT_TYPE_X = 1
-    PLOT_TYPE_Y = 2
     if mtd.doesExist(reportWSName):
         reportWS = mtd[reportWSName]
     else:
@@ -77,19 +97,10 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
                                              EnableLogging=algorithmLogging)
     existingColumnNames = reportWS.getColumnNames()
     if 'WorkspaceIndex' not in existingColumnNames:
-        reportWS.addColumn('int', 'WorkspaceIndex', PLOT_TYPE_X)
-    if 'ElasticIntensity' not in existingColumnNames:
-        reportWS.addColumn('double', 'ElasticIntensity', PLOT_TYPE_Y)
-    if 'FlatBkg' not in existingColumnNames:
-        reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
-    if 'Diagnosed' not in existingColumnNames:
-        reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
+        reportWS.addColumn('int', 'WorkspaceIndex', _PLOT_TYPE_X)
     reportWS.setRowCount(numberHistograms)
     for i in range(numberHistograms):
         reportWS.setCell('WorkspaceIndex', i, i)
-        reportWS.setCell('ElasticIntensity', i, 0.0)
-        reportWS.setCell('FlatBkg', i, 0.0)
-        reportWS.setCell('Diagnosed', i, 0)
     return reportWS
 
 
