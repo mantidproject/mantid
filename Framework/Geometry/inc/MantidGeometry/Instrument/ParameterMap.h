@@ -345,7 +345,7 @@ public:
   pmap_it end() { return m_map.end(); }
   pmap_cit end() const { return m_map.end(); }
 
-  bool hasDetectorInfo() const;
+  bool hasDetectorInfo(const Instrument *instrument) const;
   const Beamline::DetectorInfo &detectorInfo() const;
   bool hasComponentInfo() const;
   const Beamline::ComponentInfo &componentInfo() const;
