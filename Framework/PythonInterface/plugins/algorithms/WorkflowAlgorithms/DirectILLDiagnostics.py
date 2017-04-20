@@ -23,9 +23,51 @@ class _DiagnosticsSettings:
         self.significanceTest = significanceTest
 
 
-def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
-                                  reportWSName, algorithmLogging):
-    """Return a table workspace containing information used for detector diagnostics."""
+def _addBkgDiagnosticsToReport(reportWS, bkgWS, diagnosticsWS):
+    """Add background diagnostics information to a report workspace."""
+    for i in range(bkgWS.getNumberHistograms()):
+        bkg = bkgWS.readY(i)[0]
+        reportWS.setCell('FlatBkg', i, bkg)
+        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(diagnosticsWS.readY(i)[0])
+        reportWS.setCell('Diagnosed', i, diagnosed)
+
+
+def _addElasticPeakDiagnosticsToReport(reportWS, peakIntensityWS, diagnosticsWS):
+    """Add elastic peak diagnostics information to a report workspace."""
+    for i in range(peakIntensityWS.getNumberHistograms()):
+        intensity = peakIntensityWS.readY(i)[0]
+        reportWS.setCell('ElasticIntensity', i, intensity)
+        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(diagnosticsWS.readY(i)[0])
+        reportWS.setCell('Diagnosed', i, diagnosed)
+
+
+def _addUserMaskToReport(reportWS, maskWS):
+    """Add user mask information to a report workspace."""
+    for i in range(maskWS.getNumberHistograms()):
+        diagnosed = int(reportWS.cell('Diagnosed', i)) + int(maskWS.readY(i)[0])
+        reportWS.setCell('Diagnosed', i, diagnosed)
+
+
+def _bkgDiagnostics(bkgWS, noisyBkgSettings, reportWS, wsNames, algorithmLogging):
+    """Diagnose noisy flat backgrounds and return a mask workspace."""
+    noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
+    noisyBkgDiagnostics, nFailures = \
+        MedianDetectorTest(InputWorkspace=bkgWS,
+                           OutputWorkspace=noisyBkgWSName,
+                           SignificanceTest=noisyBkgSettings.significanceTest,
+                           LowThreshold=noisyBkgSettings.lowThreshold,
+                           HighThreshold=noisyBkgSettings.highThreshold,
+                           LowOutlier=0.0,
+                           EnableLogging=algorithmLogging)
+    ClearMaskFlag(Workspace=noisyBkgDiagnostics,
+                  EnableLogging=algorithmLogging)
+    if reportWS is not None:
+        _addBkgDiagnosticsToReport(reportWS, bkgWS, noisyBkgDiagnostics)
+    return noisyBkgDiagnostics
+
+
+def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLogging):
+    """Return a table workspace for detector diagnostics reporting."""
     PLOT_TYPE_X = 1
     PLOT_TYPE_Y = 2
     if mtd.doesExist(reportWSName):
@@ -42,29 +84,18 @@ def _createDiagnosticsReportTable(elasticIntensityWS, bkgWS, diagnosticsWS,
         reportWS.addColumn('double', 'FlatBkg', PLOT_TYPE_Y)
     if 'Diagnosed' not in existingColumnNames:
         reportWS.addColumn('int', 'Diagnosed', PLOT_TYPE_Y)
-    reportWS.setRowCount(0)
-    for i in range(elasticIntensityWS.getNumberHistograms()):
-        elasticIntensity = elasticIntensityWS.readY(i)[0]
-        bkg = bkgWS.readY(i)[0]
-        diagnosed = int(diagnosticsWS.readY(i)[0])
-        row = (i, elasticIntensity, bkg, diagnosed)
-        reportWS.addRow(row)
+    reportWS.setRowCount(numberHistograms)
+    for i in range(numberHistograms):
+        reportWS.setCell('WorkspaceIndex', i, i)
+        reportWS.setCell('ElasticIntensity', i, 0.0)
+        reportWS.setCell('FlatBkg', i, 0.0)
+        reportWS.setCell('Diagnosed', i, 0)
+    return reportWS
 
 
-def _extractUserMask(ws, wsNames, algorithmLogging):
-    """Extracts user specified mask from a workspace"""
-    maskWSName = wsNames.withSuffix('user_mask_extracted')
-    maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
-                                      OutputWorkspace=maskWSName,
-                                      EnableLogging=algorithmLogging)
-    return maskWS
-
-
-def _diagnoseDetectors(ws, bkgWS, eppWS, peakSettings,
-                       sigmaMultiplier, noisyBkgSettings, wsNames,
-                       wsCleanup, report, reportWSName, algorithmLogging):
-    """Return a diagnostics workspace."""
-    # 1. Diagnose elastic peak region.
+def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS, 
+                            wsNames, wsCleanup, algorithmLogging):
+    """Diagnose elastic peaks and return a mask workspace"""
     histogramCount = ws.getNumberHistograms()
     integrationBegins = numpy.empty(histogramCount)
     integrationEnds = numpy.empty(histogramCount)
@@ -111,40 +142,19 @@ def _diagnoseDetectors(ws, bkgWS, eppWS, peakSettings,
                            EnableLogging=algorithmLogging)
     ClearMaskFlag(Workspace=elasticPeakDiagnostics,
                   EnableLogging=algorithmLogging)
-    # 2. Diagnose backgrounds.
-    noisyBkgWSName = wsNames.withSuffix('diagnostics_noisy_bkg')
-    noisyBkgDiagnostics, nFailures = \
-        MedianDetectorTest(InputWorkspace=bkgWS,
-                           OutputWorkspace=noisyBkgWSName,
-                           SignificanceTest=noisyBkgSettings.significanceTest,
-                           LowThreshold=noisyBkgSettings.lowThreshold,
-                           HighThreshold=noisyBkgSettings.highThreshold,
-                           LowOutlier=0.0,
-                           EnableLogging=algorithmLogging)
-    _reportDiagnostics(report, elasticPeakDiagnostics, noisyBkgDiagnostics)
-    ClearMaskFlag(Workspace=noisyBkgDiagnostics,
-                  EnableLogging=algorithmLogging)
-    userMask = _extractUserMask(ws, wsNames, algorithmLogging)
-    combinedDiagnosticsWSName = wsNames.withSuffix('diagnostics')
-    diagnosticsWS = Plus(LHSWorkspace=elasticPeakDiagnostics,
-                         RHSWorkspace=noisyBkgDiagnostics,
-                         OutputWorkspace=combinedDiagnosticsWSName,
-                         EnableLogging=algorithmLogging)
-    diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
-                         RHSWorkspace=userMask,
-                         OutputWorkspace=combinedDiagnosticsWSName,
-                         EnableLogging=algorithmLogging)
-    if reportWSName:
-        _createDiagnosticsReportTable(solidAngleCorrectedElasticPeaksWS,
-                                      bkgWS,
-                                      diagnosticsWS,
-                                      reportWSName,
-                                      algorithmLogging)
-    wsCleanup.cleanup(elasticPeakDiagnostics)
-    wsCleanup.cleanup(noisyBkgDiagnostics)
+    if reportWS is not None:
+        _addElasticPeakDiagnosticsToReport(reportWS, solidAngleCorrectedElasticPeaksWS, elasticPeakDiagnostics)
     wsCleanup.cleanup(solidAngleCorrectedElasticPeaksWS)
-    wsCleanup.cleanup(userMask)
-    return diagnosticsWS
+    return elasticPeakDiagnostics
+
+
+def _extractUserMask(ws, wsNames, algorithmLogging):
+    """Extracts user specified mask from a workspace."""
+    maskWSName = wsNames.withSuffix('user_mask_extracted')
+    maskWS, detectorIDs = ExtractMask(InputWorkspace=ws,
+                                      OutputWorkspace=maskWSName,
+                                      EnableLogging=algorithmLogging)
+    return maskWS
 
 
 def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
@@ -157,52 +167,6 @@ def _maskDiagnosedDetectors(ws, diagnosticsWS, wsNames, algorithmLogging):
                   MaskedWorkspace=diagnosticsWS,
                   EnableLogging=algorithmLogging)
     return maskedWS
-
-
-def _reportDiagnostics(report, peakDiagnostics, bkgDiagnostics):
-    """Parse the mask workspaces and fills in the report accordingly."""
-    for i in range(peakDiagnostics.getNumberHistograms()):
-        _reportSinglePeakDiagnostics(report, peakDiagnostics, i)
-        _reportSingleBkgDiagnostics(report, bkgDiagnostics, i)
-
-
-def _reportSingleBkgDiagnostics(report, diagnostics, wsIndex):
-    """Report the result of background diagnostics for a single diagnose."""
-    diagnose = diagnostics.readY(wsIndex)[0]
-    if diagnose == 0:
-        pass  # Nothing to report.
-    elif diagnose == 1:
-        report.notice(('Workspace index {0} did not pass noisy background ' +
-                       'diagnostics.').format(wsIndex))
-    else:
-        report.error(('Workspace index {0} has been marked as bad ' +
-                      'by noisy background diagnostics for unknown ' +
-                      'reasons.').format(wsIndex))
-    det = diagnostics.getDetector(wsIndex)
-    if det and det.isMasked():
-        report.notice(('Workspace index {0} has been marked as an outlier ' +
-                       'and excluded from the background median calculation ' +
-                       'in noisy background diagnostics.').format(wsIndex))
-
-
-def _reportSinglePeakDiagnostics(report, diagnostics, wsIndex):
-    """Report the result of zero count diagnostics for a single diagnose."""
-    diagnose = diagnostics.readY(wsIndex)[0]
-    if diagnose == 0:
-        pass  # Nothing to report.
-    elif diagnose == 1:
-        report.notice(('Workspace index {0} did not pass elastic peak ' +
-                      'diagnostics.').format(wsIndex))
-    else:
-        report.error(('Workspace index {0} has been marked as bad for ' +
-                      'masking by elastic peakd diagnostics for unknown ' +
-                      'reasons.').format(wsIndex))
-    det = diagnostics.getDetector(wsIndex)
-    if det and det.isMasked():
-        report.notice(('Workspace index {0} has been marked as an outlier ' +
-                       'and excluded from the peak median intensity ' +
-                       'calculation in elastic peak diagnostics.')
-                      .format(wsIndex))
 
 
 class DirectILLDiagnostics(DataProcessorAlgorithm):
@@ -231,7 +195,6 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
     def PyExec(self):
         """Executes the data reduction workflow."""
         progress = Progress(self, 0.0, 1.0, 4)
-        report = common.Report()
         subalgLogging = self.getProperty(common.PROP_SUBALG_LOGGING).value == common.SUBALG_LOGGING_ON
         wsNamePrefix = self.getProperty(common.PROP_OUTPUT_WS).valueAsStr
         cleanupMode = self.getProperty(common.PROP_CLEANUP_MODE).value
@@ -249,7 +212,7 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
 
         # Detector diagnostics, if requested.
         progress.report('Diagnosing detectors')
-        mainWS = self._detDiagnostics(mainWS, wsNames, wsCleanup, report, subalgLogging)
+        mainWS = self._detDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
 
         self._finalize(mainWS, wsCleanup)
         progress.report('Done')
@@ -405,24 +368,49 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                       EnableLogging=algorithmLogging)
         return maskedWS
 
-    def _detDiagnostics(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
+    def _detDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Perform and apply detector diagnostics."""
-        lowThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
-        highThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
-        significanceTest = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-        peakDiagnosticsSettings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-        sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
-        lowThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
-        highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
-        significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
-        bkgDiagnosticsSettings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
-        diagnosticsReportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
-        bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
-        eppWS = self.getProperty(common.PROP_EPP_WS).value
-        diagnosticsWS = _diagnoseDetectors(mainWS, bkgWS, eppWS, peakDiagnosticsSettings,
-                                           sigmaMultiplier, bkgDiagnosticsSettings, wsNames, wsCleanup,
-                                           report, diagnosticsReportWSName, subalgLogging)
+        reportWS = None
+        if not self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).isDefault:
+            reportWSName = self.getProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS).valueAsStr
+            reportWS = _createDiagnosticsReportTable(reportWSName, mainWS.getNumberHistograms(), subalgLogging)
+        userMaskWS = _extractUserMask(mainWS, wsNames, subalgLogging)
+        diagnosticsWSName = wsNames.withSuffix('diagnostics')
+        diagnosticsWS = CloneWorkspace(InputWorkspace=userMaskWS,
+                                       OutputWorkspace=diagnosticsWSName,
+                                       EnableLogging=subalgLogging)
+        if reportWS is not None:
+            _addUserMaskToReport(reportWS, userMaskWS)
+        wsCleanup.cleanup(userMaskWS)
+        if not self.getProperty(common.PROP_EPP_WS).isDefault:
+            eppWS = self.getProperty(common.PROP_EPP_WS).value
+            lowThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD).value
+            highThreshold = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD).value
+            significanceTest = self.getProperty(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+            settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
+            sigmaMultiplier = self.getProperty(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER).value
+            peakDiagnosticsWS = _elasticPeakDiagnostics(mainWS, eppWS, settings, sigmaMultiplier, reportWS, wsNames,
+                                                        wsCleanup, subalgLogging)
+            diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
+                                 RHSWorkspace=peakDiagnosticsWS,
+                                 OutputWorkspace=diagnosticsWSName,
+                                 EnableLogging=subalgLogging)
+            wsCleanup.cleanup(peakDiagnosticsWS)
+        if not self.getProperty(common.PROP_FLAT_BKG_WS).isDefault:
+            bkgWS = self.getProperty(common.PROP_FLAT_BKG_WS).value
+            lowThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD).value
+            highThreshold = self.getProperty(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD).value
+            significanceTest = self.getProperty(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST).value
+            settings = _DiagnosticsSettings(lowThreshold, highThreshold, significanceTest)
+            bkgDiagnosticsWS = _bkgDiagnostics(bkgWS, settings, reportWS, wsNames, subalgLogging)
+            diagnosticsWS = Plus(LHSWorkspace=diagnosticsWS,
+                                 RHSWorkspace=bkgDiagnosticsWS,
+                                 OutputWorkspace=diagnosticsWSName,
+                                 EnableLogging=subalgLogging)
+            wsCleanup.cleanup(bkgDiagnosticsWS)
         wsCleanup.cleanup(mainWS)
+        if reportWS is not None:
+            self.setProperty(common.PROP_OUTPUT_DIAGNOSTICS_REPORT_WS, reportWS)
         return diagnosticsWS
 
     def _finalize(self, outWS, wsCleanup):
