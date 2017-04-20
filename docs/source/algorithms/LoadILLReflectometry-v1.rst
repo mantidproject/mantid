@@ -55,7 +55,7 @@ For the input option :literal:`InputAngle` is :literal:`detector angle`, the cen
 
 .. math:: \phi_{c} = \pm \frac{\phi_{\mbox{detector}, r} - \phi_{\mbox{detector}, d}}{2},
 
-where the beginning sign depends on the Figaro reflection (up or down), :math:`\phi_{\mbox{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mbox{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mbox{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
+where the beginning sign depends on the Figaro reflection (up (+) or down (-)), :math:`\phi_{\mbox{detector}, r}` is the input detector angle of the reflected beam and :math:`\phi_{\mbox{detector}, d}` is the detector angle of the direct beam. Other entries of the table describe the sample angle of the reflected beam :math:`\phi_{\mbox{sample}, r}`, the fitted detector peak position of the reflected beam (fittedR) and the direct beam (fittedD), the maximum detector peak position of the reflected beam (peakR) and the direct beam (peakD).
 
 +-----------------+--------------------------------------------------------+-----------------------------------------------------------------------+
 | Scattering type | incoherent                                             | coherent                                                              |

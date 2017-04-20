@@ -123,21 +123,18 @@ public:
   }
 
   void testCoherentScatteringSampleAngleD17() {
-    testScatteringAngle(0.013869106584602529, "sample angle", "coherent",
-                        m_d17File); // using WorkspaceFactory, now with create
-                                    // 0.013869106563677843
+    testScatteringAngle(0.013869106563677843, "sample angle", "coherent",
+                        m_d17File);
   }
 
+  // small values due to centre angle is zero
   void testIncoherentScatteringDetectorAngleD17() {
-    // small value due to centre angle is zero
     testScatteringAngle(0.0, "detector angle", "incoherent", m_d17File);
   }
 
   void testCoherentScatteringDetectorAngleD17() {
-    // small value due to centre angle is zero
-    testScatteringAngle(-7.116595751588406e-06, "detector angle", "coherent",
-                        m_d17File); // using WorkspaceFactory, now with create
-                                    // -7.116574826901076e-06
+    testScatteringAngle(-7.116574826901076e-06, "detector angle", "coherent",
+                        m_d17File);
   }
 
   // user defined input angle of 30.0 degree only needs to be converted to

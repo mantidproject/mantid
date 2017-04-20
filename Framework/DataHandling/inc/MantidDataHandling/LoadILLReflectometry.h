@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/*! LoadILLReflectometry : Loads a ILL Reflectometry data file.
+/*! LoadILLReflectometry : Loads an ILL reflectometry Nexus data file.
 
  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
  National Laboratory & European Spallation Source
@@ -88,7 +88,7 @@ private:
       0}; // number of tubes (always 1) times number of pixels per tube
   double m_wavelength{0.0};
   double m_channelWidth{0.0};
-  double m_BraggAngleDirectBeam{0.0};
+  double m_angleDirectBeam{0.0}; /// detector angle of the direct beam
   double m_offsetAngle{0.0};
   std::string m_detectorDistance{std::string()};
   std::string m_detectorAngleName{std::string()};

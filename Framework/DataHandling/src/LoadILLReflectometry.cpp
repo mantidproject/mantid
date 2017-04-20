@@ -145,10 +145,9 @@ void LoadILLReflectometry::init() {
                   "Optional angle for calculating the Bragg angle.\n");
 
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
-  positiveDouble->setLower(1.0);
-  declareProperty(
-      "BraggAngle", EMPTY_DBL(), positiveDouble,
-      "User defined Bragg angle");
+  positiveDouble->setLower(0.0);
+  declareProperty("BraggAngle", EMPTY_DBL(), positiveDouble,
+                  "User defined Bragg angle");
   setPropertySettings("BraggAngle",
                       Kernel::make_unique<EnabledWhenProperty>(
                           "InputAngle", IS_EQUAL_TO, "user defined"));
@@ -420,7 +419,7 @@ LoadILLReflectometry::loadSingleMonitor(NeXus::NXEntry &entry,
 }
 
 /**
- * Load monitors data found in nexus file
+ * Load monitor data
  *
  * @param entry :: The Nexus entry
  * @return :: A std::vector of vectors of monitors containing monitor values
@@ -436,7 +435,7 @@ LoadILLReflectometry::loadMonitors(NeXus::NXEntry &entry) {
 }
 
 /**
- * Determine x values
+ * Determine x values (unit time-of-flight)
  *
  * @return :: vector holding the x values
  */
@@ -540,7 +539,7 @@ void LoadILLReflectometry::loadData(NeXus::NXEntry &entry,
 
 /**
  * Use the LoadHelper utility to load most of the nexus entries into workspace
- * log properties
+ * sample log properties
  */
 void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   g_log.debug("Building properties...");
@@ -557,10 +556,9 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
 /** Load direct or reflected beam:
   * - load detector counts
   * - get angle value for computing the Bragg angle, only for direct beam
-  * @params beamWS :: workspace holding detector counts
-  * @params beam :: name of the beam file
-  * @params angleDirectBeam :: if the beam is a direct beam, the name of the
-  * angle used for computing the Bragg angle
+  * @params beamWS :: Workspace holding detector counts
+  * @params beam :: Name of the beam file
+  * @params angleDirectBeam :: Name of the detector angle of the direct beam
   */
 void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
                                     const std::string beam,
@@ -599,12 +597,28 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
       // set Bragg angle of the direct beam for later use
       if (!angleDirectBeam.empty()) {
         std::replace(angleDirectBeam.begin(), angleDirectBeam.end(), '.', '/');
-        m_BraggAngleDirectBeam =
+        m_angleDirectBeam =
             entry.getFloat(StringConcat("instrument/", angleDirectBeam));
         debugLogWithUnitDegrees("Bragg angle of the direct beam: ",
-                                m_BraggAngleDirectBeam); //?
+                                m_angleDirectBeam); //?
       }
     }
+    /* uncommented since validation needed. This cannot be found in cosmos
+    // set offset angle
+    if (!(incidentAngle == "user defined")) {
+      double sampleAngle = getDouble("san.value"); // read directly from Nexus
+    file
+      double detectorAngle = getDouble(m_detectorAngleName); // read directly
+    from Nexus file
+      debugLog("sample angle ", sampleAngle);
+      debugLog("detector angle ", detectorAngle);
+      m_offsetAngle = detectorAngle / 2. * sampleAngle;
+      debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to
+    "
+                              "the scattering angle) ",
+                              m_offsetAngle);
+    }
+    */
     dataRoot.close();
     // set x values
     std::vector<double> xVals;
@@ -630,8 +644,7 @@ void LoadILLReflectometry::loadBeam(MatrixWorkspace_sptr &beamWS,
   *
   * @param beam :: Name of the beam. This is the ReflectedBeam by default and
   *the DirectBeam if explicitely mentioned
-  * @param angleDirectBeam :: Name of the angle for calculating the Bragg angle.
-  *This is particularly useful in case of the detector angle.
+  * @param angleDirectBeam :: Name of detector angle of the direct beam
   * @return centre :: detector position of the peak: Gaussian fit and position
   *of the maximum (serves as start value for the optimization)
   */
@@ -724,39 +737,26 @@ double LoadILLReflectometry::computeBraggAngle() {
       throw std::runtime_error(
           std::string(incidentAngle).append(" is not defined in Nexus file"));
   }
-  /* uncommented since validation needed. This cannot be found in cosmos
-  // set offset angle
-  if (!(incidentAngle == "user defined")) {
-    double sampleAngle = getDouble("san.value");
-    double detectorAngle = getDouble(m_detectorAngleName);
-    debugLog("sample angle ", sampleAngle);
-    debugLog("detector angle ", detectorAngle);
-    m_offsetAngle = detectorAngle / 2. * sampleAngle;
-    debugLogWithUnitDegrees("Offset angle of the direct beam (will be added to "
-                            "the scattering angle) ",
-                            m_offsetAngle);
-  }
-  */
   // user angle and sample angle behave equivalently for D17
   const std::string scatteringType = getProperty("ScatteringType");
   double angleBragg{angle};
   // the reflected beam
   std::vector<double> peakPosRB = fitReflectometryPeak("Filename");
-  // Figaro theta sign informs about reflection down (1.0) or up (-1.0)
-  double down{1.0}, sign{-down}; // default value for D17
+  // Figaro theta sign informs about reflection down (-1.0) or up (1.0)
+  double down{1.0}; // default value for D17
   if (m_instrumentName == "Figaro") {
     down = getDouble("theta");
     down > 0. ? down = 1. : down = -1.;
-    sign = -down;
   }
+  double sign{-down};
   if (((inputAngle == ("sample angle")) || (m_instrumentName == "Figaro")) &&
       (scatteringType == "coherent")) {
     angleBragg = eq2(angle inRad, peakPosRB[1], peakPosRB[0], -down);
   } else if (inputAngle == "detector angle") {
-    // DirectBeam is abvailable and we can read from its NeXus file
+    // DirectBeam is abvailable and we can read from its Nexus file
     std::vector<double> peakPosDB =
         fitReflectometryPeak("DirectBeam", incidentAngle);
-    double angleCentre = sign * ((angle - m_BraggAngleDirectBeam) / 2.)inRad;
+    double angleCentre = down * ((angle - m_angleDirectBeam) / 2.)inRad;
     debugLogWithUnitDegrees("Centre angle ", angleCentre inDeg);
     if (scatteringType == "incoherent")
       angleBragg = eq1(angleCentre, peakPosDB[0], peakPosRB[0], sign);
@@ -767,7 +767,7 @@ double LoadILLReflectometry::computeBraggAngle() {
   return angleBragg;
 }
 
-/// Utility to place detector in space, according to data file
+/// Update detector position according to data file
 void LoadILLReflectometry::placeDetector() {
   g_log.debug("Move the detector bank \n");
   double dist = getDouble(StringConcat(m_detectorDistance, ".value"));
@@ -775,19 +775,18 @@ void LoadILLReflectometry::placeDetector() {
   if (m_instrumentName == "Figaro")
     dist += getDouble(StringConcat(m_detectorDistance, ".offset_value"));
   debugLogWithUnitMeter("Sample-detector distance ", m_detectorDistanceValue);
-  double theta = computeBraggAngle();
-  double twotheta_rad = (2. * theta)inRad;
-  // incident theta angle for calling the algorithm ConvertToReflectometryQ
-  m_localWorkspace->mutableRun().addProperty(
-      "stheta", double((twotheta_rad + m_offsetAngle inRad) / 2.));
+  double rho = computeBraggAngle() + m_offsetAngle / 2.;
+  double theta_rad = (2. * rho)inRad;
+  // incident angle for using the algorithm ConvertToReflectometryQ
+  m_localWorkspace->mutableRun().addProperty("stheta", double(rho inRad));
   const std::string componentName = "bank";
   V3D pos = m_loader.getComponentPosition(m_localWorkspace, componentName);
-  V3D newpos(m_detectorDistanceValue * sin(twotheta_rad), pos.Y(),
-             m_detectorDistanceValue * cos(twotheta_rad));
+  V3D newpos(m_detectorDistanceValue * sin(theta_rad), pos.Y(),
+             m_detectorDistanceValue * cos(theta_rad));
   m_loader.moveComponent(m_localWorkspace, componentName, newpos);
   // apply a local rotation to stay perpendicular to the beam
   const V3D axis(0.0, 1.0, 0.0);
-  const Quat rotation(2. * theta + m_offsetAngle, axis);
+  const Quat rotation(2. * rho, axis);
   m_loader.rotateComponent(m_localWorkspace, componentName, rotation);
 }
 } // namespace DataHandling
