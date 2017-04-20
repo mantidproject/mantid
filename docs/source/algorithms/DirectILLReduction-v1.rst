@@ -29,6 +29,17 @@ The algorithm will transform the time-of-flight and spectrum numbers of *InputWo
 
 The optional :math:`S(2\theta,\omega)` output can be enabled by the *OutputSofThetaEnergyWorkspace*.
 
+Normalisation to absolute units
+###############################
+
+Normalisation to absolute units can be enabled by setting *AbsoluteUnitsNormalisation* to 'Absolute Units ON'. In this case the data is scaled by a factor
+
+    :math:`f = \frac{N_V \sigma_V}{N_S}`
+
+after normalisation to vanadium. In the above, :math:`N_V` stands for the vanadium number density, :math:`\sigma_V` for vanadium total scattering cross section and :math:`N_S` sample number density. 
+
+The material properties should be set for *InputWorkspace* and *IntegratedVanadiumWorkspace* by :ref:`SetSample <algm-SetSample>` before running this algorithm .
+
 (Re)binning in energy and momentum transfer
 ###########################################
 

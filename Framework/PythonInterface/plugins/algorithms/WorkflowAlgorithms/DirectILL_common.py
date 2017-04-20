@@ -6,6 +6,9 @@ from mantid.api import mtd
 from mantid.simpleapi import DeleteWorkspace
 
 
+ABSOLUTE_UNITS_OFF = 'Absolute Units OFF'
+ABSOLUTE_UNITS_ON = 'Absolute Units ON'
+
 CLEANUP_OFF = 'Cleanup OFF'
 CLEANUP_ON = 'Cleanup ON'
 
@@ -32,6 +35,7 @@ NORM_METHOD_MON = 'Normalisation Monitor'
 NORM_METHOD_OFF = 'Normalisation OFF'
 NORM_METHOD_TIME = 'Normalisation Time'
 
+PROP_ABSOLUTE_UNITS = 'AbsoluteUnitsNormalisation'
 PROP_BINNING_PARAMS_Q = 'QBinningParams'
 PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD = 'NoisyBkgHighThreshold'
 PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD = 'NoisyBkgLowThreshold'

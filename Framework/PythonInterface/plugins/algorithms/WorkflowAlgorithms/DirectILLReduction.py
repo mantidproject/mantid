@@ -7,10 +7,31 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, InstrumentVali
                         MatrixWorkspaceProperty, Progress, PropertyMode, WorkspaceProperty, WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, CloneWorkspace, ConvertSpectrumAxis, ConvertUnits, CorrectKiKf, DetectorEfficiencyCorUser,
-                              Divide, GroupDetectors, MaskDetectors, Rebin, SofQWNormalisedPolygon, Transpose)
+                              Divide, GroupDetectors, MaskDetectors, Rebin, Scale, SofQWNormalisedPolygon, Transpose)
+import math
 import numpy
 import roundinghelper
 from scipy import constants
+
+
+def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
+    """Scales ws by an absolute units factor."""
+    sampleMaterial = ws.sample().getMaterial()
+    sampleNumberDensity = sampleMaterial.numberDensity
+    vanaMaterial = vanaWS.sample().getMaterial()
+    vanaNumberDensity = vanaMaterial.numberDensity
+    vanaCrossSection = vanaMaterial.totalScatterXSection()
+    factor = vanaNumberDensity / sampleNumberDensity * vanaCrossSection
+    if factor <= 0 or math.isnan(factor) or math.isinf(factor):
+        raise RuntimeError('Invalid absolute units normalisation factor: {}'.format(factor))
+    report.notice('Absolute units scaling factor: {}'.format(factor))
+    scaledWSName = wsNames.withSuffix('absolute_units')
+    scaledWS = Scale(InputWorkspace=ws,
+                     OutputWorkspace=scaledWSName,
+                     Factor=factor,
+                     EnableLogging=algorithmLogging)
+    wsCleanup.cleanup(ws)
+    return scaledWS
 
 
 def _createDetectorGroups(ws):
@@ -66,6 +87,7 @@ def _energyBinning(ws):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
+    # TODO Fix logging.
     dx = BinWidthAtX(InputWorkspace=ws,
                      X=0.0)
     lastX = numpy.max(xs[:, -1])
@@ -181,10 +203,8 @@ class DirectILLReduction(DataProcessorAlgorithm):
         mainWS = self._applyDiagnostics(mainWS, wsNames, wsCleanup, subalgLogging)
 
         # Vanadium normalization.
-        # TODO Absolute normalization.
         progress.report('Normalising to vanadium')
-        mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup,
-                                       subalgLogging)
+        mainWS = self._normalizeToVana(mainWS, wsNames, wsCleanup, report, subalgLogging)
 
         # Convert units from TOF to energy.
         progress.report('Converting to energy')
@@ -257,6 +277,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
             direction=Direction.Input,
             optional=PropertyMode.Optional),
             doc='Reduced vanadium workspace.')
+        self.declareProperty(name=common.PROP_ABSOLUTE_UNITS,
+                             defaultValue=common.ABSOLUTE_UNITS_OFF,
+                             validator=StringListValidator([
+                                 common.ABSOLUTE_UNITS_OFF,
+                                 common.ABSOLUTE_UNITS_ON]),
+                             direction=Direction.Input,
+                             doc='Enable or disable normalisation to absolute units.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_DIAGNOSTICS_WS,
             defaultValue='',
@@ -291,11 +318,15 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # TODO
         return dict()
 
+    def _absoluteUnits(self, mainwS, wsNames, wsCleanup, subalgLogging):
+        """Scale workspace by an absolute units factor."""
+        
+
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Mask workspace according to diagnostics."""
-        diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
-        if not diagnosticsWS:
+        if self.getProperty(common.PROP_DIAGNOSTICS_WS).isDefault:
             return mainWS
+        diagnosticsWS = self.getProperty(common.PROP_DIAGNOSTICS_WS).value
         maskedWSName = wsNames.withSuffix('diagnostics_applied')
         maskedWS = CloneWorkspace(InputWorkspace=mainWS,
                                   OutputWorkspace=maskedWSName,
@@ -373,17 +404,20 @@ class DirectILLReduction(DataProcessorAlgorithm):
         wsCleanup.protect(mainWS)
         return mainWS
 
-    def _normalizeToVana(self, mainWS, wsNames, wsCleanup, subalgLogging):
+    def _normalizeToVana(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Normalize to vanadium workspace."""
-        vanaWS = self.getProperty(common.PROP_VANA_WS).value
-        if not vanaWS:
+        if self.getProperty(common.PROP_VANA_WS).isDefault:
             return mainWS
+        vanaWS = self.getProperty(common.PROP_VANA_WS).value
         vanaNormalizedWSName = wsNames.withSuffix('vanadium_normalized')
         vanaNormalizedWS = Divide(LHSWorkspace=mainWS,
                                   RHSWorkspace=vanaWS,
                                   OutputWorkspace=vanaNormalizedWSName,
                                   EnableLogging=subalgLogging)
         wsCleanup.cleanup(mainWS)
+        if self.getProperty(common.PROP_ABSOLUTE_UNITS).value == common.ABSOLUTE_UNITS_ON:
+            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS, wsNames, wsCleanup, report,
+                                              subalgLogging)
         return vanaNormalizedWS
 
     def _outputWSConvertedToTheta(self, mainWS, wsNames, wsCleanup,

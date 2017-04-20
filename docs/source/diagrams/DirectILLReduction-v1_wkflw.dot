@@ -15,11 +15,13 @@ digraph DirectILLReduction {
 
   subgraph decisions {
     $decision_style
+    absoluteUnitsEnabled [label="Normalise to absolute units?"]
     inputDiagnosticsGiven [label="DiagnosticsWorkspace given?"]
   }
 
   subgraph algorithms {
     $algorithm_style
+    AbsoluteUnits [label="Scale to absolute units"]
     ApplyDiagnostics [label="Mask spectra"]
     ConvertToEnergy [label="Convert TOF to energy transfer"]
     CorrectKiKf [label="CorrectKiKf"]
@@ -40,7 +42,10 @@ digraph DirectILLReduction {
   inputDiagnostics -> ApplyDiagnostics
   ApplyDiagnostics -> Normalize
   inputVana -> Normalize
-  Normalize -> ConvertToEnergy
+  Normalize -> absoluteUnitsEnabled
+  absoluteUnitsEnabled -> ConvertToEnergy [label="no"]
+  absoluteUnitsEnabled -> AbsoluteUnits [label="yes"]
+  AbsoluteUnits -> ConvertToEnergy
   ConvertToEnergy -> CorrectKiKf
   CorrectKiKf -> Rebin
   wRebinParams -> Rebin
