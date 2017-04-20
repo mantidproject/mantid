@@ -197,6 +197,23 @@ def _normalizeToTime(ws, wsNames, wsCleanup, algorithmLogging):
     return normalizedWS
 
 
+def _scaleAfterMonitorNormalization(ws, wsNames, wsCleanup, algorithmLogging):
+    """Scale ws by a factor given in the instrument parameters."""
+    SCALING_PARAM = 'scaling_after_monitor_normalisation'
+    NON_RECURSIVE = False  # Prevent recursive calls.
+    instr = ws.getInstrument()
+    if not instr.hasParameter(SCALING_PARAM, NON_RECURSIVE):
+        return ws
+    factor = instr.getNumberParameter(SCALING_PARAM, NON_RECURSIVE)[0]
+    scaledWSName = wsNames.withSuffix('scaled_by_monitor_factor')
+    scaledWS = Scale(InputWorkspace=ws,
+                     OutputWorkspace=scaledWSName,
+                     Factor=factor,
+                     EnableLogging=algorithmLogging)
+    wsCleanup.cleanup(ws)
+    return scaledWS
+
+
 def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames,
                      wsCleanup, algorithmLogging):
     """Subtract a scaled flat background from a workspace."""
@@ -676,6 +693,8 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                     end = centre + sigmaMultiplier * sigma
                 normalizedWS = _normalizeToMonitor(mainWS, monWS, monIndex, begin, end, wsNames, wsCleanup,
                                                    subalgLogging)
+                normalizedWS = _scaleAfterMonitorNormalization(normalizedWS, wsNames, wsCleanup,
+                                                               subalgLogging)
             elif normalisationMethod == common.NORM_METHOD_TIME:
                 normalizedWS = _normalizeToTime(mainWS, wsNames, wsCleanup, subalgLogging)
             else:

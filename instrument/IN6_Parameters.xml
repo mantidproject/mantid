@@ -22,9 +22,12 @@
 
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
-			<value val="338"/>
+			<value val="338" />
 		</parameter>
-
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="1000" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="Detector.detsum, duration, monitor1.monsum" />

@@ -39,7 +39,9 @@ More detailed description of some of these steps is given below.
 Normalisation to monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the *Monitor* property is used for normalisation. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If :ref:`FindEPP <algm-FindEPP>` fails to find a peak in the monitor spectrum, the entire monitor range is integrated.
+If *Normalisation* is set to 'Normalisation Monitor', the monitor spectrum specified by the 'default-incident-monitor-spectrum' instrument parameter is used for normalisation. If the parameter is not present, the *Monitor* property is used. A flat background is subtracted from the spectrum (no scaling applied), and it is integrated over the range specified by *ElasticPeakWidthInSigmas*. The monitor peak is found using :ref:`FindEPP <algm-FindEPP>`. If :ref:`FindEPP <algm-FindEPP>` fails to find a peak in the monitor spectrum, the entire monitor range is integrated.
+
+Afterwards, the counts are scaled by a factor defined by the 'scaling_after_monitor_normalisation' entry in instrument parameters, if present.
 
 Flat background subtraction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

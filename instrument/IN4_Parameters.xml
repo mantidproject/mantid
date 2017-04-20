@@ -19,12 +19,14 @@
 		<parameter name="formula_eff" type="string">
 			<value val="0.951*exp(-0.0887/sqrt(e))*(1.0-exp(-5.597/sqrt(e)))" />
 		</parameter>
-
 		<!-- Default monitor spectrum number for monitor normalisation. -->
 		<parameter name="default-incident-monitor-spectrum" type="int">
-			<value val="397"/>
+			<value val="397" />
 		</parameter>
-
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="1000" />
+		</parameter>
 		<!-- MergeRuns behavior when merging sample logs. -->
 		<parameter name="sample_logs_sum" type="string">
 			<value val="actual_time, Detector.detsum, Detector_Rosace.detsum, duration, monitor.monsum" />

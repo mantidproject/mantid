@@ -28,6 +28,7 @@ digraph DirectILLCollectData {
     LoadILLTOF [label="LoadILLTOF"]
     MergeRuns [label="MergeRuns"]
     Normalize [label="Normalise to monitor/time"]
+    ScaleAfterNormalization [label="Scale"]
     ScaleBkg [label="Scale"]
     SubtractBkgDetector [label="Subtract flat background"]
     SubtractBkgMonitor [label="Subtract flat background"]
@@ -59,7 +60,8 @@ digraph DirectILLCollectData {
   IntegrateMonitor -> Normalize
   ExtractMonitors -> detectors
   detectors -> Normalize
-  Normalize -> inputBkgGiven
+  Normalize -> ScaleAfterNormalization
+  ScaleAfterNormalization -> inputBkgGiven
   inputBkgGiven -> CalculateFlatBackground [label="no"]
   CalculateFlatBackground -> outputBkg
   CalculateFlatBackground -> ScaleBkg
@@ -67,7 +69,7 @@ digraph DirectILLCollectData {
   inputBkg -> ScaleBkg
   bkgScaling -> ScaleBkg
   ScaleBkg -> SubtractBkgDetector
-  Normalize -> SubtractBkgDetector
+  ScaleAfterNormalization -> SubtractBkgDetector
   inputEPPGiven -> FindEPP [label="no"]
   SubtractBkgDetector -> FindEPP
   FindEPP -> CalibrateEi
