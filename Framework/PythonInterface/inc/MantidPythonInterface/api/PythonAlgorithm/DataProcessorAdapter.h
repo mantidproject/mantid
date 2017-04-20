@@ -74,6 +74,10 @@ public:
   void copyPropertiesProxy(const std::string &algName,
                            const boost::python::object &propNames,
                            const int version = -1) {
+    if (algName.empty()) {
+      throw std::invalid_argument("Failed to specify algorithm name");
+    }
+
     std::vector<std::string> names;
     if (!Mantid::PythonInterface::isNone(propNames)) {
       boost::python::extract<std::string> extractor(propNames);
@@ -91,6 +95,10 @@ public:
       for (const auto &name : names) {
         this->copyProperty(algorithm, name);
       }
+    } else {
+      std::string msg("Failed to specify properties to copy from \"");
+      msg.append(algName).append("\"");
+      throw std::invalid_argument(msg);
     }
   }
 
