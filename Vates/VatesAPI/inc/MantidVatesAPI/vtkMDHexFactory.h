@@ -12,8 +12,6 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
-using Mantid::DataObjects::MDEventWorkspace;
-
 namespace Mantid {
 namespace VATES {
 
@@ -86,7 +84,8 @@ private:
       const Mantid::API::IMDEventWorkspace_sptr &imdws) const;
 
   template <typename MDE, size_t nd>
-  void doCreate(typename MDEventWorkspace<MDE, nd>::sptr ws) const;
+  void doCreate(
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) const;
 
   /// Template Method pattern to validate the factory before use.
   void validate() const override;
