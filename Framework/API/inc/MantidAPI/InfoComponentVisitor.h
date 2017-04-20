@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <functional>
+#include <unordered_map>
 
 namespace Mantid {
 using detid_t = int32_t;
@@ -67,6 +68,9 @@ private:
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 
+  std::unordered_map<Mantid::Geometry::IComponent *, size_t>
+      m_componentIdToIndexMap;
+
 public:
   InfoComponentVisitor(const size_t nDetectors,
                        std::function<size_t(Mantid::detid_t)> mapperFunc);
@@ -84,6 +88,9 @@ public:
   const std::vector<std::pair<size_t, size_t>> &componentDetectorRanges() const;
 
   const std::vector<size_t> &assemblySortedDetectorIndices() const;
+
+  const std::unordered_map<Mantid::Geometry::IComponent *, size_t> &
+  componentIdToIndexMap() const;
 
   size_t size() const;
 };

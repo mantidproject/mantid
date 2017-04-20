@@ -12,6 +12,7 @@
 
 #include <list>
 #include <mutex>
+#include <unordered_map>
 
 namespace Mantid {
 class SpectrumDefinition;
@@ -229,7 +230,7 @@ private:
   boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
   std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
-
+  boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> m_componentIdToIndexMap;
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;
