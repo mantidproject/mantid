@@ -5,6 +5,7 @@ import os
 import struct
 import numpy as np
 import copy
+import types
 
 
 
@@ -105,7 +106,12 @@ class LoadEXED(PythonAlgorithm):
         nrows=int(parms_dict['NDET'])
 
         for sl in parms_dict.keys():
-            AddSampleLog(Workspace=ws, LogName=sl, LogText=parms_dict[sl], LogType='Number')
+            #print (sl.encode('ascii','ignore'), parms_dict[sl].encode('ascii','ignore'))
+            key_in=sl.encode('ascii','ignore')
+            if isinstance(parms_dict[sl],types.UnicodeType):
+                AddSampleLog(Workspace=ws, LogName=key_in, LogText=parms_dict[sl].encode('ascii','ignore'))#, LogType='Number')
+            else:
+                AddSampleLog(Workspace=ws, LogName=key_in, LogText=str(parms_dict[sl])), #LogType='Number')
 
         SetGoniometer(Workspace=ws, Goniometers='Universal', Axis0='phi,0,1,0,1')
         # ExtractSingleSpectrum(InputWorkspace = wsn, WorkspaceIndex = nrows-2, OutputWorkspace = wsn + '_Monitors')
