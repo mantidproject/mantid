@@ -83,13 +83,14 @@ def _detectorGroupsToXml(groups, instrument):
     return rootElement
 
 
-def _energyBinning(ws):
+def _energyBinning(ws, algorithmLogging):
     """Create common (but nonequidistant) binning for a DeltaE workspace."""
     xs = ws.extractX()
     minXIndex = numpy.nanargmin(xs[:, 0])
     # TODO Fix logging.
     dx = BinWidthAtX(InputWorkspace=ws,
-                     X=0.0)
+                     X=0.0,
+                     EnableLogging=algorithmLogging)
     lastX = numpy.max(xs[:, -1])
     binCount = ws.blocksize()
     borders = list()
@@ -438,7 +439,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
     def _rebinInW(self, mainWS, wsNames, wsCleanup, report, subalgLogging):
         """Rebin the horizontal axis of a workspace."""
         if self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
-            binBorders = _energyBinning(mainWS)
+            binBorders = _energyBinning(mainWS, subalgLogging)
             params = list()
             binWidths = numpy.diff(binBorders)
             for start, width in zip(binBorders[:-1], binWidths):
