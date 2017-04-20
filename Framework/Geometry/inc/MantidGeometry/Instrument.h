@@ -254,14 +254,14 @@ public:
   void setComponentInfo(
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
       boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
-      boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>>
+      boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
           componentIdToIndexMap);
 
   boost::shared_ptr<const std::vector<Geometry::ComponentID>>
   componentIds() const;
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
-  boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>>
+  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
   componentIdToIndexMap() const;
 
 private:
@@ -351,7 +351,7 @@ private:
   boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
   /// Component ID to component index map. NULL unless the instrument is
   /// associated with an ExperimentInfo oject.
-  boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>>
+  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
       m_componentIdToIndexMap;
 };
 namespace Conversion {

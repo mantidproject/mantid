@@ -55,19 +55,22 @@ private:
       m_compIDToIndex;
 
 public:
-
   ComponentInfo(
       const Mantid::Beamline::ComponentInfo &componentInfo,
       boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
           componentIds,
-  boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
-  compIdToIndexMap);
+      boost::shared_ptr<const std::unordered_map<Geometry::IComponent *,
+                                                 size_t>> compIdToIndexMap);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
-  const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
+  boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
+  componentIds() const;
+  boost::shared_ptr<
+      const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
+  componentIdToIndexMap() const;
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
-  bool operator==(const ComponentInfo& other) const;
-  bool operator!=(const ComponentInfo& other) const;
+  bool operator==(const ComponentInfo &other) const;
+  bool operator!=(const ComponentInfo &other) const;
 };
 
 } // namespace API

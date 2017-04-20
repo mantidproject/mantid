@@ -1272,7 +1272,8 @@ Instrument::componentIds() const {
   return m_componentIds;
 }
 
-boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> Instrument::componentIdToIndexMap () const {
+boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
+Instrument::componentIdToIndexMap() const {
   if (!hasComponentInfo()) {
     throw std::runtime_error(
         "Cannot return component index map with a NULL ComponentInfo");
@@ -1296,10 +1297,10 @@ void Instrument::setDetectorInfo(
  */
 void Instrument::setComponentInfo(
     boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds, 
-boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> componentIdToIndexMap) 
-{
-  
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds,
+    boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
+        componentIdToIndexMap) {
+
   m_componentInfo = std::move(componentInfo);
   m_componentIds = std::move(componentIds);
   m_componentIdToIndexMap = std::move(componentIdToIndexMap);

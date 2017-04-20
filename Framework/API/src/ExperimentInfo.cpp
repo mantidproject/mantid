@@ -70,8 +70,7 @@ ExperimentInfo::ExperimentInfo()
       m_run(new Run()), m_parmap(new ParameterMap()),
       sptr_instrument(new Instrument()),
       m_detectorInfo(boost::make_shared<Beamline::DetectorInfo>()),
-      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()),
-      m_componentIds(boost::make_shared<std::vector<Geometry::ComponentID>>()) {
+      m_componentInfo(boost::make_shared<Beamline::ComponentInfo>()) {
   m_parmap->setDetectorInfo(m_detectorInfo);
   m_parmap->setComponentInfo(m_componentInfo);
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
@@ -189,10 +188,10 @@ void checkDetectorInfoSize(const Instrument &instr,
                              "instrument");
 }
 
-std::tuple<std::unique_ptr<Beamline::ComponentInfo>,
-          boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
-          boost::shared_ptr<std::unordered_map<Geometry::ComponentID, size_t>> 
-          >
+std::tuple<
+    std::unique_ptr<Beamline::ComponentInfo>,
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>>,
+    boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>>
 makeComponentInfo(const Instrument &instrument,
                   const API::DetectorInfo &detectorInfo) {
   if (instrument.hasComponentInfo()) {
@@ -218,8 +217,9 @@ makeComponentInfo(const Instrument &instrument,
         boost::make_shared<const std::vector<Geometry::ComponentID>>(
             visitor.componentIds());
 
-    auto componentIdMap = 
-          boost::make_shared<std::unordered_map<Geometry::ComponentID, size_t>> (visitor.componentIdToIndexMap());
+    auto componentIdMap = boost::make_shared<
+        const std::unordered_map<Geometry::ComponentID, size_t>>(
+        visitor.componentIdToIndexMap());
     return std::make_tuple(Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
                 visitor.assemblySortedDetectorIndices(),
                 visitor.componentDetectorRanges()),
@@ -306,16 +306,19 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_detectorInfoWrapper = Kernel::make_unique<DetectorInfo>(
       *m_detectorInfo, getInstrument(), m_parmap.get());
 
-  std::tie(m_componentInfo, m_componentIds, m_componentIdToIndexMap) =
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds;
+  boost::shared_ptr<const std::unordered_map<Geometry::ComponentID, size_t>>
+      componentIdToIndexMap;
+  std::tie(m_componentInfo, componentIds, componentIdToIndexMap) =
       makeComponentInfo(*instr, detectorInfo());
   m_parmap->setComponentInfo(m_componentInfo);
 
     /*
      * If the ID -> index map has already been created. Reuse it.
      * */
-    m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
-        *m_componentInfo, m_componentIds, m_componentIdToIndexMap);
-  
+  m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
+      *m_componentInfo, componentIds, componentIdToIndexMap);
+
     // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
@@ -334,8 +337,9 @@ Instrument_const_sptr ExperimentInfo::getInstrument() const {
   auto instrument = Geometry::ParComponentFactory::createInstrument(
       sptr_instrument, m_parmap);
   instrument->setDetectorInfo(m_detectorInfo);
-  instrument->setComponentInfo(m_componentInfo, m_componentIds,
-                               m_componentIdToIndexMap);
+  instrument->setComponentInfo(m_componentInfo,
+                               m_componentInfoWrapper->componentIds(),
+                               m_componentInfoWrapper->componentIdToIndexMap());
   return instrument;
 }
 

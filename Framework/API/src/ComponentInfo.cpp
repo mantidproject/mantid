@@ -10,7 +10,6 @@
 namespace Mantid {
 namespace API {
 
-
 /**
  * Constructor.
  * @param componentInfo : Internal Beamline ComponentInfo
@@ -43,8 +42,9 @@ ComponentInfo::detectorIndices(size_t componentIndex) const {
   return m_componentInfo.detectorIndices(componentIndex);
 }
 
-const std::vector<Geometry::IComponent *> &ComponentInfo::componentIds() const {
-  return *m_componentIds;
+boost::shared_ptr<const std::vector<Geometry::IComponent *>>
+ComponentInfo::componentIds() const {
+  return m_componentIds;
 }
 
 size_t ComponentInfo::size() const { return m_componentInfo.size(); }
@@ -62,5 +62,10 @@ bool ComponentInfo::operator!=(const ComponentInfo &other) const {
   return !this->operator==(other);
 }
 
+boost::shared_ptr<
+    const std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
+ComponentInfo::componentIdToIndexMap() const {
+  return m_compIDToIndex;
+}
 } // namespace API
 } // namespace Mantid
