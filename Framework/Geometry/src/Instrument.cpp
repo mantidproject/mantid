@@ -162,9 +162,14 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
   if (m_map) {
     if (m_instr->getPhysicalInstrument()) {
       // A physical instrument should use the same parameter map as the 'main'
-      // instrument
-      return Instrument_const_sptr(
-          new Instrument(m_instr->getPhysicalInstrument(), m_map_nonconst));
+      // instrument. This constructor automatically sets the instrument as the
+      // owning instrument in the ParameterMap. We need to undo this immediately
+      // since the ParameterMap must always be owned by the neutronic
+      // instrument.
+      auto instrument = boost::make_shared<Instrument>(
+          m_instr->getPhysicalInstrument(), m_map_nonconst);
+      m_map_nonconst->setInstrument(m_instr.get());
+      return instrument;
     } else {
       return Instrument_const_sptr();
     }
