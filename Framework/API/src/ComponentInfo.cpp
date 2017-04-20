@@ -22,7 +22,7 @@ ComponentInfo::ComponentInfo(
     const Mantid::Beamline::ComponentInfo &componentInfo,
     boost::shared_ptr<const std::vector<Mantid::Geometry::IComponent *>>
         componentIds,
-    boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
+    boost::shared_ptr<const std::unordered_map<Geometry::IComponent *, size_t>>
         compIdToIndexMap)
     : m_componentInfo(componentInfo), m_componentIds(std::move(componentIds)),
       m_compIDToIndex(std::move(compIdToIndexMap)) {
