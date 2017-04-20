@@ -20,8 +20,7 @@ namespace Vates {
 namespace SimpleGui {
 
 namespace {
-
-std::array<double, 3> GetContrastingColor(const std::vector<double> &color) {
+std::array<double, 3> getContrastingColor(const std::vector<double> &color) {
   double criteria =
       1. - (0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]);
 
@@ -31,7 +30,7 @@ std::array<double, 3> GetContrastingColor(const std::vector<double> &color) {
     return {{1., 1., 1.}};
 }
 
-void SafeSetProperty(vtkSMProxy *gridAxis,
+void safeSetProperty(vtkSMProxy *gridAxis,
                      std::initializer_list<const char *> pnames,
                      const std::array<double, 3> &value) {
   if (gridAxis) {
@@ -53,42 +52,39 @@ std::vector<double> getBackgroundColor(pqRenderView *view) {
 }
 
 void VisibleAxesColor::setOrientationAxesLabelColor(pqRenderView *view) {
-  auto color = GetContrastingColor(getBackgroundColor(view));
-  SafeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
+  auto color = getContrastingColor(getBackgroundColor(view));
+  safeSetProperty(view->getProxy(), {"OrientationAxesLabelColor"}, color);
 }
 
 void VisibleAxesColor::setGridAxesColor(pqRenderView *view) {
-  auto color = GetContrastingColor(getBackgroundColor(view));
+  auto color = getContrastingColor(getBackgroundColor(view));
   vtkSMProxy *gridAxes3DActor =
       vtkSMPropertyHelper(view->getProxy(), "AxesGrid", true).GetAsProxy();
-  SafeSetProperty(gridAxes3DActor,
+  safeSetProperty(gridAxes3DActor,
                   {"XTitleColor", "YTitleColor", "ZTitleColor", "XLabelColor",
                    "YLabelColor", "ZLabelColor", "GridColor"},
                   color);
 }
 
 void VisibleAxesColor::setScalarBarColor(pqRenderView *view) {
-
-  auto color = GetContrastingColor(getBackgroundColor(view));
+  auto color = getContrastingColor(getBackgroundColor(view));
 
   // Update for all sources and all reps
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel =
       pqApplicationCore::instance()->getServerManagerModel();
+
   const QList<pqPipelineSource *> sources =
       smModel->findItems<pqPipelineSource *>(server);
-
   // For all sources
-  foreach (pqPipelineSource *source, sources) {
-    QList<pqDataRepresentation *> reps = source->getRepresentations(view);
+  for (pqPipelineSource *source : sources) {
+    const QList<pqDataRepresentation *> reps = source->getRepresentations(view);
     // For all representations
-    foreach (pqDataRepresentation *rep, reps) {
+    for (pqDataRepresentation *rep : reps) {
       vtkSMProxy *ScalarBarProxy =
           vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
               rep->getLookupTableProxy(), view->getProxy());
-      if (ScalarBarProxy) {
-        SafeSetProperty(ScalarBarProxy, {"TitleColor", "LabelColor"}, color);
-      }
+      safeSetProperty(ScalarBarProxy, {"TitleColor", "LabelColor"}, color);
     }
   }
 }
