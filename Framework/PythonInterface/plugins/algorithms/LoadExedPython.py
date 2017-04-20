@@ -102,7 +102,7 @@ class LoadEXED(PythonAlgorithm):
         fin.close()
         parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
                 #print line
-        nrows=int(parms['NDET'])
+        nrows=int(parms_dict['NDET'])
 
         for sl in parms_dict.keys():
             AddSampleLog(Workspace=ws, LogName=sl, LogText=parms_dict[sl], LogType='Number')
