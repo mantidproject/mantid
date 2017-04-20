@@ -170,7 +170,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.signaldict['Ei']=self.Ei
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
-        self.labelS2=QtGui.QLabel('HYSPEC S2')
+        self.labelS2=QtGui.QLabel('S2')
         self.labelEi=QtGui.QLabel('Incident Energy')
         self.editS2=QtGui.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
