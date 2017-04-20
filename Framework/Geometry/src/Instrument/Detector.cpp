@@ -172,8 +172,8 @@ void Detector::registerContents(ComponentVisitor &componentVisitor) const {
 
 bool Detector::hasDetectorInfo() const {
   const IComponent *root = this;
-  while (this->m_parent)
-    root = this->m_parent;
+  while (auto parent = root->getBareParent())
+    root = parent;
   auto instrument = dynamic_cast<const Instrument *>(root);
   return m_map->hasDetectorInfo(instrument);
 }
