@@ -127,6 +127,8 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
+  void splitTimeSeriesLogs();
+
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
   DataObjects::TableWorkspace_sptr m_splitterTableWorkspace;
@@ -153,7 +155,7 @@ private:
 
   double m_progress;
 
-  /// DOC! TODO
+  /// get the names of all the time series properties in the input workspace's Run object
   std::vector<std::string> getTimeSeriesLogNames();
 
   Kernel::TimeSplitterType generateSplitters(int wsindex);
@@ -170,6 +172,10 @@ private:
 
   void splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname,
                 Kernel::TimeSplitterType &splitters);
+
+  void copyNoneSplitLogs(std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_name_vector,
+                         std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
+                         std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
 
   /// Base of output workspace's name
   std::string m_outputWSNameBase;

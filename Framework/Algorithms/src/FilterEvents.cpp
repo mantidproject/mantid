@@ -20,6 +20,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ArrayProperty.h"
+
 #include <memory>
 #include <sstream>
 
@@ -152,6 +154,9 @@ void FilterEvents::init() {
   declareProperty(
       "FilterStartTime", "",
       "Start time for splitters that can be parsed to DateAndTime.");
+
+  declareProperty(Kernel::make_unique<ArrayProperty<std::string>>("ExcludedLogs"),
+                  "List of name of sample logs that will not be copied or split into the chopped workspace.");
 }
 
 /** Execution body
@@ -244,6 +249,60 @@ void FilterEvents::exec() {
   m_progress = 1.0;
   progress(m_progress, "Completed");
 }
+
+//----------------------------------------------------------------------------------------------
+// clone the sample logs that will not be split including all Non-TimeSeriesProperties and
+void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int_tsp_name_vector,
+									 std::vector<TimeSeriesProperty<double> *> &dbl_tsp_name_vector,
+									 std::vector<TimeSeriesProperty<bool> *> &bool_tsp_name_vector)
+{
+  // initialize
+    int_tsp_name_vector.clear();
+    dbl_tsp_name_vector.clear();
+    bool_tsp_name_vector.clear();
+
+	std::vector<Property *> prop_vector = m_eventWS->run().getProperties();
+	for (size_t i = 0; i < prop_vector.size(); ++i)
+	{
+		// cast to different type of TimeSeriesProperties
+		TimeSeriesProperty<double> *dbl_prop = dynamic_cast<TimeSeriesProperty<double> *>(prop_vector[i]);
+		if (dbl_prop)
+		{
+			// is double time series property
+			dbl_tsp_name_vector.push_back(dbl_prop);
+			continue;
+		}
+		TimeSeriesProperty<int> *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(prop_vector[i]);
+		if (int_prop)
+		{
+			// is integer time series property
+			int_tsp_name_vector.push_back(int_prop);
+			continue;
+		}
+		TimeSeriesProperty<bool> *bool_prop = dynamic_cast<TimeSeriesProperty<bool> *>(prop_vector[i]);
+		if (bool_prop)
+		{
+			// is integer time series property
+			bool_tsp_name_vector.push_back(bool_prop);
+			continue;
+		}
+		// single value property: copy to the new workspace
+		std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+		for (ws_iter = m_outputWorkspacesMap.begin(); ws_iter != m_outputWorkspacesMap.end(); ++ws_iter)
+		{
+			ws_iter->second->mutableRun().addProperty(prop_vector[i]);
+		}
+	}
+
+	return;
+}
+
+// Split all the TimeSeriesProperty sample logs to all the output workspace
+void FilterEvents::splitTimeSeriesLogs()
+{
+
+}
+
 
 //----------------------------------------------------------------------------------------------
 /** Process input properties
@@ -913,6 +972,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
+    // FIXME/TOOD - call create_nolog after the previous issue is merged to master
     boost::shared_ptr<EventWorkspace> optws =
         create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -994,6 +1054,7 @@ void FilterEvents::createOutputWorkspacesTableSplitterCase() {
     }
 
     // create new workspace
+    // TODO/FIXME/ - use create_nolog after the previos issue is merged to master
     boost::shared_ptr<EventWorkspace> optws =
         create<DataObjects::EventWorkspace>(*m_eventWS);
     m_outputWorkspacesMap.emplace(wsgroup, optws);
@@ -1522,8 +1583,23 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // TODO:FIXME - Copy the prperty!
       // set to output workspace ??? -- may not be needed! as the way how output
       // workspace is created
+        // set to output workspace
+        for (int tindex = 0; tindex <= max_target_index; ++tindex) {
+          // find output workspace
+          std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
+          wsiter = m_outputWorkspacesMap.find(tindex);
+          if (wsiter == m_outputWorkspacesMap.end()) {
+            g_log.error() << "Workspace target (" << tindex
+                          << ") does not have workspace associated."
+                          << "\n";
+          } else {
+            DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
+            ws_i->mutableRun().addProperty(property->clone(), true);
+          }
+        }
+
     }
-  }
+  } // END-FOR
 
   for (int tindex = 0; tindex <= max_target_index; ++tindex) {
     // set to output workspace
