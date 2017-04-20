@@ -139,6 +139,8 @@ initializeFromParent(const API::MatrixWorkspace &parent,
                      API::MatrixWorkspace &ws, const bool noproperty = false);
 }
 
+/** This is the create() method that all the other create() methods call
+ */
 template <class T, class P, class IndexArg, class HistArg,
           class = typename std::enable_if<
               std::is_base_of<API::MatrixWorkspace, P>::value>::type>
@@ -211,10 +213,13 @@ std::unique_ptr<T> create(const P &parent) {
   return ws;
 }
 
+/** create a new workspace with empty run
+ *
+ */
 template <class T, class P,
           typename std::enable_if<std::is_base_of<API::MatrixWorkspace,
                                                   P>::value>::type * = nullptr>
-std::unique_ptr<T> create_nolog(const P &parent) {
+std::unique_ptr<T> createWithEmptyRun(const P &parent) {
   const auto numHistograms = parent.getNumberHistograms();
   const bool no_property = true;
   auto ws = create<T>(parent, numHistograms,
