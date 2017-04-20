@@ -195,6 +195,7 @@ public:
 signals:
   void setSelectionRect(const QRect &);
   void zoom();
+  void resetZoom();
   void unzoom();
 
 private:
@@ -245,26 +246,26 @@ private:
 /**
     Controller for erasing peaks on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerSelection
     : public InputControllerDraw {
   Q_OBJECT
 
 public:
-  InputControllerErase(QObject *parent);
-  ~InputControllerErase() override;
+  InputControllerSelection(QObject *parent, QPixmap *icon);
+  ~InputControllerSelection() override;
   void onPaint(QPainter &) override;
 
 signals:
-  void erase(const QRect &);
+  void selection(const QRect &);
 
 private:
   void drawCursor(QPixmap *cursor) override;
-  void signalLeftClick() override;
   void setPosition(const QPoint &pos) override;
   void resize() override;
+  void signalLeftClick() override;
 
-  QRect m_rect;
   QPixmap *m_image;
+  QRect m_rect;
 };
 
 /**

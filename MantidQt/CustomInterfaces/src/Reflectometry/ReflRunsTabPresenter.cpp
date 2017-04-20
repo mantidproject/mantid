@@ -31,32 +31,29 @@ using namespace MantidQt::MantidWidgets;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry GUI");
+}
+
 /** Constructor
 * @param mainView :: [input] The view we're managing
 * @param progressableView :: [input] The view reporting progress
-* @param tablePresenter :: [input] The data processor presenter
+* @param tablePresenters :: [input] The data processor presenters
 * @param searcher :: [input] The search implementation
 */
 ReflRunsTabPresenter::ReflRunsTabPresenter(
     IReflRunsTabView *mainView, ProgressableView *progressableView,
-    DataProcessorPresenter *tablePresenter,
+    std::vector<DataProcessorPresenter *> tablePresenters,
     boost::shared_ptr<IReflSearcher> searcher)
     : m_view(mainView), m_progressView(progressableView),
-      m_tablePresenter(tablePresenter), m_mainPresenter(),
+      m_tablePresenters(tablePresenters), m_mainPresenter(),
       m_searcher(searcher) {
 
   // Register this presenter as the workspace receiver
-  // When doing so, the inner presenter will notify this
+  // When doing so, the inner presenters will notify this
   // presenter with the list of commands
-  m_tablePresenter->accept(this);
-
-  // TODO. Select strategy.
-  /*
-  std::unique_ptr<CatalogConfigService> catConfigService(
-  makeCatalogConfigServiceAdapter(ConfigService::Instance()));
-  UserCatalogInfo catalogInfo(
-  ConfigService::Instance().getFacility().catalogInfo(), *catConfigService);
-  */
+  for (const auto &presenter : m_tablePresenters)
+    presenter->accept(this);
 
   // If we don't have a searcher yet, use ReflCatalogSearcher
   if (!m_searcher)
@@ -67,6 +64,9 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   methods.insert(LegacyTransferMethod);
   methods.insert(MeasureTransferMethod);
   m_view->setTransferMethods(methods);
+
+  // Set current transfer method
+  m_currentTransferMethod = m_view->getTransferMethod();
 
   // Set up the instrument selectors
   std::vector<std::string> instruments;
@@ -83,10 +83,12 @@ ReflRunsTabPresenter::ReflRunsTabPresenter(
   if (std::find(instruments.begin(), instruments.end(), defaultInst) !=
       instruments.end()) {
     m_view->setInstrumentList(instruments, defaultInst);
-    m_tablePresenter->setInstrumentList(instruments, defaultInst);
+    for (const auto &presenter : m_tablePresenters)
+      presenter->setInstrumentList(instruments, defaultInst);
   } else {
     m_view->setInstrumentList(instruments, "INTER");
-    m_tablePresenter->setInstrumentList(instruments, "INTER");
+    for (const auto &presenter : m_tablePresenters)
+      presenter->setInstrumentList(instruments, "INTER");
   }
 }
 
@@ -113,9 +115,16 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     auto algRunner = m_view->getAlgorithmRunner();
     IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
     populateSearch(searchAlg);
-  } break;
+    break;
+  }
   case IReflRunsTabPresenter::TransferFlag:
     transfer();
+    break;
+  case IReflRunsTabPresenter::InstrumentChangedFlag:
+    changeInstrument();
+    break;
+  case IReflRunsTabPresenter::GroupChangedFlag:
+    pushCommands();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -128,8 +137,9 @@ void ReflRunsTabPresenter::pushCommands() {
   m_view->clearCommands();
 
   // The expected number of commands
-  const size_t nCommands = 27;
-  auto commands = m_tablePresenter->publishCommands();
+  const size_t nCommands = 29;
+  auto commands =
+      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -201,6 +211,7 @@ void ReflRunsTabPresenter::search() {
 void ReflRunsTabPresenter::populateSearch(IAlgorithm_sptr searchAlg) {
   if (searchAlg->isExecuted()) {
     ITableWorkspace_sptr results = searchAlg->getProperty("OutputWorkspace");
+    m_currentTransferMethod = m_view->getTransferMethod();
     m_searchModel = ReflSearchModel_sptr(new ReflSearchModel(
         *getTransferStrategy(), results, m_view->getSearchInstrument()));
     m_view->showSearch(m_searchModel);
@@ -215,8 +226,20 @@ void ReflRunsTabPresenter::transfer() {
   SearchResultMap runs;
   auto selectedRows = m_view->getSelectedSearchRows();
 
-  // Do not begin transfer if nothing is selected
+  // Do not begin transfer if nothing is selected or if the transfer method does
+  // not match the one used for populating search
   if (selectedRows.size() == 0) {
+    m_mainPresenter->giveUserCritical(
+        "Error: Please select at least one run to transfer.",
+        "No runs selected");
+    return;
+  } else if (m_currentTransferMethod != m_view->getTransferMethod()) {
+    m_mainPresenter->giveUserCritical(
+        "Error: Method selected for transferring runs (" +
+            m_view->getTransferMethod() +
+            ") must match the method used for searching runs (" +
+            m_currentTransferMethod + ").",
+        "Transfer method mismatch");
     return;
   }
 
@@ -278,7 +301,8 @@ void ReflRunsTabPresenter::transfer() {
     }
   }
 
-  m_tablePresenter->transfer(results.getTransferRuns());
+  m_tablePresenters.at(m_view->getSelectedGroup())
+      ->transfer(results.getTransferRuns());
 }
 
 /**
@@ -288,9 +312,8 @@ void ReflRunsTabPresenter::transfer() {
 */
 std::unique_ptr<ReflTransferStrategy>
 ReflRunsTabPresenter::getTransferStrategy() {
-  const std::string currentMethod = m_view->getTransferMethod();
   std::unique_ptr<ReflTransferStrategy> rtnStrategy;
-  if (currentMethod == MeasureTransferMethod) {
+  if (m_currentTransferMethod == MeasureTransferMethod) {
 
     // We need catalog info overrides from the user-based config service
     std::unique_ptr<CatalogConfigService> catConfigService(
@@ -310,12 +333,12 @@ ReflRunsTabPresenter::getTransferStrategy() {
     rtnStrategy = Mantid::Kernel::make_unique<ReflMeasureTransferStrategy>(
         std::move(catInfo), std::move(source));
     return rtnStrategy;
-  } else if (currentMethod == LegacyTransferMethod) {
+  } else if (m_currentTransferMethod == LegacyTransferMethod) {
     rtnStrategy = make_unique<ReflLegacyTransferStrategy>();
     return rtnStrategy;
   } else {
     throw std::runtime_error("Unknown tranfer method selected: " +
-                             currentMethod);
+                             m_currentTransferMethod);
   }
 }
 
@@ -333,6 +356,33 @@ void ReflRunsTabPresenter::notify(DataProcessorMainPresenter::Flag flag) {
   // a flag we aren't handling.
 }
 
+/** Requests pre-processing values. Values are supplied by the main
+* presenter
+* @return :: Pre-processing values
+*/
+std::map<std::string, std::string>
+ReflRunsTabPresenter::getPreprocessingValues() const {
+
+  std::map<std::string, std::string> valuesMap;
+  valuesMap["Transmission Run(s)"] =
+      m_mainPresenter->getTransmissionRuns(m_view->getSelectedGroup());
+
+  return valuesMap;
+}
+
+/** Requests property names associated with pre-processing values.
+* @return :: Pre-processing property names.
+*/
+std::map<std::string, std::set<std::string>>
+ReflRunsTabPresenter::getPreprocessingProperties() const {
+
+  std::map<std::string, std::set<std::string>> propertiesMap;
+  propertiesMap["Transmission Run(s)"] = {"FirstTransmissionRun",
+                                          "SecondTransmissionRun"};
+
+  return propertiesMap;
+}
+
 /** Requests global pre-processing options. Options are supplied by the main
 * presenter
 * @return :: Global pre-processing options
@@ -341,26 +391,40 @@ std::map<std::string, std::string>
 ReflRunsTabPresenter::getPreprocessingOptions() const {
 
   std::map<std::string, std::string> options;
-  options["Run(s)"] = m_mainPresenter->getPlusOptions();
-  options["Transmission Run(s)"] = m_mainPresenter->getTransmissionOptions();
+  options["Transmission Run(s)"] =
+      m_mainPresenter->getTransmissionOptions(m_view->getSelectedGroup());
 
   return options;
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
+/** Requests global processing options. Options are supplied by the main
 * presenter
-* @return :: Global pre-processing options
+* @return :: Global processing options
 */
 std::string ReflRunsTabPresenter::getProcessingOptions() const {
-  return m_mainPresenter->getReductionOptions();
+  return m_mainPresenter->getReductionOptions(m_view->getSelectedGroup());
 }
 
-/** Requests global pre-processing options. Options are supplied by the main
+/** Requests global post-processing options. Options are supplied by the main
 * presenter
-* @return :: Global pre-processing options
+* @return :: Global post-processing options
 */
 std::string ReflRunsTabPresenter::getPostprocessingOptions() const {
-  return m_mainPresenter->getStitchOptions();
+  return m_mainPresenter->getStitchOptions(m_view->getSelectedGroup());
+}
+
+/** Requests time-slicing values. Values are supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingValues() const {
+  return m_mainPresenter->getTimeSlicingValues(m_view->getSelectedGroup());
+}
+
+/** Requests time-slicing type. Type is supplied by the main presenter
+* @return :: Time-slicing values
+*/
+std::string ReflRunsTabPresenter::getTimeSlicingType() const {
+  return m_mainPresenter->getTimeSlicingType(m_view->getSelectedGroup());
 }
 
 /**
@@ -420,6 +484,17 @@ std::string
 ReflRunsTabPresenter::runPythonAlgorithm(const std::string &pythonCode) {
 
   return m_mainPresenter->runPythonAlgorithm(pythonCode);
+}
+
+/** Changes the current instrument in the data processor widget. Also updates
+ * the config service and prints an information message
+*/
+void ReflRunsTabPresenter::changeInstrument() {
+  const std::string instrument = m_view->getSearchInstrument();
+  m_mainPresenter->setInstrumentName(instrument);
+  Mantid::Kernel::ConfigService::Instance().setString("default.instrument",
+                                                      instrument);
+  g_log.information() << "Instrument changed to " << instrument;
 }
 
 const std::string ReflRunsTabPresenter::MeasureTransferMethod = "Measurement";

@@ -138,7 +138,7 @@ public:
 public:
   void test_input_workspace_must_be_imdhisto() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(1, 1, 0);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(1, 1, 0, true);
     ConvertMDHistoToMatrixWorkspace alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -494,4 +494,75 @@ public:
   }
 };
 
+/* Disabling clang format because the CXX parsser cannot read across multiple
+lines.
+ Clang formatting has therefore been disabled to prevent compiler errors.
+ When the parsser has been fixed (can read across multiple lines) the clang
+formatting
+can be enabled */
+
+// clang-format off
+class ConvertMDHistoToMatrixWorkspaceTestPerformance:public CxxTest::TestSuite {
+public:
+  static ConvertMDHistoToMatrixWorkspaceTestPerformance *createSuite() {
+    return new ConvertMDHistoToMatrixWorkspaceTestPerformance;
+  }
+  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTestPerformance *suite) {
+    delete suite;
+  }
+//clang-format on
+  void setUp() override{
+    std::vector<size_t> nonInteger(2);
+    nonInteger[0] = 0;
+    nonInteger[1] = 1;
+    const size_t ndims = 4;
+    size_t size = 1;
+
+    // property values for CreateMDHistoWorkspace
+    std::vector<size_t> numberOfBins(ndims);
+    std::vector<std::string> names(ndims);
+    // property values for SliceMDHisto
+    std::vector<coord_t> start(ndims);
+    std::vector<coord_t> end(ndims);
+    for (size_t i = 0; i < ndims; ++i) {
+      names[i] = "x_" + boost::lexical_cast<std::string>(i);
+      if (nonInteger.end() != std::find(nonInteger.begin(), nonInteger.end(), i)) {
+        size_t nbins = 3 + i;
+        size *= nbins;
+        numberOfBins[i] = nbins;
+        // if it's a non-integrated dimension - don't slice
+        end[i] = static_cast<coord_t>(nbins);
+      } else {
+        numberOfBins[i] = 1;
+      }
+    }
+    signal_t signal(0.f), error(0.f);
+    // IMDHistoWorkspace_sptr slice =
+    auto slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
+        ndims, signal, error, &numberOfBins.front(), &start.front(),
+        &end.front(), names);
+    alg =
+        AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setChild(true);
+    alg->setProperty("InputWorkspace", slice);
+    alg->setPropertyValue("OutputWorkspace",
+                          "_2"); // Not really required for child algorithm
+
+
+  }
+
+  void test_ConvertMDhistoToMatrixWorkspace() {
+
+      try {
+        alg->execute();
+      } catch (std::exception &e) {
+        TS_FAIL(e.what());
+      }
+  }
+
+private:
+  IAlgorithm_sptr alg;
+};
 #endif /* CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_ */

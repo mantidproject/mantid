@@ -1,21 +1,19 @@
 #ifndef MANTID_API_IMDWORKSPACE_H_
 #define MANTID_API_IMDWORKSPACE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <cstdarg>
 #include <cstdint>
 #include <vector>
 
 namespace Mantid {
+
+namespace Geometry {
+class MDImplicitFunction;
+}
 
 namespace API {
 

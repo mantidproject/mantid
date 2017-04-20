@@ -2,6 +2,7 @@
 #define MANTIDQT_API_SIGNALRANGETEST_H_
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtAPI/SignalRange.h"

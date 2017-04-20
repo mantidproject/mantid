@@ -5,6 +5,7 @@ from mantid.api import *
 import mantid.simpleapi
 import math
 
+
 class PearlMCAbsorption(PythonAlgorithm):
 
     def category(self):

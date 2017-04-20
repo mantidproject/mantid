@@ -1,8 +1,11 @@
 #include "MantidMDAlgorithms/ConvertCWSDMDtoHKL.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -13,7 +16,6 @@
 
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidAPI/FileProperty.h"
@@ -33,7 +35,6 @@ using namespace Mantid::Geometry;
 
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
-//----------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertCWSDMDtoHKL::init() {
@@ -65,7 +66,6 @@ void ConvertCWSDMDtoHKL::init() {
                   "Name of file for HKL.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertCWSDMDtoHKL::exec() {
@@ -105,7 +105,7 @@ void ConvertCWSDMDtoHKL::exec() {
 
   std::string qsamplefilename = getPropertyValue("QSampleFileName");
   // Abort with an empty string
-  if (qsamplefilename.size() > 0)
+  if (!qsamplefilename.empty())
     saveEventsToFile(qsamplefilename, vec_event_qsample, vec_event_signal,
                      vec_event_det);
 
@@ -116,7 +116,7 @@ void ConvertCWSDMDtoHKL::exec() {
   // Get file name
   std::string hklfilename = getPropertyValue("HKLFileName");
   // Abort mission if no file name is given
-  if (hklfilename.size() > 0)
+  if (!hklfilename.empty())
     saveEventsToFile(hklfilename, vec_event_hkl, vec_event_signal,
                      vec_event_det);
 
@@ -136,7 +136,7 @@ void ConvertCWSDMDtoHKL::exec() {
 
 void ConvertCWSDMDtoHKL::getUBMatrix() {
   std::string peakwsname = getPropertyValue("PeaksWorkspace");
-  if (peakwsname.size() > 0 &&
+  if (!peakwsname.empty() &&
       AnalysisDataService::Instance().doesExist(peakwsname)) {
     // Get from peak works
     DataObjects::PeaksWorkspace_sptr peakws = getProperty("PeaksWorkspace");
@@ -221,7 +221,7 @@ void ConvertCWSDMDtoHKL::saveMDToFile(
   std::string filename = getPropertyValue("QSampleFileName");
 
   // Abort with an empty string
-  if (filename.size() == 0)
+  if (filename.empty())
     return;
   if (vec_event_qsample.size() != vec_event_signal.size())
     throw std::runtime_error(

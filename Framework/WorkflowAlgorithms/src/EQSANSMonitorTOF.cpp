@@ -1,14 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument.h"
-#include "Poco/NumberFormatter.h"
-
-#include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -54,22 +50,21 @@ void EQSANSMonitorTOF::exec() {
   // Get the monitor
   const std::vector<detid_t> monitor_list =
       inputWS->getInstrument()->getMonitors();
-  if (monitor_list.size() != 1) {
+  if (monitor_list.size() != 1)
     g_log.error() << "EQSANS workspace does not have exactly ones monitor! "
                      "This should not happen\n";
-  }
-  IDetector_const_sptr mon;
-  try {
-    mon = inputWS->getInstrument()->getDetector(monitor_list[0]);
-  } catch (Exception::NotFoundError &) {
-    g_log.error() << "Spectrum number " << monitor_list[0]
+
+  const auto &detInfo = inputWS->detectorInfo();
+  const size_t monIndex0 = detInfo.indexOf(0);
+  if (!detInfo.isMonitor(monIndex0)) {
+    g_log.error() << "Spectrum number " << monIndex0
                   << " has no detector assigned to it - discarding\n";
     return;
   }
 
   // Get the source to monitor distance in mm
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
-  double monitor_z = mon->getPos().Z();
+  double monitor_z = detInfo.position(monIndex0).Z();
   double source_to_monitor = (monitor_z - source_z) * 1000.0;
 
   // Calculate the frame width
@@ -268,10 +263,7 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
     } else
       chopper_wl_1[i] = chopper_srcpulse_wl_1[i] = 0.;
 
-    if (x2 > 0)
-      chopper_wl_2[i] = 3.9560346 * x2 / CHOPPER_LOCATION[i];
-    else
-      chopper_wl_2[i] = 0.;
+    chopper_wl_2[i] = (x2 > 0) ? 3.9560346 * x2 / CHOPPER_LOCATION[i] : 0.;
 
     if (first) {
       frame_wl_1 = chopper_wl_1[i];

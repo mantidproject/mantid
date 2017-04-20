@@ -27,12 +27,12 @@
  *                                                                         *
  ***************************************************************************/
 #include "Correlation.h"
+#include "ColorBox.h"
 #include "MultiLayer.h"
 #include "Plot.h"
 #include "PlotCurve.h"
-#include "ColorBox.h"
-#include <QMessageBox>
 #include <QLocale>
+#include <QMessageBox>
 
 #include <gsl/gsl_fft_halfcomplex.h>
 
@@ -191,7 +191,7 @@ void Correlation::addResultCurve() {
     c->setData(x_temp.data(), y_temp.data(),
                d_n); // c->setData(x_temp, y_temp, d_n);
     c->setPen(QPen(ColorBox::color(d_curveColorIndex), 1));
-    d_output_graph->insertPlotItem(c, Graph::Line);
+    d_output_graph->insertPlotItem(c, GraphOptions::Line);
     d_output_graph->updatePlot();
   }
 }

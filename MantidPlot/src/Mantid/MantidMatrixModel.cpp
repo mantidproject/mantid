@@ -3,11 +3,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/ReadLock.h"
-
-#include "MantidGeometry/IDetector.h"
 
 #include <QApplication>
 #include <QObject>
@@ -55,14 +54,19 @@ double MantidMatrixModel::data(int row, int col) const {
   Mantid::Kernel::ReadLock _lock(*m_workspace);
 
   double val;
-  if (m_type == X) {
-    val = m_workspace->readX(row + m_startRow)[col];
-  } else if (m_type == Y) {
-    val = m_workspace->readY(row + m_startRow)[col];
-  } else if (m_type == E) {
-    val = m_workspace->readE(row + m_startRow)[col];
-  } else {
-    val = m_workspace->readDx(row + m_startRow)[col];
+  switch (m_type) {
+  case X:
+    val = m_workspace->x(row + m_startRow)[col];
+    break;
+  case Y:
+    val = m_workspace->y(row + m_startRow)[col];
+    break;
+  case E:
+    val = m_workspace->e(row + m_startRow)[col];
+    break;
+  default:
+    val = m_workspace->dx(row + m_startRow)[col];
+    break;
   }
   return val;
 }
@@ -143,7 +147,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
 
       // get bin centre value
       double binCentreValue;
-      const Mantid::MantidVec xVec = m_workspace->readX(0);
+      const auto &xVec = m_workspace->x(0);
       if (m_workspace->isHistogramData()) {
         if ((section + 1) >= static_cast<int>(xVec.size()))
           return section;
@@ -282,15 +286,10 @@ bool MantidMatrixModel::checkMonitorCache(int row) const {
     if (m_monCache.contains(row)) {
       isMon = m_monCache.value(row);
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMon = det->isMonitor();
-        m_monCache.insert(row, isMon);
-      } catch (std::exception &) {
-        m_monCache.insert(row, false);
-        isMon = false;
-      }
+      const auto &specInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      isMon = specInfo.hasDetectors(wsIndex) && specInfo.isMonitor(wsIndex);
+      m_monCache.insert(row, isMon);
     }
     return isMon;
   } else {
@@ -310,15 +309,10 @@ bool MantidMatrixModel::checkMaskedCache(int row) const {
     if (m_maskCache.contains(row)) {
       isMasked = m_maskCache.value(row);
     } else {
-      try {
-        size_t wsIndex = static_cast<size_t>(row);
-        auto det = m_workspace->getDetector(wsIndex);
-        isMasked = det->isMasked();
-        m_maskCache.insert(row, isMasked);
-      } catch (std::exception &) {
-        m_maskCache.insert(row, false);
-        isMasked = false;
-      }
+      const auto &specInfo = m_workspace->spectrumInfo();
+      size_t wsIndex = static_cast<size_t>(row);
+      isMasked = specInfo.hasDetectors(wsIndex) && specInfo.isMasked(wsIndex);
+      m_maskCache.insert(row, isMasked);
     }
     return isMasked;
   } else {

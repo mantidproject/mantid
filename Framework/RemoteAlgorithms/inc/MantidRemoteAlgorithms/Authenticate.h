@@ -2,6 +2,7 @@
 #define AUTHENTICATE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -46,8 +47,12 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class DLLExport Authenticate : public Mantid::API::Algorithm {
+class DLLExport Authenticate : public Mantid::API::Algorithm,
+                               public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  Authenticate();
+
   /// Algorithm's name
   const std::string name() const override { return "Authenticate"; }
   /// Summary of algorithms purpose

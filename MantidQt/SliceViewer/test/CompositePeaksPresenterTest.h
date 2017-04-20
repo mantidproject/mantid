@@ -6,6 +6,7 @@
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MockObjects.h"
 
 using namespace MantidQt::SliceViewer;

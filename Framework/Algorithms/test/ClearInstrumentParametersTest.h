@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ClearInstrumentParameters.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -27,6 +28,9 @@ public:
     // Set some parameters
     setParam("nickel-holder", "testDouble", 1.23);
     setParam("nickel-holder", "testString", "hello world");
+    const auto oldPos = m_ws->detectorInfo().position(0);
+    m_ws->mutableDetectorInfo().setPosition(0, oldPos + V3D(1.1, 2.2, 3.3));
+    TS_ASSERT_DIFFERS(oldPos, m_ws->detectorInfo().position(0));
 
     // Clear the parameters
     clearParameters();
@@ -34,6 +38,7 @@ public:
     // Check the parameters
     checkEmpty("nickel-holder", "testDouble");
     checkEmpty("nickel-holder", "testString");
+    TS_ASSERT_EQUALS(oldPos, m_ws->detectorInfo().position(0));
   }
 
   void setParam(std::string cName, std::string pName, std::string value) {
@@ -61,7 +66,7 @@ public:
   void clearParameters() {
     ClearInstrumentParameters clearer;
     TS_ASSERT_THROWS_NOTHING(clearer.initialize());
-    clearer.setPropertyValue("Workspace", m_ws->name());
+    clearer.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(clearer.execute());
     TS_ASSERT(clearer.isExecuted());
   }

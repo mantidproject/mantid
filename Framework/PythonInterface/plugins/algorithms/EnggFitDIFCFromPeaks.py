@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
+
 class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
     def category(self):
@@ -30,14 +31,14 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
                              'These two parameters are added as two columns in a single row. If not given, '
                              'the table workspace is not created.')
 
-        self.declareProperty('DIFA', 0.0, direction = Direction.Output,\
+        self.declareProperty('DIFA', 0.0, direction = Direction.Output,
                              doc = 'Fitted DIFA value. This parameter is not effectively considered and it '
                              'is always zero in this version of the algorithm.')
 
-        self.declareProperty('DIFC', 0.0, direction = Direction.Output,\
+        self.declareProperty('DIFC', 0.0, direction = Direction.Output,
                              doc = "Fitted DIFC calibration parameter")
 
-        self.declareProperty('TZERO', 0.0, direction = Direction.Output,\
+        self.declareProperty('TZERO', 0.0, direction = Direction.Output,
                              doc = "Fitted TZERO calibration parameter")
 
     def validateInputs(self):

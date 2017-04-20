@@ -7,14 +7,16 @@
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/ConfigService.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <cmath>
+#include <limits>
 
 namespace Mantid {
 namespace API {
+
+namespace {
 
 /** A Jacobian for individual functions
  */
@@ -42,6 +44,12 @@ public:
    * @param iP :: The parameter index of an individual function.
    */
   double get(size_t iY, size_t iP) override { return m_J->get(m_iY0 + iY, iP); }
+  /** Zero all matrix elements.
+  */
+  void zero() override {
+    throw Kernel::Exception::NotImplementedError(
+        "zero() is not implemented for PartialJacobian1");
+  }
 };
 
 class TempJacobian : public Jacobian {
@@ -64,6 +72,7 @@ public:
 
     return maxIndex;
   }
+  void zero() override { m_J.assign(m_J.size(), 0.0); }
 
 protected:
   size_t m_y;
@@ -71,21 +80,24 @@ protected:
   std::vector<double> m_J;
 };
 
-/// Default value for the peak radius
-int IPeakFunction::s_peakRadius = 5;
+/// Tolerance for determining the smallest significant value on the peak
+const double PEAK_TOLERANCE = 1e-14;
+/// "Infinite" value for the peak radius
+const int MAX_PEAK_RADIUS = std::numeric_limits<int>::max();
+
+} // namespace
 
 /**
-  * Constructor. Sets peak radius to the value of curvefitting.peakRadius
- * property
+  * Constructor.
   */
-IPeakFunction::IPeakFunction() {
-  int peakRadius;
-  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
-                                                 peakRadius)) {
-    if (peakRadius != s_peakRadius) {
-      setPeakRadius(peakRadius);
-    }
-  }
+IPeakFunction::IPeakFunction() : m_peakRadius(MAX_PEAK_RADIUS) {}
+
+void IPeakFunction::function(const FunctionDomain &domain,
+                             FunctionValues &values) const {
+  auto peakRadius =
+      dynamic_cast<const FunctionDomain1D &>(domain).getPeakRadius();
+  setPeakRadius(peakRadius);
+  IFunction1D::function(domain, values);
 }
 
 /**
@@ -101,7 +113,7 @@ IPeakFunction::IPeakFunction() {
 void IPeakFunction::function1D(double *out, const double *xValues,
                                const size_t nData) const {
   double c = this->centre();
-  double dx = fabs(s_peakRadius * this->fwhm());
+  double dx = fabs(m_peakRadius * this->fwhm());
   int i0 = -1;
   int n = 0;
   for (size_t i = 0; i < nData; ++i) {
@@ -132,7 +144,7 @@ void IPeakFunction::function1D(double *out, const double *xValues,
 void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
                                     const size_t nData) {
   double c = this->centre();
-  double dx = fabs(s_peakRadius * this->fwhm());
+  double dx = fabs(m_peakRadius * this->fwhm());
   int i0 = -1;
   int n = 0;
   for (size_t i = 0; i < nData; ++i) {
@@ -152,23 +164,22 @@ void IPeakFunction::functionDeriv1D(Jacobian *out, const double *xValues,
   this->functionDerivLocal(&J, xValues + i0, n);
 }
 
-void IPeakFunction::setPeakRadius(const int &r) {
+void IPeakFunction::setPeakRadius(int r) const {
   if (r > 0) {
-    s_peakRadius = r;
-    std::string setting = std::to_string(r);
-    Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",
-                                                setting);
+    m_peakRadius = r;
+  } else if (r == 0) {
+    m_peakRadius = MAX_PEAK_RADIUS;
   }
 }
 
 /// Returns the integral intensity of the peak function, using the peak radius
 /// to determine integration borders.
 double IPeakFunction::intensity() const {
-  double x0 = centre();
-  double dx = fabs(s_peakRadius * fwhm());
+  auto interval = getDomainInterval();
 
   PeakFunctionIntegrator integrator;
-  IntegrationResult result = integrator.integrate(*this, x0 - dx, x0 + dx);
+  IntegrationResult result =
+      integrator.integrate(*this, interval.first, interval.second);
 
   if (!result.success) {
     return 0.0;
@@ -217,6 +228,41 @@ std::string IPeakFunction::getCentreParameterName() const {
   fn->functionDeriv(domain, jacobian);
 
   return parameterName(jacobian.maxParam(0));
+}
+
+/// Get the interval on which the peak has all its values above a certain
+/// level. All values outside the interval are below that level.
+/// @param level :: A fraction of the peak height.
+/// @return A pair of doubles giving the bounds of the interval.
+std::pair<double, double> IPeakFunction::getDomainInterval(double level) const {
+  if (level < PEAK_TOLERANCE) {
+    level = PEAK_TOLERANCE;
+  }
+  double left = 0.0;
+  double right = 0.0;
+  auto h = height();
+  auto w = fwhm();
+  auto c = centre();
+  if (h == 0.0 || w == 0.0 || level >= 1.0) {
+    return std::make_pair(c, c);
+  }
+
+  auto findBound = [this, c, h, level](double dx) {
+    for (size_t i = 0; i < 100; ++i) {
+      double x = c + dx;
+      double y = 0.0;
+      this->functionLocal(&y, &x, 1);
+      if (fabs(y / h) < level) {
+        return x;
+      }
+      dx *= 2;
+    }
+    return c + dx;
+  };
+
+  left = findBound(-w);
+  right = findBound(w);
+  return std::make_pair(left, right);
 }
 
 } // namespace API

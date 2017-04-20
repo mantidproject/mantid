@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 
 #include <QVTKWidget.h>
 #include <pqActiveObjects.h>
@@ -59,7 +60,7 @@ ViewBase::ViewBase(QWidget *parent,
                    RebinnedSourcesManager *rebinnedSourcesManager)
     : QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
       m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
-      m_colorScaleLock(NULL) {}
+      m_colorScaleLock(nullptr) {}
 
 /**
  * This function creates a single standard ParaView view instance.
@@ -141,12 +142,25 @@ void ViewBase::setAutoColorScale() {
 }
 
 /**
+ * Clear the render layout completely
+ */
+void ViewBase::clearRenderLayout(QFrame *frame) {
+  QLayout *layout = frame->layout();
+  if (layout) {
+    QLayoutItem *item;
+    while ((item = layout->takeAt(0)))
+      layout->removeItem(item);
+    delete layout;
+  }
+}
+
+/**
  * This function sets the requested color map on the data.
  * @param model the color map to use
  */
 void ViewBase::onColorMapChange(const Json::Value &model) {
   pqPipelineRepresentation *rep = this->getRep();
-  if (NULL == rep) {
+  if (!rep) {
     return;
   }
   // Work around a "bug" in pqScalarToColors::checkRange() where the lower
@@ -231,7 +245,7 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale) {
  * @return true if the pipeline source is derived from PeaksWorkspace
  */
 bool ViewBase::isPeaksWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
@@ -284,7 +298,7 @@ pqPipelineSource *ViewBase::setPluginSource(QString pluginName, QString wsName,
   auto workspaceProvider = Mantid::Kernel::make_unique<
       Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace>>();
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(
-          wsName.toStdString(), std::move(workspaceProvider))) {
+          wsName.toStdString(), *workspaceProvider)) {
     vtkSMPropertyHelper(src->getProxy(), "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END
@@ -412,7 +426,7 @@ long long ViewBase::getNumSources() {
  * @param dvp the vector property containing the "time" information
  */
 void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp) {
-  if (NULL == dvp) {
+  if (!dvp) {
     // This is a normal filter and therefore has no timesteps.
     // qDebug() << "No timestep vector, returning.";
     return;
@@ -461,6 +475,9 @@ void ViewBase::onResetCenterToPoint(double x, double y, double z) {
  */
 void ViewBase::onParallelProjection(bool state) {
   pqRenderView *cview = this->getPvActiveView();
+  if (cview == nullptr) {
+    return;
+  }
   vtkSMProxy *proxy = cview->getProxy();
   vtkSMPropertyHelper(proxy, "CameraParallelProjection").Set(state);
   proxy->UpdateVTKObjects();
@@ -563,7 +580,7 @@ void ViewBase::closeSubWindows() {}
  */
 pqPipelineRepresentation *ViewBase::getRep() {
   pqPipelineRepresentation *rep = this->getPvActiveRep();
-  if (NULL == rep) {
+  if (!rep) {
     rep = this->origRep;
   }
   return rep;
@@ -574,7 +591,7 @@ pqPipelineRepresentation *ViewBase::getRep() {
  * @return true if the source is a MDHistoWorkspace
  */
 bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(), "WorkspaceTypeName", true)
@@ -592,7 +609,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src) {
  * @return true if the source is an internally rebinned workspace;
  */
 bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src) {
-  if (NULL == src) {
+  if (!src) {
     return false;
   }
 
@@ -670,7 +687,7 @@ pqPipelineSource *ViewBase::hasWorkspace(const QString &name) {
       }
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -882,7 +899,7 @@ void ViewBase::setAxesGrid(bool on) {
  * Check if there is an active source available
  * @returns true if there is an active source else false
  */
-bool ViewBase::hasActiveSource() { return this->getPvActiveSrc() != nullptr; }
+bool ViewBase::hasActiveSource() { return this->getPvActiveSrc(); }
 
 } // namespace SimpleGui
 } // namespace Vates

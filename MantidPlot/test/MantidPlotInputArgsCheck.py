@@ -5,6 +5,7 @@ All these functions should throw a ValueError exception when, for example:
  - the specified workspaces don't exist
  - the index(es) of spectra, bin or dimension is wrong
 """
+from __future__ import (absolute_import, division, print_function)
 import mantidplottests
 from mantidplottests import *
 import time
@@ -61,19 +62,19 @@ class MantidPlotInputArgsCheck(unittest.TestCase):
         try:
             self.assertRaises(ValueError, plotSpectrum(WrongWorkspaceName, 0), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotSpectrum_fail_spectrumNeg(self):
         try:
             self.assertRaises(ValueError, plotSpectrum(WrongWorkspaceName, -2), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotSpectrum_fail_spectrumTooBig(self):
         try:
             self.assertRaises(ValueError, plotSpectrum(WrongWorkspaceName, 3), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotBin_ok(self):
         self.g = plotSpectrum(WorkspaceName2D, 0)
@@ -83,31 +84,31 @@ class MantidPlotInputArgsCheck(unittest.TestCase):
         try:
             self.assertRaises(ValueError, plotBin(WrongWorkspaceName, 0), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotBin_fail_indexNeg(self):
         try:
             self.assertRaises(ValueError, plotBin(WrongWorkspaceName, -5), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotBin_fail_indexTooBig(self):
         try:
             self.assertRaises(ValueError, plotBin(WrongWorkspaceName, 100), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotMD_fail_NonMD(self):
         try:
             self.assertRaises(ValueError, plotMD(WorkspaceName2D, 0), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
     def test_plotMD_fail_nonIntegrated(self):
         try:
             self.assertRaises(ValueError, plotMD(MDWWorkspaceName, 100), "wont see this tab")
         except:
-            print "Failed, as it should"
+            print("Failed, as it should")
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotInputArgsCheck)

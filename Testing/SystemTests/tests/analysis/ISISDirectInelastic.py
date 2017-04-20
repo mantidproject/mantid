@@ -1,8 +1,9 @@
-﻿#pylint: disable=no-init
+#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
-import os,shutil
+import os
+import shutil
 
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
@@ -45,8 +46,6 @@ class ISISDirectInelasticReduction(stresstesting.MantidStressTest):
         """Defines the workflow for the test"""
      # rename workspace to the name expected by unit test framework
 
-
-
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-6
@@ -60,7 +59,7 @@ class ISISDirectInelasticReduction(stresstesting.MantidStressTest):
 
     def _is_numeric(self, obj):
         """Returns true if the object is an int or float, false otherwise"""
-        if type(obj) != float or type(obj) != int:
+        if not isinstance(obj, float) or not isinstance(obj, int):
             return True
         else:
             return False
@@ -68,12 +67,14 @@ class ISISDirectInelasticReduction(stresstesting.MantidStressTest):
     def _is_workspace(self, obj):
         """ Returns True if the object is a workspace"""
         return isinstance(obj, Workspace)
+
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         # this is temporary parameter
         self.scale_to_fix_abf=1
 
 #------------------------- MARI tests -------------------------------------------------
+
 
 class MARIReductionFromFile(ISISDirectInelasticReduction):
 
@@ -97,8 +98,10 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return "outWS"
+
     def get_reference_file(self):
         return "MARIReduction.nxs"
+
 
 class MARIReductionAutoEi(ISISDirectInelasticReduction):
 
@@ -123,13 +126,13 @@ class MARIReductionAutoEi(ISISDirectInelasticReduction):
         outWS*=self.scale_to_fix_abf
         self.ws_name = outWS.name()
 
-
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return self.ws_name
+
     def get_reference_file(self):
         return "MARIReductionAutoEi.nxs"
+
 
 class MARIReductionFromFileCache(ISISDirectInelasticReduction):
     _counter=0
@@ -167,8 +170,6 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
             self._file_to_clear = targ_file
             self._counter = 0
 
-
-
     def runTest(self):
         self.red.wait_for_file = 10
         self.red._debug_wait_for_files_operation = self.prepare_test_file
@@ -195,10 +196,10 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
     def validateMethod(self):
         return "validateWorkspaceToWorkspace"
 
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return "outWS"
+
     def get_reference_file(self):
         return "MARIReduction.nxs"
 
@@ -216,7 +217,6 @@ class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
 
         self.scale_to_fix_abf = 1.
 
-
     def runTest(self):
         """Defines the workflow for the test"""
         #pylint: disable=unused-variable
@@ -224,13 +224,13 @@ class MARIReductionFromWorkspace(ISISDirectInelasticReduction):
         # temporary fix to account for different monovan integral
         outWS*=self.scale_to_fix_abf
 
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return "outWS"
 
     def get_reference_file(self):
         return "MARIReduction.nxs"
+
 
 class MARIReductionMon2Norm(ISISDirectInelasticReduction):
 
@@ -288,16 +288,17 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
         outWS=self.red.reduce()
         # temporary fix to account for different monovan integral
         #outWS*=0.997966051169129
-
+        self.ws_name = outWS.name()
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
-        return "outWS"
+        return self.ws_name
 
     def get_reference_file(self):
         # monitor separate for MARI needs new maps and masks so, it is easier to redefine
         # reference file for the time being
         return "MARIReductionMonSeparate.nxs"
+
 
 class MARIReductionSum(ISISDirectInelasticReduction):
 
@@ -317,13 +318,15 @@ class MARIReductionSum(ISISDirectInelasticReduction):
         #pylint: disable=unused-variable
         outWS=self.red.reduce()
         #outWS*=1.00001556766686
+        self.ws_name = outWS.name()
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
-        return "outWS"
+        return self.ws_name
 
     def get_reference_file(self):
         return "MARIReductionSum.nxs"
+
 
 class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
 
@@ -371,20 +374,21 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
         self.red.reducer.prop_man.sample_run=[11001,11002]
         #pylint: disable=unused-variable
         outWS = self.red.run_reduction()
+        self.ws_name = outWS.name()
 
         self.red.wait_for_file =0
         self.red._debug_wait_for_files_operation = None
         os.remove(self._file_to_clear)
 
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
-        return "outWS"
+        return self.ws_name
 
     def get_reference_file(self):
         return "MARIReductionSum.nxs"
 
 #------------------------- MAPS tests -------------------------------------------------
+
 
 class MAPSDgreduceReduction(ISISDirectInelasticReduction):
 
@@ -411,11 +415,11 @@ class MAPSDgreduceReduction(ISISDirectInelasticReduction):
 
         # rename workspace to the name expected by unit test framework
         #RenameWorkspace(InputWorkspace=outWS,OutputWorkspace=wsName)
-        self.ws_name = 'outWS'
-
+        self.ws_name = outWS.name()
 
     def get_reference_file(self):
         return "MAPSDgreduceReduction.nxs"
+
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return self.ws_name
@@ -443,12 +447,14 @@ class MERLINReduction(ISISDirectInelasticReduction):
     def runTest(self):
         #pylint: disable=unused-variable
         outWS = self.red.reduce()
+        self.ws_name = outWS.name()
 
     def get_reference_file(self):
         return "MERLINReduction.nxs"
+
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
-        return "outWS"
+        return self.ws_name
 
     def validate(self):
         self.tolerance = 1e-6
@@ -462,9 +468,11 @@ class MERLINReduction(ISISDirectInelasticReduction):
 #------------------------- LET tests -------------------------------------------------
 #
 
+
 class LETReduction(stresstesting.MantidStressTest):
     tolerance = 1e-6
     tolerance_is_reller=True
+
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
         return 2000
@@ -481,7 +489,7 @@ class LETReduction(stresstesting.MantidStressTest):
         red.def_advanced_properties()
         #pylint: disable=unused-variable
         outWS=red.reduce()
-
+        self.ws_name = outWS.name()
 
     def validate(self):
         self.tolerance = 1e-6
@@ -489,7 +497,7 @@ class LETReduction(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
-        return "outWS", "LETReduction.nxs"
+        return self.ws_name, "LETReduction.nxs"
 
 
 class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
@@ -498,6 +506,7 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
     """
     tolerance = 1e-6
     tolerance_is_reller=True
+
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 20Gb"""
         return 20000
@@ -516,10 +525,10 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
 
         #pylint: disable=unused-variable
         out_ws_list=red.run_reduction()
+        self.ws_names=[ws.name() for ws in out_ws_list]
 
         #for ind,ws in enumerate(out_ws_list):
         #  ws *=mults[ind]
-
 
     def validate(self):
         self.tolerance = 1e-6
@@ -527,5 +536,4 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
 
-        return "LETreducedEi3.4","LET14305_3_4meV2015.nxs","LETreducedEi8.0", "LET14305_8_0meV2015.nxs"
-
+        return self.ws_names[0],"LET14305_3_4meV2015.nxs",self.ws_names[1], "LET14305_8_0meV2015.nxs"

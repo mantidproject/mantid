@@ -137,20 +137,24 @@ private:
         ShapeFactory().createShape(xmlShape, addTypeTag);
 
     boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
+    const int ndets(2);
+    std::vector<Detector *> detectors;
+    for (int i = 0; i < ndets; ++i) {
+      Detector *detector = new Detector("det", i + 1, shape, NULL);
+      detector->setPos(i * 0.2, i * 0.2, 5);
+      instrument->add(detector);
+      instrument->markAsDetector(detector);
+      detectors.push_back(detector);
+    }
     space2D->setInstrument(instrument);
     ObjComponent *sample = new ObjComponent("sample", shape, NULL);
     sample->setPos(0, 0, 0);
     instrument->markAsSamplePos(sample);
 
     ParameterMap &pmap = space2D->instrumentParameters();
-    // Detector info
-    const int ndets(2);
-    for (int i = 0; i < ndets; ++i) {
-      Detector *detector = new Detector("det", i + 1, shape, NULL);
-      detector->setPos(i * 0.2, i * 0.2, 5);
+    for (const auto detector : detectors) {
       pmap.add("double", detector, "TubePressure", 10.0);
       pmap.add("double", detector, "TubeThickness", 0.0008);
-      instrument->markAsDetector(detector);
     }
     return space2D;
   }

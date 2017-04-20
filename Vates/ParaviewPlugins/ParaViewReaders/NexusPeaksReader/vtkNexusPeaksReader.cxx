@@ -29,8 +29,6 @@
 vtkStandardNewMacro(vtkNexusPeaksReader)
 
 using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
@@ -215,10 +213,8 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   return 0;
 }
 
-unsigned long vtkNexusPeaksReader::GetMTime()
-{
-  unsigned long mTime = this->Superclass::GetMTime();
-  return mTime;
+vtkMTimeType vtkNexusPeaksReader::GetMTime() {
+  return this->Superclass::GetMTime();
 }
 
 /**

@@ -1,37 +1,20 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidLiveData/TOPAZLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
-//#include "MantidDataObjects/Events.h"
-//#include "MantidKernel/DateAndTime.h"
-//#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-//#include "MantidKernel/WriteLock.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/SocketAddress.h>
-//#include <Poco/Net/SocketStream.h>
-//#include <Poco/Timestamp.h>
 
-// Includes for parsing the XML device descriptions
-//#include "Poco/DOM/DOMParser.h"
-//#include "Poco/DOM/Document.h"
-//#include "Poco/DOM/AutoPtr.h"
-//#include "Poco/DOM/NodeList.h"
-//#include "Poco/DOM/NamedNodeMap.h"
-
-//#include <Poco/Thread.h>
-//#include <Poco/Runnable.h>
-
-//#include <time.h>
-//#include <sstream> // for ostringstream
 #include <string>
 #include <fstream>
 #include <exception>
@@ -157,7 +140,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
+    : LiveListener(), m_workspaceInitialized(false), m_eventBuffer(),
       m_monitorLogs(), m_wsName(), m_indexMap(), m_monitorIndexMap(),
       m_tcpSocket(), m_dataSocket(), m_dataAddr(), m_isConnected(false),
       m_udpBuf(nullptr), m_udpBufSize(32768), m_runNumber(0), m_mutex(),
@@ -202,6 +185,8 @@ TOPAZLiveEventDataListener::~TOPAZLiveEventDataListener() {
 /// Connect to the TOPAZ event_catcher util (which will supply us with
 /// events).
 /// @param address The address to attempt to connect to
+/// @param args A ConnectionArgs object used to supply additional arguments
+/// required for the connection
 /// @return Returns true if the connection succeeds.  False otherwise.
 bool TOPAZLiveEventDataListener::connect(
     const Poco::Net::SocketAddress &address)
@@ -493,7 +478,11 @@ void TOPAZLiveEventDataListener::initWorkspace() {
 
   auto tmp = createWorkspace<DataObjects::EventWorkspace>(
       m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
+  if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
+    // need to generate the spectra to detector map
+    tmp->rebuildSpectraMapping();
+  }
   m_eventBuffer = std::move(tmp);
 
   // Set the units
@@ -515,8 +504,8 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,
-                                                    monitorsBuffer, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
+                                                    *monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
     monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
@@ -577,7 +566,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
                                                          false);
 
   // Clear out the old logs, except for the most recent entry
@@ -596,8 +585,8 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(monitorBuffer,
-                                                    newMonitorBuffer, false);
+  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
+                                                    *newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces

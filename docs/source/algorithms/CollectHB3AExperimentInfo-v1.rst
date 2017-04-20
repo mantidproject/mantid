@@ -82,7 +82,7 @@ Output:
 
   Number of input files = 2
   Number of detectors in virtual instrument = 131072
-  Virtual detectors are from ID = 1 to ID = 131072
+  Virtual detectors are from ID = 0 to ID = 131070
 
 .. categories::
 

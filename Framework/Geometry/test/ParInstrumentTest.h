@@ -52,6 +52,14 @@ public:
                      std::invalid_argument);
   }
 
+  void test_getMonitors() {
+    // testDetector injects a pointer into `instrument` that is deleted later.
+    // Instrument::getMonitors will then cause a segmentation fault, so this
+    // test must run before we have invalid pointers.
+    Instrument pinstrument(instrument, pmap);
+    TS_ASSERT_EQUALS(pinstrument.getMonitors().size(), 1)
+  }
+
   void testDetector() {
     Instrument pinstrument(instrument, pmap);
     TS_ASSERT_THROWS(pinstrument.getDetector(0), Exception::NotFoundError);
@@ -86,11 +94,6 @@ public:
     ComponentID id3 = det3->getComponentID();
     TS_ASSERT_EQUALS(det3->getName(),
                      instrument->getComponentByID(id3)->getName());
-  }
-
-  void test_numMonitors() {
-    Instrument pinstrument(instrument, pmap);
-    TS_ASSERT_EQUALS(pinstrument.numMonitors(), 1)
   }
 
 private:

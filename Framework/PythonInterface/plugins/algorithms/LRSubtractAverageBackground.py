@@ -4,6 +4,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
+
 class LRSubtractAverageBackground(PythonAlgorithm):
 
     def category(self):

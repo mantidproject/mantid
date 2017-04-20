@@ -7,10 +7,10 @@
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 using Mantid::Algorithms::ConvertEmptyToTof;
 using namespace Mantid;
@@ -76,9 +76,10 @@ public:
 
     DataObjects::Workspace2D_sptr testWS = createTestWorkspace();
     WorkspaceCreationHelper::storeWS(inWSName, testWS);
+    auto &detectorInfo = testWS->mutableDetectorInfo();
 
     // move
-    placeDetectorAtSamePosition(testWS, "pixel-5)", "pixel-6)");
+    detectorInfo.setPosition(6, detectorInfo.position(5));
 
     ConvertEmptyToTof alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -173,31 +174,6 @@ private:
       }
     }
     return testWS;
-  }
-  /**
-   * Place componentName1 and componentName2 at the same distance!
-   */
-  void placeDetectorAtSamePosition(API::MatrixWorkspace_sptr ws,
-                                   const std::string &componentName1,
-                                   const std::string &componentName2) {
-
-    Geometry::Instrument_const_sptr instrument = ws->getInstrument();
-    Geometry::IComponent_const_sptr component1 =
-        instrument->getComponentByName(componentName1);
-    Geometry::IComponent_const_sptr component2 =
-        instrument->getComponentByName(componentName2);
-
-    if (component1 == 0 || component2 == 0)
-      throw std::runtime_error(
-          "component1 = 0 || component2 == 0 : Not found!");
-
-    Kernel::V3D component1Pos = component1->getPos();
-    Kernel::V3D component2NewPos(component1Pos);
-
-    Geometry::ParameterMap &pmap = ws->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(
-        *component2, pmap, component2NewPos,
-        Geometry::ComponentHelper::Absolute);
   }
 };
 

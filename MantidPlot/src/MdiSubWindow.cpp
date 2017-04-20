@@ -91,6 +91,7 @@ void MdiSubWindow::init(QWidget *parent, const QString &label,
             SLOT(changeToFloating(MdiSubWindow *)));
   }
 }
+
 void MdiSubWindow::updateCaption() {
   switch (d_caption_policy) {
   case Name:
@@ -133,9 +134,15 @@ MdiSubWindow::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
 std::string MdiSubWindow::saveToProject(ApplicationWindow *app) {
   Q_UNUSED(app);
-  throw std::runtime_error(
-      "SaveToProject not implemented for raw MdiSubWindow");
+  // By default this is unimplemented and so should return nothing
+  return "";
 }
+
+std::vector<std::string> MdiSubWindow::getWorkspaceNames() { return {}; }
+
+std::string MdiSubWindow::getWindowName() { return objectName().toStdString(); }
+
+std::string MdiSubWindow::getWindowType() { return metaObject()->className(); }
 
 void MdiSubWindow::resizeEvent(QResizeEvent *e) {
   emit resizedWindow(this);

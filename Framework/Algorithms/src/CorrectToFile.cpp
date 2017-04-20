@@ -1,12 +1,10 @@
-//-----------------------------
-// Includes
-//----------------------------
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {

@@ -176,8 +176,10 @@ public:
     bkq["B42"] = -3.8296;
     bkq["B44"] = -2.3210;
 
-    std::map<std::string, std::vector<double>> bme;
-    bme["Bmol"] = {1, 2, 3};
+    std::map<std::string, double> bme;
+    bme["BmolX"] = 1;
+    bme["BmolY"] = 2;
+    bme["BmolX"] = 3;
 
     GSLVector evalues;
     ComplexMatrix evectors;
@@ -194,8 +196,10 @@ public:
     bkq["B42"] = -3.8296;
     bkq["B44"] = -2.3210;
 
-    std::map<std::string, std::vector<double>> bme;
-    bme["Bext"] = {1, 2, 3};
+    std::map<std::string, double> bme;
+    bme["BextX"] = 1;
+    bme["BextY"] = 2;
+    bme["BextZ"] = 3;
 
     GSLVector evalues;
     ComplexMatrix evectors;
@@ -212,9 +216,13 @@ public:
     bkq["B42"] = -3.8296;
     bkq["B44"] = -2.3210;
 
-    std::map<std::string, std::vector<double>> bme;
-    bme["Bext"] = {1, 2, 3};
-    bme["Bmol"] = {3, 2, 1};
+    std::map<std::string, double> bme;
+    bme["BextX"] = 1;
+    bme["BextY"] = 2;
+    bme["BextZ"] = 3;
+    bme["BmolX"] = 3;
+    bme["BmolY"] = 2;
+    bme["BmolZ"] = 1;
 
     GSLVector evalues;
     ComplexMatrix evectors;
@@ -225,9 +233,8 @@ public:
 
 private:
   bool run(int nre, const std::map<std::string, double> &bkq,
-           const std::map<std::string, std::vector<double>> &bme,
-           GSLVector &evalues, ComplexMatrix &evectors,
-           ComplexMatrix &hamiltonian) {
+           const std::map<std::string, double> &bme, GSLVector &evalues,
+           ComplexMatrix &evectors, ComplexMatrix &hamiltonian) {
     CrystalFieldEnergies alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -259,7 +266,7 @@ private:
   }
 
 private:
-  std::map<std::string, std::vector<double>> emptyBme;
+  std::map<std::string, double> emptyBme;
 
   void doTestEigensystem(GSLVector &en, ComplexMatrix &wf, ComplexMatrix &ham) {
     const size_t n = en.size();

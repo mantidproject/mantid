@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample MARI reduction scrip used in testing ReductionWrapper """
 import os
 #
@@ -42,6 +42,7 @@ class ReduceMARIFromFile(ReductionWrapper):
         prop['nullify_negative_signal']=True
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """Method executes reduction over single file
@@ -77,13 +78,14 @@ class ReduceMARIFromFile(ReductionWrapper):
         # use this method to use standard file name generating function
         return None
 
-
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
 #-------------------------------------------------------------------------------------------------#
+
+
 def main(input_file=None,output_directory=None):
     """ This method is used to run code from web service
         and should not be touched except changing the name of the
@@ -101,6 +103,8 @@ def main(input_file=None,output_directory=None):
     return ''
 
 #----------------------------------------------------------------------------------------------------------------------
+
+
 class ReduceMARIFromWorkspace(ReductionWrapper):
 
     @MainProperties
@@ -117,7 +121,6 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         prop['monovan_run'] = Load(Filename='MAR11015.RAW',OutputWorkspace='MAR11015.RAW')
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
-
 
         return prop
 
@@ -139,6 +142,7 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         prop['nullify_negative_signal']=True
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -152,6 +156,8 @@ class ReduceMARIFromWorkspace(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
+
+
 class ReduceMARIMon2Norm(ReductionWrapper):
 
     @MainProperties
@@ -191,6 +197,7 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         prop['nullify_negative_signal']=True
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -204,6 +211,8 @@ class ReduceMARIMon2Norm(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
+
+
 class MARIReductionSum(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
@@ -236,6 +245,7 @@ class MARIReductionSum(ReductionWrapper):
         prop['nullify_negative_signal']=True
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -249,6 +259,8 @@ class MARIReductionSum(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
 #----------------------------------------------------------------------------------------------------------------------
+
+
 class ReduceMARIMonitorsSeparate(ReductionWrapper):
 
     @MainProperties
@@ -265,7 +277,6 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['monovan_run'] = 11015 #
         prop['sample_mass'] = 10
         prop['sample_rmm'] = 435.96
-
 
         return prop
 
@@ -286,12 +297,12 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
         prop['save_format'] = ''
         prop['load_monitors_with_workspace'] = False
         prop['nullify_negative_signal']=False
-        prop['mapmask_ref_ws'] = Load(Filename='MAR11001.RAW',\
-            OutputWorkspace='MAR11001.RAW',LoadMonitors='Include')
-
+        prop['mapmask_ref_ws'] = Load(Filename='MAR11001.RAW',
+                                      OutputWorkspace='MAR11001.RAW',LoadMonitors='Include')
 
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -304,6 +315,7 @@ class ReduceMARIMonitorsSeparate(ReductionWrapper):
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAR',web_var_val)
+
 
 class ReduceMARIAutoEi(ReductionWrapper):
     @MainProperties
@@ -349,6 +361,7 @@ class ReduceMARIAutoEi(ReductionWrapper):
         prop['nullify_negative_signal']=True
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """Method executes reduction over single file
@@ -383,7 +396,6 @@ class ReduceMARIAutoEi(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
-
 
     def __init__(self,web_var_val=None):
         """ sets properties defaults for the instrument with Name"""
@@ -450,4 +462,3 @@ if __name__ == "__main__":
     #red_ws = rd.run_reduction()
     # usual way to go is to reduce workspace and save it internally
     rd.run_reduction()
-

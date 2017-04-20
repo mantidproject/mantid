@@ -22,13 +22,10 @@ add_definitions ( -DQ_COMPILER_INITIALIZER_LISTS )
 # Additional compiler flags
 ##########################################################################
 # /MP     - Compile .cpp files in parallel
-# /w34296 - Treat warning C4396, about comparison on unsigned and zero,
-#           as a level 3 warning
-# /w34389 - Treat warning C4389, about equality comparison on unsigned
-#           and signed, as a level 3 warning
+# /W3     - Warning Level 3 (This is also the default)
 # /Zc:wchar_t- - Do not treat wchar_t as a builtin type. Required for Qt to
 #           work with wstring
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w34296 /w34389 /Zc:wchar_t-" )
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3 /Zc:wchar_t-" )
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
 # Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
@@ -100,15 +97,32 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/visual-studio.bat ${PROJECT_BINARY_DIR}/
 set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
 # build version
 set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\buildenv.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+
+if ( MAKE_VATES )
+  set ( PARAVIEW_PYTHON_PATHS ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk" )
+else ()
+  set (PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
-    ${PROJECT_BINARY_DIR}/mantidpython.bat @ONLY )
-# build-time rule to place it in the appropriate directory
-add_custom_target ( mantidpython ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_BINARY_DIR}/mantidpython.bat
-    ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython.bat
-    COMMENT "Generating mantidpython" )
+    ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY )
+# place it in the appropriate directory
+file(GENERATE
+     OUTPUT
+     ${PROJECT_BINARY_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/mantidpython.bat
+     INPUT
+     ${PROJECT_BINARY_DIR}/mantidpython.bat.in
+  )
 # install version
 set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
+
+if (MAKE_VATES)
+  set ( PV_LIBS "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
+  set ( PARAVIEW_PYTHON_PATHS ";${PV_LIBS}\\site-packages;${PV_LIBS}\\site-packages\\vtk" )
+else ()
+  set ( PARAVIEW_PYTHON_PATHS "" )
+endif ()
+
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
 

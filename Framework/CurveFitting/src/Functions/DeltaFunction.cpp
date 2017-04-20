@@ -17,7 +17,7 @@ using namespace API;
 
 DECLARE_FUNCTION(DeltaFunction)
 
-DeltaFunction::DeltaFunction() {
+DeltaFunction::DeltaFunction() : IPeakFunction() {
   declareParameter("Height", 1.0,
                    "Scaling factor to be applied to the resolution.");
   declareParameter("Centre", 0.0,

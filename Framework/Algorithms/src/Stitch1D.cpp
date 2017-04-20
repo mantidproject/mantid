@@ -3,6 +3,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/HistogramX.h"
+#include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -17,25 +20,19 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::MantidVec;
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace {
 
 typedef boost::tuple<double, double> MinMaxTuple;
 MinMaxTuple calculateXIntersection(MatrixWorkspace_sptr lhsWS,
                                    MatrixWorkspace_sptr rhsWS) {
-  MantidVec lhs_x = lhsWS->readX(0);
-  MantidVec rhs_x = rhsWS->readX(0);
-  return MinMaxTuple(rhs_x.front(), lhs_x.back());
+  return MinMaxTuple(rhsWS->x(0).front(), lhsWS->x(0).back());
 }
 
 bool isNonzero(double i) { return (0 != i); }
-
-bool isNan(const double &value) { return boost::math::isnan(value); }
-
-bool isInf(const double &value) {
-  return std::abs(value) == std::numeric_limits<double>::infinity();
-}
 }
 
 namespace Mantid {
@@ -63,21 +60,21 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
                                           MatrixWorkspace_sptr &source) {
   MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR2(source, product)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source, *product))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the bin boundaries
-    product->setX(i, source->refX(i));
+    product->setSharedX(i, source->sharedX(i));
     // Copy over the data
-    const MantidVec &sourceY = source->readY(i);
-    const MantidVec &sourceE = source->readE(i);
+    const auto &sourceY = source->y(i);
+    const auto &sourceE = source->e(i);
 
     // initially zero - out the data.
-    product->dataY(i) = MantidVec(sourceY.size(), 0);
-    product->dataE(i) = MantidVec(sourceE.size(), 0);
+    product->mutableY(i) = HistogramY(sourceY.size(), 0);
+    product->mutableE(i) = HistogramE(sourceE.size(), 0);
 
-    MantidVec &newY = product->dataY(i);
-    MantidVec &newE = product->dataE(i);
+    auto &newY = product->mutableY(i);
+    auto &newE = product->mutableE(i);
 
     // Copy over the non-zero stuff
     std::copy(sourceY.begin() + a1 + 1, sourceY.begin() + a2,
@@ -99,14 +96,13 @@ MatrixWorkspace_sptr Stitch1D::maskAllBut(int a1, int a2,
  * @param source : Workspace to mask.
  */
 void Stitch1D::maskInPlace(int a1, int a2, MatrixWorkspace_sptr source) {
-  MatrixWorkspace_sptr product = WorkspaceFactory::Instance().create(source);
   const int histogramCount = static_cast<int>(source->getNumberHistograms());
-  PARALLEL_FOR2(source, product)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*source))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
-    MantidVec &sourceY = source->dataY(i);
-    MantidVec &sourceE = source->dataE(i);
+    auto &sourceY = source->mutableY(i);
+    auto &sourceE = source->mutableE(i);
 
     for (int i = a1; i < a2; ++i) {
       sourceY[i] = 0;
@@ -147,9 +143,10 @@ void Stitch1D::init() {
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
-  declareProperty(make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace",
-                                                       true, Direction::Input),
-                  "Scaling either with respect to workspace 1 or workspace 2");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("ScaleRHSWorkspace", true,
+                                           Direction::Input),
+      "Scaling either with respect to LHS workspace or RHS workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("UseManualScaleFactor",
                                                        false, Direction::Input),
                   "True to use a provided value for the scale factor.");
@@ -234,24 +231,24 @@ double Stitch1D::getEndOverlap(const double &intesectionMin,
  @param scaleRHS :: Scale the right hand side workspace
  @return a vector<double> contianing the rebinning parameters
  */
-MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
-                                   MatrixWorkspace_sptr &rhsWS,
-                                   const bool scaleRHS) const {
-  MantidVec inputParams = this->getProperty("Params");
+std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
+                                             MatrixWorkspace_sptr &rhsWS,
+                                             const bool scaleRHS) const {
+  std::vector<double> inputParams = this->getProperty("Params");
   Property *prop = this->getProperty("Params");
   const bool areParamsDefault = prop->isDefault();
 
-  const MantidVec &lhsX = lhsWS->readX(0);
+  const auto &lhsX = lhsWS->x(0);
   auto it = std::min_element(lhsX.begin(), lhsX.end());
   const double minLHSX = *it;
 
-  const MantidVec &rhsX = rhsWS->readX(0);
+  const auto &rhsX = rhsWS->x(0);
   it = std::max_element(rhsX.begin(), rhsX.end());
   const double maxRHSX = *it;
 
-  MantidVec result;
+  std::vector<double> result;
   if (areParamsDefault) {
-    MantidVec calculatedParams;
+    std::vector<double> calculatedParams;
 
     // Calculate the step size based on the existing step size of the LHS
     // workspace. That way scale factors should be reasonably maintained.
@@ -272,7 +269,7 @@ MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
     result = calculatedParams;
   } else {
     if (inputParams.size() == 1) {
-      MantidVec calculatedParams;
+      std::vector<double> calculatedParams;
       calculatedParams.push_back(minLHSX);
       calculatedParams.push_back(inputParams.front()); // Use the step supplied.
       calculatedParams.push_back(maxRHSX);
@@ -284,13 +281,13 @@ MantidVec Stitch1D::getRebinParams(MatrixWorkspace_sptr &lhsWS,
   return result;
 }
 
-/**Runs the Rebin Algorithm as a child
+/**Runs the Rebin Algorithm as a child and replaces special values
  @param input :: The input workspace
  @param params :: a vector<double> containing rebinning parameters
  @return A shared pointer to the resulting MatrixWorkspace
  */
 MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
-                                     const MantidVec &params) {
+                                     const std::vector<double> &params) {
   auto rebin = this->createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", input);
   rebin->setProperty("Params", params);
@@ -304,7 +301,7 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
 
   // Record special values and then mask them out as zeros. Special values are
   // remembered and then replaced post processing.
-  PARALLEL_FOR1(outWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outWS))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     std::vector<size_t> &nanYIndexes = m_nanYIndexes[i];
@@ -312,24 +309,24 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     std::vector<size_t> &infYIndexes = m_infYIndexes[i];
     std::vector<size_t> &infEIndexes = m_infEIndexes[i];
     // Copy over the data
-    MantidVec &sourceY = outWS->dataY(i);
-    MantidVec &sourceE = outWS->dataE(i);
+    auto &sourceY = outWS->mutableY(i);
+    auto &sourceE = outWS->mutableE(i);
 
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double &value = sourceY[j];
       const double &eValue = sourceE[j];
-      if (isNan(value)) {
+      if (std::isnan(value)) {
         nanYIndexes.push_back(j);
         sourceY[j] = 0;
-      } else if (isInf(value)) {
+      } else if (std::isinf(value)) {
         infYIndexes.push_back(j);
         sourceY[j] = 0;
       }
 
-      if (isNan(eValue)) {
+      if (std::isnan(eValue)) {
         nanEIndexes.push_back(j);
         sourceE[j] = 0;
-      } else if (isInf(eValue)) {
+      } else if (std::isinf(eValue)) {
         infEIndexes.push_back(j);
         sourceE[j] = 0;
       }
@@ -361,52 +358,6 @@ MatrixWorkspace_sptr Stitch1D::integration(MatrixWorkspace_sptr &input,
                     boost::lexical_cast<std::string>(stop));
   integration->execute();
   MatrixWorkspace_sptr outWS = integration->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-/**Runs the MultiplyRange Algorithm as a child defining an end bin
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param endBin :: The last bin in the range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const int &endBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("EndBin", endBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange EndBin: " + std::to_string(endBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
-  return outWS;
-}
-
-/**Runs the MultiplyRange Algorithm as a child
- @param input :: The input workspace
- @param startBin :: The first bin int eh range to multiply
- @param factor :: The multiplication factor
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::multiplyRange(MatrixWorkspace_sptr &input,
-                                             const int &startBin,
-                                             const double &factor) {
-  auto multiplyRange = this->createChildAlgorithm("MultiplyRange");
-  multiplyRange->setProperty("InputWorkspace", input);
-  multiplyRange->setProperty("StartBin", startBin);
-  multiplyRange->setProperty("Factor", factor);
-  g_log.information("MultiplyRange StartBin: " + std::to_string(startBin));
-  g_log.information("MultiplyRange Factor: " +
-                    boost::lexical_cast<std::string>(factor));
-  multiplyRange->execute();
-  MatrixWorkspace_sptr outWS = multiplyRange->getProperty("OutputWorkspace");
   return outWS;
 }
 
@@ -465,12 +416,12 @@ Stitch1D::findStartEndIndexes(double startOverlap, double endOverlap,
 bool Stitch1D::hasNonzeroErrors(MatrixWorkspace_sptr ws) {
   int64_t ws_size = static_cast<int64_t>(ws->getNumberHistograms());
   bool hasNonZeroErrors = false;
-  PARALLEL_FOR1(ws)
-  for (int i = 0; i < ws_size; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
+  for (int64_t i = 0; i < ws_size; ++i) {
     PARALLEL_START_INTERUPT_REGION
     if (!hasNonZeroErrors) // Keep checking
     {
-      auto e = ws->readE(i);
+      auto e = ws->e(i);
       auto it = std::find_if(e.begin(), e.end(), isNonzero);
       if (it != e.end()) {
         PARALLEL_CRITICAL(has_non_zero) {
@@ -577,10 +528,9 @@ void Stitch1D::exec() {
       ratio = rhsOverlapIntegrated / lhsOverlapIntegrated;
       rebinnedLHS = rebinnedLHS * ratio;
     }
-    scaleFactor = ratio->readY(0).front();
-    errorScaleFactor = ratio->readE(0).front();
-    if (scaleFactor < 1e-2 || scaleFactor > 1e2 ||
-        boost::math::isnan(scaleFactor)) {
+    scaleFactor = ratio->y(0).front();
+    errorScaleFactor = ratio->e(0).front();
+    if (scaleFactor < 1e-2 || scaleFactor > 1e2 || std::isnan(scaleFactor)) {
       std::stringstream messageBuffer;
       messageBuffer << "Stitch1D calculated scale factor is: " << scaleFactor
                     << ". Check that in both input workspaces the integrated "
@@ -630,11 +580,11 @@ void Stitch1D::exec() {
  */
 void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
   int histogramCount = static_cast<int>(ws->getNumberHistograms());
-  PARALLEL_FOR1(ws)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Copy over the data
-    MantidVec &sourceY = ws->dataY(i);
+    auto &sourceY = ws->mutableY(i);
 
     for (auto j : m_nanYIndexes[i]) {
       sourceY[j] = std::numeric_limits<double>::quiet_NaN();

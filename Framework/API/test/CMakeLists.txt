@@ -9,12 +9,15 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/InstrumentCreationHelper.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
+                        ../../TestHelpers/src/FakeObjects.cpp
       )
   cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries( APITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
             Geometry
             HistogramData
+            Indexing
+            Beamline
             Kernel
             Nexus
             ${JSONCPP_LIBRARIES}
@@ -23,7 +26,7 @@ if ( CXXTEST_FOUND )
             ${POCO_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${GMOCK_LIBRARIES}
-            ${GTEST_LIBRARIES}  )
+            ${GTEST_LIBRARIES} )
 
   add_dependencies ( FrameworkTests APITest )
   # Test data

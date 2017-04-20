@@ -9,6 +9,7 @@ class DNSdata(object):
     this class describes the DNS data structure
     will be used for DNS data read-in and write-out routines
     """
+
     def __init__(self):
         self.title = ""
         self.experiment_number = ""

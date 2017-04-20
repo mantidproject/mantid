@@ -1,5 +1,6 @@
 #include <cfloat>
 #include <cmath>
+#include <complex>
 #include <vector>
 
 #include "MantidKernel/V3D.h"
@@ -638,9 +639,9 @@ void V3D::readPrinted(std::istream &IX) {
   if (c1 == std::string::npos || c2 == std::string::npos)
     throw std::runtime_error("Wrong format for V3D input: [" + in + "]");
 
-  x = atof(in.substr(i + 1, c1 - i - 1).c_str());
-  y = atof(in.substr(c1 + 1, c2 - c1 - 1).c_str());
-  z = atof(in.substr(c2 + 1, j - c2 - 1).c_str());
+  x = std::stod(in.substr(i + 1, c1 - i - 1));
+  y = std::stod(in.substr(c1 + 1, c2 - c1 - 1));
+  z = std::stod(in.substr(c2 + 1, j - c2 - 1));
 }
 
 /**

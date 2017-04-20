@@ -37,9 +37,9 @@ public:
 
     // Test some values in the range
     const size_t npts(inputWS->blocksize());
-    const auto &inX(inputWS->readX(0));
-    const auto &backX(backgroundWS->readX(0));
-    const auto &corrX(backgroundWS->readX(0));
+    const auto &inX(inputWS->x(0));
+    const auto &backX(backgroundWS->x(0));
+    const auto &corrX(backgroundWS->x(0));
 
     // X values are just straight copy
     TS_ASSERT_DELTA(backX.front(), inX.front(), 1e-08);
@@ -50,23 +50,24 @@ public:
     TS_ASSERT_DELTA(corrX.back(), inX.back(), 1e-08);
 
     // E values are zero for background & copy for corrected
-    const auto &backE(backgroundWS->readE(0));
+    const auto &backE(backgroundWS->e(0));
     TS_ASSERT_DELTA(backE.front(), 0.0, 1e-08);
     TS_ASSERT_DELTA(backE[npts / 2], 0.0, 1e-08);
     TS_ASSERT_DELTA(backE.back(), 0.0, 1e-08);
-    const auto &corrE(correctedWS->readE(0));
-    const auto &inE(inputWS->readE(0));
+
+    const auto &corrE(correctedWS->e(0));
+    const auto &inE(inputWS->e(0));
     TS_ASSERT_DELTA(corrE.front(), inE.front(), 1e-08);
     TS_ASSERT_DELTA(corrE[npts / 2], inE[npts / 2], 1e-08);
     TS_ASSERT_DELTA(corrE.back(), inE.back(), 1e-08);
 
-    const auto &corrY(correctedWS->readY(0));
+    const auto &corrY(correctedWS->y(0));
     TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
     TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
     TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
 
     // Background Y values = 0.0
-    const auto &backY(backgroundWS->readY(0));
+    const auto &backY(backgroundWS->y(0));
     TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
     TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
     TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
@@ -86,9 +87,9 @@ public:
 
     // Test some values in the range
     const size_t npts(inputWS->blocksize());
-    const auto &inX(inputWS->readX(0));
-    const auto &backX(backgroundWS->readX(0));
-    const auto &corrX(backgroundWS->readX(0));
+    const auto &inX(inputWS->x(0));
+    const auto &backX(backgroundWS->x(0));
+    const auto &corrX(backgroundWS->x(0));
 
     // X values are just straight copy
     TS_ASSERT_DELTA(backX.front(), inX.front(), 1e-08);
@@ -100,14 +101,14 @@ public:
 
     // Corrected matches input the detector is not defined as forward scatter
     // range - Currently hardcoded in algorithm
-    const auto &inY(inputWS->readY(0));
-    const auto &corrY(correctedWS->readY(0));
+    const auto &inY(inputWS->y(0));
+    const auto &corrY(correctedWS->y(0));
     TS_ASSERT_DELTA(corrY.front(), inY.front(), 1e-08);
     TS_ASSERT_DELTA(corrY[npts / 2], inY[npts / 2], 1e-08);
     TS_ASSERT_DELTA(corrY.back(), inY.back(), 1e-08);
 
     // Background Y values = 0.0
-    const auto &backY(backgroundWS->readY(0));
+    const auto &backY(backgroundWS->y(0));
     TS_ASSERT_DELTA(backY.front(), 0.0, 1e-08);
     TS_ASSERT_DELTA(backY[npts / 2], 0.0, 1e-08);
     TS_ASSERT_DELTA(backY.back(), 0.0, 1e-08);
@@ -133,9 +134,9 @@ public:
 
     // Test some values in the range
     const size_t npts(inputWS->blocksize());
-    const auto &inX(inputWS->readX(0));
-    const auto &backX(backgroundWS->readX(0));
-    const auto &corrX(backgroundWS->readX(0));
+    const auto &inX(inputWS->x(0));
+    const auto &backX(backgroundWS->x(0));
+    const auto &corrX(backgroundWS->x(0));
 
     // X values are just straight copy
     TS_ASSERT_DELTA(backX.front(), inX.front(), 1e-08);
@@ -146,24 +147,24 @@ public:
     TS_ASSERT_DELTA(corrX.back(), inX.back(), 1e-08);
 
     // E values are zero for background & copy for corrected
-    const auto &backE(backgroundWS->readE(0));
+    const auto &backE(backgroundWS->e(0));
     TS_ASSERT_DELTA(backE.front(), 0.0, 1e-08);
     TS_ASSERT_DELTA(backE[npts / 2], 0.0, 1e-08);
     TS_ASSERT_DELTA(backE.back(), 0.0, 1e-08);
-    const auto &corrE(correctedWS->readE(0));
-    const auto &inE(inputWS->readE(0));
+    const auto &corrE(correctedWS->e(0));
+    const auto &inE(inputWS->e(0));
     TS_ASSERT_DELTA(corrE.front(), inE.front(), 1e-08);
     TS_ASSERT_DELTA(corrE[npts / 2], inE[npts / 2], 1e-08);
     TS_ASSERT_DELTA(corrE.back(), inE.back(), 1e-08);
 
     // Corrected values
-    const auto &corrY(correctedWS->readY(0));
+    const auto &corrY(correctedWS->y(0));
     TS_ASSERT_DELTA(corrY.front(), -0.00253802, 1e-08);
     TS_ASSERT_DELTA(corrY[npts / 2], 0.15060372, 1e-08);
     TS_ASSERT_DELTA(corrY.back(), -0.01696477, 1e-08);
 
     // Background Y values = 0.0
-    const auto &backY(backgroundWS->readY(0));
+    const auto &backY(backgroundWS->y(0));
     TS_ASSERT_DELTA(backY.front(), -0.00000138, 1e-08);
     TS_ASSERT_DELTA(backY[npts / 2], -0.00015056, 1e-08);
     TS_ASSERT_DELTA(backY.back(), 0.01650629, 1e-08);
@@ -251,12 +252,55 @@ private:
         Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
     // Copy data
     for (size_t i = 0; i < nhist; ++i) {
-      twoSpectrum->setX(i, singleSpectrum->refX(0));
-      twoSpectrum->dataY(i) = singleSpectrum->readY(0);
-      twoSpectrum->dataE(i) = singleSpectrum->readE(0);
+      twoSpectrum->setHistogram(i, singleSpectrum->histogram(0));
     }
     return twoSpectrum;
   }
 };
 
+// Clang format drops this down a line if namespace is used
+using namespace CxxTest;
+
+class VesuvioCalculateGammaBackgroundTestPerformance : public TestSuite {
+public:
+  void setUp() override {
+    double x0(50.0), x1(300.0), dx(0.5);
+    constexpr int nhist = 1;
+
+    auto singleSpectrum = ComptonProfileTestHelpers::createTestWorkspace(
+        1, x0, x1, dx, true, true);
+    auto inWs =
+        Mantid::API::WorkspaceFactory::Instance().create(singleSpectrum, nhist);
+
+    for (size_t i = 0; i < nhist; ++i) {
+      inWs->setHistogram(i, singleSpectrum->histogram(0));
+    }
+
+    // Bring spectrum numbers into checked range
+    inWs->getSpectrum(0).setSpectrumNo(135);
+
+    inputWs = inWs;
+
+    calcBackgroundAlg.initialize();
+    calcBackgroundAlg.setProperty("InputWorkspace", inputWs);
+    calcBackgroundAlg.setPropertyValue(
+        "ComptonFunction",
+        "name=GaussianComptonProfile,Mass=1.0079,Width=2.9e-2,Intensity=4.29");
+    calcBackgroundAlg.setProperty("BackgroundWorkspace", outBackWsName);
+    calcBackgroundAlg.setProperty("CorrectedWorkspace", outCorrWsName);
+
+    calcBackgroundAlg.setRethrows(true);
+  }
+
+  void testVesuvioCalculateGammaBackgroundPerformance() {
+    TS_ASSERT_THROWS_NOTHING(calcBackgroundAlg.execute());
+  }
+
+private:
+  VesuvioCalculateGammaBackground calcBackgroundAlg;
+  Mantid::API::MatrixWorkspace_sptr inputWs;
+
+  const std::string outBackWsName = "backgroundWs";
+  const std::string outCorrWsName = "correctedWs";
+};
 #endif /* MANTID_ALGORITHMS_VesuvioCalculateGammaBackgroundTEST_H_ */

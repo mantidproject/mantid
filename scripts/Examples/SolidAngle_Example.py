@@ -28,10 +28,9 @@ phi = detector.getPhi()
 
 print 'R = ' + str(r) + ', TwoTheta = ' + str(twoTheta)+ ', Phi = ' + str(phi)
 
-# Check if the detector is masked out and calculate the result if not
+# Check if the spectrum is masked out and calculate the result if not
 solidAngle = 0.0
-if not detector.isMasked():
+if not rawData.spectrumInfo().isMasked(0):
     sAngle = detector.solidAngle(samplePos)
 
 print "The solid angle of the spectrum located at index " + str(wsIndex) + " is: " + str(sAngle) + " steradians"
-

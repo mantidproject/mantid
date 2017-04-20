@@ -30,32 +30,31 @@
 #include "ApplicationWindow.h"
 #include "Bar.h"
 #include "Cone3D.h"
-#include "MyParser.h"
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
-#include "MantidQtAPI/PlotAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtAPI/PlotAxis.h"
 #include "MatrixModel.h"
+#include "MyParser.h"
 #include "UserFunction.h" //Mantid
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
 #include <QApplication>
-#include <QMessageBox>
-#include <QFileDialog>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QClipboard>
-#include <QPixmap>
 #include <QBitmap>
+#include <QClipboard>
 #include <QCursor>
 #include <QImageWriter>
+#include <QMessageBox>
+#include <QPixmap>
+#include <QPrintDialog>
+#include <QPrinter>
 
-#include <qwt3d_io_gl2ps.h>
 #include <qwt3d_coordsys.h>
+#include <qwt3d_io_gl2ps.h>
 
-#include <gsl/gsl_vector.h>
 #include <fstream>
+#include <gsl/gsl_vector.h>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Graph3D)
@@ -2869,7 +2868,9 @@ int Graph3D::read3DPlotStyle(MantidQt::API::TSVSerialiser &tsv) {
 
 Graph3D::SurfaceFunctionParams
 Graph3D::readSurfaceFunction(MantidQt::API::TSVSerialiser &tsv) {
-  SurfaceFunctionParams params;
+  // We cant use {0} to zero initialise as GCC incorrectly thinks
+  // the members are still uninitialised
+  SurfaceFunctionParams params = SurfaceFunctionParams();
   tsv >> params.formula;
   params.type = readSurfaceFunctionType(params.formula);
 
@@ -3099,4 +3100,10 @@ std::string Graph3D::saveToProject(ApplicationWindow *app) {
 
   tsv.writeRaw("</SurfacePlot>");
   return tsv.outputLines();
+}
+
+std::vector<std::string> Graph3D::getWorkspaceNames() {
+  // wsName is actually "Workspace workspacename", so we chop off
+  // the first 10 characters.
+  return {title.toStdString().substr(10, std::string::npos)};
 }

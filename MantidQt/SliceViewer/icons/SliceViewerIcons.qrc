@@ -30,5 +30,6 @@
         <file>peak_sphere.png</file>
         <file>peak_ellipsoid.png</file>
         <file>peak_cross.png</file>
+		<file>Nonorthogonal 32x32.png</file>
     </qresource>
 </RCC>

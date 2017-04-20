@@ -26,13 +26,13 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTableControllerVsi
   Q_OBJECT
 public:
   PeaksTableControllerVsi(boost::shared_ptr<CameraManager> cameraManager,
-                          QWidget *parent = 0);
+                          QWidget *parent = nullptr);
   ~PeaksTableControllerVsi() override;
   std::vector<bool> getViewablePeaks();
   bool hasPeaks();
   void showFullTable();
   void removeTable();
-  std::string getConcatenatedWorkspaceNames(std::string delimiter);
+  std::string getConcatenatedWorkspaceNames(const std::string &delimiter);
   void
   updatePeaksWorkspaces(const QList<QPointer<pqPipelineSource>> &peakSources,
                         pqPipelineSource *splatSource);
@@ -43,21 +43,20 @@ public slots:
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row);
   void onPeaksSorted(const std::string &columnToSortBy,
                      const bool sortAscending,
-                     Mantid::API::IPeaksWorkspace_sptr ws);
+                     const Mantid::API::IPeaksWorkspace *ws);
   void destroySinglePeakSource();
   void onPeakMarkerDestroyed();
 
 private:
-  void addWorkspace(pqPipelineSource *source,
-                    QPointer<pqPipelineSource> splatSource);
+  void addWorkspace(pqPipelineSource *source, pqPipelineSource *splatSource);
   std::vector<std::string>
-  extractFrameFromSource(QPointer<pqPipelineSource> splatSource);
+  extractFrameFromSource(pqPipelineSource *splatSource);
   void generateSinglePeaksSource(double position1, double position2,
                                  double position3, double radius);
   void resetSinglePeaksSource(double position1, double position2,
                               double position3, double radius);
   bool checkMatchingSources(pqPipelineSource *source,
-                            QPointer<pqPipelineSource> splatSource);
+                            pqPipelineSource *splatSource);
   double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
   void removeLayout(QWidget *widget);
   void createTable();

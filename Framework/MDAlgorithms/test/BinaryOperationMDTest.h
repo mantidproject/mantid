@@ -65,7 +65,7 @@ public:
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 5, 10.0, 1.0);
     event_A = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
     event_B = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+    scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
     AnalysisDataService::Instance().addOrReplace("histo_A", histo_A);
     AnalysisDataService::Instance().addOrReplace("histo_B", histo_B);
     AnalysisDataService::Instance().addOrReplace("histo2d_100", histo2d_100);

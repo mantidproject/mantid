@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"

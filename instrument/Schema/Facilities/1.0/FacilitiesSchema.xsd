@@ -82,8 +82,14 @@
                     <xs:element name="technique" maxOccurs="unbounded" type="xs:string"/>
                     <xs:element name="livedata">
                       <xs:complexType>
-                        <xs:attribute name ="address" type="xs:string" use="required"/>
-                        <xs:attribute name="listener" type="xs:string" use="optional"/>
+                        <xs:attribute name="default" type="xs:string" use="optional"/>
+                        <xs:element name="connection" minOccurs="1" maxOccurs="unbounded">
+                          <xs:complexType>
+                            <xs:attribute name="name" type="xs:string" use="required"/>
+                            <xs:attribute name="address" type="xs:string" use="required"/>
+                            <xs:attribute name="listener" type="xs:string" use="required"/>
+                          </xs:complexType>
+                        </xs:element>
                       </xs:complexType>
                     </xs:element>
                   </xs:choice>
@@ -92,17 +98,13 @@
                   <xs:attribute name="beamline" type="xs:string" use="optional"/>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="livedata" minOccurs="0">
-                <xs:complexType>
-                  <xs:attribute name="listener" type="xs:string" use="required"/>
-                </xs:complexType>
-              </xs:element>
             </xs:choice>
             <xs:attribute name="name"/>
             <xs:attribute name="zeropadding"/>
             <xs:attribute name="FileExtensions"/>
             <xs:attribute name="delimiter"/>
             <xs:attribute name="nofileprefix"/>
+            <xs:attribute name="multifilelimit"/>
           </xs:complexType>
         </xs:element>
       </xs:choice>

@@ -416,8 +416,11 @@ size_t CompositeFunction::addFunction(IFunction_sptr f) {
  * @param i :: The index of the function to remove
  */
 void CompositeFunction::removeFunction(size_t i) {
-  if (i >= nFunctions())
-    throw std::out_of_range("Function index out of range.");
+  if (i >= nFunctions()) {
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
+  }
 
   IFunction_sptr fun = getFunction(i);
 
@@ -477,8 +480,11 @@ void CompositeFunction::replaceFunctionPtr(const IFunction_sptr f_old,
  * @param f :: A pointer to the new function
  */
 void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
-  if (i >= nFunctions())
-    throw std::out_of_range("Function index out of range.");
+  if (i >= nFunctions()) {
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
+  }
 
   IFunction_sptr fun = getFunction(i);
   size_t np_old = fun->nParams();
@@ -522,7 +528,9 @@ void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
  */
 IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
   if (i >= nFunctions()) {
-    throw std::out_of_range("Function index out of range.");
+    throw std::out_of_range("Function index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nFunctions()) +
+                            ").");
   }
   return m_functions[i];
 }
@@ -534,7 +542,9 @@ IFunction_sptr CompositeFunction::getFunction(std::size_t i) const {
  */
 size_t CompositeFunction::functionIndex(std::size_t i) const {
   if (i >= nParams()) {
-    throw std::out_of_range("Function parameter index out of range.");
+    throw std::out_of_range("Function parameter index (" + std::to_string(i) +
+                            ") out of range (" + std::to_string(nParams()) +
+                            ").");
   }
   return m_IFunction[i];
 }
@@ -624,10 +634,10 @@ ParameterTie *CompositeFunction::getTie(size_t i) const {
  * Attaches a tie to this function. The attached tie is owned by the function.
  * @param tie :: A pointer to a new tie
  */
-void CompositeFunction::addTie(ParameterTie *tie) {
+void CompositeFunction::addTie(std::unique_ptr<ParameterTie> tie) {
   size_t i = getParameterIndex(*tie);
   size_t iFun = functionIndex(i);
-  m_functions[iFun]->addTie(tie);
+  m_functions[iFun]->addTie(std::move(tie));
 }
 
 /**
@@ -649,10 +659,10 @@ void CompositeFunction::declareParameter(const std::string &name,
 /** Add a constraint
  *  @param ic :: Pointer to a constraint.
  */
-void CompositeFunction::addConstraint(IConstraint *ic) {
+void CompositeFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
   size_t i = getParameterIndex(*ic);
   size_t iFun = functionIndex(i);
-  getFunction(iFun)->addConstraint(ic);
+  getFunction(iFun)->addConstraint(std::move(ic));
 }
 
 /**
@@ -753,6 +763,54 @@ CompositeFunction::getContainingFunction(const ParameterReference &ref) const {
     }
   }
   return IFunction_sptr();
+}
+
+/// Get number of domains required by this function
+size_t CompositeFunction::getNumberDomains() const {
+  auto n = nFunctions();
+  if (n == 0) {
+    return 1;
+  }
+  size_t nd = getFunction(0)->getNumberDomains();
+  for (size_t iFun = 1; iFun < n; ++iFun) {
+    if (getFunction(0)->getNumberDomains() != nd) {
+      throw std::runtime_error("CompositeFunction has members with "
+                               "inconsistent domain numbers.");
+    }
+  }
+  return nd;
+}
+
+/// Split this function (if needed) into a list of independent functions.
+/// The number of functions must be the number of domains this function is
+/// working on (== getNumberDomains()). The result of evaluation of the
+/// created functions on their domains must be the same as if this function
+/// was evaluated on the composition of those domains.
+std::vector<IFunction_sptr>
+CompositeFunction::createEquivalentFunctions() const {
+  auto nd = getNumberDomains();
+  if (nd == 1) {
+    return std::vector<IFunction_sptr>(
+        1, FunctionFactory::Instance().createInitialized(asString()));
+  }
+
+  auto nf = nFunctions();
+  std::vector<std::vector<IFunction_sptr>> equiv;
+  equiv.reserve(nf);
+  for (size_t i = 0; i < nf; ++i) {
+    equiv.push_back(getFunction(i)->createEquivalentFunctions());
+  }
+
+  std::vector<IFunction_sptr> funs;
+  funs.reserve(nd);
+  for (size_t i = 0; i < nd; ++i) {
+    auto comp = new CompositeFunction;
+    funs.push_back(IFunction_sptr(comp));
+    for (size_t j = 0; j < nf; ++j) {
+      comp->addFunction(equiv[j][i]);
+    }
+  }
+  return funs;
 }
 
 } // namespace API

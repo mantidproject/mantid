@@ -6,7 +6,9 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
 
@@ -274,33 +276,33 @@ private:
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(outputWS->blocksize(), 30);
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[0], 1.0);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0.4577471236305);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0.4583269753105);
+      TS_ASSERT_EQUALS(outputWS->x(0)[0], 1.0);
+      TS_ASSERT_EQUALS(outputWS->y(0)[0], 0.4577471236305);
+      TS_ASSERT_EQUALS(outputWS->e(0)[0], 0.4583269753105);
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[18], 19.0);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[18], 0.4269539475692);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[18], 0.7621692556536);
+      TS_ASSERT_EQUALS(outputWS->x(0)[18], 19.0);
+      TS_ASSERT_EQUALS(outputWS->y(0)[18], 0.4269539475692);
+      TS_ASSERT_EQUALS(outputWS->e(0)[18], 0.7621692556536);
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[29], 30.0);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[29], 0.9277321695608);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[29], 0.6603289895322);
+      TS_ASSERT_EQUALS(outputWS->x(0)[29], 30.0);
+      TS_ASSERT_EQUALS(outputWS->y(0)[29], 0.9277321695608);
+      TS_ASSERT_EQUALS(outputWS->e(0)[29], 0.6603289895322);
     } else {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(outputWS->blocksize(), 51);
       TS_ASSERT(!outputWS->sharedDx(0));
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0.25);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0.19104);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0.0);
+      TS_ASSERT_EQUALS(outputWS->x(0)[0], 0.25);
+      TS_ASSERT_EQUALS(outputWS->y(0)[0], 0.19104);
+      TS_ASSERT_EQUALS(outputWS->e(0)[0], 0.0);
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[18], 0.34);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[18], 0.1825);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[18], 0.0);
+      TS_ASSERT_EQUALS(outputWS->x(0)[18], 0.34);
+      TS_ASSERT_EQUALS(outputWS->y(0)[18], 0.1825);
+      TS_ASSERT_EQUALS(outputWS->e(0)[18], 0.0);
 
-      TS_ASSERT_EQUALS(outputWS->readX(0)[50], 0.50);
-      TS_ASSERT_EQUALS(outputWS->readY(0)[50], 0.16611);
-      TS_ASSERT_EQUALS(outputWS->readE(0)[50], 0.0);
+      TS_ASSERT_EQUALS(outputWS->x(0)[50], 0.50);
+      TS_ASSERT_EQUALS(outputWS->y(0)[50], 0.16611);
+      TS_ASSERT_EQUALS(outputWS->e(0)[50], 0.0);
     }
   }
 };

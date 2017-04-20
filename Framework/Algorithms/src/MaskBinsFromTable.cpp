@@ -158,7 +158,7 @@ void MaskBinsFromTable::processMaskBinWorkspace(
     } else if (boost::algorithm::starts_with(colname, "detectorid")) {
       id_dets = i;
     } else {
-      g_log.warning() << "In TableWorkspace " << masktblws->name()
+      g_log.warning() << "In TableWorkspace " << masktblws->getName()
                       << ", column " << i << " with name " << colname
                       << " is not used by MaskBinsFromTable.";
     }

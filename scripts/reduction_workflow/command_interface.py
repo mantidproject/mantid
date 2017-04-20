@@ -5,6 +5,7 @@
 
 from reduction_workflow.reducer import Reducer
 
+
 class ReductionSingleton(object):
     """ Singleton reduction class """
 
@@ -23,7 +24,7 @@ class ReductionSingleton(object):
 
     @classmethod
     def clean(cls, reducer_cls=None):
-        if reducer_cls==None:
+        if reducer_cls is None:
             ReductionSingleton.__instance = Reducer()
         else:
             ReductionSingleton.__instance = reducer_cls()
@@ -38,8 +39,7 @@ class ReductionSingleton(object):
         if issubclass(red.__class__, Reducer):
             ReductionSingleton.__instance = red
         else:
-            raise RuntimeError, 'The object passed to ReductionSingleton.replace() must be of type Reducer'
-
+            raise RuntimeError('The object passed to ReductionSingleton.replace() must be of type Reducer')
 
     @classmethod
     def run(cls):
@@ -63,28 +63,37 @@ class ReductionSingleton(object):
         return setattr(self.__instance, attr, value)
 
 ## Utilities
+
+
 def get_property_manager(name):
     prop_mng = PropertyManagerDataService.retrieve(name)
 
 ## List of user commands ######################################################
+
+
 def Clear(reducer_cls=None):
     """
         Clears the Reducer of changes applied by all previous commands
     """
     ReductionSingleton.clean(reducer_cls)
 
+
 def DataPath(path):
     ReductionSingleton().set_data_path(path)
+
 
 def OutputPath(path):
     ReductionSingleton().set_output_path(path)
     ReductionSingleton().reduction_properties["OutputDirectory"] = path
 
+
 def Reduce1D():
     return ReductionSingleton().reduce()
 
+
 def Reduce():
     return ReductionSingleton().reduce()
+
 
 def AppendDataFile(datafile, workspace=None):
     """
@@ -94,6 +103,7 @@ def AppendDataFile(datafile, workspace=None):
             [Default will be the name of the file]
     """
     ReductionSingleton().append_data_file(datafile, workspace)
+
 
 def ClearDataFiles():
     """

@@ -1,10 +1,8 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
@@ -80,9 +78,9 @@ void rotateComponent(const IComponent &comp, ParameterMap &pmap,
     // Find the corresponding relative position
     auto parent = comp.getParent();
     if (parent) {
-      Quat rot0 = parent->getRelativeRot();
+      Quat rot0 = parent->getRotation();
       rot0.inverse();
-      newRot = rot * rot0;
+      newRot = rot0 * rot;
     }
   } else if (rotType == Relative) {
     const Quat &Rot0 = comp.getRelativeRot();

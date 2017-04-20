@@ -320,7 +320,7 @@ UnitCell PoldiPeakCollection::unitCellFromString(
 
   try {
     cell = strToUnitCell(unitCellString);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // do nothing
   }
 

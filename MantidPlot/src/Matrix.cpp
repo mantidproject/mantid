@@ -30,49 +30,50 @@
 
 #include "ApplicationWindow.h"
 #include "Graph.h"
-#include "muParserScript.h"
 #include "MantidKernel/Strings.h"
-#include "MatrixCommand.h"
-#include "pixmaps.h"
-#include "ScriptingEnv.h"
 #include "MantidQtAPI/TSVSerialiser.h"
+#include "MatrixCommand.h"
+#include "ScriptingEnv.h"
+#include "muParserScript.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QtGlobal>
-#include <QTextStream>
-#include <QList>
-#include <QEvent>
-#include <QContextMenuEvent>
-#include <QVBoxLayout>
-#include <QMouseEvent>
-#include <QHeaderView>
 #include <QApplication>
-#include <QVarLengthArray>
 #include <QClipboard>
-#include <QShortcut>
-#include <QPrinter>
-#include <QPrintDialog>
-#include <QPainter>
-#include <QLocale>
+#include <QContextMenuEvent>
+#include <QEvent>
+#include <QFile>
+#include <QHeaderView>
+#include <QImageWriter>
 #include <QItemDelegate>
 #include <QLabel>
+#include <QList>
+#include <QLocale>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPrintDialog>
+#include <QPrinter>
+#include <QShortcut>
 #include <QStackedWidget>
-#include <QImageWriter>
 #include <QSvgGenerator>
-#include <QFile>
+#include <QTextStream>
 #include <QUndoStack>
+#include <QVBoxLayout>
+#include <QVarLengthArray>
+#include <QtGlobal>
 
 #include <boost/algorithm/string.hpp>
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_math.h>
 
 // Register the window into the WindowFactory
 DECLARE_WINDOW(Matrix)
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
                const QString &name, Qt::WFlags f)
@@ -1703,3 +1704,5 @@ std::string Matrix::saveToProject(ApplicationWindow *app) {
 
   return tsv.outputLines();
 }
+
+std::vector<std::string> Matrix::getWorkspaceNames() { return {}; }

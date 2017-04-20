@@ -68,6 +68,7 @@ import numpy as np
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
 
+
 def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=2, pad=True):
     """
     Removes horizontal stripes in sinograms (reducing ring artifacts in the reconstructed volume).
@@ -113,6 +114,7 @@ def remove_sino_stripes_rings_wf(data_vol, wv_levels, wavelet_name='db5', sigma=
 
     return data_vol
 
+
 def ft_horizontal_bands(c_V, wv_levels, sigma):
     """
     Fourier transform of horizontal frequency bands
@@ -131,4 +133,3 @@ def ft_horizontal_bands(c_V, wv_levels, sigma):
         c_V[nlvl] = np.real(np.fft.ifft(np.fft.ifftshift(fcV), axis=0))
 
     return c_V
-

@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/CuboidGaugeVolumeAbsorption.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -27,7 +28,7 @@ public:
 
   void testFailsIfNoInstrument() {
     // Create a simple test workspace that has no instrument
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::create2DWorkspace(10, 5);
     // Needs to have units of wavelength
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");

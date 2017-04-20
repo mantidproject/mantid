@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
-#include "ui_ConvFit.h"
 #include "IndirectDataAnalysisTab.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_ConvFit.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -64,8 +64,15 @@ private:
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
   void updatePlotOptions();
-  QString convertFuncToShort(const QString &);
-  QString convertBackToShort(const std::string &original);
+  void addParametersToTree(const QStringList &parameters,
+                           const QString &currentFitFunction);
+  void addSampleLogsToWorkspace(const std::string &workspaceName,
+                                const std::string &logName,
+                                const std::string &logText,
+                                const std::string &logType);
+  void initFABADAOptions();
+  void showFABADA(bool advanced);
+  void hideFABADA();
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -86,7 +93,12 @@ private:
   QStringList m_fitStrings;
 
   // Used in auto generating defaults for parameters
-  QStringList m_defaultParams;
+  QMap<QString, double> m_defaultParams;
+  QMap<QString, double> createDefaultParamsMap(QMap<QString, double> map);
+  QMap<QString, double>
+  constructFullPropertyMap(const QMap<QString, double> &defaultMap,
+                           const QStringList &parameters,
+                           const QString &fitFunction);
 };
 } // namespace IDA
 } // namespace CustomInterfaces

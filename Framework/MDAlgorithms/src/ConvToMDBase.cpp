@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

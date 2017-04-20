@@ -120,7 +120,7 @@ public:
 
   void setDataToClonedWS(std::string &current_WS, const std::string &cloned_WS);
 
-  void setBankItems();
+  void setBankItems(const std::vector<std::string> &bankFiles);
 
   void setRunNoItems(const std::vector<std::string> &runNumVector,
                      bool multiRun);
@@ -152,21 +152,23 @@ private:
   startAsyncFittingWorker(const std::vector<std::string> &focusedRunNo,
                           const std::string &expectedPeaks);
 
+  std::string getBaseNameFromStr(const std::string &filePath) const;
+
   std::string validateFittingexpectedPeaks(std::string &expectedPeaks) const;
 
   void inputChecksBeforeFitting(const std::string &focusedRunNo,
                                 const std::string &expectedPeaks);
 
-  void updateFittingDirVec(const std::string &focusDir,
-                           const std::string &runNumberVec,
-                           std::vector<std::string> &fittingRunNoDirVec,
-                           std::vector<std::string> &foundRunNumber);
+  // TODO make this const when the global is removed
+  bool findFilePathFromBaseName(const std::string &directoryToSearch,
+                                const std::string &baseFileNamesToFind,
+                                std::vector<std::string> &foundFullFilePath);
 
   std::vector<std::string>
   splitFittingDirectory(const std::string &selectedfPath);
 
-  void enableMultiRun(std::string firstRun, std::string lastRun,
-                      std::vector<std::string> &fittingRunNoDirVec);
+  std::vector<std::string> enableMultiRun(const std::string &firstRun,
+                                          const std::string &lastRun);
 
   void browsePeaksToFit();
 
@@ -178,19 +180,19 @@ private:
 
   void fittingWriteFile(const std::string &fileDir);
 
-  void browsedFile(const std::string strFocusedFile,
-                   std::vector<std::string> &runnoDirVector,
-                   const std::vector<std::string> &splitBaseName,
-                   std::vector<std::string> &runNoVec,
-                   const std::string &bankFileDir);
+  std::vector<std::string>
+  getAllBrowsedFilePaths(const std::string &inputFullPath,
+                         std::vector<std::string> &foundFullFilePaths);
 
-  void processMultiRun(const std::string strFocusedFile,
-                       std::vector<std::string> &runnoDirVector);
+  std::vector<std::string> processMultiRun(const std::string userInput);
 
-  void processSingleRun(const std::string &focusDir,
-                        const std::string &strFocusedFile,
-                        std::vector<std::string> &runnoDirVector,
-                        const std::vector<std::string> &splitBaseName);
+  std::vector<std::string>
+  processSingleRun(const std::string &userInputBasename,
+                   const std::vector<std::string> &splitBaseName);
+
+  std::vector<std::string>
+  processFullPathInput(const Poco::Path &pocoFilePath,
+                       const std::vector<std::string> &splitBaseName);
 
   // whether to use AlignDetectors to convert units
   static const bool g_useAlignDetectors;

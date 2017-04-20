@@ -33,6 +33,7 @@
           <property name="techniques" stdset="0">
            <stringlist>
             <string>TOF Indirect Geometry Spectroscopy</string>
+            <string>Reactor Indirect Geometry Spectroscopy</string>
            </stringlist>
           </property>
           <property name="disabledInstruments" stdset="0">
@@ -57,20 +58,10 @@
         <string>Sample Details</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
-        <property name="margin">
-         <number>9</number>
-        </property>
         <item row="0" column="0">
          <widget class="QLabel" name="lbChemicalFormula">
           <property name="text">
            <string>Chemical Formula</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lbNumberDensity">
-          <property name="text">
-           <string>Number Density</string>
           </property>
          </widget>
         </item>
@@ -101,9 +92,9 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="spNumberDensity">
+         <widget class="QDoubleSpinBox" name="spDensity">
           <property name="suffix">
-           <string> atoms/Å^3</string>
+           <string/>
           </property>
           <property name="decimals">
            <number>5</number>
@@ -135,6 +126,20 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cbDensityType">
+          <item>
+           <property name="text">
+            <string>Mass Density (g/cm^3)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Number Density  (atoms/Å^3)</string>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </widget>

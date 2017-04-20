@@ -1,10 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOOLCONFIGTOMOPY_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOOLCONFIGTOMOPY_H_
 
-#include <string>
-
-#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "Poco/NumberFormatter.h"
@@ -26,6 +24,9 @@ void EQSANSQ2D::init() {
   declareProperty("NumberOfBins", 100,
                   "Number of bins in each dimension of the 2D output",
                   Kernel::Direction::Input);
+  declareProperty("IQxQyLogBinning", false,
+                  "I(qx,qy) log binning when binning is not specified.",
+                  Kernel::Direction::Input);
   declareProperty("OutputMessage", "", Direction::Output);
 }
 
@@ -47,7 +48,7 @@ void EQSANSQ2D::exec() {
   // If the OutputWorkspace property was not given, use the
   // name of the input workspace as the base name for the output
   std::string outputWSName = getPropertyValue("OutputWorkspace");
-  if (outputWSName.size() == 0) {
+  if (outputWSName.empty()) {
     outputWSName = inputWS->getName();
   }
 
@@ -131,12 +132,14 @@ void EQSANSQ2D::exec() {
     rebinAlg->setProperty("PreserveEvents", false);
     rebinAlg->executeAsChildAlg();
 
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .5, .65);
     qxyAlg->setProperty<MatrixWorkspace_sptr>(
         "InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax / nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
+    qxyAlg->setProperty<bool>("IQxQyLogBinning", log_binning);
     qxyAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");
@@ -168,6 +171,7 @@ void EQSANSQ2D::exec() {
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax / nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
+    qxyAlg->setProperty<bool>("IQxQyLogBinning", log_binning);
     qxyAlg->executeAsChildAlg();
 
     qxy_output = qxyAlg->getProperty("OutputWorkspace");
@@ -185,11 +189,13 @@ void EQSANSQ2D::exec() {
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   } else {
     // When not in frame skipping mode, simply run Qxy
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .3, 0.9);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax / nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
+    qxyAlg->setProperty<bool>("IQxQyLogBinning", log_binning);
     qxyAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");

@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -38,7 +39,7 @@ public:
     Run &run = ws->mutableRun();
     // Do we have all we expect
     const std::vector<Property *> &logs = run.getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 74);
+    TS_ASSERT_EQUALS(logs.size(), 75);
     Property *prop;
     TimeSeriesProperty<double> *dProp;
 
@@ -83,7 +84,8 @@ public:
     const API::Run &run = testWS->run();
     const std::vector<Property *> &logs = run.getLogData();
     TS_ASSERT_EQUALS(logs.size(),
-                     34); // 33 logs in file + 1 synthetic nperiods log
+                     36); // 34 logs in file + 1 synthetic nperiods log
+                          // + 1 proton_charge_by_period log
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -113,6 +115,29 @@ public:
             run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(), 172);
+  }
+
+  void test_File_With_Bad_Property() {
+    LoadNexusLogs loader;
+    loader.initialize();
+    MatrixWorkspace_sptr testWS = createTestWorkspace();
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Workspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "IMAT00003680.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    const API::Run &run = testWS->run();
+
+    TimeSeriesProperty<std::string> *putLog =
+        dynamic_cast<TimeSeriesProperty<std::string> *>(
+            run.getLogData("EPICS_PUTLOG"));
+    TS_ASSERT(putLog);
+    std::string str = putLog->value();
+    TS_ASSERT_EQUALS(str.size(), 340);
+    // Characters 77 + 6 (i.e. 77-83) contain the bad characters
+    // Check they were replaced with space characters
+    TS_ASSERT_EQUALS(str.substr(77, 6), "E ( $ ");
   }
 
   void test_extract_nperiod_log_from_event_nexus() {
@@ -167,6 +192,33 @@ public:
                                           periodValues.end());
     TSM_ASSERT_EQUALS("Should have 4 periods in total", 4,
                       uniquePeriods.size());
+
+    std::vector<double> protonChargeByPeriod =
+        run.getPropertyValueAsType<std::vector<double>>(
+            "proton_charge_by_period");
+    TSM_ASSERT_EQUALS("Should have four proton charge entries", 4,
+                      protonChargeByPeriod.size());
+  }
+
+  void test_extract_run_title_from_event_nexus() {
+
+    auto testWS = createTestWorkspace();
+    auto run = testWS->run();
+
+    LoadNexusLogs loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setProperty("Workspace", testWS);
+    loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+    loader.execute();
+    run = testWS->run();
+
+    const bool hasTitle = run.hasProperty("run_title");
+    TSM_ASSERT("Should have run_title now we have run LoadNexusLogs", hasTitle);
+
+    std::string title = run.getPropertyValueAsType<std::string>("run_title");
+    TSM_ASSERT_EQUALS("Run title is not correct",
+                      "3He polariser test 0.9bar Long Polariser 0.75A", title);
   }
 
   void test_log_non_default_entry() {

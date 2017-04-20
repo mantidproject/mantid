@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class LoadMuonNexusTest(stresstesting.MantidStressTest):
 
     def runTest(self):

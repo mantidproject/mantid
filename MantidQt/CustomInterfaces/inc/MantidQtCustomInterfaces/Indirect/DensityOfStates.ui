@@ -21,7 +21,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwInputFile" native="true">
+       <widget class="MantidQt::API::MWRunFiles" name="mwInputFile" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -537,9 +537,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

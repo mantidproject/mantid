@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 

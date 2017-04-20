@@ -157,6 +157,12 @@ public:
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<Property *> outputs,
                    bool isPeriodic) const override;
+
+  /// New split method
+  void splitByTimeVector(std::vector<DateAndTime> &splitter_time_vec,
+                         std::vector<int> &target_vec,
+                         std::vector<TimeSeriesProperty *> outputs);
+
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
                          double max, double TimeTolerance = 0.0,
@@ -169,16 +175,22 @@ public:
   double averageValueInFilter(
       const std::vector<SplittingInterval> &filter) const override;
   /// Calculate the time-weighted average of a property
-  double timeAverageValue() const;
+  double timeAverageValue() const override;
+  /// generate constant time-step histogram from the property values
+  void histogramData(const Kernel::DateAndTime &tMin,
+                     const Kernel::DateAndTime &tMax,
+                     std::vector<double> &counts) const;
 
   ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All
   ///  values
   std::map<DateAndTime, TYPE> valueAsCorrectMap() const;
-  ///  Return the time series's values as a vector<TYPE>
+  ///  Return the time series's values (unfiltered) as a vector<TYPE>
   std::vector<TYPE> valuesAsVector() const;
   ///  Return the time series as a correct C++ multimap<DateAndTime, TYPE>. All
   ///  values
   std::multimap<DateAndTime, TYPE> valueAsMultiMap() const;
+  /// Get filtered values as a vector
+  std::vector<TYPE> filteredValuesAsVector() const;
 
   /// Return the time series's times as a vector<DateAndTime>
   std::vector<DateAndTime> timesAsVector() const override;
@@ -292,12 +304,15 @@ public:
     * total size you'll need easily available in advance.  */
   void reserve(size_t size) { m_values.reserve(size); };
 
+  /// If filtering by log, get the time intervals for splitting
+  std::vector<Mantid::Kernel::SplittingInterval> getSplittingIntervals() const;
+
 private:
   //----------------------------------------------------------------------------------------------
   /// Saves the time vector has time + start attribute
   void saveTimeVector(::NeXus::File *file);
-  /// Sort the property into increasing times
-  void sort() const;
+  /// Sort the property into increasing times, if not already sorted
+  void sortIfNecessary() const;
   ///  Find the index of the entry of time t in the mP vector (sorted)
   int findIndex(Kernel::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.
@@ -309,6 +324,8 @@ private:
   size_t findNthIndexFromQuickRef(int n) const;
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
+  /// Find if time lies in a filtered region
+  bool isTimeFiltered(const Kernel::DateAndTime &time) const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;

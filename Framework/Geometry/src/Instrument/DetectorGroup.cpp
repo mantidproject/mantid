@@ -1,9 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
 namespace Mantid {
@@ -25,12 +24,9 @@ DetectorGroup::DetectorGroup()
 /** Constructor that takes a list of detectors to add
 *  @param dets :: The vector of IDetector pointers that this virtual detector
 * will hold
-*  @param warnAboutMasked :: If true a log message at warning level will be
-* generated if a one of the detectors in dets is masked.
 *  @throw std::invalid_argument If an empty vector is passed as argument
 */
-DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
-                             bool warnAboutMasked)
+DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
     : IDetector(), m_id(), m_detectors(), group_topology(undef) {
   if (dets.empty()) {
     g_log.error("Illegal attempt to create an empty DetectorGroup");
@@ -38,36 +34,23 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets,
   }
   std::vector<IDetector_const_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it) {
-    addDetector(*it, warnAboutMasked);
+    addDetector(*it);
   }
 }
 
 /** Add a detector to the collection
 *  @param det ::  A pointer to the detector to add
-*  @param warn :: Whether to issue warnings to the log
 */
-void DetectorGroup::addDetector(IDetector_const_sptr det, bool &warn) {
+void DetectorGroup::addDetector(IDetector_const_sptr det) {
   // the topology of the group become undefined and needs recalculation if new
   // detector has been added to the group
   group_topology = undef;
-  // Warn if adding a masked detector
-  if (warn && det->isMasked()) {
-    g_log.warning() << "Adding a detector (ID:" << det->getID()
-                    << ") that is flagged as masked.\n";
-    warn = false;
-  }
 
   // For now at least, the ID is the same as the first detector that is added
   if (m_detectors.empty())
     m_id = det->getID();
 
-  if ((!m_detectors.insert(DetCollection::value_type(det->getID(), det))
-            .second) &&
-      warn) {
-    g_log.warning() << "Detector with ID " << det->getID()
-                    << " is already in group.\n";
-    warn = false;
-  }
+  m_detectors.insert(DetCollection::value_type(det->getID(), det));
 }
 
 detid_t DetectorGroup::getID() const { return m_id; }
@@ -204,7 +187,6 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
 
 /** Gives the total solid angle subtended by a group of detectors by summing the
  *  contributions from the individual detectors.
- *  Any masked detector in the group is excluded from the sum.
  *  @param observer :: The point from which the detector is being viewed
  *  @return The solid angle in steradians
  *  @throw NullPointerException If geometrical form of any detector has not been
@@ -215,26 +197,9 @@ double DetectorGroup::solidAngle(const V3D &observer) const {
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
     IDetector_const_sptr det = (*it).second;
-    if (!det->isMasked())
-      result += det->solidAngle(observer);
+    result += det->solidAngle(observer);
   }
   return result;
-}
-
-/** Are ALL the detectors in this group masked?
- *  @return True if every one of the detectors in this group is masked, false
- * otherwise.
- */
-bool DetectorGroup::isMasked() const {
-  bool isMasked = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMasked()) {
-      isMasked = false;
-      break;
-    }
-  }
-  return isMasked;
 }
 
 /** Return true if any detector in the group is parametrized.
@@ -246,22 +211,6 @@ bool DetectorGroup::isParametrized() const {
     if ((*it).second->isParametrized())
       return true;
   return false;
-}
-
-/** Indicates whether this is a monitor.
-*  Will return false if even one member of the group is not flagged as a monitor
-*  @return is detector group a monitor
-*/
-bool DetectorGroup::isMonitor() const {
-  // Would you ever want to group monitors?
-  // For now, treat as NOT a monitor if even one isn't
-  bool isMonitor = true;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if (!(*it).second->isMonitor())
-      isMonitor = false;
-  }
-  return isMonitor;
 }
 
 /** isValid() is true if the point is inside any of the detectors, i.e. one of
@@ -494,6 +443,22 @@ std::string DetectorGroup::getFullName() const {
 
 const Kernel::Material DetectorGroup::material() const {
   return Kernel::Material();
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+const ParameterMap &DetectorGroup::parameterMap() const {
+  throw std::runtime_error("A DetectorGroup cannot have a ParameterMap");
+}
+
+/// Helper for legacy access mode. Always throws for DetectorGroup.
+size_t DetectorGroup::index() const {
+  throw std::runtime_error("A DetectorGroup cannot have an index");
+}
+
+void DetectorGroup::registerContents(class ComponentVisitor &) const {
+  throw std::runtime_error("DetectorGroup::registerContents. This should not "
+                           "be called. DetectorGroups are not part of the "
+                           "instrument. On-the-fly only.");
 }
 
 } // namespace Geometry

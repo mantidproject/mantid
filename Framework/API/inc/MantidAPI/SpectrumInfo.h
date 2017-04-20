@@ -3,33 +3,41 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <boost/shared_ptr.hpp>
 
-#include <mutex>
 #include <vector>
 
 namespace Mantid {
 using detid_t = int32_t;
+class SpectrumDefinition;
+namespace Beamline {
+class SpectrumInfo;
+}
 namespace Geometry {
-class IComponent;
 class IDetector;
 class Instrument;
+class ParameterMap;
 }
 namespace API {
 
-class MatrixWorkspace;
+class DetectorInfo;
+class ExperimentInfo;
 
 /** API::SpectrumInfo is an intermediate step towards a SpectrumInfo that is
   part of Instrument-2.0. The aim is to provide a nearly identical interface
   such that we can start refactoring existing code before the full-blown
   implementation of Instrument-2.0 is available.
 
-  SpectrumInfo provides easy access to commonly used parameters, such as mask
-  and monitor flags, L1, L2, and 2-theta.
+  SpectrumInfo provides easy access to commonly used parameters of individual
+  spectra (which may correspond to one or more detectors), such as mask and
+  monitor flags, L1, L2, and 2-theta.
 
-  This class is thread safe with OpenMP BUT NOT WITH ANY OTHER THREADING LIBRARY
-  such as Poco threads or Intel TBB.
+  This class is thread safe for read operations (const access) with OpenMP BUT
+  NOT WITH ANY OTHER THREADING LIBRARY such as Poco threads or Intel TBB. There
+  are no thread-safety guarantees for write operations (non-const access). Reads
+  concurrent with writes or concurrent writes are not allowed.
 
 
   @author Simon Heybrock
@@ -58,8 +66,16 @@ class MatrixWorkspace;
 */
 class MANTID_API_DLL SpectrumInfo {
 public:
-  SpectrumInfo(const MatrixWorkspace &workspace);
+  SpectrumInfo(const Beamline::SpectrumInfo &spectrumInfo,
+               const ExperimentInfo &experimentInfo,
+               DetectorInfo &detectorInfo);
   ~SpectrumInfo();
+
+  size_t size() const;
+
+  const SpectrumDefinition &spectrumDefinition(const size_t index) const;
+  const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
+  sharedSpectrumDefinitions() const;
 
   bool isMonitor(const size_t index) const;
   bool isMasked(const size_t index) const;
@@ -70,38 +86,31 @@ public:
   bool hasDetectors(const size_t index) const;
   bool hasUniqueDetector(const size_t index) const;
 
+  void setMasked(const size_t index, bool masked);
+
+  // This is likely to be deprecated/removed with the introduction of
+  // Instrument-2.0: The concept of detector groups will probably be dropped so
+  // returning a single detector for a spectrum will not be possible anymore.
+  const Geometry::IDetector &detector(const size_t index) const;
+
   // This does not really belong into SpectrumInfo, but it seems to be useful
   // while Instrument-2.0 does not exist.
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
   double l1() const;
 
+  friend class ExperimentInfo;
+
 private:
   const Geometry::IDetector &getDetector(const size_t index) const;
-  const Geometry::IComponent &getSource() const;
-  const Geometry::IComponent &getSample() const;
+  const SpectrumDefinition &
+  checkAndGetSpectrumDefinition(const size_t index) const;
 
-  // These cache init functions are not thread-safe! Use only in combination
-  // with std::call_once!
-  void cacheSource() const;
-  void cacheSample() const;
-  void cacheL1() const;
-
-  const MatrixWorkspace &m_workspace;
-  boost::shared_ptr<const Geometry::Instrument> m_instrument;
-  std::vector<detid_t> m_validDetectorIDs;
-  // The following variables are mutable, since they are initialized (cached)
-  // only on demand, by const getters.
-  mutable boost::shared_ptr<const Geometry::IComponent> m_source;
-  mutable boost::shared_ptr<const Geometry::IComponent> m_sample;
-  mutable Kernel::V3D m_sourcePos;
-  mutable Kernel::V3D m_samplePos;
-  mutable double m_L1;
-  mutable std::once_flag m_sourceCached;
-  mutable std::once_flag m_sampleCached;
-  mutable std::once_flag m_L1Cached;
-
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>> m_detectors;
+  const ExperimentInfo &m_experimentInfo;
+  DetectorInfo &m_detectorInfo;
+  const Beamline::SpectrumInfo &m_spectrumInfo;
+  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+      m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };
 

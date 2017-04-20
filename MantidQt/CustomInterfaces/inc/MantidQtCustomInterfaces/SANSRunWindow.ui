@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>950</width>
+    <width>1022</width>
     <height>632</height>
    </rect>
   </property>
@@ -382,7 +382,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_10">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatterSample" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="scatterSample" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -398,7 +398,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="scatCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="scatCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -439,7 +439,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_11">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transmis" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="transmis" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -458,7 +458,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="transCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -499,7 +499,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_12">
                  <item row="0" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="direct" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="direct" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -518,7 +518,7 @@
                   </widget>
                  </item>
                  <item row="1" column="0">
-                  <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dirCan" native="true">
+                  <widget class="MantidQt::API::MWRunFiles" name="dirCan" native="true">
                    <property name="toolTip">
                     <string>The run with the sample under investigation</string>
                    </property>
@@ -689,20 +689,6 @@
              <string>Options</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_20">
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="verbose_check">
-               <property name="text">
-                <string>Verbose</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="log_colette">
-               <property name="text">
-                <string>Log Colette cmds</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QCheckBox" name="plot_check">
                <property name="text">
@@ -752,7 +738,20 @@
              <string>Save</string>
             </property>
             <layout class="QGridLayout" name="gridLayout">
-             <item row="0" column="5" rowspan="2">
+             <item row="3" column="2">
+              <spacer name="horizontalSpacer_25">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="9" rowspan="2">
               <widget class="QPushButton" name="saveFilename_btn">
                <property name="minimumSize">
                 <size>
@@ -768,53 +767,23 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="5">
-              <widget class="QCheckBox" name="saveCSV_check">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>CSV</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="4">
+             <item row="3" column="3">
               <widget class="QCheckBox" name="saveRKH_check">
                <property name="toolTip">
                 <string>Select one or more file formats</string>
                </property>
                <property name="text">
-                <string>RKH</string>
+                <string>RKH (1D/2D)</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="3">
-              <widget class="QCheckBox" name="saveCan_check">
+             <item row="4" column="8" colspan="2">
+              <widget class="QPushButton" name="saveSel_btn">
                <property name="toolTip">
-                <string>Select one or more file formats</string>
+                <string>Save multiple workspaces</string>
                </property>
                <property name="text">
-                <string>CanSAS</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QCheckBox" name="saveNex_check">
-               <property name="toolTip">
-                <string>Select one or more file formats</string>
-               </property>
-               <property name="text">
-                <string>Nexus</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" rowspan="2">
-              <widget class="QLabel" name="label_58">
-               <property name="toolTip">
-                <string>Save the output workspace to this file</string>
-               </property>
-               <property name="text">
-                <string>Filename:</string>
+                <string>Save Other</string>
                </property>
               </widget>
              </item>
@@ -828,7 +797,14 @@
                </property>
               </widget>
              </item>
-             <item row="4" column="1" colspan="2">
+             <item row="1" column="1" colspan="8">
+              <widget class="QLineEdit" name="outfile_edit">
+               <property name="toolTip">
+                <string>Save the output workspace to this file</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1" colspan="6">
               <widget class="QPushButton" name="saveDefault_btn">
                <property name="toolTip">
                 <string>Save the workspace from a single run file reduction</string>
@@ -838,27 +814,13 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1" colspan="4">
-              <widget class="QLineEdit" name="outfile_edit">
+             <item row="3" column="7">
+              <widget class="QCheckBox" name="saveCan_check">
                <property name="toolTip">
-                <string>Save the output workspace to this file</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="4" colspan="2">
-              <widget class="QPushButton" name="saveSel_btn">
-               <property name="toolTip">
-                <string>Save multiple workspaces</string>
+                <string>Select one or more file formats</string>
                </property>
                <property name="text">
-                <string>Save Other</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QCheckBox" name="saveNIST_Qxy_check">
-               <property name="text">
-                <string>NIST Qxy</string>
+                <string>CanSAS  (1D)</string>
                </property>
               </widget>
              </item>
@@ -875,6 +837,73 @@ Zero Error</string>
                 <bool>true</bool>
                </property>
               </widget>
+             </item>
+             <item row="3" column="5">
+              <widget class="QCheckBox" name="saveNXcanSAS_check">
+               <property name="toolTip">
+                <string>Select one or more file formats. 
+The NXcanSAS format can be used to save 1D and 2D data. </string>
+               </property>
+               <property name="text">
+                <string>NXcanSAS  (1D/2D)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" rowspan="2">
+              <widget class="QLabel" name="label_58">
+               <property name="toolTip">
+                <string>Save the output workspace to this file</string>
+               </property>
+               <property name="text">
+                <string>Filename:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QCheckBox" name="saveNIST_Qxy_check">
+               <property name="text">
+                <string>NIST Qxy(2D)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <spacer name="horizontalSpacer_26">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="6">
+              <spacer name="horizontalSpacer_27">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="8">
+              <spacer name="horizontalSpacer_28">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
@@ -1833,7 +1862,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodRearFile" native="true">
+              <widget class="MantidQt::API::MWRunFiles" name="floodRearFile" native="true">
                <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
@@ -1863,7 +1892,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFrontFile" native="true">
+              <widget class="MantidQt::API::MWRunFiles" name="floodFrontFile" native="true">
                <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
@@ -2343,7 +2372,7 @@ intermediate ranges are there for comparison</string>
           <item>
            <widget class="QGroupBox" name="q_resolution_group_box">
             <property name="title">
-             <string>QResolution</string>
+             <string>&amp;QResolution</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -3701,7 +3730,7 @@ p, li { white-space: pre-wrap; }
                     <item>
                      <widget class="QLabel" name="label_14">
                       <property name="text">
-                       <string>Tolerance 
+                       <string>Tolerance
 [um]</string>
                       </property>
                       <property name="alignment">
@@ -4159,7 +4188,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
+        <item row="2" column="2">
          <spacer name="verticalSpacer_10">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4172,7 +4201,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="4" column="0" colspan="2">
+        <item row="3" column="0" colspan="2">
          <widget class="QLabel" name="label_42">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -4194,14 +4223,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="2">
+        <item row="3" column="2">
          <widget class="QLineEdit" name="new2Add_edit">
           <property name="toolTip">
            <string>Type , separated lists of run numbers or ranges of numbers with a : </string>
           </property>
          </widget>
         </item>
-        <item row="4" column="3">
+        <item row="3" column="3">
          <widget class="QPushButton" name="add_Btn">
           <property name="toolTip">
            <string>Adds entries to the big table, use before clicking &quot;Sum&quot;.</string>
@@ -4211,7 +4240,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="4">
+        <item row="3" column="4">
          <widget class="QPushButton" name="browse_to_add_Btn">
           <property name="toolTip">
            <string>Find a file on your system</string>
@@ -4221,7 +4250,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="5">
+        <item row="3" column="5">
          <spacer name="horizontalSpacer_18">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -4237,7 +4266,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </spacer>
         </item>
-        <item row="5" column="0">
+        <item row="4" column="0">
          <widget class="QLabel" name="label_46">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4247,7 +4276,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="1" rowspan="3" colspan="2">
+        <item row="4" column="1" rowspan="3" colspan="2">
          <widget class="QListWidget" name="toAdd_List">
           <property name="toolTip">
            <string>Files to be summed, click at the top of this box or use the &quot;Add&quot; button</string>
@@ -4269,7 +4298,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
+        <item row="4" column="3">
          <widget class="QPushButton" name="clear_Btn">
           <property name="toolTip">
            <string>Clear the table</string>
@@ -4279,7 +4308,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="6" column="3">
+        <item row="5" column="3">
          <widget class="QPushButton" name="remove_Btn">
           <property name="toolTip">
            <string>Select rows by clicking on the table and remove then with this button</string>
@@ -4289,7 +4318,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="7" column="3">
+        <item row="6" column="3">
          <spacer name="verticalSpacer_7">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -4312,21 +4341,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QCheckBox" name="loadSeparateEntries">
-          <property name="text">
-           <string>Minimise memory usage</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="2">
+        <item row="8" column="2">
          <widget class="QLabel" name="histogram_binning_label">
           <property name="text">
            <string>Histogram binning (when adding event data):</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="3">
+        <item row="7" column="3">
          <widget class="QPushButton" name="sum_Btn">
           <property name="toolTip">
            <string>Load the files in the table above and save them to one file</string>
@@ -4336,7 +4358,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="10" column="2">
+        <item row="9" column="2">
          <widget class="QComboBox" name="comboBox_histogram_choice">
           <item>
            <property name="text">
@@ -4355,14 +4377,14 @@ p, li { white-space: pre-wrap; }
           </item>
          </widget>
         </item>
-        <item row="11" column="2">
+        <item row="10" column="2">
          <widget class="QCheckBox" name="overlayCheckBox">
           <property name="text">
            <string>OverlayEventWorkspaces</string>
           </property>
          </widget>
         </item>
-        <item row="12" column="2">
+        <item row="11" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_2411">
           <item>
            <widget class="QLabel" name="binning_label">
@@ -4402,7 +4424,7 @@ p, li { white-space: pre-wrap; }
            <number>6</number>
           </property>
           <item row="0" column="0">
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="file_run_edit" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -4660,9 +4682,9 @@ p, li { white-space: pre-wrap; }
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::MessageDisplay</class>
@@ -4697,17 +4719,12 @@ p, li { white-space: pre-wrap; }
   <tabstop>csv_filename</tabstop>
   <tabstop>csv_browse_btn</tabstop>
   <tabstop>batch_table</tabstop>
-  <tabstop>verbose_check</tabstop>
-  <tabstop>log_colette</tabstop>
   <tabstop>plot_check</tabstop>
   <tabstop>load_dataBtn</tabstop>
   <tabstop>oneDBtn</tabstop>
   <tabstop>twoDBtn</tabstop>
   <tabstop>saveFilename_btn</tabstop>
-  <tabstop>saveCSV_check</tabstop>
-  <tabstop>saveRKH_check</tabstop>
   <tabstop>saveCan_check</tabstop>
-  <tabstop>saveNex_check</tabstop>
   <tabstop>saveDefault_btn</tabstop>
   <tabstop>outfile_edit</tabstop>
   <tabstop>saveSel_btn</tabstop>
@@ -4742,7 +4759,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>clear_Btn</tabstop>
   <tabstop>remove_Btn</tabstop>
   <tabstop>summedPath_Btn</tabstop>
-  <tabstop>loadSeparateEntries</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -1,10 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/HistoWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -13,6 +14,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidIndexing/Extract.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -224,8 +227,8 @@ void GetAllEi::exec() {
   auto monitorWS = buildWorkspaceToFit(inputWS, det1WSIndex);
 
   // recalculate delay time from chopper position to monitor position
-  auto detector1 = inputWS->getDetector(det1WSIndex);
-  double mon1Distance = detector1->getDistance(*moderator);
+  const auto &detector1 = inputWS->spectrumInfo().detector(det1WSIndex);
+  double mon1Distance = detector1.getDistance(*moderator);
   double TOF0 = mon1Distance / velocity;
 
   //--->> below is reserved until full chopper's implementation is available;
@@ -883,24 +886,13 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
   specnum_t specNum2 = getProperty("Monitor2SpecID");
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-  auto &pSpectr1 = inputWS->getSpectrum(wsIndex0);
-  auto &pSpectr2 = inputWS->getSpectrum(wsIndex1);
-  // assuming equally binned ws.
-  // auto bins       = inputWS->dataX(wsIndex0);
-  auto bins = pSpectr1.ptrX();
-  size_t XLength = bins->size();
-  size_t YLength = inputWS->y(wsIndex0).size();
-  auto working_ws =
-      API::WorkspaceFactory::Instance().create(inputWS, 2, XLength, YLength);
-  // copy data --> very bad as implicitly assigns pointer
-  // to bins array and bins array have to exist out of this routine
-  // scope.
-  // This does not matter in this case as below we convert units
-  // which should decouple cow_pointer but very scary operation in
-  // general.
 
-  working_ws->setSharedX(0, bins);
-  working_ws->setSharedX(1, bins);
+  // assuming equally binned ws.
+  boost::shared_ptr<API::HistoWorkspace> working_ws =
+      DataObjects::create<API::HistoWorkspace>(
+          *inputWS, Indexing::extract(inputWS->indexInfo(),
+                                      std::vector<size_t>{wsIndex0, wsIndex1}),
+          inputWS->histogram(wsIndex0));
 
   // signal 1
   working_ws->setSharedY(0, inputWS->sharedY(wsIndex0));
@@ -910,17 +902,6 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   working_ws->setSharedE(0, inputWS->sharedE(wsIndex0));
   // error 2
   working_ws->setSharedE(1, inputWS->sharedE(wsIndex1));
-
-  // copy detector mapping
-  auto &spectrum1 = working_ws->getSpectrum(0);
-  spectrum1.setSpectrumNo(specNum1);
-  spectrum1.clearDetectorIDs();
-  spectrum1.addDetectorIDs(pSpectr1.getDetectorIDs());
-
-  auto &spectrum2 = working_ws->getSpectrum(1);
-  spectrum2.setSpectrumNo(specNum2);
-  spectrum2.clearDetectorIDs();
-  spectrum2.addDetectorIDs(pSpectr2.getDetectorIDs());
 
   if (inputWS->getAxis(0)->unit()->caption() != "Energy") {
     API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");

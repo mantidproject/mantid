@@ -5,6 +5,7 @@
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -45,14 +46,20 @@ public:
     TS_ASSERT_EQUALS(output2->getNumberHistograms(), 4)
 
     // get the parameter map for the period 1 CRISP data
-    ParameterMap &paramMap = output1->instrumentParameters();
+    const auto &paramMap = output1->constInstrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
+    const auto &detectorInfo = output1->detectorInfo();
+    const auto pos1 = detectorInfo.position(2); // ID 3 -> index 2
     std::vector<V3D> ret1 = paramMap.getV3D("point-detector", "pos");
-    TS_ASSERT_EQUALS(static_cast<int>(ret1.size()), 1);
-    TS_ASSERT_DELTA(ret1[0].Z(), 12.113, 0.0001);
-    TS_ASSERT_DELTA(ret1[0].X(), 0.0, 0.0001);
-    TS_ASSERT_DELTA(ret1[0].Y(), 0.0081, 0.0001);
+    // point-detector is a single detector, its position is stored in
+    // DetectorInfo, parameter has been purged from the map
+    TS_ASSERT_EQUALS(static_cast<int>(ret1.size()), 0);
+    TS_ASSERT_DELTA(pos1.Z(), 12.113, 0.0001);
+    TS_ASSERT_DELTA(pos1.X(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(pos1.Y(), 0.0081, 0.0001);
+    // linear-detector is composite, i.e., not a detector and thus not stored in
+    // DetectorInfo, parameter is in map.
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
     TS_ASSERT_EQUALS(static_cast<int>(ret2.size()), 1);
     TS_ASSERT_DELTA(ret2[0].Y(), 0.0, 0.0001);

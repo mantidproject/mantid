@@ -1,9 +1,14 @@
 #include "MantidKernel/RebinParamsValidator.h"
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {
 RebinParamsValidator::RebinParamsValidator(bool allowEmpty)
     : m_allowEmpty(allowEmpty) {}
+
+IValidator_sptr RebinParamsValidator::clone() const {
+  return boost::make_shared<RebinParamsValidator>(*this);
+}
 
 /** Check on the inputed bin boundaries and widths.
  *  @param value :: The parameter array to check

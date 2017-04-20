@@ -26,52 +26,53 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "ApplicationWindow.h"
 #include "PlotDialog.h"
+#include "ApplicationWindow.h"
+#include "BoxCurve.h"
 #include "ColorBox.h"
 #include "ColorButton.h"
+#include "ColorMapEditor.h"
+#include "ContourLinesEditor.h"
+#include "Folder.h"
+#include "FunctionCurve.h"
+#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MyParser.h"
 #include "PatternBox.h"
+#include "PenStyleBox.h"
+#include "QwtErrorPlotCurve.h"
+#include "QwtHistogram.h"
+#include "QwtPieCurve.h"
+#include "Spectrogram.h"
 #include "SymbolBox.h"
 #include "Table.h"
-#include "MyParser.h"
-#include "QwtHistogram.h"
 #include "VectorCurve.h"
-#include "QwtErrorPlotCurve.h"
-#include "BoxCurve.h"
-#include "FunctionCurve.h"
-#include "Spectrogram.h"
-#include "QwtPieCurve.h"
-#include "ColorMapEditor.h"
-#include "pixmaps.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "Folder.h"
-#include "ContourLinesEditor.h"
-#include "PenStyleBox.h"
+#include <MantidQtAPI/pixmaps.h>
 
-#include <QTreeWidget>
-#include <QLineEdit>
-#include <QLayout>
-#include <QSpinBox>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QRadioButton>
-#include <QLabel>
-#include <QWidget>
-#include <QMessageBox>
-#include <QComboBox>
-#include <QWidgetList>
-#include <QFileDialog>
-#include <QGroupBox>
-#include <QFontDialog>
-#include <QShortcut>
-#include <QKeySequence>
-#include <QDoubleSpinBox>
-#include <QMenu>
-#include <QDateTime>
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDateTime>
+#include <QDoubleSpinBox>
+#include <QFileInfo>
+#include <QFontDialog>
+#include <QGroupBox>
+#include <QKeySequence>
+#include <QLabel>
+#include <QLayout>
+#include <QLineEdit>
+#include <QMenu>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QShortcut>
+#include <QSpinBox>
+#include <QTreeWidget>
+#include <QWidget>
+#include <QWidgetList>
 
 using Mantid::Kernel::ConfigService;
+using namespace MantidQt::API;
 
 PlotDialog::PlotDialog(bool showExtended, ApplicationWindow *app,
                        MultiLayer *ml, Qt::WFlags fl)
@@ -336,7 +337,7 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int) {
   PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
   if (!pc)
     return;
-  if (pc->type() == Graph::Function) {
+  if (pc->type() == GraphOptions::Function) {
     FunctionDialog *fd =
         d_app->showFunctionDialog(ctit->graph(), ctit->plotItemIndex());
 
@@ -367,7 +368,7 @@ void PlotDialog::editCurve() {
   hide();
 
   if (d_app) {
-    if (curveType == Graph::Function) {
+    if (curveType == GraphOptions::Function) {
       FunctionDialog *fd = d_app->showFunctionDialog(item->graph(), index);
       if (fd)
         connect(reinterpret_cast<QObject *>(fd), SIGNAL(destroyed()), this,
@@ -395,12 +396,14 @@ void PlotDialog::changePlotType(int plotType) {
     return;
 
   int curveType = item->plotItemType();
-  if (curveType == Graph::ColorMap || curveType == Graph::Contour ||
-      curveType == Graph::GrayScale)
+  if (curveType == GraphOptions::ColorMap ||
+      curveType == GraphOptions::Contour ||
+      curveType == GraphOptions::GrayScale)
     clearTabWidget();
-  else if (curveType == Graph::VectXYAM || curveType == Graph::VectXYXY) {
-    if ((plotType && curveType == Graph::VectXYAM) ||
-        (!plotType && curveType == Graph::VectXYXY))
+  else if (curveType == GraphOptions::VectXYAM ||
+           curveType == GraphOptions::VectXYXY) {
+    if ((plotType && curveType == GraphOptions::VectXYAM) ||
+        (!plotType && curveType == GraphOptions::VectXYXY))
       return;
 
     clearTabWidget();
@@ -411,10 +414,10 @@ void PlotDialog::changePlotType(int plotType) {
       return;
 
     if (plotType) {
-      graph->setCurveType(item->plotItemIndex(), Graph::VectXYAM);
+      graph->setCurveType(item->plotItemIndex(), GraphOptions::VectXYAM);
       v->setVectorStyle(VectorCurve::XYAM);
     } else {
-      graph->setCurveType(item->plotItemIndex(), Graph::VectXYXY);
+      graph->setCurveType(item->plotItemIndex(), GraphOptions::VectXYXY);
       v->setVectorStyle(VectorCurve::XYXY);
     }
     customVectorsPage(plotType);
@@ -427,11 +430,11 @@ void PlotDialog::changePlotType(int plotType) {
     boxConnect->setCurrentIndex(1); // show line for Line and LineSymbol plots
 
     QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(9, 9));
-    if (plotType == Graph::Line)
+    if (plotType == GraphOptions::Line)
       s.setStyle(QwtSymbol::NoSymbol);
-    else if (plotType == Graph::Scatter)
+    else if (plotType == GraphOptions::Scatter)
       graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
-    else if (plotType == Graph::LineSymbols)
+    else if (plotType == GraphOptions::LineSymbols)
       graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
 
     graph->setCurveSymbol(item->plotItemIndex(), s);
@@ -464,11 +467,11 @@ void PlotDialog::setPlotType(int plotType, int curveNum, const QString &color) {
     return;
 
   QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(5, 5));
-  if (plotType == Graph::Line)
+  if (plotType == GraphOptions::Line)
     s.setStyle(QwtSymbol::NoSymbol);
-  else if (plotType == Graph::Scatter)
+  else if (plotType == GraphOptions::Scatter)
     graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
-  else if (plotType == Graph::LineSymbols)
+  else if (plotType == GraphOptions::LineSymbols)
     graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
 
   if (color != "Default")
@@ -1544,7 +1547,7 @@ void PlotDialog::contextMenuEvent(QContextMenuEvent *e) {
       PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
       if (!pc)
         return;
-      if (pc->type() == Graph::Function)
+      if (pc->type() == GraphOptions::Function)
         contextMenu.addAction(tr("&Edit..."), this, SLOT(editCurve()));
       else
         contextMenu.addAction(tr("&Plot Associations..."), this,
@@ -1649,7 +1652,7 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem,
 }
 
 void PlotDialog::insertTabs(int plot_type) {
-  if (plot_type == Graph::Pie) {
+  if (plot_type == GraphOptions::Pie) {
     privateTabWidget->addTab(piePage, tr("Pattern"));
     privateTabWidget->addTab(pieGeometryPage, tr("Pie Geometry"));
     privateTabWidget->addTab(pieLabelsPage, tr("Labels"));
@@ -1659,30 +1662,30 @@ void PlotDialog::insertTabs(int plot_type) {
   }
 
   privateTabWidget->addTab(axesPage, tr("Axes"));
-  if (plot_type == Graph::Line) {
+  if (plot_type == GraphOptions::Line) {
     boxConnect->setEnabled(true);
     privateTabWidget->addTab(linePage, tr("Line"));
     const int index = privateTabWidget->indexOf(linePage);
     privateTabWidget->setCurrentIndex(index);
-  } else if (plot_type == Graph::Scatter) {
+  } else if (plot_type == GraphOptions::Scatter) {
     boxConnect->setEnabled(true);
     privateTabWidget->addTab(symbolPage, tr("Symbol"));
     const int index = privateTabWidget->indexOf(symbolPage);
     privateTabWidget->setCurrentIndex(index);
-  } else if (plot_type == Graph::LineSymbols) {
+  } else if (plot_type == GraphOptions::LineSymbols) {
     boxConnect->setEnabled(true);
     privateTabWidget->addTab(linePage, tr("Line"));
     privateTabWidget->addTab(symbolPage, tr("Symbol"));
     const int index = privateTabWidget->indexOf(symbolPage);
     privateTabWidget->setCurrentIndex(index);
-  } else if (plot_type == Graph::VerticalBars ||
-             plot_type == Graph::HorizontalBars ||
-             plot_type == Graph::Histogram) {
+  } else if (plot_type == GraphOptions::VerticalBars ||
+             plot_type == GraphOptions::HorizontalBars ||
+             plot_type == GraphOptions::Histogram) {
     boxConnect->setEnabled(false);
     privateTabWidget->addTab(linePage, tr("Pattern"));
     privateTabWidget->addTab(spacingPage, tr("Spacing"));
 
-    if (plot_type == Graph::Histogram) {
+    if (plot_type == GraphOptions::Histogram) {
       privateTabWidget->addTab(histogramPage, tr("Histogram Data"));
       const int index = privateTabWidget->indexOf(histogramPage);
       privateTabWidget->setCurrentIndex(index);
@@ -1690,18 +1693,19 @@ void PlotDialog::insertTabs(int plot_type) {
       const int index = privateTabWidget->indexOf(linePage);
       privateTabWidget->setCurrentIndex(index);
     }
-  } else if (plot_type == Graph::VectXYXY || plot_type == Graph::VectXYAM) {
+  } else if (plot_type == GraphOptions::VectXYXY ||
+             plot_type == GraphOptions::VectXYAM) {
     boxConnect->setEnabled(true);
     privateTabWidget->addTab(linePage, tr("Line"));
     privateTabWidget->addTab(vectPage, tr("Vector"));
-    customVectorsPage(plot_type == Graph::VectXYAM);
+    customVectorsPage(plot_type == GraphOptions::VectXYAM);
     const int index = privateTabWidget->indexOf(vectPage);
     privateTabWidget->setCurrentIndex(index);
-  } else if (plot_type == Graph::ErrorBars) {
+  } else if (plot_type == GraphOptions::ErrorBars) {
     privateTabWidget->addTab(errorsPage, tr("Error Bars"));
     const int index = privateTabWidget->indexOf(errorsPage);
     privateTabWidget->setCurrentIndex(index);
-  } else if (plot_type == Graph::Box) {
+  } else if (plot_type == GraphOptions::Box) {
     boxConnect->setEnabled(false);
     privateTabWidget->addTab(linePage, tr("Pattern"));
     privateTabWidget->addTab(boxPage, tr("Box/Whiskers"));
@@ -1709,9 +1713,10 @@ void PlotDialog::insertTabs(int plot_type) {
     const int index = privateTabWidget->indexOf(linePage);
     privateTabWidget->setCurrentIndex(index);
     return;
-  } else if (plot_type == Graph::ColorMap || plot_type == Graph::GrayScale ||
-             plot_type == Graph::Contour ||
-             plot_type == Graph::ColorMapContour) {
+  } else if (plot_type == GraphOptions::ColorMap ||
+             plot_type == GraphOptions::GrayScale ||
+             plot_type == GraphOptions::Contour ||
+             plot_type == GraphOptions::ColorMapContour) {
     privateTabWidget->addTab(spectrogramPage, tr("Colors"));
     setColorMapName();
     privateTabWidget->addTab(contourLinesPage, tr("Contour Lines"));
@@ -1732,7 +1737,7 @@ void PlotDialog::insertTabs(int plot_type) {
   const DataCurve *c = dynamic_cast<const DataCurve *>(ctit->plotItem());
   if (!c)
     return;
-  if (c && c->type() != Graph::Function) {
+  if (c && c->type() != GraphOptions::Function) {
     privateTabWidget->addTab(labelsPage, tr("Labels"));
     if (c->hasSelectedLabels()) {
       const int index = privateTabWidget->indexOf(labelsPage);
@@ -1787,25 +1792,28 @@ int PlotDialog::setPlotType(CurveTreeItem *item) {
   if (curveType >= 0) {
     boxPlotType->clear();
 
-    if (curveType == Graph::ErrorBars)
+    if (curveType == GraphOptions::ErrorBars)
       boxPlotType->addItem(tr("Error Bars"));
-    else if (curveType == Graph::Pie)
+    else if (curveType == GraphOptions::Pie)
       boxPlotType->addItem(tr("Pie"));
-    else if (curveType == Graph::VerticalBars)
+    else if (curveType == GraphOptions::VerticalBars)
       boxPlotType->addItem(tr("Vertical Bars"));
-    else if (curveType == Graph::HorizontalBars)
+    else if (curveType == GraphOptions::HorizontalBars)
       boxPlotType->addItem(tr("Horizontal Bars"));
-    else if (curveType == Graph::Histogram)
+    else if (curveType == GraphOptions::Histogram)
       boxPlotType->addItem(tr("Histogram"));
-    else if (curveType == Graph::VectXYXY || curveType == Graph::VectXYAM) {
+    else if (curveType == GraphOptions::VectXYXY ||
+             curveType == GraphOptions::VectXYAM) {
       boxPlotType->addItem(tr("Vector XYXY"));
       boxPlotType->addItem(tr("Vector XYAM"));
-      if (curveType == Graph::VectXYAM)
+      if (curveType == GraphOptions::VectXYAM)
         boxPlotType->setCurrentIndex(1);
-    } else if (curveType == Graph::Box)
+    } else if (curveType == GraphOptions::Box)
       boxPlotType->addItem(tr("Box"));
-    else if (curveType == Graph::ColorMap || curveType == Graph::GrayScale ||
-             curveType == Graph::Contour || curveType == Graph::ColorMapContour)
+    else if (curveType == GraphOptions::ColorMap ||
+             curveType == GraphOptions::GrayScale ||
+             curveType == GraphOptions::Contour ||
+             curveType == GraphOptions::ColorMapContour)
       boxPlotType->insertItem(-1, tr("Contour") + " / " + tr("Image"));
     else {
       boxPlotType->addItem(tr("Line"));
@@ -1819,13 +1827,13 @@ int PlotDialog::setPlotType(CurveTreeItem *item) {
       QwtSymbol s = c->symbol();
       if (s.style() == QwtSymbol::NoSymbol) {
         boxPlotType->setCurrentIndex(0);
-        return Graph::Line;
+        return GraphOptions::Line;
       } else if (c->style() == QwtPlotCurve::NoCurve) {
         boxPlotType->setCurrentIndex(1);
-        return Graph::Scatter;
+        return GraphOptions::Scatter;
       } else {
         boxPlotType->setCurrentIndex(2);
-        return Graph::LineSymbols;
+        return GraphOptions::LineSymbols;
       }
     }
   }
@@ -1991,13 +1999,13 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
   if (!c)
     return;
 
-  if (c->type() == Graph::Function)
+  if (c->type() == GraphOptions::Function)
     btnEditCurve->setText(tr("&Edit..."));
   else
     btnEditCurve->setText(tr("&Plot Associations..."));
 
   int curveType = item->plotItemType();
-  if (curveType == Graph::Pie) {
+  if (curveType == GraphOptions::Pie) {
     QwtPieCurve *pie = dynamic_cast<QwtPieCurve *>(i);
     if (!pie)
       return;
@@ -2038,9 +2046,9 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
   }
   // line page
   int style = c->style();
-  if (curveType == Graph::Spline)
+  if (curveType == GraphOptions::Spline)
     style = 5;
-  else if (curveType == Graph::VerticalSteps)
+  else if (curveType == GraphOptions::VerticalSteps)
     style = 6;
   boxConnect->setCurrentIndex(style);
   setPenStyle(c->pen().style());
@@ -2063,11 +2071,12 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
   boxFillColor->setEnabled(s.brush() != Qt::NoBrush);
   boxFillColor->setColor(s.brush().color());
 
-  if (c->type() == Graph::Function)
+  if (c->type() == GraphOptions::Function)
     return;
 
-  if (curveType == Graph::VerticalBars || curveType == Graph::HorizontalBars ||
-      curveType == Graph::Histogram) { // spacing page
+  if (curveType == GraphOptions::VerticalBars ||
+      curveType == GraphOptions::HorizontalBars ||
+      curveType == GraphOptions::Histogram) { // spacing page
     QwtBarCurve *b = dynamic_cast<QwtBarCurve *>(i);
     if (b) {
       gapBox->setValue(b->gap());
@@ -2075,7 +2084,7 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
     }
   }
 
-  if (curveType == Graph::Histogram) { // Histogram page
+  if (curveType == GraphOptions::Histogram) { // Histogram page
     QwtHistogram *h = dynamic_cast<QwtHistogram *>(i);
     if (h) {
       automaticBox->setChecked(h->autoBinning());
@@ -2086,8 +2095,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
     }
   }
 
-  if (curveType == Graph::VectXYXY ||
-      curveType == Graph::VectXYAM) { // Vector page
+  if (curveType == GraphOptions::VectXYXY ||
+      curveType == GraphOptions::VectXYAM) { // Vector page
     VectorCurve *v = dynamic_cast<VectorCurve *>(i);
     if (v) {
       vectColorBox->setColor(v->color());
@@ -2100,7 +2109,7 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
     }
   }
 
-  if (curveType == Graph::ErrorBars) {
+  if (curveType == GraphOptions::ErrorBars) {
     QwtErrorPlotCurve *err = dynamic_cast<QwtErrorPlotCurve *>(i);
     if (err) {
       widthBox->blockSignals(true);
@@ -2128,7 +2137,7 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item) {
     return;
   }
 
-  if (curveType == Graph::Box) {
+  if (curveType == GraphOptions::Box) {
     BoxCurve *b = dynamic_cast<BoxCurve *>(i);
     if (b) {
       boxMaxStyle->setStyle(b->maxStyle());
@@ -2465,7 +2474,7 @@ bool PlotDialog::acceptParams() {
     QString table = t[0];
 
     QStringList cols = t[1].split(",", QString::SkipEmptyParts);
-    if (graph->curveType(index) == Graph::VectXYXY) {
+    if (graph->curveType(index) == GraphOptions::VectXYXY) {
       xEndCol = xEndCol.remove(table + "_") + "(X)";
       yEndCol = yEndCol.remove(table + "_") + "(Y)";
     } else {
@@ -3011,7 +3020,7 @@ void LayerItem::insertCurvesList() {
     if (it->rtti() == QwtPlotItem::Rtti_PlotCurve) {
       PlotCurve *c = dynamic_cast<PlotCurve *>(it);
       DataCurve *dc = dynamic_cast<DataCurve *>(it);
-      if (c && dc && c->type() != Graph::Function && dc->table()) {
+      if (c && dc && c->type() != GraphOptions::Function && dc->table()) {
         QString s = dc->plotAssociation();
         QString table = dc->table()->name();
         plotAssociation = table + ": " + s.remove(table + "_");

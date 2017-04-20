@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/OneStepMDEW.h"

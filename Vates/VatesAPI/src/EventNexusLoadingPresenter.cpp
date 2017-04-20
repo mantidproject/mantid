@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
@@ -25,7 +26,7 @@ namespace VATES {
  @throw logic_error if cannot use the reader-presenter for this filetype.
  */
 EventNexusLoadingPresenter::EventNexusLoadingPresenter(
-    std::unique_ptr<MDLoadingView> view, const std::string filename)
+    std::unique_ptr<MDLoadingView> view, const std::string &filename)
     : MDEWLoadingPresenter(std::move(view)), m_filename(filename),
       m_wsTypeName("") {
   if (this->m_filename.empty()) {

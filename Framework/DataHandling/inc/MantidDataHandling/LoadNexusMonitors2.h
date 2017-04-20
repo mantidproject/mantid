@@ -5,45 +5,50 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include <boost/scoped_array.hpp>
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
+
+namespace HistogramData {
+class Counts;
+class BinEdges;
+}
 namespace DataHandling {
 
 /**
- * Load Monitors from NeXus files.
- *
- * Required Properties:
- * <UL>
- *   <LI> Filename - The name of and path to the input NeXus file </LI>
- *   <LI> Workspace - The name of the workspace to output</LI>
- * </UL>
- *
- * @author Michael Reuter, SNS
- * @author Michael Hart, ISIS
- * @date December 4, 2015
- *
- * Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- * National Laboratory & European Spallation Source
- *
- * This file is part of Mantid.
- *
- * Mantid is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * Mantid is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * File change history is stored at: <https://github.com/mantidproject/mantid>
- */
+* Load Monitors from NeXus files.
+*
+* Required Properties:
+* <UL>
+*   <LI> Filename - The name of and path to the input NeXus file </LI>
+*   <LI> Workspace - The name of the workspace to output</LI>
+* </UL>
+*
+* @author Michael Reuter, SNS
+* @author Michael Hart, ISIS
+* @date December 4, 2015
+*
+* Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+* National Laboratory & European Spallation Source
+*
+* This file is part of Mantid.
+*
+* Mantid is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 3 of the License, or
+* (at your option) any later version.
+*
+* Mantid is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*
+* File change history is stored at: <https://github.com/mantidproject/mantid>
+*/
 class DLLExport LoadNexusMonitors2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification
@@ -104,16 +109,18 @@ private:
 
   void readEventMonitorEntry(NeXus::File &file, size_t i);
 
-  void readHistoMonitorEntry(NeXus::File &file, size_t i);
+  void readHistoMonitorEntry(NeXus::File &file, size_t i, size_t numPeriods);
 
 private:
+  std::vector<HistogramData::BinEdges> m_multiPeriodBinEdges;
+  std::vector<HistogramData::Counts> m_multiPeriodCounts;
   std::string m_filename; ///< The name and path of the input file
   API::MatrixWorkspace_sptr m_workspace; ///< The workspace being filled out
   size_t m_monitor_count{0};             ///< Number of monitors
   std::string m_top_entry_name;          ///< name of top level NXentry to use
   bool m_allMonitorsHaveHistoData{
       false}; ///< Flag that all monitors have histogram
-  /// data in the entry
+              /// data in the entry
 };
 
 } // namespace DataHandling

@@ -22,6 +22,7 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
+#include <sstream>
 #include <string>
 #include <typeinfo>
 #include <vector>

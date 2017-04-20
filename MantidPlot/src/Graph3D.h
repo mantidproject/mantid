@@ -303,6 +303,7 @@ public slots:
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
   std::string saveToProject(ApplicationWindow *app) override;
+  std::vector<std::string> getWorkspaceNames() override;
 
   void zoomChanged(double);
   void rotationChanged(double, double, double);
@@ -311,7 +312,7 @@ public slots:
 
   //! \name Colors
   //@{
-  void setDataColors(const QColor &cMax, const QColor &cMin);
+  void setDataColors(const QColor &cMin, const QColor &cMax);
 
   void changeTransparency(double t);
   void setTransparency(double t);

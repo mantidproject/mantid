@@ -10,8 +10,9 @@
 Description
 -----------
 
-This algorithm can be used to clear several areas of cached files or in memory caches within Mantid.
-The various boolean options give the choice of which caches to clear.
+This algorithm can be used to clear several areas of cached files or
+in memory caches within Mantid.  The various boolean options give the
+choice of which caches to clear.
 
 
 Usage
@@ -33,10 +34,15 @@ Output:
 
 .. testoutput:: ClearCacheExample
    :options: +ELLIPSIS
-   
+
    ... files were removed
+
+Related Algorithms
+------------------
+
+:ref:`CreateCacheFilename <algm-CreateCacheFilename>` will create
+filenames that this will delete.
 
 .. categories::
 
 .. sourcelink::
-

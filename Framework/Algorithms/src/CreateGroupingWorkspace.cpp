@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <queue>
 #include <fstream>
 #include "MantidAPI/FileProperty.h"
@@ -70,11 +71,13 @@ void CreateGroupingWorkspace::init() {
                   "Use / or , to separate multiple groups. "
                   "If empty, then an empty GroupingWorkspace will be created.");
 
-  std::vector<std::string> grouping{"", "All", "Group", "Column", "bank"};
+  std::vector<std::string> grouping{"", "All", "Group", "2_4Grouping", "Column",
+                                    "bank"};
   declareProperty(
       "GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
-      "(East,West for SNAP), Columns for SNAP, detector banks");
+      "(Group or East,West for SNAP), 2_4Grouping (SNAP), Columns, detector "
+      "banks");
   declareProperty("MaxRecursionDepth", 5,
                   "Number of levels to search into the instrument (default=5)");
 
@@ -354,12 +357,23 @@ void CreateGroupingWorkspace::exec() {
     inst = tempWS->getInstrument();
   }
 
+  // Validation for 2_4Grouping input used only for SNAP
+  if (inst->getName().compare("SNAP") != 0 &&
+      grouping.compare("2_4Grouping") == 0) {
+    const std::string message("2_4Grouping only works for SNAP.");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
   if (GroupNames.empty() && OldCalFilename.empty()) {
     if (grouping.compare("All") == 0) {
       GroupNames = inst->getName();
     } else if (inst->getName().compare("SNAP") == 0 &&
                grouping.compare("Group") == 0) {
       GroupNames = "East,West";
+    } else if (inst->getName().compare("SNAP") == 0 &&
+               grouping.compare("2_4Grouping") == 0) {
+      GroupNames = "Column1,Column2,Column3,Column4,Column5,Column6,";
     } else {
       sortnames = true;
       GroupNames = "";
@@ -391,9 +405,20 @@ void CreateGroupingWorkspace::exec() {
 
   Progress prog(this, 0.2, 1.0, outWS->getNumberHistograms());
   // Make the grouping one of three ways:
-  if (!GroupNames.empty())
+  if (!GroupNames.empty()) {
     detIDtoGroup = makeGroupingByNames(GroupNames, inst, prog, sortnames);
-  else if (!OldCalFilename.empty())
+    if (grouping.compare("2_4Grouping") == 0) {
+      std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
+      std::map<detid_t, int>::const_iterator it;
+      for (it = detIDtoGroup.begin(); it != it_end; ++it) {
+        if (it->second < 5)
+          detIDtoGroup[it->first] = 1;
+        else
+          detIDtoGroup[it->first] = 2;
+      }
+    }
+
+  } else if (!OldCalFilename.empty())
     detIDtoGroup = readGroupingFile(OldCalFilename, prog);
   else if ((numGroups > 0) && !componentName.empty())
     detIDtoGroup =

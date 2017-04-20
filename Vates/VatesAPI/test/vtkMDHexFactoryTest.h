@@ -1,6 +1,7 @@
 #ifndef VTK_MD_HEX_FACTORY_TEST
 #define VTK_MD_HEX_FACTORY_TEST
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -8,9 +9,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -50,8 +49,7 @@ private:
         AnalysisDataService::Instance().retrieve("binned");
     FakeProgressAction progressUpdater;
 
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setCheckDimensionality(doCheckDimensionality);
     if (doCheckDimensionality) {
       TS_ASSERT_THROWS(factory.initialize(binned_ws), std::runtime_error);
@@ -67,15 +65,13 @@ public:
 
   void testCreateWithoutInitalizeThrows() {
     FakeProgressAction progressUpdater;
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.",
                       factory.create(progressUpdater), std::runtime_error);
   }
 
   void testInitalizeWithNullWorkspaceThrows() {
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
 
     IMDEventWorkspace *ws = NULL;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
@@ -84,8 +80,7 @@ public:
   }
 
   void testGetFactoryTypeName() {
-    vtkMDHexFactory factory(boost::make_shared<NoThresholdRange>(),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDHexFactory", factory.getFactoryTypeName());
   }
 
@@ -96,8 +91,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDHexFactory factory(boost::make_shared<NoThresholdRange>(),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
@@ -120,8 +114,7 @@ public:
         .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDHexFactory factory(boost::make_shared<NoThresholdRange>(),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
@@ -134,8 +127,7 @@ public:
 
   void testOnInitaliseCannotDelegateToSuccessor() {
     FakeProgressAction progressUpdater;
-    vtkMDHexFactory factory(boost::make_shared<NoThresholdRange>(),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     // factory.SetSuccessor(mockSuccessor); No Successor set.
 
     auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
@@ -144,8 +136,7 @@ public:
 
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdater;
-    vtkMDHexFactory factory(boost::make_shared<NoThresholdRange>(),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     // initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdater), std::runtime_error);
   }
@@ -186,8 +177,7 @@ public:
 
     Mantid::DataObjects::MDEventWorkspace3Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -226,8 +216,7 @@ public:
 
     Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -274,8 +263,7 @@ public:
 
     Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws =
         MDEventsTestHelper::makeMDEW<4>(4, -10.0, 10.0, 1);
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(ws);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -319,8 +307,7 @@ public:
   void test_CreateDataSet_from3D() {
     FakeProgressAction progressUpdate;
 
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(m_ws3);
     vtkSmartPointer<vtkDataSet> product;
 
@@ -359,8 +346,7 @@ public:
   void test_CreateDataSet_from4D() {
     FakeProgressAction progressUpdate;
 
-    vtkMDHexFactory factory(boost::make_shared<UserDefinedThresholdRange>(0, 1),
-                            VATES::VolumeNormalization);
+    vtkMDHexFactory factory(VATES::VolumeNormalization);
     factory.initialize(m_ws4);
     vtkSmartPointer<vtkDataSet> product;
 

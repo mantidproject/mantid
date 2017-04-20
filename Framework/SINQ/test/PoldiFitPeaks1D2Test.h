@@ -309,7 +309,7 @@ private:
 
     // put it into a workspace
     Workspace2D_sptr ws =
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(50, 0.0, 1.0);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(50, 0.0, 1.0, false);
     std::vector<double> &x = ws->dataX(0);
     std::vector<double> &y = ws->dataY(0);
 

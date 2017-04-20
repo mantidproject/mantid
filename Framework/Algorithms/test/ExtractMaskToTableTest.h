@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -104,7 +105,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -167,7 +168,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -268,7 +269,7 @@ public:
     // Create a workspace with some detectors masked
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputws =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
 
     //   Mask every 10th spectra
     std::set<int64_t> maskedIndices;
@@ -375,12 +376,11 @@ public:
       cout << "Workspace masked."
            << "\n";
 
-    Instrument_const_sptr instrument = inputws->getInstrument();
-    for (size_t i = 0; i < instrument->getDetectorIDs().size(); ++i) {
-      if (instrument->getDetector(instrument->getDetectorIDs()[i])->isMasked())
-        cout << "Detector : " << instrument->getDetectorIDs()[i]
-             << " is masked."
-             << "\n";
+    const auto &detectorInfo = inputws->detectorInfo();
+    for (size_t i = 0; i < detectorInfo.size(); ++i) {
+      if (detectorInfo.isMasked(i))
+        cout << "Detector : " << detectorInfo.detectorIDs()[i]
+             << " is masked.\n";
     }
 
     /*

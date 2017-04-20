@@ -20,7 +20,7 @@ default.instrument =
 Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_Powder_Diffraction_Reduction.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py
 
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
@@ -89,6 +89,10 @@ datasearch.directories = @DATADIRS@
 # points to the ParaView obtained from the Mantid download page
 paraview.path = @PARAVIEW_APP_BIN_DIR@
 
+# A semi-colon(;) separated list of directories to use to search for data
+# Use forward slash / for all paths
+paraview.pythonpaths = @PARAVIEW_PYTHON_PATHS@
+
 # Whether to look for ParaView (0 = try to use, 1 = don't use).
 paraview.ignore = @IGNORE_PARAVIEW@
 
@@ -120,10 +124,12 @@ MultiThreaded.MaxCores = 0
 
 # Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated.
 # Outside this area peak functions return zero.
-curvefitting.peakRadius = 5
 curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
+
+#Defines whether or not the sliceViewer will show NonOrthogonal view as a default
+sliceviewer.nonorthogonal=false
 
 # Network Timeouts (in seconds for various uses within Mantid)
 network.default.timeout = 30
@@ -216,7 +222,10 @@ loading.multifile=On
 # Limits the maximum number of files Mantid will attempt to load as part of a range.
 # Set to a very high number to disable, however this limit is in place to protect
 # you and your computer from simple formatting mistakes
-loading.multifilelimit=100
+# By default it is facility dependent, and can be specified in Facilities.xml
+# If not specified there for a given facility, it is assumed 100.
+# If overwritten by the user, the user defined value takes priority over facility dependent defaults.
+loading.multifilelimit =
 
 # Hide algorithms that use a Property Manager by default.
 algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development;Remote

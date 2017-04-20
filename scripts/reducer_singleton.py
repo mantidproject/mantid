@@ -71,7 +71,7 @@ class Reducer(object):
         if issubclass(configuration.__class__, BaseInstrument):
             self.instrument = configuration
         else:
-            raise RuntimeError, "Reducer.set_instrument expects an %s object, found %s" % (Instrument, configuration.__class__)
+            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" % (Instrument, configuration.__class__))
 
     def set_data_path(self, path):
         """
@@ -83,7 +83,7 @@ class Reducer(object):
             self._data_path = path
             mantid.config.appendDataSearchDir(path)
         else:
-            raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_data_path: provided path is not a directory (%s)" % path)
 
     def set_output_path(self, path):
         """
@@ -94,7 +94,7 @@ class Reducer(object):
         if os.path.isdir(path):
             self._output_path = path
         else:
-            raise RuntimeError, "Reducer.set_output_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_output_path: provided path is not a directory (%s)" % path)
 
     def pre_process(self):
         """
@@ -163,6 +163,7 @@ class Reducer(object):
         f.close()
         return self.log_text
 
+
 class ReductionSingleton(object):
     """ Singleton reduction class """
 
@@ -181,7 +182,7 @@ class ReductionSingleton(object):
 
     @classmethod
     def clean(cls, reducer_cls=None):
-        if reducer_cls==None:
+        if reducer_cls is None:
             ReductionSingleton.__instance = Reducer()
         else:
             ReductionSingleton.__instance = reducer_cls()
@@ -196,8 +197,7 @@ class ReductionSingleton(object):
         if issubclass(red.__class__, Reducer):
             ReductionSingleton.__instance = red
         else:
-            raise RuntimeError, 'The object passed to ReductionSingleton.replace() must be of type Reducer'
-
+            raise RuntimeError('The object passed to ReductionSingleton.replace() must be of type Reducer')
 
     @classmethod
     def run(cls):
@@ -219,4 +219,3 @@ class ReductionSingleton(object):
     def __setattr__(self, attr, value):
         """ Delegate access to implementation """
         return setattr(self.__instance, attr, value)
-

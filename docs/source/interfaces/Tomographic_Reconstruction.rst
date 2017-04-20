@@ -26,10 +26,9 @@ login and through its `web portal
 ISIS users.
 
 .. warning:: This interface is undergoing heavy works. The tabs are
-			 subject to changes and reorganization.New
-             functionality is being added and the pre-post-processing
-             and reconstruction workflow is being modified based on
-             feedback from initial test data.
+  subject to changes and reorganization. New functionality is being added
+  and the pre-post-processing and reconstruction workflow is being
+  modified based on feedback from initial test data.
 
 Interface at a glance
 ---------------------
@@ -87,7 +86,7 @@ SCARF and some ISIS machines:
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox <http://visielab.uantwerpen.be/software>`_ found from
+* `Astra Toolbox <http://visielab.uantwerpen.be/astra-toolbox>`_ found from
   `here <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_.
 
 References for the Astra Toolbox:
@@ -343,9 +342,18 @@ same location:
 Running jobs locally
 --------------------
 
-This capability is being developed at the moment, and it requires
-additional setup steps on the local analysis machine. Basic
-functionality is supported only on the IMAT data analysis machine.
+You can run local reconstructions as well, however that requires properly setting up the:
+
+* External python interpretor path, for example:
+
+  - `C:/Anaconda/python.exe for Windows`
+  - `~/Anaconda2/bin/python for Linux`
+
+* PYTHONPATH environment variable should contain the Python directories 
+  that have the installed plugins for the supported tools
+
+* (Optional) Scripts directory
+  - By default this will be properly setup from the Mantid installation
 
 Visualization
 -------------

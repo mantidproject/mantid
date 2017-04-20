@@ -210,6 +210,33 @@ If any other functions need to be included in the list please leave a request at
 `Forum <http://forum.mantidproject.org/>`_.
 
 
+Excluding data from fit
+#######################
+
+Regions of a 1D data set can be excluded from fit with the `Exclude` property. It is a list of
+pairs of real numbers which define the regions to exclude. In the following example the regions
+under the peaks are excluded thus fitting only the background
+
+.. code-block:: python
+
+    x = np.linspace(-10, 10, 100)
+    y = np.exp(-4*(x+3)**2) + np.exp(-4*(x-3)**2) + 0.1 - 0.001*x**2
+    ws = CreateWorkspace(x, y)
+    Fit("name=Polynomial,n=2", ws, Exclude=[-5, -1, 1, 5], Output='out')
+
+.. figure:: /images/FitExcludeRange.png
+
+Peak Radius
+###########
+
+The effect of setting `PeakRadius` to a non-default value can be seen from next figure.
+
+.. figure:: /images/PeakRadius_Fit.png
+   :width: 700
+
+It can be used to speed up computations but there is a danger of introducing higher errors.
+
+
 Output
 ######
 

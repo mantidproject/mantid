@@ -2,6 +2,7 @@
 #define SUBMITREMOTEJOB_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
@@ -54,8 +55,12 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class DLLExport SubmitRemoteJob : public Mantid::API::Algorithm {
+class DLLExport SubmitRemoteJob : public Mantid::API::Algorithm,
+                                  public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  SubmitRemoteJob() { this->useAlgorithm("SubmitRemoteJob", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "SubmitRemoteJob"; }
   /// Summary of algorithms purpose

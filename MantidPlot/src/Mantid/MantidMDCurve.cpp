@@ -1,13 +1,13 @@
 #include "MantidMDCurve.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "../ApplicationWindow.h"
+#include "../Graph.h"
+#include "../MultiLayer.h"
+#include "ErrorBarSettings.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <qpainter.h>
 #include <qwt_symbol.h>
-#include "MantidAPI/AnalysisDataService.h"
-#include "ErrorBarSettings.h"
-#include "../Graph.h"
-#include "../ApplicationWindow.h"
-#include "../MultiLayer.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -27,7 +27,7 @@ Mantid::Kernel::Logger g_log("MantidMDCurve");
  * workspace
  */
 MantidMDCurve::MantidMDCurve(const QString &wsName, Graph *g, bool err,
-                             bool distr, Graph::CurveType style)
+                             bool distr, GraphOptions::CurveType style)
     : MantidCurve(wsName, err), m_wsName(wsName) {
   if (!g) {
     throw std::invalid_argument(
@@ -53,7 +53,7 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve &c)
  *  @param distr :: True if this is a distribution
  *  @param style :: The graph style to use
  */
-void MantidMDCurve::init(Graph *g, bool distr, Graph::CurveType style) {
+void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style) {
   UNUSED_ARG(distr);
   IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
@@ -76,7 +76,7 @@ void MantidMDCurve::init(Graph *g, bool distr, Graph::CurveType style) {
 
   int lineWidth = 1;
   MultiLayer *ml = dynamic_cast<MultiLayer *>(g->parent()->parent()->parent());
-  if (ml && (style == Graph::Unspecified ||
+  if (ml && (style == GraphOptions::Unspecified ||
              ml->applicationWindow()->applyCurveStyleToMantid)) {
     // FIXME: Style HorizontalSteps does NOT seem to be applied
     applyStyleChoice(style, ml, lineWidth);

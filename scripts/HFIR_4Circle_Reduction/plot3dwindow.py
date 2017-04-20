@@ -13,6 +13,7 @@ class Plot3DWindow(QtGui.QMainWindow):
     """
     Main window to view merged data in 3D
     """
+
     def __init__(self, parent=None):
         """
         Initialization

@@ -2,9 +2,12 @@
 #define COMPTONPROFILETESTHELPERS_H_
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -41,7 +44,7 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
                     const double dx, const bool singleMassSpectrum,
                     const bool addFoilChanger) {
   bool isHist(false);
-  auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
       ones(), static_cast<int>(nhist), x0, x1, dx, isHist);
   ws2d->getAxis(0)->setUnit("TOF");
   if (singleMassSpectrum) {
@@ -85,13 +88,13 @@ createTestWorkspace(const size_t nhist, const double x0, const double x1,
   }
 
   // Link workspace with detector
-  for (size_t i = 0; i < nhist; ++i) {
-    const Mantid::specnum_t specID = static_cast<Mantid::specnum_t>(id + i);
-    auto &spec = ws2d->getSpectrum(i);
-    spec.setSpectrumNo(specID);
-    spec.clearDetectorIDs();
-    spec.addDetectorID(id);
-  }
+  Mantid::Indexing::IndexInfo indexInfo(nhist);
+  Mantid::SpectrumDefinition specDef;
+  specDef.add(0); // id 1
+  indexInfo.setSpectrumDefinitions(
+      std::vector<Mantid::SpectrumDefinition>(nhist, specDef));
+  ws2d->setIndexInfo(indexInfo);
+
   return ws2d;
 }
 
@@ -166,8 +169,9 @@ static void addResolutionParameters(const Mantid::API::MatrixWorkspace_sptr &ws,
                                     const Mantid::detid_t detID) {
   // Parameters
   auto &pmap = ws->instrumentParameters();
-  auto det0 = ws->getInstrument()->getDetector(detID);
-  auto compID = det0->getComponentID();
+  const auto &detectorInfo = ws->detectorInfo();
+  const auto detIndex = detectorInfo.indexOf(detID);
+  const auto compID = detectorInfo.detector(detIndex).getComponentID();
 
   pmap.addDouble(compID, "sigma_l1", 0.021);
   pmap.addDouble(compID, "sigma_l2", 0.023);

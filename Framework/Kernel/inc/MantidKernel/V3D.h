@@ -2,8 +2,6 @@
 #define MANTID_KERNEL_V3D_H_
 
 #include <cmath>
-#include <cfloat>
-#include <complex>
 #include <vector>
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Matrix.h"

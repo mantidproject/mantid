@@ -28,14 +28,16 @@
  ***************************************************************************/
 #include "ScreenPickerTool.h"
 #include "ApplicationWindow.h"
-#include "SymbolBox.h"
-#include "Table.h"
 #include "Graph.h"
 #include "Plot.h"
 #include "PlotCurve.h"
-#include "pixmaps.h"
-#include <qwt_symbol.h>
+#include "SymbolBox.h"
+#include "Table.h"
+#include <MantidQtAPI/pixmaps.h>
 #include <QKeyEvent>
+#include <qwt_symbol.h>
+
+using namespace MantidQt::API;
 
 ScreenPickerTool::ScreenPickerTool(Graph *graph, const QObject *status_target,
                                    const char *status_slot)
@@ -162,7 +164,7 @@ void DrawPointTool::appendPoint(const QwtDoublePoint &pos) {
         QwtSymbol(QwtSymbol::Ellipse, QBrush(Qt::black),
                   QPen(Qt::black, d_app->defaultCurveLineWidth),
                   QSize(d_app->defaultSymbolSize, d_app->defaultSymbolSize)));
-    d_graph->insertPlotItem(d_curve, Graph::LineSymbols);
+    d_graph->insertPlotItem(d_curve, GraphOptions::LineSymbols);
   }
 
   d_curve->setFullRange();

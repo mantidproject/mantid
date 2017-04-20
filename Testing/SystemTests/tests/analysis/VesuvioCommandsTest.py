@@ -26,6 +26,7 @@ def _is_old_boost_version():
 
     return False
 
+
 def _create_test_flags(background, multivariate=False):
     flags = dict()
     flags['fit_mode'] = 'spectrum'
@@ -56,6 +57,7 @@ def _create_test_flags(background, multivariate=False):
 
     return flags
 
+
 def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     """
     Checks the expected value is equal to the actual value with in a percentage of tolerance
@@ -63,6 +65,7 @@ def _equal_within_tolerance(self, expected, actual, tolerance=0.05):
     tolerance_value = expected * tolerance
     abs_difference = abs(expected - actual)
     self.assertTrue(abs_difference <= abs(tolerance_value))
+
 
 def _get_peak_height_and_index(workspace, ws_index):
     """
@@ -76,6 +79,7 @@ def _get_peak_height_and_index(workspace, ws_index):
     return peak_height, peak_bin
 
 #====================================================================================
+
 
 class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
@@ -126,6 +130,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
 
 #====================================================================================
 
+
 class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest):
     """
     Test ensures that internal ties for mass profiles work correctly
@@ -147,6 +152,7 @@ class FitSingleSpectrumBivariateGaussianTiesTest(stresstesting.MantidStressTest)
         self.assertAlmostEqual(f0_sigma_x, f0_sigma_y)
 
 #====================================================================================
+
 
 class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
@@ -199,6 +205,7 @@ class SingleSpectrumBackground(stresstesting.MantidStressTest):
 
 #====================================================================================
 
+
 class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
 
     _fit_results = None
@@ -250,6 +257,7 @@ class BankByBankForwardSpectraNoBackground(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(exit_iteration, int))
 
 #====================================================================================
+
 
 class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest):
 

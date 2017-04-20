@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHM_HE3TUBEEFFICIENCY_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -84,11 +85,11 @@ private:
   void execEvent();
 
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(std::size_t spectraIndex);
+  void correctForEfficiency(std::size_t spectraIndex,
+                            const API::SpectrumInfo &spectrumInfo);
   /// Sets the detector geometry cache if necessary
-  void
-  getDetectorGeometry(const boost::shared_ptr<const Geometry::IDetector> &det,
-                      double &detRadius, Kernel::V3D &detAxis);
+  void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius,
+                           Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
   double distToSurface(const Kernel::V3D start,
                        const Geometry::Object *shape) const;
@@ -99,14 +100,12 @@ private:
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
   double getParameter(std::string wsPropName, std::size_t currentIndex,
-                      std::string detPropName,
-                      boost::shared_ptr<const Geometry::IDetector> idet);
+                      std::string detPropName, const Geometry::IDetector &idet);
   /// Helper for event handling
   template <class T> void eventHelper(std::vector<T> &events, double expval);
   /// Function to calculate exponential contribution
-  double
-  calculateExponential(std::size_t spectraIndex,
-                       boost::shared_ptr<const Geometry::IDetector> idet);
+  double calculateExponential(std::size_t spectraIndex,
+                              const Geometry::IDetector &idet);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr inputWS;

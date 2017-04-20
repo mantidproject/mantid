@@ -22,4 +22,3 @@ insView.setBinRange(10000,15000)
 #insView.selectComponent("main-detector-pixel")
 
 insView.show()
-

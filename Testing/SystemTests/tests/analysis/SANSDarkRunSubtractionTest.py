@@ -1,13 +1,15 @@
-﻿#pylint: disable=no-init
+#pylint: disable=no-init
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
 import unittest
 import stresstesting
 from mantid.simpleapi import *
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
 from SANSUtility import getFileAndName
+import numpy as np
 
 
 class DarkRunSubtractionTest(unittest.TestCase):
@@ -85,14 +87,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
-
-        for i in range(0, scatter_workspace.getNumberHistograms()):
-            self.assertTrue(all_entries_zero(scatter_workspace, i), "Detector entries should all be 0")
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
-        for i in [0,3]:
-            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor entries should not all be 0")
+        self.assertTrue(monitor_workspace.extractY()[:,0:3].any(), "Monitor entries should not all be 0")
 
     def test_that_subtracts_with_correct_single_dark_run_and_multiple_settings(self):
         # Arrange
@@ -124,16 +123,16 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Expect all entries to be 0 except for monitor 0. We selected monitor 1 and all detectors
         # for the subtraction. Hence only moniotr 0 would have been spared.
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
-        for i in range(0, scatter_workspace.getNumberHistograms()):
-            self.assertTrue(all_entries_zero(scatter_workspace, i), "Detector entries should all be 0")
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
 
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor entries should not all be 0")
+            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
 
         for i in ws_index2:
-            self.assertTrue(all_entries_zero(monitor_workspace, i), "Entries should all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Entries should all be 0")
 
     def test_that_subtracts_correct_added_file_type(self):
         # Arrange
@@ -160,14 +159,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
-
-        for i in range(0, scatter_workspace.getNumberHistograms()):
-            self.assertTrue(all_entries_zero(scatter_workspace, i), "Detector entries should all be 0")
-
+        y = scatter_workspace.extractY()
+        self.assertFalse(np.greater(y, 1e-14).any(), "Detector entries should all be 0")
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0,3]:
-            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor entries should not all be 0")
+            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor entries should not all be 0")
 
         os.remove(os.path.join(config['defaultsave.directory'],run_number))
 
@@ -198,21 +194,18 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # Some spectra might be zero, so we have to check that there is something which is not zero
-        all_detectors_zero = True
-        for i in range(0, scatter_workspace.getNumberHistograms()):
-            all_detectors_zero = all_detectors_zero & all_entries_zero(scatter_workspace, i)
-        self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
+        self.assertTrue(scatter_workspace.extractY().any(), "There should be some detectors which are not zero")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 2 (workspace index 1 should be 0
         for i in ws_index:
-            self.assertTrue(all_entries_zero(monitor_workspace, i), "Monitor2 entries should  all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
         os.remove(os.path.join(config['defaultsave.directory'],run_number))
 
@@ -238,21 +231,18 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # Some spectra might be zero, so we have to check that there is something which is not zero
-        all_detectors_zero = True
-        for i in range(0, scatter_workspace.getNumberHistograms()):
-            all_detectors_zero = all_detectors_zero & all_entries_zero(scatter_workspace, i)
-        self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
+        self.assertTrue(scatter_workspace.extractY().any(), "There should be some detectors which are not zero")
 
         # The monitors should not be affected, but we only have data in ws_index 0-3
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(monitor_workspace, i), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(monitor_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor 1 should be 0
         for i in ws_index:
-            self.assertTrue(all_entries_zero(monitor_workspace, i), "Monitor2 entries should  all be 0")
+            y = monitor_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_correct_for_transmission_workspace_with_only_monitors(self):
         # Arrange
@@ -277,15 +267,15 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # We only have monitors in our transmission file, monitor 2 should be 0
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
+            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor1, Monitor3, Monitor4 entries should not all be 0")
 
         # Monitor2 should be 0
         for i in ws_index:
-            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor2 entries should  all be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should  all be 0")
 
     def test_that_subtracts_nothing_when_selecting_detector_subtraction_for_transmission_workspace_with_only_monitors(self):
         # Arrange
@@ -309,12 +299,11 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # We only have monitors in our transmission file
         for i in [0,1,2,3]:
-            self.assertFalse(all_entries_zero(transmission_workspace, i),
-                             ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
+            self.assertTrue(transmission_workspace.dataY(i).any(),
+                            ("Monitor1, Monitor2, Monitor3 and Monitor4 entries should not all be 0"))
 
     def test_that_subtracts_monitors_and_detectors_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange
@@ -340,7 +329,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert
@@ -351,20 +340,21 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # We only have monitors in our transmission file, monitor 1 should be 0
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index2:
-            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor2 entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should be set to 0
-        detector_indices = range(4,14)
+        detector_indices = list(range(4,14))
         for i in detector_indices:
-            self.assertTrue(all_entries_zero(transmission_workspace, i), "All detectors entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "All detectors entries should be 0")
 
     def test_that_subtracts_monitors_only_for_transmission_workspace_with_monitors_and_detectors(self):
         # Arrange
@@ -381,7 +371,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         monitor_ids = [1,2,3,4]
         trans_ids = monitor_ids
-        detector_ids = range(1100000, 1100010)
+        detector_ids = list(range(1100000, 1100010))
         trans_ids.extend(detector_ids)
 
         # Act + Assert
@@ -392,22 +382,18 @@ class DarkRunSubtractionTest(unittest.TestCase):
 
         # Since in this test we use the same file for the scatterer and the dark run, we expect
         # that the detectors are 0. This is because we subtract bin by bin when using UAMP
-        all_entries_zero = lambda ws, index : all([0.0 == element for element in ws.dataY(index)])
 
         # We only have monitors in our transmission file, monitor 1 should be 0
         for i in [0,2,3]:
-            self.assertFalse(all_entries_zero(transmission_workspace, i), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
+            self.assertTrue(transmission_workspace.dataY(i).any(), "Monitor0, Monitor2, Monitor3 entries should not all be 0")
 
         # Monitor 2 should be set to 0
         for i in ws_index:
-            self.assertTrue(all_entries_zero(transmission_workspace, i), "Monitor2 entries should be 0")
+            y = transmission_workspace.dataY(i)
+            self.assertFalse(np.greater(y, 1e-14).any(), "Monitor2 entries should be 0")
 
         # Detectors should NOT all be set to 0
-        detector_indices = set(range(0, transmission_workspace.getNumberHistograms())) - set(range(0,8))
-        all_detectors_zero = True
-        for i in detector_indices:
-            all_detectors_zero = all_detectors_zero & all_entries_zero(transmission_workspace, i)
-        self.assertFalse(all_detectors_zero, "There should be some detectors which are not zero")
+        self.assertTrue(transmission_workspace.extractY().any(), "There should be some detectors which are not zero")
 
     #------- HELPER Methods
     def _do_test_valid(self, settings, is_input_event= True, run_number = None) :
@@ -636,6 +622,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
                                time = time,
                                mean = mean,
                                mon_number = mon_number)
+
 
 class DarkRunSubtractionTestStressTest(stresstesting.MantidStressTest):
     def __init__(self):

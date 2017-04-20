@@ -3,11 +3,16 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
+
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialogBase.h"
 
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 class TomographyIfaceModelTest : public CxxTest::TestSuite {
@@ -107,7 +112,7 @@ public:
     model.setupRunTool("Local");
 
     TSM_ASSERT_THROWS_NOTHING("Problem with experiment number",
-                              model.updateExperimentReference("RB0001234"));
+                              model.setExperimentReference("RB0001234"));
 
     auto sts = model.jobsStatus();
     TSM_ASSERT_EQUALS("Unexpected number of jobs", sts.size(), 0);
@@ -167,25 +172,6 @@ public:
     TS_ASSERT_EQUALS(cmds.size(), 0);
   }
 
-  void test_submitFailEmptyDefinition() {
-    TomographyIfaceModel model;
-
-    TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
-                      model.doSubmitReconstructionJob("Local"),
-                      std::invalid_argument);
-  }
-
-  void test_submitFailWrongResource() {
-    TomographyIfaceModel model;
-
-    model.setupComputeResource();
-    model.setupRunTool("Local");
-    model.usingTool("TomoPy");
-    TSM_ASSERT_THROWS("Exception not thrown as expected - submit local",
-                      model.doSubmitReconstructionJob("Local"),
-                      std::invalid_argument);
-  }
-
   void test_cancelFail() {
     TomographyIfaceModel model;
 
@@ -196,23 +182,6 @@ public:
                       model.doCancelJobs("Local", ids), std::invalid_argument);
   }
 
-  void test_runCustomCommandLocally() {
-    TomographyIfaceModel model;
-
-    model.setupComputeResource();
-    model.setupRunTool("Local");
-    model.usingTool("Custom command");
-
-    TomoReconToolsUserSettings toolsSettings;
-    toolsSettings.custom = ToolConfigCustom("fail", "some params");
-    model.updateReconToolsSettings(toolsSettings);
-    model.doRunReconstructionJobLocal();
-  }
-
-  void test_setupToolsTomoPy() { dryRunToolLocal("TomoPy", "gridrec"); }
-
-  void test_setupToolsAstra() { dryRunToolLocal("Astra", "FBP3D_CUDA"); }
-
   void test_loadFITSFail() {
     TomographyIfaceModel model;
 
@@ -221,41 +190,216 @@ public:
                       std::invalid_argument);
   }
 
+  // this currently just transforms the names to lower case
+  void test_prepareToolNameForArgs() {
+
+    TestableTomographyIfaceModel model;
+
+    const std::string exp1 = model.prepareToolNameForArgs("TomoPy");
+    const std::string exp2 = model.prepareToolNameForArgs("Astra");
+    const std::string exp3 = model.prepareToolNameForArgs("Savu");
+    const std::string exp4 = model.prepareToolNameForArgs("Custom Command");
+
+    TS_ASSERT_EQUALS(exp1, "tomopy");
+    TS_ASSERT_EQUALS(exp2, "astra");
+    TS_ASSERT_EQUALS(exp3, "savu");
+    TS_ASSERT_EQUALS(exp4, "custom command");
+    // although custom command never reaches that function
+  }
+
+  void test_makeRemoteRunnableWithOptionsCustom() {
+    std::string inputRunnable = "/scriptPath/";
+    // the custom one just processes a single member
+    std::vector<std::string> inputArgsVector{
+        "--some params --some other params"};
+
+    TestableTomographyIfaceModel model;
+
+    std::string inputArgsString =
+        model.constructSingleStringFromVector(inputArgsVector);
+
+    std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
+        new ToolConfigCustom(inputRunnable, inputArgsString));
+
+    model.usingTool(TestableTomographyIfaceModel::g_customCmdTool);
+    model.setCurrentToolMethod("gridrec");
+
+    model.setCurrentToolSettings(d);
+
+    const bool local = false;
+
+    std::string actualRunnable;
+    std::string allOpts;
+    std::vector<std::string> actualArgsVector;
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
+
+    std::string expectedRunnable = "/scriptPath/";
+    // the space at the end is necessary, because of how
+    // constructSingleStringFromVector works
+    std::vector<std::string> expectedArgsVector{
+        "--some params --some other params "};
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
+  }
+
+  void test_makeLocalRunnableWithOptionsCustom() {
+    std::string inputRunnable = "python /scriptPath/";
+    // the custom one just processes a single member
+    std::vector<std::string> inputArgsVector{
+        "--some params --some other params"};
+
+    TestableTomographyIfaceModel model;
+
+    std::string inputArgsString =
+        model.constructSingleStringFromVector(inputArgsVector);
+
+    std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
+        new ToolConfigCustom(inputRunnable, inputArgsString));
+
+    model.usingTool(TestableTomographyIfaceModel::g_customCmdTool);
+    model.setCurrentToolMethod("gridrec");
+
+    model.setCurrentToolSettings(d);
+
+    const bool local = true;
+
+    std::string actualRunnable;
+    std::string allOpts;
+
+    std::vector<std::string> actualArgsVector;
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
+
+    std::string expectedRunnable = "python";
+    // the space at the end is necessary, because of how
+    // constructSingleStringFromVector works
+    std::vector<std::string> expectedArgsVector{
+        "/scriptPath/", "--some params --some other params "};
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
+  }
+
+  void test_makeRemoteRunnableWithOptions() {
+    std::string expectedRunnable =
+        "/work/imat/phase_commissioning/scripts/Imaging/"
+        "IMAT/tomo_reconstruct.py";
+    TomoPathsConfig pathConfig;
+
+    const std::string pathOut = "/work/imat";
+    static size_t reconIdx = 1;
+    const std::string localOutNameAppendix = std::string("/processed/") +
+                                             "reconstruction_" +
+                                             std::to_string(reconIdx);
+
+    std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
+        new ToolConfigTomoPy(expectedRunnable, pathOut + localOutNameAppendix,
+                             pathConfig.pathDarks(), pathConfig.pathOpenBeam(),
+                             pathConfig.pathSamples()));
+
+    TestableTomographyIfaceModel model;
+
+    model.usingTool(TestableTomographyIfaceModel::g_TomoPyTool);
+    model.setCurrentToolMethod("gridrec");
+
+    model.setCurrentToolSettings(d);
+
+    const bool local = false;
+
+    std::string allOpts;
+    std::string actualRunnable;
+    std::vector<std::string> actualArgsVector;
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
+
+    std::vector<std::string> expectedArgsVector{
+        "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
+        "--input-path=" + pathConfig.pathSamples(),
+        "--input-path-flat=" + pathConfig.pathOpenBeam(),
+        "--input-path-dark=" + pathConfig.pathDarks(),
+        "--output=\"/work/imat/phase_commissioning/processed/"
+        "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
+        "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+        "--max-angle=360.000000", "--circular-mask=0.940000",
+        "--out-img-format=png"};
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
+  }
+
+  void test_makeLocalRunnableWithOptions() {
+    std::string inputRunnable = "python "
+                                "/work/imat/phase_commissioning/scripts/"
+                                "Imaging/IMAT/tomo_reconstruct.py";
+
+    TomoPathsConfig pathConfig;
+    const std::string pathOut = "~/imat/RB000XXX";
+    static size_t reconIdx = 1;
+    const std::string localOutNameAppendix = std::string("/processed/") +
+                                             "reconstruction_" +
+                                             std::to_string(reconIdx);
+
+    std::shared_ptr<TomoRecToolConfig> d = std::shared_ptr<TomoRecToolConfig>(
+        new ToolConfigTomoPy(inputRunnable, pathOut + localOutNameAppendix,
+                             pathConfig.pathDarks(), pathConfig.pathOpenBeam(),
+                             pathConfig.pathSamples()));
+
+    TestableTomographyIfaceModel model;
+
+    model.usingTool(TestableTomographyIfaceModel::g_TomoPyTool);
+    model.setCurrentToolMethod("gridrec");
+
+    model.setCurrentToolSettings(d);
+
+    const bool local = true;
+
+    // should be just the externalInterpretor path
+    std::string actualRunnable;
+    std::string allOpts;
+    std::vector<std::string> actualArgsVector;
+    model.prepareSubmissionArguments(local, actualRunnable, actualArgsVector,
+                                     allOpts);
+
+    std::string expectedRunnable = "python";
+    std::vector<std::string> expectedArgsVector{
+        "/work/imat/phase_commissioning/scripts/Imaging/IMAT/"
+        "tomo_reconstruct.py",
+        "--tool=tomopy", "--algorithm=gridrec", "--num-iter=5",
+        "--input-path=/work/imat/phase_commissioning/data",
+        "--input-path-flat=/work/imat/phase_commissioning/flat",
+        "--input-path-dark=/work/imat/phase_commissioning/dark",
+        "--output=/work/imat/phase_commissioning/processed/"
+        "reconstruction_TomoPy_gridrec_2016October20_113701_413275000",
+        "--median-filter-size=3", "--cor=0.000000", "--rotation=0",
+        "--max-angle=360.000000", "--circular-mask=0.940000",
+        "--out-img-format=png"};
+
+    doTestExpectedRunnableAndArguments(expectedRunnable, actualRunnable,
+                                       expectedArgsVector, actualArgsVector);
+  }
+
 private:
-  void dryRunToolLocal(const std::string &tool, const std::string &method) {
-    TomographyIfaceModel model;
-    model.setupComputeResource();
-    model.setupRunTool(model.localComputeResource());
-    model.usingTool(tool);
-    model.updateTomopyMethod(method);
+  // inner class to access the model's protected functions
+  class TestableTomographyIfaceModel : public TomographyIfaceModel {
+    friend class TomographyIfaceModelTest;
+    TestableTomographyIfaceModel() : TomographyIfaceModel() {}
+  };
 
-    TSM_ASSERT_EQUALS("Unexpected number of reconstruction tools",
-                      model.reconTools().size(), 5);
+  void doTestExpectedRunnableAndArguments(
+      const std::string &expectedRunnable, const std::string &actualRunnable,
+      const std::vector<std::string> &expectedArguments,
+      const std::vector<std::string> &actualArguments) {
+    TSM_ASSERT_EQUALS("Local interpreter executable not properly separated",
+                      actualRunnable, expectedRunnable);
+    TSM_ASSERT_EQUALS("Invalid argument size", expectedArguments.size(),
+                      actualArguments.size());
 
-    auto localSts = model.jobsStatusLocal();
-    TSM_ASSERT_EQUALS("Unexpected number of jobs (local)", localSts.size(), 0);
-
-    // default/empty paths, to make sure nothing will be found
-    TomoPathsConfig paths;
-    model.updateTomoPathsConfig(paths);
-
-    // paths that don't make sense, so nothing gets executed even if you have a
-    // local installation of tomopy available
-    TomoSystemSettings settings;
-    settings.m_local.m_basePathTomoData = "/never_find_anything/";
-    settings.m_local.m_reconScriptsPath = "/dont_find_the_scripts/";
-    model.updateSystemSettings(settings);
-
-    TomoReconToolsUserSettings toolsSettings;
-    toolsSettings.tomoPy =
-        ToolConfigTomoPy("fail", "/out/", "/dark/", "/flat/", "/sample/");
-    model.updateReconToolsSettings(toolsSettings);
-    model.doRunReconstructionJobLocal();
-
-    model.refreshLocalJobsInfo();
-    localSts = model.jobsStatusLocal();
-    TSM_ASSERT_EQUALS("Unexpected number of jobs (local), after refreshing",
-                      localSts.size(), 1);
+    for (size_t i = 0; i < expectedArguments.size(); ++i) {
+      // this is the --output one that varies depending on time, so just skip
+      if (expectedArguments[i].substr(0, 8) == "--output") {
+        continue;
+      }
+      TS_ASSERT_EQUALS(expectedArguments[i], actualArguments[i]);
+    }
   }
 };
 

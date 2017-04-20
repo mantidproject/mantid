@@ -79,9 +79,9 @@ public:
   }
 
   void setUp() override {
-    inputMatrix = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 1000);
+    inputMatrix = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 1000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(10000, 1000, 5000);
+        WorkspaceCreationHelper::createEventWorkspace(10000, 1000, 5000);
   }
 
   void tearDown() override {

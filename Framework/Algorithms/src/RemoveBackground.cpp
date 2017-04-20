@@ -1,8 +1,9 @@
 #include "MantidAlgorithms/RemoveBackground.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -12,9 +13,14 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/make_unique.h"
+
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,10 +30,6 @@ DECLARE_ALGORITHM(RemoveBackground)
 
 using namespace Kernel;
 using namespace API;
-
-//---------------------------------------------------------------------------------------------
-// Public methods
-//---------------------------------------------------------------------------------------------
 
 /** Initialization method. Declares properties to be used in algorithm.
 *
@@ -119,15 +121,15 @@ void RemoveBackground::exec() {
                                 inPlace, nullifyNegative);
 
   Progress prog(this, 0.0, 1.0, histnumber);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int hist = 0; hist < histnumber; ++hist) {
     PARALLEL_START_INTERUPT_REGION
     // get references to output Workspace X-arrays.
-    MantidVec &XValues = outputWS->dataX(hist);
+    auto &XValues = outputWS->mutableX(hist);
     // get references to output workspace data and error. If it is new
     // workspace, data will be copied there, if old, modified in-place
-    MantidVec &YValues = outputWS->dataY(hist);
-    MantidVec &YErrors = outputWS->dataE(hist);
+    auto &YValues = outputWS->mutableY(hist);
+    auto &YErrors = outputWS->mutableE(hist);
 
     // output data arrays are implicitly filled by function
     int id = PARALLEL_THREAD_NUMBER;
@@ -146,9 +148,9 @@ void RemoveBackground::exec() {
 //-------------------------------------------------------------------------------------------------------------------------------
 /// Constructor
 BackgroundHelper::BackgroundHelper()
-    : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(nullptr), m_inPlace(true),
-      m_singleValueBackground(false), m_NBg(0), m_dtBg(1), m_ErrSq(0),
-      m_Emode(0), m_Efix(0), m_nullifyNegative(false),
+    : m_WSUnit(), m_bgWs(), m_wkWS(), m_spectrumInfo(nullptr), m_pgLog(nullptr),
+      m_inPlace(true), m_singleValueBackground(false), m_NBg(0), m_dtBg(1),
+      m_ErrSq(0), m_Emode(0), m_Efix(0), m_nullifyNegative(false),
       m_previouslyRemovedBkgMode(false) {}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
@@ -216,9 +218,9 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
 
-  const MantidVec &dataX = bkgWS->readX(0);
-  const MantidVec &dataY = bkgWS->readY(0);
-  const MantidVec &dataE = bkgWS->readE(0);
+  auto &dataX = bkgWS->x(0);
+  auto &dataY = bkgWS->y(0);
+  auto &dataE = bkgWS->e(0);
   m_NBg = dataY[0];
   m_dtBg = dataX[1] - dataX[0];
   m_ErrSq = dataE[0] * dataE[0]; // needs further clarification
@@ -242,8 +244,8 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
 * single thread, in multithreading -- result of
 *                      omp_get_thread_num() )
 */
-void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
-                                        MantidVec &y_data, MantidVec &e_data,
+void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
+                                        HistogramY &y_data, HistogramE &e_data,
                                         int threadNum) const {
 
   double dtBg, IBg, ErrBgSq;
@@ -252,9 +254,9 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
     ErrBgSq = m_ErrSq;
     IBg = m_NBg;
   } else {
-    const MantidVec &dataX = m_bgWs->readX(nHist);
-    const MantidVec &dataY = m_bgWs->readY(nHist);
-    const MantidVec &dataE = m_bgWs->readE(nHist);
+    auto &dataX = m_bgWs->x(nHist);
+    auto &dataY = m_bgWs->y(nHist);
+    auto &dataE = m_bgWs->e(nHist);
     dtBg = (dataX[1] - dataX[0]);
     IBg = dataY[0];
     ErrBgSq = dataE[0] * dataE[0]; // Needs further clarification
@@ -266,9 +268,9 @@ void BackgroundHelper::removeBackground(int nHist, MantidVec &x_data,
     double L2 = m_spectrumInfo->l2(nHist);
     double delta(std::numeric_limits<double>::quiet_NaN());
     // get access to source workspace in case if target is different from source
-    const MantidVec &XValues = m_wkWS->readX(nHist);
-    const MantidVec &YValues = m_wkWS->readY(nHist);
-    const MantidVec &YErrors = m_wkWS->readE(nHist);
+    auto &XValues = m_wkWS->x(nHist);
+    auto &YValues = m_wkWS->y(nHist);
+    auto &YErrors = m_wkWS->e(nHist);
 
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum];

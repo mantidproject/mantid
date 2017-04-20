@@ -58,7 +58,7 @@ T checkForMandatoryInstrumentDefault(
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() == 0) {
+    if (defaults.empty()) {
       throw std::runtime_error("No data could be retrieved from the parameters "
                                "and argument wasn't provided: " +
                                propName);
@@ -90,7 +90,7 @@ boost::optional<T> checkForOptionalInstrumentDefault(
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
-    if (defaults.size() != 0) {
+    if (!defaults.empty()) {
       return boost::optional<T>(static_cast<T>(defaults[0]));
     } else {
       return boost::optional<T>();

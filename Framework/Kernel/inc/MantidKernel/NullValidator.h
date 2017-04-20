@@ -1,9 +1,6 @@
 #ifndef MANTID_KERNEL_NULLVALIDATOR_H_
 #define MANTID_KERNEL_NULLVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
 
 namespace Mantid {
@@ -38,15 +35,10 @@ namespace Kernel {
 */
 class DLLExport NullValidator final : public IValidator {
 public:
-  IValidator_sptr clone() const override {
-    return boost::make_shared<NullValidator>(*this);
-  }
+  IValidator_sptr clone() const override;
 
 private:
-  /** Always returns valid, that is ""
-   *  @returns an empty string
-   */
-  std::string check(const boost::any &) const override { return ""; }
+  std::string check(const boost::any &) const override;
 };
 
 } // namespace Kernel

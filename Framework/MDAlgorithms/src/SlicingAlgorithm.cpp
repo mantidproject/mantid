@@ -10,6 +10,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidAPI/Run.h"
 
 #include <boost/regex.hpp>
 
@@ -21,7 +22,6 @@ using Mantid::Kernel::Strings::strip;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 SlicingAlgorithm::SlicingAlgorithm()
@@ -30,7 +30,6 @@ SlicingAlgorithm::SlicingAlgorithm()
       m_axisAligned(true), m_outD(0), // unititialized and should be invalid
       m_NormalizeBasisVectors(false) {}
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SlicingAlgorithm::initSlicingProps() {
@@ -178,7 +177,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
 
   // Get the entire name
   std::string name = Strings::strip(input.substr(0, n_first_comma));
-  if (name.size() == 0)
+  if (name.empty())
     throw std::invalid_argument("name should not be blank.");
 
   // Now remove the name and comma
@@ -252,20 +251,19 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
   double binningScaling = double(numBins) / (lengthInInput);
 
   // Extract the arguments
-  std::string id = name;
   std::string units = Strings::strip(strs[0]);
 
   // Create the appropriate frame
   auto frame = createMDFrameForNonAxisAligned(units, basis);
 
   // Create the output dimension
-  MDHistoDimension_sptr out(
-      new MDHistoDimension(name, id, *frame, static_cast<coord_t>(min),
-                           static_cast<coord_t>(max), numBins));
+  auto out = boost::make_shared<MDHistoDimension>(
+      name, name, *frame, static_cast<coord_t>(min), static_cast<coord_t>(max),
+      numBins);
 
   // Put both in the algo for future use
   m_bases.push_back(basis);
-  m_binDimensions.push_back(out);
+  m_binDimensions.push_back(std::move(out));
   m_binningScaling.push_back(binningScaling);
   m_transformScaling.push_back(transformScaling);
 }
@@ -431,8 +429,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
     auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
-    Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
-    Matrix<coord_t> toMatrix = fromMatrix;
+    Matrix<coord_t> toMatrix = ctFrom->getMatrix();
     // Invert the affine matrix to get the reverse transformation
     toMatrix.Invert();
     ctTo->setMatrix(toMatrix);
@@ -491,7 +488,7 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     Strings::convert(strs[0], min);
     Strings::convert(strs[1], max);
     Strings::convert(strs[2], numBins);
-    if (name.size() == 0)
+    if (name.empty())
       throw std::invalid_argument("Name should not be blank.");
     if (min >= max)
       throw std::invalid_argument("Min should be > max.");

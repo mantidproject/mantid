@@ -5,6 +5,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,46 +31,40 @@ const std::string WorkspaceJoiners::category() const {
 /** Executes the algorithm for histogram workspace inputs
  *  @returns The result workspace
  */
-MatrixWorkspace_sptr
-WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
-                           API::MatrixWorkspace_const_sptr ws2) {
+MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
+                                                const MatrixWorkspace &ws2) {
   // Create the output workspace
   const size_t totalHists =
-      ws1->getNumberHistograms() + ws2->getNumberHistograms();
+      ws1.getNumberHistograms() + ws2.getNumberHistograms();
   MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create(
-      "Workspace2D", totalHists, ws1->readX(0).size(), ws1->readY(0).size());
+      "Workspace2D", totalHists, ws1.x(0).size(), ws1.y(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
-  WorkspaceFactory::Instance().initializeFromParent(ws1, output, true);
+  WorkspaceFactory::Instance().initializeFromParent(ws1, *output, true);
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace
-  auto XValues = ws1->refX(0);
+  auto XValues = ws1.refX(0);
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
   // Loop over the input workspaces in turn copying the data into the output one
-  const int64_t &nhist1 = ws1->getNumberHistograms();
-  PARALLEL_FOR2(ws1, output)
+  const int64_t &nhist1 = ws1.getNumberHistograms();
+  PARALLEL_FOR_IF(Kernel::threadSafe(ws1, *output))
   for (int64_t i = 0; i < nhist1; ++i) {
     PARALLEL_START_INTERUPT_REGION
     auto &outSpec = output->getSpectrum(i);
-    const auto &inSpec = ws1->getSpectrum(i);
+    const auto &inSpec = ws1.getSpectrum(i);
 
-    // Copy X,Y,E
-    outSpec.setX(XValues);
-    outSpec.dataY() = inSpec.dataY();
-    outSpec.dataE() = inSpec.dataE();
+    outSpec.setHistogram(inSpec.histogram());
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
     // Propagate binmasking, if needed
-    if (ws1->hasMaskedBins(i)) {
-      const MatrixWorkspace::MaskList &inputMasks = ws1->maskedBins(i);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        output->flagMasked(i, (*it).first, (*it).second);
+    if (ws1.hasMaskedBins(i)) {
+      for (const auto &inputMask : ws1.maskedBins(i)) {
+        output->flagMasked(i, inputMask.first, inputMask.second);
       }
     }
 
@@ -78,41 +74,41 @@ WorkspaceJoiners::execWS2D(API::MatrixWorkspace_const_sptr ws1,
   PARALLEL_CHECK_INTERUPT_REGION
 
   // For second loop we use the offset from the first
-  const int64_t &nhist2 = ws2->getNumberHistograms();
-  const auto &spectrumInfo = ws2->spectrumInfo();
-  PARALLEL_FOR2(ws2, output)
+  const int64_t &nhist2 = ws2.getNumberHistograms();
+  const auto &spectrumInfo = ws2.spectrumInfo();
+  auto &outSpectrumInfo = output->mutableSpectrumInfo();
+  PARALLEL_FOR_IF(Kernel::threadSafe(ws2, *output))
   for (int64_t j = 0; j < nhist2; ++j) {
     PARALLEL_START_INTERUPT_REGION
     // The spectrum in the output workspace
     auto &outSpec = output->getSpectrum(nhist1 + j);
     // Spectrum in the second workspace
-    const auto &inSpec = ws2->getSpectrum(j);
+    const auto &inSpec = ws2.getSpectrum(j);
 
-    // Copy X,Y,E
-    outSpec.setX(XValues);
-    outSpec.dataY() = inSpec.dataY();
-    outSpec.dataE() = inSpec.dataE();
+    outSpec.setHistogram(inSpec.histogram());
     // Copy the spectrum number/detector IDs
     outSpec.copyInfoFrom(inSpec);
 
     // Propagate masking, if needed
-    if (ws2->hasMaskedBins(j)) {
-      const MatrixWorkspace::MaskList &inputMasks = ws2->maskedBins(j);
-      MatrixWorkspace::MaskList::const_iterator it;
-      for (it = inputMasks.begin(); it != inputMasks.end(); ++it) {
-        output->flagMasked(nhist1 + j, (*it).first, (*it).second);
+    if (ws2.hasMaskedBins(j)) {
+      for (const auto &inputMask : ws2.maskedBins(j)) {
+        output->flagMasked(nhist1 + j, inputMask.first, inputMask.second);
       }
     }
     // Propagate spectrum masking
-    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
-      output->maskWorkspaceIndex(nhist1 + j);
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
+      output->getSpectrum(nhist1 + j).clearData();
+      PARALLEL_CRITICAL(setMasked) {
+        outSpectrumInfo.setMasked(nhist1 + j, true);
+      }
+    }
 
     m_progress->report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  fixSpectrumNumbers(ws1, ws2, output);
+  fixSpectrumNumbers(ws1, ws2, *output);
 
   return output;
 }
@@ -126,13 +122,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // Create the output workspace
   const size_t totalHists =
       event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
-  // Have the minimum # of histograms in the output.
-  EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", totalHists,
-                                          event_ws1->readX(0).size(),
-                                          event_ws1->readY(0).size()));
-  // Copy over geometry (but not data) from first input workspace
-  WorkspaceFactory::Instance().initializeFromParent(event_ws1, output, true);
+  auto output =
+      create<EventWorkspace>(*event_ws1, totalHists, event_ws1->binEdges(0));
 
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
@@ -146,6 +137,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
   // For second loop we use the offset from the first
   const int64_t &nhist2 = event_ws2->getNumberHistograms();
   const auto &spectrumInfo = event_ws2->spectrumInfo();
+  auto &outSpectrumInfo = output->mutableSpectrumInfo();
   for (int64_t j = 0; j < nhist2; ++j) {
     // This is the workspace index at which we assign in the output
     int64_t output_wi = j + nhist1;
@@ -153,18 +145,22 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
 
     // Propagate spectrum masking. First workspace will have been done by the
     // factory
-    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j))
-      output->maskWorkspaceIndex(output_wi);
+    if (spectrumInfo.hasDetectors(j) && spectrumInfo.isMasked(j)) {
+      output->getSpectrum(output_wi).clearData();
+      PARALLEL_CRITICAL(setMaskedEvent) {
+        outSpectrumInfo.setMasked(output_wi, true);
+      }
+    }
 
     m_progress->report();
   }
 
   // Set the same bins for all output pixels
-  output->setAllX(HistogramData::BinEdges(event_ws1->refX(0)));
+  output->setAllX(event_ws1->binEdges(0));
 
-  fixSpectrumNumbers(event_ws1, event_ws2, output);
+  fixSpectrumNumbers(*event_ws1, *event_ws2, *output);
 
-  return output;
+  return std::move(output);
 }
 
 /** Checks that the two input workspace have common binning & size, the same
@@ -174,8 +170,8 @@ MatrixWorkspace_sptr WorkspaceJoiners::execEvent() {
  *  @param ws2 :: The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
-void WorkspaceJoiners::validateInputs(API::MatrixWorkspace_const_sptr ws1,
-                                      API::MatrixWorkspace_const_sptr ws2) {
+void WorkspaceJoiners::validateInputs(const MatrixWorkspace &ws1,
+                                      const MatrixWorkspace &ws2) {
   // This is the full check for common binning
   if (!WorkspaceHelpers::commonBoundaries(ws1) ||
       !WorkspaceHelpers::commonBoundaries(ws2)) {
@@ -185,15 +181,15 @@ void WorkspaceJoiners::validateInputs(API::MatrixWorkspace_const_sptr ws1,
         "Both input workspaces must have common binning for all their spectra");
   }
 
-  if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
+  if (ws1.getInstrument()->getName() != ws2.getInstrument()->getName()) {
     const std::string message("The input workspaces are not compatible because "
                               "they come from different instruments");
     g_log.error(message);
     throw std::invalid_argument(message);
   }
 
-  Unit_const_sptr ws1_unit = ws1->getAxis(0)->unit();
-  Unit_const_sptr ws2_unit = ws2->getAxis(0)->unit();
+  Unit_const_sptr ws1_unit = ws1.getAxis(0)->unit();
+  Unit_const_sptr ws2_unit = ws2.getAxis(0)->unit();
   const std::string ws1_unitID = (ws1_unit ? ws1_unit->unitID() : "");
   const std::string ws2_unitID = (ws2_unit ? ws2_unit->unitID() : "");
 
@@ -204,7 +200,7 @@ void WorkspaceJoiners::validateInputs(API::MatrixWorkspace_const_sptr ws1,
     throw std::invalid_argument(message);
   }
 
-  if (ws1->isDistribution() != ws2->isDistribution()) {
+  if (ws1.isDistribution() != ws2.isDistribution()) {
     const std::string message(
         "The input workspaces have inconsistent distribution flags");
     g_log.error(message);
@@ -226,14 +222,14 @@ void WorkspaceJoiners::validateInputs(API::MatrixWorkspace_const_sptr ws1,
  * @param min The minimum id (output).
  * @param max The maximum id (output).
  */
-void WorkspaceJoiners::getMinMax(MatrixWorkspace_const_sptr ws, specnum_t &min,
+void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min,
                                  specnum_t &max) {
   specnum_t temp;
-  size_t length = ws->getNumberHistograms();
+  size_t length = ws.getNumberHistograms();
   // initial values
-  min = max = ws->getSpectrum(0).getSpectrumNo();
+  min = max = ws.getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws->getSpectrum(i).getSpectrumNo();
+    temp = ws.getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;

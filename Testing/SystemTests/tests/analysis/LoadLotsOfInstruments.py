@@ -7,6 +7,7 @@ import stresstesting
 
 EXPECTED_EXT = '.expected'
 
+
 class LoadLotsOfInstruments(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
@@ -23,7 +24,6 @@ class LoadLotsOfInstruments(stresstesting.MantidStressTest):
             files.append(os.path.join(direc, filename))
         files.sort()
         return files
-
 
     def __loadAndTest__(self, filename):
         """Do all of the real work of loading and testing the file"""
@@ -72,8 +72,8 @@ class LoadLotsOfInstruments(stresstesting.MantidStressTest):
             print "SUMMARY OF FAILED FILES"
             for filename in failed:
                 print filename
-            raise RuntimeError("Failed to load %d of %d files" \
-                                   % (len(failed), len(files)))
+            raise RuntimeError("Failed to load %d of %d files"
+                               % (len(failed), len(files)))
         else:
             print "Successfully loaded %d files" % len(files)
         print files

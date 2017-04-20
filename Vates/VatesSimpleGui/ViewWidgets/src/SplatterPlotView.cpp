@@ -22,6 +22,7 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
@@ -51,13 +52,17 @@ namespace SimpleGui {
 
 namespace {
 Mantid::Kernel::Logger g_log("SplatterPlotView");
+const char *g_defaultRepresentation = "Point Gaussian";
+const double g_defaultOpacity = 0.5;
+const double g_defaultRadius = 0.005;
 }
 
 SplatterPlotView::SplatterPlotView(
-    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager)
+    QWidget *parent, RebinnedSourcesManager *rebinnedSourcesManager,
+    bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_cameraManager(boost::make_shared<CameraManager>()),
-      m_peaksTableController(NULL), m_peaksWorkspaceNameDelimiter(";") {
+      m_peaksTableController(nullptr), m_peaksWorkspaceNameDelimiter(";") {
   this->m_noOverlay = false;
   this->m_ui.setupUi(this);
 
@@ -83,7 +88,9 @@ SplatterPlotView::SplatterPlotView(
   QObject::connect(this->m_ui.pickModeButton, SIGNAL(toggled(bool)), this,
                    SLOT(onPickModeToggled(bool)));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if (createRenderProxy)
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
+
   this->installEventFilter(this);
 
   setupVisiblePeaksButtons();
@@ -127,14 +134,13 @@ void SplatterPlotView::destroyView() {
 pqRenderView *SplatterPlotView::getView() { return this->m_view.data(); }
 
 void SplatterPlotView::render() {
-  pqPipelineSource *src = NULL;
-  src = pqActiveObjects::instance().activeSource();
+  pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   bool isPeaksWorkspace = this->isPeaksWorkspace(src);
   // Hedge for two things.
   // 1. If there is no active source
   // 2. If we are loading a peak workspace without haveing
   //    a splatterplot source in place
-  bool isBadInput = !src || (isPeaksWorkspace && this->m_splatSource == NULL);
+  bool isBadInput = !src || (isPeaksWorkspace && !this->m_splatSource);
   if (isBadInput) {
     g_log.warning() << "SplatterPlotView: Could not render source. You are "
                        "either loading an active source "
@@ -143,11 +149,11 @@ void SplatterPlotView::render() {
     return;
   }
 
-  const char *renderType = "Point Gaussian";
+  const char *renderType = g_defaultRepresentation;
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
-  if (!this->isPeaksWorkspace(src) && NULL != this->m_splatSource) {
+  if (!this->isPeaksWorkspace(src) && this->m_splatSource) {
     QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
                          QApplication::tr("SplatterPlot mode does not allow "
                                           "more that one MDEventWorkspace to "
@@ -193,8 +199,9 @@ void SplatterPlotView::render() {
       builder->createDataRepresentation(src->getOutputPort(0), this->m_view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType);
   if (!isPeaksWorkspace) {
-    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(0.5);
-    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius").Set(0.005);
+    vtkSMPropertyHelper(drep->getProxy(), "Opacity").Set(g_defaultOpacity);
+    vtkSMPropertyHelper(drep->getProxy(), "GaussianRadius")
+        .Set(g_defaultRadius);
   } else {
     vtkSMPropertyHelper(drep->getProxy(), "LineWidth").Set(2);
   }
@@ -281,6 +288,13 @@ void SplatterPlotView::onThresholdButtonClicked() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->m_threshSource = builder->createFilter(
       "filters", MantidQt::API::MdConstants::Threshold, this->m_splatSource);
+  auto filterProxy =
+      builder->createDataRepresentation(this->m_threshSource->getOutputPort(0),
+                                        this->m_view)->getProxy();
+  vtkSMPropertyHelper(filterProxy, "Representation")
+      .Set(g_defaultRepresentation);
+  vtkSMPropertyHelper(filterProxy, "Opacity").Set(g_defaultOpacity);
+  vtkSMPropertyHelper(filterProxy, "GaussianRadius").Set(g_defaultRadius);
   emit this->lockColorControls();
 }
 
@@ -299,8 +313,8 @@ void SplatterPlotView::checkView(ModeControlWidget::Views initialView) {
 void SplatterPlotView::onPickModeToggled(bool state) {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (state) {
-    pqPipelineSource *src = NULL;
-    if (NULL != this->m_threshSource) {
+    pqPipelineSource *src = nullptr;
+    if (this->m_threshSource) {
       src = this->m_threshSource;
     } else {
       src = this->m_splatSource;
@@ -347,7 +361,7 @@ void SplatterPlotView::readAndSendCoordinates() {
   vtkSMDoubleVectorProperty *coords =
       vtkSMDoubleVectorProperty::SafeDownCast(pList[0]->GetProperty("Center"));
 
-  if (NULL != coords) {
+  if (coords) {
     // Get coordinate type
     int peakViewCoords =
         vtkSMPropertyHelper(
@@ -456,10 +470,11 @@ void SplatterPlotView::createPeaksFilter() {
     pqDataRepresentation *dataRepresentation =
         m_peaksFilter->getRepresentation(this->m_view);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation")
-        .Set("Point Gaussian");
+        .Set(g_defaultRepresentation);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "GaussianRadius")
-        .Set(0.005);
-    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity").Set(0.5);
+        .Set(g_defaultRadius);
+    vtkSMPropertyHelper(dataRepresentation->getProxy(), "Opacity")
+        .Set(g_defaultOpacity);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
     if (!this->isPeaksWorkspace(this->origSrc)) {
@@ -618,7 +633,7 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource *filter) {
  * We need to do this, since PV can destroy the filter in a general
  * destorySources command.
  */
-void SplatterPlotView::onPeaksFilterDestroyed() { m_peaksFilter = NULL; }
+void SplatterPlotView::onPeaksFilterDestroyed() { m_peaksFilter = nullptr; }
 
 /**
  * Destroy all sources in the splatterplot view. We need to delete the filters
@@ -631,6 +646,33 @@ void SplatterPlotView::destroyAllSourcesInView() {
   // Destroy the remaning sources and filters
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroySources();
+}
+
+void SplatterPlotView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.renderFrame);
+
+  auto &activeObjects = pqActiveObjects::instance();
+  this->m_view = view;
+
+  auto server = activeObjects.activeServer();
+  auto model = pqApplicationCore::instance()->getServerManagerModel();
+  auto filters = model->findItems<pqPipelineFilter *>(server);
+  this->m_splatSource = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewSplatterPlot);
+  this->m_peaksFilter = findFilter(
+      filters, MantidQt::API::MdConstants::MantidParaViewPeaksFilter);
+  this->m_threshSource =
+      findFilter(filters, MantidQt::API::MdConstants::Threshold);
+  this->m_probeSource =
+      findFilter(filters, MantidQt::API::MdConstants::ProbePoint);
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
+}
+
+ModeControlWidget::Views SplatterPlotView::getViewType() {
+  return ModeControlWidget::Views::SPLATTERPLOT;
 }
 
 void SplatterPlotView::destroyFiltersForSplatterPlotView() {
@@ -650,6 +692,31 @@ void SplatterPlotView::destroyFiltersForSplatterPlotView() {
   }
   if (this->m_splatSource) {
     builder->destroy(this->m_splatSource);
+  }
+}
+
+/* Find a pqPipelineFilter using the XML name of the proxy
+ *
+ * If there is more than one match only the first found is returned. If no items
+ * are matched a nullptr is returned.
+ *
+ * @param filters :: a list of filters to search
+ * @param name :: the XML name of the item to find
+ * @return pointer to the pqPipelineFilter found in filters
+ */
+pqPipelineFilter *
+SplatterPlotView::findFilter(const QList<pqPipelineFilter *> &filters,
+                             const QString &name) const {
+  auto result = std::find_if(filters.begin(), filters.end(),
+                             [&name](const pqPipelineFilter *src) {
+                               return strcmp(src->getProxy()->GetXMLName(),
+                                             name.toStdString().c_str()) == 0;
+                             });
+
+  if (result != filters.end()) {
+    return result[0];
+  } else {
+    return nullptr;
   }
 }
 

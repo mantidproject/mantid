@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -44,6 +45,9 @@ void EvaluateFunction::execConcrete() {
 
   // Do something with the function which may depend on workspace.
   m_domainCreator->initFunction(m_function);
+
+  // Apply any ties.
+  m_function->applyTies();
 
   // Calculate function values.
   m_function->function(*domain, *values);

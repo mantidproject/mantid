@@ -5,6 +5,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/BoundedValidator.h"
 
 #include <algorithm>
@@ -98,6 +99,10 @@ void SplineSmoothing::exec() {
     pgress.report();
   }
 
+  if (m_inputWorkspace->isHistogramData()) {
+    convertToHistogram();
+  }
+
   setProperty("OutputWorkspace", m_outputWorkspace);
 
   if (m_derivativeWorkspaceGroup->size() > 0) {
@@ -109,17 +114,17 @@ void SplineSmoothing::exec() {
  *
  * @param index :: index of the spectrum to smooth
  */
-void SplineSmoothing::smoothSpectrum(int index) {
+void SplineSmoothing::smoothSpectrum(const int index) {
   m_cspline = boost::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
   // choose some smoothing points from input workspace
-  selectSmoothingPoints(m_inputWorkspacePointData, index);
+  selectSmoothingPoints(*m_inputWorkspacePointData, index);
   performAdditionalFitting(m_inputWorkspacePointData, index);
 
-  // compare the data set against our spline
-  m_outputWorkspace->setX(index, m_inputWorkspace->refX(index));
-  calculateSmoothing(m_inputWorkspacePointData, m_outputWorkspace, index);
+  m_outputWorkspace->setPoints(index, m_inputWorkspace->points(index));
+
+  calculateSmoothing(*m_inputWorkspacePointData, *m_outputWorkspace, index);
 }
 
 /** Calculate the derivatives for each spectrum in the input workspace
@@ -127,14 +132,15 @@ void SplineSmoothing::smoothSpectrum(int index) {
  * @param index :: index of the spectrum
  * @param order :: order of derivatives to calculate
  */
-void SplineSmoothing::calculateSpectrumDerivatives(int index, int order) {
+void SplineSmoothing::calculateSpectrumDerivatives(const int index,
+                                                   const int order) {
   if (order > 0) {
     API::MatrixWorkspace_sptr derivs =
         setupOutputWorkspace(m_inputWorkspace, order);
 
     for (int j = 0; j < order; ++j) {
-      derivs->setX(j, m_inputWorkspace->refX(index));
-      calculateDerivatives(m_inputWorkspacePointData, derivs, j + 1, index);
+      derivs->setSharedX(j, m_inputWorkspace->sharedX(index));
+      calculateDerivatives(*m_inputWorkspacePointData, *derivs, j + 1, index);
     }
 
     m_derivativeWorkspaceGroup->addWorkspace(derivs);
@@ -162,20 +168,22 @@ void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws,
  *it with the desired number of spectra.
  * Also labels the axis of each spectra with Yi, where i is the index
  *
- * @param inws :: The input workspace
+ * @param inws :: The input workspace as a shared pointer
  * @param size :: The number of spectra the workspace should be created with
  * @return The pointer to the newly created workspace
  */
 API::MatrixWorkspace_sptr
-SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_const_sptr inws,
-                                      int size) const {
+SplineSmoothing::setupOutputWorkspace(const MatrixWorkspace_sptr &inws,
+                                      const int size) const {
+  // Must pass a shared pointer instead of a reference as the
+  // workspace factory will not accept raw pointers.
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
 
   // create labels for output workspace
   auto tAxis = new API::TextAxis(size);
   for (int i = 0; i < size; ++i) {
-    std::string index = std::to_string(i);
+    const std::string index = std::to_string(i);
     tAxis->setLabel(i, "Y" + index);
   }
   outputWorkspace->replaceAxis(1, tAxis);
@@ -200,6 +208,17 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
   }
 }
 
+/**
+* Converts the output workspace back to histogram data if it was
+* converted to point data previously
+*/
+void SplineSmoothing::convertToHistogram() {
+  auto alg = createChildAlgorithm("ConvertToHistogram");
+  alg->setProperty("InputWorkspace", m_outputWorkspace);
+  alg->execute();
+  m_outputWorkspace = alg->getProperty("OutputWorkspace");
+}
+
 /** Calculate smoothing of the data using the spline
  * Wraps CubicSpline function1D
  *
@@ -207,14 +226,14 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
  * @param outputWorkspace :: The output workspace
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::calculateSmoothing(
-    MatrixWorkspace_const_sptr inputWorkspace,
-    MatrixWorkspace_sptr outputWorkspace, size_t row) const {
+void SplineSmoothing::calculateSmoothing(const MatrixWorkspace &inputWorkspace,
+                                         MatrixWorkspace &outputWorkspace,
+                                         size_t row) const {
   // define the spline's parameters
-  const auto &xIn = inputWorkspace->readX(row);
-  size_t nData = xIn.size();
-  const double *xValues = xIn.data();
-  double *yValues = outputWorkspace->dataY(row).data();
+  const auto &xIn = inputWorkspace.x(row);
+  const size_t nData = xIn.size();
+  const double *xValues = &(xIn[0]);
+  double *yValues = &(outputWorkspace.mutableY(row)[0]);
 
   // calculate the smoothing
   m_cspline->function1D(yValues, xValues, nData);
@@ -229,19 +248,19 @@ void SplineSmoothing::calculateSmoothing(
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::calculateDerivatives(
-    API::MatrixWorkspace_const_sptr inputWorkspace,
-    API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const {
-  const auto &xIn = inputWorkspace->readX(row);
-  const double *xValues = xIn.data();
-  double *yValues = outputWorkspace->dataY(order - 1).data();
-  size_t nData = xIn.size();
+    const MatrixWorkspace &inputWorkspace,
+    API::MatrixWorkspace &outputWorkspace, const int order,
+    const size_t row) const {
+  const auto &xIn = inputWorkspace.x(row);
+  const double *xValues = &(xIn[0]);
+  double *yValues = &(outputWorkspace.mutableY(order - 1)[0]);
+  const size_t nData = xIn.size();
 
   m_cspline->derivative1D(yValues, xValues, nData, order);
 }
 
 /** Checks if the difference of each data point between the smoothing points
- *falls within
- * the error tolerance.
+ * falls within the error tolerance.
  *
  * @param start :: The index of start checking accuracy at
  * @param end :: The index to stop checking accuracy at
@@ -303,10 +322,10 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  * @param row :: The row of spectra to use
  */
 void SplineSmoothing::selectSmoothingPoints(
-    MatrixWorkspace_const_sptr inputWorkspace, size_t row) {
+    const MatrixWorkspace &inputWorkspace, const size_t row) {
   std::set<int> smoothPts;
-  const auto &xs = inputWorkspace->readX(row);
-  const auto &ys = inputWorkspace->readY(row);
+  const auto &xs = inputWorkspace.x(row);
+  const auto &ys = inputWorkspace.y(row);
 
   // retrieving number of breaks
   int maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
@@ -349,12 +368,12 @@ void SplineSmoothing::selectSmoothingPoints(
       }
     }
 
-    addSmoothingPoints(smoothPts, xs.data(), ys.data());
+    addSmoothingPoints(smoothPts, &xs[0], &ys[0]);
     resmooth = false;
 
     // calculate the spline and retrieve smoothed points
     boost::shared_array<double> ysmooth(new double[xSize]);
-    m_cspline->function1D(ysmooth.get(), xs.data(), xSize);
+    m_cspline->function1D(ysmooth.get(), &xs[0], xSize);
 
     // iterate over smoothing points
     auto iter = smoothPts.cbegin();
@@ -364,8 +383,7 @@ void SplineSmoothing::selectSmoothingPoints(
       int end = *iter;
 
       // check each point falls within our range of error.
-      bool accurate =
-          checkSmoothingAccuracy(start, end, ys.data(), ysmooth.get());
+      bool accurate = checkSmoothingAccuracy(start, end, &ys[0], ysmooth.get());
 
       // if not, flag for resmoothing and add another point between these two
       // data points

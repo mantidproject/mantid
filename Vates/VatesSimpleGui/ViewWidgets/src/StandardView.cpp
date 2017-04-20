@@ -88,11 +88,13 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
+ * @param createRenderProxy :: whether to create a render proxy for the view
  */
 StandardView::StandardView(QWidget *parent,
-                           RebinnedSourcesManager *rebinnedSourcesManager)
-    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(NULL),
-      m_sliceMDAction(NULL), m_cutMDAction(NULL), m_unbinAction(NULL) {
+                           RebinnedSourcesManager *rebinnedSourcesManager,
+                           bool createRenderProxy)
+    : ViewBase(parent, rebinnedSourcesManager), m_binMDAction(nullptr),
+      m_sliceMDAction(nullptr), m_cutMDAction(nullptr), m_unbinAction(nullptr) {
   this->m_ui.setupUi(this);
   this->m_cameraReset = false;
 
@@ -110,6 +112,10 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
+  // Set the cut button to create a slice on the data
+  QObject::connect(this->m_ui.thresholdButton, SIGNAL(clicked()), this,
+                   SLOT(onThresholdButtonClicked()));
+
   // Listen to a change in the active source, to adapt our rebin buttons
   QObject::connect(&pqActiveObjects::instance(),
                    SIGNAL(sourceChanged(pqPipelineSource *)), this,
@@ -119,10 +125,12 @@ StandardView::StandardView(QWidget *parent,
   QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()), this,
                    SLOT(onScaleButtonClicked()));
 
-  this->m_view = this->createRenderView(this->m_ui.renderFrame);
+  if (createRenderProxy) {
+    this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
-                   SLOT(onRenderDone()));
+    QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                     SLOT(onRenderDone()));
+  }
 }
 
 StandardView::~StandardView() {}
@@ -171,6 +179,7 @@ void StandardView::setupViewButtons() {
 void StandardView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
+  this->destroyFilter(QString("Threshold"));
   builder->destroy(this->m_view);
 }
 
@@ -178,7 +187,7 @@ pqRenderView *StandardView::getView() { return this->m_view.data(); }
 
 void StandardView::render() {
   this->origSrc = pqActiveObjects::instance().activeSource();
-  if (NULL == this->origSrc) {
+  if (!this->origSrc) {
     return;
   }
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -201,15 +210,11 @@ void StandardView::render() {
   if (!this->isPeaksWorkspace(this->origSrc)) {
     vtkSMPVRepresentationProxy::SetScalarColoring(
         drep->getProxy(), "signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
-    // drep->getProxy()->UpdateVTKObjects();
-    // vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
-    //                                                               "signal",
-    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
     drep->getProxy()->UpdateVTKObjects();
   }
 
-  this->resetDisplay();
   emit this->triggerAccept();
+  this->resetDisplay();
 }
 
 void StandardView::onCutButtonClicked() {
@@ -221,6 +226,21 @@ void StandardView::onCutButtonClicked() {
   // Apply cut to currently viewed data
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
+
+  // We need to attach the visibility listener to the newly
+  // created filter, this is required for automatic updating the color scale
+  setVisibilityListener();
+}
+
+void StandardView::onThresholdButtonClicked() {
+  // check that has active source
+  if (!hasActiveSource()) {
+    return;
+  }
+
+  // Apply cut to currently viewed data
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  builder->createFilter("filters", "Threshold", this->getPvActiveSrc());
 
   // We need to attach the visibility listener to the newly
   // created filter, this is required for automatic updating the color scale
@@ -286,6 +306,23 @@ void StandardView::updateUI() { this->m_ui.cutButton->setEnabled(true); }
 void StandardView::updateView() { this->m_cameraReset = true; }
 
 void StandardView::closeSubWindows() {}
+
+void StandardView::setView(pqRenderView *view) {
+  clearRenderLayout(this->m_ui.renderFrame);
+
+  this->m_view = view;
+
+  QHBoxLayout *hbox = new QHBoxLayout(this->m_ui.renderFrame);
+  hbox->setMargin(0);
+  hbox->addWidget(m_view->widget());
+
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()), this,
+                   SLOT(onRenderDone()));
+}
+
+ModeControlWidget::Views StandardView::getViewType() {
+  return ModeControlWidget::Views::STANDARD;
+}
 
 /**
  * Check if the rebin and unbin buttons should be visible

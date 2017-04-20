@@ -2,6 +2,7 @@
 #define FIND_SX_PEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -12,24 +13,22 @@ using namespace Mantid::DataObjects;
 
 // Helper method to overwrite spectra.
 void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
-                       const Mantid::MantidVec &Yvalues) {
-  Mantid::MantidVec &Y = workspace->dataY(histo);
-  for (size_t i = 0; i < Y.size(); i++) {
-    Y[i] = Yvalues[i];
-  }
+                       const std::vector<double> &Yvalues) {
+
+  workspace->dataY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
 void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
                  Workspace2D_sptr workspace) {
-  size_t nBins = workspace->readY(0).size();
-  Mantid::MantidVec peaksInY(nBins);
+  size_t nBins = workspace->y(0).size();
+  std::vector<double> peaksInY(nBins);
 
   for (size_t i = 0; i < nBins; i++) {
     if (i == at_bin) {
       peaksInY[i] = peak_intensity; // overwrite with special value
     } else {
-      peaksInY[i] = workspace->readY(histo)[i];
+      peaksInY[i] = workspace->y(histo)[i];
     }
   }
   overWriteSpectraY(histo, workspace, peaksInY);
@@ -45,13 +44,11 @@ public:
   void testSXPeakConstructorThrowsIfNegativeIntensity() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = -1; // Negative intensity.
     std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
     TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
-                      SXPeak(0.001, 0.02, 0.01, intensity, spectra,
-                             detectorDistance, 1, instrument),
+                      SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
                       std::invalid_argument);
   }
 
@@ -59,41 +56,22 @@ public:
   void testSXPeakConstructorThrowsIfSpectraSizeZero() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra; // Zero size spectra list
-    double detectorDistance = 3;
     TSM_ASSERT_THROWS(
         "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
-        std::invalid_argument);
-  }
-
-  // Test out of bounds construction arguments.
-  void testSXPeakConstructorThrowsIfNegativeDetectorDistance() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
-    double intensity = 1;
-    std::vector<int> spectra(1, 1);
-    double detectorDistance = -1; // Negative detector distance
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
+        SXPeak(0.001, 0.02, intensity, spectra, 0, spectrumInfo),
         std::invalid_argument);
   }
 
   void testSXPeakGetters() {
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
+    const auto &spectrumInfo = workspace->spectrumInfo();
     double intensity = 1;
     std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
-    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2,
-                instrument);
+    SXPeak peak(0.001, 0.02, intensity, spectra, 1, spectrumInfo);
 
     TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
                       peak.getIntensity());
@@ -238,6 +216,29 @@ public:
                       results[1]);
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
                       results[2]);
+  }
+
+  void testSpectrumWithoutUniqueDetectorsThrows() {
+    const int nHist = 10;
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
+    makeOnePeak(2, 400, 5, workspace);
+    Mantid::DataHandling::GroupDetectors2 grouping;
+    grouping.setChild(true);
+    grouping.initialize();
+    grouping.setProperty("InputWorkspace", workspace);
+    grouping.setProperty("OutputWorkspace", "unused_for_child");
+    grouping.setProperty("GroupingPattern", "0,1-3,4,5");
+    grouping.execute();
+    MatrixWorkspace_sptr grouped = grouping.getProperty("OutputWorkspace");
+    std::cout << grouped->getNumberHistograms() << '\n';
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", grouped);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.setRethrows(true);
+    TSM_ASSERT_THROWS_ANYTHING("FindSXPeak should have thrown.", alg.execute());
+    TSM_ASSERT("FindSXPeak should not have been executed.", !alg.isExecuted());
   }
 
   void testUseWorkspaceRangeCropping() {

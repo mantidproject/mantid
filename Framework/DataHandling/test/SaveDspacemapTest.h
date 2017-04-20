@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

@@ -12,6 +12,7 @@ derivative
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class Example1DFunction(IFunction1D):
 
     def category(self):

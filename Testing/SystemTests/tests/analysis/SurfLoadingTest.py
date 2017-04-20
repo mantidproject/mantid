@@ -1,6 +1,7 @@
 #pylint: disable=no-init
 from LoadAndCheckBase import *
 
+
 class SurfLoadingTest(LoadAndCheckBase):
     '''
     Test File loading and basic data integrity checks of SURF data in Mantid.

@@ -1,20 +1,21 @@
 #include "MantidLiveData/ISIS/ISISHistoDataListener.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidGeometry/Instrument.h"
 
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
@@ -33,6 +34,7 @@ GCC_DIAG_OFF(unused-variable)
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::HistogramData::Counts;
 using Mantid::Kernel::ConfigService;
 
 namespace Mantid {
@@ -46,7 +48,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
-    : ILiveListener(), isInitilized(false), m_daeHandle(nullptr),
+    : LiveListener(), isInitilized(false), m_daeHandle(nullptr),
       m_numberOfPeriods(0), m_totalNumberOfSpectra(0), m_timeRegime(-1) {
   declareProperty(
       Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>("SpectraList"),
@@ -83,6 +85,8 @@ void ISISHistoDataListener::IDCReporter(int status, int code,
 
 /** Connect to the specified address and checks that is valid
   *  @param address   The IP address and port to contact (port is ignored).
+  * @param args A ConnectionArgs object used to supply additional arguments
+  * required for the connection
   *  @return True if the connection was successfully established
   */
 bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
@@ -428,15 +432,14 @@ void ISISHistoDataListener::getData(int period, int index, int count,
                                        m_daeName);
   }
 
+  auto size = workspace->y(0).size();
   for (size_t i = 0; i < static_cast<size_t>(count); ++i) {
     size_t wi = workspaceIndex + i;
-    workspace->setBinEdges(wi, m_bins[m_timeRegime]);
-    MantidVec &y = workspace->dataY(wi);
-    MantidVec &e = workspace->dataE(wi);
     workspace->getSpectrum(wi).setSpectrumNo(index + static_cast<specnum_t>(i));
     size_t shift = i * (numberOfBins + 1) + 1;
-    y.assign(dataBuffer.begin() + shift, dataBuffer.begin() + shift + y.size());
-    std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
+    workspace->setHistogram(
+        wi, m_bins[m_timeRegime],
+        Counts(dataBuffer.begin() + shift, dataBuffer.begin() + shift + size));
   }
 }
 

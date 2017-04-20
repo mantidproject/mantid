@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class WishAnalysis(stresstesting.MantidStressTest):
     """
     Runs the WISH analysis chain on one bank of data

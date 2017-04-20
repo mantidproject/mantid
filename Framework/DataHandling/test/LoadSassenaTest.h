@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSassena.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid;
 
@@ -51,37 +52,37 @@ public:
     DataObjects::Workspace2D_sptr ws =
         boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             gws->getItem("outGWS_qvectors"));
-    TS_ASSERT_DELTA(ws->readY(4)[0], 0.02402402, 1e-08);
+    TS_ASSERT_DELTA(ws->y(4)[0], 0.02402402, 1e-08);
 
     // Test fq
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         gws->getItem("outGWS_fq"));
-    TS_ASSERT_DELTA(ws->readY(0)[4], 1070.7009, 1e-04);
-    TS_ASSERT_DELTA(ws->readY(1)[4], 674.67703, 1e-05);
+    TS_ASSERT_DELTA(ws->y(0)[4], 1070.7009, 1e-04);
+    TS_ASSERT_DELTA(ws->y(1)[4], 674.67703, 1e-05);
 
     // Test fq0
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         gws->getItem("outGWS_fq0"));
-    TS_ASSERT_DELTA(ws->readY(0)[4], 1094.1314, 1e-04);
-    TS_ASSERT_DELTA(ws->readY(1)[4], 652.75902, 1e-05);
+    TS_ASSERT_DELTA(ws->y(0)[4], 1094.1314, 1e-04);
+    TS_ASSERT_DELTA(ws->y(1)[4], 652.75902, 1e-05);
 
     // Test fq2
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         gws->getItem("outGWS_fq2"));
-    TS_ASSERT_DELTA(ws->readY(0)[4], 358926.16, 1e-02);
-    TS_ASSERT_EQUALS(ws->readY(1)[4], 0.0);
+    TS_ASSERT_DELTA(ws->y(0)[4], 358926.16, 1e-02);
+    TS_ASSERT_EQUALS(ws->y(1)[4], 0.0);
 
     // Test fq Real part
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         gws->getItem("outGWS_fqt.Re"));
-    TS_ASSERT_DELTA(ws->readY(4)[0], 1918.2156, 1e-04);
-    TS_ASSERT_DELTA(ws->readY(4)[14], 1918.2156, 1e-04);
+    TS_ASSERT_DELTA(ws->y(4)[0], 1918.2156, 1e-04);
+    TS_ASSERT_DELTA(ws->y(4)[14], 1918.2156, 1e-04);
 
     // Test fq Imaginary part
     ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
         gws->getItem("outGWS_fqt.Im"));
-    TS_ASSERT_DELTA(ws->readY(4)[0], -656.82368, 1e-05);
-    TS_ASSERT_DELTA(ws->readY(4)[14], 656.82368, 1e-05);
+    TS_ASSERT_DELTA(ws->y(4)[0], -656.82368, 1e-05);
+    TS_ASSERT_DELTA(ws->y(4)[14], 656.82368, 1e-05);
 
   } // end of testExec
 

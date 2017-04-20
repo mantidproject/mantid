@@ -2,7 +2,9 @@
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtMantidWidgets/DataProcessorUI/DataProcessorPresenter.h"
@@ -19,7 +21,6 @@ namespace MantidWidgets {
 // Forward decs
 class ProgressableView;
 class DataProcessorView;
-class DataProcessorCommand;
 class DataProcessorTreeManager;
 
 /** @class GenericDataProcessorPresenter
@@ -59,7 +60,10 @@ public:
       const std::map<std::string, DataProcessorPreprocessingAlgorithm> &
           preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor);
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const std::map<std::string, std::string> &postprocessMap =
+          std::map<std::string, std::string>(),
+      const std::string &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
@@ -75,7 +79,7 @@ public:
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
       const DataProcessorProcessingAlgorithm &processor);
-  ~GenericDataProcessorPresenter() override;
+  virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<std::string, QVariant> &options() const override;
   void setOptions(const std::map<std::string, QVariant> &options) override;
@@ -106,15 +110,36 @@ public:
   void giveUserWarning(const std::string &prompt,
                        const std::string &title) const override;
 
-private:
-  // the tree manager
-  std::unique_ptr<DataProcessorTreeManager> m_manager;
-  // the name of the workspace/table/model in the ADS, blank if unsaved
-  std::string m_wsName;
-  // the table view we're managing
+protected:
+  // The table view we're managing
   DataProcessorView *m_view;
   // The progress view
   ProgressableView *m_progressView;
+  // A workspace receiver we want to notify
+  DataProcessorMainPresenter *m_mainPresenter;
+  // The tree manager, a proxy class to retrieve data from the model
+  std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // Loader
+  std::string m_loader;
+
+  // Post-process some rows
+  void postProcessGroup(const GroupData &data);
+  // Reduce a row
+  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  // Finds a run in the AnalysisDataService
+  std::string findRunInADS(const std::string &run, const std::string &prefix,
+                           bool &runFound);
+
+  // Process selected rows
+  virtual void process();
+  // Plotting
+  virtual void plotRow();
+  virtual void plotGroup();
+  void plotWorkspaces(const std::set<std::string> &workspaces);
+
+private:
+  // the name of the workspace/table/model in the ADS, blank if unsaved
+  std::string m_wsName;
   // The whitelist
   DataProcessorWhiteList m_whitelist;
   // The pre-processing instructions
@@ -123,31 +148,29 @@ private:
   DataProcessorProcessingAlgorithm m_processor;
   // Post-processing algorithm
   DataProcessorPostprocessingAlgorithm m_postprocessor;
+  // Post-processing map
+  std::map<std::string, std::string> m_postprocessMap;
   // A boolean indicating whether a post-processing algorithm has been defined
   bool m_postprocess;
   // The number of columns
   int m_columns;
-  // A workspace receiver we want to notify
-  DataProcessorMainPresenter *m_mainPresenter;
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
   std::map<std::string, QVariant> m_options;
-  // Post-process some rows
-  void postProcessGroup(const GroupData &data);
-  // process selected rows
-  void process();
-  // Reduce a row
-  std::vector<std::string> reduceRow(const std::vector<std::string> &data);
+  // load a run into the ADS, or re-use one in the ADS if possible
+  Mantid::API::Workspace_sptr getRun(const std::string &run,
+                                     const std::string &instrument,
+                                     const std::string &prefix);
+  // Loads a run from disk
+  std::string loadRun(const std::string &run, const std::string &instrument,
+                      const std::string &prefix, const std::string &loader,
+                      bool &runFound);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
   prepareRunWorkspace(const std::string &run,
                       const DataProcessorPreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
-  // load a run into the ADS, or re-use one in the ADS if possible
-  Mantid::API::Workspace_sptr loadRun(const std::string &run,
-                                      const std::string &instrument,
-                                      const std::string &prefix); // change
   // add row(s) to the model
   void appendRow();
   // add group(s) to the model
@@ -168,6 +191,10 @@ private:
   void groupRows();
   // expand selection to group
   void expandSelection();
+  // expand all groups
+  void expandAll();
+  // close all groups
+  void collapseAll();
   // table io methods
   void newTable();
   void openTable();
@@ -175,10 +202,6 @@ private:
   void saveTableAs();
   void importTable();
   void exportTable();
-  // plotting
-  void plotRow();
-  void plotGroup();
-  void plotWorkspaces(const std::set<std::string> &workspaces);
 
   // options
   void showOptionsDialog();

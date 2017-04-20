@@ -180,7 +180,6 @@ private:
       space2D->setBinEdges(i, x);
       space2D->setCounts(i, y);
       space2D->setCountStandardDeviations(i, e);
-      space2D->getSpectrum(i).setSpectrumNo(i);
     }
 
     AnalysisDataService::Instance().add(inputWS, space2D);
@@ -196,7 +195,7 @@ private:
 
   void createEventWorkspace() {
     EventWorkspace_sptr event =
-        WorkspaceCreationHelper::CreateEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
+        WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().add(inputEvWS, event);
 

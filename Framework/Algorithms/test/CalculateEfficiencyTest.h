@@ -1,10 +1,13 @@
 #ifndef CALCULATEEFFICIENCYTEST_H_
 #define CALCULATEEFFICIENCYTEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
@@ -98,12 +101,9 @@ public:
                     0.4502, tolerance);
 
     // Check that pixels that were out of range were masked
-    TS_ASSERT(
-        !ws2d_out->getDetector(5 + SANSInstrumentCreationHelper::nMonitors)
-             ->isMasked())
-    TS_ASSERT(
-        !ws2d_out->getDetector(1 + SANSInstrumentCreationHelper::nMonitors)
-             ->isMasked())
+    const auto &oSpecInfo = ws2d_out->spectrumInfo();
+    TS_ASSERT(!oSpecInfo.isMasked(5 + SANSInstrumentCreationHelper::nMonitors));
+    TS_ASSERT(!oSpecInfo.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
 
     // Repeat the calculation by excluding high/low pixels
 
@@ -143,11 +143,10 @@ public:
                     0.5002, tolerance);
 
     // Check that pixels that were out of range were masked
-    TS_ASSERT(ws2d_out->getDetector(5 + SANSInstrumentCreationHelper::nMonitors)
-                  ->isMasked())
+    const auto &oSpecInfo2 = ws2d_out->spectrumInfo();
+    TS_ASSERT(oSpecInfo2.isMasked(5 + SANSInstrumentCreationHelper::nMonitors));
     TS_ASSERT(
-        !ws2d_out->getDetector(1 + SANSInstrumentCreationHelper::nMonitors)
-             ->isMasked())
+        !oSpecInfo2.isMasked(1 + SANSInstrumentCreationHelper::nMonitors));
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
@@ -230,9 +229,10 @@ public:
     TS_ASSERT_DELTA(ws2d_out->e(6 + nmon)[0], 0.105261, tolerance);
 
     // Check that pixels that were out of range were masked
-    TS_ASSERT(ws2d_out->getDetector(1826)->isMasked())
-    TS_ASSERT(ws2d_out->getDetector(2014)->isMasked())
-    TS_ASSERT(ws2d_out->getDetector(2015)->isMasked())
+    const auto &oSpecInfo = ws2d_out->spectrumInfo();
+    TS_ASSERT(oSpecInfo.isMasked(1826));
+    TS_ASSERT(oSpecInfo.isMasked(2014));
+    TS_ASSERT(oSpecInfo.isMasked(2015));
 
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);

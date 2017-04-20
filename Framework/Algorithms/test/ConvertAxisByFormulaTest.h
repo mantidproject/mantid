@@ -32,7 +32,7 @@ public:
     std::string resultWs = alg.name() + "_testPlusRefAxis_Result";
 
     AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::Create2DWorkspace123(10, 10));
+        inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", "x+3"));
@@ -89,7 +89,7 @@ public:
     std::string resultWs = alg.name() + "_testSquareXNumeric_Result";
 
     AnalysisDataService::Instance().add(
-        inputWs, WorkspaceCreationHelper::Create2DWorkspace123(10, 10));
+        inputWs, WorkspaceCreationHelper::create2DWorkspace123(10, 10));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inputWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", resultWs));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Formula", "(X+2)*(x+2)"));

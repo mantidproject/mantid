@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
@@ -23,7 +24,7 @@ using Mantid::Geometry::IDetector_const_sptr;
 
 /*****************************************************************************************/
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
-/********** Source = MultiplyDivideTest.h.in *********************************************/
+/********** Source = MultiplyDivideTest.in.h *********************************************/
 /*****************************************************************************************/
 
 class @MULTIPLYDIVIDETEST_CLASS@ : public CxxTest::TestSuite
@@ -42,11 +43,11 @@ public:
   {
     DO_DIVIDE = @MULTIPLYDIVIDETEST_DO_DIVIDE@;
 
-    fibWS1d = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
-    histWS_5x10_123 = WorkspaceCreationHelper::Create2DWorkspace123(5,10);
-    histWS_5x10_154 = WorkspaceCreationHelper::Create2DWorkspace154(5,10);
-    histWS_5x10_bin = WorkspaceCreationHelper::Create2DWorkspace(5,10);
-    eventWS_5x10_50 = WorkspaceCreationHelper::CreateEventWorkspace(5,10,50,0.0,1.0,2);
+    fibWS1d = WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
+    histWS_5x10_123 = WorkspaceCreationHelper::create2DWorkspace123(5,10, true);
+    histWS_5x10_154 = WorkspaceCreationHelper::create2DWorkspace154(5,10, true);
+    histWS_5x10_bin = WorkspaceCreationHelper::create2DWorkspace(5,10);
+    eventWS_5x10_50 = WorkspaceCreationHelper::createEventWorkspace(5,10,50,0.0,1.0,2);
   }
 
 
@@ -84,9 +85,9 @@ public:
   void testCompoundAssignment()
   {
 
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::createWorkspaceSingleValue(3);
     const Workspace_const_sptr b = a;
-    MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    MatrixWorkspace_sptr c = WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     if (DO_DIVIDE)
     {
       a /= 5;
@@ -125,7 +126,7 @@ public:
 
   void test_2D_2D_inPlace()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(5,10);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_bin;
     performTest(work_in1,work_in2, false /*not event*/,
         DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
@@ -136,8 +137,8 @@ public:
     if(DO_DIVIDE)
     {
     int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr numerator  = WorkspaceCreationHelper::Create2DWorkspace123(nHist-1,nBins); // Cropped
-    MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::Create2DWorkspace123(nHist, 1); // Integrated
+    MatrixWorkspace_sptr numerator  = WorkspaceCreationHelper::create2DWorkspace123(nHist-1,nBins); // Cropped
+    MatrixWorkspace_sptr denominator = WorkspaceCreationHelper::create2DWorkspace123(nHist, 1); // Integrated
     Divide alg;
     alg.initialize();
     alg.setChild(true);
@@ -156,8 +157,8 @@ public:
     for (int inplace=0; inplace<2; inplace++)
     {
       int nHist = 5,nBins=10;
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(nHist,1);
       performTest(work_in1,work_in2, false /*not event*/,
           DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, inplace!=0 /*in place*/);
     }
@@ -166,15 +167,16 @@ public:
   void test_1D_Rand2D()
   {
     int nHist = 5,nBins=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    const bool isHistogram(true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, isHistogram);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create1DWorkspaceRand(nBins, isHistogram);
     performTest(work_in1,work_in2);
   }
 
   void test_2D_1DVertical()
   {
     MatrixWorkspace_sptr work_in1 = histWS_5x10_154;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,10);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace123(1,10, true);
     performTest(work_in1,work_in2);
   }
 
@@ -182,8 +184,8 @@ public:
   {
     //In 2D workspaces, the X bins have to match
     int nHist = 20,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(1,nBins*5);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins, true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(1,nBins*5, true);
     performTest_fails(work_in1, work_in2);
   }
 
@@ -218,7 +220,7 @@ public:
 
   void test_2D_2DbyOperatorOverload_inPlace()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(5,10);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_bin;
     MatrixWorkspace_sptr work_out1;
     if (DO_DIVIDE)
@@ -237,15 +239,15 @@ public:
   void test_1D_SingleValue()
   {
     MatrixWorkspace_sptr work_in1 = fibWS1d;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
     performTest(work_in1,work_in2);
   }
 
   void test_SingleValue_1D()
   {
     int nBins = 5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(10.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1,nBins);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2,false,
           5.0, 3.8729, false, true /*commutes*/);
@@ -258,8 +260,8 @@ public:
     for (int inplace=0; inplace<2; inplace++)
     {
       int nHist = 5,nBins=10;
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
       performTest(work_in1,work_in2, false /*not event*/,
           DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, inplace!=0 /*in place*/);
     }
@@ -267,7 +269,7 @@ public:
 
   void test_SingleValue_2D()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(10.0);
     MatrixWorkspace_sptr work_in2 = histWS_5x10_bin;
     if (DO_DIVIDE)
       performTest(work_in1,work_in2,false,
@@ -279,7 +281,7 @@ public:
   void test_2D_SingleValueNoError()
   {
     MatrixWorkspace_sptr work_in1 = histWS_5x10_bin;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(5.0, 0.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(5.0, 0.0);
     performTest(work_in1,work_in2);
   }
 
@@ -299,8 +301,8 @@ public:
   void test_1DVertical_EventWithOneBin_willCommute()
   {
     int nBins=1,nHist=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist, nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, 1.0, false, false, false /* not in place */);
     else
@@ -310,8 +312,8 @@ public:
   void test_1DVertical_EventWithOneBin_willCommute_inplace()
   {
     int nBins=1,nHist=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist, nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, 1.0, false, false, true /*in place*/);
     else
@@ -320,7 +322,7 @@ public:
 
   void test_2D_Event_inPlace()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(5,10);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, true);
@@ -331,7 +333,7 @@ public:
   void test_2D_Event_RHSEventWorkspaceHasOnebin()
   {
     MatrixWorkspace_sptr work_in1 = histWS_5x10_bin;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(5, 1,50,0.0,100.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(5, 1,50,0.0,100.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, false);
     else
@@ -341,8 +343,8 @@ public:
   void test_2D_Event_inPlace_RHSEventWorkspaceHasOnebin()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,50,0.0,100.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist, 1,50,0.0,100.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, true);
     else
@@ -352,8 +354,8 @@ public:
   void test_2D_Event_inPlace_RHSEventWorkspaceHasOnebinAndOneSpectrum()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(1, 1,50,0.0,100.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(1, 1,50,0.0,100.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*output is not Event*/, 1.0, sqrt(1.0), false, false, true);
     else
@@ -363,8 +365,8 @@ public:
   void test_Event_2D_inplace_LHSEventWorkspaceHasOnebin()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true /*output is Event */, 1.0, 0.8660, false, false, true);
     else
@@ -375,8 +377,8 @@ public:
   void test_Event_2D_inplace_LHSEventWorkspaceHasOnebinAndOneSpectrum()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(1, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(1, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
     if (DO_DIVIDE)
       performTest_fails(work_in1,work_in2); // Incompatible sizes
     else
@@ -397,8 +399,8 @@ public:
   void test_Event_2D_inPlace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(nHist,nBins);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75), false, false, true);
     else
@@ -412,7 +414,7 @@ public:
   void test_Event_2DSingleSpectrum()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
@@ -422,8 +424,8 @@ public:
   void test_Event_2DSingleSpectrum_inPlace()
   {
     int nHist = 10,nBins=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1, nBins);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75), false, false, true /* in-place */);
     else
@@ -434,7 +436,7 @@ public:
   {
     //Unlike 2D workspaces, you can divide by a single spectrum with different X bins!
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(1, 5*2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace(1, 5*2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
@@ -443,7 +445,7 @@ public:
 
   void test_2DSingleSpectrum_Event()
   {
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, 10);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     if (DO_DIVIDE)
       performTest_fails(work_in1,work_in2); /* Fails for dividing, since you can't commute */
@@ -454,8 +456,8 @@ public:
   void test_2DSingleSpectrum_Event_inPlace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(1, nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest_fails(work_in1,work_in2); /* Fails for dividing, since you can't commute */
     else
@@ -466,8 +468,8 @@ public:
   {
     //Unlike 2D workspaces, you can divide by a single spectrum with different X bins!
     int nBins = 5,nHist=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nHist*2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nBins,nHist,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(1, nHist*2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nBins,nHist,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest_fails(work_in1,work_in2); /* Fails for dividing, since you can't commute */
     else
@@ -478,8 +480,8 @@ public:
   {
     //Unlike 2D workspaces, you can divide by a single spectrum with different X bins!
     int nBins = 5,nHist=5;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins*2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nBins,nHist,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace(1, nBins*2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nBins,nHist,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest_fails(work_in1,work_in2); /* Fails for dividing, since you can't commute */
     else
@@ -489,7 +491,7 @@ public:
   void test_Event_SingleValue()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75));
     else
@@ -499,8 +501,8 @@ public:
   void test_Event_SingleValue_inPlace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75), false, false, true /* in-place */);
     else
@@ -510,8 +512,8 @@ public:
   void test_SingleValue_Event()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(10.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*NOT events*/,
           5.0, 3.8729, false, true /*commutes*/);
@@ -523,8 +525,8 @@ public:
   {
     // Doing in-place on a single value is silly since it just gets overwritten, but it works!
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, false /*NOT events*/,
           1.0, 1.0, false, true /*commutes*/);
@@ -535,7 +537,7 @@ public:
   void test_Event_SingleValueNoError()
   {
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValueWithError(2.0, 0.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(2.0, 0.0);
     performTest(work_in1,work_in2, true);
   }
 
@@ -552,8 +554,8 @@ public:
   void test_Event_Event_inPlace()
   {
     int nHist = 5,nBins=10;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     if (DO_DIVIDE)
       performTest(work_in1,work_in2, true, 1.0, sqrt(0.75), false, false, true /* in-place */);
     else
@@ -585,13 +587,13 @@ public:
       rhs[i/rhs_grouping].push_back(i);
     }
     // Grouped workspace will have lhs_grouping events in each bin (also).
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 10, 1.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createGroupedEventWorkspace(lhs, 10, 1.0);
     if (lhs2D)
       work_in1 = EventWorkspaceHelpers::convertEventTo2D(work_in1);
     TS_ASSERT_DELTA( work_in1->readE(0)[0], sqrt( double(lhs_grouping*1.0) ), 1e-5);
 
     // Grouped workspace will have rhs_grouping events in each bin (also).
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 10, 1.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createGroupedEventWorkspace(rhs, 10, 1.0);
     if (rhs2D)
       work_in2 = EventWorkspaceHelpers::convertEventTo2D(work_in2);
     TS_ASSERT_DELTA( work_in2->readE(0)[0], sqrt( double(rhs_grouping*1.0) ), 1e-5);
@@ -727,6 +729,7 @@ public:
     alg->setPropertyValue("RHSWorkspace",wsName2);
     alg->setPropertyValue("OutputWorkspace",wsNameOut);
     alg->setProperty("AllowDifferentNumberSpectra", allowMismatchedSpectra);
+    alg->setRethrows(true);
     TSM_ASSERT_THROWS_NOTHING(message, alg->execute());
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;
@@ -917,8 +920,8 @@ public:
     masking.insert(2);
     masking.insert(7);
 
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins, 0, masking);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins, 0, masking);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::create2DWorkspace123(nHist,nBins, 0, masking);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::create2DWorkspace154(nHist,nBins, 0, masking);
     const std::string lhs("work_in1"), rhs("work_in2");
     AnalysisDataService::Instance().add(lhs, work_in1);
     AnalysisDataService::Instance().add(rhs, work_in2);
@@ -956,21 +959,20 @@ public:
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("work_in1");
     TS_ASSERT(output);
 
+    const auto &spectrumInfo = output->spectrumInfo();
     for( int i = 0; i < nHist; ++i )
     {
-      IDetector_const_sptr det = output->getDetector(i);
-      TS_ASSERT(det);
-      if( !det ) TS_FAIL("No detector found");
+      TS_ASSERT(spectrumInfo.hasDetectors(i));
       if( masking.count(i) == 0 )
       {
-        TS_ASSERT_EQUALS(det->isMasked(), false);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
       }
       else
       {
-        TS_ASSERT_EQUALS(det->isMasked(), true);
+        TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
         double yValue = output->readY(i)[0];
         TS_ASSERT_EQUALS(yValue, yValue );
-        TS_ASSERT_DIFFERS(yValue, std::numeric_limits<double>::infinity() );
+        TS_ASSERT( !std::isinf(yValue) );
       }
     }
     AnalysisDataService::Instance().remove(lhs);

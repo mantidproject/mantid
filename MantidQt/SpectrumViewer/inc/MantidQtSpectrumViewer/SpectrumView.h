@@ -82,6 +82,12 @@ public:
                                                     const int fileVersion);
   /// Save the state of the spectrum viewer to a Mantid project file
   virtual std::string saveToProject(ApplicationWindow *app) override;
+  /// Get the name of the window
+  std::string getWindowName() override;
+  /// Get the workspaces associated with this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Get the window type as a string
+  std::string getWindowType() override;
 
 signals:
   void spectrumDisplayChanged(SpectrumDisplay *);

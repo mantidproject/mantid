@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -15,7 +16,9 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;
@@ -29,7 +32,6 @@ public:
   void testSavingParameters() {
     // First we want to load a workspace to work with.
     prepareWorkspace();
-
     // Now let's set some parameters
     setParam("nickel-holder", "testDouble1", 1.23);
     setParam("nickel-holder", "testDouble2", 1.00);
@@ -83,12 +85,11 @@ public:
   }
 
   void setParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    paramMap.addDouble(comp->getComponentID(), pName, value);
+    const auto &detectorInfo = m_ws->detectorInfo();
+    const auto detectorIndex = detectorInfo.indexOf(id);
+    const auto &detector = detectorInfo.detector(detectorIndex);
+    paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
   void setFitParam(std::string cName, std::string pName, std::string value) {
@@ -117,12 +118,10 @@ public:
   }
 
   void checkParamByDetID(int id, std::string pName, double value) {
-    Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    IDetector_const_sptr det = inst->getDetector(id);
-    IComponent_const_sptr comp =
-        boost::dynamic_pointer_cast<const IComponent>(det);
-    Parameter_sptr param = paramMap.get(comp.get(), pName);
+    const auto &detectorInfo = m_ws->detectorInfo();
+    const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
+    Parameter_sptr param = paramMap.get(&detector, pName);
     double pValue = param->value<double>();
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
@@ -148,7 +147,7 @@ public:
     LoadParameterFile loaderPF;
     TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
     loaderPF.setPropertyValue("Filename", filename);
-    loaderPF.setPropertyValue("Workspace", m_ws->name());
+    loaderPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
     TS_ASSERT(loaderPF.isExecuted());
   }
@@ -157,7 +156,7 @@ public:
     SaveParameterFile saverPF;
     TS_ASSERT_THROWS_NOTHING(saverPF.initialize());
     saverPF.setPropertyValue("Filename", filename);
-    saverPF.setPropertyValue("Workspace", m_ws->name());
+    saverPF.setPropertyValue("Workspace", m_ws->getName());
     TS_ASSERT_THROWS_NOTHING(saverPF.execute());
     TS_ASSERT(saverPF.isExecuted());
   }

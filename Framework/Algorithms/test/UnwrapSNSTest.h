@@ -27,7 +27,7 @@ private:
 
   void makeFakeEventWorkspace(std::string wsName) {
     // Make an event workspace with 2 events in each bin.
-    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
         NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
     // Fake a d-spacing unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
@@ -87,9 +87,9 @@ public:
     TS_ASSERT(min_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMin());
     TS_ASSERT(max_eventN < ws->getSpectrum(NUMPIXELS - 1).getTofMax());
 
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[0], 0.0);
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[1], 2.0);
-    TS_ASSERT_EQUALS(ws->getSpectrum(0).dataX()[2], 4.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[0], 0.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[1], 2.0);
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[2], 4.0);
   }
 };
 

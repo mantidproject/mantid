@@ -64,7 +64,7 @@ public:
   void testCalculationHist() {
     // setup the test workspace
     Workspace2D_sptr wksp =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(9, 16, 1000, 1000);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(9, 16, 1000, 1000);
     wksp->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
     wksp->getAxis(0)->setUnit("TOF");

@@ -41,8 +41,7 @@
 namespace Mantid {
 namespace Kernel {
 template <typename TYPE = std::string>
-class MANTID_KERNEL_DLL MaskedProperty
-    : public Kernel::PropertyWithValue<TYPE> {
+class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
 public:
   /// Constructor with a validator
   MaskedProperty(const std::string &name, TYPE defaultvalue,

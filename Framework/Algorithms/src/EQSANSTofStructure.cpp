@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/EQSANSTofStructure.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Events.h"
@@ -130,7 +131,7 @@ void EQSANSTofStructure::execEvent(
   const auto l1 = spectrumInfo.l1();
 
   // Loop through the spectra and apply correction
-  PARALLEL_FOR1(inputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec) {
     PARALLEL_START_INTERUPT_REGION
 

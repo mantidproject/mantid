@@ -1,5 +1,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 
+#include <boost/lexical_cast.hpp>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid {

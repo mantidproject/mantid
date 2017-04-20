@@ -4,6 +4,8 @@
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Validation.h"
 
+#include <numeric>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
@@ -114,6 +116,14 @@ public:
   /// Returns a const reference to the underlying vector.
   const std::vector<double> &rawData() const { return m_data; }
 
+  /// Returns the sum over a range of values from min (inclusive) to max
+  /// (exclusive)
+  double sum(size_t min = 0, size_t max = std::numeric_limits<size_t>::max(),
+             double initialValue = 0.0) const {
+    max = std::min(max, size());
+    return std::accumulate(begin() + min, begin() + max, initialValue);
+  }
+
 protected:
   /** Returns a reference to the underlying vector.
    *
@@ -157,6 +167,10 @@ public:
   double &back() { return m_data.back(); }
   const double &front() const { return m_data.front(); }
   const double &back() const { return m_data.back(); }
+
+  // expose typedefs for the iterator types in the underlying container
+  typedef std::vector<double>::iterator iterator;
+  typedef std::vector<double>::const_iterator const_iterator;
 };
 
 } // namespace detail

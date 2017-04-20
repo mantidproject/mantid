@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 

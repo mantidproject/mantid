@@ -27,21 +27,21 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include <QVector>
-#include <QWidgetList>
-#include <QPrinter>
-#include <QPrintDialog>
 #include <QApplication>
-#include <QMessageBox>
 #include <QBitmap>
+#include <QCheckBox>
+#include <QClipboard>
+#include <QGroupBox>
 #include <QImageWriter>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPicture>
-#include <QClipboard>
-#include <QCheckBox>
-#include <QGroupBox>
-#include <QSpinBox>
+#include <QPrintDialog>
+#include <QPrinter>
 #include <QSize>
+#include <QSpinBox>
+#include <QVector>
+#include <QWidgetList>
 
 #include <cmath>
 #include <limits>
@@ -57,21 +57,24 @@
 #include <qwt_scale_widget.h>
 #include <qwt_text_label.h>
 
+#include "ApplicationWindow.h"
+#include "LegendWidget.h"
 #include "MultiLayer.h"
 #include "Plot.h"
-#include "LegendWidget.h"
 #include "SelectionMoveResizer.h"
-#include "ApplicationWindow.h"
+#include "Spectrogram.h"
 #include <ColorButton.h>
 
-#include "Mantid/MantidDock.h"
-#include "Mantid/MantidMatrixCurve.h"
 #include "Mantid/MantidMDCurve.h"
+#include "Mantid/MantidMatrixCurve.h"
+#include "MantidKernel/Strings.h"
+#include <MantidQtMantidWidgets/MantidTreeWidget.h>
 
-#include <gsl/gsl_vector.h>
 #include "Mantid/MantidMDCurveDialog.h"
-#include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
+#include <MantidQtMantidWidgets/MantidTreeWidget.h>
+#include <MantidQtMantidWidgets/MantidWSIndexDialog.h>
+#include <gsl/gsl_vector.h>
 
 #include "MantidQtAPI/TSVSerialiser.h"
 
@@ -79,6 +82,7 @@
 DECLARE_WINDOW(MultiLayer)
 
 using namespace Mantid;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 /// static logger
@@ -1322,7 +1326,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
     IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {
-      QString currentName(imdWS->name().c_str());
+      QString currentName(imdWS->getName().c_str());
       try {
         MantidMDCurve *curve = new MantidMDCurve(currentName, g, showErrors);
         MantidQwtIMDWorkspaceData *data = curve->mantidData();
@@ -1809,18 +1813,7 @@ MultiLayer::loadFromProject(const std::string &lines, ApplicationWindow *app,
 
       if (gtsv.selectLine("ggeometry")) {
         int x = 0, y = 0, w = 0, h = 0;
-        gtsv >> x >> y;
-
-        w = multiLayer->canvas->width();
-        w -= multiLayer->left_margin;
-        w -= multiLayer->right_margin;
-        w -= (multiLayer->d_cols - 1) * multiLayer->colsSpace;
-
-        h = multiLayer->canvas->height();
-        h -= multiLayer->top_margin;
-        h -= multiLayer->left_margin;
-        h -= (multiLayer->d_rows - 1) * multiLayer->rowsSpace;
-        h -= LayerButton::btnSize();
+        gtsv >> x >> y >> w >> h;
 
         if (isWaterfall)
           h -= LayerButton::btnSize(); // need an extra offset for the buttons
@@ -1866,6 +1859,39 @@ std::string MultiLayer::saveToProject(ApplicationWindow *app) {
   return tsv.outputLines();
 }
 
+std::vector<std::string> MultiLayer::getWorkspaceNames() {
+  std::vector<std::string> names;
+  std::string name;
+  MantidMatrixCurve *mmc;
+  Spectrogram *spec;
+  for (auto graph : graphsList) {
+    for (int i = 0; i < graph->getNumCurves(); ++i) {
+      auto item = graph->plotItem(i);
+
+      switch (item->rtti()) {
+      case QwtPlotItem::Rtti_PlotUserItem:
+        mmc = dynamic_cast<MantidMatrixCurve *>(item);
+        if (!mmc)
+          continue;
+
+        name = mmc->workspaceName().toStdString();
+        names.push_back(name);
+        break;
+      case QwtPlotItem::Rtti_PlotSpectrogram:
+        spec = dynamic_cast<Spectrogram *>(item);
+        if (!spec)
+          continue;
+
+        name = spec->workspaceName();
+        names.push_back(name);
+        break;
+      }
+    }
+  }
+
+  return names;
+}
+
 /**
  * Sets axes for all layers to the same scales, which are set to encompass the
  * widest range of data.
@@ -1893,5 +1919,6 @@ void MultiLayer::setCommonAxisScales() {
     auto *plot = layer(i)->plotWidget();
     plot->setAxisScale(AXIS_X, lowestX, highestX);
     plot->setAxisScale(AXIS_Y, lowestY, highestY);
+    layer(i)->replot();
   }
 }

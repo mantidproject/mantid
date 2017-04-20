@@ -7,6 +7,7 @@ import inspect
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
+
 class ReductionOptions(BaseScriptElement):
     instrument_name = "BIOSANS"
     nx_pixels = 192

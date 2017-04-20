@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,super-on-old-class,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import sys
 import numpy
@@ -18,20 +19,22 @@ def returnValid(validity,teststring,pos):
 class EmptyOrDoubleValidator(QtGui.QValidator):
     def __init__(self, dummy_parent):
         super(EmptyOrDoubleValidator,self).__init__()
+
     def validate(self,teststring, pos):
         if len(str(teststring))==0:
             return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
         else:
             try:
-                dummy=float(str(teststring))
+                float(str(teststring))
                 return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
             except ValueError:
                 try:
                     #this is the case when you start typing - or 1e or 1e- and putting 1 at the end would make it a float
-                    dummy=float(str(teststring)+'1')
+                    float(str(teststring)+'1')
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
+
 
 class V3DValidator(QtGui.QValidator):
     def __init__(self, dummy_parent):
@@ -43,25 +46,27 @@ class V3DValidator(QtGui.QValidator):
             return returnValid(QtGui.QValidator.Invalid,teststring,pos)
         if len(parts)==3:
             try:
-                dummy_0=float(parts[0])
-                dummy_1=float(parts[1])
-                dummy_2=float(parts[2])
+                float(parts[0])
+                float(parts[1])
+                float(parts[2])
                 return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
             except ValueError:
                 try:
-                    dummy_0=float(parts[0]+'1')
-                    dummy_1=float(parts[1]+'1')
-                    dummy_2=float(parts[2]+'1')
+                    float(parts[0]+'1')
+                    float(parts[1]+'1')
+                    float(parts[2]+'1')
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
         return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
+
 
 def FloatToQString(value):
     if numpy.isfinite(value):
         return QString(format(value,'.3f'))
     else:
         return QString("")
+
 
 def translation(number,character):
     if number==0:
@@ -75,6 +80,7 @@ def translation(number,character):
 
 class DimensionSelectorWidget(QtGui.QWidget):
     changed=QtCore.pyqtSignal(dict)
+
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(DimensionSelectorWidget,self).__init__()
@@ -326,7 +332,6 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._comboDim3.setCurrentIndex(2)
         self._comboDim4.setCurrentIndex(3)
         self.inhibitSignal=False
-
 
     def updateChanges(self):
         d=dict()

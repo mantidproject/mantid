@@ -76,11 +76,6 @@ private:
   correctPosition(API::MatrixWorkspace_sptr &toCorrect,
                   const double &thetaInDeg, const bool isPointDetector);
 
-  /// Sum spectra.
-  Mantid::API::MatrixWorkspace_sptr
-  sumSpectraOverRange(API::MatrixWorkspace_sptr inWS, const int startIndex,
-                      const int endIndex);
-
   /// Perform a transmission correction on the input IvsLam workspace
   API::MatrixWorkspace_sptr transmissonCorrection(
       API::MatrixWorkspace_sptr IvsLam, const MinMax &wavelengthInterval,

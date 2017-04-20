@@ -1,4 +1,5 @@
-﻿# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes, too-many-branches,too-many-locals, too-many-nested-blocks
+# pylint: disable = too-many-lines, invalid-name, line-too-long, too-many-instance-attributes,
+# pylint: disable = too-many-branches,too-many-locals, too-many-nested-blocks
 
 try:
     from mantidplot import *
@@ -27,10 +28,10 @@ from mantid import UsageService
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
 
 canMantidPlot = True
-
 
 
 class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
@@ -83,7 +84,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         #Setup instrument with defaults assigned.
         self.instrument_list = ['INTER', 'SURF', 'CRISP', 'POLREF', 'OFFSPEC']
         self.polarisation_instruments = ['CRISP', 'POLREF']
-        self.polarisation_options = {'None': PolarisationCorrection.NONE, '1-PNR': PolarisationCorrection.PNR, '2-PA': PolarisationCorrection.PA}
+        self.polarisation_options = {'None': PolarisationCorrection.NONE,
+                                     '1-PNR': PolarisationCorrection.PNR,
+                                     '2-PA': PolarisationCorrection.PA}
 
         #Set the live data settings, use default if none have been set before
         settings = QtCore.QSettings()
@@ -119,7 +122,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         settings.setValue(self.__group_tof_workspaces_key, self.__group_tof_workspaces)
         settings.setValue(self.__alg_migration_key, self.__alg_migrate)
         settings.setValue(self.__stitch_right_key, self.__scale_right)
-
 
         settings.endGroup()
 
@@ -385,7 +387,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.actionRefl_Gui_Options.triggered.connect(self._options_dialog)
         self.actionSlit_Calculator.triggered.connect(self._show_slit_calculator)
 
-
     def __valid_rb(self):
         # Ensure that you cannot put zero in for an rb search
         rbSearchValidator = QtGui.QIntValidator(self)
@@ -399,7 +400,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if current_text:
                 logger.warning("RB search restricted to numbers > 0")
             return False
-
 
     def _populate_runs_list(self):
         """
@@ -451,7 +451,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         copy the contents of the selected cells to the row below as long as the row below contains a run number in the first cell
         """
-        _col = 0
         # make sure all selected cells are in the same row
         sum = 0
         howMany = len(self.tableMain.selectedItems())
@@ -472,7 +471,10 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         row = row + 1
                         filled = filled + 1
                 if not filled:
-                    QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "No target cells to autofill. Rows to be filled should contain a run number in their first cell, and start from directly below the selected line.")
+                    QtGui.QMessageBox.critical(self.tableMain,
+                                               'Cannot perform Autofill',
+                                               "No target cells to autofill. Rows to be filled should contain a run number in their "
+                                               "first cell, and start from directly below the selected line.")
             else:
                 QtGui.QMessageBox.critical(self.tableMain, 'Cannot perform Autofill', "Selected cells must all be in the same row.")
         else:
@@ -593,34 +595,37 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             logger.warning("Cannot paste, no editable cells selected")
 
     def _transfer(self):
-
         """
         Transfer run numbers to the table
         """
 
         tup = ()
         for idx in self.listMain.selectedItems():
-            split_title = re.split("th=|:", idx.text())
-            if len(split_title) != 3:
+            split_title = re.split(":th=|th=|:|dq/q=", idx.text())
+            if len(split_title) < 3:
                 split_title = re.split(":", idx.text())
-                if len(split_title) != 2:
+                if len(split_title) < 2:
                     logger.warning('cannot transfer ' + idx.text() + ' title is not in the right form ')
+                    continue
                 else:
                     theta = 0
                     split_title.append(theta) # Append a dummy theta value.
-                    tup = tup + (split_title,)
-            else:
-                tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta)
+            if len(split_title) < 4:
+                dqq = 0
+                split_title.append(dqq) # Append a dummy dq/q value.
+            tup = tup + (split_title,) # Tuple of lists containing (run number, title, theta, dq/q)
 
         tupsort = sorted(tup, key=itemgetter(1, 2))  # now sorted by title then theta
         row = 0
         for _key, group in itertools.groupby(tupsort, lambda x: x[1]): # now group by title
             col = 0
+            dqq = 0 # only one value of dqq per row
             run_angle_pairs_of_title = list() # for storing run_angle pairs all with the same title
             for object in group:  # loop over all with equal title
 
                 run_no = object[0]
-                angle = object[-1]
+                dqq = object[-1]
+                angle = object[-2]
                 run_angle_pairs_of_title.append((run_no, angle))
 
             for angle_key, group in itertools.groupby(run_angle_pairs_of_title, lambda x: x[1]):
@@ -645,12 +650,16 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 if col >= 11:
                     col = 0
 
+            # set dq/q
+            item = QtGui.QTableWidgetItem()
+            item.setText(str(dqq))
+            self.tableMain.setItem(row, 15, item)
+
             row = row + 1
 
         if self.__icat_download:
 
             # If ICAT is being used for download, then files must be downloaded at the same time as they are transferred
-
 
             contents = str(idx.text()).strip()
             file_id, _runnumber, file_name = self.icat_file_map[contents]
@@ -666,15 +675,12 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if save_location not in current_search_dirs:
                 config.appendDataSearchDir(save_location)
 
-
-
     def _set_all_stitch(self, state):
         """
         Set the checkboxes in the Stitch? column to the same
         """
         for row in range(self.tableMain.rowCount()):
             self.tableMain.cellWidget(row, self.stitch_col).children()[1].setCheckState(state)
-
 
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
@@ -693,7 +699,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             for idx in rows:
                 rowIndexes.append(idx.row())
             if not len(rowIndexes):
-                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?', "This will process all rows in the table. Continue?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+                reply = QtGui.QMessageBox.question(self.tableMain, 'Process all rows?',
+                                                   "This will process all rows in the table. Continue?",
+                                                   QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
                 if reply == QtGui.QMessageBox.No:
                     logger.notice("Cancelled!")
                     willProcess = False
@@ -702,11 +710,9 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             if willProcess:
                 for row in rowIndexes:  # range(self.tableMain.rowCount()):
                     runno = []
-                    _loadedRuns = []
                     wksp = []
                     overlapLow = []
                     overlapHigh = []
-                    _theta = [0, 0, 0]
                     if self.tableMain.item(row, 0).text() != '':
                         self.statusMain.showMessage("Processing row: " + str(row + 1))
                         logger.debug("Processing row: " + str(row + 1))
@@ -725,7 +731,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         if self.tableMain.item(row, 15).text() == '':
                             loadedRun = None
                             if load_live_runs.is_live_run(runno[0]):
-                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
+                                loadedRun = load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq,
+                                                                         accumulation=self.live_method)
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
@@ -755,12 +762,14 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                 logger.notice("Calculated resolution: " + str(dqq))
                             except:
                                 self.statusMain.clearMessage()
-                                logger.error("Failed to calculate dq/q because we could not find theta in the workspace's sample log. Try entering theta or dq/q manually.")
+                                logger.error("Failed to calculate dq/q because we could not find theta in the workspace's sample log. "
+                                             "Try entering theta or dq/q manually.")
                                 return
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        #Check secondary and tertiary two_theta columns, if they're blank and their corresponding run columns are set, fill them.
+                        # Check secondary and tertiary two_theta columns, if they're
+                        # blank and their corresponding run columns are set, fill them.
                         for run_col in [5, 10]:
                             tht_col = run_col + 1
                             run_val = str(self.tableMain.item(row, run_col).text())
@@ -775,7 +784,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         # Populate runlist
                         first_wq = None
                         for i in range(0, len(runno)):
-                            theta, qmin, qmax, _wlam, wq = self._do_run(runno[i], row, i)
+                            theta, qmin, qmax, _wlam, _wqBinned, wq = self._do_run(runno[i], row, i)
                             if not first_wq:
                                 first_wq = wq # Cache the first Q workspace
                             theta = round(theta, 3)
@@ -808,7 +817,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                         outputwksp = runno[0] + '_' + runno[1][3:]
                                     else:
                                         outputwksp = runno[0] + '_' + runno[-1][3:]
-                                    _begoverlap = w2.readX(0)[0]
                                     # get Qmax
                                     if self.tableMain.item(row, i * 5 + 4).text() == '':
                                         overlapHigh = 0.3 * max(w1.readX(0))
@@ -827,7 +835,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                                     _wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh,
                                                               _overallQMin, _overallQMax, -dqq, 1, keep=True,
                                                               scale_right=self.__scale_right)
-
 
                         # Enable the plot button
                         plotbutton = self.tableMain.cellWidget(row, self.plot_col).children()[1]
@@ -874,7 +881,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             self.__reset_plot_button(plotbutton)
             return
         for i in range(len(runno)):
-            _ws = getWorkspace(wksp[i])
             if len(overlapLow):
                 Qmin = overlapLow[0]
             else:
@@ -903,12 +909,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 self.__graphs[wksp[i]] = base_graph
 
                 titl = groupGet(ws_name_binned, 'samp', 'run_title')
-                if type(titl) == str:
+                if isinstance(titl, str):
                     base_graph.activeLayer().setTitle(titl)
                 base_graph.activeLayer().setAxisScale(Layer.Left, _Imin * 0.1, _Imax * 10, Layer.Log10)
                 base_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 base_graph.activeLayer().setAutoScale()
-
 
         # Create and plot stitched outputs
         if self.__checked_row_stiched(row):
@@ -932,7 +937,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 stitched_graph.activeLayer().setAxisScale(Layer.Bottom, Qmin * 0.9, Qmax * 1.1, Layer.Log10)
                 self.__graphs[outputwksp] = stitched_graph
 
-
     def __name_trans(self, transrun):
         """
         From a comma or colon separated string of run numbers
@@ -951,8 +955,6 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             for t in split_trans:
                 name += '_' + str(t)
         return name
-
-
 
     def _do_run(self, runno, row, which):
         """
@@ -983,22 +985,24 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         loadedRun = runno
         if load_live_runs.is_live_run(runno):
             load_live_runs.get_live_data(config['default.instrument'], frequency=self.live_freq, accumulation=self.live_method)
-        wlam, wq, th = None, None, None
+        wlam, wq, th, wqBinned = None, None, None, None
 
         # Only make a transmission workspace if we need one.
         if transrun and not transmission_ws:
             converter = ConvertToWavelength(transrun)
-            _trans_run_names = converter.get_name_list()
             size = converter.get_ws_list_size()
             out_ws_name = transrun_named
             if size == 1:
                 trans1 = converter.get_workspace_from_list(0)
 
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
+                                                                  Params=0.02, StartOverlap=10.0, EndOverlap=12.0, Version=1)
             elif size == 2:
                 trans1 = converter.get_workspace_from_list(0)
                 trans2 = converter.get_workspace_from_list(1)
-                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name, SecondTransmissionRun=trans2, Params=0.02, StartOverlap=10.0, EndOverlap=12.0)
+                transmission_ws = CreateTransmissionWorkspaceAuto(FirstTransmissionRun=trans1, OutputWorkspace=out_ws_name,
+                                                                  SecondTransmissionRun=trans2, Params=0.02,
+                                                                  StartOverlap=10.0, EndOverlap=12.0, Version=1)
             else:
                 raise RuntimeError("Up to 2 transmission runs can be specified. No more than that.")
 
@@ -1025,6 +1029,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             # If we're dealing with a workspace group, we'll manually map execution over each group member
             # We do this so we can get ThetaOut correctly (see ticket #10597 for why we can't at the moment)
             if isinstance(ws, WorkspaceGroup):
+                wqGroupBinned = []
                 wqGroup = []
                 wlamGroup = []
                 thetaGroup = []
@@ -1033,20 +1038,62 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                     #If the transmission workspace is a group, we'll use it pair-wise with the tof workspace group
                     if isinstance(transmission_ws, WorkspaceGroup):
                         group_trans_ws = transmission_ws[i]
-                    wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws[i], FirstTransmissionRun=group_trans_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ_'+str(i+1),
-                                                                 OutputWorkspaceWavelength=runno+'_IvsLam_'+str(i+1),ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                                 MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+
+                    alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                    alg.initialize()
+                    alg.setProperty("InputWorkspace", ws[i])
+                    if group_trans_ws:
+                        alg.setProperty("FirstTransmissionRun", group_trans_ws)
+                    if angle is not None:
+                        alg.setProperty("ThetaIn", angle)
+                    alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned_'+str(i+1))
+                    alg.setProperty("OutputWorkspace", runno+'_IvsQ_'+str(i+1))
+                    alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam_'+str(i+1))
+                    alg.setProperty("ScaleFactor", factor)
+                    if Qstep is not None:
+                        alg.setProperty("MomentumTransferStep", Qstep)
+                    if Qmin is not None:
+                        alg.setProperty("MomentumTransferMin", Qmin)
+                    if Qmax is not None:
+                        alg.setProperty("MomentumTransferMax", Qmax)
+                    alg.execute()
+                    wqBinned = mtd[runno+'_IvsQ_binned_'+str(i+1)]
+                    wq = mtd[runno+'_IvsQ_'+str(i+1)]
+                    wlam = mtd[runno+'_IvsLam_'+str(i+1)]
+                    th = alg.getProperty("ThetaIn").value
+
+                    wqGroupBinned.append(wqBinned)
                     wqGroup.append(wq)
                     wlamGroup.append(wlam)
                     thetaGroup.append(th)
 
+                wqBinned = GroupWorkspaces(InputWorkspaces=wqGroupBinned, OutputWorkspace=runno+'_IvsQ_binned')
                 wq = GroupWorkspaces(InputWorkspaces=wqGroup, OutputWorkspace=runno+'_IvsQ')
                 wlam = GroupWorkspaces(InputWorkspaces=wlamGroup, OutputWorkspace=runno+'_IvsLam')
                 th = thetaGroup[0]
             else:
-                wq, wlam, th = ReflectometryReductionOneAuto(InputWorkspace=ws, FirstTransmissionRun=transmission_ws, thetaIn=angle, OutputWorkspace=runno+'_IvsQ',
-                                                             OutputWorkspaceWavelength=runno+'_IvsLam', ScaleFactor=factor,MomentumTransferStep=Qstep,
-                                                             MomentumTransferMinimum=Qmin, MomentumTransferMaximum=Qmax)
+                alg = AlgorithmManager.create("ReflectometryReductionOneAuto")
+                alg.initialize()
+                alg.setProperty("InputWorkspace", ws)
+                if transmission_ws:
+                    alg.setProperty("FirstTransmissionRun", transmission_ws)
+                if angle is not None:
+                    alg.setProperty("ThetaIn", angle)
+                alg.setProperty("OutputWorkspaceBinned", runno+'_IvsQ_binned')
+                alg.setProperty("OutputWorkspace", runno+'_IvsQ')
+                alg.setProperty("OutputWorkspaceWavelength", runno+'_IvsLam')
+                alg.setProperty("ScaleFactor", factor)
+                if Qstep is not None:
+                    alg.setProperty("MomentumTransferStep", Qstep)
+                if Qmin is not None:
+                    alg.setProperty("MomentumTransferMin", Qmin)
+                if Qmax is not None:
+                    alg.setProperty("MomentumTransferMax", Qmax)
+                alg.execute()
+                wqBinned = mtd[runno+'_IvsQ_binned']
+                wq = mtd[runno+'_IvsQ']
+                wlam = mtd[runno+'_IvsLam']
+                th = alg.getProperty("ThetaIn").value
 
             cleanup()
         else:
@@ -1074,7 +1121,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         qmin = 4 * math.pi / lmax * math.sin(th * math.pi / 180)
         qmax = 4 * math.pi / lmin * math.sin(th * math.pi / 180)
 
-        return th, qmin, qmax, wlam, wq
+        return th, qmin, qmax, wlam, wqBinned, wq
 
     def _save_table_contents(self, filename):
         """
@@ -1105,7 +1152,8 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             #this is an emergency autosave as the program is failing
             logger.error("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.")
             msgBox = QtGui.QMessageBox()
-            msgBox.setText("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.\nPlease check the log for details.")
+            msgBox.setText("The ISIS Reflectonomy GUI has encountered an error, it will now attempt to save a copy of your work.\n"
+                           "Please check the log for details.")
             msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
             msgBox.setIcon(QtGui.QMessageBox.Critical)
             msgBox.setDefaultButton(QtGui.QMessageBox.Ok)
@@ -1130,7 +1178,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
             else:
                 saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
                 saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+                saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
                 saveDialog.setDefaultSuffix("tbl")
                 saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
                 if saveDialog.exec_():
@@ -1145,7 +1193,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         saveDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Save Table")
         saveDialog.setFileMode(QtGui.QFileDialog.AnyFile)
-        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        saveDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         saveDialog.setDefaultSuffix("tbl")
         saveDialog.setAcceptMode(QtGui.QFileDialog.AcceptSave)
         if saveDialog.exec_():
@@ -1159,7 +1207,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         self.loading = True
         loadDialog = QtGui.QFileDialog(self.widgetMainRow.parent(), "Open Table")
         loadDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*.*)")
+        loadDialog.setNameFilter("Table Files (*.tbl);;All files (*)")
         if loadDialog.exec_():
             try:
                 #before loading make sure you give them a chance to save
@@ -1310,10 +1358,11 @@ def getLogValue(wksp, field=''):
     ws = getWorkspace(wksp)
     log = ws.getRun().getLogData(field).value
 
-    if type(log) is int or type(log) is str:
+    if isinstance(log, int) or isinstance(log, str):
         return log
     else:
         return log[-1]
+
 
 def getWorkspace(wksp, report_error=True):
     """

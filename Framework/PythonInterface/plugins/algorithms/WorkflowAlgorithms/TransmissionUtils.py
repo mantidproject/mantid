@@ -6,8 +6,10 @@ import os
 import sys
 from six import iteritems
 
+
 def simple_algorithm(algorithm_str, parameters):
     return _execute(algorithm_str, parameters)
+
 
 def _execute(algorithm_str, parameters, is_name=True):
     if is_name:
@@ -20,7 +22,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         if value is None:
             Logger("TransmissionUtils").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):
-            if type(value)==str:
+            if isinstance(value, str):
                 alg.setPropertyValue(key, value)
             else:
                 alg.setProperty(key, value)
@@ -32,6 +34,8 @@ def _execute(algorithm_str, parameters, is_name=True):
     return alg
 
 #pylint: disable=too-many-locals
+
+
 def load_monitors(self, property_manager):
     """
         Load files necessary to compute transmission.
@@ -62,7 +66,7 @@ def load_monitors(self, property_manager):
 
         alg_props = {"Filename": filename,
                      "OutputWorkspace": output_ws,
-                     "ReductionProperties": property_manager_name,\
+                     "ReductionProperties": property_manager_name,
                      }
         if beam_center_x is not None and beam_center_y is not None:
             alg_props["BeamCenterX"] = beam_center_x
@@ -105,17 +109,16 @@ def load_monitors(self, property_manager):
     beam_radius = self.getProperty("BeamRadius").value
     pixel_size_x = sample_ws.getInstrument().getNumberParameter("x-pixel-size")[0]
     cylXML = '<infinite-cylinder id="transmission_monitor">' + \
-               '<centre x="0.0" y="0.0" z="0.0" />' + \
-               '<axis x="0.0" y="0.0" z="1.0" />' + \
-               '<radius val="%12.10f" />' % (beam_radius*pixel_size_x/1000.0) + \
+        '<centre x="0.0" y="0.0" z="0.0" />' + \
+        '<axis x="0.0" y="0.0" z="1.0" />' + \
+        '<radius val="%12.10f" />' % (beam_radius*pixel_size_x/1000.0) + \
              '</infinite-cylinder>\n'
 
     # Use the transmission workspaces to find the list of monitor pixels
     # since the beam center may be at a different location
     alg = _execute("FindDetectorsInShape",
                    {"Workspace": sample_ws,
-                    "ShapeXML": cylXML\
-                    })
+                    "ShapeXML": cylXML})
     det_list = alg.getProperty("DetectorList").value
     first_det = det_list[0]
 
@@ -134,8 +137,7 @@ def load_monitors(self, property_manager):
             alg = _execute(p.valueAsStr,
                            {"InputWorkspace": workspace,
                             "OutputWorkspace": workspace,
-                            "ReductionProperties": property_manager_name\
-                            },
+                            "ReductionProperties": property_manager_name},
                            is_name=False)
             msg = ''
             if alg.existsProperty("OutputMessage"):
@@ -160,60 +162,54 @@ def load_monitors(self, property_manager):
         alg = _execute("ExtractSingleSpectrum",
                        {"InputWorkspace": empty_ws,
                         "OutputWorkspace": '__reference_binning',
-                        "WorkspaceIndex": det_list[0]\
-                        })
+                        "WorkspaceIndex": det_list[0]})
         reference_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": empty_ws,
                         "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": empty_ws_name\
-                        })
+                        "OutputWorkspace": empty_ws_name})
         empty_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": sample_ws,
                         "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": sample_ws_name\
-                        })
+                        "OutputWorkspace": sample_ws_name})
         sample_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("GroupDetectors",
                    {"InputWorkspace": empty_ws,
                     "OutputWorkspace": empty_mon_ws_name,
                     "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True\
-                    })
+                    "KeepUngroupedSpectra": True})
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("GroupDetectors",
                    {"InputWorkspace": sample_ws,
                     "OutputWorkspace": sample_mon_ws_name,
                     "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True\
-                    })
+                    "KeepUngroupedSpectra": True})
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": empty_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name\
-                    })
+                    "OutputWorkspace": empty_mon_ws_name})
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": sample_mon_ws,
-                    "OutputWorkspace": sample_mon_ws_name\
-                    })
+                    "OutputWorkspace": sample_mon_ws_name})
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("RebinToWorkspace",
                    {"WorkspaceToRebin": empty_mon_ws,
                     "WorkspaceToMatch": sample_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name\
-                    })
+                    "OutputWorkspace": empty_mon_ws_name})
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
 
 #pylint: disable=too-many-arguments
+
+
 def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                            trans_output_workspace, monitor_det_ID=None):
     """
@@ -265,6 +261,7 @@ def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
         Logger("TransmissionUtils").error("Couldn't compute transmission. Is the beam center in the right place?\n%s" % sys.exc_info()[1])
         return None, None
 
+
 def apply_transmission(self, workspace, trans_workspace):
     """
         Apply transmission correction
@@ -280,8 +277,7 @@ def apply_transmission(self, workspace, trans_workspace):
                    {"WorkspaceToRebin": trans_workspace,
                     "WorkspaceToMatch": workspace,
                     "OutputWorkspace": '__trans_rebin',
-                    "PreserveEvents": False\
-                    })
+                    "PreserveEvents": False})
     rebinned_ws = alg.getProperty("OutputWorkspace").value
 
     # Apply angle-dependent transmission correction using the zero-angle transmission
@@ -291,10 +287,10 @@ def apply_transmission(self, workspace, trans_workspace):
                    {"InputWorkspace": workspace,
                     "TransmissionWorkspace": rebinned_ws,
                     "OutputWorkspace": '__corrected_output',
-                    "ThetaDependent": theta_dependent\
-                    })
+                    "ThetaDependent": theta_dependent})
     output_ws = alg.getProperty("OutputWorkspace").value
     return output_ws
+
 
 def subtract_dark_current(self, workspace, property_manager):
     """
@@ -312,14 +308,14 @@ def subtract_dark_current(self, workspace, property_manager):
     #    instrument = property_manager.getProperty("InstrumentName").value
 
     dark_current_property = "DefaultDarkCurrentAlgorithm"
+
     def _dark(ws, dark_current_property, dark_current_file=None):
         if property_manager.existsProperty(dark_current_property):
             p=property_manager.getProperty(dark_current_property)
 
             alg_props = {"InputWorkspace": ws,
                          "PersistentCorrection": False,
-                         "ReductionProperties": property_manager_name\
-                         }
+                         "ReductionProperties": property_manager_name}
             if dark_current_file is not None:
                 alg_props["Filename"] = dark_current_file
 

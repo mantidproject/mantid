@@ -1,5 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -124,7 +125,7 @@ void LoadEmptyInstrument::exec() {
     outWS = WorkspaceFactory::Instance().create("EventWorkspace",
                                                 number_spectra, 2, 1);
     // Copy geometry over.
-    WorkspaceFactory::Instance().initializeFromParent(ws, outWS, true);
+    WorkspaceFactory::Instance().initializeFromParent(*ws, *outWS, true);
   } else {
     // Now create the outputworkspace and copy over the instrument object
     outWS = WorkspaceFactory::Instance().create(ws, number_spectra, 2, 1);
@@ -140,9 +141,9 @@ void LoadEmptyInstrument::exec() {
     CountStandardDeviations v_e(1, detector_value);
     CountStandardDeviations v_monitor_e(1, monitor_value);
 
+    const auto &spectrumInfo = ws2D->spectrumInfo();
     for (size_t i = 0; i < ws2D->getNumberHistograms(); i++) {
-      IDetector_const_sptr det = ws2D->getDetector(i);
-      if (det->isMonitor()) {
+      if (spectrumInfo.isMonitor(i)) {
         ws2D->setCounts(i, v_monitor_y);
         ws2D->setCountStandardDeviations(i, v_monitor_e);
       } else {

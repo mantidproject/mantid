@@ -79,14 +79,14 @@ def validate_loader(func):
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace)
                     else:
                         data_file = self._data_file
 
                     alg = mantid.api.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.AlgorithmProxy):
-                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
-                            type(alg))
+                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
+                            type(alg)))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -103,7 +103,7 @@ def validate_loader(func):
                         kwargs["Filename"] = data_file
 
                     if "AlternateName" in kwargs and \
-                                    kwargs["AlternateName"] in propertyOrder:
+                            kwargs["AlternateName"] in propertyOrder:
                         kwargs[kwargs["AlternateName"]] = data_file
 
                     self.algorithm = alg
@@ -146,7 +146,7 @@ def validate_loader(func):
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace)
                     else:
                         data_file = self._data_file
 
@@ -161,7 +161,7 @@ def validate_loader(func):
                         algorithm.setPropertyValue("Filename", data_file)
 
                     if "AlternateName" in kwargs and \
-                                    kwargs["AlternateName"] in propertyOrder:
+                            kwargs["AlternateName"] in propertyOrder:
                         algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
 
                     algorithm.execute()
@@ -170,7 +170,7 @@ def validate_loader(func):
             return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
+            raise RuntimeError("%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__))
 
     return validated_f
 
@@ -237,8 +237,8 @@ def validate_step(func):
                         outputworkspace = inputworkspace
                     alg = mantid.AlgorithmManager.create(algorithm)
                     if not isinstance(alg, mantid.api.AlgorithmProxy):
-                        raise RuntimeError, "Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
-                            type(alg))
+                        raise RuntimeError("Reducer expects an Algorithm object from FrameworkManager, found '%s'" % str(
+                            type(alg)))
 
                     propertyOrder = alg.orderedProperties()
 
@@ -306,7 +306,7 @@ def validate_step(func):
             return func(reducer, _AlgorithmStep())
 
         else:
-            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__)
+            raise RuntimeError("%s expects a ReductionStep object, found %s" % (func.__name__, algorithm.__class__))
 
     return validated_f
 
@@ -351,8 +351,8 @@ class Reducer(object):
         if issubclass(configuration.__class__, Instrument):
             self.instrument = configuration
         else:
-            raise RuntimeError, "Reducer.set_instrument expects an %s object, found %s" % (
-                Instrument, configuration.__class__)
+            raise RuntimeError("Reducer.set_instrument expects an %s object, found %s" % (
+                Instrument, configuration.__class__))
 
     def dirty(self, workspace):
         """
@@ -396,7 +396,7 @@ class Reducer(object):
             self._data_path = path
             mantid.config.appendDataSearchDir(path)
         else:
-            raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_data_path: provided path is not a directory (%s)" % path)
 
     def set_output_path(self, path):
         """
@@ -407,7 +407,7 @@ class Reducer(object):
         if os.path.isdir(path):
             self._output_path = path
         else:
-            raise RuntimeError, "Reducer.set_output_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("Reducer.set_output_path: provided path is not a directory (%s)" % path)
 
     def _full_file_path(self, filename):
         """
@@ -458,8 +458,8 @@ class Reducer(object):
                 self._data_files[workspace] = None
                 return
             else:
-                raise RuntimeError, "Trying to append a data set without a file name or an existing workspace."
-        if type(data_file) == list:
+                raise RuntimeError("Trying to append a data set without a file name or an existing workspace.")
+        if isinstance(data_file, list):
             if workspace is None:
                 # Use the first file to determine the workspace name
                 workspace = extract_workspace_name(data_file[0])
@@ -577,13 +577,13 @@ def extract_workspace_name(filepath, suffix=''):
         @param suffix: string to append to name
     """
     filepath_tmp = filepath
-    if type(filepath) == list:
+    if isinstance(filepath, list):
         filepath_tmp = filepath[0]
 
     (head, tail) = os.path.split(filepath_tmp)
     basename, extension = os.path.splitext(tail)
 
-    if type(filepath) == list:
+    if isinstance(filepath, list):
         basename += "_combined"
 
     # TODO: check whether the workspace name is already in use

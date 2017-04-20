@@ -3,19 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/IDTypes.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/LogFilter.h"
-#include "MantidKernel/FilteredTimeSeriesProperty.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 #include "MantidDataHandling/LoadISISNexus2.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <cmath>
 
@@ -62,7 +58,7 @@ private:
     // Check that the logs also contain a current_period property.
     Property *current_period_log = fetchCurrentPeriodLog(workspace);
     TS_ASSERT_EQUALS(expectedPeriodNumber,
-                     atoi(current_period_log->value().c_str()));
+                     std::stoi(current_period_log->value()));
 
     // Check time series properties have been filtered by period
     p = NULL;
@@ -76,7 +72,6 @@ private:
 
 public:
   void testExecMonSeparated() {
-    Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -100,29 +95,27 @@ public:
     // Two monitors which form two first spectra are excluded by load separately
 
     // spectrum with ID 5 is now spectrum N 3 as 2 monitors
-    TS_ASSERT_EQUALS(ws->readY(5 - 2)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(5 - 2)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(5 - 2).getSpectrumNo(), 6);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(5 - 2).getDetectorIDs().begin()), 6);
     // spectrum with ID 7 is now spectrum N 4
-    TS_ASSERT_EQUALS(ws->readY(6 - 2)[0], 1.);
+    TS_ASSERT_EQUALS(ws->y(6 - 2)[0], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(6 - 2).getSpectrumNo(), 7);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(6 - 2).getDetectorIDs().begin()), 7);
     //
-    TS_ASSERT_EQUALS(ws->readY(8 - 2)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(8 - 2)[3], 1.);
 
-    TS_ASSERT_EQUALS(mon_ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(mon_ws->readX(0)[1], 4005.);
-    TS_ASSERT_EQUALS(mon_ws->readX(0)[2], 8005.);
+    TS_ASSERT_EQUALS(mon_ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(mon_ws->x(0)[1], 4005.);
+    TS_ASSERT_EQUALS(mon_ws->x(0)[2], 8005.);
 
     // these spectra are not loaded as above so their values are different
     // (occasionally 0)
-    TS_ASSERT_EQUALS(mon_ws->readY(0)[1], 0);
-    TS_ASSERT_EQUALS(mon_ws->readY(1)[0], 0.);
-    TS_ASSERT_EQUALS(mon_ws->readY(0)[3], 0.);
+    TS_ASSERT_EQUALS(mon_ws->y(0)[1], 0);
+    TS_ASSERT_EQUALS(mon_ws->y(1)[0], 0.);
+    TS_ASSERT_EQUALS(mon_ws->y(0)[3], 0.);
 
     const std::vector<Property *> &logs = mon_ws->run().getLogData();
-    for (size_t i = 0; i < logs.size(); ++i)
-      std::cerr << logs[i]->name() << "\n";
     TS_ASSERT_EQUALS(logs.size(), 62);
 
     std::string header =
@@ -151,7 +144,7 @@ public:
   }
 
   void testExec() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -163,41 +156,41 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 17792);
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 4005.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 8005.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 4005.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 8005.);
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(0).getDetectorIDs().begin()), 1);
 
-    TS_ASSERT_EQUALS(ws->readY(5)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(5)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(5).getSpectrumNo(), 6);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(5).getDetectorIDs().begin()), 6);
-    TS_ASSERT_EQUALS(ws->readY(6)[0], 1.);
+    TS_ASSERT_EQUALS(ws->y(6)[0], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(6).getSpectrumNo(), 7);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(6).getDetectorIDs().begin()), 7);
-    TS_ASSERT_EQUALS(ws->readY(8)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(8)[3], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(8).getSpectrumNo(), 9);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(8).getDetectorIDs().begin()), 9);
 
-    TS_ASSERT_EQUALS(ws->readY(13)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(13)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(13).getSpectrumNo(), 14);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(13).getDetectorIDs().begin()), 14);
-    TS_ASSERT_EQUALS(ws->readY(17)[1], 2.);
+    TS_ASSERT_EQUALS(ws->y(17)[1], 2.);
     TS_ASSERT_EQUALS(ws->getSpectrum(17).getSpectrumNo(), 18);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(17).getDetectorIDs().begin()), 18);
-    TS_ASSERT_EQUALS(ws->readY(18)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(18)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18).getSpectrumNo(), 19);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(18).getDetectorIDs().begin()), 19);
 
-    TS_ASSERT_EQUALS(ws->readY(33)[2], 1.);
+    TS_ASSERT_EQUALS(ws->y(33)[2], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(33).getSpectrumNo(), 34);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(33).getDetectorIDs().begin()), 34);
-    TS_ASSERT_EQUALS(ws->readY(34)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(34)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(34).getSpectrumNo(), 35);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(34).getDetectorIDs().begin()), 35);
 
-    TS_ASSERT_EQUALS(ws->readY(37)[3], 1.);
-    TS_ASSERT_EQUALS(ws->readY(37)[4], 1.);
+    TS_ASSERT_EQUALS(ws->y(37)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(37)[4], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(37).getSpectrumNo(), 38);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(37).getDetectorIDs().begin()), 38);
 
@@ -265,7 +258,7 @@ public:
   }
 
   void testExec2() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -281,46 +274,46 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 15);
 
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 4005.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 8005.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 4005.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 8005.);
     TS_ASSERT_EQUALS(ws->getSpectrum(0).getSpectrumNo(), 5);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(0).getDetectorIDs().begin()), 5);
 
     // these spectra are not loaded as above so their values are different
     // (occasionally 0)
     TSM_ASSERT_EQUALS("Total workspace spectra N13, index 1 is occasionally 1 ",
-                      ws->readY(5)[1], 1.);
+                      ws->y(5)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(5).getSpectrumNo(), 14);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(5).getDetectorIDs().begin()), 14);
-    TS_ASSERT_EQUALS(ws->readY(6)[0], 0.);
+    TS_ASSERT_EQUALS(ws->y(6)[0], 0.);
     TS_ASSERT_EQUALS(ws->getSpectrum(6).getSpectrumNo(), 15);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(6).getDetectorIDs().begin()), 15);
-    TS_ASSERT_EQUALS(ws->readY(8)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(8)[3], 0.);
     TS_ASSERT_EQUALS(ws->getSpectrum(8).getSpectrumNo(), 17);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(8).getDetectorIDs().begin()), 17);
 
     // look at the same values as the full loader above
-    TS_ASSERT_EQUALS(ws->readY(13 - 8)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(13 - 8)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(13 - 8).getSpectrumNo(), 14);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(13 - 8).getDetectorIDs().begin()), 14);
 
-    TS_ASSERT_EQUALS(ws->readY(17 - 8)[1], 2.);
+    TS_ASSERT_EQUALS(ws->y(17 - 8)[1], 2.);
     TS_ASSERT_EQUALS(ws->getSpectrum(17 - 8).getSpectrumNo(), 18);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(17 - 8).getDetectorIDs().begin()), 18);
-    TS_ASSERT_EQUALS(ws->readY(18 - 8)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(18 - 8)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18 - 8).getSpectrumNo(), 19);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(18 - 8).getDetectorIDs().begin()), 19);
 
     // look at the same values as the full loader above
-    TS_ASSERT_EQUALS(ws->readY(33 - 21)[2], 1.);
+    TS_ASSERT_EQUALS(ws->y(33 - 21)[2], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(33 - 21).getSpectrumNo(), 34);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(33 - 21).getDetectorIDs().begin()), 34);
-    TS_ASSERT_EQUALS(ws->readY(34 - 21)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(34 - 21)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(34 - 21).getSpectrumNo(), 35);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(34 - 21).getDetectorIDs().begin()), 35);
-    TS_ASSERT_EQUALS(ws->readY(37 - 23)[3], 1.);
-    TS_ASSERT_EQUALS(ws->readY(37 - 23)[4], 1.);
+    TS_ASSERT_EQUALS(ws->y(37 - 23)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(37 - 23)[4], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(37 - 23).getSpectrumNo(), 38);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(37 - 23).getDetectorIDs().begin()), 38);
 
@@ -351,7 +344,7 @@ public:
   }
 
   void testExec3() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -366,22 +359,22 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 5);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 11);
 
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 4005.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 8005.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 4005.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 8005.);
 
     // these spectra are not loaded as above so their values are different
     // (occasionally 0)
-    TS_ASSERT_EQUALS(ws->readY(5)[1], 0);
-    TS_ASSERT_EQUALS(ws->readY(6)[0], 0.);
-    TS_ASSERT_EQUALS(ws->readY(8)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(5)[1], 0);
+    TS_ASSERT_EQUALS(ws->y(6)[0], 0.);
+    TS_ASSERT_EQUALS(ws->y(8)[3], 0.);
 
     // look at the same values as the full/partial loader above
-    TS_ASSERT_EQUALS(ws->readY(13 - 9)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(13 - 9)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(13 - 9).getSpectrumNo(), 14);
-    TS_ASSERT_EQUALS(ws->readY(17 - 9)[1], 2.);
+    TS_ASSERT_EQUALS(ws->y(17 - 9)[1], 2.);
     TS_ASSERT_EQUALS(ws->getSpectrum(17 - 9).getSpectrumNo(), 18);
-    TS_ASSERT_EQUALS(ws->readY(18 - 9)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(18 - 9)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18 - 9).getSpectrumNo(), 19);
 
     Mantid::specnum_t offset;
@@ -397,7 +390,7 @@ public:
   }
 
   void testMultiPeriodEntryNumberZero() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "TEST00000008.nxs");
@@ -420,22 +413,22 @@ public:
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 10);
     TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
 
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 6.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 7.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 6.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 7.);
 
-    TS_ASSERT_EQUALS(ws->readY(5)[1], 0);
-    TS_ASSERT_EQUALS(ws->readY(6)[0], 0.);
-    TS_ASSERT_EQUALS(ws->readY(8)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(5)[1], 0);
+    TS_ASSERT_EQUALS(ws->y(6)[0], 0.);
+    TS_ASSERT_EQUALS(ws->y(8)[3], 0.);
 
-    TS_ASSERT_EQUALS(ws->readY(7)[1], 0.);
-    TS_ASSERT_EQUALS(ws->readY(9)[3], 0.);
-    TS_ASSERT_EQUALS(ws->readY(9)[1], 0.);
+    TS_ASSERT_EQUALS(ws->y(7)[1], 0.);
+    TS_ASSERT_EQUALS(ws->y(9)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(9)[1], 0.);
     AnalysisDataService::Instance().remove("outWS");
   }
 
   void testMultiPeriodEntryNumberNonZero() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "TEST00000008.nxs");
@@ -453,22 +446,22 @@ public:
     //   TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
     TS_ASSERT_EQUALS(ws->getTitle(), "hello\\0");
     TS_ASSERT_DELTA(ws->run().getProtonCharge(), 0.069991, 1e-6);
-    TS_ASSERT_EQUALS(ws->readX(0)[0], 5.);
-    TS_ASSERT_EQUALS(ws->readX(0)[1], 6.);
-    TS_ASSERT_EQUALS(ws->readX(0)[2], 7.);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 5.);
+    TS_ASSERT_EQUALS(ws->x(0)[1], 6.);
+    TS_ASSERT_EQUALS(ws->x(0)[2], 7.);
 
-    TS_ASSERT_EQUALS(ws->readY(5)[1], 0.);
-    TS_ASSERT_EQUALS(ws->readY(6)[0], 0.);
-    TS_ASSERT_EQUALS(ws->readY(8)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(5)[1], 0.);
+    TS_ASSERT_EQUALS(ws->y(6)[0], 0.);
+    TS_ASSERT_EQUALS(ws->y(8)[3], 0.);
 
-    TS_ASSERT_EQUALS(ws->readY(7)[1], 0.);
-    TS_ASSERT_EQUALS(ws->readY(9)[3], 0.);
-    TS_ASSERT_EQUALS(ws->readY(9)[1], 0.);
+    TS_ASSERT_EQUALS(ws->y(7)[1], 0.);
+    TS_ASSERT_EQUALS(ws->y(9)[3], 0.);
+    TS_ASSERT_EQUALS(ws->y(9)[1], 0.);
     AnalysisDataService::Instance().remove("outWS");
   }
 
   void testLoadMultiPeriodData() {
-    Mantid::API::FrameworkManager::Instance();
+
     const std::string wsName = "outWS";
     LoadISISNexus2 loadingAlg;
     loadingAlg.initialize();
@@ -510,7 +503,7 @@ public:
     PropertyWithValue<double> *totalChargeProperty =
         dynamic_cast<PropertyWithValue<double> *>(
             run.getLogData("gd_prtn_chrg"));
-    double totalCharge = atof(totalChargeProperty->value().c_str());
+    double totalCharge = std::stod(totalChargeProperty->value());
     TSM_ASSERT_DELTA("Something is badly wrong if the sum across the periods "
                      "does not correspond to the total charge.",
                      totalCharge, chargeSum, 0.000001);
@@ -518,7 +511,7 @@ public:
   }
 
   void test_instrument_and_default_param_loaded_when_inst_not_in_nexus_file() {
-    Mantid::API::FrameworkManager::Instance();
+
     const std::string wsName = "InstNotInNexus";
     LoadISISNexus2 loadingAlg;
     loadingAlg.initialize();
@@ -548,7 +541,7 @@ public:
   }
 
   void testExecMonExcluded() {
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -565,42 +558,42 @@ public:
     // Two monitors which form two first spectra are excluded by load separately
 
     // spectrum with ID 5 is now spectrum N 3 as 2 monitors
-    TS_ASSERT_EQUALS(ws->readY(5 - 2)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(5 - 2)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(5 - 2).getSpectrumNo(), 6);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(5 - 2).getDetectorIDs().begin()), 6);
     // spectrum with ID 7 is now spectrum N 4
-    TS_ASSERT_EQUALS(ws->readY(6 - 2)[0], 1.);
+    TS_ASSERT_EQUALS(ws->y(6 - 2)[0], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(6 - 2).getSpectrumNo(), 7);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(6 - 2).getDetectorIDs().begin()), 7);
     //
-    TS_ASSERT_EQUALS(ws->readY(8 - 2)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(8 - 2)[3], 1.);
 
     // spectrum with ID 9 is now spectrum N 6
     TS_ASSERT_EQUALS(ws->getSpectrum(8 - 2).getSpectrumNo(), 9);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(8 - 2).getDetectorIDs().begin()), 9);
     // spectrum with ID 14 is now spectrum N 11
-    TS_ASSERT_EQUALS(ws->readY(13 - 2)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(13 - 2)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(13 - 2).getSpectrumNo(), 14);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(13 - 2).getDetectorIDs().begin()), 14);
     // spectrum with ID 18 is now spectrum N 15
-    TS_ASSERT_EQUALS(ws->readY(17 - 2)[1], 2.);
+    TS_ASSERT_EQUALS(ws->y(17 - 2)[1], 2.);
     TS_ASSERT_EQUALS(ws->getSpectrum(17 - 2).getSpectrumNo(), 18);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(17 - 2).getDetectorIDs().begin()), 18);
     // spectrum with ID 19 is now spectrum N 16
-    TS_ASSERT_EQUALS(ws->readY(18 - 2)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(18 - 2)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(18 - 2).getSpectrumNo(), 19);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(18 - 2).getDetectorIDs().begin()), 19);
 
-    TS_ASSERT_EQUALS(ws->readY(33 - 2)[2], 1.);
+    TS_ASSERT_EQUALS(ws->y(33 - 2)[2], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(33 - 2).getSpectrumNo(), 34);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(33 - 2).getDetectorIDs().begin()), 34);
     //
-    TS_ASSERT_EQUALS(ws->readY(34 - 2)[1], 1.);
+    TS_ASSERT_EQUALS(ws->y(34 - 2)[1], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(34 - 2).getSpectrumNo(), 35);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(34 - 2).getDetectorIDs().begin()), 35);
 
-    TS_ASSERT_EQUALS(ws->readY(37 - 2)[3], 1.);
-    TS_ASSERT_EQUALS(ws->readY(37 - 2)[4], 1.);
+    TS_ASSERT_EQUALS(ws->y(37 - 2)[3], 1.);
+    TS_ASSERT_EQUALS(ws->y(37 - 2)[4], 1.);
     TS_ASSERT_EQUALS(ws->getSpectrum(37 - 2).getSpectrumNo(), 38);
     TS_ASSERT_EQUALS(*(ws->getSpectrum(37 - 2).getDetectorIDs().begin()), 38);
 
@@ -695,18 +688,18 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, detWS0->blocksize());
     TS_ASSERT_EQUALS(243, detWS0->getNumberHistograms());
-    TS_ASSERT_DELTA(105, detWS0->readX(1)[1], 1e-08);
-    TS_ASSERT_DELTA(2, detWS0->readY(1)[1], 1e-08);
-    TS_ASSERT_DELTA(M_SQRT2, detWS0->readE(1)[1], 1e-08);
+    TS_ASSERT_DELTA(105, detWS0->x(1)[1], 1e-08);
+    TS_ASSERT_DELTA(2, detWS0->y(1)[1], 1e-08);
+    TS_ASSERT_DELTA(M_SQRT2, detWS0->e(1)[1], 1e-08);
     TS_ASSERT_EQUALS(detWS0->getSpectrum(0).getSpectrumNo(), 4);
 
     auto monWS0 =
         boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, monWS0->blocksize());
     TS_ASSERT_EQUALS(3, monWS0->getNumberHistograms());
-    TS_ASSERT_DELTA(105, monWS0->readX(1)[1], 1e-08);
-    TS_ASSERT_DELTA(12563.0, monWS0->readY(0)[1], 1e-08);
-    TS_ASSERT_DELTA(std::sqrt(12563.0), monWS0->readE(0)[1], 1e-08);
+    TS_ASSERT_DELTA(105, monWS0->x(1)[1], 1e-08);
+    TS_ASSERT_DELTA(12563.0, monWS0->y(0)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(12563.0), monWS0->e(0)[1], 1e-08);
     TS_ASSERT_EQUALS(monWS0->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(monWS0->getSpectrum(2).getSpectrumNo(), 3);
 
@@ -714,9 +707,9 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
     TS_ASSERT_EQUALS(1000, monWS1->blocksize());
     TS_ASSERT_EQUALS(3, monWS1->getNumberHistograms());
-    TS_ASSERT_DELTA(105, monWS1->readX(1)[1], 1e-08);
-    TS_ASSERT_DELTA(12595.0, monWS1->readY(0)[1], 1e-08);
-    TS_ASSERT_DELTA(std::sqrt(12595.0), monWS1->readE(0)[1], 1e-08);
+    TS_ASSERT_DELTA(105, monWS1->x(1)[1], 1e-08);
+    TS_ASSERT_DELTA(12595.0, monWS1->y(0)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(12595.0), monWS1->e(0)[1], 1e-08);
     TS_ASSERT_EQUALS(monWS1->getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(monWS1->getSpectrum(2).getSpectrumNo(), 3);
 
@@ -781,7 +774,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -815,15 +808,15 @@ public:
 
     // Check some of the data
     double delta = 1e-6;
-    TS_ASSERT_DELTA(ws->readY(142)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[1], 82.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[2], 57.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17034], 5.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17035], 8.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[1], 82.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[2], 57.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17034], 5.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17035], 8.0, delta);
 
-    TS_ASSERT_DELTA(ws->readY(143)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(143)[1], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(143)[2], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[1], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[2], 0.0, delta);
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
@@ -833,12 +826,15 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a spectrum number of 144", 144,
         ws->getSpectrum(143).getSpectrumNo());
+
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     TSM_ASSERT_EQUALS(
         "Detector at WS index 142 should have a detector ID of 143", 143,
-        ws->getDetector(142)->getID());
+        spectrumInfo.detector(142).getID());
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a detector ID of 144", 144,
-        ws->getDetector(143)->getID());
+        spectrumInfo.detector(143).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -850,7 +846,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -915,8 +911,10 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 24 should have a spectrum number of 73", 73,
         ws->getSpectrum(24).getSpectrumNo());
+
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73",
-                      73, ws->getDetector(24)->getID());
+                      73, spectrumInfo.detector(24).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -930,7 +928,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -963,17 +961,17 @@ public:
 
     // Check some of the data
     double delta = 1e-6;
-    TS_ASSERT_DELTA(ws->readY(142)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[1], 82.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[2], 57.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17034], 5.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17035], 8.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[1], 82.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[2], 57.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17034], 5.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17035], 8.0, delta);
 
-    TS_ASSERT_DELTA(ws->readY(144)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(144)[1], 176660.0, delta);
-    TS_ASSERT_DELTA(ws->readY(144)[2], 57659.0, delta);
-    TS_ASSERT_DELTA(ws->readY(144)[17034], 4851.0, delta);
-    TS_ASSERT_DELTA(ws->readY(144)[17035], 4513.0, delta);
+    TS_ASSERT_DELTA(ws->y(144)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(144)[1], 176660.0, delta);
+    TS_ASSERT_DELTA(ws->y(144)[2], 57659.0, delta);
+    TS_ASSERT_DELTA(ws->y(144)[17034], 4851.0, delta);
+    TS_ASSERT_DELTA(ws->y(144)[17035], 4513.0, delta);
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
@@ -983,12 +981,14 @@ public:
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 144 should have a spectrum number of 145", 145,
         ws->getSpectrum(144).getSpectrumNo());
+
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS(
         "Detector at WS index 142 should have a detector ID of 143", 143,
-        ws->getDetector(142)->getID());
+        spectrumInfo.detector(142).getID());
     TSM_ASSERT_EQUALS(
         "Detector at WS index 144 should have a detector ID of 145", 145,
-        ws->getDetector(144)->getID());
+        spectrumInfo.detector(144).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1000,7 +1000,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -1062,26 +1062,28 @@ public:
 
     double delta = 1e-6;
     // Make sure that the monitor data is correct (should be workspace index 26)
-    TS_ASSERT_DELTA(ws->readY(25)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(25)[1], 176660.0, delta);
-    TS_ASSERT_DELTA(ws->readY(25)[2], 57659.0, delta);
-    TS_ASSERT_DELTA(ws->readY(25)[17034], 4851.0, delta);
-    TS_ASSERT_DELTA(ws->readY(25)[17035], 4513.0, delta);
+    TS_ASSERT_DELTA(ws->y(25)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(25)[1], 176660.0, delta);
+    TS_ASSERT_DELTA(ws->y(25)[2], 57659.0, delta);
+    TS_ASSERT_DELTA(ws->y(25)[17034], 4851.0, delta);
+    TS_ASSERT_DELTA(ws->y(25)[17035], 4513.0, delta);
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID (for some sample spectra)
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     TSM_ASSERT_EQUALS(
         "Detector at WS index 24 should have a spectrum number of 73", 73,
         ws->getSpectrum(24).getSpectrumNo());
     TSM_ASSERT_EQUALS("Detector at WS index 24 should have a detector ID of 73",
-                      73, ws->getDetector(24)->getID());
+                      73, spectrumInfo.detector(24).getID());
 
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 25 should have a spectrum number of 145", 145,
         ws->getSpectrum(25).getSpectrumNo());
     TSM_ASSERT_EQUALS(
         "Detector at WS index 25 should have a detector ID of 145", 145,
-        ws->getDetector(25)->getID());
+        spectrumInfo.detector(25).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1095,7 +1097,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -1145,21 +1147,21 @@ public:
 
     // Check some of the data
     double delta = 1e-6;
-    TS_ASSERT_DELTA(ws->readY(142)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[1], 82.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[2], 57.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17034], 5.0, delta);
-    TS_ASSERT_DELTA(ws->readY(142)[17035], 8.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[1], 82.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[2], 57.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17034], 5.0, delta);
+    TS_ASSERT_DELTA(ws->y(142)[17035], 8.0, delta);
 
-    TS_ASSERT_DELTA(ws->readY(143)[0], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(143)[1], 0.0, delta);
-    TS_ASSERT_DELTA(ws->readY(143)[2], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[0], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[1], 0.0, delta);
+    TS_ASSERT_DELTA(ws->y(143)[2], 0.0, delta);
 
-    TS_ASSERT_DELTA(mon_ws->readY(0)[0], 0.0, delta);
-    TS_ASSERT_DELTA(mon_ws->readY(0)[1], 176660.0, delta);
-    TS_ASSERT_DELTA(mon_ws->readY(0)[2], 57659.0, delta);
-    TS_ASSERT_DELTA(mon_ws->readY(0)[17034], 4851.0, delta);
-    TS_ASSERT_DELTA(mon_ws->readY(0)[17035], 4513.0, delta);
+    TS_ASSERT_DELTA(mon_ws->y(0)[0], 0.0, delta);
+    TS_ASSERT_DELTA(mon_ws->y(0)[1], 176660.0, delta);
+    TS_ASSERT_DELTA(mon_ws->y(0)[2], 57659.0, delta);
+    TS_ASSERT_DELTA(mon_ws->y(0)[17034], 4851.0, delta);
+    TS_ASSERT_DELTA(mon_ws->y(0)[17035], 4513.0, delta);
 
     // Check that the data has the expected spectrum number and the expected
     // detecor ID
@@ -1169,18 +1171,22 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a spectrum number of 144", 144,
         ws->getSpectrum(143).getSpectrumNo());
+
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS(
         "Detector at WS index 142 should have a detector ID of 143", 143,
-        ws->getDetector(142)->getID());
+        spectrumInfo.detector(142).getID());
     TSM_ASSERT_EQUALS(
         "Detector at WS index 143 should have a detector ID of 144", 144,
-        ws->getDetector(143)->getID());
+        spectrumInfo.detector(143).getID());
 
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 0 should have a spectrum number of 145", 145,
         mon_ws->getSpectrum(0).getSpectrumNo());
+
+    const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145",
-                      145, mon_ws->getDetector(0)->getID());
+                      145, monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1193,7 +1199,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -1265,15 +1271,17 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 2 should have a spectrum number of 51", 51,
         ws->getSpectrum(2).getSpectrumNo());
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51",
-                      51, ws->getDetector(2)->getID());
+                      51, spectrumInfo.detector(2).getID());
 
     // Test the monitor workspace
     TSM_ASSERT_EQUALS(
         "Detector at WS index 0 should have a spectrum number of 145", 145,
         mon_ws->getSpectrum(0).getSpectrumNo());
+    const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 145",
-                      145, mon_ws->getDetector(0)->getID());
+                      145, monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1286,7 +1294,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -1358,15 +1366,17 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 2 should have a spectrum number of 51", 51,
         ws->getSpectrum(2).getSpectrumNo());
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 51",
-                      51, ws->getDetector(2)->getID());
+                      51, spectrumInfo.detector(2).getID());
 
     // Test the monitor workspace
     TSM_ASSERT_EQUALS(
         "Detector at WS index 2 should have a spectrum number of 147", 147,
         mon_ws->getSpectrum(2).getSpectrumNo());
+    const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 147",
-                      147, mon_ws->getDetector(2)->getID());
+                      147, monSpectrumInfo.detector(2).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1379,7 +1389,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setRethrows(true);
@@ -1404,16 +1414,18 @@ public:
     TSM_ASSERT_EQUALS("Should have 17036 bins", ws->blocksize(), 17036);
     TSM_ASSERT_EQUALS("Should have 2 detectors", ws->getNumberHistograms(), 2);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 0 should have a spectrum number of 145", 145,
         ws->getSpectrum(0).getSpectrumNo());
     TSM_ASSERT_EQUALS("Monitor at WS index 0 should have a detector ID of 145",
-                      145, ws->getDetector(0)->getID());
+                      145, spectrumInfo.detector(0).getID());
     TSM_ASSERT_EQUALS(
         "Monitor at WS index 1 should have a spectrum number of 147", 147,
         ws->getSpectrum(1).getSpectrumNo());
     TSM_ASSERT_EQUALS("Monitor at WS index 1 should have a detector ID of 147",
-                      147, ws->getDetector(1)->getID());
+                      147, spectrumInfo.detector(1).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1425,7 +1437,7 @@ public:
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "INS09161.nxs");
@@ -1485,8 +1497,10 @@ public:
     TSM_ASSERT_EQUALS(
         "Detector at WS index 2 should have a spectrum number of 52", 52,
         ws->getSpectrum(2).getSpectrumNo());
+
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 52",
-                      52, ws->getDetector(2)->getID());
+                      52, spectrumInfo.detector(2).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
@@ -1494,12 +1508,12 @@ public:
   }
 
   void
-  test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specfied_without_spectra_list() {
+  test_that_non_contiguous_data_loads_only_monitors_in_parts_when_only_lower_bound_is_specified_without_spectra_list() {
     /*
     Monitors can be found at detID: 145, 146, 147, 148
     */
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "LOQ49886.nxs");
@@ -1530,26 +1544,40 @@ public:
                       mon_ws->getNumberHistograms(), 1);
 
     // Check some samples
+    const auto &spectrumInfo = ws->spectrumInfo();
     TSM_ASSERT_EQUALS(
         "Detector at WS index 2 should have a spectrum number of 5", 5,
         ws->getSpectrum(2).getSpectrumNo());
     TSM_ASSERT_EQUALS("Detector at WS index 2 should have a detector ID of 5",
-                      5, ws->getDetector(2)->getID());
+                      5, spectrumInfo.detector(2).getID());
     TSM_ASSERT_EQUALS(
         "Detector at WS index 3 should have a spectrum number of 6", 6,
         ws->getSpectrum(3).getSpectrumNo());
     TSM_ASSERT_EQUALS("Detector at WS index 3 should have a detector ID of 6",
-                      6, ws->getDetector(3)->getID());
+                      6, spectrumInfo.detector(3).getID());
 
     TSM_ASSERT_EQUALS(
         "Detector at WS index 0 should have a spectrum number of 2", 2,
         mon_ws->getSpectrum(0).getSpectrumNo());
+    const auto &monSpectrumInfo = mon_ws->spectrumInfo();
     TSM_ASSERT_EQUALS("Detector at WS index 0 should have a detector ID of 2",
-                      2, mon_ws->getDetector(0)->getID());
+                      2, monSpectrumInfo.detector(0).getID());
 
     // Clean up
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS_monitors");
+  }
+
+  void test_that_multiple_time_regime_file_is_detected_and_loads() {
+    // Arrange
+    LoadISISNexus2 ld;
+    ld.setRethrows(true);
+    ld.initialize();
+    ld.setPropertyValue("Filename", "LARMOR00009848.nxs");
+    ld.setPropertyValue("OutputWorkspace", "outWS");
+    ld.setPropertyValue("LoadMonitors", "1"); /*separate monitors*/
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
   }
 
   //------------------------------------------------------------------
@@ -1561,7 +1589,7 @@ public:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:   |  |
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.setRethrows(true);
     ld.initialize();
@@ -1583,7 +1611,7 @@ public:
     // Data:    |--Mon--||--Det--||--Mon--||--Det--|
     // Select:                      |  |
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.setRethrows(true);
     ld.initialize();
@@ -1601,7 +1629,7 @@ public:
   void
   test_that_when_selecting_list_with_only_monitors_and_exclude_monitors_exception_is_thrown() {
     // Arrange
-    Mantid::API::FrameworkManager::Instance();
+
     LoadISISNexus2 ld;
     ld.setRethrows(true);
     ld.initialize();

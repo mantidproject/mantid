@@ -1,7 +1,9 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -173,9 +175,13 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
   for (auto &dir : dirs) {
     if ((dir.length() > CAL_LEN) &&
         (dir.compare(dir.length() - CAL.length(), CAL.length(), CAL) == 0)) {
-      if (Poco::File(base.path() + "/" + dir + "/calibrations/" + mapping)
-              .exists())
-        files.push_back(base.path() + "/" + dir + "/calibrations/" + mapping);
+      std::string path = std::string(base.path())
+                             .append("/")
+                             .append(dir)
+                             .append("/calibrations/")
+                             .append(mapping);
+      if (Poco::File(path).exists())
+        files.push_back(path);
     }
   }
 
@@ -450,7 +456,8 @@ void LoadEventPreNexus2::createOutputWorkspace(
   if (!this->spectra_list.empty())
     nSpec = this->spectra_list.size();
   auto tmp = createWorkspace<EventWorkspace>(nSpec, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(localWorkspace, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*localWorkspace, *tmp,
+                                                    true);
   localWorkspace = std::move(tmp);
 }
 
@@ -502,19 +509,18 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
 
   // Put x-values
   for (size_t i = 0; i < 2; ++i) {
-    MantidVec &dataX = disws->dataX(i);
+    auto &dataX = disws->mutableX(i);
     dataX[0] = 0;
     for (size_t j = 0; j < sizex; ++j) {
       int64_t time =
           pulsetimes[j].totalNanoseconds() - pulsetimes[0].totalNanoseconds();
       dataX[j] = static_cast<double>(time) * 1.0E-9;
-      // dataX[j] = static_cast<double>(j);
     }
   }
 
   // Put y-values
-  MantidVec &dataY0 = disws->dataY(0);
-  MantidVec &dataY1 = disws->dataY(1);
+  auto &dataY0 = disws->mutableY(0);
+  auto &dataY1 = disws->mutableY(1);
 
   dataY0[0] = 0;
   dataY1[1] = static_cast<double>(event_indices[0]);
@@ -668,8 +674,8 @@ void LoadEventPreNexus2::procEvents(
   size_t numBlocks = (max_events + loadBlockSize - 1) / loadBlockSize;
 
   // We want to pad out empty pixels.
-  detid2det_map detector_map;
-  workspace->getInstrument()->getDetectors(detector_map);
+  const auto &detectorInfo = workspace->detectorInfo();
+  const auto &detIDs = detectorInfo.detectorIDs();
 
   // Determine processing mode
   std::string procMode = getProperty("UseParallelProcessing");
@@ -684,18 +690,17 @@ void LoadEventPreNexus2::procEvents(
     // second, e.g. 7 million events more per seconds).
     // compared to a setup time/merging time of about 10 seconds per million
     // detectors.
-    double setUpTime = double(detector_map.size()) * 10e-6;
+    double setUpTime = double(detectorInfo.size()) * 10e-6;
     parallelProcessing = ((double(max_events) / 7e6) > setUpTime);
     g_log.debug() << (parallelProcessing ? "Using" : "Not using")
                   << " parallel processing.\n";
   }
 
   // determine maximum pixel id
-  detid2det_map::iterator it;
   detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); it++)
-    if (it->first > detid_max)
-      detid_max = it->first;
+  for (const auto detID : detIDs)
+    if (detID > detid_max)
+      detid_max = detID;
 
   // For slight speed up
   loadOnlySomeSpectra = (!this->spectra_list.empty());
@@ -712,17 +717,17 @@ void LoadEventPreNexus2::procEvents(
   this->pixel_to_wkspindex.assign(detid_max + 1, 0);
   size_t workspaceIndex = 0;
   specnum_t spectrumNumber = 1;
-  for (it = detector_map.begin(); it != detector_map.end(); it++) {
-    if (!it->second->isMonitor()) {
+  for (size_t i = 0; i < detectorInfo.size(); ++i) {
+    if (!detectorInfo.isMonitor(i)) {
       if (!loadOnlySomeSpectra ||
-          (spectraLoadMap.find(it->first) != spectraLoadMap.end())) {
-        this->pixel_to_wkspindex[it->first] = workspaceIndex;
+          (spectraLoadMap.find(detIDs[i]) != spectraLoadMap.end())) {
+        this->pixel_to_wkspindex[detIDs[i]] = workspaceIndex;
         EventList &spec = workspace->getSpectrum(workspaceIndex);
-        spec.setDetectorID(it->first);
+        spec.setDetectorID(detIDs[i]);
         spec.setSpectrumNo(spectrumNumber);
         ++workspaceIndex;
       } else {
-        this->pixel_to_wkspindex[it->first] = -1;
+        this->pixel_to_wkspindex[detIDs[i]] = -1;
       }
       ++spectrumNumber;
     }

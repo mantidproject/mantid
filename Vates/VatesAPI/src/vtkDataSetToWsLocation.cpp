@@ -26,7 +26,7 @@ Constructor
 */
 vtkDataSetToWsLocation::vtkDataSetToWsLocation(vtkDataSet *dataSet)
     : m_dataset(dataSet) {
-  if (m_dataset == NULL) {
+  if (!m_dataset) {
     throw std::runtime_error(
         "Tried to construct vtkDataSetToWsLocation with NULL vtkDataSet");
   }
@@ -47,7 +47,7 @@ std::string vtkDataSetToWsLocation::execute() {
   Poco::XML::Element *pRootElem = pDoc->documentElement();
   Poco::XML::Element *wsLocationElem = pRootElem->getChildElement(
       MDGeometryXMLDefinitions::workspaceLocationElementName());
-  if (wsLocationElem == NULL) {
+  if (!wsLocationElem) {
     throw std::runtime_error(
         "The element containing the workspace location must be present.");
   }

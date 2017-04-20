@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/Normalization.h"
 
 #include <vtkCellData.h>
+#include <vtkCellType.h>
 #include <vtkFloatArray.h>
 #include <vtkHexahedron.h>
 #include <vtkNew.h>
@@ -29,8 +30,9 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkVertex.h>
 
+#include "boost/algorithm/clamp.hpp"
+
 #include <algorithm>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <iterator>
 #include <qwt_double_interval.h>
 
@@ -44,17 +46,15 @@ namespace Mantid {
 namespace VATES {
 /**
  * Constructor
- * @param thresholdRange : Threshold range strategy
  * @param scalarName : Name for scalar signal array.
  * @param numPoints : Total number of points to create.
  * @param percentToUse : Cutoff for the densest boxes.
  */
-vtkSplatterPlotFactory::vtkSplatterPlotFactory(
-    ThresholdRange_scptr thresholdRange, const std::string &scalarName,
-    const size_t numPoints, const double percentToUse)
-    : m_thresholdRange(thresholdRange), m_scalarName(scalarName),
-      m_numPoints(numPoints), m_buildSortedList(true), m_wsName(""),
-      slice(false), m_time(0.0), m_minValue(0.1), m_maxValue(0.1),
+vtkSplatterPlotFactory::vtkSplatterPlotFactory(const std::string &scalarName,
+                                               const size_t numPoints,
+                                               const double percentToUse)
+    : m_scalarName(scalarName), m_numPoints(numPoints), m_buildSortedList(true),
+      m_wsName(""), slice(false), m_time(0.0),
       m_metaDataExtractor(new MetaDataExtractorUtils()),
       m_metadataJsonManager(new MetadataJsonManager()),
       m_vatesConfigurations(new VatesConfigurations()) {
@@ -118,7 +118,7 @@ void vtkSplatterPlotFactory::doCreate(
   }
   size_t num_boxes_to_use = static_cast<size_t>(
       m_percentToUse * static_cast<double>(m_sortedBoxes.size()) / 100.0);
-  if (num_boxes_to_use >= m_sortedBoxes.size()) {
+  if (num_boxes_to_use > 0 && num_boxes_to_use >= m_sortedBoxes.size()) {
     num_boxes_to_use = m_sortedBoxes.size() - 1;
   }
 
@@ -159,7 +159,7 @@ void vtkSplatterPlotFactory::doCreate(
 
   // Create the point list, one position for each point actually used
   vtkNew<vtkPoints> points;
-  vtkFloatArray *pointsArray = vtkFloatArray::SafeDownCast(points->GetData());
+  vtkFloatArray *pointsArray = vtkFloatArray::FastDownCast(points->GetData());
   if (!pointsArray) {
     throw std::runtime_error("Failed to cast vtkDataArray to vtkFloatArray.");
   }
@@ -214,6 +214,12 @@ void vtkSplatterPlotFactory::doCreate(
   // Add points and scalars
   visualDataSet->SetPoints(points.GetPointer());
   visualDataSet->GetPointData()->SetScalars(signal.GetPointer());
+  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+
+  visualDataSet->Allocate(points->GetNumberOfPoints());
+  for (vtkIdType ptId = 0; ptId < points->GetNumberOfPoints(); ++ptId) {
+    visualDataSet->InsertNextCell(VTK_VERTEX, 1, &ptId);
+  }
 }
 
 /**
@@ -246,22 +252,22 @@ void vtkSplatterPlotFactory::sortBoxesByDecreasingSignal(
  * scalar data.
  */
 void vtkSplatterPlotFactory::doCreateMDHisto(
-    IMDHistoWorkspace_sptr workspace) const {
+    const IMDHistoWorkspace &workspace) const {
   // Acquire a scoped read-only lock to the workspace (prevent segfault
   // from algos modifying wworkspace)
-  ReadLock lock(*workspace);
+  ReadLock lock(workspace);
 
   // Get the geometric information of the bins
-  const int nBinsX = static_cast<int>(workspace->getXDimension()->getNBins());
-  const int nBinsY = static_cast<int>(workspace->getYDimension()->getNBins());
-  const int nBinsZ = static_cast<int>(workspace->getZDimension()->getNBins());
+  const int nBinsX = static_cast<int>(workspace.getXDimension()->getNBins());
+  const int nBinsY = static_cast<int>(workspace.getYDimension()->getNBins());
+  const int nBinsZ = static_cast<int>(workspace.getZDimension()->getNBins());
 
-  const coord_t maxX = workspace->getXDimension()->getMaximum();
-  const coord_t minX = workspace->getXDimension()->getMinimum();
-  const coord_t maxY = workspace->getYDimension()->getMaximum();
-  const coord_t minY = workspace->getYDimension()->getMinimum();
-  const coord_t maxZ = workspace->getZDimension()->getMaximum();
-  const coord_t minZ = workspace->getZDimension()->getMinimum();
+  const coord_t maxX = workspace.getXDimension()->getMaximum();
+  const coord_t minX = workspace.getXDimension()->getMinimum();
+  const coord_t maxY = workspace.getYDimension()->getMaximum();
+  const coord_t minY = workspace.getYDimension()->getMinimum();
+  const coord_t maxZ = workspace.getZDimension()->getMaximum();
+  const coord_t minZ = workspace.getZDimension()->getMinimum();
 
   coord_t incrementX = (maxX - minX) / static_cast<coord_t>(nBinsX);
   coord_t incrementY = (maxY - minY) / static_cast<coord_t>(nBinsY);
@@ -288,21 +294,17 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
   vtkNew<vtkVertex> vertex;
 
   // Check if the workspace requires 4D handling.
-  bool do4D = doMDHisto4D(workspace);
+  bool do4D = doMDHisto4D(&workspace);
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
-  Mantid::API::CoordTransform const *transform = NULL;
+  Mantid::API::CoordTransform const *transform = nullptr;
   if (m_useTransform) {
-    transform = workspace->getTransformToOriginal();
+    transform = workspace.getTransformToOriginal();
   }
 
   Mantid::coord_t in[3];
   Mantid::coord_t out[3];
-
-  signal_t signalScalar;
-
-  size_t index = 0;
 
   for (int z = 0; z < nBinsZ; z++) {
     in[2] = (minZ + (static_cast<coord_t>(z) + 0.5f) * incrementZ);
@@ -310,12 +312,12 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
       in[1] = (minY + (static_cast<coord_t>(y) + 0.5f) * incrementY);
       for (int x = 0; x < nBinsX; x++) {
         // Get the signalScalar
-        signalScalar = this->extractScalarSignal(workspace, do4D, x, y, z);
+        signal_t signalScalar =
+            this->extractScalarSignal(workspace, do4D, x, y, z);
 
         // Make sure that the signal is not bad and is in the range and larger
         // than 0
         if (std::isfinite(signalScalar) &&
-            m_thresholdRange->inRange(signalScalar) &&
             (signalScalar > static_cast<signal_t>(0.0))) {
           in[0] = (minX + (static_cast<coord_t>(x) + 0.5f) * incrementX);
           // Create the transformed value if required
@@ -334,7 +336,6 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
 
           visualDataSet->InsertNextCell(VTK_VERTEX, vertex->GetPointIds());
         }
-        index++;
       }
     }
   }
@@ -354,17 +355,17 @@ void vtkSplatterPlotFactory::doCreateMDHisto(
  * @returns The scalar signal.
  */
 signal_t
-vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
+vtkSplatterPlotFactory::extractScalarSignal(const IMDHistoWorkspace &workspace,
                                             bool do4D, const int x, const int y,
                                             const int z) const {
   signal_t signalScalar;
 
   if (do4D) {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z),
         static_cast<size_t>(m_time));
   } else {
-    signalScalar = workspace->getSignalNormalizedAt(
+    signalScalar = workspace.getSignalNormalizedAt(
         static_cast<size_t>(x), static_cast<size_t>(y), static_cast<size_t>(z));
   }
 
@@ -377,19 +378,13 @@ vtkSplatterPlotFactory::extractScalarSignal(IMDHistoWorkspace_sptr workspace,
  * @returns Is the workspace 4D?
  */
 bool vtkSplatterPlotFactory::doMDHisto4D(
-    IMDHistoWorkspace_sptr workspace) const {
-  bool do4D = false;
-
+    const IMDHistoWorkspace *workspace) const {
   bool bExactMatch = true;
-
-  IMDHistoWorkspace_sptr workspace4D =
-      castAndCheck<IMDHistoWorkspace, 4>(workspace, bExactMatch);
-
-  if (workspace4D) {
-    do4D = true;
+  if (workspace &&
+      checkWorkspace<IMDHistoWorkspace, 4>(*workspace, bExactMatch)) {
+    return true;
   }
-
-  return do4D;
+  return false;
 }
 
 /**
@@ -445,17 +440,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
   CALL_MDEVENT_FUNCTION(this->doCreate, m_workspace);
 
   // Set the instrument
-  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace);
-  double *range = nullptr;
-
-  if (dataSet) {
-    range = dataSet->GetScalarRange();
-  }
-
-  if (range) {
-    m_minValue = range[0];
-    m_maxValue = range[1];
-  }
+  m_instrument = m_metaDataExtractor->extractInstrument(m_workspace.get());
 
   // Check for the workspace type, i.e. if it is MDHisto or MDEvent
   IMDEventWorkspace_sptr eventWorkspace =
@@ -467,7 +452,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
     // Macro to call the right instance of the
     CALL_MDEVENT_FUNCTION(this->doCreate, eventWorkspace);
   } else {
-    this->doCreateMDHisto(histoWorkspace);
+    this->doCreateMDHisto(*histoWorkspace);
   }
 
   // Add metadata in json format
@@ -484,7 +469,7 @@ vtkSplatterPlotFactory::create(ProgressAction &progressUpdating) const {
  * not an IMDEventWorkspace, throws an invalid argument exception.
  * @param ws : Workspace to use.
  */
-void vtkSplatterPlotFactory::initialize(Mantid::API::Workspace_sptr ws) {
+void vtkSplatterPlotFactory::initialize(const Mantid::API::Workspace_sptr &ws) {
   this->m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
   this->validate();
 }
@@ -519,24 +504,9 @@ void vtkSplatterPlotFactory::validate() const {
  * Add meta data to the visual data set.
  */
 void vtkSplatterPlotFactory::addMetadata() const {
-  const double defaultValue = 0.1;
-
   if (this->dataSet) {
-    double *range = nullptr;
-    range = dataSet->GetScalarRange();
-
-    if (range) {
-      m_minValue = range[0];
-      m_maxValue = range[1];
-    } else {
-      m_minValue = defaultValue;
-      m_maxValue = defaultValue;
-    }
-
-    m_metadataJsonManager->setMinValue(m_minValue);
-    m_metadataJsonManager->setMaxValue(m_maxValue);
     m_metadataJsonManager->setInstrument(
-        m_metaDataExtractor->extractInstrument(m_workspace));
+        m_metaDataExtractor->extractInstrument(m_workspace.get()));
     m_metadataJsonManager->setSpecialCoordinates(
         static_cast<int>(m_workspace->getSpecialCoordinateSystem()));
 
@@ -547,7 +517,7 @@ void vtkSplatterPlotFactory::addMetadata() const {
     // Add metadata to dataset.
     MetadataToFieldData convert;
     convert(outputFD.GetPointer(), jsonString,
-            m_vatesConfigurations->getMetadataIdJson().c_str());
+            m_vatesConfigurations->getMetadataIdJson());
     dataSet->SetFieldData(outputFD.GetPointer());
   }
 }
@@ -563,18 +533,16 @@ void vtkSplatterPlotFactory::setMetadata(vtkFieldData *fieldData,
   // the dataset
   FieldDataToMetadata convertFtoM;
   std::string xmlString = convertFtoM(fieldData, XMLDefinitions::metaDataId());
-  std::string jsonString =
-      convertFtoM(dataSet->GetFieldData(),
-                  m_vatesConfigurations->getMetadataIdJson().c_str());
+  std::string jsonString = convertFtoM(
+      dataSet->GetFieldData(), m_vatesConfigurations->getMetadataIdJson());
 
   // Create a new field data array
   MetadataToFieldData convertMtoF;
   vtkNew<vtkFieldData> outputFD;
   outputFD->ShallowCopy(fieldData);
-  convertMtoF(outputFD.GetPointer(), xmlString,
-              XMLDefinitions::metaDataId().c_str());
+  convertMtoF(outputFD.GetPointer(), xmlString, XMLDefinitions::metaDataId());
   convertMtoF(outputFD.GetPointer(), jsonString,
-              m_vatesConfigurations->getMetadataIdJson().c_str());
+              m_vatesConfigurations->getMetadataIdJson());
   dataSet->SetFieldData(outputFD.GetPointer());
 }
 
@@ -596,13 +564,8 @@ void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points) {
  *                       to the interval (0,100].
  */
 void vtkSplatterPlotFactory::SetPercentToUse(double percentToUse) {
-  if (percentToUse <= 0) {
-    m_percentToUse = 5;
-  } else if (percentToUse > 100) {
-    m_percentToUse = 100;
-  } else {
-    m_percentToUse = percentToUse;
-  }
+  m_percentToUse = boost::algorithm::clamp(
+      percentToUse, std::numeric_limits<double>::min(), 100.0);
 }
 
 /**
@@ -615,18 +578,6 @@ void vtkSplatterPlotFactory::setTime(double time) {
   }
   m_time = time;
 }
-
-/**
-* Getter for the minimum value;
-* @return The minimum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMinValue() { return m_minValue; }
-
-/**
-* Getter for the maximum value;
-* @return The maximum value of the data set.
-*/
-double vtkSplatterPlotFactory::getMaxValue() { return m_maxValue; }
 
 /**
 * Getter for the instrument.

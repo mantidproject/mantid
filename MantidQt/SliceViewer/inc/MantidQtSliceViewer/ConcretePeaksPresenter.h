@@ -25,7 +25,8 @@ ConcretePeaksPresenter
 
 Concrete implmentation of the Peaks presenter.
 ----------------------------------------------------------*/
-class DLLExport ConcretePeaksPresenter : public PeaksPresenter {
+class EXPORT_OPT_MANTIDQT_SLICEVIEWER ConcretePeaksPresenter
+    : public PeaksPresenter {
 public:
   ConcretePeaksPresenter(
       PeakOverlayViewFactory_sptr viewFactory,
@@ -85,7 +86,6 @@ private:
   EditMode m_editMode;
   /// Can we add to this peaks workspace
   bool m_hasAddPeaksMode;
-
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views

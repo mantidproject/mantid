@@ -49,25 +49,47 @@ class ApplicationWindow;
 namespace MantidQt {
 namespace API {
 
-class ProjectSerialiser {
+class ProjectSerialiser : public QObject {
+  Q_OBJECT
 public:
   /// Create a new serialiser with the current application window
   explicit ProjectSerialiser(ApplicationWindow *window);
+  explicit ProjectSerialiser(ApplicationWindow *window, Folder *folder);
+
   /// Save the current state of the project to disk
-  void save(Folder *folder, const QString &projectName, bool compress = false);
+  void save(const QString &projectName, const std::vector<std::string> &wsNames,
+            const std::vector<std::string> &windowNames, bool compress = false);
+  void save(const QString &projectName, bool compress = false,
+            bool saveAll = true);
   /// Load a project file from disk
   void load(std::string lines, const int fileVersion,
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
 
+signals:
+  /// Set the curret progress of serialisation
+  void setProgressBarRange(int min, int max);
+  /// Set the forcasted range of things to do when saving
+  void setProgressBarValue(int value);
+  /// Set what is currently happening to listening progress bars
+  void setProgressBarText(QString text);
+
 private:
   // Instance Variables
 
   /// Store a reference to the caller application window instance
   ApplicationWindow *window;
+  /// Store a reference to the current folder
+  Folder *m_currentFolder;
+  /// Vector of names of windows to save to file
+  std::vector<std::string> m_windowNames;
+  /// Vector of names of workspaces to save to file
+  std::vector<std::string> m_workspaceNames;
   /// Store a count of the number of windows during saving
   int m_windowCount;
+  /// Flag to check if e should save all workspaces
+  bool m_saveAll;
 
   // Saving Functions
 
@@ -118,6 +140,13 @@ private:
   void loadWsToMantidTree(const std::string &wsName);
   /// Load additional windows (e.g. slice viewer)
   void loadAdditionalWindows(const std::string &lines, const int fileVersion);
+
+  // Misc functions
+
+  /// Create a handle to a new QMdiSubWindow instance
+  QMdiSubWindow *setupQMdiSubWindow() const;
+  /// Check if a vector of strings contains a string
+  bool contains(const std::vector<std::string> &vec, const std::string &value);
 };
 }
 }

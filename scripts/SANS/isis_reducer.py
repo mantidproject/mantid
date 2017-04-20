@@ -1,4 +1,4 @@
-﻿# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
+# pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
     ISIS-specific implementation of the SANS Reducer.
 
@@ -6,6 +6,7 @@
     understand what's happening and how best to fit it in the Reducer design.
 
 """
+from __future__ import (absolute_import, division, print_function)
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
@@ -21,16 +22,131 @@ import sys
 
 logger = Logger("ISISReducer")
 
+
+class ReductionStateTransferer(object):
+    def __init__(self):
+        super(ReductionStateTransferer, self).__init__()
+        # A copy of the reducer
+        self.rc = None
+
+    def get_copy_of_reducer(self, reducer):
+        self.rc = copy.deepcopy(reducer)
+
+    def apply_gui_changes_from_old_reducer_to_new_reducer(self, reducer):
+        # Apply detector
+        det_name = self.rc.instrument.det_selection
+        reducer.instrument.setDetector(det_name)
+
+        # Apply output type
+        reducer.to_Q.output_type = self.rc.to_Q.output_type
+
+        # Get radius limit
+        reducer.to_Q.r_cut = self.rc.to_Q.r_cut
+        reducer.mask.min_radius = self.rc.mask.min_radius
+        reducer.mask.max_radius = self.rc.mask.max_radius
+        reducer.mask.max_radius = self.rc.mask.max_radius
+        reducer.CENT_FIND_RMIN = self.rc.CENT_FIND_RMIN
+        reducer.CENT_FIND_RMAX = self.rc.CENT_FIND_RMAX
+
+        # Get events binning
+        if hasattr(reducer, "settings") and hasattr(self.rc, "settings"):
+            settings1 = reducer.settings
+            settings2 = self.rc.settings
+            if "events.binning" in settings1 and "events.binning" in settings2:
+                reducer.settings["events.binning"] = copy.deepcopy(self.rc.settings["events.binning"])
+
+        # Get wavelength limits
+        reducer.to_Q.w_cut  = self.rc.to_Q.w_cut
+
+        # Get Q limits
+        reducer.to_Q.binning = self.rc.to_Q.binning
+
+        # Get QXY limits
+        reducer.QXY2 = self.rc.QXY2
+        reducer.DQXY = self.rc.DQXY
+
+        # Get Phi Limits
+        reducer.mask.phi_min = self.rc.mask.phi_min
+        reducer.mask.phi_max = self.rc.mask.phi_max
+        reducer.mask.phi_mirror = self.rc.mask.phi_mirror
+
+        # Get flood files
+        reducer.prep_normalize._high_angle_pixel_file = self.rc.prep_normalize._high_angle_pixel_file
+        reducer.prep_normalize._low_angle_pixel_file = self.rc.prep_normalize._low_angle_pixel_file
+
+        # Transmission fits
+        reducer.transmission_calculator.fit_settings = copy.deepcopy(self.rc.transmission_calculator.fit_settings)
+
+        # Set front detector scale, shift and q range
+        reducer.instrument.getDetector('FRONT').rescaleAndShift = copy.deepcopy(self.rc.instrument.getDetector('FRONT').rescaleAndShift)
+
+        # Set Gravity and extra length
+        reducer.to_Q._use_gravity = self.rc.to_Q._use_gravity
+        reducer.to_Q._grav_extra_length = self.rc.to_Q._grav_extra_length
+        reducer.to_Q._grav_extra_length_set = self.rc.to_Q._grav_extra_length_set
+
+        # Set sample offset
+        reducer.instrument.SAMPLE_Z_CORR = self.rc.instrument.SAMPLE_Z_CORR
+
+        # Set monitor spectrum
+        reducer.instrument._use_interpol_norm = self.rc.instrument._use_interpol_norm
+        reducer.instrument.set_incident_mon(self.rc.instrument.get_incident_mon())
+
+        # Set transmission spectrum
+        reducer.instrument.incid_mon_4_trans_calc = self.rc.instrument.incid_mon_4_trans_calc
+        reducer.transmission_calculator.interpolate = self.rc.transmission_calculator.interpolate
+
+        # Set transmission settings
+        reducer.transmission_calculator.trans_mon = self.rc.transmission_calculator.trans_mon
+        if hasattr(self.rc.instrument, "monitor_4_offset"):
+            reducer.instrument.monitor_4_offset = self.rc.instrument.monitor_4_offset
+        reducer.transmission_calculator.radius = self.rc.transmission_calculator.radius
+        reducer.transmission_calculator.roi_files = self.rc.transmission_calculator.roi_files
+        reducer.transmission_calculator.mask_files = self.rc.transmission_calculator.mask_files
+
+        # Set q resolution settings
+        reducer.to_Q.use_q_resolution = self.rc.to_Q.use_q_resolution
+        reducer.to_Q._q_resolution_moderator_file_name = self.rc.to_Q._q_resolution_moderator_file_name
+        reducer.to_Q._q_resolution_delta_r = self.rc.to_Q._q_resolution_delta_r
+        reducer.to_Q._q_resolution_a1 = self.rc.to_Q._q_resolution_a1
+        reducer.to_Q._q_resolution_a2 = self.rc.to_Q._q_resolution_a2
+        reducer.to_Q._q_resolution_h1 = self.rc.to_Q._q_resolution_h1
+        reducer.to_Q._q_resolution_w1 = self.rc.to_Q._q_resolution_w1
+        reducer.to_Q._q_resolution_h2 = self.rc.to_Q._q_resolution_h2
+        reducer.to_Q._q_resolution_w2 = self.rc.to_Q._q_resolution_w2
+        reducer.to_Q._q_resolution_collimation_length = self.rc.to_Q._q_resolution_collimation_length
+
+        # Set background correction settings
+        reducer.dark_run_subtraction = copy.deepcopy(self.rc.dark_run_subtraction)
+
+        # Set centre
+        reducer._front_beam_finder = copy.deepcopy(self.rc._front_beam_finder)
+        reducer._beam_finder = copy.deepcopy(self.rc._beam_finder)
+
+        # Set mask
+        reducer.mask.spec_mask_f = copy.deepcopy(self.rc.mask.spec_mask_f)
+        reducer.mask.spec_mask_r = copy.deepcopy(self.rc.mask.spec_mask_r)
+        reducer.mask.time_mask = copy.deepcopy(self.rc.mask.time_mask)
+        reducer.mask.time_mask_f = copy.deepcopy(self.rc.mask.time_mask_f)
+        reducer.mask.time_mask_r = copy.deepcopy(self.rc.mask.time_mask_r)
+        reducer.mask.arm_width = copy.deepcopy(self.rc.mask.arm_width)
+        reducer.mask.arm_angle = copy.deepcopy(self.rc.mask.arm_angle)
+        reducer.mask.arm_x = copy.deepcopy(self.rc.mask.arm_x)
+        reducer.mask.arm_y = copy.deepcopy(self.rc.mask.arm_y)
+
+        # Add slices
+        reducer._slices_def = copy.deepcopy(self.rc._slices_def)
+        reducer._slice_index = copy.deepcopy(self.rc._slice_index)
+
+
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
 # http://bugs.python.org/issue1515
 if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     import types
 
-
     def _deepcopy_method(x, memo):
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
-
+        return type(x)(x.__func__, copy.deepcopy(x.__self__, memo), x.__self__.__class__)
 
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
@@ -86,7 +202,7 @@ class Sample(object):
     def get_monitor(self, index=None):
         try:
             _ws = mtd[self.loader.wksp_name + "_monitors"]
-        except (StandardError, Warning):
+        except (Exception, Warning):
             _ws = mtd[self.loader.wksp_name]
 
         if index is not None:
@@ -210,10 +326,10 @@ class ISISReducer(Reducer):
         # so currently do not understand why it is in isis_reduction_steps
         # Also the main purpose of this class is to use it as an input argument
         # to ConvertToQ below
-        self.prep_normalize = isis_reduction_steps.CalculateNormISIS( \
+        self.prep_normalize = isis_reduction_steps.CalculateNormISIS(
             [self.norm_mon, self.transmission_calculator])
 
-        self.to_Q = isis_reduction_steps.ConvertToQISIS( \
+        self.to_Q = isis_reduction_steps.ConvertToQISIS(
             self.prep_normalize)
         self._background_subtracter = isis_reduction_steps.CanSubtraction()
         self.geometry_correcter = isis_reduction_steps.SampleGeomCor()
@@ -267,6 +383,9 @@ class ISISReducer(Reducer):
         # Dark Run Subtraction handler. This is not a step but a utility class
         # which gets used during cropping and Tranmission calculation
         self.dark_run_subtraction = isis_reduction_steps.DarkRunSubtraction()
+
+        # Unwrap monitors
+        self._unwrap_monitors = False
 
     def set_instrument(self, configuration):
         """
@@ -346,8 +465,7 @@ class ISISReducer(Reducer):
         name += self.instrument.cur_detector().name('short')
         name += '_' + self.to_Q.output_type
         name += '_' + self.to_wavelen.get_range()
-        if self.to_Q.get_output_type() == "1D":
-            name += self.mask.get_phi_limits_tag()
+        name += self.mask.get_phi_limits_tag()
 
         if self.getNumSlices() > 0:
             limits = self.getCurrSliceLimit()
@@ -465,7 +583,7 @@ class ISISReducer(Reducer):
             the list of reduction steps.
         """
         if self.instrument is None:
-            raise RuntimeError, "ISISReducer: trying to run a reduction with no instrument specified"
+            raise RuntimeError("ISISReducer: trying to run a reduction with no instrument specified")
 
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
@@ -497,20 +615,22 @@ class ISISReducer(Reducer):
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
         # are current being used for saving CanSAS (ticket #6929)
         if self.__transmission_sample:
+            unfitted_transmission_workspace_name = su.get_unfitted_transmission_workspace_name(self.__transmission_sample)
             AddSampleLog(Workspace=self.output_wksp, LogName="Transmission",
-                         LogText=self.__transmission_sample + str('_unfitted'))
+                         LogText=unfitted_transmission_workspace_name)
         if self.__transmission_can:
+            unfitted_transmission_workspace_name = su.get_unfitted_transmission_workspace_name(self.__transmission_can)
             AddSampleLog(Workspace=self.output_wksp, LogName="TransmissionCan",
-                         LogText=self.__transmission_can + str('_unfitted'))
+                         LogText=unfitted_transmission_workspace_name)
 
         # clean these values for subsequent executions
         self.__transmission_sample = ""
         self.__transmission_can = ""
 
-        for role in self._temporys.keys():
+        for role in list(self._temporys.keys()):
             try:
                 DeleteWorkspace(Workspace=self._temporys[role])
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if cleaning up isn't possible there is probably nothing we can do
                 pass
 
@@ -522,7 +642,7 @@ class ISISReducer(Reducer):
         if os.path.isdir(path):
             self._user_file_path = path
         else:
-            raise RuntimeError, "ISISReducer.set_user_path: provided path is not a directory (%s)" % path
+            raise RuntimeError("ISISReducer.set_user_path: provided path is not a directory (%s)" % path)
 
     def get_user_path(self):
         return self._user_file_path
@@ -603,7 +723,6 @@ class ISISReducer(Reducer):
     CENT_FIND_RMIN = None
     CENT_FIND_RMAX = None
 
-
     # override some functions from the Base Reduction
 
     # set_beam_finder: override to accept the front detector
@@ -620,7 +739,7 @@ class ISISReducer(Reducer):
             else:
                 self._beam_finder = finder
         else:
-            raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
+            raise RuntimeError("Reducer.set_beam_finder expects an object of class ReductionStep")
 
     def get_beam_center(self, bank=None):
         """
@@ -691,7 +810,7 @@ class ISISReducer(Reducer):
             try:
                 if wk and wk in mtd:
                     DeleteWorkspace(Workspace=wk)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 
@@ -715,7 +834,7 @@ class ISISReducer(Reducer):
             to_check = self._reduction_steps
             for element in to_check:
                 element.run_consistency_check()
-        except RuntimeError, details:
+        except RuntimeError as details:
             if was_empty:
                 self._reduction_steps = None
             raise RuntimeError(str(details))
@@ -766,9 +885,9 @@ class ISISReducer(Reducer):
         idf_path_reducer = self.get_idf_file_path()
         idf_path_reducer = os.path.normpath(idf_path_reducer)
 
-        # Now check if both idf paths and underlying files. If they are, then don't do anything
+        # Now check both underlying files. If they are equal, then don't do anything
         # else switch the underlying instrument
-        if idf_path_reducer == idf_path_workspace and su.are_two_files_identical(idf_path_reducer, idf_path_reducer):
+        if su.are_two_files_identical(idf_path_workspace, idf_path_reducer):
             return
         else:
             logger.notice("Updating the IDF of the Reducer. Switching from " +
@@ -781,12 +900,20 @@ class ISISReducer(Reducer):
             old_detector_selection = old_instrument.get_detector_selection()
 
             if instrument is not None:
+                # Read the values of some variables which are set on the reduction
+                # framework.
+                state_transfer = ReductionStateTransferer()
+                state_transfer.get_copy_of_reducer(self)
+
                 self.set_instrument(instrument)
 
                 # We need to update the instrument, by reloading the user file.
                 # This is pretty bad, but looking at the reducer architecture this
                 # seems to be the only reasonable way to do this.
                 self.user_settings.execute(self)
+
+                # Apply the settings to reloaded reduction framework
+                state_transfer.apply_gui_changes_from_old_reducer_to_new_reducer(self)
 
                 # Now we set the correct detector, this is also being done in the GUI
                 self.get_instrument().setDetector(old_detector_selection)
@@ -846,19 +973,19 @@ class ISISReducer(Reducer):
         '''
         was_event = False
         if self.is_can():
-            sample = self.get_can()
-            try:
-                dummy_ws = mtd[can.loader.wksp_name + "_monitors"]
+            can = self.get_can()
+            if can.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
-            # pylint: disable=bare-except
-            except:
-                was_event = False
         else:
             sample = self.get_sample()
-            try:
-                dummy_ws = mtd[sample.loader.wksp_name + "_monitors"]
+            if sample.loader.wksp_name + "_monitors" in mtd.getObjectNames():
                 was_event = True
-            # pylint: disable=bare-except
-            except:
-                was_event = False
         return was_event
+
+    def get_unwrap_monitors(self):
+        return self._unwrap_monitors
+
+    def set_unwrap_monitors(self, value):
+        self._unwrap_monitors = value
+
+    unwrap_monitors = property(get_unwrap_monitors, set_unwrap_monitors, None, None)

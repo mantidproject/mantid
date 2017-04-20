@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CommonBinsValidator.cpp
+	src/ComponentInfo.cpp
 	src/CompositeCatalog.cpp
 	src/CompositeDomainMD.cpp
 	src/CompositeFunction.cpp
@@ -27,6 +28,7 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/DetectorInfo.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -49,6 +51,7 @@ set ( SRC_FILES
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
+	src/HistoWorkspace.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -63,7 +66,6 @@ set ( SRC_FILES
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
-	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -80,16 +82,18 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/InfoComponentVisitor.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
+	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
+	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
-	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -99,6 +103,8 @@ set ( SRC_FILES
 	src/MultiPeriodGroupWorker.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/NearestNeighbourInfo.cpp
+	src/NearestNeighbours.cpp
 	src/NotebookBuilder.cpp
 	src/NotebookWriter.cpp
 	src/NullCoordTransform.cpp
@@ -110,9 +116,11 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
+	src/ResizeRectangularDetectorHelper.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleShapeValidator.cpp
@@ -169,6 +177,7 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CommonBinsValidator.h
+	inc/MantidAPI/ComponentInfo.h
 	inc/MantidAPI/CompositeCatalog.h
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
@@ -179,6 +188,7 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
+	inc/MantidAPI/DetectorInfo.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -203,6 +213,7 @@ set ( INC_FILES
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
+	inc/MantidAPI/HistoWorkspace.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -260,17 +271,19 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/InfoComponentVisitor.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
+	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
-	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -282,6 +295,8 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+	inc/MantidAPI/NearestNeighbourInfo.h
+	inc/MantidAPI/NearestNeighbours.h
 	inc/MantidAPI/NotebookBuilder.h
 	inc/MantidAPI/NotebookWriter.h
 	inc/MantidAPI/NullCoordTransform.h
@@ -296,6 +311,7 @@ set ( INC_FILES
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
+	inc/MantidAPI/ResizeRectangularDetectorHelper.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleShapeValidator.h
@@ -322,6 +338,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
@@ -341,10 +358,12 @@ set ( TEST_FILES
 	BinEdgeAxisTest.h
 	BoxControllerTest.h
 	CommonBinsValidatorTest.h
+	ComponentInfoTest.h
 	CompositeFunctionTest.h
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
+	DetectorInfoTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
@@ -372,17 +391,19 @@ set ( TEST_FILES
 	IFunction1DTest.h
 	IFunctionMDTest.h
 	ILatticeFunctionTest.h
-	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	InfoComponentVisitorTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
+	LiveListenerTest.h
+	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
@@ -393,6 +414,8 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
+	NearestNeighbourInfoTest.h
+	NearestNeighboursTest.h
 	NotebookBuilderTest.h
 	NotebookWriterTest.h
 	NumericAxisTest.h
@@ -404,6 +427,7 @@ set ( TEST_FILES
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
+	ResizeRectangularDetectorHelperTest.h
 	RunTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h

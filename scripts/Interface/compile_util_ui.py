@@ -1,5 +1,6 @@
 import os
 
+
 def compile_ui(ui_filename):
     """
     Hand this a ui file and it will make a py file.

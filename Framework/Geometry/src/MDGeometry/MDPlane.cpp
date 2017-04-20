@@ -4,7 +4,6 @@
 #include "MantidKernel/VMD.h"
 #include <gsl/gsl_linalg.h>
 #include "MantidKernel/Matrix.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Kernel;
 

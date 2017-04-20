@@ -11,10 +11,6 @@
 #include <string>
 #include <vector>
 
-namespace {
-Mantid::Kernel::Logger g_log("MDLoadingPresenter");
-}
-
 class vtkUnstructuredGrid;
 namespace Mantid {
 namespace VATES {
@@ -61,25 +57,13 @@ public:
   virtual void setDefaultCOBandBoundaries(vtkDataSet *visualDataSet);
   virtual void makeNonOrthogonal(
       vtkDataSet *visualDataSet,
-      std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider);
+      std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider,
+      ProgressAction *progress);
   virtual bool canReadFile() const = 0;
   virtual const std::string &getGeometryXML() const = 0;
   virtual ~MDLoadingPresenter() {}
   virtual std::string getWorkspaceTypeName() { return "NotSet"; }
   virtual int getSpecialCoordinates() { return Kernel::None; }
-
-  /**
-   * Gets the minimum value.
-   * @returns The minimum value of the dataset or 0.0
-   */
-  virtual double getMinValue() { return 0.0; };
-
-  /**
-   * Gets the maximum value.
-   * @returns The maximum value of the dataset or 0.0
-   */
-  virtual double getMaxValue() { return 0.0; };
-
   /**
    * Gets the instrument associated with the dataset.
    * @returns The instrument associated with the dataset.

@@ -50,6 +50,7 @@ class MplFigureCanvas(QtGui.QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
     """
+
     def __init__(self, parent):
         """ Initialization
         """
@@ -90,7 +91,6 @@ class MplFigureCanvas(QtGui.QWidget):
 
         return
 
-
     def addPlot2D(self, array2d, xmin, xmax, ymin, ymax, holdprev=True, yticklabels=None):
         """ Plot a 2D image
         Arguments
@@ -99,7 +99,6 @@ class MplFigureCanvas(QtGui.QWidget):
         self.canvas.addPlot2D(array2d, xmin, xmax, ymin, ymax, holdprev, yticklabels)
 
         return
-
 
     def addImage(self, imagefilename):
         """ Add an image by file
@@ -111,7 +110,6 @@ class MplFigureCanvas(QtGui.QWidget):
         self.canvas.addImage(imagefilename)
 
         return
-
 
     def clearAllLines(self):
         """
@@ -158,18 +156,15 @@ class MplFigureCanvas(QtGui.QWidget):
         """
         return self.canvas.setXYLimit(xmin, xmax, ymin, ymax)
 
-
     def updateLine(self, ikey, vecx, vecy, linestyle=None, linecolor=None, marker=None, markercolor=None):
         """
         """
         return self.canvas.updateLine(ikey, vecx, vecy, linestyle, linecolor, marker, markercolor)
 
-
     def getLineStyleList(self):
         """
         """
         return MplLineStyles
-
 
     def getLineMarkerList(self):
         """
@@ -238,10 +233,12 @@ class MplFigureCanvas(QtGui.QWidget):
 
         return
 
+
 class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
     It can be used to replace GraphicsView of QtGui
     """
+
     def __init__(self, parent):
         """  Initialization
         """
@@ -351,7 +348,6 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-
     def addPlot2D(self, array2d, xmin, xmax, ymin, ymax, holdprev, yticklabels=None):
         """ Add a 2D plot
 
@@ -420,7 +416,6 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-
     def clearAllLines(self):
         """ Remove all lines from the canvas
         """
@@ -484,12 +479,10 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-
     def getLastPlotIndexKey(self):
         """ Get the index/key of the last added line
         """
         return self._lineIndex-1
-
 
     def getPlot(self):
         """ reture figure's axes to expose the matplotlib figure to PyQt client
@@ -582,7 +575,6 @@ class Qt4MplCanvas(FigureCanvas):
         """
         return MplLineStyles
 
-
     def getLineMarkerList(self):
         """
         """
@@ -611,7 +603,6 @@ class Qt4MplCanvas(FigureCanvas):
 
         return combolist
 
-
     def _flush(self):
         """ A dirty hack to flush the image
         """
@@ -620,7 +611,6 @@ class Qt4MplCanvas(FigureCanvas):
         self.resize(w,h)
 
         return
-
 
     def _setupLegend(self, location='best'):
         """ Set up legend
@@ -654,10 +644,10 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
 
-
 class MyNavigationToolbar(NavigationToolbar):
     """ A customized navigation tool bar attached to canvas
     """
+
     def __init__(self, parent, canvas):
         """ Initialization
         FUTURE: direction='h'

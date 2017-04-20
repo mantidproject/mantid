@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ChopData.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -28,7 +29,7 @@ public:
 
   void testExec() {
     Mantid::DataObjects::Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(149, 24974, 5, 4);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(149, 24974, 5, 4);
 
     for (int i = 0; i < 4995; i++) {
       inputWS->mutableX(140)[i + 19980] = 0.2;

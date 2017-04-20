@@ -126,8 +126,8 @@ public:
 
   void testParenting() {
     MatrixWorkspace_sptr parent =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 1, 1);
-    WorkspaceCreationHelper::AddTSPEntry(parent->mutableRun(), "ALogEntry",
+        WorkspaceCreationHelper::createEventWorkspace(1, 1, 1);
+    WorkspaceCreationHelper::addTSPEntry(parent->mutableRun(), "ALogEntry",
                                          99.0);
 
     Mantid::Algorithms::CreateWorkspace alg;

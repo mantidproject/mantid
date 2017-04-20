@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ConfigService.h"
@@ -301,29 +302,8 @@ Qt::ItemFlags QPeaksTableModel::flags(const QModelIndex &index) const {
 std::vector<int> QPeaksTableModel::defaultHideCols() {
   std::vector<int> result;
 
-  // figure out if there are any rectangular detectors
-  Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
-  { // shrink variable scope
-    std::vector<Mantid::detid_t> ids = instr->getDetectorIDs(true);
-    size_t numToCheck(ids.size());
-    if (numToCheck > 20) // arbitrary cutoff
-      numToCheck = 20;
-    const std::string RECT_DET("RectangularDetector");
-    for (size_t i = 0; i < numToCheck; ++i) {
-      boost::shared_ptr<const Mantid::Geometry::IComponent> component =
-          instr->getDetector(ids[i]);
-      if (component->type().compare(RECT_DET) == 0) {
-        break;
-      } else {
-        component = component->getParent();
-        if (component->type().compare(RECT_DET) == 0) {
-          break;
-        }
-      }
-    }
-  }
-
   // only show bank name for SNS instruments
+  Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
   std::string instrName = instr->getName();
   try {
     Mantid::Kernel::InstrumentInfo instrInfo =

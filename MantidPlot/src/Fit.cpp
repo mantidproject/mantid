@@ -27,24 +27,24 @@
  *                                                                         *
  ***************************************************************************/
 #include "Fit.h"
-#include "fit_gsl.h"
-#include "Table.h"
-#include "Matrix.h"
-#include "QwtErrorPlotCurve.h"
-#include "FunctionCurve.h"
 #include "ColorBox.h"
-#include "MultiLayer.h"
 #include "FitModelHandler.h"
+#include "FunctionCurve.h"
 #include "Mantid/MantidCurve.h"
+#include "Matrix.h"
+#include "MultiLayer.h"
+#include "QwtErrorPlotCurve.h"
+#include "Table.h"
+#include "fit_gsl.h"
 
-#include <gsl/gsl_statistics.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_statistics.h>
 #include <gsl/gsl_version.h>
 
 #include <QApplication>
-#include <QMessageBox>
 #include <QDateTime>
 #include <QLocale>
+#include <QMessageBox>
 #include <QTextStream>
 
 Fit::Fit(ApplicationWindow *parent, Graph *g, const QString &name)
@@ -235,7 +235,7 @@ void Fit::setDataCurve(int curve, double start, double end) {
   PlotCurve *plotCurve = dynamic_cast<PlotCurve *>(d_curve);
   DataCurve *dataCurve = dynamic_cast<DataCurve *>(d_curve);
   // if it is a DataCurve (coming from a Table)
-  if (plotCurve && dataCurve && plotCurve->type() != Graph::Function) {
+  if (plotCurve && dataCurve && plotCurve->type() != GraphOptions::Function) {
     QList<DataCurve *> lst = dataCurve->errorBarsList();
     foreach (DataCurve *c, lst) {
       QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c);
@@ -441,7 +441,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString &colName) {
 
     bool error = true;
     QwtErrorPlotCurve *er = 0;
-    if (dataCurve && dataCurve->type() != Graph::Function) {
+    if (dataCurve && dataCurve->type() != GraphOptions::Function) {
       QList<DataCurve *> lst = dataCurve->errorBarsList();
       foreach (DataCurve *c, lst) {
         er = dynamic_cast<QwtErrorPlotCurve *>(c);
@@ -722,7 +722,7 @@ void Fit::insertFitFunctionCurve(const QString &name, double *x, double *y,
   c->setData(x, y, d_points);
   c->setRange(d_x[0], d_x[d_n - 1]);
   c->setFormula(formula);
-  d_output_graph->insertPlotItem(c, Graph::Line);
+  d_output_graph->insertPlotItem(c, GraphOptions::Line);
   d_output_graph->addFitCurve(c);
 }
 

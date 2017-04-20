@@ -172,10 +172,10 @@ public:
 
     // Make workspaces where Y value == workspace index
     if (event)
-      ws1 = WorkspaceCreationHelper::CreateEventWorkspace(10, numBins, numBins,
+      ws1 = WorkspaceCreationHelper::createEventWorkspace(10, numBins, numBins,
                                                           0, 1.0, 4);
     else
-      ws1 = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(
+      ws1 = WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
           numPixels, numBins);
 
     std::string outName = "SmoothedWS";

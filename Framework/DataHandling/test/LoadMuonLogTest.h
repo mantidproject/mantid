@@ -6,7 +6,6 @@
 // test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,6 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/TimeSeriesProperty.h"

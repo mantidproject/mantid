@@ -1,14 +1,9 @@
 #ifndef MANTID_GEOMETRY_OBJCOMPONENT_H_
 #define MANTID_GEOMETRY_OBJCOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/Track.h"
-#include "MantidGeometry/Objects/Object.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)
@@ -16,6 +11,7 @@
 
 namespace Mantid {
 namespace Geometry {
+class Objects;
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
@@ -61,7 +57,8 @@ public:
   // Looking to get rid of the first of these constructors in due course (and
   // probably add others)
   explicit ObjComponent(const std::string &name, IComponent *parent = nullptr);
-  explicit ObjComponent(const std::string &name, Object_const_sptr shape,
+  explicit ObjComponent(const std::string &name,
+                        boost::shared_ptr<const Object> shape,
                         IComponent *parent = nullptr);
 
   /** Virtual Copy Constructor
@@ -92,9 +89,9 @@ public:
   void initDraw() const override;
 
   /// Return the shape of the component
-  const Object_const_sptr shape() const override;
+  const boost::shared_ptr<const Object> shape() const override;
   /// Set a new shape on the component
-  void setShape(Object_const_sptr newShape);
+  void setShape(boost::shared_ptr<const Object> newShape);
   /// Return the material this component is made from
   const Kernel::Material material() const override;
 
@@ -103,7 +100,7 @@ protected:
   // Made a pointer to a const object. Since this is a shared object we
   // shouldn't be
   // exposing non-const methods of Object through this class.
-  Object_const_sptr m_shape;
+  boost::shared_ptr<const Object> m_shape;
 
   const Kernel::V3D factorOutComponentPosition(const Kernel::V3D &point) const;
   const Kernel::V3D takeOutRotation(Kernel::V3D point) const;

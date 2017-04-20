@@ -2,13 +2,14 @@
 """
     Main window for reduction UIs
 """
-import sys, os
+import sys
+import os
 import traceback
 
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     IS_IN_MANTIDPLOT = True
     from mantid.kernel import ConfigService
     from mantid.api import AlgorithmFactory
@@ -18,7 +19,7 @@ except:
     sip.setapi('QString',2)
     sip.setapi('QVariant',2)
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore # noqa
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -39,11 +40,12 @@ if IS_IN_MANTIDPLOT:
         WARNING_MESSAGE = "Please contact the Mantid team with the following message:\n\n\n"
         WARNING_MESSAGE += unicode(traceback.format_exc())
 
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
-from reduction_gui.settings.application_settings import GeneralSettings
-import ui.ui_reduction_main
-import ui.ui_instrument_dialog
-import ui.ui_cluster_details_dialog
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT # noqa
+from reduction_gui.settings.application_settings import GeneralSettings # noqa
+import ui.ui_reduction_main # noqa
+import ui.ui_instrument_dialog # noqa
+import ui.ui_cluster_details_dialog # noqa
+
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None, instrument_list=None):
@@ -90,7 +92,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._cores_per_node = 16
         self._compute_resources = ['Fermi']
         if IS_IN_MANTIDPLOT \
-        and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+                and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
             self._compute_resources = ConfigService.Instance().getFacility().computeResources()
 
         # Internal flag for clearing all settings and restarting the application
@@ -177,10 +179,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
             # Show the parallel reduction button if enabled
             if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
-            and CLUSTER_ENABLED:
+                    and CLUSTER_ENABLED:
                 config = ConfigService.Instance()
                 if config.hasProperty("cluster.submission") \
-                and config.getString("cluster.submission").lower()=='on':
+                        and config.getString("cluster.submission").lower()=='on':
                     self.cluster_button.show()
                     self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)
             else:
@@ -270,7 +272,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
         recent_files = []
         for fname in self._recent_files:
-            if fname != self._filename and QtCore.QFile.exists(fname) and not fname in recent_files:
+            if fname != self._filename and QtCore.QFile.exists(fname) and fname not in recent_files:
                 recent_files.append(fname)
 
         if len(recent_files)>0:
@@ -310,8 +312,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.setupUi(self)
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                instruments = INSTRUMENT_DICT.keys()
-                instruments.sort()
+                instruments = sorted(INSTRUMENT_DICT.keys())
                 instruments.reverse()
                 for facility in instruments:
                     self.facility_combo.addItem(QtGui.QApplication.translate("Dialog", facility, None, QtGui.QApplication.UnicodeUTF8))
@@ -321,8 +322,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
 
             def _facility_changed(self, facility):
                 self.instr_combo.clear()
-                instr_list = INSTRUMENT_DICT[unicode(facility)].keys()
-                instr_list.sort()
+                instr_list = sorted(INSTRUMENT_DICT[unicode(facility)].keys())
                 for item in instr_list:
                     if self.instrument_list is None or item in self.instrument_list:
                         self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
@@ -392,8 +392,9 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Executed when the application closes
         """
         if False:
-            reply = QtGui.QMessageBox.question(self, 'Message',\
-                "Are you sure you want to quit this application?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
+            reply = QtGui.QMessageBox.question(self, 'Message',
+                                               "Are you sure you want to quit this application?",
+                                               QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)
 
             if reply == QtGui.QMessageBox.Yes:
                 event.accept()
@@ -443,8 +444,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._cluster_details_dialog()
 
         if self._interface is not None \
-        and self.general_settings.cluster_user is not None \
-        and self.general_settings.cluster_pass is not None:
+                and self.general_settings.cluster_user is not None \
+                and self.general_settings.cluster_pass is not None:
             # Chose a name for the job
             if self._filename is not None:
                 job_name = os.path.basename(self._filename).strip()
@@ -548,7 +549,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 print sys.exc_value
                 self.statusBar().showMessage("Failed to save %s" % self._filename)
 
-
     def _save_as(self):
         """
             Present a file dialog to the user and saves the content of
@@ -604,6 +604,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.statusBar().showMessage("Could not save file")
 
 #--------------------------------------------------------------------------------------------------------
+
+
 def start(argv):
     app = QtGui.QApplication(argv)
     app.setOrganizationName("Mantid")

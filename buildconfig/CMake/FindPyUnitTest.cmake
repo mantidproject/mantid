@@ -27,26 +27,23 @@ macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     if ( MSVC )
       # Debug
       add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND mantidpython.bat --classic -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name}_Debug PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir_debug}"
                              WORKING_DIRECTORY ${_working_dir_debug}
                              TIMEOUT ${TESTING_TIMEOUT} )
       # Release
       add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND mantidpython.bat --classic -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
                              WORKING_DIRECTORY ${_working_dir}
                              TIMEOUT ${TESTING_TIMEOUT} )
     else()
       add_test ( NAME ${_pyunit_separate_name}
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND mantidpython --classic -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
                              WORKING_DIRECTORY ${_working_dir}
                              TIMEOUT ${TESTING_TIMEOUT} )
     endif()

@@ -6,7 +6,11 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 #include <cstdio>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -230,8 +234,8 @@ ChopperConfiguration::parseStringDbl(const string &instring) const {
 
   vector<double> vecdouble;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      double item = atof(str.c_str());
+    if (!str.empty()) {
+      double item = std::stod(str.c_str());
       vecdouble.push_back(item);
       // cout << "[C] |" << strs[i] << "|" << item << "\n";
     }
@@ -253,8 +257,8 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 
   vector<unsigned int> vecinteger;
   for (auto &str : strs) {
-    if (str.size() > 0) {
-      int item = atoi(str.c_str());
+    if (!str.empty()) {
+      int item = std::stoi(str);
       if (item < 0) {
         throw runtime_error(
             "Found negative number in a string for unsigned integers.");
@@ -422,7 +426,7 @@ void SaveGSASInstrumentFile::processProperties() {
   m_2theta = getProperty("TwoTheta");
   m_L2 = getProperty("L2");
   string freqtempstr = getProperty("ChopperFrequency");
-  m_frequency = atoi(freqtempstr.c_str());
+  m_frequency = std::stoi(freqtempstr);
 
   /* Set default value for L1
   if (m_L1 == EMPTY_DBL())

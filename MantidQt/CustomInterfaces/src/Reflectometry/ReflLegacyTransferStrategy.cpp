@@ -20,8 +20,6 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
 
   // maps descriptions to runs. Multiple runs are joined with '+'
   std::map<std::string, std::string> runsByDesc;
-  // Counter used to feed fresh group ids
-  int nextGroupId = 0;
   // maps a description to a group. If descriptions only differ by theta,
   // they'll share a group
   std::map<std::string, std::string> groupsByDesc;
@@ -61,7 +59,7 @@ TransferResults ReflLegacyTransferStrategy::transferRuns(
     // If there isn't a group for this description (ignoring differences in
     // theta) yet, make one
     if (groupsByDesc[cleanDesc].empty())
-      groupsByDesc[cleanDesc] = boost::lexical_cast<std::string>(nextGroupId++);
+      groupsByDesc[cleanDesc] = desc.substr(0, desc.find("th") - 1);
 
     // Assign this description to the group it belongs to
     groupsByDesc[desc] = groupsByDesc[cleanDesc];

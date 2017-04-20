@@ -1,9 +1,7 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"

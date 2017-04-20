@@ -5,6 +5,7 @@ import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData as BaseSampleData
 
+
 class SampleData(BaseSampleData):
 
     calculation_method = BaseSampleData.DirectBeam()

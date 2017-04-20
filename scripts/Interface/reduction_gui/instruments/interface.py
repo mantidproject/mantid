@@ -6,8 +6,8 @@ from PyQt4 import QtGui
 import sys
 import os
 import traceback
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
+
 
 class InstrumentInterface(object):
     """
@@ -147,7 +147,7 @@ class InstrumentInterface(object):
             if "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True):
                 config = ConfigService.Instance()
                 if config.hasProperty("cluster.submission") \
-                and config.getString("cluster.submission").lower()=='on':
+                        and config.getString("cluster.submission").lower()=='on':
                     return True
 
             return False
@@ -206,7 +206,7 @@ class InstrumentInterface(object):
                 # Otherwise take the 'normal' path
                 self.scripter.apply()
             self.set_running(False)
-        except RuntimeError, e:
+        except RuntimeError:
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
@@ -236,7 +236,7 @@ class InstrumentInterface(object):
         f = open(log_path, 'w')
         reduction = self.scripter.to_xml()
         f.write("<Report>\n")
-        f.write(reduction)
+        f.write(str(reduction))
         f.write("<ErrorReport>")
         f.write(trace)
         f.write("</ErrorReport>")
@@ -299,4 +299,3 @@ class InstrumentInterface(object):
         """
         self.scripter.reset()
         self.scripter.push_state()
-

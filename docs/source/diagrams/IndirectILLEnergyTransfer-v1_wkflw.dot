@@ -1,0 +1,47 @@
+digraph IndirectILLEnergyTransfer {
+  label="IndirectILLEnergyTransfer Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+    CropDeadMonitorChannels
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	MapFile
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	LoadILLIndirect
+  	MergeRuns
+  	GroupDetectors
+  	NormaliseToMonitor
+  	ConvertAxisByFormula
+  	ConvertSpectrumAxis
+  	CropWorkspace
+  	MaskBins
+  	GroupWorkspaces
+  }
+
+  Run -> LoadILLIndirect
+  LoadILLIndirect -> MergeRuns
+  MapFile -> GroupDetectors
+  MergeRuns -> GroupDetectors
+  GroupDetectors -> NormaliseToMonitor
+  NormaliseToMonitor -> CropDeadMonitorChannels
+  CropDeadMonitorChannels -> CropWorkspace [label="yes"]
+  CropDeadMonitorChannels -> MaskBins [label="no"]
+  CropWorkspace -> ConvertAxisByFormula
+  MaskBins -> ConvertAxisByFormula
+  ConvertAxisByFormula -> ConvertSpectrumAxis
+  ConvertSpectrumAxis -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}

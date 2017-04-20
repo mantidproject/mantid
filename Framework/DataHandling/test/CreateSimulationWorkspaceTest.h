@@ -4,9 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::DataHandling::CreateSimulationWorkspace;
 
@@ -155,7 +157,7 @@ private:
   runAlgorithm(const std::string &inst, const std::string &unitx = "",
                const std::string &maptable = "") {
     using namespace Mantid::API;
-    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(m_wsName);
+    IAlgorithm_sptr alg = createAlgorithm(m_wsName);
 
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Instrument", inst));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("BinParams", "-30,3,279"));
@@ -225,4 +227,33 @@ private:
   std::string m_wsName;
 };
 
+class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+
+    // Starting bin, bin width, last bin
+    const std::string binParams("-30,3,279");
+
+    alg.initialize();
+
+    alg.setPropertyValue("Instrument", "HET");
+    alg.setPropertyValue("BinParams", "-30,3,279");
+    alg.setPropertyValue("OutputWorkspace", outWsName);
+
+    alg.setRethrows(true);
+  }
+
+  void testCreateSimulationWorkspacePerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove(outWsName);
+  }
+
+private:
+  CreateSimulationWorkspace alg;
+
+  const std::string outWsName = "outTestWs";
+};
 #endif /* MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_ */

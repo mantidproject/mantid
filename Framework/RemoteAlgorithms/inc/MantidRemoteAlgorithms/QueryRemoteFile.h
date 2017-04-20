@@ -2,12 +2,17 @@
 #define QUERYREMOTEFILE_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class DLLExport QueryRemoteFile : public Mantid::API::Algorithm {
+class DLLExport QueryRemoteFile : public Mantid::API::Algorithm,
+                                  public API::DeprecatedAlgorithm {
 public:
+  /// Constructor
+  QueryRemoteFile() { this->useAlgorithm("QueryRemoteFile", 2); }
+
   /// Algorithm's name
   const std::string name() const override { return "QueryRemoteFile"; }
   /// Summary of algorithms purpose

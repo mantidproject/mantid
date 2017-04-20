@@ -18,26 +18,26 @@ class AddSampleLogTest : public CxxTest::TestSuite {
 public:
   void test_Workspace2D() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
   void test_EventWorkspace() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
   }
 
   void test_CanOverwrite() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0);
     ExecuteAlgorithm(ws, "My Name", "String", "My New Value", 0.0);
   }
 
   void test_Number() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "Number", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name", "Number", "2.456", 2.456);
 
@@ -47,19 +47,19 @@ public:
 
   void test_BadNumber() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "Number", "OneTwoThreeFour", 0.0, true);
   }
 
   void test_BadNumberSeries() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "FiveSixSeven", 0.0, true);
   }
 
   void test_NumberSeries() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
                                         DateAndTime("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234);
@@ -73,7 +73,7 @@ public:
 
   void test_Units() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
                                         DateAndTime("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false,
@@ -86,7 +86,7 @@ public:
 
   void test_number_type() {
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),
                                         DateAndTime("2013-12-18T13:42:00"));
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false,

@@ -13,7 +13,7 @@
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -27,8 +27,6 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::DataHandling::LoadEventPreNexus;
-
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:
@@ -55,9 +53,9 @@ private:
   /// matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS.
   WorkspaceGroup_sptr create_good_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a1");
     // b->setName("b1");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -74,9 +72,9 @@ private:
   /// matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS AT ZERO.
   WorkspaceGroup_sptr create_good_zerod_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a2");
     // b->setName("b2");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -99,9 +97,9 @@ private:
   /// 5
   WorkspaceGroup_sptr create_corrupted_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a4");
     // b->setName("b4");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -124,9 +122,9 @@ private:
   /// matrixworkspaces.
   WorkspaceGroup_sptr create_good_multiperiod_workspace_group() {
     MatrixWorkspace_sptr a =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     MatrixWorkspace_sptr b =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     // a->setName("a3");
     // b->setName("b3");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -234,7 +232,7 @@ private:
     MergeRuns alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspaces", input->name() + "," + input->name()));
+        "InputWorkspaces", input->getName() + "," + input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr wsOut = Mantid::API::AnalysisDataService::Instance()
@@ -263,17 +261,17 @@ public:
 
   MergeRunsTest() {
     AnalysisDataService::Instance().add(
-        "in1", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in1", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in2", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in2", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in3", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 1));
+        "in3", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 1));
     AnalysisDataService::Instance().add(
-        "in4", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 5, 20));
+        "in4", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 20));
     AnalysisDataService::Instance().add(
-        "in5", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 5, 3.5, 2));
+        "in5", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 5, 3.5, 2));
     AnalysisDataService::Instance().add(
-        "in6", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 3, 2, 2));
+        "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2, 2));
   }
 
   void checkOutput(std::string wsname) {
@@ -334,48 +332,48 @@ public:
 
   void EventSetup() {
     ev1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10, 100, 0.0, 1.0, 3);
+        WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 3);
     AnalysisDataService::Instance().addOrReplace(
         "ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(ev1)); // 100 ev
     AnalysisDataService::Instance().addOrReplace(
         "ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2))); // 200 ev
     AnalysisDataService::Instance().addOrReplace(
         "ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        3, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
                                                         // spectra are at
                                                         // different pixel ids
     // Make one with weird units
     MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceCreationHelper::CreateEventWorkspace(3, 10, 100, 0.0, 1.0, 2,
+        WorkspaceCreationHelper::createEventWorkspace(3, 10, 100, 0.0, 1.0, 2,
                                                       100));
     ev4->setYUnit("Microfurlongs per Megafortnights");
     AnalysisDataService::Instance().addOrReplace("ev4_weird_units", ev4);
     AnalysisDataService::Instance().addOrReplace(
         "ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(
-                   WorkspaceCreationHelper::CreateEventWorkspace(
+                   WorkspaceCreationHelper::createEventWorkspace(
                        5, 10, 100, 0.0, 1.0, 2, 100))); // 200 events per
                                                         // spectrum, but the
                                                         // spectra are at
                                                         // different pixel ids
-    ev6 = WorkspaceCreationHelper::CreateEventWorkspace(6, 10, 100, 0.0, 1.0,
+    ev6 = WorkspaceCreationHelper::createEventWorkspace(6, 10, 100, 0.0, 1.0,
                                                         3); // ids 0-5
     AnalysisDataService::Instance().addOrReplace(
         "ev6", boost::dynamic_pointer_cast<MatrixWorkspace>(ev6));
     // a 2d workspace with the value 2 in each bin
     AnalysisDataService::Instance().addOrReplace(
         "in2D",
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
+        WorkspaceCreationHelper::create2DWorkspaceBinned(3, 10, 0.0, 1.0));
 
     std::vector<std::vector<int>> groups;
 
     groups.clear();
     groups.push_back(makeVector(3, 0, 1, 2));
     groups.push_back(makeVector(3, 3, 4, 5));
-    evg1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    evg1 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg1", boost::dynamic_pointer_cast<MatrixWorkspace>(evg1));
 
@@ -391,7 +389,7 @@ public:
     groups.push_back(makeVector(2, 3, 4));
     groups.push_back(makeVector(3, 0, 1, 2));
     groups.push_back(makeVector(1, 15));
-    evg2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100);
+    evg2 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg2", boost::dynamic_pointer_cast<MatrixWorkspace>(evg2));
   }
@@ -736,7 +734,7 @@ public:
     TS_ASSERT_THROWS(merge2.execute(), std::runtime_error);
     TS_ASSERT(!merge2.isExecuted());
     MatrixWorkspace_sptr badIn =
-        WorkspaceCreationHelper::Create2DWorkspace123(3, 10, 1);
+        WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
     badIn->mutableX(0) = 2.0;
     AnalysisDataService::Instance().add("badIn", badIn);
     TS_ASSERT_THROWS_ANYTHING(
@@ -834,7 +832,7 @@ public:
     MergeRuns alg;
     alg.setRethrows(true);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", a->name() + "," + b->name());
+    alg.setPropertyValue("InputWorkspaces", a->getName() + "," + b->getName());
     alg.setPropertyValue("OutputWorkspace", "out");
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
   }
@@ -882,7 +880,7 @@ public:
     MergeRuns alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspaces", input->name() + "," + input->name()));
+        "InputWorkspaces", input->getName() + "," + input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outer"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     WorkspaceGroup_sptr wsgroup =
@@ -960,7 +958,7 @@ public:
                                             const bool noOutput = false) {
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspaces", input->name()));
+        alg.setPropertyValue("InputWorkspaces", input->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -981,17 +979,18 @@ public:
     TS_ASSERT_EQUALS(output->y(0).front(), 2.0 * filesMerged);
 
     if (mergeType.compare(SampleLogsBehaviour::TIME_SERIES_MERGE) == 0) {
-      prop = output->mutableRun().getTimeSeriesProperty<double>(
-          propertyName + SampleLogsBehaviour::TIME_SERIES_SUFFIX);
-      TS_ASSERT_EQUALS(prop->value(), result);
-    } else if (mergeType.compare(SampleLogsBehaviour::LIST_MERGE) == 0) {
-      prop = output->mutableRun().getLogData(propertyName +
-                                             SampleLogsBehaviour::LIST_SUFFIX);
+      prop = output->mutableRun().getTimeSeriesProperty<double>(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     } else {
       prop = output->mutableRun().getLogData(propertyName);
       TS_ASSERT_EQUALS(prop->value(), result);
     }
+
+    // We add and remove the property from the addee workspace to supress a
+    // warning. Check it is back here.
+    const auto &addeeWS =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    TS_ASSERT_THROWS_NOTHING(addeeWS->run().getProperty("prop1"));
 
     sample_logs_teardown();
   }
@@ -1004,6 +1003,13 @@ public:
     AnalysisDataService::Instance().remove("outWS");
     AnalysisDataService::Instance().remove("outWS1");
     AnalysisDataService::Instance().remove("outWS2");
+  }
+
+  void test_mergeSampleLogs_sum() {
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 1.2, 2.3, 0.0, 0.0);
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "3.5", 2);
   }
 
   void test_mergeSampleLogs_time_series() {
@@ -1125,7 +1131,7 @@ public:
   }
 
   void
-  test_mergeSampleLogs_log_used_twice_with_different_merge_types_succeeds() {
+  test_mergeSampleLogs_log_used_twice_with_incompatible_merge_types_fails() {
     std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
     std::string mergeTypeList = SampleLogsBehaviour::LIST_MERGE;
     WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
@@ -1138,15 +1144,32 @@ public:
     // Error is caught by Algorithm, but check no output workspace created
     do_test_mergeSampleLogs(
         gws, "prop1", mergeTypeTimeSeries,
-        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2, false);
+        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2, true);
+  }
+
+  void
+  test_mergeSampleLogs_log_used_twice_with_compatible_merge_types_suceeds() {
+    std::string mergeTypeTimeSeries = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeTypeWarn = SampleLogsBehaviour::WARN_MERGE;
+    WorkspaceGroup_sptr gws = create_group_workspace_with_sample_logs<double>(
+        mergeTypeTimeSeries, "prop1", 1.0, 2.0, 0.0, 0.0);
+    MatrixWorkspace_sptr a =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    a->instrumentParameters().addString(a->getInstrument()->getComponentID(),
+                                        mergeTypeWarn, "prop1");
+
+    // Error is caught by Algorithm, but check no output workspace created
+    do_test_mergeSampleLogs(
+        gws, "prop1", mergeTypeTimeSeries,
+        "2013-Jun-25 10:59:15  1\n2013-Jun-25 11:59:15  2\n", 2);
   }
 
   void test_mergeSampleLogs_non_numeric_property_fails_to_merge() {
-    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+    std::string mergeType = SampleLogsBehaviour::SUM_MERGE;
     do_test_mergeSampleLogs(
         create_group_workspace_with_sample_logs<std::string>(
             mergeType, "prop1", "1", "two", "", ""),
-        "prop1", mergeType, "2013-Jun-25 10:59:15  1\n", 1);
+        "prop1", mergeType, "1", 1);
   }
 
   void
@@ -1154,10 +1177,10 @@ public:
     std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
     auto ws = create_group_workspace_with_sample_logs<std::string>(
         mergeType, "prop1", "one", "two", "", "");
-    // should get stuck when looking for "prop1_time_series"
+    // should get stuck when trying to get "prop1" as a time series
     TS_ASSERT_THROWS(do_test_mergeSampleLogs(ws, "prop1", mergeType,
                                              "2013-Jun-25 10:59:15  1\n", 2),
-                     Mantid::Kernel::Exception::NotFoundError);
+                     std::invalid_argument);
   }
 
   void test_mergeSampleLogs_with_additional_time_series_property() {
@@ -1230,6 +1253,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1", mergeType, "1", 2);
   }
 
+  void test_mergeSampleLogs_sum_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
   void test_mergeSampleLogs_time_series_and_error_skips_merging_second_file() {
     auto ws = create_group_workspace_with_sample_logs<double>(
         SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0,
@@ -1242,6 +1277,18 @@ public:
     do_test_mergeSampleLogs_modified_alg(alg, ws, "prop1",
                                          SampleLogsBehaviour::TIME_SERIES_MERGE,
                                          "2013-Jun-25 10:59:15  1\n", 1);
+  }
+
+  void test_mergeSampleLogs_list_and_error_skips_merging_second_file() {
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::LIST_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0, "0.5");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::LIST_MERGE, "1", 1);
   }
 
   void test_merging_three_workspace_with_time_series() {
@@ -1267,7 +1314,7 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -1302,7 +1349,7 @@ public:
 
     MergeRuns alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspaces", ws->name());
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
@@ -1311,7 +1358,7 @@ public:
 
     MergeRuns alg2;
     alg2.initialize();
-    alg2.setPropertyValue("InputWorkspaces", ws2->name());
+    alg2.setPropertyValue("InputWorkspaces", ws2->getName());
     alg2.setPropertyValue("OutputWorkspace", "outWS2");
     TS_ASSERT_THROWS_NOTHING(alg2.execute());
 
@@ -1338,6 +1385,88 @@ public:
   void test_merging_two_workspace_then_two_already_merged_with_list() {
     do_test_merging_two_workspaces_both_already_merged(
         SampleLogsBehaviour::LIST_MERGE, "1, 2, 6, 7");
+  }
+
+  void test_merging_single_workspace() {
+    std::string mergeType = SampleLogsBehaviour::TIME_SERIES_MERGE;
+
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    ws->remove("b1");
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "2013-Jun-25 10:59:15  1\n",
+                            1);
+  }
+
+  void test_mergeSampleLogs_fail_throwing_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::TIME_SERIES_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("SampleLogsFail", "prop2");
+    alg.setPropertyValue("SampleLogsFailTolerances", "0.5");
+    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop2", SampleLogsBehaviour::FAIL_MERGE, "3", 1, true);
+  }
+
+  void rebin_one_workspace() {
+    Rebin rebinAlg;
+    rebinAlg.initialize();
+    rebinAlg.setPropertyValue("InputWorkspace", "b1");
+    rebinAlg.setPropertyValue("OutputWorkspace", "b1");
+    rebinAlg.setPropertyValue("Params", "0.1");
+    rebinAlg.execute();
+  }
+
+  void test_mergeSampleLogs_with_different_binning_skips_merging() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1);
+  }
+
+  void
+  test_mergeSampleLogs_with_different_binning_skips_merging_and_throws_error() {
+    WorkspaceGroup_sptr ws = create_group_workspace_with_sample_logs<double>(
+        SampleLogsBehaviour::SUM_MERGE, "prop1", 1.0, 2.0, 3.0, 4.0);
+
+    rebin_one_workspace();
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("RebinBehaviour", MergeRunsOptions::FAIL_BEHAVIOUR);
+    alg.setPropertyValue("FailBehaviour", MergeRunsOptions::STOP_BEHAVIOUR);
+    do_test_mergeSampleLogs_modified_alg(
+        alg, ws, "prop1", SampleLogsBehaviour::SUM_MERGE, "1", 1, true);
+  }
+
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1", 0.0, 0.0, 0.0, 0.0, "-1.0");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 2, true);
+  }
+
+  void test_mergeSampleLogs_fail_with_single_negative_tolerance_in_a_list() {
+    std::string mergeType = SampleLogsBehaviour::FAIL_MERGE;
+    auto ws = create_group_workspace_with_sample_logs<double>(
+        mergeType, "prop1, prop2", 0.0, 0.0, 0.0, 0.0, "-0.5, 1.5");
+    do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1, true);
   }
 
 private:

@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,6 +10,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -168,7 +167,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
                                          std::string &bkgdfunctype) {
   // Function parameters
   std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
-  if (paramwsname.size() > 0) {
+  if (!paramwsname.empty()) {
     // Using parameter table workspace has a higher priority
     m_useFuncParamWS = true;
     m_funcParamWS = getProperty("PeakParametersWorkspace");
@@ -761,31 +760,24 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     else
       xvalue += fabs(dx) * xvalue;
   }
-  size_t numxvalue = xarray.size();
 
-  BinEdges xArrayEdges(xarray);
-
-  // Create new workspace
-  MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
-  for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
-    ws->setBinEdges(ip, xArrayEdges);
-  }
-  // Set spectrum numbers
-  std::map<specnum_t, specnum_t>::iterator spiter;
-  for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();
-       ++spiter) {
-    specnum_t specid = spiter->first;
-    specnum_t wsindex = spiter->second;
-    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
-                  << specid << "\n";
-    ws->getSpectrum(wsindex).setSpectrumNo(specid);
+  std::vector<Indexing::SpectrumNumber> specNums;
+  for (const auto &item : m_SpectrumMap) {
+    specnum_t specid = item.first;
+    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
+                  << " , " << specid << "\n";
+    specNums.push_back(specid);
   }
 
-  return ws;
+  Indexing::IndexInfo indices(specNums.size());
+  indices.setSpectrumNumbers(std::move(specNums));
+  // There is no instrument, so the automatic build of a 1:1 mapping would fail.
+  // Need to set empty grouping manually.
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(specNums.size()));
+  return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Add function's parameter names after peak function name
   */
 std::vector<std::string>

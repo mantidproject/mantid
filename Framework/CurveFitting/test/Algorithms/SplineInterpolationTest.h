@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::CurveFitting::Algorithms::SplineInterpolation;
 using namespace Mantid::API;
@@ -36,10 +37,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, false);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 0.1, false);
 
     SplineInterpolation alg;
@@ -52,10 +53,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
@@ -68,10 +69,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     SplineInterpolation alg;
@@ -84,10 +85,10 @@ public:
 
     // create binned workspaces
     MatrixWorkspace_sptr mws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1,
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(SplineFunc(), 1,
                                                                0, 20, 1, true);
     MatrixWorkspace_sptr iws =
-        WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
             SplineFunc(), spectra, 0, 20, 1, true);
 
     // Add an axis
@@ -129,10 +130,10 @@ public:
           TS_ASSERT_EQUALS((*derivVAxis)(i), i + 1);
       }
 
-      const auto &xs = ows->readX(i);
-      const auto &ys = ows->readY(i);
-      const auto &d1 = derivsWs->readY(0);
-      const auto &d2 = derivsWs->readY(1);
+      const auto &xs = ows->x(i);
+      const auto &ys = ows->y(i);
+      const auto &d1 = derivsWs->y(0);
+      const auto &d2 = derivsWs->y(1);
 
       // check output for consistency
       for (size_t j = 0; j < ys.size(); ++j) {
@@ -162,4 +163,58 @@ public:
   }
 };
 
+class SplineInterpolationTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+
+    constexpr int order(2), spectra(1);
+    constexpr int xStartVal(0), xEndVal(100);
+    constexpr int xStepVal(1);
+
+    MatrixWorkspace_sptr matWs =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+            SplineFunc(), spectra, xStartVal, xEndVal, xStepVal, false);
+
+    MatrixWorkspace_sptr inWs =
+        WorkspaceCreationHelper::create2DWorkspaceFromFunction(
+            SplineFunc(), spectra, xStartVal, xEndVal, (xStepVal * 0.1), false);
+
+    inputWs = inWs;
+    matrixWs = matWs;
+
+    splineInterpAlg.initialize();
+    splineInterpAlg.setPropertyValue("OutputWorkspace", outputWsName);
+    splineInterpAlg.setPropertyValue("OutputWorkspaceDeriv", outDerivWsName);
+
+    splineInterpAlg.setProperty("DerivOrder", order);
+
+    splineInterpAlg.setProperty("WorkspaceToInterpolate", inputWs);
+    splineInterpAlg.setProperty("WorkspaceToMatch", matrixWs);
+
+    splineInterpAlg.setRethrows(true);
+  }
+
+  void testSplineInterpolationPerformance() {
+    TS_ASSERT_THROWS_NOTHING(splineInterpAlg.execute());
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove(outputWsName);
+    AnalysisDataService::Instance().remove(outDerivWsName);
+  }
+
+private:
+  SplineInterpolation splineInterpAlg;
+
+  MatrixWorkspace_sptr inputWs;
+  MatrixWorkspace_sptr matrixWs;
+
+  const std::string outputWsName = "outputWs";
+  const std::string outDerivWsName = "outputDerivativeWs";
+
+  // Functor to generate spline values
+  struct SplineFunc {
+    double operator()(double x, int) { return x * 2; }
+  };
+};
 #endif /* MANTID_CURVEFITTING_SPLINEINTERPOLATIONTEST_H_ */

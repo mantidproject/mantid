@@ -1,4 +1,5 @@
-﻿#!/usr/bin/python
+#!/usr/bin/python
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import platform
@@ -8,6 +9,7 @@ import copy
 from datetime import date
 import time
 from xml.dom import minidom
+from six import iteritems
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS', 'LET', 'MERLIN', 'MARI', 'HET']
@@ -47,17 +49,16 @@ class UserProperties(object):
             self._user_id = str(args[0])
             self.set_user_properties(args[1], args[2], args[3], args[4])
         else:
-            raise RuntimeError("User has to be defined by the list of 5 components in the form:\n{0}". \
+            raise RuntimeError("User has to be defined by the list of 5 components in the form:\n{0}".
                                format("[userId,instr_name,rb_num,cycle_mu,start_date]"))
 
     def __str__(self):
         """Convert class to string. Only last cycle settings are returned"""
         if self._user_id:
-            return "{0} {1} {2} {3} {4}".format(self._user_id, self.instrument, \
+            return "{0} {1} {2} {3} {4}".format(self._user_id, self.instrument,
                                                 self.rb_folder, self.cycleID, str(self.start_date))
         else:
             return "None"
-
 
             #
 
@@ -80,14 +81,13 @@ class UserProperties(object):
         self._start_dates[recent_date_id] = recent_date
         self._rb_exist[recent_date_id] = rb_exist
 
-
         # a data which define the cycle ID e.g 2014_3 or something
         self._cycle_IDs[recent_date_id] = (str(cycle[5:9]), str(cycle[9:10]))
         self._instrument[recent_date_id] = str(instrument).upper()
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
             max_date = self._start_dates[self._recent_dateID]
-            for date_key, a_date in self._start_dates.iteritems():
+            for date_key, a_date in iteritems(self._start_dates):
                 if a_date > max_date:
                     self._recent_dateID = date_key
                     max_date = a_date
@@ -103,9 +103,10 @@ class UserProperties(object):
         for prop in USER_PROPERTIES:
             try:
                 ind = str_parts.index(prop)
+            # pylint: disable=W0703
             except Exception:
                 ind = None
-            if not ind is None:
+            if ind is not None:
                 str_parts[ind] = str(getattr(self, prop))
         data_string = "".join(str_parts)
         return data_string
@@ -154,7 +155,6 @@ class UserProperties(object):
         else:
             pass
 
-
     def get_rb_num(self,exp_date):
         """Returns short name of user's RB folder
            consisting of string RB and string representation of
@@ -163,8 +163,9 @@ class UserProperties(object):
         """
         return os.path.basename(self._rb_dirs[exp_date])
     #
+
     def get_rb_dir(self,exp_date):
-        """Returns full name name of user's RB folder correspinding to the
+        """Returns full name name of user's RB folder corresponding to the
            experiment, with the data provided.
         """
         return self._rb_dirs[exp_date]
@@ -195,10 +196,10 @@ class UserProperties(object):
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
             #
+
     def get_instrument(self,cycle_date_id):
         """Return the instrument, used in the cycle with the date specified"""
         return self._instrument[cycle_date_id]
-
 
     #
     @property
@@ -237,26 +238,33 @@ class UserProperties(object):
     def userID(self, val):
         self._user_id = str(val)
 
-    #
+    # number of branches as necessary
+    # pylint: disable=R0912
     def check_input(self, instrument, start_date, cycle, rb_folder_or_id):
         """Verify that input is correct"""
-        if not instrument in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of " \
+        if instrument not in INELASTIC_INSTRUMENTS:
+            raise RuntimeError("Instrument {0} has to be one of "
                                "ISIS inelastic instruments".format(instrument))
         if isinstance(start_date, str):
-            start_date = start_date.replace('-', '')
-            if len(start_date) != 8:
-                start_date = '20' + start_date
-            if len(start_date) == 8:
+            # the date of express -- let's make it long in the past
+            if start_date.lower() == 'none':
+                start_date = '19800101'
                 error = False
             else:
-                error = True
+                start_date = start_date.replace('-', '')
+                if len(start_date) != 8:
+                    start_date = '20' + start_date
+                if len(start_date) == 8:
+                    error = False
+                else:
+                    error = True
         else:
             error = True
         if error:
-            raise RuntimeError("Experiment start date should be defined as" \
+            raise RuntimeError("Experiment start date should be defined as"
                                " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
         #
+
         def convert_cycle_int(cycle_int):
             if cycle_int > 999:  # Full cycle format 20151
                 cycle = "CYCLE{0:05}".format(cycle_int)
@@ -272,13 +280,13 @@ class UserProperties(object):
                 try:
                     cycle = int(cycle)
                 except ValueError:
-                    raise RuntimeError("Cycle should be a string in the form CYCLEYYYYN " \
-                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN " \
+                    raise RuntimeError("Cycle should be a string in the form CYCLEYYYYN "
+                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
                                        "but it is {0}".format(cycle))
                 cycle = convert_cycle_int(cycle)
                 if not (len(cycle) == 10 and re.match('^CYCLE', cycle)):
-                    raise RuntimeError("Cycle should be a string in form CYCLEYYYYN " \
-                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN " \
+                    raise RuntimeError("Cycle should be a string in form CYCLEYYYYN "
+                                       "N-- the cycle's number in a year or integer in the form: YYYYN or YYN "
                                        "but it is {0}".format(cycle))
         if isinstance(rb_folder_or_id, int):
             rb_folder_or_id = "RB{0:07}".format(rb_folder_or_id)
@@ -304,14 +312,22 @@ class UserProperties(object):
 
     def get_all_instruments(self):
         """ Return list of all instruments, user is working on during this cycle"""
-        return self._instrument.values()
+        return list(self._instrument.values())
+
     def get_all_cycles(self):
         """Return list of all cycles the user participates in"""
-        return self._instrument.keys()
+        return list(self._instrument.keys())
+
+    def get_all_rb(self):
+        """Return list of all rb folders the user participates in"""
+        return list(self._rb_dirs.values())
+
 
 #
 # --------------------------------------------------------------------#
 #
+
+
 class MantidConfigDirectInelastic(object):
     """Class describes Mantid server specific user's configuration,
         necessary for Direct Inelastic reduction and analysis to work
@@ -337,8 +353,9 @@ class MantidConfigDirectInelastic(object):
     """
     # pylint: disable=too-many-instance-attributes
     # It has as many as parameters describing ISIS configuration.
-    def __init__(self, mantid='/opt/Mantid/', home_dir='/home/', \
-                 script_repo='/opt/UserScripts/', \
+
+    def __init__(self, mantid='/opt/Mantid/', home_dir='/home/',
+                 script_repo='/opt/UserScripts/',
                  map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
         """Initialize generic config variables and variables specific to a server"""
 
@@ -373,7 +390,6 @@ class MantidConfigDirectInelastic(object):
         # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
         # it will not work without lambda as intended
         self._target_reduction_file = lambda InstrName, cycleID: '{0}Reduction_{1}.py'.format(InstrName, cycleID)
-
 
         # Static contents of the Mantid Config file
         self._header = ("# This file can be used to override any properties for this installation.\n"
@@ -450,6 +466,7 @@ class MantidConfigDirectInelastic(object):
             return False
             #
     #
+
     def get_user_file_description(self,instr_name=None):
         """returbs full file name (with path) for an xml file which describes
            files, which should be copied to a user.
@@ -509,16 +526,18 @@ class MantidConfigDirectInelastic(object):
         return full_source, full_target
 
     #
-    def copy_reduction_sample(self, user_file_description=None,cycle_id=None):
+    def copy_reduction_sample(self, user_file_description=None,cycle_id=None,rb_group=None):
         """copy sample reduction scripts from Mantid script repository
            to user folder.
         """
         if user_file_description is None:
             user_file_description = self.get_user_file_description()
+        if rb_group is None:
+            rb_group = self._user.userID
 
         info_to_copy = self._parse_user_files_description(user_file_description,cycle_id)
         for source_file,dest_file,subst_list in info_to_copy:
-            self._copy_user_file_job(source_file,dest_file,subst_list)
+            self._copy_user_file_job(source_file,dest_file,rb_group,subst_list)
 
     def _copy_and_parse_user_file(self, input_file, output_file, replacemets_list):
         """Method processes file provided for user and replaces list of keywords, describing user
@@ -527,7 +546,7 @@ class MantidConfigDirectInelastic(object):
         fh_targ = open(output_file, 'w')
         if not fh_targ:
             return
-        var_to_replace = replacemets_list.keys()
+        var_to_replace = list(replacemets_list.keys())
         with open(input_file) as fh_source:
             for line in fh_source:
                 rez = line
@@ -538,7 +557,7 @@ class MantidConfigDirectInelastic(object):
         fh_targ.close()
 
     #
-    def _copy_user_file_job(self, input_file, output_file, replacement_list=None):
+    def _copy_user_file_job(self, input_file, output_file, rb_group,replacement_list=None):
         """Method copies file provided into the requested destination
            and replaces keys specified in replacement list dictionary with their
            values if replacement_list is provided.
@@ -555,10 +574,11 @@ class MantidConfigDirectInelastic(object):
             shutil.copyfile(input_file, output_file)
         else:
             self._copy_and_parse_user_file(input_file, output_file, replacement_list)
-        os.chmod(output_file, 0777)
+        os.chmod(output_file, 0o777)
 
+        ownership_str = "chown {0}:{1} {2}".format(self._user.userID,rb_group, output_file)
         if platform.system() != 'Windows':
-            os.system("chown {0}:{1} {2}".format(self._user.userID, self._user.rb_id, output_file))
+            os.system(ownership_str)
         # Set up the file creation and modification dates to the users start date
         start_date = self._user.start_date
         file_time = time.mktime(start_date.timetuple())
@@ -596,14 +616,14 @@ class MantidConfigDirectInelastic(object):
         source = repl_info.getAttribute("var")
         if len(source) == 0:
             raise InvalidArgument(
-                '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value' \
-                    .format(self._user_files_descr, self._user.instrument))
+                '"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'
+                .format(self._user_files_descr, self._user.instrument))
         # what should be placed instead of the replacement
         dest = repl_info.getAttribute("by_var")
         if len(dest) == 0:
             raise InvalidArgument(
-                '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value' \
-                    .format(self._user_files_descr, self._user.instrument))
+                '"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'
+                .format(self._user_files_descr, self._user.instrument))
 
         # replace use-specific variables by their values
         if '$' in dest:
@@ -623,6 +643,8 @@ class MantidConfigDirectInelastic(object):
         # user files description is not there
         try:
             domObj = minidom.parse(job_description_file)
+        # have no idea what minidom specific exception is:
+        # pylint: disable=W0703
         except Exception:
             input_file, output_file = self._fullpath_to_copy(None,None,cycle_id)
             filenames_to_copy.append((input_file, output_file, None))
@@ -659,7 +681,7 @@ class MantidConfigDirectInelastic(object):
         """
         # cycle folder have short form without leading numbers
         cycle_fold_n = int(cycle_ID[0]) - 2000
-        folder = os.path.join(self._root_data_folder, 'NDX' + instr.upper(), \
+        folder = os.path.join(self._root_data_folder, 'NDX' + instr.upper(),
                               "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n, str(cycle_ID[1])))
         return folder
 
@@ -702,9 +724,9 @@ class MantidConfigDirectInelastic(object):
         user_folder = os.path.join(self._home_path, self._fedid)
         if not os.path.exists(user_folder):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(self._fedid))
-        # pylint: disable=W0212
-        # bad practice but I need all rb_dires, not the current one
-        for rb_folder in theUser._rb_dirs.values():
+        # get RB folders for all experiments user participates in.
+        all_rbf = theUser.get_all_rb()
+        for rb_folder in all_rbf:
             if not os.path.exists(str(rb_folder)):
                 raise RuntimeError(
                     "Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
@@ -712,7 +734,7 @@ class MantidConfigDirectInelastic(object):
         # how to check cycle folders, they may not be available
         self._cycle_data_folder = set()
         # pylint: disable=W0212
-        for date_key, folder_id in theUser._cycle_IDs.items():
+        for date_key, folder_id in list(theUser._cycle_IDs.items()):
             self._cycle_data_folder.add(self.get_data_folder_name(theUser._instrument[date_key], folder_id))
         # Initialize configuration settings
         self._dynamic_configuration = copy.deepcopy(self._dynamic_options_base)
@@ -793,7 +815,7 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("Can not define Data search path without user being defined")
 
         instr_name = self._user.instrument
-        map_mask_dir = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder), \
+        map_mask_dir = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),
                                                     '{0}'.format(str.lower(instr_name))))
         # set up all data folders
         all_data_folders = list(self._cycle_data_folder)
@@ -801,24 +823,21 @@ class MantidConfigDirectInelastic(object):
         for folder in all_data_folders[1:]:
             data_dir += ';' + os.path.abspath('{0}'.format(folder))
 
-        # pylint: disable=W0212
-        all_rb_folders = self._user._rb_dirs
-        for folder in all_rb_folders.values():
+        all_rb_folders = self._user.get_all_rb()
+        for folder in all_rb_folders:
             data_dir += ';' + os.path.abspath('{0}'.format(folder))
 
         self._dynamic_configuration.append('datasearch.directories=' + map_mask_dir + ';' + data_dir)
 
     #
-    def generate_config(self):
+    def generate_config(self,key_users_list=None):
         """Save generated Mantid configuration file into user's home folder
            and copy other files, necessary for Mantid to work properly
         """
         user_path = os.path.join(self._home_path, self._fedid)
         config_path = os.path.join(user_path, '.mantid')
         if not os.path.exists(config_path):
-            err = os.makedirs(config_path)
-            if err:
-                raise RuntimeError('can not find or create Mantid configuration path {0}'.format(config_path))
+            os.makedirs(config_path)
 
         config_file = os.path.join(config_path, 'Mantid.user.properties')
         if self.config_need_replacing(config_file):
@@ -830,12 +849,19 @@ class MantidConfigDirectInelastic(object):
         self.make_map_mask_links(user_path)
 
         users_cycles = self._user.get_all_cycles()
+        users_rb     = self._user.get_all_rb()
+        # extract rb folder without path, which gives RB group name
+        users_rb     = list(map(os.path.basename,users_rb))
         #
-        for cycle in users_cycles:
-            instr = self._user.get_instrument(cycle)
-            self.copy_reduction_sample(self.get_user_file_description(instr),cycle)
-        #
+        for cycle,rb_name in zip(users_cycles,users_rb):
+            if key_users_list:
+                key_user = str(key_users_list[rb_name])
+                if self._fedid.lower() != key_user.lower():
+                    continue
 
+            instr = self._user.get_instrument(cycle)
+            self.copy_reduction_sample(self.get_user_file_description(instr),cycle,rb_name)
+        #
 
     #
     def make_map_mask_links(self, user_path):
@@ -890,7 +916,7 @@ class MantidConfigDirectInelastic(object):
 if __name__ == "__main__":
 
     if len(sys.argv) != 6:
-        print "usage: Config.py userID instrument RBNumber cycleID start_date"
+        print("usage: Config.py userID instrument RBNumber cycleID start_date")
         exit()
 
     argi = sys.argv[1:]
@@ -911,7 +937,6 @@ if __name__ == "__main__":
         sys.path.insert(0, '/opt/Mantid/scripts/Inelastic/Direct/')
         # sys.path.insert(0,'/opt/mantidnightly/scripts/Inelastic/Direct/')
 
-
         MantidDir = '/opt/Mantid'
         MapMaskDir = '/usr/local/mprogs/InstrumentFiles/'
         UserScriptRepoDir = '/opt/UserScripts'
@@ -921,20 +946,21 @@ if __name__ == "__main__":
         analysisDir = "/instrument/"
 
     # initialize Mantid configuration
-
-    from ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
+    # its testing route under main so it rightly imports itself
+    #pylint: disable=W0406
+    from .ISISDirecInelasticConfig import MantidConfigDirectInelastic, UserProperties
 
     mcf = MantidConfigDirectInelastic(MantidDir, rootDir, UserScriptRepoDir, MapMaskDir)
-    print "Successfully initialized ISIS Inelastic Configuration script generator"
+    print("Successfully initialized ISIS Inelastic Configuration script generator")
 
     rb_user_folder = os.path.join(mcf._home_path, user.userID)
     user.rb_dir = rb_user_folder
     if not user.rb_dir_exist:
-        print "RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,\
-                                                                                                        user.userID)
+        print("RB folder {0} for user {1} should exist and be accessible to configure this user".format(user.rb_dir,
+                                                                                                        user.userID))
         exit()
     # Configure user
     mcf.init_user(user.userID, user)
     mcf.generate_config()
-    print "Successfully Configured user: {0} for instrument {1} and RBNum: {2}" \
-        .format(user.userID, user.instrument, user.rb_folder)
+    print("Successfully Configured user: {0} for instrument {1} and RBNum: {2}"
+          .format(user.userID, user.instrument, user.rb_folder))

@@ -1,12 +1,10 @@
-//----------------------------------
-// Includes
-//----------------------------------
 #include "MantidSampleMaterialDialog.h"
 
 #include "MantidUI.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Material.h"
 
 #include <QTreeWidgetItem>

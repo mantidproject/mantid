@@ -90,7 +90,7 @@ public:
   }
 
   void test_pass_inputworkspace_as_pointer() {
-    Workspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(2, 5);
+    Workspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(2, 5);
 
     SaveNexus alg;
     alg.initialize();

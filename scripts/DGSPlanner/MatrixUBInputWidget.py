@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-name-in-module,too-many-public-methods
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
@@ -11,6 +12,7 @@ except ImportError:
 
 class UBTableModel(QtCore.QAbstractTableModel):
     changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)
+
     def __init__(self, lattice,  parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.__lattice = lattice
@@ -67,6 +69,7 @@ class UBTableModel(QtCore.QAbstractTableModel):
         self.__UB=self.__lattice.getUB().copy()
         self.endResetModel()
 
+
 class MatrixUBInputWidget(QtGui.QWidget):
     # pylint: disable=too-few-public-methods
     def __init__(self,ol,parent=None):
@@ -114,4 +117,3 @@ if __name__ == '__main__':
     mainForm=MatrixUBInputWidget(inputol)
     mainForm.show()
     sys.exit(app.exec_())
-

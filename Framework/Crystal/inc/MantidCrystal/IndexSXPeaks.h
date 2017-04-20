@@ -1,14 +1,13 @@
 #ifndef MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 #define MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <boost/tuple/tuple.hpp>
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
+
+#include <iterator>
 #include <set>
 
 namespace Mantid {

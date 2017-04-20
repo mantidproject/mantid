@@ -419,17 +419,22 @@ public:
   }
 
   void test_toString_vector_of_ints() {
-    std::vector<int> sortedInts;
-    sortedInts.push_back(1);
-    sortedInts.push_back(2);
-    sortedInts.push_back(3);
-    sortedInts.push_back(5);
-    sortedInts.push_back(6);
-    sortedInts.push_back(8);
-
+    std::vector<int> sortedInts{1, 2, 3, 5, 6, 8};
     auto result = toString(sortedInts);
-
     TS_ASSERT_EQUALS(std::string("1-3,5-6,8"), result);
+  }
+
+  void test_getLine() {
+    std::istringstream text("blah blah\nfoo bar#comment\n");
+    std::string line = getLine(text);
+    TSM_ASSERT_EQUALS("Strings::getLine failed to read the first line.", line,
+                      "blah blah");
+    getLine(text, line);
+    TSM_ASSERT_EQUALS("Strings::getLine failed to remove comment.", line,
+                      "foo bar");
+    getLine(text, line);
+    TSM_ASSERT_EQUALS("Strings::getLine didn't return empty string after eof.",
+                      line, "");
   }
 };
 

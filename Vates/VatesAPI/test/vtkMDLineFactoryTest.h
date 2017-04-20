@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/make_unique.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
@@ -24,8 +24,7 @@ using namespace testing;
 class vtkMDLineFactoryTest : public CxxTest::TestSuite {
 public:
   void testGetFactoryTypeName() {
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
@@ -36,8 +35,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
@@ -60,8 +58,7 @@ public:
         .WillOnce(Return(vtkSmartPointer<vtkStructuredGrid>::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     auto ws = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
@@ -73,10 +70,7 @@ public:
   }
 
   void testOnInitaliseCannotDelegateToSuccessor() {
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
-    // factory.SetSuccessor(mockSuccessor); No Successor set.
-
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     ITableWorkspace_sptr ws =
         boost::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), std::runtime_error);
@@ -85,8 +79,7 @@ public:
   void testCreateWithoutInitializeThrows() {
     FakeProgressAction progressUpdate;
 
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     // initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
@@ -115,8 +108,7 @@ public:
     Workspace_sptr binned =
         Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product = factory.create(mockProgressAction);
@@ -162,8 +154,7 @@ public:
     Workspace_sptr binned =
         Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(boost::make_shared<NoThresholdRange>(),
-                             Mantid::VATES::VolumeNormalization);
+    vtkMDLineFactory factory(Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     auto product = factory.create(progressAction);

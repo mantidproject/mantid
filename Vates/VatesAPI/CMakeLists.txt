@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 3.5 )
 
 project( VatesAPI )
 
-set( SRC_FILES 
+set( SRC_FILES
 src/ADSWorkspaceProvider.cpp
 src/BoxInfo.cpp
 src/Common.cpp
@@ -11,7 +11,6 @@ src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
-src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
@@ -21,22 +20,20 @@ src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
 src/MDLoadingViewSimple.cpp
-src/MedianAndBelowThresholdRange.cpp
 src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
 src/MDLoadingPresenter.cpp
 src/Normalization.cpp
-src/NoThresholdRange.cpp
 src/ProgressAction.cpp
+src/PresenterFactories.cpp
 src/PresenterUtilities.cpp
 src/SaveMDWorkspaceToVTK.cpp
 src/SaveMDWorkspaceToVTKImpl.cpp
 src/SingleWorkspaceProvider.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
-src/UserDefinedThresholdRange.cpp
 src/VatesXMLDefinitions.cpp
 src/VatesConfigurations.cpp
 src/ViewFrustum.cpp
@@ -65,7 +62,7 @@ src/vtkSinglePeakMarker.cpp
 src/SQWLoadingPresenter.cpp
 )
 
-set( INC_FILES 
+set( INC_FILES
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
@@ -89,14 +86,11 @@ inc/MantidVatesAPI/MDLoadingPresenter.h
 inc/MantidVatesAPI/MDLoadingView.h
 inc/MantidVatesAPI/MDLoadingViewSimple.h
 inc/MantidVatesAPI/MDLoadingViewAdapter.h
-inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
 inc/MantidVatesAPI/MetadataJsonManager.h
 inc/MantidVatesAPI/Normalization.h
-inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
-inc/MantidVatesAPI/NoThresholdRange.h
 inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/PresenterFactories.h
@@ -105,10 +99,8 @@ inc/MantidVatesAPI/SaveMDWorkspaceToVTK.h
 inc/MantidVatesAPI/SaveMDWorkspaceToVTKImpl.h
 inc/MantidVatesAPI/SingleWorkspaceProvider.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
-inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
-inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/VatesXMLDefinitions.h
 inc/MantidVatesAPI/VatesConfigurations.h
 inc/MantidVatesAPI/VatesKnowledgeSerializer.h
@@ -135,7 +127,6 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
-inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
 set( TEST_FILES
@@ -180,10 +171,6 @@ test/SingleWorkspaceProviderTest.h
 test/SQWLoadingPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
-test/UserDefinedThresholdRangeTest.h
-test/MedianAndBelowThresholdRangeTest.h
-test/NoThresholdRangeTest.h
-test/IgnoreZerosThresholdRangeTest.h
 test/VatesKnowledgeSerializerTest.h
 test/ViewFrustumTest.h
 test/vtkDataSetToScaledDataSetTest.h
@@ -218,8 +205,8 @@ set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 
-target_link_libraries( VatesAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-${MANTID_SUBPROJECT_LIBS} 
+target_link_libraries( VatesAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
@@ -255,22 +242,21 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # Create test file projects
-if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
-  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                        ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
-                        ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
-  cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-  ${MANTID_SUBPROJECT_LIBS} 
-  VatesAPI 
-  DataHandling 
-  Kernel 
-  DataObjects 
+include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
+set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+                      ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+                      ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
+cxxtest_add_test( VatesAPITest ${TEST_FILES} )
+target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${MANTID_SUBPROJECT_LIBS}
+  VatesAPI
+  DataHandling
+  Kernel
+  DataObjects
   vtkCommonCore
   vtkCommonDataModel
   vtkIOLegacy
@@ -280,13 +266,13 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   ${vtkjsoncpp_LIBRARIES}
   ${POCO_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES} 
+  ${GMOCK_LIBRARIES}
+  ${GTEST_LIBRARIES}
   ${QWT_LIBRARIES}
   Qt4::QtCore
-  ${GTEST_LIBRARIES} )
-  add_dependencies( AllTests VatesAPITest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
-endif()
+  )
+add_dependencies( AllTests VatesAPITest )
+# Add to the 'UnitTests' group in VS
+set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )
 
 install( TARGETS VatesAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )

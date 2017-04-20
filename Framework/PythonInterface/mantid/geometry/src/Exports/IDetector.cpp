@@ -15,11 +15,6 @@ void export_IDetector() {
   class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector",
                                                               no_init)
       .def("getID", &IDetector::getID, arg("self"), "Returns the detector ID")
-      .def("isMasked", &IDetector::isMasked, arg("self"),
-           "Returns the value of the masked flag. True means ignore this "
-           "detector")
-      .def("isMonitor", &IDetector::isMonitor, arg("self"),
-           "Returns True if the detector is marked as a monitor in the IDF")
       .def("solidAngle", &IDetector::solidAngle, (arg("self"), arg("observer")),
            "Return the solid angle in steradians between this "
            "detector and an observer")

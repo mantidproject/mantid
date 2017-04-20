@@ -28,13 +28,11 @@
 vtkStandardNewMacro(vtkPeaksReader)
 
 using namespace Mantid::VATES;
-using Mantid::Geometry::IMDDimension_sptr;
-using Mantid::Geometry::IMDDimension_sptr;
 using Mantid::API::Workspace_sptr;
 using Mantid::API::AnalysisDataService;
 
 vtkPeaksReader::vtkPeaksReader()
-    : FileName{NULL}, m_isSetup{false}, m_uintPeakMarkerSize{0.3},
+    : FileName{nullptr}, m_isSetup{false}, m_uintPeakMarkerSize{0.3},
       m_dimensions{1} {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -182,11 +180,7 @@ int vtkPeaksReader::CanReadFile(const char* fname)
   }
 }
 
-unsigned long vtkPeaksReader::GetMTime()
-{
-  unsigned long mTime = this->Superclass::GetMTime();
-  return mTime;
-}
+vtkMTimeType vtkPeaksReader::GetMTime() { return this->Superclass::GetMTime(); }
 
 /**
   Update/Set the progress.

@@ -1,5 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -316,9 +316,20 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName + "_Workspaces", true))
-    plotSpectrum((QString::fromStdString(m_pythonExportWsName) + "_Workspaces"),
-                 0, 2);
+  auto wsName = QString::fromStdString(m_pythonExportWsName) + "_Workspaces";
+  if (checkADSForPlotSaveWorkspace(wsName.toStdString(), true)) {
+    // Get the workspace
+    auto groupWs =
+        AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
+            wsName.toStdString());
+    auto groupWsNames = groupWs->getNames();
+    if (groupWsNames.size() != 1) {
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
+    }
+
+    else
+      plotSpectrum(wsName, 0, 2);
+  }
 }
 
 } // namespace IDA

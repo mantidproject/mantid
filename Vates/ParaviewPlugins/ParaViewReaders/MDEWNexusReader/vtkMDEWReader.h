@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -44,7 +45,7 @@ protected:
                   vtkInformationVector *);
   int Canreadfile(const char *fname);
   /// Handle time variation.
-  unsigned long GetMTime();
+  vtkMTimeType GetMTime() override;
 
 private:
   vtkMDEWNexusReader(const vtkMDEWNexusReader &);

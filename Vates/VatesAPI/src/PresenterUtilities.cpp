@@ -2,7 +2,6 @@
 #include "MantidVatesAPI/FactoryChains.h"
 
 #include "MantidVatesAPI/MDLoadingPresenter.h"
-#include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
@@ -33,7 +32,7 @@ namespace VATES {
  * @returns a clipped object
  */
 vtkSmartPointer<vtkPVClipDataSet>
-getClippedDataSet(vtkSmartPointer<vtkDataSet> dataSet) {
+getClippedDataSet(const vtkSmartPointer<vtkDataSet> &dataSet) {
   auto box = vtkSmartPointer<vtkBox>::New();
   box->SetBounds(dataSet->GetBounds());
   auto clipper = vtkSmartPointer<vtkPVClipDataSet>::New();
@@ -56,7 +55,8 @@ void applyCOBMatrixSettingsToVtkDataSet(
     Mantid::VATES::MDLoadingPresenter *presenter, vtkDataSet *dataSet,
     std::unique_ptr<Mantid::VATES::WorkspaceProvider> workspaceProvider) {
   try {
-    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider));
+    presenter->makeNonOrthogonal(dataSet, std::move(workspaceProvider),
+                                 nullptr);
   } catch (std::invalid_argument &e) {
     std::string error = e.what();
     g_log_presenter_utilities.warning()
@@ -76,21 +76,18 @@ void applyCOBMatrixSettingsToVtkDataSet(
 
 /**
  * Creates a factory chain for MDEvent workspaces
- * @param threshold: the threshold range
  * @param normalization: the normalization option
  * @param time: the time slice time
  * @returns a factory chain
  */
 std::unique_ptr<vtkMDHexFactory>
-createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
-                                    VisualNormalization normalization,
+createFactoryChainForEventWorkspace(VisualNormalization normalization,
                                     double time) {
-  auto factory =
-      Mantid::Kernel::make_unique<vtkMDHexFactory>(threshold, normalization);
-  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDQuadFactory>(
-                            threshold, normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMDLineFactory>(
-          threshold, normalization))
+  auto factory = Mantid::Kernel::make_unique<vtkMDHexFactory>(normalization);
+  factory->setSuccessor(
+               Mantid::Kernel::make_unique<vtkMDQuadFactory>(normalization))
+      .setSuccessor(
+           Mantid::Kernel::make_unique<vtkMDLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   factory->setTime(time);
   return factory;
@@ -98,24 +95,22 @@ createFactoryChainForEventWorkspace(ThresholdRange_scptr threshold,
 
 /**
 * Creates a factory chain for MDHisto workspaces
-* @param threshold: the threshold range
 * @param normalization: the normalization option
 * @param time: the time slice time
 * @returns a factory chain
 */
 std::unique_ptr<vtkMDHistoHex4DFactory<TimeToTimeStep>>
-createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
-                                    VisualNormalization normalization,
+createFactoryChainForHistoWorkspace(VisualNormalization normalization,
                                     double time) {
   auto factory =
       Mantid::Kernel::make_unique<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-          threshold, normalization, time);
-  factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-                            threshold, normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-          threshold, normalization))
-      .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-          threshold, normalization))
+          normalization, time);
+  factory->setSuccessor(
+               Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(normalization))
+      .setSuccessor(
+           Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(normalization))
+      .setSuccessor(
+           Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(normalization))
       .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
   return factory;
 }
@@ -125,7 +120,7 @@ createFactoryChainForHistoWorkspace(ThresholdRange_scptr threshold,
 * @param name: the input name
 * @return a name with a time stamp
 */
-std::string createTimeStampedName(std::string name) {
+std::string createTimeStampedName(const std::string &name) {
   auto currentTime =
       std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::string timeInReadableFormat = std::string(std::ctime(&currentTime));

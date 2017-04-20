@@ -7,6 +7,7 @@ from mantid.kernel import *
 from mantid import config
 import os
 
+DEPRECATION_NOTICE = "BASISReduction311 is deprecated (on 2017-03-11). Use BASISReduction instead."
 DEFAULT_BINS = [-740, 1.6, 740]
 DEFAULT_QBINS = [0.4, 0.2, 3.8]
 DEFAULT_WRANGE = [6.24, 6.30]
@@ -15,6 +16,7 @@ DEFAULT_MASK_FILE = "BASIS_Mask_OneQuarterRemains_SouthBottom.xml"
 DEFAULT_CONFIG_DIR = config["instrumentDefinition.directory"]
 
 DEFAULT_ENERGY = 7.6368
+
 
 class BASISReduction311(PythonAlgorithm):
 
@@ -47,7 +49,7 @@ class BASISReduction311(PythonAlgorithm):
         return "BASISReduction311"
 
     def summary(self):
-        return "Multiple-file BASIS reduction for the 311 reflection."
+        return DEPRECATION_NOTICE
 
     def PyInit(self):
         self._short_inst = "BSS"
@@ -64,21 +66,22 @@ class BASISReduction311(PythonAlgorithm):
                                                 arrVal, direction=Direction.Input),
                              "Wavelength range for normalization. default:(6.24A, 6.30A)")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS,
-                                                direction=Direction.Input),\
-                                                "Energy transfer binning scheme (in ueV)")
+                                                direction=Direction.Input),
+                             "Energy transfer binning scheme (in ueV)")
         self.declareProperty(FloatArrayProperty("MomentumTransferBins",
                                                 DEFAULT_QBINS,
-                                                direction=Direction.Input),\
-                                                "Momentum transfer binning scheme")
-        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",\
-                                            action=FileAction.OptionalLoad, extensions=['.xml']),\
-                                            "Directory location for standard masking and grouping files.")
+                                                direction=Direction.Input),
+                             "Momentum transfer binning scheme")
+        self.declareProperty(FileProperty(name="MaskFile", defaultValue="",
+                                          action=FileAction.OptionalLoad, extensions=['.xml']),
+                             "Directory location for standard masking and grouping files.")
         grouping_type = ["None", "Low-Resolution", "By-Tube"]
         self.declareProperty("GroupDetectors", "None",
                              StringListValidator(grouping_type),
                              "Switch for grouping detectors")
 
     def PyExec(self):
+        self.log().error(DEPRECATION_NOTICE)
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
         self._doIndiv = self.getProperty("DoIndividual").value
@@ -254,8 +257,8 @@ class BASISReduction311(PythonAlgorithm):
                          Target='Wavelength', EMode='Indirect')
 
         if not self._noMonNorm:
-            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,\
-                               OutputWorkspace=mon_ws)
+            api.ModeratorTzeroLinear(InputWorkspace=mon_ws,
+                                     OutputWorkspace=mon_ws)
             api.Rebin(InputWorkspace=mon_ws,
                       OutputWorkspace=mon_ws, Params='10')
             api.ConvertUnits(InputWorkspace=mon_ws,

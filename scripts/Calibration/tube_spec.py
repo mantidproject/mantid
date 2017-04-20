@@ -1,12 +1,11 @@
 #pylint: disable=invalid-name
-from mantid.simpleapi import *
-from mantid.kernel import *
 
 # This class is to take a specification of a set of tubes for an instrument provided by a user
 # and then provide a list of workspace index ranges corresponding to each of the specified tubes
 # to be used the the tube calibration code
 
 # Author: Karl Palmen ISIS
+
 
 class TubeSpec:
     """
@@ -36,6 +35,7 @@ class TubeSpec:
         This may differ from the order they appear in the workspace indices.
 
     """
+
     def __init__(self,ws):
         """
         The constructor creates empty tube specification for specified instrument.
@@ -49,7 +49,6 @@ class TubeSpec:
         self.minNumDetsInTube = 200
         self.tubes = []
         self.delimiter = '/' # delimiter between parts of string in tree
-
 
     def setTubeSpecByString(self, tubeSpecString ):
         """
@@ -75,7 +74,6 @@ class TubeSpec:
         self.componentNameArray.append(tubeSpecString)
         self.numTubes = -1  # Negative value forces tubes to be searched and counted
 
-
     def setTubeSpecByStringArray( self, tubeSpecArray ):
         """
         Define the sets of tube from the workspace with an array of strings.
@@ -93,7 +91,6 @@ class TubeSpec:
         """
         for i in range(len(tubeSpecArray)):
             self.setTubeSpecByString(tubeSpecArray[i])
-
 
     def getInstrumentName (self):
         return self.inst.getName()
@@ -129,7 +126,6 @@ class TubeSpec:
                 for i in range(comp.nelements()):
                     self.searchForTubes(comp[i])
 
-
     def getNumTubes(self):
         """
         Returns number of tubes specified. May also save info about these tubes
@@ -150,7 +146,6 @@ class TubeSpec:
         self.numTubes = len(self.tubes)
         return self.numTubes
 
-
     def getComponent ( self ):
         """
         Returns instrument component corresponding to specification
@@ -169,7 +164,6 @@ class TubeSpec:
             self.componentArray.append(comp)
 
         return self.componentArray[0]
-
 
     def getComponents ( self ):
         """
@@ -267,7 +261,6 @@ class TubeSpec:
         comp = self.tubes[tubeIx]
 
         if comp != 0:
-            firstDet = comp[0].getID()
             numDet = comp.nelements()
             return comp[0].getDistance( comp[numDet-1] )
         else:
@@ -300,8 +293,6 @@ class TubeSpec:
         else:
             print self.componentNameArray[0], tubeIx, "not found"
             return "Unknown"
-
-
 
     def getTubeByString(self, tubeIx):
         """
@@ -354,7 +345,6 @@ class TubeSpec:
             self.numTubes = 0
         return wkIds, skipped
 
-
     def getTube(self, tubeIx):
         """
         Returns list of workspace indices of a tube
@@ -368,6 +358,3 @@ class TubeSpec:
             return self.getTubeByString(tubeIx)
         else:
             print "Tube", tubeIx, "out of range 0 to",self.numTubes,"."
-
-
-

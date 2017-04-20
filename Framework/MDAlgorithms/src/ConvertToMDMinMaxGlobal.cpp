@@ -2,6 +2,9 @@
 
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -12,7 +15,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
-#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -25,7 +27,6 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxGlobal)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxGlobal::name() const {
   return "ConvertToMDMinMaxGlobal";
@@ -39,14 +40,10 @@ const std::string ConvertToMDMinMaxGlobal::category() const {
   return "MDAlgorithms\\Creation";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ConvertToMDMinMaxGlobal::init() {
   auto ws_valid = boost::make_shared<CompositeValidator>();
-  //
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("");
@@ -153,14 +150,13 @@ void ConvertToMDMinMaxGlobal::exec() {
       wstemp = conv->getProperty("OutputWorkspace");
       evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
-      if (evWS) {
+      if (evWS)
         qmax = evWS->getTofMax() *
                2; // assumes maximum scattering angle 180 degrees
-      } else {
+      else
         qmax = wstemp->getXMax() *
                2.; // assumes maximum scattering angle 180 degrees
-      }
-    } else // inelastic
+    } else         // inelastic
     {
       conv->setProperty("Target", "DeltaE");
       conv->setProperty("Emode", GeometryMode);
@@ -194,24 +190,18 @@ void ConvertToMDMinMaxGlobal::exec() {
       } else // indirect
       {
         double Ef = -DBL_MAX, Eftemp = Ef;
-        const Geometry::ParameterMap &pmap = ws->constInstrumentParameters();
+        const auto &pmap = ws->constInstrumentParameters();
+        const auto &specInfo = ws->spectrumInfo();
         for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-          Geometry::IDetector_const_sptr spDet;
-          try {
-            spDet = ws->getDetector(i);
-            Geometry::Parameter_sptr par =
-                pmap.getRecursive(spDet.get(), "eFixed");
-            if (par)
-              Eftemp = par->value<double>();
-            if (Eftemp > Ef)
-              Ef = Eftemp;
-          } catch (...) {
+          if (!specInfo.hasDetectors(i))
             continue;
-          }
-          if (Ef <= 0) {
+          const auto &det = specInfo.detector(i);
+          const auto &par = pmap.getRecursive(det.getComponentID(), "eFixed");
+          Eftemp = (par) ? par->value<double>() : Eftemp;
+          Ef = (Eftemp > Ef) ? Eftemp : Ef;
+          if (Ef <= 0)
             throw std::runtime_error("Could not find a fixed final energy for "
                                      "indirect geometry instrument.");
-          }
         }
         qmax =
             std::sqrt(energyToK * Ef) + std::sqrt(energyToK * (Ef + deltaEmax));

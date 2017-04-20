@@ -178,8 +178,7 @@ void CompareMDWorkspaces::compareMDHistoWorkspaces(
 */
 template <typename MDE, size_t nd>
 void CompareMDWorkspaces::compareMDWorkspaces(
-    typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
+    typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(inWS2);
   if (!ws1 || !ws2)

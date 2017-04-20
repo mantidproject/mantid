@@ -39,7 +39,7 @@ If you want to check if a variable points to something that is a Workspace2D you
     histoWS = CreateSampleWorkspace()
 
     if histoWS.id() == "Workspace2D":
-        print histoWS.getName() + " is an " + histoWS.id()
+        print histoWS.name() + " is an " + histoWS.id()
 
 Output:
 

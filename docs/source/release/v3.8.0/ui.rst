@@ -13,9 +13,6 @@ Windows
 
 * IPython has been upgraded to version 3.2.1
 
-OS X
-####
-
 User Interface
 --------------
 
@@ -36,9 +33,7 @@ Plotting Improvements
 
   - When this option is used for a workspace group, each workspace will its own subplot, with all specified spectra in it.
   - When the option is used for a single workspace, each of the specified spectra will have its own subplot.
-
-Algorithm Toolbox
-#################
+* Using the Label Tool on a plot to add Sample Logs as labels now opens up a dialogue for the selected workspace with all the available Sample Logs listed and the ability to import the selected one onto the plot as a label.
 
 Algorithms
 ##########
@@ -53,15 +48,13 @@ Algorithms
 Scripting Window
 ################
 
- - All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
-
+- All `matplotlib` examples now work out of the box when run inside the MantidPlot scripting environment.
 
 Progress Reporting
 ##################
 
 - The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
-- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processin workspace groups or multi-period workspaces.
-
+- The progress reporting for algorithms has been improved, so that the progress is reported correctly when processing workspace groups or multi-period workspaces.
 
 Documentation
 #############
@@ -73,21 +66,20 @@ Options Window
 - Within Preferences->Mantid->Options ticking a category off/on will now untick/tick all subcategories. Also having some subcategories on and off will now show a partially ticked box for that category. 
 
 
-Bugs Resolved
--------------
-- Floating windows now always stay on top of the main window in OSX.
-- The sliceviewer will now rebin an existing binned workspace correctly.
-- 2D plots now display correctly for point data workspaces as well as for histogram data
-- Cuts aligned with an axis no longer generate an empty integrated line plot.
-
 SliceViewer Improvements
 ------------------------
 * When opening the SliceViewer, it will default to showing the first two non-integrated dimensions
 * The SliceViewer now uses bin centres instead of bin edges when slicing on a histogram workspace
+* The SliceViewer will now save the state of the window to a Mantid project file.
 
 VSI Improvements
 ----------------
-* ParaView updated to version 5.1.0
+* ParaView updated to version 5.1.2
+* VSI will now save the state of the window to a Mantid project file.
+
+SpectrumViewer Improvements
+---------------------------
+* The SpectrumViewer will now save the state of the window to a Mantid project file.
 
 Multi-dataset fitting interface improvements
 --------------------------------------------
@@ -99,7 +91,14 @@ Multi-dataset fitting interface improvements
 
 * "Set to log" and "Set all to log" options have been added to the parameter editing dialog. These enable a parameter to be set to a value from a sample log for one or all spectra.
 
-|
+Bugs Resolved
+-------------
+- Floating windows now always stay on top of the main window in OSX.
+- The sliceviewer will now rebin an existing binned workspace correctly.
+- 2D plots now display correctly for point data workspaces as well as for histogram data
+- Cuts aligned with an axis no longer generate an empty integrated line plot.
+
+
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.8%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_

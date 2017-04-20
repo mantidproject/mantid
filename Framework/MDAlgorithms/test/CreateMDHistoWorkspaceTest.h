@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 
 using namespace Mantid;

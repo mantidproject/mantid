@@ -1,4 +1,6 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidCrystal/TOFExtinction.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -7,7 +9,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -21,7 +23,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 // DECLARE_ALGORITHM(TOFExtinction)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void TOFExtinction::init() {
@@ -50,7 +51,6 @@ void TOFExtinction::init() {
                   "Wavelength dependence of beam divergence");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void TOFExtinction::exec() {
@@ -168,7 +168,7 @@ void TOFExtinction::exec() {
     double ys = fsq / y_corr;
     // std::cout << fsq << "  " << y_corr<<"  "<<wl<<"  "<<twoth<<"  "<<tbar<< "
     // " << ys <<"\n";
-    if (!boost::math::isnan(ys))
+    if (!std::isnan(ys))
       peak1.setIntensity(ys);
     else
       peak1.setIntensity(0.0);

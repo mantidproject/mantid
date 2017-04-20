@@ -2,6 +2,7 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 
@@ -11,7 +12,8 @@ Mantid::Kernel::Logger g_log("Stretch");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent) {
+Stretch::Stretch(QWidget *parent)
+    : IndirectBayesTab(parent), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   // Create range selector
@@ -57,10 +59,15 @@ Stretch::Stretch(QWidget *parent) : IndirectBayesTab(parent) {
           SLOT(handleSampleInputReady(const QString &)));
   connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot,
           SLOT(setEnabled(bool)));
+  // Connect preview spectrum spinner to handler
+  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(previewSpecChanged(int)));
 
   // Connect the plot and save push buttons
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
+  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
+          SLOT(plotCurrentPreview()));
 }
 
 void Stretch::setup() {}
@@ -176,7 +183,7 @@ void Stretch::algorithmComplete(const bool &error) {
 }
 
 /**
- * Handles the saving of workspaces post alogrithm completion
+ * Handles the saving of workspaces post algorithm completion
  * when save button is clicked
  */
 void Stretch::saveWorkspaces() {
@@ -263,6 +270,39 @@ void Stretch::handleSampleInputReady(const QString &filename) {
   // update the current positions of the range bars
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
+
+  // set the max spectrum
+  MatrixWorkspace_const_sptr sampleWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          filename.toStdString());
+  const int spectra = static_cast<int>(sampleWs->getNumberHistograms());
+  m_uiForm.spPreviewSpectrum->setMaximum(spectra);
+}
+
+/**
+* Sets a new preview spectrum for the mini plot.
+*
+* @param value workspace index
+*/
+void Stretch::previewSpecChanged(int value) {
+  m_previewSpec = value;
+
+  if (!m_uiForm.dsSample->isValid())
+    return;
+
+  m_uiForm.ppPlot->clear();
+
+  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+}
+
+/**
+* plots the current miniplot preview
+*/
+void Stretch::plotCurrentPreview() {
+  if (m_uiForm.ppPlot->hasCurve("Sample")) {
+    plotSpectrum(m_uiForm.dsSample->getCurrentDataName(), m_previewSpec);
+  }
 }
 
 /**

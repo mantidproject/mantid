@@ -15,6 +15,7 @@
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidGeometry/Crystal/ReflectionGenerator.h"
 
+#include <boost/bind.hpp>
 #include <stdexcept>
 
 using namespace Mantid::Poldi;

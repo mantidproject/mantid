@@ -11,6 +11,8 @@ from mantid.api import *
 from mantid.kernel import *
 
 ###############################################################################
+
+
 class PlusMDTest(stresstesting.MantidStressTest):
 
     _saved_filename = None
@@ -128,6 +130,8 @@ class PlusMDTest(stresstesting.MantidStressTest):
                 Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % self._saved_filename)
 
 ###############################################################################
+
+
 class MergeMDTest(stresstesting.MantidStressTest):
 
     _saved_filenames = []
@@ -187,4 +191,3 @@ class MergeMDTest(stresstesting.MantidStressTest):
                 Logger.get("MDWorkspaceTests").notice("Removed %s" % filename)
             except OSError:
                 Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % filename)
-

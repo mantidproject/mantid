@@ -1,9 +1,9 @@
-﻿#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 import unittest
-
 
 
 """
@@ -29,6 +29,7 @@ from files.
 
 """
 
+
 class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
     The following tests is to ensure that the reload obeys the following requirement:
@@ -36,6 +37,7 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
      * If reload is False, it will be used, if it pass the following tests:
        * The instrument components have not been moved
     """
+
     def setUp(self):
         self.load_run = '54431.raw'
         config["default.instrument"] = "LOQ"
@@ -65,7 +67,6 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         Reduce()
         self.assertTrue(self.control_name in mtd)
 
-
     def test_accept_loaded_workspace_but_reload_the_data_file_if_reload_true(self):
         my_workspace = Load(self.load_run)
         #set the value for my_workspace to ensure it is the one used
@@ -88,7 +89,6 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         ## attempt to use a workspace that has been moved
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
-
     def test_should_not_accept_loaded_workspace_if_moved_2(self):
         # assign sample loads and move the workspace to the defined center
         AssignSample(self.load_run)
@@ -100,6 +100,7 @@ class LOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         ## trying to assing it again to AssingSample must fail
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
+
 class SANS2DReductionShouldAcceptLoadedWorkspace(LOQReductionShouldAcceptLoadedWorkspace):
     def setUp(self):
         self.load_run = '2500.nxs'
@@ -109,14 +110,17 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(LOQReductionShouldAcceptLoadedW
         self.control_name = '2500front_1D_4.6_12.85'
         self.inst_comp = 'rear-detector'
 
+
 class SANS2DReductionShouldAcceptLoadedWorkspaceRawFile(SANS2DReductionShouldAcceptLoadedWorkspace):
     def setUp(self):
         SANS2DReductionShouldAcceptLoadedWorkspace.setUp(self)
         self.load_run = '5547.raw'
         self.control_name = '5547front_1D_4.6_12.85'
 
+
 class LOQReductionShouldAcceptLoadedWorkspaceStressTest(stresstesting.MantidStressTest):
     cl = LOQReductionShouldAcceptLoadedWorkspace
+
     def runTest(self):
         self._success = False
     # Custom code to create and run this single test suite
@@ -131,8 +135,10 @@ class LOQReductionShouldAcceptLoadedWorkspaceStressTest(stresstesting.MantidStre
     def validate(self):
         return self._success
 
+
 class SANS2DReductionShouldAcceptLoadedWorkspaceStressTest(LOQReductionShouldAcceptLoadedWorkspaceStressTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspace
+
 
 class SANS2DReductionShouldAcceptLoadedWorkspaceStressTest2(LOQReductionShouldAcceptLoadedWorkspaceStressTest):
     cl = SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
@@ -169,10 +175,12 @@ class LOQTransFitWorkspace2DWithLoadedWorkspace(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
         return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
 
+
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.MantidStressTest):
     """ It will repeat the test done at LOQCentreNoGrav but using
     loaded workspaces
     """
+
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self.tolerance = 1e-6
@@ -205,11 +213,13 @@ class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(stresstesting.Mant
         self.disableChecking.append('Instrument')
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
+
 class LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(stresstesting.MantidStressTest):
     """Before ticket #8461 test LOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
     to produce a workspace that matches LOQCentreNoGrav.nxs. This test is created to ensure
     that if we put the same centre that was produced before, we finish in the same result
     for the reduction"""
+
     def runTest(self):
         config["default.instrument"] = "LOQ"
         LOQ()
@@ -263,7 +273,6 @@ class SANSLOQCan2DReloadWorkspace(stresstesting.MantidStressTest):
 
         WavRangeReduction(None, None, False)
 
-
     def validate(self):
     # Need to disable checking of the Spectra-Detector map because it isn't
     # fully saved out to the nexus file (it's limited to the spectra that
@@ -274,6 +283,7 @@ class SANSLOQCan2DReloadWorkspace(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
     # the change in number is because the run number reported from 99630 is 53615
         return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
+
 
 class SANS2DFrontNoGravReloadWorkspace(stresstesting.MantidStressTest):
 
@@ -294,6 +304,7 @@ class SANS2DFrontNoGravReloadWorkspace(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
+
 
 class SANS2DWaveloopsReloadWorkspace(stresstesting.MantidStressTest):
 

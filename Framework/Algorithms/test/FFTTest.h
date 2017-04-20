@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"

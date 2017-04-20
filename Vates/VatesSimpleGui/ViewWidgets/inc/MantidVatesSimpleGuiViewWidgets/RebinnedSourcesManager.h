@@ -61,7 +61,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS RebinnedSourcesManager
       MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  RebinnedSourcesManager(QWidget *parent = 0);
+  RebinnedSourcesManager(QWidget *parent = nullptr);
 
   ~RebinnedSourcesManager() override;
 
@@ -80,6 +80,11 @@ public:
   void registerRebinnedSource(pqPipelineSource *source);
 
   bool isRebinnedSourceBeingTracked(pqPipelineSource *source);
+
+  /// Save the state of the manager to a Mantid project file
+  std::string saveToProject();
+  /// Load the state of the manager from a Mantid project file
+  void loadFromProject(const std::string &lines);
 
 signals:
   void switchSources(std::string rebinnedWorkspaceName, std::string sourceType);
@@ -127,7 +132,7 @@ private:
   pqPipelineSource *m_rebinnedSource;
 
   std::vector<pqPipelineSource *>
-  findAllRebinnedSourcesForWorkspace(std::string workspaceName);
+  findAllRebinnedSourcesForWorkspace(const std::string &workspaceName);
 
   void swapSources(pqPipelineSource *source1, pqPipelineSource *source2);
 
@@ -137,9 +142,9 @@ private:
                              std::string &outputWorkspace,
                              pqPipelineSource *source,
                              std::string workspaceName,
-                             std::string algorithmType);
+                             const std::string &algorithmType);
 
-  void untrackWorkspaces(std::pair<std::string, std::string> key);
+  void untrackWorkspaces(const std::pair<std::string, std::string> &key);
 
   void copyProperties(pqPipelineFilter *filter1, pqPipelineFilter *filter2);
 

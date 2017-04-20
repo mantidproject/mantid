@@ -1,11 +1,9 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -15,9 +13,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #include <numeric>
 
@@ -31,8 +26,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
-using boost::function;
-using boost::bind;
 
 /// Default constructor
 ConvertUnits::ConvertUnits()
@@ -239,7 +232,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
 
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
-  if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS))
+  if (alignBins && !WorkspaceHelpers::commonBoundaries(*outputWS))
     outputWS = this->alignBins(outputWS);
 
   // If appropriate, put back the bin width division into Y/E.
@@ -289,7 +282,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
   if (!m_inputEvents && m_distribution) {
     // Loop over the histograms (detector spectra)
     Progress prog(this, 0.0, 0.2, m_numberOfSpectra);
-    PARALLEL_FOR1(outputWS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
     for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       // Take the bin width dependency out of the Y & E data
@@ -310,12 +303,19 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
 
   // Set the final unit that our output workspace will have
   outputWS->getAxis(0)->unit() = m_outputUnit;
+  storeEModeOnWorkspace(outputWS);
+
+  return outputWS;
+}
+
+/** Stores the emode in the provided workspace
+*  @param outputWS The workspace
+*/
+void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
   // Store the emode
   const bool overwrite(true);
   outputWS->mutableRun().addProperty("deltaE-mode", getPropertyValue("EMode"),
                                      overwrite);
-
-  return outputWS;
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b)
@@ -338,7 +338,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   CommonBinsValidator sameBins;
   bool commonBoundaries = false;
   if (sameBins.isValid(inputWS) == "") {
-    commonBoundaries = WorkspaceHelpers::commonBoundaries(inputWS);
+    commonBoundaries = WorkspaceHelpers::commonBoundaries(*inputWS);
     // Only do the full check if the quick one passes
     if (commonBoundaries) {
       // Calculate the new (common) X values
@@ -348,7 +348,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 
       auto xVals = outputWS->sharedX(0);
 
-      PARALLEL_FOR1(outputWS)
+      PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
       for (int64_t j = 1; j < numberOfSpectra_i; ++j) {
         PARALLEL_START_INTERUPT_REGION
         outputWS->setX(j, xVals);
@@ -368,7 +368,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   // If we get to here then the bins weren't aligned and each spectrum is
   // unique
   // Loop over the histograms (detector spectra)
-  PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
     PARALLEL_START_INTERUPT_REGION
     if (!commonBoundaries) {
@@ -392,66 +392,55 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
 }
 
 /** Get the L2, theta and efixed values for a workspace index
+* @param spectrumInfo :: SpectrumInfo of the workspace
 * @param outputUnit :: The output unit
-* @param source :: The source of the instrument
-* @param sample :: The sample of the instrument
-* @param l1 :: The source to sample distance
 * @param emode :: The energy mode
 * @param ws :: The workspace
-* @param thetaFunction :: The function to calculate twotheta
+* @param signedTheta :: Return twotheta with sign or without
 * @param wsIndex :: The workspace index
 * @param efixed :: the returned fixed energy
 * @param l2 :: The returned sample - detector distance
 * @param twoTheta :: the returned two theta angle
 * @returns true if lookup successful, false on error
 */
-bool ConvertUnits::getDetectorValues(
-    const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-    const Geometry::IComponent &sample, double l1, int emode,
-    const MatrixWorkspace &ws,
-    function<double(const Geometry::IDetector &)> thetaFunction,
-    int64_t wsIndex, double &efixed, double &l2, double &twoTheta) {
-  try {
-    Geometry::IDetector_const_sptr det = ws.getDetector(wsIndex);
-    // Get the sample-detector distance for this detector (in metres)
-    if (!det->isMonitor()) {
-      l2 = det->getDistance(sample);
-      // The scattering angle for this detector (in radians).
-      twoTheta = thetaFunction(*det);
-      // If an indirect instrument, try getting Efixed from the geometry
-      if (emode == 2) // indirect
-      {
-        if (efixed == EMPTY_DBL()) {
-          try {
-            // Get the parameter map
-            Geometry::Parameter_sptr par =
-                ws.constInstrumentParameters().getRecursive(det.get(),
-                                                            "Efixed");
-            if (par) {
-              efixed = par->value<double>();
-              g_log.debug() << "Detector: " << det->getID()
-                            << " EFixed: " << efixed << "\n";
-            }
-          } catch (std::runtime_error &) { /* Throws if a DetectorGroup, use
-                                                                       single
-                                              provided value */
-          }
+bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                                     const Kernel::Unit &outputUnit, int emode,
+                                     const MatrixWorkspace &ws,
+                                     const bool signedTheta, int64_t wsIndex,
+                                     double &efixed, double &l2,
+                                     double &twoTheta) {
+  if (!spectrumInfo.hasDetectors(wsIndex))
+    return false;
+
+  l2 = spectrumInfo.l2(wsIndex);
+
+  if (!spectrumInfo.isMonitor(wsIndex)) {
+    // The scattering angle for this detector (in radians).
+    if (signedTheta)
+      twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
+    else
+      twoTheta = spectrumInfo.twoTheta(wsIndex);
+    // If an indirect instrument, try getting Efixed from the geometry
+    if (emode == 2 && efixed == EMPTY_DBL()) // indirect
+    {
+      if (spectrumInfo.hasUniqueDetector(wsIndex)) {
+        const auto &det = spectrumInfo.detector(wsIndex);
+        auto par = ws.constInstrumentParameters().getRecursive(&det, "Efixed");
+        if (par) {
+          efixed = par->value<double>();
+          g_log.debug() << "Detector: " << det.getID() << " EFixed: " << efixed
+                        << "\n";
         }
       }
-    } else // If this is a monitor then make l1+l2 = source-detector distance
-    // and twoTheta=0
-    {
-      l2 = det->getDistance(source);
-      l2 = l2 - l1;
-      twoTheta = 0.0;
-      efixed = DBL_MIN;
-      // Energy transfer is meaningless for a monitor, so set l2 to 0.
-      if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
-        l2 = 0.0;
-      }
+      // Non-unique detector (i.e., DetectorGroup): use single provided value
     }
-  } catch (Exception::NotFoundError &) {
-    return false;
+  } else {
+    twoTheta = 0.0;
+    efixed = DBL_MIN;
+    // Energy transfer is meaningless for a monitor, so set l2 to 0.
+    if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
+      l2 = 0.0;
+    }
   }
   return true;
 }
@@ -476,23 +465,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   Kernel::Unit_const_sptr outputUnit = m_outputUnit;
 
-  // Get the distance between the source and the sample (assume in metres)
-  IComponent_const_sptr source = instrument->getSource();
-  IComponent_const_sptr sample = instrument->getSample();
-  if (source == nullptr || sample == nullptr) {
-    throw Exception::InstrumentDefinitionError("Instrument not sufficiently "
-                                               "defined: failed to get source "
-                                               "and/or sample");
-  }
-  double l1;
-  try {
-    l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << '\n';
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", inputWS->getTitle());
-  }
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  double l1 = spectrumInfo.l1();
+  g_log.debug() << "Source-sample distance: " << l1 << '\n';
 
   int failedDetectorCount = 0;
 
@@ -538,32 +513,28 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
   std::vector<std::string> parameters =
       inputWS->getInstrument()->getStringParameter("show-signed-theta");
-  bool bUseSignedVersion =
+  bool signedTheta =
       (!parameters.empty()) &&
       find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-  function<double(const IDetector &)> thetaFunction =
-      bUseSignedVersion
-          ? bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1)
-          : bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+
+  auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
+  auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
 
   // Perform Sanity Validation before creating workspace
   double checkefixed = efixedProp;
   double checkl2;
   double checktwoTheta;
   size_t checkIndex = 0;
-  if (getDetectorValues(*outputUnit, *source, *sample, l1, emode, *inputWS,
-                        thetaFunction, checkIndex, checkefixed, checkl2,
-                        checktwoTheta)) {
+  if (getDetectorValues(spectrumInfo, *outputUnit, emode, *inputWS, signedTheta,
+                        checkIndex, checkefixed, checkl2, checktwoTheta)) {
     const double checkdelta = 0.0;
     // copy the X values for the check
     auto checkXValues = inputWS->readX(checkIndex);
     // Convert the input unit to time-of-flight
-    auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-    auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    localFromUnit->toTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                          emode, checkefixed, checkdelta);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
+    localOutputUnit->fromTOF(checkXValues, emptyVec, l1, checkl2, checktwoTheta,
                              emode, checkefixed, checkdelta);
   }
 
@@ -573,6 +544,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
   assert(static_cast<bool>(eventWS) == m_inputEvents); // Sanity check
 
+  auto &outSpectrumInfo = outputWS->mutableSpectrumInfo();
   // Loop over the histograms (detector spectra)
   for (int64_t i = 0; i < numberOfSpectra_i; ++i) {
     double efixed = efixedProp;
@@ -580,13 +552,8 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
     // Now get the detector object for this histogram
     double l2;
     double twoTheta;
-    if (getDetectorValues(*outputUnit, *source, *sample, l1, emode, *outputWS,
-                          thetaFunction, i, efixed, l2, twoTheta)) {
-
-      // Make local copies of the units. This allows running the loop in
-      // parallel
-      auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
-      auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
+    if (getDetectorValues(outSpectrumInfo, *outputUnit, emode, *outputWS,
+                          signedTheta, i, efixed, l2, twoTheta)) {
 
       /// @todo Don't yet consider hold-off (delta)
       const double delta = 0.0;
@@ -610,7 +577,9 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
       // detectors, this call is
       // the same as just zeroing out the data (calling clearData on the
       // spectrum)
-      outputWS->maskWorkspaceIndex(i);
+      outputWS->getSpectrum(i).clearData();
+      if (outSpectrumInfo.hasDetectors(i))
+        outSpectrumInfo.setMasked(i, true);
     }
 
     prog.report("Convert to " + m_outputUnit->unitID());
@@ -653,29 +622,25 @@ ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
 }
 
 /// The Rebin parameters should cover the full range of the converted unit,
-/// with
-/// the same number of bins
+/// with the same number of bins
 const std::vector<double> ConvertUnits::calculateRebinParams(
     const API::MatrixWorkspace_const_sptr workspace) const {
+  const auto &spectrumInfo = workspace->spectrumInfo();
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
   const size_t numSpec = workspace->getNumberHistograms();
   for (size_t i = 0; i < numSpec; ++i) {
-    try {
-      Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-      if (!det->isMasked()) {
-        auto &XData = workspace->x(i);
-        double xfront = XData.front();
-        double xback = XData.back();
-        if (boost::math::isfinite(xfront) && boost::math::isfinite(xback)) {
-          if (xfront < XMin)
-            XMin = xfront;
-          if (xback > XMax)
-            XMax = xback;
-        }
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMasked(i)) {
+      auto &XData = workspace->x(i);
+      double xfront = XData.front();
+      double xback = XData.back();
+      if (std::isfinite(xfront) && std::isfinite(xback)) {
+        if (xfront < XMin)
+          XMin = xfront;
+        if (xback > XMax)
+          XMax = xback;
       }
-    } catch (Exception::NotFoundError &) {
-    } // Do nothing
+    }
   }
   const double step =
       (XMax - XMin) / static_cast<double>(workspace->blocksize());
@@ -690,10 +655,9 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   bool isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
-  if (WorkspaceHelpers::commonBoundaries(WS) && !isInputEvents) {
+  if (WorkspaceHelpers::commonBoundaries(*WS) && !isInputEvents) {
     auto reverseX = make_cow<HistogramData::HistogramX>(WS->x(0).crbegin(),
                                                         WS->x(0).crend());
-
     for (size_t j = 0; j < numberOfSpectra; ++j) {
       WS->setSharedX(j, reverseX);
       std::reverse(WS->dataY(j).begin(), WS->dataY(j).end());
@@ -704,7 +668,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
   } else {
     // either events or ragged boundaries
     int numberOfSpectra_i = static_cast<int>(numberOfSpectra);
-    PARALLEL_FOR1(WS)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*WS))
     for (int j = 0; j < numberOfSpectra_i; ++j) {
       PARALLEL_START_INTERUPT_REGION
       if (isInputEvents) {
@@ -740,6 +704,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     const Mantid::API::MatrixWorkspace_const_sptr workspace) {
   MatrixWorkspace_sptr result;
 
+  const auto &spectrumInfo = workspace->spectrumInfo();
   const size_t numSpec = workspace->getNumberHistograms();
   const std::string emode = getProperty("Emode");
   if (emode == "Direct") {
@@ -750,12 +715,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
     // (X0)
     size_t i = 0;
     for (; i < numSpec; ++i) {
-      try {
-        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-        if (!det->isMonitor())
-          break;
-      } catch (Exception::NotFoundError &) { /* Do nothing */
-      }
+      if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i))
+        break;
     }
     // Get an X spectrum to search (they're all the same, monitors excepted)
     auto &X0 = workspace->x(i);
@@ -807,18 +768,18 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
       auto edges = workspace->binEdges(j);
       auto k = lastBins[j];
 
-      result->mutableX(j).assign(edges.cbegin(), edges.cbegin() + k);
+      auto &X = result->mutableX(j);
+      std::copy(edges.cbegin(), edges.cbegin() + k, X.begin());
 
       // If the entire X range is not covered, generate fake values.
       if (k < maxBins) {
-        std::iota(result->mutableX(j).begin() + k, result->mutableX(j).end(),
-                  workspace->x(j)[k] + 1);
+        std::iota(X.begin() + k, X.end(), workspace->x(j)[k] + 1);
       }
 
-      result->mutableY(j)
-          .assign(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1));
-      result->mutableE(j)
-          .assign(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1));
+      std::copy(workspace->y(j).cbegin(), workspace->y(j).cbegin() + (k - 1),
+                result->mutableY(j).begin());
+      std::copy(workspace->e(j).cbegin(), workspace->e(j).cbegin() + (k - 1),
+                result->mutableE(j).begin());
     }
   }
 

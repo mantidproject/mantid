@@ -1,15 +1,16 @@
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
-#include <utility>
-#include <numeric>
-#include <algorithm>
-#include "boost/bind.hpp"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "boost/bind.hpp"
+#include <algorithm>
+#include <numeric>
+#include <utility>
 
-#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
@@ -84,7 +85,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::finalizeCalculation(
 
   outputWorkspace->getAxis(0)->setUnit("MomentumTransfer");
 
-  outputWorkspace->dataY(0) = correctedCorrelatedIntensities;
+  outputWorkspace->mutableY(0) = correctedCorrelatedIntensities;
 
   outputWorkspace->setPoints(0, qValues);
 
@@ -117,7 +118,7 @@ DataObjects::Workspace2D_sptr PoldiAutoCorrelationCore::calculate(
      *  - d-resolution deltaD, which results directly from deltaT
      *  - number of time bins for each copper cycle
      */
-    std::vector<double> timeData = m_countData->readX(0);
+    const auto &timeData = m_countData->x(0);
 
     m_logger.information() << "  Setting time data...\n";
     m_deltaT = timeData[1] - timeData[0];
@@ -326,7 +327,7 @@ PoldiAutoCorrelationCore::getRawCorrelatedIntensity(double dValue,
      * The algorithm used for this depends on the intended use.
      */
     return reduceChopperSlitList(current, weight);
-  } catch (std::domain_error) {
+  } catch (const std::domain_error &) {
     /* Trying to construct an UncertainValue with negative error will throw, so
      * to preserve
      * the old "checking behavior", this exception is caught here.
@@ -552,7 +553,7 @@ double PoldiAutoCorrelationCore::reduceChopperSlitList(
     return pow(static_cast<double>(valuesWithSigma.size()), 2.0) /
            std::accumulate(signalToNoise.begin(), signalToNoise.end(), 0.0) *
            weight;
-  } catch (std::domain_error) {
+  } catch (const std::domain_error &) {
     return 0.0;
   }
 }
@@ -623,7 +624,7 @@ std::vector<double> PoldiAutoCorrelationCore::getTofsFor1Angstrom(
   * @return Counts at position.
   */
 double PoldiAutoCorrelationCore::getCounts(int x, int y) const {
-  return m_countData->readY(x)[y];
+  return m_countData->y(x)[y];
 }
 
 /** Returns normalized counts for correlation method at given position - these
@@ -634,7 +635,7 @@ double PoldiAutoCorrelationCore::getCounts(int x, int y) const {
   * @return Normalized counts at position.
   */
 double PoldiAutoCorrelationCore::getNormCounts(int x, int y) const {
-  return std::max(1.0, m_normCountData->readY(x)[y]);
+  return std::max(1.0, m_normCountData->y(x)[y]);
 }
 
 /** Returns detector element index for given index

@@ -3,13 +3,38 @@
 
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 
 using Mantid::Geometry::SampleEnvironment;
+
+namespace {
+// -----------------------------------------------------------------------------
+// Mock Random Number Generator
+// -----------------------------------------------------------------------------
+class MockRNG final : public Mantid::Kernel::PseudoRandomNumberGenerator {
+public:
+  GCC_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD0(nextValue, double());
+  MOCK_METHOD2(nextValue, double(double, double));
+  MOCK_METHOD2(nextInt, int(int, int));
+  MOCK_METHOD0(restart, void());
+  MOCK_METHOD0(save, void());
+  MOCK_METHOD0(restore, void());
+  MOCK_METHOD1(setSeed, void(size_t));
+  MOCK_METHOD2(setRange, void(const double, const double));
+  MOCK_CONST_METHOD0(min, double());
+  MOCK_CONST_METHOD0(max, double());
+  GCC_DIAG_ON_SUGGEST_OVERRIDE
+};
+}
 
 class SampleEnvironmentTest : public CxxTest::TestSuite {
 public:
@@ -80,6 +105,78 @@ public:
     TS_ASSERT_DELTA(0.7, widths.X(), 1e-12);
     TS_ASSERT_DELTA(0.2, widths.Y(), 1e-12);
     TS_ASSERT_DELTA(0.2, widths.Z(), 1e-12);
+  }
+
+  void testGeneratePointConsidersAllComponents() {
+    using namespace ::testing;
+    using namespace Mantid::Kernel;
+
+    auto kit = createTestKit();
+    size_t maxAttempts(1);
+
+    // Generate "random" sequence
+    MockRNG rng;
+    // Selects first component
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(1));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
+    V3D comp1Point;
+    TS_ASSERT_THROWS_NOTHING(comp1Point = kit->generatePoint(rng, maxAttempts));
+    TS_ASSERT(kit->isValid(comp1Point));
+    Mock::VerifyAndClearExpectations(&rng);
+
+    // Selects second component
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
+    V3D comp2Point;
+    TS_ASSERT_THROWS_NOTHING(comp2Point = kit->generatePoint(rng, maxAttempts));
+    TS_ASSERT(comp2Point != comp1Point);
+    TS_ASSERT(kit->isValid(comp2Point));
+    Mock::VerifyAndClearExpectations(&rng);
+
+    // Selects third component
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(3));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.55))
+        .WillOnce(Return(0.65))
+        .WillOnce(Return(0.70));
+    V3D comp3Point;
+    TS_ASSERT_THROWS_NOTHING(comp3Point = kit->generatePoint(rng, maxAttempts));
+    TS_ASSERT(comp3Point != comp2Point);
+    TS_ASSERT(comp3Point != comp1Point);
+    TS_ASSERT(kit->isValid(comp3Point));
+    Mock::VerifyAndClearExpectations(&rng);
+  }
+
+  void testGeneratePointRespectsActiveRegion() {
+    using namespace ::testing;
+    using namespace Mantid::Kernel;
+
+    auto kit = createTestKit();
+    size_t maxAttempts(1);
+
+    // Generate "random" sequence
+    MockRNG rng;
+    // Sequence will try to select one of the non-container pieces
+    EXPECT_CALL(rng, nextInt(_, _)).Times(Exactly(1)).WillOnce(Return(2));
+    EXPECT_CALL(rng, nextValue())
+        .Times(3)
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5))
+        .WillOnce(Return(0.5));
+    // Restrict region to can
+    TS_ASSERT_THROWS(kit->generatePoint(rng, kit->container()->getBoundingBox(),
+                                        maxAttempts),
+                     std::runtime_error);
+    Mock::VerifyAndClearExpectations(&rng);
   }
 
 private:

@@ -1261,7 +1261,7 @@ bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
   code += hvMax;
   code += ")\n";
   code += "except:\n";
-  code += "  print 'Failure'";
+  code += "  print('Failure')";
 
   QString ret = runPythonCode(code.trimmed());
   if (!ret.isEmpty()) {
@@ -1310,7 +1310,7 @@ bool SANSDiagnostics::runsumSpectra(const QString &ipwsName,
   code += wsEndIndex;
   code += ")\n";
   code += "except:\n";
-  code += "  print 'Failure'";
+  code += "  print('Failure')";
 
   QString ret = runPythonCode(code.trimmed());
   if (!ret.isEmpty()) {
@@ -1362,7 +1362,7 @@ bool SANSDiagnostics::runLoadAlgorithm(const QString &fileName,
   }
   load += ")\n";
   load += "except:\n";
-  load += "  print 'Failure'";
+  load += "  print('Failure')";
 
   QString ret = runPythonCode(load.trimmed());
   if (!ret.isEmpty()) {

@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name
-from geometry_writer import MantidGeom
+from __future__ import (absolute_import, division, print_function)
+from .geometry_writer import MantidGeom
 import math
 
 RADIUS = 5.0
@@ -11,6 +12,7 @@ AIR_GAP_WIDTH = 0.0
 NUM_BANKS = 48
 NUM_BANKS_PER_LAYER = 24
 GAP_BTW_PLANES = 0.0082
+
 
 def get_position(bank, tube, tube_width=TUBE_WIDTH):
     """
@@ -28,6 +30,7 @@ def get_position(bank, tube, tube_width=TUBE_WIDTH):
     z = RADIUS*math.cos(theta)-RADIUS+i_plane*GAP_BTW_PLANES
     x = RADIUS*math.sin(theta)
     return x, 0, z
+
 
 def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE):
     """
@@ -55,15 +58,13 @@ def create_geometry(file_name=None, tube_width=TUBE_WIDTH, tube_length=TUBE_SIZE
     det.addComponent(id_str, id_str)
     doc_handle = det.makeTypeElement(id_str)
 
-    det.addCylinderPixel("pixel", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),\
-                        (tube_width/2.0),\
-                        (tube_length/NUM_PIXELS_PER_TUBE))
+    det.addCylinderPixel("pixel", (0.0, 0.0, 0.0), (0.0, 1.0, 0.0),
+                         (tube_width/2.0),
+                         (tube_length/NUM_PIXELS_PER_TUBE))
 
     for i in range(0, NUM_BANKS/2):
         i_low_bank = i
         i_high_bank = i+NUM_BANKS/2
-        low_bank = "bank"+str(i_low_bank+1)
-        high_bank = "bank"+str(i_high_bank+1)
 
         # FRONT plane
         for j in range(NUM_TUBES_PER_BANK):

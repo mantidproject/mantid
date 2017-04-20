@@ -2,6 +2,7 @@
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace Kernel {

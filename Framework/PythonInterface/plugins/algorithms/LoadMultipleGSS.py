@@ -5,6 +5,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 import os
 
+
 class LoadMultipleGSS(PythonAlgorithm):
 
     __exts = None

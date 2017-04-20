@@ -1,9 +1,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
@@ -20,7 +23,6 @@ namespace Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawPeaks)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawPeaks::init() {
@@ -43,7 +45,6 @@ void SaveIsawPeaks::init() {
       "An optional Workspace2D of profiles from integrating cylinder.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveIsawPeaks::exec() {
@@ -351,7 +352,7 @@ void SaveIsawPeaks::exec() {
           Workspace2D_sptr wsProfile2D = getProperty("ProfileWorkspace");
           if (wsProfile2D) {
             out << "8";
-            const Mantid::MantidVec &yValues = wsProfile2D->readY(wi);
+            const auto &yValues = wsProfile2D->y(wi);
             for (size_t j = 0; j < yValues.size(); j++) {
               out << std::setw(8) << static_cast<int>(yValues[j]);
               if ((j + 1) % 10 == 0) {

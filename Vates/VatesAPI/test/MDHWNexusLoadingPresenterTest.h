@@ -14,7 +14,6 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -155,22 +154,19 @@ public:
         .WillRepeatedly(testing::Return(true));
     EXPECT_CALL(*view, updateAlgorithmProgress(_, _)).Times(AnyNumber());
 
-    ThresholdRange_scptr thresholdRange =
-        boost::make_shared<IgnoreZerosThresholdRange>();
-
     // Create the presenter as in the vtkMDHWSource
     auto normalizationOption = Mantid::VATES::VisualNormalization::AutoSelect;
     MDHWNexusLoadingPresenter presenter(std::move(view), filename);
     const double time = 0.0;
     auto factory = boost::make_shared<vtkMDHistoHex4DFactory<TimeToTimeStep>>(
-        thresholdRange, normalizationOption, time);
+        normalizationOption, time);
 
     factory->setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoHexFactory>(
-                              thresholdRange, normalizationOption))
+                              normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoQuadFactory>(
-            thresholdRange, normalizationOption))
+            normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMDHistoLineFactory>(
-            thresholdRange, normalizationOption))
+            normalizationOption))
         .setSuccessor(Mantid::Kernel::make_unique<vtkMD0DFactory>());
 
     presenter.executeLoadMetadata();
@@ -181,7 +177,8 @@ public:
     try {
       auto workspaceProvider = Mantid::Kernel::make_unique<
           ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
-      presenter.makeNonOrthogonal(product, std::move(workspaceProvider));
+      presenter.makeNonOrthogonal(product, std::move(workspaceProvider),
+                                  &mockDrawingProgressAction);
     } catch (...) {
       // Add the standard change of basis matrix and set the boundaries
       presenter.setDefaultCOBandBoundaries(product);

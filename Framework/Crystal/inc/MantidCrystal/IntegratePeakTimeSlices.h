@@ -21,6 +21,12 @@
 
 #include <array>
 
+// Forward Declarations
+namespace Mantid {
+namespace HistogramData {
+class HistogramX;
+}
+}
 namespace Mantid {
 namespace Crystal {
 /**
@@ -287,8 +293,8 @@ private:
                          Kernel::V3D &Center, double &Radius, int *&ArryofID);
 
   int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ,
-                               Mantid::MantidVec const &X, const int specNum,
-                               int &Centerchan);
+                               const Mantid::HistogramData::HistogramX &X,
+                               const int specNum, int &Centerchan);
 
   double CalculatePositionSpan(Geometry::IPeak const &peak, const double dQ);
 
@@ -341,8 +347,8 @@ private:
                    const double row, const double col,
                    std::vector<double> &StatBase);
 
-  int find(std::string const &oneName,
-           std::vector<std::string> const &nameList);
+  int findNameInVector(std::string const &oneName,
+                       std::vector<std::string> const &nameList);
 
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
@@ -355,7 +361,8 @@ private:
                  double &pixWidthx, double &pixHeighty,
                  Geometry::IPeak const &peak) const;
 
-  int find(Mantid::MantidVec const &X, const double time);
+  int findTimeChannel(const Mantid::HistogramData::HistogramX &X,
+                      const double time);
 
   // returns true if Neighborhood list is changed
   bool updateNeighbors(boost::shared_ptr<Geometry::IComponent> &comp,

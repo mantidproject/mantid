@@ -1,9 +1,12 @@
 #include "MantidAlgorithms/AddPeak.h"
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/DetectorInfo.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/System.h"
 
@@ -18,7 +21,6 @@ DECLARE_ALGORITHM(AddPeak)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void AddPeak::init() {
@@ -34,7 +36,6 @@ void AddPeak::init() {
   declareProperty("BinCount", 0.0, "Bin count.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void AddPeak::exec() {
@@ -46,22 +47,19 @@ void AddPeak::exec() {
   const double height = getProperty("Height");
   const double count = getProperty("BinCount");
 
-  Mantid::Geometry::Instrument_const_sptr instr = runWS->getInstrument();
-  Mantid::Geometry::IComponent_const_sptr source = instr->getSource();
-  Mantid::Geometry::IComponent_const_sptr sample = instr->getSample();
-  Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(detID);
+  const DetectorInfo &detectorInfo = runWS->detectorInfo();
+  const size_t detectorIndex = detectorInfo.indexOf(detID);
 
-  const Mantid::Kernel::V3D samplePos = sample->getPos();
-  const Mantid::Kernel::V3D beamLine = samplePos - source->getPos();
-  double theta2 = det->getTwoTheta(samplePos, beamLine);
-  double phi = det->getPhi();
+  double theta2 = detectorInfo.twoTheta(detectorIndex);
+  const Mantid::Geometry::IDetector &det = detectorInfo.detector(detectorIndex);
+  double phi = det.getPhi();
 
   // In the inelastic convention, Q = ki - kf.
   double Qx = -sin(theta2) * cos(phi);
   double Qy = -sin(theta2) * sin(phi);
   double Qz = 1.0 - cos(theta2);
-  double l1 = source->getDistance(*sample);
-  double l2 = det->getDistance(*sample);
+  double l1 = detectorInfo.l1();
+  double l2 = detectorInfo.l2(detectorIndex);
 
   Mantid::Kernel::Unit_sptr unit = runWS->getAxis(0)->unit();
   if (unit->unitID() != "TOF") {
@@ -74,13 +72,13 @@ void AddPeak::exec() {
         Mantid::Kernel::Property *prop = run.getProperty("Ei");
         efixed = boost::lexical_cast<double, std::string>(prop->value());
       }
-    } else if (det->hasParameter("Efixed")) {
+    } else if (det.hasParameter("Efixed")) {
       emode = 2; // indirect
       try {
         const Mantid::Geometry::ParameterMap &pmap =
             runWS->constInstrumentParameters();
         Mantid::Geometry::Parameter_sptr par =
-            pmap.getRecursive(det.get(), "Efixed");
+            pmap.getRecursive(&det, "Efixed");
         if (par) {
           efixed = par->value<double>();
         }
@@ -90,7 +88,7 @@ void AddPeak::exec() {
     } else {
       // m_emode = 0; // Elastic
       // This should be elastic if Ei and Efixed are not set
-      // TODO?
+      // TODO
     }
     std::vector<double> xdata(1, tof);
     std::vector<double> ydata;

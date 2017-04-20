@@ -11,13 +11,16 @@ The output of each function is a workspace containing a single bin where:
 This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
+from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
+
 
 def diagnose(white_int,**kwargs):
     """
@@ -76,7 +79,7 @@ def diagnose(white_int,**kwargs):
     # process subsequent calls to this routine, when white mask is already defined
     white= kwargs.get('white_mask',None) # and white beam is not changed
     #white mask assumed to be global so no sectors in there
-    if not white is None and isinstance(white,RunDescriptor.RunDescriptor):
+    if white is not None and isinstance(white,RunDescriptor.RunDescriptor):
         hardmask_file = None
         white_mask,num_failed = white.get_masking(2)
         add_masking(white_int, white_mask)
@@ -85,14 +88,14 @@ def diagnose(white_int,**kwargs):
         white_mask = None
         van_mask = CloneWorkspace(white_int)
 
-    if not hardmask_file is None:
+    if hardmask_file is not None:
         if parser.mapmask_ref_ws is None:
             ref_ws = white_int
         else:
             ref_ws = parser.mapmask_ref_ws
 
-        hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,\
-                 OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
+        hm_ws = LoadMask(Instrument=kwargs.get('instr_name',''),InputFile=parser.hard_mask_file,
+                         OutputWorkspace='hard_mask_ws',RefWorkspace = ref_ws)
         MaskDetectors(Workspace=white_int, MaskedWorkspace=hm_ws)
         MaskDetectors(Workspace=van_mask, MaskedWorkspace=hm_ws)
         # Find out how many detectors we hard masked
@@ -119,10 +122,10 @@ def diagnose(white_int,**kwargs):
         # Second white beam test
         if 'second_white' in kwargs: #NOT IMPLEMENTED
             raise NotImplementedError("Second detector vanadium test")
-            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
-                                                       parser.van_out_lo, parser.van_out_hi,\
-                                                       parser.van_lo, parser.van_hi, parser.variation,\
-                                                       parser.van_sig, start_index, end_index)
+            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,
+                                                                    parser.van_out_lo, parser.van_out_hi,
+                                                                    parser.van_lo, parser.van_hi, parser.variation,
+                                                                    parser.van_sig, start_index, end_index)
             test_results['Second detector vanadium test:'] = [str(__second_white_masks), num_failed]
             add_masking(white_int, __second_white_masks, start_index, end_index)
             #TODO
@@ -134,9 +137,9 @@ def diagnose(white_int,**kwargs):
         zero_count_failures = 0
         if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
             add_masking(parser.sample_counts, white_int)
-            maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,\
-                                                                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,\
-                                                                   LowThreshold=1e-10, HighThreshold=1e100)
+            maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,
+                                                                       StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+                                                                       LowThreshold=1e-10, HighThreshold=1e100)
             test_results['Zero total count sample check:'] = [str(maskZero),zero_count_failures]
             add_masking(white_int, maskZero, start_index, end_index)
             DeleteWorkspace(maskZero)
@@ -145,7 +148,7 @@ def diagnose(white_int,**kwargs):
         #
         if hasattr(parser, 'background_int'):
             add_masking(parser.background_int, white_int)
-            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,\
+            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,
                                                        parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
             test_results['Background test:'] = [str(__bkgd_mask), zero_count_failures + failures]
             add_masking(white_int, __bkgd_mask, start_index, end_index)
@@ -174,7 +177,6 @@ def diagnose(white_int,**kwargs):
         default = False
         end_index_name = " to: "+str(kwargs['end_index'])
 
-
     testName=start_index_name+end_index_name
     if not default :
         testName = " For bank: "+start_index_name+end_index_name
@@ -185,6 +187,7 @@ def diagnose(white_int,**kwargs):
 
 #-------------------------------------------------------------------------------
 
+
 def add_masking(input_ws, mask_ws, start_index=None, end_index=None):
     """
     Mask the Detectors on the input workspace that are masked
@@ -194,6 +197,7 @@ def add_masking(input_ws, mask_ws, start_index=None, end_index=None):
                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
 
 #-------------------------------------------------------------------------------
+
 
 def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, sigma,
                   start_index=None, end_index=None):
@@ -217,9 +221,9 @@ def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, 
     # Make sure we are a MatrixWorkspace
     white_int = ConvertToMatrixWorkspace(InputWorkspace=white_int,OutputWorkspace=white_int)
     # The output workspace will have the failed detectors masked
-    white_masks,num_failed = FindDetectorsOutsideLimits(white_int, StartWorkspaceIndex=start_index,\
-                                             EndWorkspaceIndex=end_index,\
-                                             HighThreshold=large, LowThreshold=tiny)
+    white_masks,num_failed = FindDetectorsOutsideLimits(white_int, StartWorkspaceIndex=start_index,
+                                                        EndWorkspaceIndex=end_index,
+                                                        HighThreshold=large, LowThreshold=tiny)
 
     MaskDetectors(Workspace=white_int, MaskedWorkspace=white_masks,
                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index)
@@ -235,6 +239,7 @@ def do_white_test(white_int, tiny, large, out_lo, out_hi, median_lo, median_hi, 
     return white_masks, num_failed
 
 #-------------------------------------------------------------------------------
+
 
 def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, out_hi,
                          median_lo, median_hi, sigma, variation,
@@ -289,6 +294,8 @@ def do_second_white_test(white_counts, comp_white_counts, tiny, large, out_lo, o
     return maskWS, num_failed
 
 #------------------------------------------------------------------------------
+
+
 def normalise_background(background_int, white_int, second_white_int=None):
     """Normalize the background integrals
 
@@ -312,8 +319,10 @@ def normalise_background(background_int, white_int, second_white_int=None):
         DeleteWorkspace(hmean)
 
 #------------------------------------------------------------------------------
-def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,\
-                        start_index=None, end_index=None):
+
+
+def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
+                       start_index=None, end_index=None):
     """
     Run the background tests
 
@@ -327,13 +336,6 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,\
     """
     logger.notice('Running background count test')
 
-    # What shall we call the output
-    lhs_names = lhs_info('names')
-    if len(lhs_names) > 0:
-        ws_name = lhs_names[0]
-    else:
-        ws_name = '__do_background_test'
-
     mask_bkgd, num_failures = MedianDetectorTest(InputWorkspace=background_int,
                                                  StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
                                                  SignificanceTest=sigma,
@@ -343,6 +345,7 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,\
     return mask_bkgd, abs(num_failures)
 
 #-------------------------------------------------------------------------------
+
 
 def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     """Runs the CreatePSDBleedMask algorithm
@@ -388,9 +391,8 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
             AddSampleLog(Workspace=data_ws, LogName='goodfrm', LogText=str(int(nFrames)), LogType='Number')
         except RuntimeError:
             raise RuntimeError("Bleed test fails as no appropriate 'good_frames' or 'goodfrm' log is loaded with ws: {0}\n"
-                               "Disable bleed test by setting diag_bleed_test=False or add 'goodfrm' log to the workspace\n"\
-                                  .format(data_ws.name()))
-
+                               "Disable bleed test by setting diag_bleed_test=False or add 'goodfrm' log to the workspace\n"
+                               .format(data_ws.name()))
 
     bleed_test, num_failed = CreatePSDBleedMask(InputWorkspace=data_ws, OutputWorkspace=ws_name,
                                                 MaxTubeFramerate=max_framerate,
@@ -398,6 +400,7 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     return bleed_test, num_failed
 
 #-------------------------------------------------------------------------------
+
 
 def print_test_summary(test_results,test_name=None):
     """Print a summary of the failures per test run.
@@ -411,13 +414,13 @@ def print_test_summary(test_results,test_name=None):
     """
 
     if len(test_results) == 0:
-        print "No tests have been run!"
+        print("No tests have been run!")
         return
 
-    if test_name == None:
-        print '======== Diagnostic Test Summary '
+    if test_name is None:
+        print('======== Diagnostic Test Summary ')
     else:
-        print '======== Diagnostic Test Summary {0} '.format(test_name)
+        print('======== Diagnostic Test Summary {0} '.format(test_name))
 
     max_test_len = 0
     max_ws_len = 0
@@ -431,10 +434,10 @@ def print_test_summary(test_results,test_name=None):
 
     for t_name in test_results:
         t_result = test_results[t_name]
-        print format_string.format(t_name,t_result[0],t_result[1])
+        print(format_string.format(t_name,t_result[0],t_result[1]))
     # Append a new line
-    print '================================================================'
-    print ''
+    print('================================================================')
+    print('')
 
 
 #-------------------------------------------------------------------------------
@@ -447,25 +450,25 @@ def get_failed_spectra_list(diag_workspace):
 
      diag_workspace  -  A workspace containing masking
     """
-    if type(diag_workspace) == str:
+    if isinstance(diag_workspace, str):
         diag_workspace = mtd[diag_workspace]
 
     failed_spectra = []
+    spectrumInfo = diag_workspace.spectrumInfo()
     for i in range(diag_workspace.getNumberHistograms()):
-        try:
-            det = diag_workspace.getDetector(i)
-        except RuntimeError:
-            continue
-        if det.isMasked():
-            failed_spectra.append(diag_workspace.getSpectrum(i).getSpectrumNo())
+        if spectrumInfo.hasDetectors(i):
+            if spectrumInfo.isMasked(i):
+                failed_spectra.append(diag_workspace.getSpectrum(i).getSpectrumNo())
 
     return failed_spectra
 
 #------------------------------------------------------------------------------
+
+
 class ArgumentParser(object):
 
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None
-        for key, value in keywords.iteritems():
+        for key, value in iteritems(keywords):
             setattr(self, key, value)

@@ -1,9 +1,12 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import (WorkspaceProperty,DataProcessorAlgorithm, AlgorithmFactory,
                         mtd, Progress)
 from mantid.simpleapi import *
 import numpy as np
+
 
 class SwapWidths(DataProcessorAlgorithm):
 
@@ -11,20 +14,16 @@ class SwapWidths(DataProcessorAlgorithm):
     _output_ws = None
     _swap_point = None
 
-
     def category(self):
         return 'Workflow\\MIDAS;Inelastic'
 
-
     def summary(self):
         return 'Creates a calibration workspace in energy trnasfer for IN16B.'
-
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('InputWorkspace', '',
                                                direction=Direction.Input),
                              doc='Input workspace')
-
 
         self.declareProperty(name='SwapPoint', defaultValue=1,
                              doc='Swap point')
@@ -32,7 +31,6 @@ class SwapWidths(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output workspace')
-
 
     def PyExec(self):
         prog_workflow = Progress(self, start=0, end=1.0, nreports=6)
@@ -85,7 +83,6 @@ class SwapWidths(DataProcessorAlgorithm):
 
         prog_workflow.report("Algorithm finished")
         self.setProperty('OutputWorkspace', self._output_ws)
-
 
     def _setup(self):
         """

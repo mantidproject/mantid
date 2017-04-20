@@ -1,10 +1,12 @@
 #pylint: disable=invalid-name
-from geometry_writer import MantidGeom
+from __future__ import (absolute_import, division, print_function)
+from .geometry_writer import MantidGeom
 
 NUM_PIXELS_PER_TUBE = 304
 NUM_TUBES = 256
 PIXEL_WIDTH = 0.0007
 PIXEL_HEIGHT = 0.0007
+
 
 def create_grouping(workspace=None):
     # This should be read from the
@@ -58,10 +60,11 @@ def create_grouping(workspace=None):
 
 def create_geometry(file_name=None, pixel_width=None, pixel_height=None):
     inst_name = "REF_L"
-    short_name = "REF_L"
 
-    if pixel_width is None: pixel_width = PIXEL_WIDTH
-    if pixel_height is None: pixel_height = PIXEL_HEIGHT
+    if pixel_width is None:
+        pixel_width = PIXEL_WIDTH
+    if pixel_height is None:
+        pixel_height = PIXEL_HEIGHT
 
     if file_name is None:
         xml_outfile = inst_name+"_Definition.xml"

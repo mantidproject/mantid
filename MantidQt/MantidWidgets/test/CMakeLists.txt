@@ -9,7 +9,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( MantidWidgetsTest ${TEST_FILES} )
-  target_link_libraries( MantidWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+  target_link_libraries( MantidWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidWidgets
             API
             DataObjects
@@ -20,6 +20,7 @@ if ( CXXTEST_FOUND )
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}
             )
 
   # Add to the 'UnitTests' group in VS

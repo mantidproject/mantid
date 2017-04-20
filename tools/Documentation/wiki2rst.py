@@ -29,6 +29,7 @@ import mantid
 
 DEBUG = 0
 
+
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Converts mediawiki pages to rst pages for sphinx.')
     parser.add_argument('pagename', help='The name of a page on the wiki site')
@@ -46,14 +47,17 @@ def parse_arguments(argv):
 
 # ------------------------------------------------------------------------------
 
+
 def display_info(*args):
     print(*args)
+
 
 def display_debug(*args):
     if DEBUG == 1:
         print(*args)
 
 # ------------------------------------------------------------------------------
+
 
 class WikiURL(object):
 
@@ -92,6 +96,7 @@ class WikiURL(object):
 
 # ------------------------------------------------------------------------------
 
+
 def fetch_wiki_markup(wiki_url):
     try:
         response = urllib2.urlopen(wiki_url.raw())
@@ -100,6 +105,7 @@ def fetch_wiki_markup(wiki_url):
         raise RuntimeError("Failed to fetch wiki page: {}".format(str(err)))
 
 # ------------------------------------------------------------------------------
+
 
 def to_rst(wiki_url, post_process_args):
     wiki_markup_text = fetch_wiki_markup(wiki_url)
@@ -110,6 +116,7 @@ def to_rst(wiki_url, post_process_args):
     return mantid_rst
 
 # ------------------------------------------------------------------------------
+
 
 def run_pandoc(wiki_markup_text):
     wiki_tmp_file = tempfile.NamedTemporaryFile(delete=True)
@@ -127,6 +134,7 @@ def run_pandoc(wiki_markup_text):
     return rst_text
 
 # ------------------------------------------------------------------------------
+
 
 def execute_process(cmd, args):
     """Execute the command with the given arguments.
@@ -151,6 +159,7 @@ def execute_process(cmd, args):
 
 # ------------------------------------------------------------------------------
 
+
 def post_process(pandoc_rst, wiki_url, wiki_markup,
                  post_process_args):
     """Takes raw reST text produced by pandoc and applies several post-processing steps
@@ -164,6 +173,7 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
 
 # ------------------------------------------------------------------------------
 
+
 def fix_underscores_in_ref_links(pandoc_rst):
     """Defalt pandoc-translated references links seem to contain a backslash before
     the underscore of a link. This removes the backslash
@@ -171,6 +181,7 @@ def fix_underscores_in_ref_links(pandoc_rst):
     return re.sub(r"\b\\\_", "_", pandoc_rst)
 
 # ------------------------------------------------------------------------------
+
 
 def fix_image_links(rst_text, wiki_markup, rel_img_dir):
     """Fix the image links to point to the correct relative image location
@@ -212,6 +223,7 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
 
 # ------------------------------------------------------------------------------
 
+
 def generate_rst_img_link(match, rel_img_dir):
     link = "image:: " + rel_img_dir + "/" + match.group(2) + "\n"
     for i in range(3,len(match.groups())):
@@ -224,6 +236,7 @@ def generate_rst_img_link(match, rel_img_dir):
     return link
 
 # ------------------------------------------------------------------------------
+
 
 def add_img_option(mw_img_opt):
     mw_img_opt = mw_img_opt.strip()
@@ -239,6 +252,7 @@ def add_img_option(mw_img_opt):
 
 # ------------------------------------------------------------------------------
 
+
 def clean_inline_img_def(rst_link):
     match = re.search(r'^\s+:align:\s+\w+\s*$', rst_link, re.MULTILINE)
     if match is not None:
@@ -250,11 +264,13 @@ def clean_inline_img_def(rst_link):
 
 # ------------------------------------------------------------------------------
 
+
 def download_images_from_wiki(wiki_url, image_names, img_dir):
     for name in image_names:
         download_image_from_wiki(wiki_url, name, img_dir)
 
 # ------------------------------------------------------------------------------
+
 
 def download_image_from_wiki(wiki_url, name, img_dir):
     image_url = wiki_url.fileurl(name)
@@ -270,6 +286,7 @@ def download_image_from_wiki(wiki_url, name, img_dir):
     return None
 
 # ------------------------------------------------------------------------------
+
 
 def add_mantid_concept_links(post_processed_rst):
     """Adds the concept link for mantid things

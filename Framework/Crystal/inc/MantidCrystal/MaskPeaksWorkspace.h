@@ -63,7 +63,7 @@ private:
                            Geometry::IComponent_const_sptr comp, const int x,
                            const int y);
   void getTofRange(double &tofMin, double &tofMax, const double tofPeak,
-                   const MantidVec &tof);
+                   const HistogramData::HistogramX &tof);
   int findPixelID(std::string bankName, int col, int row);
 
   /// Read in all the input parameters

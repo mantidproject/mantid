@@ -6,6 +6,7 @@ from reduction_workflow.instruments.sans.hfir_command_interface import *
 
 import os
 
+
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
              "BioSANS_test_data_Iq.xml",
@@ -16,6 +17,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class HFIRBackground(stresstesting.MantidStressTest):
 
@@ -42,6 +44,7 @@ class HFIRBackground(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackground.nxs'
 
+
 class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -66,6 +69,7 @@ class HFIRBackgroundTransmission(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundTransmission.nxs'
+
 
 class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
 
@@ -93,6 +97,7 @@ class HFIRBackgroundDirectBeamTrans(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundDirectBeamTrans.nxs'
+
 
 class HFIRBackgroundBeamSpreaderTrans(stresstesting.MantidStressTest):
 
@@ -124,6 +129,7 @@ class HFIRBackgroundBeamSpreaderTrans(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundBeamSpreaderTrans.nxs'
 
+
 class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -152,6 +158,7 @@ class HFIRBackgroundTransDarkCurrent(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundTransDarkCurrent.nxs'
 
+
 class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -179,4 +186,3 @@ class HFIRBackgroundDirectBeamTransDC(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRBackgroundDirectBeamTransDC.nxs'
-

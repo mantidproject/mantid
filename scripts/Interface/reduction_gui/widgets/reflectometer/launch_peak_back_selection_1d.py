@@ -23,6 +23,7 @@ CSS_LOWRES = """QLineEdit{
                    background-color: #a7f6a1;
                 }"""
 
+
 class DesignerMainWindow(QtGui.QMainWindow):
     """ Customization for Qt Designer created window """
 
@@ -264,7 +265,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def peak_input_changed(self):
         self.update_graph()
 
-
     def update_peak_back_selection_mode(self, bPeak):
         """Make sure that only 1 peak/back selection is activated at the same time"""
         self.peakSwitch.setChecked(bPeak)
@@ -450,7 +450,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
             def on_release(self, event):
                 """on release we reset the press data"""
-                _event = event
                 self.xpress = None
                 self.rect.figure.canvas.draw()
 

@@ -9,6 +9,7 @@ namespace Mantid {
 
 namespace API {
 class MatrixWorkspace;
+class SpectrumInfo;
 }
 
 namespace Algorithms {
@@ -46,6 +47,7 @@ public:
 private:
   /// Workspace to operate on
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ws;
+  const API::SpectrumInfo &m_spectrumInfo;
 };
 
 } // namespace Algorithms

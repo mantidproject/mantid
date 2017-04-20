@@ -111,12 +111,7 @@ public:
 
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double a = 6.6;
-    double b = 9.7;
-    double c = 9.9;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
+    OrientedLattice lattice(6.6, 9.7, 9.9, 84, 71, 70);
     // test both default case(-1) and
     // case with specified base index(4)
     for (int base_index = -1; base_index < 5; base_index += 5) {
@@ -124,9 +119,9 @@ public:
       size_t num_initial = 3;
       double degrees_per_step = 3;
 
-      double error = IndexingUtils::Find_UB(
-          UB, q_vectors, a, b, c, alpha, beta, gamma, required_tolerance,
-          base_index, num_initial, degrees_per_step);
+      double error =
+          IndexingUtils::Find_UB(UB, q_vectors, lattice, required_tolerance,
+                                 base_index, num_initial, degrees_per_step);
 
       //      std::cout << std::endl << "USING LATTICE PARAMETERS\n";
       //      ShowIndexingStats( UB, q_vectors, required_tolerance );
@@ -260,18 +255,12 @@ public:
     Matrix<double> UB(3, 3, false);
     int degrees_per_step = 3;
     double required_tolerance = 0.2;
-    double a = 6.6f;
-    double b = 9.7f;
-    double c = 9.9f;
-    double alpha = 84;
-    double beta = 71;
-    double gamma = 70;
 
+    UnitCell cell(6.6f, 9.7f, 9.9f, 84, 71, 70);
     std::vector<V3D> q_vectors = getNatroliteQs();
 
-    double error =
-        IndexingUtils::ScanFor_UB(UB, q_vectors, a, b, c, alpha, beta, gamma,
-                                  degrees_per_step, required_tolerance);
+    double error = IndexingUtils::ScanFor_UB(
+        UB, q_vectors, cell, degrees_per_step, required_tolerance);
 
     TS_ASSERT_DELTA(error, 0.147397, 1.e-5);
 

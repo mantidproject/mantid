@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class CalMuonDeadTimeTest(stresstesting.MantidStressTest):
     '''Tests the CalMuonDeadTime algorithm'''
 

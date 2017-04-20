@@ -113,7 +113,7 @@
                  <number>6</number>
                 </property>
                 <item>
-                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="runFiles" native="true">
+                 <widget class="MantidQt::API::MWRunFiles" name="runFiles" native="true">
                   <property name="label" stdset="0">
                    <string>Runs          </string>
                   </property>
@@ -129,7 +129,7 @@
                </layout>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mapFile" native="true">
+               <widget class="MantidQt::API::MWRunFiles" name="mapFile" native="true">
                 <property name="findRunFiles" stdset="0">
                  <bool>false</bool>
                 </property>
@@ -148,7 +148,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" native="true">
+               <widget class="MantidQt::API::MWRunFiles" name="whiteBeamFile" native="true">
                 <property name="label" stdset="0">
                  <string>Detector Vanadium</string>
                 </property>
@@ -888,14 +888,14 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_31">
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="absRunFiles" native="true">
             <property name="label" stdset="0">
              <string>Abs Units Vanadium</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absMapFile" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="absMapFile" native="true">
             <property name="findRunFiles" stdset="0">
              <bool>false</bool>
             </property>
@@ -914,7 +914,7 @@
            </widget>
           </item>
           <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" native="true">
+           <widget class="MantidQt::API::MWRunFiles" name="absWhiteFile" native="true">
             <property name="label" stdset="0">
              <string>Detector Vanadium (Abs Units)</string>
             </property>
@@ -1309,9 +1309,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <class>MantidQt::API::MWRunFiles</class>
    <extends>QWidget</extends>
-   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <header>MantidQtAPI/MWRunFiles.h</header>
   </customwidget>
   <customwidget>
    <class>MantidQt::MantidWidgets::InstrumentSelector</class>

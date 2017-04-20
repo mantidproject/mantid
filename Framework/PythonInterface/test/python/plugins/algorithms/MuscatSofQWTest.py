@@ -37,7 +37,7 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -0.5)
         self.assertAlmostEqual(x_data[-1], 0.5)
-        self.assertAlmostEqual(x_data[len(x_data)/2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
         self.assertEquals(sqw_ws.blocksize(), 200)
 
@@ -59,7 +59,7 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -1.0)
         self.assertAlmostEqual(x_data[-1], 1.0)
-        self.assertAlmostEqual(x_data[len(x_data)/2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
         self.assertEquals(sqw_ws.blocksize(), 400)
 
@@ -81,7 +81,7 @@ class MuscatSofQWTest(unittest.TestCase):
         x_data = sqw_ws.dataX(0)
         self.assertAlmostEqual(x_data[0], -0.5)
         self.assertAlmostEqual(x_data[-1], 0.5)
-        self.assertAlmostEqual(x_data[len(x_data)/2], 0.0)
+        self.assertAlmostEqual(x_data[len(x_data)//2], 0.0)
 
         self.assertEquals(sqw_ws.blocksize(), 10)
 

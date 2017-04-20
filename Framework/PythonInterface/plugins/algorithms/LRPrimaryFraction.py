@@ -5,6 +5,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
+
 class LRPrimaryFraction(PythonAlgorithm):
 
     def category(self):

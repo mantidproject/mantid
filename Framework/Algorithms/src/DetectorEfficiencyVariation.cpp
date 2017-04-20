@@ -3,8 +3,6 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -100,7 +98,7 @@ void DetectorEfficiencyVariation::exec() {
     throw;
   }
   double average =
-      calculateMedian(countRatio, false, makeInstrumentMap(countRatio))
+      calculateMedian(*countRatio, false, makeInstrumentMap(*countRatio))
           .at(0); // Include zeroes
   g_log.notice() << name()
                  << ": The median of the ratio of the integrated counts is: "
@@ -212,7 +210,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
   const double deadValue(1.0);
   int numFailed(0);
   const auto &spectrumInfo = counts1->spectrumInfo();
-  PARALLEL_FOR3(counts1, counts2, maskWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*counts1, *counts2, *maskWS))
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // move progress bar
@@ -236,8 +234,7 @@ int DetectorEfficiencyVariation::doDetectorTests(
     const double signal2 = counts2->y(i)[0];
 
     // Mask out NaN and infinite
-    if (boost::math::isinf(signal1) || boost::math::isnan(signal1) ||
-        boost::math::isinf(signal2) || boost::math::isnan(signal2)) {
+    if (!std::isfinite(signal1) || !std::isfinite(signal2)) {
       maskWS->mutableY(i)[0] = deadValue;
       PARALLEL_ATOMIC
       ++numFailed;

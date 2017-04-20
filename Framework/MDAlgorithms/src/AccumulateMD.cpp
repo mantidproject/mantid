@@ -6,12 +6,17 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+
 #include <Poco/File.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

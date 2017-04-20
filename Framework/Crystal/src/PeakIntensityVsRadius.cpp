@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -189,16 +190,16 @@ void PeakIntensityVsRadius::exec() {
       size_t ISigI5 = 0;
       size_t ISigI10 = 0;
       for (int i = 0; i < 4; i++) {
-        outWS2->dataX(i)[step] = radius;
+        outWS2->mutableX(i)[step] = radius;
       }
       // Retrieve the integrated workspace
       PeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
       for (int i = 0; i < outPeaks->getNumberPeaks(); i++) {
         size_t wi = size_t(i); // workspace index in output
         Geometry::IPeak &p = outPeaks->getPeak(i);
-        outWS->dataX(wi)[step] = radius;
-        outWS->dataY(wi)[step] = p.getIntensity();
-        outWS->dataE(wi)[step] = p.getSigmaIntensity();
+        outWS->mutableX(wi)[step] = radius;
+        outWS->mutableY(wi)[step] = p.getIntensity();
+        outWS->mutableE(wi)[step] = p.getSigmaIntensity();
         double ISigI = p.getIntensity() / p.getSigmaIntensity();
         if (ISigI > 10.0) {
           ISigI2++;
@@ -216,10 +217,10 @@ void PeakIntensityVsRadius::exec() {
           ISigI2++;
         }
       }
-      outWS2->dataY(0)[step] = static_cast<double>(ISigI2);
-      outWS2->dataY(1)[step] = static_cast<double>(ISigI3);
-      outWS2->dataY(2)[step] = static_cast<double>(ISigI5);
-      outWS2->dataY(3)[step] = static_cast<double>(ISigI10);
+      outWS2->mutableY(0)[step] = static_cast<double>(ISigI2);
+      outWS2->mutableY(1)[step] = static_cast<double>(ISigI3);
+      outWS2->mutableY(2)[step] = static_cast<double>(ISigI5);
+      outWS2->mutableY(3)[step] = static_cast<double>(ISigI10);
     } else {
       // TODO: Clear the point
     }

@@ -31,6 +31,7 @@ set ( EXPORT_FILES
   src/Exports/DateAndTime.cpp
   src/Exports/InstrumentInfo.cpp
   src/Exports/FacilityInfo.cpp
+  src/Exports/LiveListenerInfo.cpp
   src/Exports/NullValidator.cpp
   src/Exports/ListValidator.cpp
   src/Exports/ArrayLengthValidator.cpp
