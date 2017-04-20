@@ -100,7 +100,7 @@ class LoadEXED(PythonAlgorithm):
                 if line.find("Comment")>-1:
                    parms_dict['Comment']=line.strip('Comment =')
         fin.close()
-        parms_dict['phi']=copy.deepcopy(parms_dict[CAR_OMEGA_MAG])
+        parms_dict['phi']=copy.deepcopy(parms_dict['CAR_OMEGA_MAG'])
                 #print line
         nrows=int(parms['NDET'])
 
