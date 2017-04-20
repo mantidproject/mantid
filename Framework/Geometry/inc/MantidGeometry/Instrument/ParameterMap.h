@@ -391,7 +391,9 @@ private:
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
   /// Pointer to the owning instrument for translating detector IDs into
-  /// detector indices when accessing the DetectorInfo object
+  /// detector indices when accessing the DetectorInfo object. If the workspace
+  /// distinguishes between a neutronic instrument and a physical instrument
+  /// the owning instrument is the neutronic one.
   const Instrument *m_instrument{nullptr};
 };
 
