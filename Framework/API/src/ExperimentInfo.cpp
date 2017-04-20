@@ -1226,6 +1226,7 @@ const SpectrumInfo &ExperimentInfo::spectrumInfo() const {
     if (std::any_of(m_spectrumDefinitionNeedsUpdate.cbegin(),
                     m_spectrumDefinitionNeedsUpdate.cend(),
                     [](char i) { return i == 1; })) {
+#pragma omp parallel for
       for (size_t i = 0; i < m_spectrumInfoWrapper->size(); ++i)
         updateSpectrumDefinitionIfNecessary(i);
     }
