@@ -19,7 +19,10 @@ class EnabledWhenPropertyTest(unittest.TestCase):
         for att in attrs:
             self.assertTrue(hasattr(PropertyCriterion, att))
 
-    def test_construction_with_multiple_conditions_succeeds(self):
+    def test_construction_with_multiple_OR_conditions_succeeds(self):
+        # We cannot manipulate properties easily from the Python side compared to the C++
+        # side. So we will check we can construct the object from Python correctly and rely
+        # on the C++ unit tests to check all operators
         a = EnabledWhenProperty("PropA", PropertyCriterion.IsDefault)
         b = EnabledWhenProperty("PropB", PropertyCriterion.IsDefault)
         result = EnabledWhenProperty(a, b, LogicOperator.Or)

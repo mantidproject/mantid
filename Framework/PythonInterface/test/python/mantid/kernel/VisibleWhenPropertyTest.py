@@ -14,7 +14,10 @@ class VisibleWhenPropertyTest(unittest.TestCase):
         p = VisibleWhenProperty("OtherProperty", PropertyCriterion.IsEqualTo, "value")
         self.assertIsNotNone(p)
 
-    def test_multiple_condition_constructio(self):
+    def test_multiple_condition_construction(self):
+        # We cannot manipulate properties easily from the Python side compared to the C++
+        # side. So we will check we can construct the object from Python correctly and rely
+        # on the C++ unit tests to check all operators
         a = VisibleWhenProperty("PropA", PropertyCriterion.IsDefault)
         b = VisibleWhenProperty("PropB", PropertyCriterion.IsDefault)
         result = VisibleWhenProperty(a, b, LogicOperator.And)
