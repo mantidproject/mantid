@@ -150,7 +150,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA','EXED']
+        self.instrumentList=['ARCS','CNCS','DNS','EXED','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
         self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
