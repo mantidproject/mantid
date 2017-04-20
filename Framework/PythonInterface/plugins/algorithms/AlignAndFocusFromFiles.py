@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, ITableWorkspaceProperty, MatrixWorkspaceProperty, FileAction, FileProperty, MultipleFileProperty, Progress, PropertyMode
 from mantid.kernel import Direction
-from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, DeleteWorkspace, DetermineChunking, Divide, FilterBadPulses, Load, PDDetermineCharacterizations, Plus, RenameWorkspace
+from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertUnits, CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RenameWorkspace, SaveNexusProcessed
 import os
 
 EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
@@ -93,6 +93,34 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 args[name] = prop.value
         return args
 
+    def __determineCharacterizations(self, filename, wkspname):
+        tempname = '__%s_temp' % wkspname
+        Load(Filename=filename, OutputWorkspace=tempname,
+             MetaDataOnly=True)
+        if self.charac is not None:
+            PDDetermineCharacterizations(InputWorkspace=tempname,
+                                         Characterizations=self.charac,
+                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        else:
+            PDDetermineCharacterizations(InputWorkspace=tempname,
+                                         ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
+        DeleteWorkspace(Workspace=tempname)
+
+    def __getCacheName(self, wkspname):
+        propman_properties = ['bank', 'd_min', 'd_max', 'tof_min', 'tof_max', 'wavelength_min', 'wavelength_max']
+        alignandfocusargs = []
+        for name in PROPS_FOR_ALIGN:
+            prop = self.getProperty(name)
+            if name == 'PreserveEvents' or not prop.isDefault:
+                # TODO need unique identifier for absorption workspace
+                alignandfocusargs.append('%s=%s' % (name, prop.valueAsStr))
+
+        return CreateCacheFilename(Prefix=wkspname,
+                                   PropertyManager=self.getProperty('ReductionProperties').valueAsStr,
+                                   Properties=propman_properties,
+                                   OtherProperties=alignandfocusargs,
+                                   CacheDir=self.getProperty('CacheDirectory').value).OutputFilename
+
     def __processFile(self, filename, wkspname, file_prog_start):
         chunks = determineChunking(filename, self.chunkSize)
         self.log().information('Processing \'%s\' in %d chunks' % (filename, len(chunks)))
@@ -111,12 +139,6 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                                 LowerCutoff=self.filterBadPulses,
                                 startProgress=prog_start, endProgress=prog_start+prog_per_chunk_step)
             prog_start += prog_per_chunk_step
-
-            # TODO only do once per file
-            if j == 0 and self.charac is not None:
-                PDDetermineCharacterizations(InputWorkspace=chunkname,
-                                             Characterizations=self.charac,
-                                             ReductionProperties=self.getProperty('ReductionProperties').valueAsStr)
 
             # absorption correction workspace
             if self.absorption is not None and len(str(self.absorption)) > 0:
@@ -159,9 +181,24 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
 
         # outer loop creates chunks to load
         for (i, filename) in enumerate(filenames):
-            wkspname = os.path.split(filename)[-1].split('.')[0] + '_f' + str(i)
+            # default name is based off of filename
+            wkspname = os.path.split(filename)[-1].split('.')[0]
+            self.__determineCharacterizations(filename, wkspname)
+            cachefile = self.__getCacheName(wkspname)
+            wkspname += '_f%d' % i # add file number to be unique
 
-            self.__processFile(filename, wkspname, self.prog_per_file*float(i))
+            if os.path.exists(cachefile):
+                LoadNexusProcessed(Filename=cachefile, OutputWorkspace=wkspname)
+                # TODO SaveNexuProcessed/LoadNexusProcessed have a bug
+                editinstrargs = {}
+                for name in PROPS_FOR_INSTR:
+                    prop = self.getProperty(name)
+                    if not prop.isDefault:
+                        editinstrargs[name] = prop.value
+                EditInstrumentGeometry(Workspace=wkspname, **editinstrargs)
+            else:
+                self.__processFile(filename, wkspname, self.prog_per_file*float(i))
+                SaveNexusProcessed(InputWorkspace=wkspname, Filename=cachefile)
 
             # accumulate runs
             if i == 0:
