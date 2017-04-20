@@ -184,7 +184,7 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                            ComponentName='Tank',
                                                            Y=1,
                                                            Angle=str(self.masterDict['S2']),
-                                                           RelativeRotation=False) 
+                                                           RelativeRotation=False)
             #masking
             if 'maskFilename' in self.masterDict and len(self.masterDict['maskFilename'].strip())>0:
                 try:
