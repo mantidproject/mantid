@@ -64,12 +64,21 @@ class CreateCacheFilename(PythonAlgorithm):
         """ Main Execution Body
         """
         # Inputs
-        prop_manager = self.getPropertyValue("PropertyManager")
+        prop_manager = self.getPropertyValue("PropertyManager").strip()
+        if len(prop_manager) > 0:
+            if mantid.PropertyManagerDataService.doesExist(prop_manager):
+                prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+            else:
+                self.log().warning('PropertyManager "%s" does not exist - ignoring' % prop_manager)
+                prop_manager = None
+        else:
+            prop_manager = None
+
         other_props = self.getProperty("OtherProperties").value
+
         if not prop_manager and not other_props:
             raise ValueError("Either PropertyManager or OtherProperties should be supplied")
-        prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)\
-            if prop_manager else None
+
         # default to all properties in the manager
         props = self.getProperty("Properties").value
         if not props and prop_manager:
