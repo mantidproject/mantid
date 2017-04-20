@@ -1263,7 +1263,8 @@ const Beamline::ComponentInfo &Instrument::componentInfo() const {
  * @return const ref to a vector of ComponentIds. Throws a std::runtime_error if
  * Component Info not set.
  */
-const std::vector<Geometry::ComponentID> &Instrument::componentIds() const {
+boost::shared_ptr<const std::vector<Geometry::ComponentID>>
+Instrument::componentIds() const {
   if (!hasComponentInfo()) {
     throw std::runtime_error(
         "Cannot return component ids with a NULL ComponentInfo");
@@ -1284,7 +1285,7 @@ void Instrument::setDetectorInfo(
  */
 void Instrument::setComponentInfo(
     boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    std::vector<Geometry::ComponentID> componentIds) {
+    boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds) {
   m_componentInfo = std::move(componentInfo);
   m_componentIds = std::move(componentIds);
 }
