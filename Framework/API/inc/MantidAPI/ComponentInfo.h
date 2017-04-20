@@ -5,8 +5,6 @@
 #include <unordered_map>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <atomic>
-#include <mutex>
 
 namespace Mantid {
 
@@ -55,10 +53,7 @@ private:
   /// Map of component ids to indexes
   boost::shared_ptr<std::unordered_map<Geometry::IComponent *, size_t>>
       m_compIDToIndex;
-  /// Flag to indicate that index mapping has been calculated
-  mutable std::atomic<bool> m_initIndexMapping;
-  /// Control access to component id mappings
-  mutable std::mutex m_mutex;
+
 public:
   ComponentInfo(
       const Mantid::Beamline::ComponentInfo &componentInfo,
@@ -66,7 +61,6 @@ public:
           componentIds);
   std::vector<size_t> detectorIndices(size_t componentIndex) const;
   const std::vector<Mantid::Geometry::IComponent *> &componentIds() const;
-
   size_t size() const;
   size_t indexOf(Geometry::IComponent *id) const;
 };

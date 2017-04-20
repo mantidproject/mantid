@@ -32,9 +32,7 @@ DetectorInfo::DetectorInfo(
     throw std::runtime_error("Workspace does not contain an instrument!");
 
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  const auto nDetIds = m_detectorIDs.size();
-  m_detIDToIndex.reserve(nDetIds);
-  for (size_t i = 0; i < nDetIds; ++i)
+  for (size_t i = 0; i < m_detectorIDs.size(); ++i)
     m_detIDToIndex[m_detectorIDs[i]] = i;
 }
 
