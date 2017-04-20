@@ -9,8 +9,11 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/IDetector.h"
 #include <fstream>
 #include <Poco/File.h>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -58,15 +61,39 @@ void SaveIsawPeaks::exec() {
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
 
-  // We cannot assume the peaks have bank type detector modules, so we have a
-  // string to check this
-  std::string bankPart = "?";
-
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
   typedef std::map<int, std::vector<size_t>> bankMap_t;
   typedef std::map<int, bankMap_t> runMap_t;
   std::set<int, std::less<int>> uniqueBanks;
+  if (!inst)
+    throw std::runtime_error(
+        "No instrument in the Workspace. Cannot save DetCal file.");
+  // We cannot assume the peaks have bank type detector modules, so we have a
+  // string to check this
+  std::string bankPart = "bank";
+  if (inst->getName().compare("WISH") == 0)
+    bankPart = "WISHpanel";
+
+  // Get all children
+  std::vector<IComponent_const_sptr> comps;
+  inst->getChildren(comps, true);
+
+  const auto &detectorInfo = ws->detectorInfo();
+  for (auto &comp : comps) {
+    std::string bankName = comp->getName();
+    const IDetector det = dynamic_cast<const IDetector>(comp);
+    auto detID = det->getID();
+    if (detectorInfo.isMasked(detID)) continue;
+    boost::trim(bankName);
+    boost::erase_all(bankName, bankPart);
+    int bank = 0;
+    Strings::convert(bankName, bank);
+    if (bank == 0)
+      continue;
+    // Track unique bank numbers
+    uniqueBanks.insert(bank);
+  }
   runMap_t runMap;
   for (size_t i = 0; i < peaks.size(); ++i) {
     Peak &p = peaks[i];
@@ -90,8 +117,6 @@ void SaveIsawPeaks::exec() {
 
     // Save in the map
     runMap[run][bank].push_back(i);
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
   }
 
   if (!inst)
