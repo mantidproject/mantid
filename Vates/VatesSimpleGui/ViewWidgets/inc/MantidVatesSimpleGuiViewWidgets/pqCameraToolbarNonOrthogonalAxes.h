@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef pqCameraToolbarNonOrthogonalAxes_h
 #define pqCameraToolbarNonOrthogonalAxes_h
 
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqApplicationComponentsModule.h"
 #include <QToolBar>
 
@@ -68,8 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * camera
 * orientations as well as zoom-to-data and zoom-to-box.
 */
-class PQAPPLICATIONCOMPONENTS_EXPORT pqCameraToolbarNonOrthogonalAxes
-    : public QToolBar {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
+    pqCameraToolbarNonOrthogonalAxes : public QToolBar {
   Q_OBJECT
   typedef QToolBar Superclass;
 

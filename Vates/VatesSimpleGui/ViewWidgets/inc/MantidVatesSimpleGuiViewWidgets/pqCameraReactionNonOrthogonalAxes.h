@@ -60,6 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef pqCameraReactionNonOrthogonalAxes_h
 #define pqCameraReactionNonOrthogonalAxes_h
 
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqReaction.h"
 
 /**
@@ -67,8 +68,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * pqCameraReaction has the logic to handle common operations associated with
 * the camera such as reset view along X axis etc.
 */
-class PQAPPLICATIONCOMPONENTS_EXPORT pqCameraReactionNonOrthogonalAxes
-    : public pqReaction {
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS
+    pqCameraReactionNonOrthogonalAxes : public pqReaction {
   Q_OBJECT
   typedef pqReaction Superclass;
 
