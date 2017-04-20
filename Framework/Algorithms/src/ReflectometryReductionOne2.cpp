@@ -948,7 +948,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   double lambdaVMin = 0.0;
   double lambdaVMax = 0.0;
   double dummy = 0.0;
-  const int numBins = static_cast<int>(detectorWS->blocksize());
 
   // bLambda is the lambda bin size at the twoThetaMin detector
   auto spIdx = spectrumMin(detectors);
@@ -970,7 +969,9 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
   }
 
   // Use the same number of bins as the input
-  const double binWidth = (lambdaVMax - lambdaVMin) / numBins;
+  const int origNumBins = static_cast<int>(detectorWS->blocksize());
+  const double binWidth = (lambdaMax() - lambdaMin()) / origNumBins;
+  const int newNumBins = (lambdaVMax - lambdaVMin) / binWidth;
   std::stringstream params;
   params << lambdaVMin << "," << binWidth << "," << lambdaVMax;
 
