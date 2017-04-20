@@ -500,7 +500,7 @@ void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   auto useLogNames = m_advanced && isSuitableForLogValues(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
   auto isSurfaceOrContourPlot = m_plotOptions->currentText() == SURFACE_PLOT ||
-    m_plotOptions->currentText() == CONTOUR_PLOT;
+                                m_plotOptions->currentText() == CONTOUR_PLOT;
   // Enable widgets as appropriate
   m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
