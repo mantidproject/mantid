@@ -499,11 +499,14 @@ void MantidWSIndexWidget::onLogSelected(const QString &logName) {
 void MantidWSIndexWidget::onPlotOptionChanged(const QString &plotOption) {
   auto useLogNames = m_advanced && isSuitableForLogValues(plotOption);
   auto isLogSelectorCustom = m_logSelector->currentText() == CUSTOM;
+  auto isSurfaceOrContourPlot = m_plotOptions->currentText() == SURFACE_PLOT ||
+    m_plotOptions->currentText() == CONTOUR_PLOT;
+  // Enable widgets as appropriate
+  m_showErrorBars->setEnabled(!isSurfaceOrContourPlot);
   m_logSelector->setEnabled(useLogNames);
   m_logValues->setEnabled(useLogNames && isLogSelectorCustom);
   m_logValues->clear();
-  m_axisNameEdit->setEnabled(m_plotOptions->currentText() == SURFACE_PLOT ||
-                             m_plotOptions->currentText() == CONTOUR_PLOT);
+  m_axisNameEdit->setEnabled(isSurfaceOrContourPlot);
   if (useLogNames) {
     // Make sure an appropriate name is shown for the default log option.
     if (m_plotOptions->currentText() == SURFACE_PLOT ||
