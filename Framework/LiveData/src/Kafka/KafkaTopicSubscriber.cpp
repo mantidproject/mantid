@@ -131,6 +131,7 @@ KafkaTopicSubscriber::getTopicPartitions() {
     auto matchedTopic = *iter;
     auto partitionMetadata = matchedTopic->partitions();
     auto numberOfPartitions = partitionMetadata->size();
+    // Create a TopicPartition for each partition in the topic
     for (int partitionNumber = 0; partitionNumber < numberOfPartitions;
          ++partitionNumber) {
       auto topicPartition =
