@@ -229,12 +229,16 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     // remove last comma
     maskBanks.resize(maskBanks.size() - 1);
     // Mask banks that are not in header lines
+    try {
     Algorithm_sptr alg = createChildAlgorithm("MaskBTP");
     alg->setProperty<Workspace_sptr>("Workspace", outWS);
     alg->setProperty("Bank", maskBanks);
     if (!alg->execute())
       throw std::runtime_error(
           "MaskDetectors Child Algorithm has not executed successfully");
+    } catch (...) {
+      g_log.error("Can't execute MaskBTP algorithm");
+    }
   }
   return s;
 }
