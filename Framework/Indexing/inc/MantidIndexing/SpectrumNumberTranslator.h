@@ -69,7 +69,7 @@ private:
   bool isPartitioned() const;
   void checkUniqueSpectrumNumbers() const;
   // Not thread-safe! Use only in combination with std::call_once!
-  void setupMaps() const;
+  void setupSpectrumNumberToIndexMap() const;
 
   struct SpectrumNumberHash {
     std::size_t operator()(const SpectrumNumber &spectrumNumber) const {

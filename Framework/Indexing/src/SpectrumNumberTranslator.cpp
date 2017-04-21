@@ -91,7 +91,9 @@ SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
   static_cast<void>(m_spectrumNumberToPartition.at(min));
   static_cast<void>(m_spectrumNumberToPartition.at(max));
 
-  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupMaps, this);
+  std::call_once(m_mapSetup,
+                 &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
+                 this);
   std::vector<size_t> indices;
   const auto begin = lower_bound(m_spectrumNumberToIndex, min);
   const auto end = upper_bound(m_spectrumNumberToIndex, max);
@@ -122,7 +124,9 @@ SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
 SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
     const std::vector<SpectrumNumber> &spectrumNumbers) const {
   checkUniqueSpectrumNumbers();
-  std::call_once(m_mapSetup, &SpectrumNumberTranslator::setupMaps, this);
+  std::call_once(m_mapSetup,
+                 &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
+                 this);
   std::vector<size_t> indices;
   for (const auto &spectrumNumber : spectrumNumbers)
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
@@ -160,7 +164,7 @@ void SpectrumNumberTranslator::checkUniqueSpectrumNumbers() const {
                            "numbers contained duplicate entries.");
 }
 
-void SpectrumNumberTranslator::setupMaps() const {
+void SpectrumNumberTranslator::setupSpectrumNumberToIndexMap() const {
   std::sort(m_spectrumNumberToIndex.begin(), m_spectrumNumberToIndex.end(),
             [](const std::pair<SpectrumNumber, size_t> &a,
                const std::pair<SpectrumNumber, size_t> &b)
