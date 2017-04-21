@@ -81,7 +81,8 @@ private:
   const PartitionIndex m_partition;
   std::unordered_map<SpectrumNumber, PartitionIndex, SpectrumNumberHash>
       m_spectrumNumberToPartition;
-  mutable std::vector<std::pair<SpectrumNumber, size_t>> m_spectrumNumberToIndex;
+  mutable std::vector<std::pair<SpectrumNumber, size_t>>
+      m_spectrumNumberToIndex;
   std::vector<std::pair<GlobalSpectrumIndex, size_t>> m_globalToLocal;
   std::vector<SpectrumNumber> m_spectrumNumbers;
   std::vector<SpectrumNumber> m_globalSpectrumNumbers;
