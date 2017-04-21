@@ -90,6 +90,9 @@ private:
   /// process splitters given by a MatrixWorkspace
   void processMatrixSplitterWorkspace();
 
+  /// create event workspace
+  boost::shared_ptr<DataObjects::EventWorkspace> createEventWorkspaceNoLog();
+  /// create output workspaces if the splitters are given in SplittersWorkspace
   void createOutputWorkspaces();
   /// create output workspaces in the case of using TableWorlspace for splitters
   void createOutputWorkspacesTableSplitterCase();
@@ -127,7 +130,9 @@ private:
   /// (itarget)
   void convertSplittersWorkspaceToVectors();
 
-  void splitTimeSeriesLogs();
+  void splitTimeSeriesLogs(const std::vector<Kernel::TimeSeriesProperty<int> *> &int_tsp_vector,
+                           const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
+                           const std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_vector);
 
   DataObjects::EventWorkspace_sptr m_eventWS;
   DataObjects::SplittersWorkspace_sptr m_splittersWorkspace;
@@ -200,6 +205,7 @@ private:
 
   /// Flag to split sample logs
   bool m_splitSampleLogs;
+  std::set<std::string> m_excludedSampleLogs;
 
   /// Debug
   bool m_useDBSpectrum;

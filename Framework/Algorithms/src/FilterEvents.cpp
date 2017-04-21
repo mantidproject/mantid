@@ -188,6 +188,12 @@ void FilterEvents::exec() {
   else
     createOutputWorkspacesMatrixCase();
 
+  // clone the properties but TimeSeriesProperty
+  std::vector<Kernel::TimeSeriesProperty<int> *> int_tsp_vector;
+  std::vector<Kernel::TimeSeriesProperty<double> *> dbl_tsp_vector;
+  std::vector<Kernel::TimeSeriesProperty<bool> *> bool_tsp_vector;
+  copyNoneSplitLogs(int_tsp_vector, dbl_tsp_vector, bool_tsp_vector);
+
   // Optionall import corrections
   m_progress = 0.20;
   progress(m_progress, "Importing TOF corrections. ");
@@ -298,9 +304,37 @@ void FilterEvents::copyNoneSplitLogs(std::vector<TimeSeriesProperty<int> *> &int
 }
 
 // Split all the TimeSeriesProperty sample logs to all the output workspace
-void FilterEvents::splitTimeSeriesLogs()
+void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int> *> &int_tsp_vector,
+									   const std::vector<TimeSeriesProperty<double> *> &dbl_tsp_vector,
+									   const std::vector<TimeSeriesProperty<bool> *> &bool_tsp_vector)
 {
+  std::set<std::string>::iterator set_iter;
 
+  // deal with integer time series property
+  for (size_t i = 0; i < int_tsp_vector.size(); ++i)
+  {
+    std::string property_name = int_tsp_vector[i]->name();
+    set_iter = m_excludedSampleLogs.find(property_name);
+    if (set_iter == m_excludedSampleLogs.end())
+    {
+      // split log
+      std::vector<TimeSeriesProperty<int> *> child_vectors;
+      if (m_useSplittersWorkspace)
+        int_tsp_vector[i]->split(m_vecSplitterTime, child_vectors);
+      else
+        int_tsp_vector[i]->split(m_vecSplitterGroup, child_vectors);
+      // assign to output workspaces
+      for (auto ws_iter = m_outputWorkspacesMap.begin(); ws_iter != m_outputWorkspacesMap.end(); ++ws_iter)
+        ws_iter->second->mutableRun().addProperty(child_vectors.front());
+    }
+  }
+
+  // deal with double time series property
+
+  // deal with bool time series property
+
+
+  return;
 }
 
 
@@ -423,6 +457,12 @@ void FilterEvents::processAlgorithmProperties() {
       }
     }
   } // END-IF: m_isSplitterRelativeTime
+
+  // sample logs
+  std::vector<std::string> excluded_logs = getProperty("ExcludedLogs");
+  for (auto iter = excluded_logs.begin(); iter != excluded_logs.end(); ++iter)
+    m_excludedSampleLogs.insert(*iter);
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -819,6 +859,70 @@ void FilterEvents::processTableSplittersWorkspace() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** create an EventWorkspace from m_eventWS but without copying over any TimeSeriesProperty
+ *  with more than 1 entry
+ * Note: This method is migrated from WorkspaceFactory::initializeFromParent()
+ * @brief FilterEvents::createEventWorkspaceNoLog
+ * @return
+ */
+boost::shared_ptr<DataObjects::EventWorkspace> FilterEvents::createEventWorkspaceNoLog()
+{
+  // create an EventWorkspac
+  boost::shared_ptr<EventWorkspace> child = boost::make_shared<EventWorkspace>();
+  boost::shared_ptr<EventWorkspace> parent = m_eventWS;
+
+  // clone title, comment
+  child->setTitle(parent->getTitle());
+  child->setComment(parent->getComment());
+  // clone instrument, This call also copies the SHARED POINTER to the parameter map
+  child->setInstrument(parent->getInstrument());
+  // This call will (should) perform a COPY of the parameter map.
+  child->instrumentParameters();
+
+  // sample and no run!
+  // child->mutableSample() = parent->mutableSample(); // parent->m_sample;
+  // child.m_run = parent.m_run;
+
+  // set the Y unit and etc.
+  child->setYUnit(parent->YUnit());
+  child->setYUnitLabel(parent->YUnitLabel());
+  child->setDistribution(parent->isDistribution());
+
+  // Same number of histograms = copy over the spectra data
+//  if (parent->getNumberHistograms() == child->getNumberHistograms()) {
+//    for (size_t i = 0; i < parent->getNumberHistograms(); ++i)
+//      child->getSpectrum(i).copyInfoFrom(parent->getSpectrum(i));
+//    // We use this variant without ISpectrum update to avoid costly rebuilds
+//    // triggered by setIndexInfo(). ISpectrum::copyInfoFrom sets invalid flags
+//    // for spectrum definitions, so it is important to call this *afterwards*,
+//    // since it clears the flags:
+//    // child->setIndexInfoWithoutISpectrumUpdate(parent->indexInfo());
+//  }
+
+//  // deal with axis
+//  for (size_t i = 0; i < parent->m_axes.size(); ++i) {
+//    const size_t newAxisLength = child->getAxis(i)->length();
+//    const size_t oldAxisLength = parent->getAxis(i)->length();
+
+//    if (newAxisLength == oldAxisLength) {
+//      // Need to delete the existing axis created in init above
+//      delete child->m_axes[i];
+//      // Now set to a copy of the parent workspace's axis
+//      child->m_axes[i] = parent->m_axes[i]->clone(&child);
+//    } else {
+//      if (!parent.getAxis(i)->isSpectra()) // WHY???
+//      {
+//        delete child->m_axes[i];
+//        // Call the 'different length' clone variant
+//        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, &child);
+//      }
+//    }
+// }
+
+  return child;
+}
+
+//----------------------------------------------------------------------------------------------
 /** Create a list of EventWorkspace for output in the case that splitters are
  * given by
  *  SplittersWorkspace
@@ -865,8 +969,8 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    boost::shared_ptr<EventWorkspace> optws =
-        create<DataObjects::EventWorkspace>(*m_eventWS);
+    // create an output workspace without any sample log
+    boost::shared_ptr<EventWorkspace> optws = createEventWorkspaceNoLog();
     m_outputWorkspacesMap.emplace(wsgroup, optws);
 
     // Add information, including title and comment, to output workspace
