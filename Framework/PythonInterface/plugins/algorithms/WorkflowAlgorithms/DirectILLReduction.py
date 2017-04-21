@@ -319,10 +319,6 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # TODO
         return dict()
 
-    def _absoluteUnits(self, mainwS, wsNames, wsCleanup, subalgLogging):
-        """Scale workspace by an absolute units factor."""
-        
-
     def _applyDiagnostics(self, mainWS, wsNames, wsCleanup, subalgLogging):
         """Mask workspace according to diagnostics."""
         if self.getProperty(common.PROP_DIAGNOSTICS_WS).isDefault:

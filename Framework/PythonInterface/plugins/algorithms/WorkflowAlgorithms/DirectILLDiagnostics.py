@@ -104,7 +104,7 @@ def _createDiagnosticsReportTable(reportWSName, numberHistograms, algorithmLoggi
     return reportWS
 
 
-def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS, 
+def _elasticPeakDiagnostics(ws, eppWS, peakSettings, sigmaMultiplier, reportWS,
                             wsNames, wsCleanup, algorithmLogging):
     """Diagnose elastic peaks and return a mask workspace"""
     histogramCount = ws.getNumberHistograms()
