@@ -569,7 +569,9 @@ QwtDoubleRect MantidMatrix::boundingRect() {
   const int defaultNumberSpectroGramRows = 700;
   const int defaultNumberSpectroGramColumns = 700;
   if (m_boundingRect.isNull()) {
-    m_spectrogramRows = numRows() > defaultNumberSpectroGramRows ? numRows() : defaultNumberSpectroGramRows;
+    m_spectrogramRows = numRows() > defaultNumberSpectroGramRows
+                            ? numRows()
+                            : defaultNumberSpectroGramRows;
 
     // This is only meaningful if a 2D (or greater) workspace
     if (m_workspace->axes() > 1) {
@@ -639,7 +641,9 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         if (m_spectrogramCols < defaultNumberSpectroGramColumns)
           m_spectrogramCols = defaultNumberSpectroGramColumns;
       } else {
-        m_spectrogramCols = numCols() > defaultNumberSpectroGramColumns ? numCols() : defaultNumberSpectroGramColumns;
+        m_spectrogramCols = numCols() > defaultNumberSpectroGramColumns
+                                ? numCols()
+                                : defaultNumberSpectroGramColumns;
       }
       m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
                                      qMin(y_start, y_end) - 0.5 * dy,
