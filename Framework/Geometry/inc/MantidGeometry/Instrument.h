@@ -252,8 +252,9 @@ public:
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setComponentInfo(
       boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      std::vector<Geometry::ComponentID> componentIds);
-  const std::vector<Geometry::ComponentID> &componentIds() const;
+      boost::shared_ptr<const std::vector<Geometry::ComponentID>> componentIds);
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>>
+  componentIds() const;
   boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
 private:
@@ -336,7 +337,7 @@ private:
   boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
 
   boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
-  std::vector<Geometry::ComponentID> m_componentIds;
+  boost::shared_ptr<const std::vector<Geometry::ComponentID>> m_componentIds;
 };
 namespace Conversion {
 

@@ -1185,20 +1185,6 @@ const Beamline::ComponentInfo &ParameterMap::componentInfo() const {
   return *m_componentInfo;
 }
 
-/**
- * @brief ParameterMap::componentIds
- * @return const ref to vector of component ids. Throws a std::runtime_error if
- * the ComponentInfo has not been set.
- */
-const std::vector<Geometry::ComponentID> &ParameterMap::componentIds() const {
-  // Component ids do not make sense without a ComponentInfo
-  if (!hasComponentInfo()) {
-    throw std::runtime_error(
-        "Cannot return component ids when ComponentInfo is NULL");
-  }
-  return m_componentIds;
-}
-
 /// Only for use by Detector. Returns a detector index for a detector ID.
 size_t ParameterMap::detectorIndex(const detid_t detID) const {
   return m_instrument->detectorIndex(detID);
@@ -1212,10 +1198,8 @@ void ParameterMap::setDetectorInfo(
 
 /// Only for use by ExperimentInfo. Sets the pointer to the ComponentInfo.
 void ParameterMap::setComponentInfo(
-    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-    std::vector<Geometry::ComponentID> componentIds) {
+    boost::shared_ptr<const Beamline::ComponentInfo> componentInfo) {
   m_componentInfo = std::move(componentInfo);
-  m_componentIds = std::move(componentIds);
 }
 
 /// Only for use by Instrument. Sets the pointer to the owning instrument.

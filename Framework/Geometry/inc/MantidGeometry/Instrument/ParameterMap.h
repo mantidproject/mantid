@@ -354,8 +354,7 @@ public:
   void
   setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
   void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo,
-      std::vector<Geometry::ComponentID> componentIds);
+      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -391,8 +390,6 @@ private:
   /// Pointer to the ComponentInfo object. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
   boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
-  /// Component ids.
-  std::vector<Geometry::ComponentID> m_componentIds;
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object
   const Instrument *m_instrument{nullptr};

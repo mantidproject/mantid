@@ -5,7 +5,6 @@
 
 namespace Mantid {
 namespace API {
-
 /**
   Base implementation for common behaviour of all live listener classes. It
   implements the ILiveListener interface.
@@ -35,6 +34,7 @@ class DLLExport LiveListener : public API::ILiveListener {
 public:
   bool dataReset() override;
   void setSpectra(const std::vector<specnum_t> &specList) override;
+  void setAlgorithm(const class IAlgorithm &callingAlgorithm) override;
 
 protected:
   /// Indicates receipt of a reset signal from the DAS.
