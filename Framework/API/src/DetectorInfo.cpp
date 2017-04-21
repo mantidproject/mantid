@@ -25,15 +25,20 @@ DetectorInfo::DetectorInfo(
     : m_detectorInfo(detectorInfo), m_pmap(pmap), m_instrument(instrument),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastAssemblyDetectorIndices(PARALLEL_GET_MAX_THREADS),
-      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
+      m_lastIndex(PARALLEL_GET_MAX_THREADS, -1),
+      m_detIDToIndex(boost::make_shared<std::unordered_map<detid_t, size_t>>())
+
+{
   // Note: This does not seem possible currently (the instrument objects is
   // always allocated, even if it is empty), so this will not fail.
   if (!m_instrument)
     throw std::runtime_error("Workspace does not contain an instrument!");
 
   m_detectorIDs = instrument->getDetectorIDs(false /* do not skip monitors */);
-  for (size_t i = 0; i < m_detectorIDs.size(); ++i)
-    m_detIDToIndex[m_detectorIDs[i]] = i;
+  const size_t nDetIds = m_detectorIDs.size();
+  m_detIDToIndex->reserve(nDetIds);
+  for (size_t i = 0; i < nDetIds; ++i)
+    (*m_detIDToIndex)[m_detectorIDs[i]] = i;
 }
 
 /// Assigns the contents of the non-wrapping part of `rhs` to this.
@@ -526,5 +531,9 @@ void DetectorInfo::doCacheSample() const {
 
 void DetectorInfo::cacheL1() const { m_L1 = m_source->getDistance(*m_sample); }
 
+boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
+DetectorInfo::detIdToIndexMap() const {
+  return m_detIDToIndex;
+}
 } // namespace API
 } // namespace Mantid

@@ -198,8 +198,9 @@ makeComponentInfo(const Instrument &instrument,
     const auto &componentInfo = instrument.componentInfo();
     const auto &componentIds = instrument.componentIds();
     const auto &componentIdMap = instrument.componentIdToIndexMap();
-    return std::make_tuple(Kernel::make_unique<Beamline::ComponentInfo>(componentInfo),
-            componentIds, componentIdMap);
+    return std::make_tuple(
+        Kernel::make_unique<Beamline::ComponentInfo>(componentInfo),
+        componentIds, componentIdMap);
   } else {
     InfoComponentVisitor visitor(
         detectorInfo.size(), std::bind(&DetectorInfo::indexOf, &detectorInfo,
@@ -221,9 +222,9 @@ makeComponentInfo(const Instrument &instrument,
         const std::unordered_map<Geometry::ComponentID, size_t>>(
         visitor.componentIdToIndexMap());
     return std::make_tuple(Kernel::make_unique<Mantid::Beamline::ComponentInfo>(
-                visitor.assemblySortedDetectorIndices(),
-                visitor.componentDetectorRanges()),
-            componentIds, componentIdMap);
+                               visitor.assemblySortedDetectorIndices(),
+                               visitor.componentDetectorRanges()),
+                           componentIds, componentIdMap);
   }
 }
 
@@ -313,13 +314,13 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
       makeComponentInfo(*instr, detectorInfo());
   m_parmap->setComponentInfo(m_componentInfo);
 
-    /*
-     * If the ID -> index map has already been created. Reuse it.
-     * */
+  /*
+   * If the ID -> index map has already been created. Reuse it.
+   * */
   m_componentInfoWrapper = Kernel::make_unique<ComponentInfo>(
       *m_componentInfo, componentIds, componentIdToIndexMap);
 
-    // Detector IDs that were previously dropped because they were not part of the
+  // Detector IDs that were previously dropped because they were not part of the
   // instrument may now suddenly be valid, so we have to reinitialize the
   // detector grouping. Also the index corresponding to specific IDs may have
   // changed.

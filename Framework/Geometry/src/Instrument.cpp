@@ -1279,7 +1279,6 @@ Instrument::componentIdToIndexMap() const {
         "Cannot return component index map with a NULL ComponentInfo");
   }
   return m_componentIdToIndexMap;
-
 }
 
 /// Only for use by ExperimentInfo. Sets the pointer to the DetectorInfo.
@@ -1290,7 +1289,7 @@ void Instrument::setDetectorInfo(
 
 /**
  * Gets called when an Instrument is associated with an ExperimentInfo
- *  
+ *
  * @param componentInfo : ComponentInfo to store
  * @param componentIds : ComponentIds to store
  * @param componentIdToIndexMap : Comp ID to index map to store.

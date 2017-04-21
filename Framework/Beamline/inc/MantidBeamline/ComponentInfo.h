@@ -48,8 +48,8 @@ public:
                 const std::vector<std::pair<size_t, size_t>> &ranges);
   std::vector<size_t> detectorIndices(const size_t componentIndex) const;
   size_t size() const;
-  bool operator==(const ComponentInfo& other) const;
-  bool operator!=(const ComponentInfo& other) const;
+  bool operator==(const ComponentInfo &other) const;
+  bool operator!=(const ComponentInfo &other) const;
 };
 } // namespace Beamline
 } // namespace Mantid

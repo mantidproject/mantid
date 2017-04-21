@@ -91,7 +91,8 @@ public:
     auto componentIdToIndexMap = visitor.componentIdToIndexMap();
 
     TSM_ASSERT_EQUALS("Expect 4 component Ids", componentIds.size(), 4);
-    TSM_ASSERT_EQUALS("Expect 4 component Ids in map", componentIdToIndexMap.size(), 4);
+    TSM_ASSERT_EQUALS("Expect 4 component Ids in map",
+                      componentIdToIndexMap.size(), 4);
 
     TSM_ASSERT_EQUALS("Should contain the instrument id", 1,
                       componentIds.count(visitee->getComponentID()));
@@ -107,11 +108,15 @@ public:
         componentIds.count(
             visitee->getComponentByName("point-detector")->getComponentID()));
     std::set<size_t> uniqueIndices;
-    for(auto id : componentIds){
+    for (auto id : componentIds) {
       uniqueIndices.insert(componentIdToIndexMap.at(id));
     }
-    TSM_ASSERT_EQUALS("We should have unique index values in our map", uniqueIndices.size(), componentIds.size()-1);
-    TSM_ASSERT_EQUALS("Indices are out of range", *std::max_element(uniqueIndices.begin(), uniqueIndices.end()), componentIds.size()-1);
+    TSM_ASSERT_EQUALS("We should have unique index values in our map",
+                      uniqueIndices.size(), componentIds.size() - 1);
+    TSM_ASSERT_EQUALS(
+        "Indices are out of range",
+        *std::max_element(uniqueIndices.begin(), uniqueIndices.end()),
+        componentIds.size() - 1);
   }
 
   void test_visitor_ranges_check() {

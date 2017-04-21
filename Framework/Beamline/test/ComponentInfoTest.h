@@ -73,10 +73,10 @@ public:
     differentRanges.push_back(std::make_pair(0, 1));
     auto c = ComponentInfo(bankSortedDetectorIndices, differentRanges);
     TS_ASSERT_DIFFERS(a, c);
-    
+
     // Different detector indices
     auto differentIndices = bankSortedDetectorIndices;
-    differentIndices[0]=7;
+    differentIndices[0] = 7;
     auto d = ComponentInfo(differentIndices, ranges);
     TS_ASSERT_DIFFERS(a, d);
   }

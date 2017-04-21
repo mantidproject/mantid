@@ -13,7 +13,8 @@
 using Mantid::API::ComponentInfo;
 namespace {
 
-boost::shared_ptr<const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
+boost::shared_ptr<
+    const std::unordered_map<Mantid::Geometry::ComponentID, size_t>>
 makeComponentIDMap(const boost::shared_ptr<
     const std::vector<Mantid::Geometry::ComponentID>> &componentIds) {
   auto idMap = boost::make_shared<
