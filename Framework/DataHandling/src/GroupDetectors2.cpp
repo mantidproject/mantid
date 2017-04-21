@@ -1182,7 +1182,7 @@ void translateSumRange(const std::string &instructions,
 
   // add all the spectra in the range to the output group
   std::vector<int> outSpectra;
-  outSpectra.reserve(last - first);
+  outSpectra.reserve(last - first + 1);
   for (int i = first; i <= last; ++i)
     outSpectra.push_back(i);
   if (!outSpectra.empty())
