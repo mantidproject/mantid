@@ -2,7 +2,7 @@
 #define VIEWBASE_H_
 
 #include "MantidVatesAPI/ColorScaleGuard.h"
-#include "MantidVatesSimpleGUiViewWidgets/VisibleAxesColor.h"
+#include "MantidVatesSimpleGuiViewWidgets/VisibleAxesColor.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
