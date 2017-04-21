@@ -114,22 +114,48 @@ void KafkaTopicSubscriber::subscribe(int64_t offset) {
 }
 
 /**
- * Get list of partitions on configured topic
+ * Construct list of partitions on configured topics
  * @return list of TopicPartitions
  */
 std::vector<RdKafka::TopicPartition *>
 KafkaTopicSubscriber::getTopicPartitions() {
-  using namespace std::chrono_literals;
   std::vector<RdKafka::TopicPartition *> partitions;
-  m_consumer->subscribe(m_topicNames);
-  std::this_thread::sleep_for(2s);
-  auto error = m_consumer->assignment(partitions);
-  if (error != RdKafka::ERR_NO_ERROR) {
-    throw std::runtime_error("In KafkaTopicSubscriber failed to get "
-                             "TopicPartition information from Kafka brokers.");
+  auto metadata = queryMetadata();
+  auto topics = metadata->topics();
+  // Search through all topics for the ones we are interested in
+  for (const auto &topicName : m_topicNames) {
+    auto iter = std::find_if(topics->cbegin(), topics->cend(),
+                             [topicName](const TopicMetadata *tpc) {
+                               return tpc->topic() == topicName;
+                             });
+    auto matchedTopic = *iter;
+    auto partitionMetadata = matchedTopic->partitions();
+    auto numberOfPartitions = partitionMetadata->size();
+    for (int partitionNumber = 0; partitionNumber < numberOfPartitions;
+         ++partitionNumber) {
+      auto topicPartition =
+          RdKafka::TopicPartition::create(topicName, partitionNumber);
+      partitions.push_back(topicPartition);
+    }
   }
-  m_consumer->unsubscribe();
   return partitions;
+}
+
+/**
+ * Get metadata from the Kafka brokers
+ * @return metadata
+ */
+std::unique_ptr<Metadata> KafkaTopicSubscriber::queryMetadata() const {
+  Metadata *metadataRawPtr(nullptr);
+  // API requires address of a pointer to the struct but compiler won't allow
+  // &metadata.get() as it is an rvalue
+  m_consumer->metadata(true, nullptr, &metadataRawPtr, CONSUME_TIMEOUT_MS);
+  // Capture the pointer in an owning struct to take care of deletion
+  std::unique_ptr<Metadata> metadata(std::move(metadataRawPtr));
+  if (!metadata) {
+    throw std::runtime_error("Failed to query metadata from broker");
+  }
+  return metadata;
 }
 
 /**
@@ -212,15 +238,7 @@ void KafkaTopicSubscriber::createConsumer() {
  * Check that the topic we want to subscribe to exists on the Kafka brokers
  */
 void KafkaTopicSubscriber::checkTopicsExist() const {
-  Metadata *metadataRawPtr(nullptr);
-  // API requires address of a pointer to the struct but compiler won't allow
-  // &metadata.get() as it is an rvalue
-  m_consumer->metadata(true, nullptr, &metadataRawPtr, CONSUME_TIMEOUT_MS);
-  // Capture the pointer in an owning struct to take care of deletion
-  std::unique_ptr<Metadata> metadata(std::move(metadataRawPtr));
-  if (!metadata) {
-    throw std::runtime_error("Failed to query metadata from broker");
-  }
+  auto metadata = queryMetadata();
   auto topics = metadata->topics();
   for (const auto &topicName : m_topicNames) {
     auto iter = std::find_if(topics->cbegin(), topics->cend(),

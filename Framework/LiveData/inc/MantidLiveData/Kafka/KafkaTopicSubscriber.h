@@ -72,6 +72,7 @@ private:
   void createConsumer();
   int64_t getCurrentOffset(const std::string &topic, int partition);
   std::vector<RdKafka::TopicPartition *> getTopicPartitions();
+  std::unique_ptr<RdKafka::Metadata> queryMetadata() const;
 };
 
 } // namespace LiveData
